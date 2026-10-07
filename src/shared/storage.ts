@@ -52,7 +52,9 @@ function checkColor(color: string): void {
 /** 「すべて」+ 保存済みフォルダ (order 昇順) */
 export async function listFolders(): Promise<Folder[]> {
   const folders = await readFolders();
-  return [ALL_FOLDER, ...[...folders].sort((a, b) => a.order - b.order)];
+  // 「未分類」は常に「すべて」の次。残りは order 昇順
+  const rank = (f: Folder) => (f.id === INBOX_ID ? -Infinity : f.order);
+  return [ALL_FOLDER, ...[...folders].sort((a, b) => rank(a) - rank(b))];
 }
 
 export async function createFolder(input: {
@@ -232,4 +234,86 @@ export function onDataChanged(cb: () => void): () => void {
   };
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);
+}
+
+// ---- Bulk operations (manager) ----
+// どれも 1 回の書き込みにまとめ、取り消し用に変更前の状態 (BookmarkUndo) を返す。
+
+/** tweetId → 変更前のブックマーク (null は「もともと存在しなかった」) */
+export type BookmarkUndo = Record<string, Bookmark | null>;
+
+async function mutateBookmarks(
+  tweetIds: string[],
+  fn: (b: Bookmark) => Bookmark | null,
+  opts: { ensureInbox?: boolean } = {},
+): Promise<BookmarkUndo> {
+  const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
+  const undo: BookmarkUndo = {};
+  for (const id of new Set(tweetIds)) {
+    const prev = map[id];
+    if (!prev) continue;
+    const next = fn(structuredClone(prev));
+    if (JSON.stringify(next) === JSON.stringify(prev)) continue;
+    undo[id] = prev;
+    if (next) map[id] = next;
+    else delete map[id];
+  }
+  if (Object.keys(undo).length === 0) return undo;
+  if (opts.ensureInbox) {
+    const folders = await readFolders();
+    if (!folders.some((f) => f.id === INBOX_ID)) {
+      const order = folders.reduce((m, f) => Math.max(m, f.order), -1) + 1;
+      await write(KEY_FOLDERS, [...folders, { id: INBOX_ID, name: '', icon: 'ti-star', order }]);
+    }
+  }
+  await write(KEY_BOOKMARKS, map);
+  return undo;
+}
+
+const uniq = (a: string[]) => [...new Set(a)];
+const realIds = (ids: string[]) => ids.filter((id) => !isBuiltinFolder(id));
+
+export const addToFolders = (tweetIds: string[], folderIds: string[]) =>
+  mutateBookmarks(tweetIds, (b) => ({ ...b, folderIds: uniq([...b.folderIds, ...realIds(folderIds)]) }));
+
+/**
+ * フォルダから外す。最後のフォルダを外してもポストは消さず「未分類」に移す
+ * (ポストを消すのは明示的な deleteBookmarks だけ)。
+ */
+export const removeFromFolders = (tweetIds: string[], folderIds: string[]) =>
+  mutateBookmarks(
+    tweetIds,
+    (b) => {
+      const rest = b.folderIds.filter((id) => !folderIds.includes(id));
+      return { ...b, folderIds: rest.length ? rest : [INBOX_ID] };
+    },
+    { ensureInbox: true },
+  );
+
+/** from から外して to に入れる。from が「すべて」(または未指定) なら追加のみ */
+export const moveToFolder = (tweetIds: string[], fromId: string | null, toId: string) =>
+  mutateBookmarks(tweetIds, (b) => {
+    const rest = fromId && !isBuiltinFolder(fromId) && fromId !== toId ? b.folderIds.filter((id) => id !== fromId) : b.folderIds;
+    return { ...b, folderIds: uniq([...rest, ...realIds([toId])]) };
+  });
+
+/** PostShelf から削除する (X 側のブックマークには触らない) */
+export const deleteBookmarks = (tweetIds: string[]) => mutateBookmarks(tweetIds, () => null);
+
+/** BookmarkUndo の内容で変更前の状態に戻す (1 回の書き込み) */
+export async function restoreBookmarks(undo: BookmarkUndo): Promise<void> {
+  const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
+  for (const [id, prev] of Object.entries(undo)) {
+    if (prev) map[id] = prev;
+    else delete map[id];
+  }
+  await write(KEY_BOOKMARKS, map);
+}
+
+/** フォルダの並び順を更新する。orderedIds に無いフォルダは末尾に残す。「すべて」は無視、「未分類」は表示側で常に先頭 */
+export async function reorderFolders(orderedIds: string[]): Promise<void> {
+  const folders = await readFolders();
+  const rank = new Map(realIds(orderedIds).map((id, i) => [id, i]));
+  const sorted = [...folders].sort((a, b) => (rank.get(a.id) ?? Infinity) - (rank.get(b.id) ?? Infinity) || a.order - b.order);
+  await write(KEY_FOLDERS, sorted.map((f, i) => ({ ...f, order: i })));
 }

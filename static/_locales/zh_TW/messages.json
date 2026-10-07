@@ -184,5 +184,98 @@
   },
   "buttonModeNote": {
     "message": "X 更新後可能失效，失效時會恢復為標準行為。"
+  },
+  "selectedCount": {
+    "message": "已選取 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "加入資料夾"
+  },
+  "bulkRemove": {
+    "message": "從資料夾移除"
+  },
+  "clearSelection": {
+    "message": "取消選取"
+  },
+  "changeFolder": {
+    "message": "變更資料夾"
+  },
+  "removeFromFolder": {
+    "message": "從「$NAME$」移除",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "從 PostShelf 刪除"
+  },
+  "confirmDeletePosts": {
+    "message": "要從 PostShelf 刪除 $COUNT$ 則貼文嗎？X 上的書籤不會改變。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "復原"
+  },
+  "toastDeleted": {
+    "message": "已刪除 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "已移動 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "已將 $COUNT$ 則移出資料夾",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "已將 $COUNT$ 則加入資料夾",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "選取此貼文"
+  },
+  "pickFolder": {
+    "message": "選擇資料夾"
+  },
+  "dragHint": {
+    "message": "拖曳以加入（按住 Alt 為移動）"
+  },
+  "sortLabel": {
+    "message": "排序"
   }
 }

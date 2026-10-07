@@ -184,5 +184,98 @@
   },
   "buttonModeNote": {
     "message": "X 更新后可能失效，失效时会恢复为标准行为。"
+  },
+  "selectedCount": {
+    "message": "已选择 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "添加到文件夹"
+  },
+  "bulkRemove": {
+    "message": "从文件夹移除"
+  },
+  "clearSelection": {
+    "message": "取消选择"
+  },
+  "changeFolder": {
+    "message": "更改文件夹"
+  },
+  "removeFromFolder": {
+    "message": "从“$NAME$”移除",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "从 PostShelf 删除"
+  },
+  "confirmDeletePosts": {
+    "message": "要从 PostShelf 删除 $COUNT$ 条帖子吗？X 上的书签不会改变。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "撤销"
+  },
+  "toastDeleted": {
+    "message": "已删除 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "已移动 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "已将 $COUNT$ 条移出文件夹",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "已将 $COUNT$ 条添加到文件夹",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "选择此帖子"
+  },
+  "pickFolder": {
+    "message": "选择文件夹"
+  },
+  "dragHint": {
+    "message": "拖动以添加（按住 Alt 为移动）"
+  },
+  "sortLabel": {
+    "message": "排序"
   }
 }

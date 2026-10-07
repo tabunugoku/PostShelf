@@ -184,5 +184,98 @@
   },
   "buttonModeNote": {
     "message": "This may stop working after X updates. If it does, the standard behavior is used instead."
+  },
+  "selectedCount": {
+    "message": "$COUNT$ selected",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "Add to folder"
+  },
+  "bulkRemove": {
+    "message": "Remove from folder"
+  },
+  "clearSelection": {
+    "message": "Clear selection"
+  },
+  "changeFolder": {
+    "message": "Change folders"
+  },
+  "removeFromFolder": {
+    "message": "Remove from \"$NAME$\"",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "Delete from PostShelf"
+  },
+  "confirmDeletePosts": {
+    "message": "Delete $COUNT$ post(s) from PostShelf? Your X bookmarks are not changed.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "Undo"
+  },
+  "toastDeleted": {
+    "message": "Deleted $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "Moved $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "Removed $COUNT$ from folder",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "Added $COUNT$ to folder",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "Select this post"
+  },
+  "pickFolder": {
+    "message": "Choose a folder"
+  },
+  "dragHint": {
+    "message": "Drag to add (Alt to move)"
+  },
+  "sortLabel": {
+    "message": "Sort"
   }
 }

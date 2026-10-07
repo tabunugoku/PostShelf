@@ -184,5 +184,98 @@
   },
   "buttonModeNote": {
     "message": "Pode parar de funcionar após atualizações do X; nesse caso o comportamento padrão é usado."
+  },
+  "selectedCount": {
+    "message": "$COUNT$ selecionados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "Adicionar à pasta"
+  },
+  "bulkRemove": {
+    "message": "Remover da pasta"
+  },
+  "clearSelection": {
+    "message": "Limpar seleção"
+  },
+  "changeFolder": {
+    "message": "Alterar pastas"
+  },
+  "removeFromFolder": {
+    "message": "Remover de \"$NAME$\"",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "Excluir do PostShelf"
+  },
+  "confirmDeletePosts": {
+    "message": "Excluir $COUNT$ post(s) do PostShelf? Seus favoritos no X não são alterados.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "Desfazer"
+  },
+  "toastDeleted": {
+    "message": "$COUNT$ excluído(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "$COUNT$ movido(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "$COUNT$ removido(s) da pasta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "$COUNT$ adicionado(s) à pasta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "Selecionar este post"
+  },
+  "pickFolder": {
+    "message": "Escolher pasta"
+  },
+  "dragHint": {
+    "message": "Arraste para adicionar (Alt para mover)"
+  },
+  "sortLabel": {
+    "message": "Ordenar"
   }
 }

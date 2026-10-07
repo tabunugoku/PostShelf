@@ -184,5 +184,98 @@
   },
   "buttonModeNote": {
     "message": "X 업데이트 후 동작하지 않을 수 있으며, 그 경우 기본 동작으로 돌아갑니다."
+  },
+  "selectedCount": {
+    "message": "$COUNT$개 선택됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "폴더에 추가"
+  },
+  "bulkRemove": {
+    "message": "폴더에서 제외"
+  },
+  "clearSelection": {
+    "message": "선택 해제"
+  },
+  "changeFolder": {
+    "message": "폴더 변경"
+  },
+  "removeFromFolder": {
+    "message": "\"$NAME$\"에서 제외",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "PostShelf에서 삭제"
+  },
+  "confirmDeletePosts": {
+    "message": "게시물 $COUNT$개를 PostShelf에서 삭제할까요? X 북마크는 바뀌지 않습니다.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "실행 취소"
+  },
+  "toastDeleted": {
+    "message": "$COUNT$개 삭제됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "$COUNT$개 이동됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "$COUNT$개를 폴더에서 제외했습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "$COUNT$개를 폴더에 추가했습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "이 게시물 선택"
+  },
+  "pickFolder": {
+    "message": "폴더 선택"
+  },
+  "dragHint": {
+    "message": "드래그해서 추가 (Alt는 이동)"
+  },
+  "sortLabel": {
+    "message": "정렬"
   }
 }

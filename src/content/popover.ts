@@ -1,15 +1,10 @@
 import { SEL } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { extractTweet } from './snapshot';
-import {
-  createFolder,
-  getBookmark,
-  listFolders,
-  setBookmarkFolders,
-  StorageError,
-} from '../shared/storage';
+import { getBookmark, listFolders, setBookmarkFolders } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
+import { createFolderPicker } from '../shared/folderPicker';
 import { setNativeBookmark } from './native';
 import { getSettings, type ButtonMode } from '../shared/settings';
 
@@ -56,75 +51,25 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     if ((await getSettings()).syncNative) setNativeBookmark(article, saved !== undefined);
   };
 
-  const render = (list: typeof folders) => {
-    pop.replaceChildren();
-    if (list.length === 0) {
-      const empty = document.createElement('div');
-      empty.textContent = t('noFolders');
-      pop.append(empty);
-    }
-    for (const f of list) {
-      const label = document.createElement('label');
-      label.style.cssText = 'display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer';
-      label.addEventListener('mouseenter', () => (label.style.background = th.hover));
-      label.addEventListener('mouseleave', () => (label.style.background = ''));
-      const ico = document.createElement('i');
-      ico.className = `ti ${f.icon}`;
-      ico.style.cssText = `font-size:18px;color:${f.color ?? th.fg}`;
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = selected.has(f.id);
-      cb.style.cssText = `accent-color:${th.accent};width:16px;height:16px;margin:0`;
-      cb.addEventListener('change', () => {
-        if (cb.checked) selected.add(f.id);
-        else selected.delete(f.id);
-        void save();
-      });
-      const name = document.createElement('span');
-      name.textContent = displayName(f);
-      name.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-      label.append(ico, name, cb);
-      pop.append(label);
-    }
-    // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
-    if (mode === 'replace' && article.querySelector(SEL.removeBookmark)) {
-      const rel = document.createElement('button');
-      rel.type = 'button';
-      rel.textContent = t('releaseNative');
-      rel.style.cssText = `display:block;width:100%;text-align:left;margin-top:6px;padding:6px 8px;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;cursor:pointer`;
-      rel.addEventListener('click', () => {
-        setNativeBookmark(article, false);
-        rel.remove();
-      });
-      pop.append(rel);
-    }
-    const row = document.createElement('form');
-    row.style.cssText = `display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:.5px solid ${th.border}`;
-    const input = document.createElement('input');
-    input.placeholder = t('newFolderPlaceholder');
-    input.setAttribute('aria-label', t('newFolder'));
-    input.style.cssText = `flex:1;min-width:0;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;padding:4px 8px`;
-    const add = document.createElement('button');
-    add.type = 'submit';
-    add.textContent = t('add');
-    add.style.cssText = `background:${th.accent};color:#fff;border:0;border-radius:8px;padding:4px 10px;cursor:pointer`;
-    row.append(input, add);
-    row.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        const f = await createFolder({ name: input.value });
-        selected.add(f.id);
-        await save();
-        render([...list, f]);
-      } catch (err) {
-        if (!(err instanceof StorageError)) throw err;
-        input.setCustomValidity(err.message);
-        input.reportValidity();
-      }
+  const picker = createFolderPicker({
+    folders,
+    selected,
+    theme: th,
+    onChange: () => save(),
+  });
+  pop.append(picker.el);
+  // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
+  if (mode === 'replace' && article.querySelector(SEL.removeBookmark)) {
+    const rel = document.createElement('button');
+    rel.type = 'button';
+    rel.textContent = t('releaseNative');
+    rel.style.cssText = `display:block;width:100%;text-align:left;margin-top:6px;padding:6px 8px;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;cursor:pointer`;
+    rel.addEventListener('click', () => {
+      setNativeBookmark(article, false);
+      rel.remove();
     });
-    pop.append(row);
-  };
-  render(folders);
+    pop.append(rel);
+  }
   document.body.append(pop);
   position(pop, anchor);
   return pop;

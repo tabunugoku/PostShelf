@@ -184,5 +184,98 @@
   },
   "buttonModeNote": {
     "message": "Peut cesser de fonctionner après une mise à jour de X ; le comportement standard est alors utilisé."
+  },
+  "selectedCount": {
+    "message": "$COUNT$ sélectionnés",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "Ajouter au dossier"
+  },
+  "bulkRemove": {
+    "message": "Retirer du dossier"
+  },
+  "clearSelection": {
+    "message": "Tout désélectionner"
+  },
+  "changeFolder": {
+    "message": "Changer de dossiers"
+  },
+  "removeFromFolder": {
+    "message": "Retirer de « $NAME$ »",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "Supprimer de PostShelf"
+  },
+  "confirmDeletePosts": {
+    "message": "Supprimer $COUNT$ post(s) de PostShelf ? Vos favoris X ne sont pas modifiés.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "Annuler"
+  },
+  "toastDeleted": {
+    "message": "$COUNT$ supprimé(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "$COUNT$ déplacé(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "$COUNT$ retiré(s) du dossier",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "$COUNT$ ajouté(s) au dossier",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "Sélectionner ce post"
+  },
+  "pickFolder": {
+    "message": "Choisir un dossier"
+  },
+  "dragHint": {
+    "message": "Glisser pour ajouter (Alt pour déplacer)"
+  },
+  "sortLabel": {
+    "message": "Trier"
   }
 }

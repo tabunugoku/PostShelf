@@ -184,5 +184,98 @@
   },
   "buttonModeNote": {
     "message": "X の更新で動かなくなることがあります。その場合は標準の動作に戻ります。"
+  },
+  "selectedCount": {
+    "message": "$COUNT$ 件選択中",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "フォルダに追加"
+  },
+  "bulkRemove": {
+    "message": "フォルダから外す"
+  },
+  "clearSelection": {
+    "message": "選択解除"
+  },
+  "changeFolder": {
+    "message": "フォルダを変更"
+  },
+  "removeFromFolder": {
+    "message": "「$NAME$」から外す",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "PostShelf から削除"
+  },
+  "confirmDeletePosts": {
+    "message": "$COUNT$ 件のポストを PostShelf から削除しますか？ X のブックマークは変更されません。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "元に戻す"
+  },
+  "toastDeleted": {
+    "message": "$COUNT$ 件を削除しました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "$COUNT$ 件を移動しました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "$COUNT$ 件をフォルダから外しました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "$COUNT$ 件をフォルダに追加しました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "このポストを選択"
+  },
+  "pickFolder": {
+    "message": "フォルダを選ぶ"
+  },
+  "dragHint": {
+    "message": "ドラッグで追加 (Alt で移動)"
+  },
+  "sortLabel": {
+    "message": "並べ替え"
   }
 }

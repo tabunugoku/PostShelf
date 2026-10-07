@@ -184,5 +184,98 @@
   },
   "buttonModeNote": {
     "message": "Puede dejar de funcionar tras una actualización de X; en ese caso se usa el comportamiento estándar."
+  },
+  "selectedCount": {
+    "message": "$COUNT$ seleccionadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "Añadir a carpeta"
+  },
+  "bulkRemove": {
+    "message": "Quitar de carpeta"
+  },
+  "clearSelection": {
+    "message": "Deseleccionar"
+  },
+  "changeFolder": {
+    "message": "Cambiar carpetas"
+  },
+  "removeFromFolder": {
+    "message": "Quitar de «$NAME$»",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "Eliminar de PostShelf"
+  },
+  "confirmDeletePosts": {
+    "message": "¿Eliminar $COUNT$ publicación(es) de PostShelf? Tus marcadores de X no cambian.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "Deshacer"
+  },
+  "toastDeleted": {
+    "message": "Se eliminaron $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "Se movieron $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "Se quitaron $COUNT$ de la carpeta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "Se añadieron $COUNT$ a la carpeta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "Seleccionar esta publicación"
+  },
+  "pickFolder": {
+    "message": "Elegir carpeta"
+  },
+  "dragHint": {
+    "message": "Arrastra para añadir (Alt para mover)"
+  },
+  "sortLabel": {
+    "message": "Ordenar"
   }
 }
