@@ -5,6 +5,7 @@ import { installChromeMock } from './chrome-mock';
 import { App } from '../src/manager/App';
 import { MIME_FOLDER, MIME_POSTS } from '../src/manager/selection';
 import { createFolder, getBookmark, listBookmarks, listFolders, setBookmarkFolders } from '../src/shared/storage';
+import { getImportHint, getSettings, recordPending } from '../src/shared/settings';
 
 const snap = (n: number) => ({ text: `post ${n}`, author: 'A', handle: `@u${n}`, media: [], url: `https://x.com/u${n}/status/${n}` });
 const flush = () => act(() => new Promise<void>((r) => setTimeout(r, 15)));
@@ -116,7 +117,7 @@ describe('manager organizing', () => {
     await click(chip);
     expect((await getBookmark('1'))!.folderIds).toEqual(['inbox']);
     expect((await listFolders())[1].id).toBe('inbox');
-    expect(folderRow('未分類').querySelector('.n')!.textContent).toBe('1');
+    expect(folderRow('未分類').querySelector('.badge')!.textContent).toBe('1');
     expect($('.toast').textContent).toContain('外しました');
     await click($('.toast button'));
     expect((await getBookmark('1'))!.folderIds).toEqual([a]);
@@ -158,31 +159,38 @@ describe('manager organizing', () => {
     }
   });
 
-  it('deleting a folder from the edit panel uses the in-app confirm', async () => {
-    await click(folderRow('Alpha'));
-    await click($('[aria-label=編集]'));
-    await click($('.edit .danger'));
+  const openEdit = async (name: string) => {
+    await click($(`[aria-label="名前・アイコン・色を変更: ${name}"]`));
+  };
+
+  it('deleting a folder from its edit popover uses the in-app confirm', async () => {
+    await openEdit('Alpha');
+    await click($('.folder-edit .danger'));
     expect($('[role=alertdialog]')).toBeTruthy();
     await click($$('.dialog-actions button')[1]);
     expect((await listFolders()).map((f) => f.id)).toEqual(['all', b]);
   });
 
-  it('edit panel: colors are always enabled; any icon can have a color; "no color" clears it', async () => {
-    await click(folderRow('Alpha'));
-    await click($('[aria-label=編集]'));
-    await click($('.ic[aria-label="ti-star"]'));
-    const sws = $$<HTMLButtonElement>('.edit .sw');
+  it('folder edit popover: any icon can have a color, "no color" clears it, the name commits on Enter', async () => {
+    await openEdit('Alpha');
+    await click($('.folder-edit .ic[aria-label="ti-star"]'));
+    const sws = $$<HTMLButtonElement>('.folder-edit .sw');
     expect(sws.length).toBe(9); // 色なし + 8 色
     expect(sws.every((x) => !x.disabled)).toBe(true);
-    await click($('.edit .sw[aria-label="#378ADD"]'));
-    await click($('.edit .primary'));
+    await click($('.folder-edit .sw[aria-label="#378ADD"]'));
     let f = (await listFolders()).find((x) => x.id === a)!;
     expect(f).toMatchObject({ icon: 'ti-star', color: '#378ADD' });
-    await click($('[aria-label=編集]'));
-    await click($('.edit .sw-none'));
-    await click($('.edit .primary'));
+    await click($('.folder-edit .sw-none'));
     f = (await listFolders()).find((x) => x.id === a)!;
     expect(f.color).toBeUndefined();
+    const input = $<HTMLInputElement>('.folder-edit input');
+    await act(() => {
+      input.value = 'Renamed';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await key(input, 'Enter');
+    expect((await listFolders()).find((x) => x.id === a)!.name).toBe('Renamed');
+    expect(folderRow('Renamed')).toBeTruthy();
   });
 
   it('sort is an in-app listbox with aria and full keyboard support', async () => {
@@ -210,5 +218,109 @@ describe('manager organizing', () => {
     expect($$('[role=listbox]').length).toBe(1);
     await click($$('[role=option]')[1]); // 保存が古い順
     expect(rowIds()).toEqual(['1', '2', '3', '4']);
+  });
+});
+
+describe('v7 manager layout', () => {
+  const rerender = async () => {
+    await act(() => void render(null, $('#app')));
+    await act(() => void render(<App />, $('#app')));
+    await flush();
+  };
+
+  it('sidebar has smart views (すべて / 未分類 with a badge / 最近の 7 日) and the folder list', async () => {
+    const names = $$('.sec').map((x) => x.textContent);
+    expect(names).toEqual(['スマートビュー', 'フォルダ']);
+    expect($$('.side .fr .fr-name').map((x) => x.textContent).slice(0, 3)).toEqual(['すべて', '未分類', '最近の 7 日']);
+    await click($('.fr [aria-label="名前・アイコン・色を変更: Alpha"]')); // 「…」から編集ポップオーバー
+    expect($('.folder-edit')).toBeTruthy();
+    expect($$('[aria-label=編集]').length).toBe(0); // ヘッダーの編集パネルは廃止
+    expect(folderRow('最近の 7 日').querySelector('.n')!.textContent).toBe('0'); // beforeEach の savedAt (1..4) は 7 日より前
+    const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+    data['1'].savedAt = Date.now() - 2 * 86400000;
+    await chrome.storage.local.set({ bookmarks: data });
+    await flush();
+    expect(folderRow('最近の 7 日').querySelector('.n')!.textContent).toBe('1');
+    await click(folderRow('最近の 7 日'));
+    expect(rowIds()).toEqual(['1']);
+  });
+
+  it('header shows the view name, count, search and 3 view modes; the choice is saved in chrome.storage.local', async () => {
+    expect($('.bar-name').textContent).toBe('すべて');
+    expect($('.bar-count').textContent).toBe('4 件');
+    expect($$('.seg button').length).toBe(3);
+    await click($('.seg button[aria-label="グリッド表示"]'));
+    expect($('.rows').classList.contains('view-grid')).toBe(true);
+    await click(folderRow('Alpha'));
+    expect($('.bar-name').textContent).toBe('Alpha');
+    expect($('.bar-count').textContent).toBe('2 件');
+    expect(await getSettings()).toMatchObject({ viewMode: 'grid', lastFolderId: a });
+    await rerender(); // 再起動を模擬: 最後のフォルダと表示形式が復元される
+    expect($('.bar-name').textContent).toBe('Alpha');
+    expect($('.rows').classList.contains('view-grid')).toBe(true);
+  });
+
+  it('filter chips (author menu, AND) and the empty "not found" state with a way back', async () => {
+    const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+    data['1'].snapshot.media = ['https://x/img.jpg'];
+    data['2'].snapshot.media = ['https://x/img2.jpg'];
+    data['2'].snapshot.handle = '@u1';
+    await chrome.storage.local.set({ bookmarks: data });
+    await rerender();
+    await click($$('.chip.filter').find((c) => c.textContent?.includes('画像あり'))!);
+    expect(rowIds().sort()).toEqual(['1', '2']);
+    await click($$('.chip.filter').find((c) => c.textContent?.includes('投稿者で絞り込み'))!);
+    const items = $$('.menu-scroll .menu-item');
+    expect(items.map((i) => i.querySelector('.fr-name')!.textContent)).toContain('@u1');
+    await click(items.find((i) => i.textContent?.includes('@u1'))!);
+    expect(rowIds().sort()).toEqual(['1', '2']); // @u1 は 2 件 (post 1 と 2)、どちらも画像あり
+    await click($$('.chip.filter').find((c) => c.textContent?.includes('動画あり'))!); // 未判定は出ない
+    expect(rowIds()).toEqual([]);
+    expect($('.empty-state').textContent).toContain('見つかりませんでした');
+    expect($('.empty-state').textContent).toContain('絞り込みを外してください');
+    await click($('.empty-state button'));
+    expect(rowIds().length).toBe(4);
+  });
+
+  it('with no saved posts at all, explains how to save', async () => {
+    await chrome.storage.local.set({ bookmarks: {} });
+    await rerender();
+    expect($('.empty-state').textContent).toContain('まだ保存したポストがありません');
+    expect($('.empty-state').textContent).toContain('フォルダボタン');
+  });
+
+  it('import banner: shows the pending count, how-to dialog, dismiss survives until it grows', async () => {
+    expect($$('.banner').length).toBe(0);
+    await recordPending(12);
+    await flush();
+    expect($('.banner').textContent).toContain('12 件');
+    await click($('.banner-btn'));
+    expect($('[role=dialog] .pre').textContent).toContain('/i/bookmarks');
+    await key(document.body, 'Escape');
+    await click($('.banner [aria-label=閉じる]'));
+    expect($$('.banner').length).toBe(0);
+    expect((await getImportHint()).dismissed).toBe(12);
+    await rerender();
+    expect($$('.banner').length).toBe(0);
+    await recordPending(13);
+    await flush();
+    expect($$('.banner').length).toBe(1);
+  });
+
+  it('grid cards keep an equal-height 3-column grid and show the first image as a cover', async () => {
+    const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+    data['4'].snapshot.media = ['https://x/cover.jpg', 'https://x/second.jpg'];
+    await chrome.storage.local.set({ bookmarks: data });
+    await rerender();
+    await click($('.seg button[aria-label="グリッド表示"]'));
+    expect($$('.gc').length).toBe(4);
+    expect($<HTMLImageElement>('[data-row="4"] .cover').src).toContain('cover.jpg');
+    const css = (await import('node:fs')).readFileSync('static/manager.css', 'utf8');
+    expect(css).toMatch(/\.view-grid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\);grid-auto-rows:1fr/);
+  });
+
+  it('hover actions exist on every card: change folders / open original / delete', () => {
+    const acts = $$('[data-row="4"] .row-actions .icon-btn');
+    expect(acts.map((x) => x.getAttribute('aria-label') ?? x.getAttribute('title'))).toEqual(['フォルダを変更', 'X で開く', 'PostShelf から削除']);
   });
 });

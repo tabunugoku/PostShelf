@@ -307,5 +307,98 @@
   },
   "collectAllDone": {
     "message": "全部已匯入"
+  },
+  "smartViews": {
+    "message": "智慧檢視"
+  },
+  "foldersSection": {
+    "message": "資料夾"
+  },
+  "recent7": {
+    "message": "最近 7 天"
+  },
+  "searchPlaceholder": {
+    "message": "依內文或 @使用者名稱搜尋"
+  },
+  "gridView": {
+    "message": "格狀檢視"
+  },
+  "itemCount": {
+    "message": "$COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "x.com「書籤」中有 $COUNT$ 則貼文可以匯入",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "匯入方法"
+  },
+  "importHowTitle": {
+    "message": "匯入 x.com 書籤"
+  },
+  "importHowSteps": {
+    "message": "1. 在 Chrome 中開啟 x.com 的「書籤」(/i/bookmarks)\n2. 自行捲動頁面，直到想匯入的貼文顯示在畫面上（不會自動捲動）\n3. 點擊右下角的「尚未匯入 N 則」按鈕\n4. 匯入的貼文會進入「未分類」"
+  },
+  "dismiss": {
+    "message": "關閉"
+  },
+  "filterImage": {
+    "message": "含圖片"
+  },
+  "filterVideo": {
+    "message": "含影片"
+  },
+  "filterLink": {
+    "message": "含連結"
+  },
+  "filterAuthor": {
+    "message": "依作者篩選"
+  },
+  "clearFilters": {
+    "message": "清除篩選"
+  },
+  "notFoundTitle": {
+    "message": "找不到"
+  },
+  "notFoundHint": {
+    "message": "請更換搜尋字詞或清除篩選。"
+  },
+  "noPostsTitle": {
+    "message": "還沒有儲存的貼文"
+  },
+  "noPostsHint": {
+    "message": "在 x.com 上點擊貼文的資料夾按鈕即可儲存。在手機上加入的書籤，可在桌面版 Chrome 中開啟 x.com「書籤」來匯入。"
+  },
+  "folderMore": {
+    "message": "變更名稱、圖示、顏色"
+  },
+  "cardMenu": {
+    "message": "更多操作"
+  },
+  "selectMode": {
+    "message": "選取"
+  },
+  "chooseFolderMenu": {
+    "message": "開啟資料夾清單"
+  },
+  "searchShow": {
+    "message": "顯示搜尋"
+  },
+  "viewLabel": {
+    "message": "檢視"
+  },
+  "dataSection": {
+    "message": "資料"
   }
 }

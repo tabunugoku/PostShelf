@@ -307,5 +307,98 @@
   },
   "collectAllDone": {
     "message": "Tudo importado"
+  },
+  "smartViews": {
+    "message": "Visualizações inteligentes"
+  },
+  "foldersSection": {
+    "message": "Pastas"
+  },
+  "recent7": {
+    "message": "Últimos 7 dias"
+  },
+  "searchPlaceholder": {
+    "message": "Buscar texto ou @usuário"
+  },
+  "gridView": {
+    "message": "Visualização em grade"
+  },
+  "itemCount": {
+    "message": "$COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "Há $COUNT$ posts dos seus Favoritos do x.com que podem ser importados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "Como importar"
+  },
+  "importHowTitle": {
+    "message": "Importar seus favoritos do x.com"
+  },
+  "importHowSteps": {
+    "message": "1. Abra os Favoritos do x.com (/i/bookmarks) no Chrome\n2. Role você mesmo até os posts aparecerem na tela (o PostShelf nunca rola sozinho)\n3. Clique no botão \"N não importados\" no canto inferior direito\n4. Os posts importados vão para \"Sem categoria\""
+  },
+  "dismiss": {
+    "message": "Fechar"
+  },
+  "filterImage": {
+    "message": "Com imagens"
+  },
+  "filterVideo": {
+    "message": "Com vídeo"
+  },
+  "filterLink": {
+    "message": "Com links"
+  },
+  "filterAuthor": {
+    "message": "Filtrar por autor"
+  },
+  "clearFilters": {
+    "message": "Limpar filtros"
+  },
+  "notFoundTitle": {
+    "message": "Nada encontrado"
+  },
+  "notFoundHint": {
+    "message": "Tente outra busca ou limpe os filtros."
+  },
+  "noPostsTitle": {
+    "message": "Ainda não há posts salvos"
+  },
+  "noPostsHint": {
+    "message": "Clique no botão de pasta de um post no x.com para salvá-lo. Favoritos feitos no celular podem ser importados abrindo seus Favoritos do x.com no Chrome para computador."
+  },
+  "folderMore": {
+    "message": "Alterar nome, ícone, cor"
+  },
+  "cardMenu": {
+    "message": "Mais ações"
+  },
+  "selectMode": {
+    "message": "Selecionar"
+  },
+  "chooseFolderMenu": {
+    "message": "Abrir lista de pastas"
+  },
+  "searchShow": {
+    "message": "Mostrar busca"
+  },
+  "viewLabel": {
+    "message": "Visualização"
+  },
+  "dataSection": {
+    "message": "Dados"
   }
 }

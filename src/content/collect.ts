@@ -1,6 +1,7 @@
 import { SEL } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
+import { recordPending } from '../shared/settings';
 import { xTheme } from './theme';
 import { extractTweet, type Extracted } from './snapshot';
 
@@ -28,6 +29,7 @@ export async function refreshCollectButton(): Promise<void> {
   const btn = document.querySelector<HTMLButtonElement>('.postshelf-collect');
   if (!btn || flashing) return;
   const n = unsavedItems(collectVisible(), await getSavedIds()).length;
+  void recordPending(n); // manager の取り込み案内バナー用に最後に観測した件数を残す
   btn.textContent = n > 0 ? t('collectPending', n) : t('collectAllDone');
   btn.dataset.pending = String(n);
   btn.disabled = n === 0;

@@ -37,6 +37,36 @@ export function Confirm(props: { message: string; confirmLabel: string; onConfir
   );
 }
 
+/** 閉じるだけの案内ダイアログ (本文は改行を保って表示) */
+export function InfoDialog(props: { title: string; body: string; onClose: () => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') props.onClose();
+    };
+    document.addEventListener('keydown', key);
+    return () => {
+      document.removeEventListener('keydown', key);
+      prev?.focus?.();
+    };
+  }, []);
+  return (
+    <div class="overlay" onClick={props.onClose}>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="info-title" onClick={(e) => e.stopPropagation()}>
+        <h2 id="info-title" class="dialog-title">{props.title}</h2>
+        <p class="pre">{props.body}</p>
+        <div class="dialog-actions">
+          <button ref={closeRef} onClick={props.onClose}>
+            {t('dismiss')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** 「元に戻す」付きトースト (表示時間は呼び出し側のタイマーで制御) */
 export function Toast(props: { message: string; onUndo: () => void }) {
   return (
@@ -52,7 +82,9 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const down = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) props.onClose();
+      // 開くボタン (親の .menu-anchor 内) の mousedown では閉じない。ボタン側のトグルに任せる
+      const host = ref.current?.parentElement ?? ref.current;
+      if (!host?.contains(e.target as Node)) props.onClose();
     };
     const key = (e: KeyboardEvent) => {
       if (e.key === 'Escape') props.onClose();

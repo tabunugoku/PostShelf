@@ -84,20 +84,20 @@ describe('manager surface', () => {
   it('sidepanel surface gets the class and an "open in tab" button, no "open side panel"', async () => {
     installPanelMock();
     await mount('sidepanel');
-    expect($('.ps').classList.contains('surface-sidepanel')).toBe(true);
+    expect($('.app').classList.contains('surface-sidepanel')).toBe(true);
     expect($$('[aria-label="タブで開く"]').length).toBe(1);
     expect($$('[aria-label="サイドパネルで開く"]').length).toBe(0);
   });
 
   it('tab surface shows "open in side panel" only when the API exists', async () => {
     await mount('tab');
-    expect($('.ps').classList.contains('surface-tab')).toBe(true);
-    expect($$('[aria-label="サイドパネルで開く"]').length).toBe(0);
+    expect($('.app').classList.contains('surface-tab')).toBe(true);
+    const sideRow = () => $$('.fr').find((r) => r.textContent?.includes('サイドパネルで開く'));
+    expect(sideRow()).toBeUndefined();
     await act(() => void render(null, $('#app')));
     const calls = installPanelMock();
     await mount('tab');
-    const btn = $('[aria-label="サイドパネルで開く"]');
-    await act(() => void btn.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await act(() => void sideRow()!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     await flush();
     expect(calls.open).toEqual([{ windowId: 7 }]);
     expect($$('[aria-label="タブで開く"]').length).toBe(0);
@@ -129,18 +129,56 @@ describe('x.com popover side panel link', () => {
   });
 });
 
-describe('narrow layout CSS', () => {
+describe('narrow layout', () => {
   const css = readFileSync(resolve(process.cwd(), 'static/manager.css'), 'utf8');
-  const narrow = css.slice(css.indexOf('@media (max-width:519px)'));
-  it('turns the folder list into a horizontally scrolling chip row below 520px', () => {
-    expect(narrow).toMatch(/\.side\{display:flex;[^}]*overflow-x:auto/);
-    expect(narrow).toMatch(/\.fr\{[^}]*min-height:32px/);
+
+  beforeEach(() => {
+    installChromeMock();
+    document.body.innerHTML = '<div id="app"></div>';
   });
-  it('stacks the bulk bar and keeps the list row single-line', () => {
-    expect(narrow).toMatch(/\.bulk\{flex-direction:column/);
+  const mountAt = async (width: number) => {
+    Object.defineProperty(window, 'innerWidth', { value: width, configurable: true });
+    await act(() => void render(<App surface="sidepanel" />, $('#app')));
+    await flush();
+  };
+
+  it('width <= 520px: folder button + horizontally scrolling chips, no sidebar (shared components)', async () => {
+    await mountAt(400);
+    expect($('.app').classList.contains('layout-narrow')).toBe(true);
+    expect($$('.side').length).toBe(0);
+    expect($('.folder-btn').getAttribute('aria-haspopup')).toBe('menu');
+    expect($$('.scroll .chip').length).toBeGreaterThanOrEqual(3); // すべて / 未分類 / 最近の 7 日
+    expect($$('[aria-label="タブで開く"]').length).toBe(1);
+    await act(() => void render(null, $('#app')));
+  });
+
+  it('width > 520px switches to the tab layout (sidebar)', async () => {
+    await mountAt(521);
+    expect($('.app').classList.contains('layout-wide')).toBe(true);
+    expect($$('.side').length).toBe(1);
+    expect($$('.folder-btn').length).toBe(0);
+    await act(() => void render(null, $('#app')));
+  });
+
+  it('switches live when the window is resized', async () => {
+    await mountAt(900);
+    Object.defineProperty(window, 'innerWidth', { value: 480, configurable: true });
+    await act(() => void window.dispatchEvent(new Event('resize')));
+    await flush();
+    expect($('.app').classList.contains('layout-narrow')).toBe(true);
+    await act(() => void render(null, $('#app')));
+    Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
+  });
+
+  it('css: chips scroll horizontally, bulk bar stacks, list rows stay single-line', () => {
+    expect(css).toMatch(/\.scroll\{[^}]*overflow-x:auto/);
+    expect(css).toMatch(/\.layout-narrow \.bulk\{flex-direction:column/);
     expect(css).toMatch(/\.mini \.t\{[^}]*white-space:nowrap/);
   });
-  it('manifest declares the side panel and Chrome 114+', () => {
+});
+
+describe('manifest', () => {
+  it('declares the side panel and Chrome 114+', () => {
     const m = JSON.parse(readFileSync(resolve(process.cwd(), 'static/manifest.json'), 'utf8'));
     expect(m.permissions).toContain('sidePanel');
     expect(m.side_panel.default_path).toBe('sidepanel.html');

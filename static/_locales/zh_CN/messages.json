@@ -307,5 +307,98 @@
   },
   "collectAllDone": {
     "message": "全部已导入"
+  },
+  "smartViews": {
+    "message": "智能视图"
+  },
+  "foldersSection": {
+    "message": "文件夹"
+  },
+  "recent7": {
+    "message": "最近 7 天"
+  },
+  "searchPlaceholder": {
+    "message": "按正文或 @用户名搜索"
+  },
+  "gridView": {
+    "message": "网格视图"
+  },
+  "itemCount": {
+    "message": "$COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "x.com“书签”中有 $COUNT$ 条帖子可以导入",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "导入方法"
+  },
+  "importHowTitle": {
+    "message": "导入 x.com 书签"
+  },
+  "importHowSteps": {
+    "message": "1. 在 Chrome 中打开 x.com 的“书签”(/i/bookmarks)\n2. 自己滚动页面，直到想导入的帖子显示在屏幕上（不会自动滚动）\n3. 点击右下角的“未导入 N 条”按钮\n4. 导入的帖子会进入“未分类”"
+  },
+  "dismiss": {
+    "message": "关闭"
+  },
+  "filterImage": {
+    "message": "含图片"
+  },
+  "filterVideo": {
+    "message": "含视频"
+  },
+  "filterLink": {
+    "message": "含链接"
+  },
+  "filterAuthor": {
+    "message": "按作者筛选"
+  },
+  "clearFilters": {
+    "message": "清除筛选"
+  },
+  "notFoundTitle": {
+    "message": "没有找到"
+  },
+  "notFoundHint": {
+    "message": "请更换搜索词或清除筛选。"
+  },
+  "noPostsTitle": {
+    "message": "还没有保存的帖子"
+  },
+  "noPostsHint": {
+    "message": "在 x.com 上点击帖子的文件夹按钮即可保存。在手机上添加的书签，可在桌面版 Chrome 中打开 x.com“书签”来导入。"
+  },
+  "folderMore": {
+    "message": "更改名称、图标、颜色"
+  },
+  "cardMenu": {
+    "message": "更多操作"
+  },
+  "selectMode": {
+    "message": "选择"
+  },
+  "chooseFolderMenu": {
+    "message": "打开文件夹列表"
+  },
+  "searchShow": {
+    "message": "显示搜索"
+  },
+  "viewLabel": {
+    "message": "视图"
+  },
+  "dataSection": {
+    "message": "数据"
   }
 }

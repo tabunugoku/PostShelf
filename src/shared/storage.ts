@@ -247,7 +247,6 @@ export type BookmarkUndo = Record<string, Bookmark | null>;
 async function mutateBookmarks(
   tweetIds: string[],
   fn: (b: Bookmark) => Bookmark | null,
-  opts: { ensureInbox?: boolean } = {},
 ): Promise<BookmarkUndo> {
   const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
   const undo: BookmarkUndo = {};
@@ -261,7 +260,8 @@ async function mutateBookmarks(
     else delete map[id];
   }
   if (Object.keys(undo).length === 0) return undo;
-  if (opts.ensureInbox) {
+  // 「未分類」に入るポストがあれば、受け皿のフォルダ (名前なし = 表示時に解決) を用意する
+  if (Object.values(map).some((b) => b.folderIds.includes(INBOX_ID))) {
     const folders = await readFolders();
     if (!folders.some((f) => f.id === INBOX_ID)) {
       const order = folders.reduce((m, f) => Math.max(m, f.order), -1) + 1;
@@ -283,14 +283,10 @@ export const addToFolders = (tweetIds: string[], folderIds: string[]) =>
  * (ポストを消すのは明示的な deleteBookmarks だけ)。
  */
 export const removeFromFolders = (tweetIds: string[], folderIds: string[]) =>
-  mutateBookmarks(
-    tweetIds,
-    (b) => {
-      const rest = b.folderIds.filter((id) => !folderIds.includes(id));
-      return { ...b, folderIds: rest.length ? rest : [INBOX_ID] };
-    },
-    { ensureInbox: true },
-  );
+  mutateBookmarks(tweetIds, (b) => {
+    const rest = b.folderIds.filter((id) => !folderIds.includes(id));
+    return { ...b, folderIds: rest.length ? rest : [INBOX_ID] };
+  });
 
 /** from から外して to に入れる。from が「すべて」(または未指定) なら追加のみ */
 export const moveToFolder = (tweetIds: string[], fromId: string | null, toId: string) =>

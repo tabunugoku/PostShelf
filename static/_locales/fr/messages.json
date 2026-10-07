@@ -307,5 +307,98 @@
   },
   "collectAllDone": {
     "message": "Tout est importé"
+  },
+  "smartViews": {
+    "message": "Vues intelligentes"
+  },
+  "foldersSection": {
+    "message": "Dossiers"
+  },
+  "recent7": {
+    "message": "7 derniers jours"
+  },
+  "searchPlaceholder": {
+    "message": "Rechercher texte ou @compte"
+  },
+  "gridView": {
+    "message": "Vue en grille"
+  },
+  "itemCount": {
+    "message": "$COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "$COUNT$ posts de vos Favoris x.com peuvent être importés",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "Comment importer"
+  },
+  "importHowTitle": {
+    "message": "Importer vos favoris x.com"
+  },
+  "importHowSteps": {
+    "message": "1. Ouvrez vos Favoris x.com (/i/bookmarks) dans Chrome\n2. Faites défiler vous-même jusqu'à ce que les posts apparaissent à l'écran (PostShelf ne défile jamais seul)\n3. Cliquez sur le bouton « N non importé(s) » en bas à droite\n4. Les posts importés vont dans « Non classés »"
+  },
+  "dismiss": {
+    "message": "Fermer"
+  },
+  "filterImage": {
+    "message": "Avec images"
+  },
+  "filterVideo": {
+    "message": "Avec vidéo"
+  },
+  "filterLink": {
+    "message": "Avec liens"
+  },
+  "filterAuthor": {
+    "message": "Filtrer par auteur"
+  },
+  "clearFilters": {
+    "message": "Retirer les filtres"
+  },
+  "notFoundTitle": {
+    "message": "Aucun résultat"
+  },
+  "notFoundHint": {
+    "message": "Modifiez la recherche ou retirez les filtres."
+  },
+  "noPostsTitle": {
+    "message": "Aucun post enregistré pour l'instant"
+  },
+  "noPostsHint": {
+    "message": "Cliquez sur le bouton dossier d'un post sur x.com pour l'enregistrer. Les favoris faits sur mobile s'importent en ouvrant vos Favoris x.com dans Chrome sur ordinateur."
+  },
+  "folderMore": {
+    "message": "Modifier nom, icône, couleur"
+  },
+  "cardMenu": {
+    "message": "Plus d'actions"
+  },
+  "selectMode": {
+    "message": "Sélectionner"
+  },
+  "chooseFolderMenu": {
+    "message": "Ouvrir la liste des dossiers"
+  },
+  "searchShow": {
+    "message": "Afficher la recherche"
+  },
+  "viewLabel": {
+    "message": "Affichage"
+  },
+  "dataSection": {
+    "message": "Données"
   }
 }

@@ -16,6 +16,10 @@ export interface Snapshot {
   media: string[];
   createdAt?: string;
   url: string;
+  /** 動画を含むか。保存時に content script が判定する (v7)。既存データでは未定義 = 未判定 (「動画あり」の絞り込みには出ない) */
+  hasVideo?: boolean;
+  /** 外部リンク / リンクカードを含むか。同上 (v7) */
+  hasLink?: boolean;
 }
 
 export interface Bookmark {

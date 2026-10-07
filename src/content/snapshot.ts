@@ -21,6 +21,11 @@ export function extractTweet(article: Element): Extracted | null {
   const avatar = article.querySelector<HTMLImageElement>(SEL.avatar)?.src || undefined;
   const media = [...article.querySelectorAll<HTMLImageElement>(SEL.media)].map((i) => i.src).filter(Boolean);
 
+  // 外部リンク: リンクカード、または本文中の t.co 等の外部 URL (メンション/ハッシュタグ/ポスト間リンクは除く)。推測 (実機未確認)
+  const bodyLinks = [...article.querySelectorAll(`${SEL.tweetText} a[href]`)].some((a) => /^https?:\/\//i.test(a.getAttribute('href') ?? ''));
+  const hasLink = !!article.querySelector(SEL.linkCard) || bodyLinks;
+  const hasVideo = !!article.querySelector(SEL.video);
+
   return {
     tweetId,
     snapshot: {
@@ -31,6 +36,8 @@ export function extractTweet(article: Element): Extracted | null {
       media,
       createdAt: time?.getAttribute('datetime') ?? undefined,
       url: `https://x.com/${handle}/status/${tweetId}`,
+      hasVideo,
+      hasLink,
     },
   };
 }

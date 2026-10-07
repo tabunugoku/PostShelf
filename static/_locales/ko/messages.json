@@ -307,5 +307,98 @@
   },
   "collectAllDone": {
     "message": "모두 가져옴"
+  },
+  "smartViews": {
+    "message": "스마트 보기"
+  },
+  "foldersSection": {
+    "message": "폴더"
+  },
+  "recent7": {
+    "message": "최근 7일"
+  },
+  "searchPlaceholder": {
+    "message": "본문, @사용자명으로 검색"
+  },
+  "gridView": {
+    "message": "그리드 보기"
+  },
+  "itemCount": {
+    "message": "$COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "x.com 북마크에서 가져올 수 있는 게시물이 $COUNT$개 있습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "가져오는 방법"
+  },
+  "importHowTitle": {
+    "message": "x.com 북마크 가져오기"
+  },
+  "importHowSteps": {
+    "message": "1. Chrome에서 x.com 북마크(/i/bookmarks)를 엽니다\n2. 가져올 게시물이 화면에 보일 때까지 직접 스크롤합니다 (자동 스크롤은 하지 않습니다)\n3. 오른쪽 아래의 \"미가져옴 N개\" 버튼을 누릅니다\n4. 가져온 게시물은 \"미분류\"에 들어갑니다"
+  },
+  "dismiss": {
+    "message": "닫기"
+  },
+  "filterImage": {
+    "message": "이미지 있음"
+  },
+  "filterVideo": {
+    "message": "동영상 있음"
+  },
+  "filterLink": {
+    "message": "링크 있음"
+  },
+  "filterAuthor": {
+    "message": "작성자로 필터"
+  },
+  "clearFilters": {
+    "message": "필터 해제"
+  },
+  "notFoundTitle": {
+    "message": "찾을 수 없습니다"
+  },
+  "notFoundHint": {
+    "message": "검색어를 바꾸거나 필터를 해제해 보세요."
+  },
+  "noPostsTitle": {
+    "message": "아직 저장한 게시물이 없습니다"
+  },
+  "noPostsHint": {
+    "message": "x.com에서 게시물의 폴더 버튼을 눌러 저장하세요. 휴대폰에서 북마크한 것은 데스크톱 Chrome에서 x.com 북마크를 열어 가져올 수 있습니다."
+  },
+  "folderMore": {
+    "message": "이름·아이콘·색 변경"
+  },
+  "cardMenu": {
+    "message": "더보기"
+  },
+  "selectMode": {
+    "message": "선택"
+  },
+  "chooseFolderMenu": {
+    "message": "폴더 목록 열기"
+  },
+  "searchShow": {
+    "message": "검색 표시"
+  },
+  "viewLabel": {
+    "message": "보기 방식"
+  },
+  "dataSection": {
+    "message": "데이터"
   }
 }

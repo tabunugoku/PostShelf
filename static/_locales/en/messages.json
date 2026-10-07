@@ -307,5 +307,98 @@
   },
   "collectAllDone": {
     "message": "All imported"
+  },
+  "smartViews": {
+    "message": "Smart views"
+  },
+  "foldersSection": {
+    "message": "Folders"
+  },
+  "recent7": {
+    "message": "Last 7 days"
+  },
+  "searchPlaceholder": {
+    "message": "Search text or @handle"
+  },
+  "gridView": {
+    "message": "Grid view"
+  },
+  "itemCount": {
+    "message": "$COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "$COUNT$ posts on your x.com Bookmarks can be imported",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "How to import"
+  },
+  "importHowTitle": {
+    "message": "Importing your x.com bookmarks"
+  },
+  "importHowSteps": {
+    "message": "1. Open your x.com Bookmarks (/i/bookmarks) in Chrome\n2. Scroll yourself until the posts you want are on screen (PostShelf never auto-scrolls)\n3. Press the \"N not yet imported\" button at the bottom right\n4. Imported posts go to \"Unsorted\""
+  },
+  "dismiss": {
+    "message": "Dismiss"
+  },
+  "filterImage": {
+    "message": "With images"
+  },
+  "filterVideo": {
+    "message": "With video"
+  },
+  "filterLink": {
+    "message": "With links"
+  },
+  "filterAuthor": {
+    "message": "Filter by author"
+  },
+  "clearFilters": {
+    "message": "Clear filters"
+  },
+  "notFoundTitle": {
+    "message": "Nothing found"
+  },
+  "notFoundHint": {
+    "message": "Try a different search or clear the filters."
+  },
+  "noPostsTitle": {
+    "message": "No saved posts yet"
+  },
+  "noPostsHint": {
+    "message": "Press the folder button on a post on x.com to save it. Bookmarks made on your phone can be imported by opening your x.com Bookmarks in desktop Chrome."
+  },
+  "folderMore": {
+    "message": "Change name, icon, color"
+  },
+  "cardMenu": {
+    "message": "More actions"
+  },
+  "selectMode": {
+    "message": "Select"
+  },
+  "chooseFolderMenu": {
+    "message": "Open folder list"
+  },
+  "searchShow": {
+    "message": "Show search"
+  },
+  "viewLabel": {
+    "message": "View"
+  },
+  "dataSection": {
+    "message": "Data"
   }
 }

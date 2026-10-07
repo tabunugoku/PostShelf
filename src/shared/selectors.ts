@@ -16,6 +16,9 @@ export const SEL = {
   media: '[data-testid="tweetPhoto"] img',
   time: 'time',
   statusLink: 'a[href*="/status/"]',
+  // 以下 2 つは実機未確認の推測 (v7)。動画は video 要素か videoPlayer、リンクはリンクカード (card.wrapper) か本文中の外部リンク。
+  video: 'video, [data-testid="videoPlayer"], [data-testid="videoComponent"]',
+  linkCard: '[data-testid="card.wrapper"]',
 } as const;
 
 export const bookmarkButtonSelector = `${SEL.bookmark}, ${SEL.removeBookmark}`;

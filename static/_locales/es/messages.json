@@ -307,5 +307,98 @@
   },
   "collectAllDone": {
     "message": "Todo importado"
+  },
+  "smartViews": {
+    "message": "Vistas inteligentes"
+  },
+  "foldersSection": {
+    "message": "Carpetas"
+  },
+  "recent7": {
+    "message": "Últimos 7 días"
+  },
+  "searchPlaceholder": {
+    "message": "Buscar texto o @usuario"
+  },
+  "gridView": {
+    "message": "Vista de cuadrícula"
+  },
+  "itemCount": {
+    "message": "$COUNT$ publicaciones",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "Hay $COUNT$ publicaciones de tus Marcadores de x.com que se pueden importar",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "Cómo importar"
+  },
+  "importHowTitle": {
+    "message": "Importar tus marcadores de x.com"
+  },
+  "importHowSteps": {
+    "message": "1. Abre los Marcadores de x.com (/i/bookmarks) en Chrome\n2. Desplázate tú mismo hasta que las publicaciones aparezcan en pantalla (PostShelf nunca se desplaza solo)\n3. Pulsa el botón «N sin importar» de la esquina inferior derecha\n4. Las publicaciones importadas van a «Sin clasificar»"
+  },
+  "dismiss": {
+    "message": "Cerrar"
+  },
+  "filterImage": {
+    "message": "Con imágenes"
+  },
+  "filterVideo": {
+    "message": "Con vídeo"
+  },
+  "filterLink": {
+    "message": "Con enlaces"
+  },
+  "filterAuthor": {
+    "message": "Filtrar por autor"
+  },
+  "clearFilters": {
+    "message": "Quitar filtros"
+  },
+  "notFoundTitle": {
+    "message": "No se encontró nada"
+  },
+  "notFoundHint": {
+    "message": "Prueba otra búsqueda o quita los filtros."
+  },
+  "noPostsTitle": {
+    "message": "Aún no hay publicaciones guardadas"
+  },
+  "noPostsHint": {
+    "message": "Pulsa el botón de carpeta de una publicación en x.com para guardarla. Los marcadores hechos en el móvil se importan abriendo tus Marcadores de x.com en Chrome de escritorio."
+  },
+  "folderMore": {
+    "message": "Cambiar nombre, icono, color"
+  },
+  "cardMenu": {
+    "message": "Más acciones"
+  },
+  "selectMode": {
+    "message": "Seleccionar"
+  },
+  "chooseFolderMenu": {
+    "message": "Abrir lista de carpetas"
+  },
+  "searchShow": {
+    "message": "Mostrar búsqueda"
+  },
+  "viewLabel": {
+    "message": "Vista"
+  },
+  "dataSection": {
+    "message": "Datos"
   }
 }

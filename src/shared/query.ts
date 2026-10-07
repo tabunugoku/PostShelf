@@ -2,16 +2,48 @@ import { ALL_FOLDER_ID, type Bookmark } from './models';
 
 export type SortKey = 'savedDesc' | 'savedAsc' | 'postedDesc' | 'postedAsc';
 
+/** スマートビュー「最近の 7 日」。保存データには無い仮想の絞り込み */
+export const RECENT_ID = '@recent';
+export const RECENT_MS = 7 * 24 * 60 * 60 * 1000;
+
+export interface Filters {
+  image?: boolean;
+  video?: boolean;
+  link?: boolean;
+  /** 投稿者のハンドル (@ 付き)。ほかの条件とは AND */
+  handle?: string;
+}
+
 const posted = (b: Bookmark) => (b.snapshot.createdAt ? Date.parse(b.snapshot.createdAt) : 0) || 0;
 
-/** フォルダで絞り込み → 検索 (本文/投稿者/ハンドル) → 並べ替え */
+export const hasImage = (b: Bookmark): boolean => b.snapshot.media.length > 0;
+
+/** 保存データに hasVideo / hasLink が無い (v6 以前に保存した) ポストは未判定として false 扱い = 絞り込みに出ない */
+export function matchesFilters(b: Bookmark, f: Filters): boolean {
+  if (f.image && !hasImage(b)) return false;
+  if (f.video && b.snapshot.hasVideo !== true) return false;
+  if (f.link && b.snapshot.hasLink !== true) return false;
+  if (f.handle && b.snapshot.handle.toLowerCase() !== f.handle.toLowerCase()) return false;
+  return true;
+}
+
+export const hasActiveFilters = (f: Filters): boolean => !!(f.image || f.video || f.link || f.handle);
+
+export function inView(b: Bookmark, folderId: string, now = Date.now()): boolean {
+  if (folderId === ALL_FOLDER_ID) return true;
+  if (folderId === RECENT_ID) return b.savedAt >= now - RECENT_MS;
+  return b.folderIds.includes(folderId);
+}
+
+/** ビュー (フォルダ / すべて / 最近の 7 日) で絞り込み → 検索 (本文/投稿者/ハンドル) → 絞り込みチップ (AND) → 並べ替え */
 export function queryBookmarks(
   all: Bookmark[],
-  opts: { folderId: string; search: string; sort: SortKey },
+  opts: { folderId: string; search: string; sort: SortKey; filters?: Filters; now?: number },
 ): Bookmark[] {
   const q = opts.search.trim().toLowerCase();
   const out = all.filter((b) => {
-    if (opts.folderId !== ALL_FOLDER_ID && !b.folderIds.includes(opts.folderId)) return false;
+    if (!inView(b, opts.folderId, opts.now)) return false;
+    if (opts.filters && !matchesFilters(b, opts.filters)) return false;
     if (!q) return true;
     const s = b.snapshot;
     return [s.text, s.author, s.handle].some((x) => x.toLowerCase().includes(q));
@@ -25,6 +57,18 @@ export function queryBookmarks(
   return out.sort(cmp[opts.sort]);
 }
 
-export function countFolder(all: Bookmark[], folderId: string): number {
-  return folderId === ALL_FOLDER_ID ? all.length : all.filter((b) => b.folderIds.includes(folderId)).length;
+export function countFolder(all: Bookmark[], folderId: string, now = Date.now()): number {
+  return all.filter((b) => inView(b, folderId, now)).length;
+}
+
+/** 保存データにある投稿者のハンドル一覧 (件数の多い順、同数は名前順) */
+export function authorHandles(all: Bookmark[]): { handle: string; author: string; count: number }[] {
+  const m = new Map<string, { handle: string; author: string; count: number }>();
+  for (const b of all) {
+    const k = b.snapshot.handle.toLowerCase();
+    const e = m.get(k) ?? { handle: b.snapshot.handle, author: b.snapshot.author, count: 0 };
+    e.count++;
+    m.set(k, e);
+  }
+  return [...m.values()].sort((a, b) => b.count - a.count || a.handle.localeCompare(b.handle));
 }
