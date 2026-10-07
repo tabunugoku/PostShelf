@@ -1,3 +1,4 @@
+import { initAccount } from './account';
 import { initButtons } from './buttons';
 import { initHealth } from './health';
 import { ensureCollectButton, scheduleCollectRefresh, watchCollectData, watchPath } from './collect';
@@ -6,6 +7,7 @@ import { installGlobalHandlers } from './popover';
 
 installGlobalHandlers();
 installMessageHandler();
+initAccount();
 initHealth();
 initButtons();
 ensureCollectButton();

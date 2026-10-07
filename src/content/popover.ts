@@ -7,6 +7,7 @@ import { xTheme } from './theme';
 import { createFolderPicker } from '../shared/folderPicker';
 import { setNativeBookmark } from './native';
 import { getSettings, type ButtonMode } from '../shared/settings';
+import { getCurrentAccount, subscribeAccount } from './account';
 
 const POP_CLASS = 'postshelf-popover';
 
@@ -35,6 +36,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   const ex = extractTweet(article);
   if (!ex) return null;
   const { tweetId, snapshot } = ex;
+  const account = getCurrentAccount(); // 保存先は、判定できた現在のアカウントだけ
   const folders = (await listFolders()).filter((f) => !isBuiltinFolder(f.id));
   const selected = new Set((await getBookmark(tweetId))?.folderIds ?? []);
 
@@ -45,7 +47,29 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif`;
   pop.addEventListener('click', (e) => e.stopPropagation());
 
+  // 保存先の表示 (アバター小 + @ハンドル)。判定できないときは警告だけを出して保存させない
+  const head = document.createElement('div');
+  head.className = 'postshelf-account';
+  head.style.cssText = `display:flex;gap:6px;align-items:center;padding:2px 8px 8px;margin-bottom:6px;border-bottom:.5px solid ${th.border};font-size:14px;overflow-wrap:anywhere`;
+  if (account) {
+    if (account.avatar) {
+      const img = document.createElement('img');
+      img.src = account.avatar;
+      img.alt = '';
+      img.style.cssText = 'width:20px;height:20px;border-radius:50%;flex:none;object-fit:cover';
+      head.append(img);
+    }
+    const label = document.createElement('span');
+    label.textContent = t('saveTo', `@${account.handle}`);
+    head.append(label);
+  } else {
+    head.setAttribute('role', 'alert');
+    head.textContent = t('accountUnknown');
+  }
+  pop.append(head);
+
   const save = async () => {
+    if (getCurrentAccount()?.id !== account?.id) return closePopovers(); // 開いている間にアカウントが切り替わった
     const saved = await setBookmarkFolders(tweetId, [...selected], snapshot);
     // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
     if ((await getSettings()).syncNative) setNativeBookmark(article, saved !== undefined);
@@ -57,9 +81,9 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     theme: th,
     onChange: () => save(),
   });
-  pop.append(picker.el);
+  if (account) pop.append(picker.el);
   // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
-  if (mode === 'replace' && queryFirst(article, 'removeBookmark')) {
+  if (account && mode === 'replace' && queryFirst(article, 'removeBookmark')) {
     const rel = document.createElement('button');
     rel.type = 'button';
     rel.textContent = t('releaseNative');
@@ -100,6 +124,7 @@ function position(pop: HTMLElement, anchor: HTMLElement): void {
 }
 
 export function installGlobalHandlers(): void {
+  subscribeAccount(() => closePopovers()); // アカウントが切り替わったら閉じる (開き直すと新しいアカウントで開く)
   document.addEventListener('click', (e) => {
     if (!(e.target as Element)?.closest?.(`.${POP_CLASS}`)) closePopovers();
   });

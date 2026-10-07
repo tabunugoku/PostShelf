@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Icon } from '../shared/Icon';
-import { ALL_FOLDER_ID, INBOX_ID, displayName, isBuiltinFolder, type Bookmark, type Folder } from '../shared/models';
+import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, type Account, type Bookmark, type Folder } from '../shared/models';
 import {
   RECENT_ID,
   authorHandles,
@@ -24,6 +24,13 @@ import {
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
 import {
   addToFolders,
+  assignAccount,
+  deleteAccountData,
+  getLastSeenAccount,
+  listAccounts,
+  onLastSeenAccountChanged,
+  setAccountScope,
+  type AccountSummary,
   createFolder,
   deleteBookmarks,
   deleteFolder,
@@ -40,6 +47,7 @@ import {
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card } from './Cards';
+import { AccountSwitcher, AssignDialog, resolveViewAccount } from './Accounts';
 import { FolderEdit } from './FolderEdit';
 import { SaveCurrent } from './SaveCurrent';
 import { SettingsPage } from './Settings';
@@ -52,8 +60,9 @@ const sorts = (): [SortKey, string][] => [
   ['postedAsc', t('sortPostedAsc')],
 ];
 
-type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: string } | null;
-type ToastState = { key: number; message: string; undo: BookmarkUndo } | null;
+type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: string } | { kind: 'account'; id: string } | null;
+/** undo の無いトースト (アカウントの切替・割り当ての通知) もある */
+type ToastState = { key: number; message: string; undo?: BookmarkUndo } | null;
 
 /** 「未分類」は保存データにまだ無くても常にスマートビューに出す。アイコンは受け皿らしく inbox に統一する */
 const inboxView = (stored?: Folder): Folder => ({ id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color });
@@ -84,29 +93,46 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [showHow, setShowHow] = useState(false);
   const [bannerOn, setBannerOn] = useState(false);
   const [pending, setPending] = useState(0);
+  const [accounts, setAccounts] = useState<AccountSummary[]>([]);
+  const [viewId, setViewId] = useState(UNKNOWN_ACCOUNT_ID);
+  const [lastSeen, setLastSeen] = useState<Account | null>(null);
+  const [assignFrom, setAssignFrom] = useState<string | null>(null);
+  const viewRef = useRef(UNKNOWN_ACCOUNT_ID);
+  const lastRef = useRef<Account | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  /** 表示するアカウントを切り替える (保存層の対象も合わせる)。データの読み直しは呼び出し側 */
+  const applyView = (id: string) => {
+    viewRef.current = id;
+    setAccountScope(id);
+    setViewId(id);
+  };
   const reload = async () => {
-    const [f, b] = await Promise.all([listFolders(), listBookmarks()]);
+    const [f, b, accs] = await Promise.all([listFolders(), listBookmarks(), listAccounts()]);
     setFolders(f);
     setBookmarks(b);
+    setAccounts(accs);
     const existing = new Set(b.map((x) => x.tweetId));
     setSelected((s) => pruneSelection(s, existing));
   };
   const loadHint = async () => {
-    const h = await getImportHint();
+    const h = await getImportHint(viewRef.current);
     setPending(h.pending);
     setBannerOn(shouldShowImportHint(h));
   };
   useEffect(() => {
     void (async () => {
-      const [s] = await Promise.all([getSettings(), reload(), loadHint()]);
+      const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts()]);
+      lastRef.current = last;
+      setLastSeen(last);
+      applyView(resolveViewAccount(s.viewAccount, last, accs));
+      await Promise.all([reload(), loadHint()]);
       setCurrent(s.lastFolderId);
       setView(s.viewMode);
       setSort(s.sortKey);
       setReady(true);
     })();
-    const offs = [onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint())]; // 別タブ (x.com) での保存・取り込みも反映
+    const offs = [onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
     return () => offs.forEach((o) => o());
   }, []);
 
@@ -129,10 +155,43 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     void updateSettings({ sortKey: s });
   };
 
+  /** x.com で読み取ったアカウントが変わった。別のアカウントに切り替わったら、そのアカウントの表示に切り替えて知らせる */
+  const onLastSeen = async () => {
+    const next = await getLastSeenAccount();
+    const prev = lastRef.current;
+    lastRef.current = next;
+    setLastSeen(next);
+    if (!next || next.id === prev?.id) return;
+    const s = await getSettings();
+    if (prev === null && s.viewAccount) return; // 初めて読み取れた: 手動で選んだ表示があればそのまま
+    if (prev !== null) void updateSettings({ viewAccount: '' }); // 別のアカウントに切り替えた: 手動の選択は解く
+    switchTo(next.id);
+    if (prev !== null) setToast({ key: Date.now(), message: t('accountSwitched', accountLabel(next)) });
+  };
+  /** 表示アカウントを切り替えて、データと表示状態を読み直す */
+  const switchTo = (id: string) => {
+    applyView(id);
+    chooseView(ALL_FOLDER_ID);
+    setSearch('');
+    void Promise.all([reload(), loadHint()]);
+  };
+  const pickAccount = (id: string) => {
+    void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id }); // x.com でログイン中のアカウントは「選んでいない」と同じ (追従する)
+    switchTo(id);
+  };
+  const afterAccountChange = async (removedOrMovedId: string, nextId?: string) => {
+    if (viewRef.current === removedOrMovedId) {
+      const accs = await listAccounts();
+      const id = nextId ?? resolveViewAccount('', lastRef.current, accs.filter((a) => a.account.id !== removedOrMovedId));
+      void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id });
+      switchTo(id);
+    } else await reload();
+  };
+
   // 取り込み案内バナーの「閉じる」: 閉じた時点の件数を保存し、件数が増えるまで出さない
   const dismissBanner = () => {
     setBannerOn(false);
-    void dismissImportHint();
+    void dismissImportHint(viewRef.current);
   };
 
   // 取り消しトースト: 5 秒で消える
@@ -160,6 +219,38 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   const count = (id: string) => countFolder(bookmarks, id, now);
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
+  const assignSource = accounts.find((a) => a.account.id === assignFrom);
+  const unknownCount = accounts.find((a) => a.account.id === UNKNOWN_ACCOUNT_ID)?.count ?? 0;
+  const confirmMessage = (c: NonNullable<ConfirmState>) => {
+    if (c.kind === 'posts') return t('confirmDeletePosts', c.ids.length);
+    if (c.kind === 'account') {
+      const a = accounts.find((x) => x.account.id === c.id);
+      return t('accountDeleteConfirm', a ? accountLabel(a.account) : c.id, a?.count ?? 0);
+    }
+    return t('confirmDelete');
+  };
+  /** ログイン中のアカウントを判定できていて、「アカウント未設定」にデータが残っているとき、割り当てを案内する */
+  const unknownBanner = unknownCount > 0 && viewId !== UNKNOWN_ACCOUNT_ID && lastSeen && page === 'bookmarks' && (
+    <div class="banner" role="region" aria-label={t('accountUnknownName')}>
+      <Icon name="ti-user-question" />
+      <span>{t('accountUnknownBanner', unknownCount)}</span>
+      <button class="banner-btn" onClick={() => setAssignFrom(UNKNOWN_ACCOUNT_ID)}>
+        {t('accountAssign')}
+      </button>
+    </div>
+  );
+  const switcher = (
+    <AccountSwitcher
+      accounts={accounts}
+      viewId={viewId}
+      loggedInId={lastSeen?.id ?? null}
+      onPick={pickAccount}
+      onAssign={setAssignFrom}
+      onDelete={(id) => setConfirmState({ kind: 'account', id })}
+    />
+  );
+  /** サイドパネル下部の保存ボタンを出せない理由 (ログイン中のアカウントが分からない / 表示中と違う) */
+  const saveBlocked = !lastSeen ? t('saveCurrentNoAccount') : lastSeen.id !== viewId ? t('saveCurrentWrongAccount', accountLabel(lastSeen)) : undefined;
 
   /** 一括操作を実行し、件数が変わったら取り消し付きトーストを出す */
   const run = async (op: Promise<BookmarkUndo>, msgKey: string) => {
@@ -169,7 +260,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     if (n > 0) setToast({ key: Date.now(), message: t(msgKey, n), undo });
   };
   const doUndo = async () => {
-    if (!toast) return;
+    if (!toast?.undo) return;
     await restoreBookmarks(toast.undo);
     setToast(null);
     await reload();
@@ -543,6 +634,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   const body = (
     <>
+      {unknownBanner}
       {banner}
       {chips}
       {bulk}
@@ -555,7 +647,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     <>
       {confirmState && (
         <Confirm
-          message={confirmState.kind === 'posts' ? t('confirmDeletePosts', confirmState.ids.length) : t('confirmDelete')}
+          message={confirmMessage(confirmState)}
           confirmLabel={t('delete')}
           onCancel={() => setConfirmState(null)}
           onConfirm={async () => {
@@ -564,6 +656,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             if (c.kind === 'posts') {
               await run(deleteBookmarks(c.ids), 'toastDeleted');
               setSelected((s) => new Set([...s].filter((id) => !c.ids.includes(id))));
+            } else if (c.kind === 'account') {
+              await deleteAccountData(c.id);
+              await afterAccountChange(c.id);
             } else {
               await deleteFolder(c.id);
               if (current === c.id) chooseView(ALL_FOLDER_ID);
@@ -572,8 +667,23 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           }}
         />
       )}
+      {assignFrom && assignSource && (
+        <AssignDialog
+          from={assignSource}
+          targets={accounts.filter((a) => a.account.id !== assignFrom && a.account.id !== UNKNOWN_ACCOUNT_ID)}
+          defaultTo={lastSeen?.id ?? null}
+          onCancel={() => setAssignFrom(null)}
+          onConfirm={async (to) => {
+            const from = assignFrom;
+            setAssignFrom(null);
+            const r = await assignAccount(from, to);
+            setToast({ key: Date.now(), message: t('accountAssignDone', r.moved + r.merged) });
+            await afterAccountChange(from, to);
+          }}
+        />
+      )}
       {showHow && <InfoDialog title={t('importHowTitle')} body={t('importHowSteps')} onClose={() => setShowHow(false)} />}
-      {toast && <Toast message={toast.message} onUndo={() => void doUndo()} />}
+      {toast && <Toast message={toast.message} onUndo={toast.undo ? () => void doUndo() : undefined} />}
     </>
   );
 
@@ -586,6 +696,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     return (
       <div class={`app layout-narrow surface-${surface}`}>
         <header class="phead">
+          {switcher}
           <div class="row">
             <span class="menu-anchor grow">
               <button
@@ -649,7 +760,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             </>
           )}
         </main>
-        {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} onSaved={() => void reload()} />}
+        {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         {dialogs}
       </div>
     );
@@ -659,6 +770,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   return (
     <div class={`app layout-wide surface-${surface}`}>
       <aside class="side">
+        {switcher}
         <div class="sec">{t('smartViews')}</div>
         {smartViews.map((f) => viewRow(f, { smart: true }))}
         <div class="sec">{t('foldersSection')}</div>
@@ -697,7 +809,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </>
         )}
       </main>
-      {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} onSaved={() => void reload()} />}
+      {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
       {dialogs}
     </div>
   );

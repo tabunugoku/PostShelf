@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { installChromeMock } from './chrome-mock';
 import { setNativeBookmark } from '../src/content/native';
 import { openPopover } from '../src/content/popover';
@@ -13,6 +14,8 @@ const tick = () => new Promise((r) => setTimeout(r, 10));
 
 beforeEach(() => {
   installChromeMock();
+  resetAccount();
+  setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   document.body.innerHTML = html;
 });
 

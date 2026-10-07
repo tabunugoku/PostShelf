@@ -6,7 +6,34 @@ export interface Folder {
   icon: string;
   color?: string;
   order: number;
+  /** 所有するアカウント (v9)。保存済みのフォルダには必ず入る。「すべて」などの仮想フォルダには無い */
+  accountId?: string;
 }
+
+/** X のアカウント (x.com の画面から読み取る。保存したアカウントの区別に使う) */
+export interface Account {
+  /** 正規化したハンドル (小文字、@ なし)。ハンドルを変えると別のアカウント扱いになる */
+  id: string;
+  /** 表示用のハンドル (@ なし。X での大文字小文字のまま) */
+  handle: string;
+  displayName?: string;
+  avatar?: string;
+  /** content script が最後にこのアカウントを読み取った時刻 (ms) */
+  lastSeenAt: number;
+}
+
+/** アカウントを判定できなかったとき・v9 より前に保存したデータの所属先 (表示名は「アカウント未設定」) */
+export const UNKNOWN_ACCOUNT_ID = 'unknown';
+
+/** ブックマークの保存キー (accountId + tweetId)。同じポストを別アカウントで保存すると別のブックマークになる */
+export const bookmarkKey = (accountId: string, tweetId: string): string => `${accountId}:${tweetId}`;
+
+/** ハンドルから ID への正規化 (@ を外して小文字に) */
+export const accountIdOf = (handle: string): string => handle.replace(/^@/, '').trim().toLowerCase();
+
+/** 表示名: 「@handle」。未設定アカウントは t() で解決する */
+export const accountLabel = (a: Pick<Account, 'id' | 'handle'>): string =>
+  a.id === UNKNOWN_ACCOUNT_ID ? t('accountUnknownName') : `@${a.handle}`;
 
 export interface Snapshot {
   text: string;
@@ -23,6 +50,8 @@ export interface Snapshot {
 }
 
 export interface Bookmark {
+  /** 保存したアカウント (v9)。キーは bookmarkKey(accountId, tweetId) */
+  accountId: string;
   tweetId: string;
   folderIds: string[];
   savedAt: number;

@@ -8,6 +8,7 @@ import type { Bookmark } from '../src/shared/models';
 const DAY = 86400000;
 const NOW = 1_800_000_000_000;
 const mk = (id: string, handle: string, over: Partial<Bookmark['snapshot']> = {}, savedAt = NOW, folderIds = ['f']): Bookmark => ({
+  accountId: 'unknown',
   tweetId: id,
   folderIds,
   savedAt,
@@ -78,22 +79,22 @@ describe('persisted view state (chrome.storage.local, not localStorage)', () => 
 describe('import banner state', () => {
   beforeEach(() => installChromeMock());
   it('shows only while pending is above the count at dismissal', async () => {
-    await recordPending(12);
-    expect(shouldShowImportHint(await getImportHint())).toBe(true);
-    await dismissImportHint();
-    expect(shouldShowImportHint(await getImportHint())).toBe(false);
-    await recordPending(12);
-    expect(shouldShowImportHint(await getImportHint())).toBe(false); // 増えていない
-    await recordPending(13);
-    expect(shouldShowImportHint(await getImportHint())).toBe(true); // 新しく増えた
+    await recordPending('a', 12);
+    expect(shouldShowImportHint(await getImportHint('a'))).toBe(true);
+    await dismissImportHint('a');
+    expect(shouldShowImportHint(await getImportHint('a'))).toBe(false);
+    await recordPending('a', 12);
+    expect(shouldShowImportHint(await getImportHint('a'))).toBe(false); // 増えていない
+    await recordPending('a', 13);
+    expect(shouldShowImportHint(await getImportHint('a'))).toBe(true); // 新しく増えた
   });
   it('a lower count (after importing) resets the baseline so later growth shows again', async () => {
-    await recordPending(12);
-    await dismissImportHint();
-    await recordPending(0);
-    expect(await getImportHint()).toEqual({ pending: 0, dismissed: 0 });
-    await recordPending(3);
-    expect(shouldShowImportHint(await getImportHint())).toBe(true);
+    await recordPending('a', 12);
+    await dismissImportHint('a');
+    await recordPending('a', 0);
+    expect(await getImportHint('a')).toEqual({ pending: 0, dismissed: 0 });
+    await recordPending('a', 3);
+    expect(shouldShowImportHint(await getImportHint('a'))).toBe(true);
   });
 });
 

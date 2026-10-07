@@ -36,6 +36,15 @@ export const CANDIDATES = {
   video: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
   // 候補が 1 つだけ: リンクカードは data-testid 以外に目印が無い
   linkCard: ['[data-testid="card.wrapper"]'],
+  // 現在ログイン中のアカウント (v9)。いずれも実機未確認 (2026-10 時点):
+  // 1 番目: 左メニュー下部のアカウント切替ボタン。実機では表示名と @ハンドルが出ている
+  // 2 番目: 左メニューの「プロフィール」リンク (href が /ハンドル)
+  // 3 番目: 左メニュー内のアバター (data-testid が UserAvatar-Container-ハンドル)
+  accountSwitcher: [
+    '[data-testid="SideNav_AccountSwitcher_Button"]',
+    '[data-testid="AppTabBar_Profile_Link"]',
+    'header [data-testid^="UserAvatar-Container-"]',
+  ],
 } as const;
 
 export type SelKey = keyof typeof CANDIDATES;
@@ -58,6 +67,16 @@ export function queryFirst<T extends Element = Element>(root: ParentNode, key: S
     if (el) return { el, index: i };
   }
   return null;
+}
+
+/** 候補ごとの最初の要素 (見つかった候補だけ、優先順)。1 番目が読めなくても 2 番目以降を試したいとき用 */
+export function queryEveryCandidate<T extends Element = Element>(root: ParentNode, key: SelKey): Found<T>[] {
+  const out: Found<T>[] = [];
+  CANDIDATES[key].forEach((sel, index) => {
+    const el = root.querySelector<T>(sel);
+    if (el) out.push({ el, index });
+  });
+  return out;
 }
 
 /** 1 件以上見つかった最初の候補の全要素 */

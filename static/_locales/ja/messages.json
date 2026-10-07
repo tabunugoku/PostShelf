@@ -454,5 +454,111 @@
   },
   "diagPreparing": {
     "message": "作成中…"
+  },
+  "saveTo": {
+    "message": "保存先: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "ログイン中のアカウントを判定できないため、保存できません。x.com のページを開き直してください。"
+  },
+  "collectNoAccount": {
+    "message": "アカウント不明のため取り込めません"
+  },
+  "accountUnknownName": {
+    "message": "アカウント未設定"
+  },
+  "accountSwitchLabel": {
+    "message": "表示するアカウント"
+  },
+  "accountSwitchNote": {
+    "message": "ここで切り替えても、X のログイン状態は変わりません。X のアカウントは x.com で切り替えてください。"
+  },
+  "accountSwitched": {
+    "message": "$NAME$ に切り替えました",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "x.com でログイン中"
+  },
+  "accountAssign": {
+    "message": "割り当て…"
+  },
+  "accountAssignTitle": {
+    "message": "データの割り当て"
+  },
+  "accountAssignDesc": {
+    "message": "$NAME$ の保存データ（$COUNT$ 件）を、選んだアカウントへ移します。同じポストがすでにある場合は、フォルダを統合します。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "移動先"
+  },
+  "accountAssignNone": {
+    "message": "割り当て先のアカウントがありません。x.com を開いてログインすると、アカウントが現れます。"
+  },
+  "accountAssignDone": {
+    "message": "$COUNT$ 件を割り当てました",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "このアカウントのデータを削除"
+  },
+  "accountDeleteConfirm": {
+    "message": "$NAME$ の保存データ（$COUNT$ 件のポストとフォルダ）を削除しますか？ 取り消しはできません。X のブックマークは変更されません。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "「アカウント未設定」に $COUNT$ 件のポストがあります。どのアカウントのものかを指定してください。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "アカウント: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "x.com でログイン中のアカウントを判定できないため、保存できません。x.com のページを開き直してください。"
+  },
+  "saveCurrentWrongAccount": {
+    "message": "表示中のアカウントと、x.com でログイン中の $NAME$ が違うため保存できません。アカウントを切り替えてください。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { installChromeMock } from './chrome-mock';
 import { applyButtonMode, injectButtons, refreshAll } from '../src/content/buttons';
 import { installGlobalHandlers } from '../src/content/popover';
@@ -15,6 +16,8 @@ const popover = () => document.querySelector('.postshelf-popover');
 
 beforeEach(() => {
   installChromeMock();
+  resetAccount();
+  setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   document.body.innerHTML = html;
   applyButtonMode('separate');
 });

@@ -11,7 +11,7 @@ import { Dropdown, FolderPickerHost } from './ui';
  * アクティブタブが x.com/*\/status/* のときだけ表示。押すとそのタブの content script からスナップショットを取り、
  * 共通のフォルダ選択を開く。取れなければ短いエラーを出して何も保存しない。
  */
-export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void }) {
+export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /** 保存できない理由 (アカウントを判定できない / 表示中のアカウントが違う)。あるときは保存ボタンの代わりにこれを出す */ blockedReason?: string }) {
   const [post, setPost] = useState<ActivePost | null>(null);
   const [error, setError] = useState('');
   const [open, setOpen] = useState<{ tweetId: string; snapshot: Snapshot; selected: string[]; tabId: number } | null>(null);
@@ -21,6 +21,14 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void }) {
     setOpen(null);
   }), []);
   if (!post) return null; // x.com 以外のタブ / ポスト以外のページでは出さない
+  if (props.blockedReason)
+    return (
+      <div class="pfoot">
+        <div class="pfoot-note error" role="alert">
+          {props.blockedReason}
+        </div>
+      </div>
+    );
 
   const start = async () => {
     setError('');

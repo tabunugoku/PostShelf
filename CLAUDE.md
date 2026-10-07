@@ -26,8 +26,9 @@ v2〜v5 は実装済み。次は `docs/TASK_V6.md` (アイコン組み込み) �
 
 ## データモデル (`src/shared/models.ts`)
 ```ts
-Folder   { id: string; name: string; icon: string; color?: string; order: number }
-Bookmark { tweetId: string; folderIds: string[]; savedAt: number;
+Folder   { id: string; name: string; icon: string; color?: string; order: number; accountId?: string }
+Account  { id: string; handle: string; displayName?: string; avatar?: string; lastSeenAt: number }  // v9: id = 小文字のハンドル
+Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: number;  // v9: 保存キーは accountId:tweetId
            snapshot: { text: string; author: string; handle: string; avatar?: string;
                        media: string[]; createdAt?: string; url: string } }
 ```

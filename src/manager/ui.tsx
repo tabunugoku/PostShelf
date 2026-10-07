@@ -68,11 +68,11 @@ export function InfoDialog(props: { title: string; body: string; onClose: () => 
 }
 
 /** 「元に戻す」付きトースト (表示時間は呼び出し側のタイマーで制御) */
-export function Toast(props: { message: string; onUndo: () => void }) {
+export function Toast(props: { message: string; onUndo?: () => void }) {
   return (
     <div class="toast" role="status">
       <span>{props.message}</span>
-      <button onClick={props.onUndo}>{t('undo')}</button>
+      {props.onUndo && <button onClick={props.onUndo}>{t('undo')}</button>}
     </div>
   );
 }

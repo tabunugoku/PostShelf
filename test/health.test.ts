@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { installChromeMock } from './chrome-mock';
 import { EMPTY_GRACE_MS, THROTTLE_MS, getLocalHealth, inspect, isBroken, resetHealth, runHealthCheck, scheduleHealthCheck } from '../src/content/health';
 import { applyButtonMode, injectButtons } from '../src/content/buttons';
@@ -18,6 +19,8 @@ const tick = () => new Promise((r) => setTimeout(r, 20));
 
 beforeEach(() => {
   installChromeMock();
+  resetAccount();
+  setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   resetHealth();
   document.body.innerHTML = '';
   applyButtonMode('separate');

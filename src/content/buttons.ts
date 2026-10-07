@@ -6,6 +6,7 @@ import { getSettings, onSettingsChanged, type ButtonMode } from '../shared/setti
 import { extractTweet } from './snapshot';
 import { ensureIconCss, openPopover, setPopoverMode } from './popover';
 import { isOwnNativeClick } from './native';
+import { getCurrentAccount, subscribeAccount } from './account';
 import type { Folder } from '../shared/models';
 import { ACCENT, ACCENT_FILL } from '../shared/tokens';
 
@@ -84,6 +85,7 @@ async function refreshArticle(article: Element): Promise<void> {
   const host = marker?.closest<HTMLElement>(`[${BTN_ATTR}]`) ?? (marker ? closestFirst<HTMLElement>(marker, 'bookmarkButton')?.el : undefined);
   const ex = extractTweet(article);
   if (!host || !ex) return;
+  if (!getCurrentAccount()) return void setSaved(host, []); // アカウント不明: どのアカウントの保存か分からないので「未保存」表示
   const bm = await getBookmark(ex.tweetId);
   const all = await listFolders();
   setSaved(host, (bm?.folderIds ?? []).map((id) => all.find((f) => f.id === id)).filter((f): f is Folder => !!f));
@@ -180,6 +182,7 @@ export function initButtons(): void {
   void getSettings().then((s) => applyButtonMode(s.buttonMode));
   onSettingsChanged((s) => applyButtonMode(s.buttonMode));
   onDataChanged(() => void refreshAll());
+  subscribeAccount(() => void refreshAll()); // アカウントが判定できた / 切り替わったら表示を作り直す
   new MutationObserver(scheduleInject).observe(document.body, { childList: true, subtree: true });
 }
 

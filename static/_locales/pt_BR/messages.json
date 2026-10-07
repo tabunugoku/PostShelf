@@ -454,5 +454,111 @@
   },
   "diagPreparing": {
     "message": "Preparando…"
+  },
+  "saveTo": {
+    "message": "Salvar em: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "Não foi possível identificar a conta conectada, então nada pode ser salvo. Recarregue a página do x.com."
+  },
+  "collectNoAccount": {
+    "message": "Não é possível importar: conta desconhecida"
+  },
+  "accountUnknownName": {
+    "message": "Sem conta definida"
+  },
+  "accountSwitchLabel": {
+    "message": "Conta exibida"
+  },
+  "accountSwitchNote": {
+    "message": "Trocar aqui não muda a conta conectada no X. Troque a conta do X no x.com."
+  },
+  "accountSwitched": {
+    "message": "Alterado para $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "Conectada no x.com"
+  },
+  "accountAssign": {
+    "message": "Reatribuir…"
+  },
+  "accountAssignTitle": {
+    "message": "Reatribuir dados"
+  },
+  "accountAssignDesc": {
+    "message": "Move os dados salvos de $NAME$ ($COUNT$ posts) para a conta escolhida. Se o mesmo post já existir, as pastas serão mescladas.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "Mover para"
+  },
+  "accountAssignNone": {
+    "message": "Não há conta de destino. Abra o x.com conectado e a conta aparecerá aqui."
+  },
+  "accountAssignDone": {
+    "message": "$COUNT$ posts reatribuídos",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "Excluir os dados desta conta"
+  },
+  "accountDeleteConfirm": {
+    "message": "Excluir os dados salvos de $NAME$ ($COUNT$ posts e pastas)? Não é possível desfazer. Seus favoritos do X não são alterados.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "Há $COUNT$ posts em \"Sem conta definida\". Indique a qual conta pertencem.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "Conta: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "Não foi possível identificar a conta conectada no x.com, então nada pode ser salvo. Recarregue a página do x.com."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "A conta exibida é diferente de $NAME$, conectada no x.com, então nada pode ser salvo. Troque a conta acima.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }

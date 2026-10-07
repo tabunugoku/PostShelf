@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { installChromeMock } from './chrome-mock';
 import { extractTweet } from '../src/content/snapshot';
 import { openPopover } from '../src/content/popover';
@@ -11,6 +12,8 @@ const html = readFileSync(resolve(process.cwd(), 'test/fixtures/tweet.html'), 'u
 
 beforeEach(() => {
   installChromeMock();
+  resetAccount();
+  setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   document.body.innerHTML = html;
 });
 

@@ -55,6 +55,10 @@ export function installChromeMock(lang = 'ja'): Record<string, unknown> {
           for (const [k, v] of Object.entries(items)) data[k] = structuredClone(v);
           for (const l of listeners) l(Object.fromEntries(Object.keys(items).map((k) => [k, {}])), 'local');
         },
+        async remove(key: string) {
+          delete data[key];
+          for (const l of listeners) l({ [key]: {} }, 'local');
+        },
       },
       onChanged: { addListener: (l: any) => listeners.add(l), removeListener: (l: any) => listeners.delete(l) },
     },

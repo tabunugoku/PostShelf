@@ -36,7 +36,7 @@ beforeEach(async () => {
   for (let i = 1; i <= 4; i++) await setBookmarkFolders(String(i), [i <= 2 ? a : b], snap(i));
   // 保存日時を固定 (新しい順に 4,3,2,1)
   const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
-  for (const k of Object.keys(data)) data[k].savedAt = Number(k);
+  for (const k of Object.keys(data)) data[k].savedAt = Number(k.split(':')[1]);
   await chrome.storage.local.set({ bookmarks: data });
   await act(() => void render(<App />, $('#app')));
   await flush();
@@ -237,7 +237,7 @@ describe('v7 manager layout', () => {
     expect($$('[aria-label=編集]').length).toBe(0); // ヘッダーの編集パネルは廃止
     expect(folderRow('最近の 7 日').querySelector('.n')!.textContent).toBe('0'); // beforeEach の savedAt (1..4) は 7 日より前
     const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
-    data['1'].savedAt = Date.now() - 2 * 86400000;
+    data['unknown:1'].savedAt = Date.now() - 2 * 86400000;
     await chrome.storage.local.set({ bookmarks: data });
     await flush();
     expect(folderRow('最近の 7 日').querySelector('.n')!.textContent).toBe('1');
@@ -262,9 +262,9 @@ describe('v7 manager layout', () => {
 
   it('filter chips (author menu, AND) and the empty "not found" state with a way back', async () => {
     const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
-    data['1'].snapshot.media = ['https://x/img.jpg'];
-    data['2'].snapshot.media = ['https://x/img2.jpg'];
-    data['2'].snapshot.handle = '@u1';
+    data['unknown:1'].snapshot.media = ['https://x/img.jpg'];
+    data['unknown:2'].snapshot.media = ['https://x/img2.jpg'];
+    data['unknown:2'].snapshot.handle = '@u1';
     await chrome.storage.local.set({ bookmarks: data });
     await rerender();
     await click($$('.chip.filter').find((c) => c.textContent?.includes('画像あり'))!);
@@ -291,7 +291,7 @@ describe('v7 manager layout', () => {
 
   it('import banner: shows the pending count, how-to dialog, dismiss survives until it grows', async () => {
     expect($$('.banner').length).toBe(0);
-    await recordPending(12);
+    await recordPending('unknown', 12);
     await flush();
     expect($('.banner').textContent).toContain('12 件');
     await click($('.banner-btn'));
@@ -299,24 +299,24 @@ describe('v7 manager layout', () => {
     await key(document.body, 'Escape');
     await click($('.banner [aria-label=閉じる]'));
     expect($$('.banner').length).toBe(0);
-    expect((await getImportHint()).dismissed).toBe(12);
+    expect((await getImportHint('unknown')).dismissed).toBe(12);
     await rerender();
     expect($$('.banner').length).toBe(0);
-    await recordPending(13);
+    await recordPending('unknown', 13);
     await flush();
     expect($$('.banner').length).toBe(1);
   });
 
-  it('grid cards keep an equal-height 3-column grid and show the first image as a cover', async () => {
+  it('grid cards keep an equal-height responsive grid and show the first image as a cover', async () => {
     const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
-    data['4'].snapshot.media = ['https://x/cover.jpg', 'https://x/second.jpg'];
+    data['unknown:4'].snapshot.media = ['https://x/cover.jpg', 'https://x/second.jpg'];
     await chrome.storage.local.set({ bookmarks: data });
     await rerender();
     await click($('.seg button[aria-label="グリッド表示"]'));
     expect($$('.gc').length).toBe(4);
     expect($<HTMLImageElement>('[data-row="4"] .cover').src).toContain('cover.jpg');
     const css = (await import('node:fs')).readFileSync('static/manager.css', 'utf8');
-    expect(css).toMatch(/\.view-grid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\);grid-auto-rows:1fr/);
+    expect(css).toMatch(/\.view-grid\{display:grid;grid-template-columns:repeat\(auto-fill,minmax\(\d+px,1fr\)\);grid-auto-rows:1fr/);
   });
 
   it('hover actions exist on every card: change folders / open original / delete', () => {

@@ -454,5 +454,111 @@
   },
   "diagPreparing": {
     "message": "Preparing…"
+  },
+  "saveTo": {
+    "message": "Save to: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "Can't tell which account is logged in, so nothing can be saved. Please reload the x.com page."
+  },
+  "collectNoAccount": {
+    "message": "Can't import: account unknown"
+  },
+  "accountUnknownName": {
+    "message": "No account set"
+  },
+  "accountSwitchLabel": {
+    "message": "Account to show"
+  },
+  "accountSwitchNote": {
+    "message": "Switching here does not change who is logged in on X. Switch your X account on x.com."
+  },
+  "accountSwitched": {
+    "message": "Switched to $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "Logged in on x.com"
+  },
+  "accountAssign": {
+    "message": "Reassign…"
+  },
+  "accountAssignTitle": {
+    "message": "Reassign data"
+  },
+  "accountAssignDesc": {
+    "message": "Moves the saved data of $NAME$ ($COUNT$ posts) to the account you choose. If the same post already exists there, the folders are merged.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "Move to"
+  },
+  "accountAssignNone": {
+    "message": "There is no account to move to. Open x.com while logged in and the account will appear here."
+  },
+  "accountAssignDone": {
+    "message": "Reassigned $COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "Delete this account's data"
+  },
+  "accountDeleteConfirm": {
+    "message": "Delete the saved data of $NAME$ ($COUNT$ posts and its folders)? This cannot be undone. Your X bookmarks are not changed.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "$COUNT$ posts are saved under \"No account set\". Choose which account they belong to.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "Account: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "Can't tell which account is logged in on x.com, so nothing can be saved. Reload the x.com page."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "The account shown here differs from $NAME$, who is logged in on x.com, so nothing can be saved. Switch the account above.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }

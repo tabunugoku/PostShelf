@@ -3,21 +3,29 @@ import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { HealthNotice } from '../manager/HealthNotice';
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
-import type { Bookmark } from '../shared/models';
+import { UNKNOWN_ACCOUNT_ID, accountLabel, type Account, type Bookmark } from '../shared/models';
 import { t } from '../shared/strings';
-import { listBookmarks, listFolders } from '../shared/storage';
+import { getLastSeenAccount, listBookmarks, listFolders, onDataChanged, onLastSeenAccountChanged, setAccountScope } from '../shared/storage';
 
 const openManager = (hash = '') => void openManagerTab(hash);
 
 function Popup() {
   const [counts, setCounts] = useState({ posts: 0, folders: 0 });
   const [recent, setRecent] = useState<Bookmark[]>([]);
+  const [account, setAccount] = useState<Account | null>(null);
   useEffect(() => {
-    void (async () => {
+    // 件数は現在のアカウント (x.com で最後に読み取ったアカウント。分からなければ「アカウント未設定」) のもの
+    const load = async () => {
+      const last = await getLastSeenAccount();
+      setAccount(last);
+      setAccountScope(last?.id ?? UNKNOWN_ACCOUNT_ID);
       const [b, f] = await Promise.all([listBookmarks(), listFolders()]);
       setCounts({ posts: b.length, folders: f.length - 1 }); // 「すべて」を除く
       setRecent([...b].sort((x, y) => y.savedAt - x.savedAt).slice(0, 3));
-    })();
+    };
+    void load();
+    const offs = [onDataChanged(() => void load()), onLastSeenAccountChanged(() => void load())];
+    return () => offs.forEach((o) => o());
   }, []);
   return (
     <div>
@@ -25,6 +33,7 @@ function Popup() {
         <img class="brand" src="brand/icon-32.png" width="24" height="24" alt="" />
         <span>{t('appTitle')}</span>
       </div>
+      <div class="sub popup-account">{t('popupAccount', accountLabel(account ?? { id: UNKNOWN_ACCOUNT_ID, handle: '' }))}</div>
       <div class="sub">
         {counts.posts} {t('popupPosts')} · {counts.folders} {t('popupFolders')}
       </div>

@@ -7,7 +7,7 @@ import { installChromeMock, installPanelMock } from './chrome-mock';
 import { App } from '../src/manager/App';
 import { parsePostUrl } from '../src/shared/activeTab';
 import { handleMessage, findArticle } from '../src/content/messages';
-import { createFolder, getBookmark } from '../src/shared/storage';
+import { createFolder, getBookmark, noteAccount, setAccountScope } from '../src/shared/storage';
 import { updateSettings } from '../src/shared/settings';
 
 const flush = () => act(() => new Promise<void>((r) => setTimeout(r, 20)));
@@ -53,10 +53,12 @@ describe('parsePostUrl', () => {
 });
 
 describe('side panel "save the open post" button', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     installChromeMock();
     installPanelMock();
     Object.defineProperty(window, 'innerWidth', { value: 400, configurable: true });
+    await noteAccount({ handle: 'me' }); // x.com でログイン中のアカウント (これが無いと保存ボタンは出ない)
+    setAccountScope('me');
   });
 
   it('is hidden on non-x.com tabs and on x.com pages that are not a post', async () => {
@@ -94,6 +96,8 @@ describe('side panel "save the open post" button', () => {
     for (const reply of [{ ok: false }, new Error('Could not establish connection')]) {
       installChromeMock();
       installPanelMock();
+      await noteAccount({ handle: 'me' });
+      setAccountScope('me');
       installTabs('https://x.com/yamada/status/1234567890', reply);
       await mount();
       await act(() => void $('.cta').dispatchEvent(new MouseEvent('click', { bubbles: true })));

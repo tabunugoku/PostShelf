@@ -3,6 +3,7 @@ import { t } from '../shared/strings';
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
 import { recordPending } from '../shared/settings';
 import { xTheme } from './theme';
+import { getCurrentAccount, subscribeAccount } from './account';
 import { extractTweet, type Extracted } from './snapshot';
 
 export const isBookmarksPage = (path = location.pathname) => isBookmarksPath(path);
@@ -28,8 +29,19 @@ let flashing = false; // 取り込み完了メッセージの表示中は件数�
 export async function refreshCollectButton(): Promise<void> {
   const btn = document.querySelector<HTMLButtonElement>('.postshelf-collect');
   if (!btn || flashing) return;
+  const account = getCurrentAccount();
+  if (!account) {
+    // アカウントを判定できないときは、どのアカウントのデータか分からないので取り込まない
+    btn.textContent = t('collectNoAccount');
+    btn.dataset.pending = '0';
+    btn.disabled = true;
+    btn.style.opacity = '.7';
+    btn.style.cursor = 'default';
+    btn.title = t('accountUnknown');
+    return;
+  }
   const n = unsavedItems(collectVisible(), await getSavedIds()).length;
-  void recordPending(n); // manager の取り込み案内バナー用に最後に観測した件数を残す
+  void recordPending(account.id, n); // manager の取り込み案内バナー用に最後に観測した件数を残す (アカウントごと)
   btn.textContent = n > 0 ? t('collectPending', n) : t('collectAllDone');
   btn.dataset.pending = String(n);
   btn.disabled = n === 0;
@@ -51,6 +63,7 @@ export function ensureCollectButton(): void {
   const th = xTheme();
   btn.style.cssText = `position:fixed;right:16px;bottom:16px;z-index:2147483646;min-height:36px;padding:6px 14px;border-radius:18px;border:.5px solid ${th.border};background:${th.bg};color:${th.fg};color-scheme:${th.scheme};font:14px/1.4 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer`;
   btn.addEventListener('click', async () => {
+    if (!getCurrentAccount()) return; // アカウント不明のときは何もしない (ボタンも無効)
     const n = await addCollected(collectVisible()); // 取り込み済みは重複させない
     flashing = true;
     btn.textContent = t('collectDone', n);
@@ -71,7 +84,10 @@ export function scheduleCollectRefresh(): void {
   timer = setTimeout(() => void refreshCollectButton(), 300);
 }
 
-export const watchCollectData = (): (() => void) => onDataChanged(() => void refreshCollectButton());
+export const watchCollectData = (): (() => void) => {
+  const offs = [onDataChanged(() => void refreshCollectButton()), subscribeAccount(() => void refreshCollectButton())];
+  return () => offs.forEach((o) => o());
+};
 
 /**
  * SPA 遷移 (pushState) で URL だけが変わり DOM の変化が少ない場合でも、ボタンを出し入れできるようにパスの変化を見張る。

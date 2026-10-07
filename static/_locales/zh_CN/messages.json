@@ -454,5 +454,111 @@
   },
   "diagPreparing": {
     "message": "生成中…"
+  },
+  "saveTo": {
+    "message": "保存到：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "无法判断当前登录的账号，因此无法保存。请重新载入 x.com 页面。"
+  },
+  "collectNoAccount": {
+    "message": "账号未知，无法导入"
+  },
+  "accountUnknownName": {
+    "message": "未设置账号"
+  },
+  "accountSwitchLabel": {
+    "message": "要显示的账号"
+  },
+  "accountSwitchNote": {
+    "message": "在这里切换不会改变 X 的登录状态。请在 x.com 上切换 X 账号。"
+  },
+  "accountSwitched": {
+    "message": "已切换到 $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "x.com 上已登录"
+  },
+  "accountAssign": {
+    "message": "分配…"
+  },
+  "accountAssignTitle": {
+    "message": "分配数据"
+  },
+  "accountAssignDesc": {
+    "message": "将 $NAME$ 的已保存数据（$COUNT$ 条）移动到所选账号。如果目标账号中已有相同的帖子，会合并文件夹。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "移动到"
+  },
+  "accountAssignNone": {
+    "message": "没有可分配的账号。登录后打开 x.com，账号就会出现在这里。"
+  },
+  "accountAssignDone": {
+    "message": "已分配 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "删除此账号的数据"
+  },
+  "accountDeleteConfirm": {
+    "message": "要删除 $NAME$ 的已保存数据（$COUNT$ 条帖子及文件夹）吗？此操作无法撤销。X 上的书签不会改变。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "“未设置账号”下有 $COUNT$ 条帖子。请指定它们属于哪个账号。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "账号：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "无法判断 x.com 上登录的账号，因此无法保存。请重新载入 x.com 页面。"
+  },
+  "saveCurrentWrongAccount": {
+    "message": "当前显示的账号与 x.com 上登录的 $NAME$ 不同，因此无法保存。请切换账号。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }

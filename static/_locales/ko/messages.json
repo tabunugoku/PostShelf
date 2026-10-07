@@ -454,5 +454,111 @@
   },
   "diagPreparing": {
     "message": "만드는 중…"
+  },
+  "saveTo": {
+    "message": "저장 위치: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "로그인한 계정을 확인할 수 없어 저장할 수 없습니다. x.com 페이지를 새로고침하세요."
+  },
+  "collectNoAccount": {
+    "message": "계정을 알 수 없어 가져올 수 없음"
+  },
+  "accountUnknownName": {
+    "message": "계정 미설정"
+  },
+  "accountSwitchLabel": {
+    "message": "표시할 계정"
+  },
+  "accountSwitchNote": {
+    "message": "여기서 전환해도 X의 로그인 상태는 바뀌지 않습니다. X 계정은 x.com에서 전환하세요."
+  },
+  "accountSwitched": {
+    "message": "$NAME$(으)로 전환했습니다",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "x.com에서 로그인 중"
+  },
+  "accountAssign": {
+    "message": "다른 계정으로 이동…"
+  },
+  "accountAssignTitle": {
+    "message": "데이터 이동"
+  },
+  "accountAssignDesc": {
+    "message": "$NAME$의 저장 데이터($COUNT$개)를 선택한 계정으로 옮깁니다. 같은 게시물이 이미 있으면 폴더를 합칩니다.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "이동할 계정"
+  },
+  "accountAssignNone": {
+    "message": "이동할 계정이 없습니다. 로그인한 상태에서 x.com을 열면 계정이 여기에 나타납니다."
+  },
+  "accountAssignDone": {
+    "message": "$COUNT$개를 옮겼습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "이 계정의 데이터 삭제"
+  },
+  "accountDeleteConfirm": {
+    "message": "$NAME$의 저장 데이터(게시물 $COUNT$개와 폴더)를 삭제할까요? 되돌릴 수 없습니다. X의 북마크는 바뀌지 않습니다.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "\"계정 미설정\"에 게시물 $COUNT$개가 있습니다. 어느 계정의 것인지 지정하세요.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "계정: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "x.com에서 로그인한 계정을 확인할 수 없어 저장할 수 없습니다. x.com 페이지를 새로고침하세요."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "표시 중인 계정이 x.com에서 로그인한 $NAME$ 과(와) 달라 저장할 수 없습니다. 계정을 전환하세요.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }

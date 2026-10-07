@@ -3,7 +3,7 @@ import { countFolder, queryBookmarks } from '../src/shared/query';
 import type { Bookmark } from '../src/shared/models';
 
 const mk = (id: string, folderIds: string[], savedAt: number, text: string, createdAt?: string): Bookmark => ({
-  tweetId: id, folderIds, savedAt,
+  accountId: 'unknown', tweetId: id, folderIds, savedAt,
   snapshot: { text, author: 'Ann', handle: '@ann', media: [], url: '', createdAt },
 });
 const all = [

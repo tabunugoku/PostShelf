@@ -12,6 +12,8 @@ export interface Settings {
   lastFolderId: string;
   viewMode: ViewMode;
   sortKey: SortKey;
+  /** 手動で選んだ表示アカウントの ID。'' = 選んでいない (最後に x.com で読み取ったアカウントを使う) */
+  viewAccount: string;
 }
 
 export type ViewMode = 'post' | 'list' | 'grid';
@@ -20,7 +22,7 @@ export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc' };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '' };
 
 const KEY = 'settings';
 
@@ -33,6 +35,7 @@ export async function getSettings(): Promise<Settings> {
   if (!['post', 'list', 'grid'].includes(merged.viewMode)) merged.viewMode = 'post';
   if (!['savedDesc', 'savedAsc', 'postedDesc', 'postedAsc'].includes(merged.sortKey)) merged.sortKey = 'savedDesc';
   if (typeof merged.lastFolderId !== 'string') merged.lastFolderId = 'all';
+  if (typeof merged.viewAccount !== 'string') merged.viewAccount = '';
   return merged;
 }
 
@@ -45,10 +48,17 @@ export function onSettingsChanged(cb: (s: Settings) => void): () => void {
   return () => chrome.storage.onChanged?.removeListener(listener as never);
 }
 
-export async function updateSettings(patch: Partial<Settings>): Promise<Settings> {
-  const next = { ...(await getSettings()), ...patch };
-  await chrome.storage.local.set({ [KEY]: next });
-  return next;
+// 読み出し → 書き込みの途中で別の更新が入って、片方の変更が消えないよう、更新は 1 つずつ順に行う
+let queue: Promise<unknown> = Promise.resolve();
+
+export function updateSettings(patch: Partial<Settings>): Promise<Settings> {
+  const run = queue.then(async () => {
+    const next = { ...(await getSettings()), ...patch };
+    await chrome.storage.local.set({ [KEY]: next });
+    return next;
+  });
+  queue = run.catch(() => undefined);
+  return run;
 }
 
 // ---- 取り込み案内 (manager のバナー用) ----
@@ -64,22 +74,31 @@ export interface ImportHint {
 
 const HINT_KEY = 'importHint';
 
-export async function getImportHint(): Promise<ImportHint> {
+/** アカウントごとの記録 (v9)。旧形式 (アカウントなしの { pending, dismissed }) は読み飛ばす = 一時的な値なので次の観測で作り直される */
+type HintMap = Record<string, Partial<ImportHint>>;
+
+async function readHints(): Promise<HintMap> {
   const res = await chrome.storage.local.get(HINT_KEY);
-  const h = (res[HINT_KEY] ?? {}) as Partial<ImportHint>;
+  const raw = res[HINT_KEY];
+  if (!raw || typeof raw !== 'object' || 'pending' in raw || 'dismissed' in raw) return {};
+  return raw as HintMap;
+}
+
+export async function getImportHint(accountId: string): Promise<ImportHint> {
+  const h = (await readHints())[accountId] ?? {};
   return { pending: Number(h.pending) || 0, dismissed: Number(h.dismissed) || 0 };
 }
 
 /** 観測した件数を記録する。件数が減ったら (取り込んだ等)、閉じた時点の件数も下げて、次の増加で再び案内できるようにする */
-export async function recordPending(pending: number): Promise<void> {
-  const h = await getImportHint();
+export async function recordPending(accountId: string, pending: number): Promise<void> {
+  const h = await getImportHint(accountId);
   if (h.pending === pending && h.dismissed <= pending) return;
-  await chrome.storage.local.set({ [HINT_KEY]: { pending, dismissed: Math.min(h.dismissed, pending) } });
+  await chrome.storage.local.set({ [HINT_KEY]: { ...(await readHints()), [accountId]: { pending, dismissed: Math.min(h.dismissed, pending) } } });
 }
 
-export async function dismissImportHint(): Promise<void> {
-  const h = await getImportHint();
-  await chrome.storage.local.set({ [HINT_KEY]: { ...h, dismissed: h.pending } });
+export async function dismissImportHint(accountId: string): Promise<void> {
+  const h = await getImportHint(accountId);
+  await chrome.storage.local.set({ [HINT_KEY]: { ...(await readHints()), [accountId]: { ...h, dismissed: h.pending } } });
 }
 
 export const shouldShowImportHint = (h: ImportHint): boolean => h.pending > h.dismissed;
@@ -128,3 +147,4 @@ export function onHealthChanged(cb: () => void): () => void {
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);
 }
+

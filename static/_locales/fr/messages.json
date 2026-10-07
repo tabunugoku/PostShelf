@@ -454,5 +454,111 @@
   },
   "diagPreparing": {
     "message": "Préparation…"
+  },
+  "saveTo": {
+    "message": "Enregistrer pour : $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "Impossible de savoir quel compte est connecté : rien ne peut être enregistré. Rechargez la page x.com."
+  },
+  "collectNoAccount": {
+    "message": "Import impossible : compte inconnu"
+  },
+  "accountUnknownName": {
+    "message": "Aucun compte défini"
+  },
+  "accountSwitchLabel": {
+    "message": "Compte affiché"
+  },
+  "accountSwitchNote": {
+    "message": "Changer ici ne modifie pas la connexion à X. Changez de compte X sur x.com."
+  },
+  "accountSwitched": {
+    "message": "Passé à $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "Connecté sur x.com"
+  },
+  "accountAssign": {
+    "message": "Réaffecter…"
+  },
+  "accountAssignTitle": {
+    "message": "Réaffecter les données"
+  },
+  "accountAssignDesc": {
+    "message": "Déplace les données enregistrées de $NAME$ ($COUNT$ posts) vers le compte choisi. Si le même post existe déjà, les dossiers sont fusionnés.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "Déplacer vers"
+  },
+  "accountAssignNone": {
+    "message": "Aucun compte de destination. Ouvrez x.com en étant connecté et le compte apparaîtra ici."
+  },
+  "accountAssignDone": {
+    "message": "$COUNT$ posts réaffectés",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "Supprimer les données de ce compte"
+  },
+  "accountDeleteConfirm": {
+    "message": "Supprimer les données enregistrées de $NAME$ ($COUNT$ posts et dossiers) ? Action irréversible. Vos favoris X ne sont pas modifiés.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "$COUNT$ posts sont enregistrés sous « Aucun compte défini ». Indiquez à quel compte ils appartiennent.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "Compte : $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "Impossible de savoir quel compte est connecté sur x.com : rien ne peut être enregistré. Rechargez la page x.com."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "Le compte affiché est différent de $NAME$, connecté sur x.com : rien ne peut être enregistré. Changez de compte ci-dessus.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }

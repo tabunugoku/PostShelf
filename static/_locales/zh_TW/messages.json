@@ -454,5 +454,111 @@
   },
   "diagPreparing": {
     "message": "產生中…"
+  },
+  "saveTo": {
+    "message": "儲存到：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "無法判斷目前登入的帳號，因此無法儲存。請重新載入 x.com 頁面。"
+  },
+  "collectNoAccount": {
+    "message": "帳號未知，無法匯入"
+  },
+  "accountUnknownName": {
+    "message": "未設定帳號"
+  },
+  "accountSwitchLabel": {
+    "message": "要顯示的帳號"
+  },
+  "accountSwitchNote": {
+    "message": "在這裡切換不會改變 X 的登入狀態。請在 x.com 上切換 X 帳號。"
+  },
+  "accountSwitched": {
+    "message": "已切換到 $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "x.com 上已登入"
+  },
+  "accountAssign": {
+    "message": "重新指定…"
+  },
+  "accountAssignTitle": {
+    "message": "重新指定資料"
+  },
+  "accountAssignDesc": {
+    "message": "將 $NAME$ 的已儲存資料（$COUNT$ 則）移到所選帳號。如果目標帳號中已有相同的貼文，會合併資料夾。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "移到"
+  },
+  "accountAssignNone": {
+    "message": "沒有可指定的帳號。登入後開啟 x.com，帳號就會出現在這裡。"
+  },
+  "accountAssignDone": {
+    "message": "已重新指定 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "刪除此帳號的資料"
+  },
+  "accountDeleteConfirm": {
+    "message": "要刪除 $NAME$ 的已儲存資料（$COUNT$ 則貼文及資料夾）嗎？此操作無法復原。X 上的書籤不會改變。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "「未設定帳號」下有 $COUNT$ 則貼文。請指定它們屬於哪個帳號。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "帳號：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "無法判斷 x.com 上登入的帳號，因此無法儲存。請重新載入 x.com 頁面。"
+  },
+  "saveCurrentWrongAccount": {
+    "message": "目前顯示的帳號與 x.com 上登入的 $NAME$ 不同，因此無法儲存。請切換帳號。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }

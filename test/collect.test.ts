@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { installChromeMock } from './chrome-mock';
 import { collectVisible, ensureCollectButton, refreshCollectButton, unsavedItems, watchPath } from '../src/content/collect';
 import { createFolder, getSavedIds, setBookmarkFolders } from '../src/shared/storage';
@@ -14,6 +15,8 @@ const btn = () => document.querySelector<HTMLButtonElement>('.postshelf-collect'
 
 beforeEach(() => {
   installChromeMock();
+  resetAccount();
+  setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   history.pushState({}, '', '/i/history');
 });
 afterEach(() => {
@@ -66,7 +69,7 @@ describe('collect button', () => {
     await vi.advanceTimersByTimeAsync(10);
     expect(btn().textContent).toBe('1 件を「未分類」として取り込みました');
     expect([...(await getSavedIds())].sort()).toEqual(['1', '2']);
-    expect((await (async () => (await chrome.storage.local.get('bookmarks')).bookmarks['1'].folderIds)())).toEqual([f.id]); // 既存は触らない
+    expect((await (async () => (await chrome.storage.local.get('bookmarks')).bookmarks['me:1'].folderIds)())).toEqual([f.id]); // 既存は触らない
     await vi.advanceTimersByTimeAsync(3100);
     expect(btn().textContent).toBe('すべて取り込み済み');
   });

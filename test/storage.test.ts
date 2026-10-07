@@ -70,10 +70,10 @@ describe('folders', () => {
 
   it('delete removes the folder id from bookmarks but keeps the bookmark', async () => {
     const f = await createFolder({ name: 'a' });
-    data.bookmarks = { '1': { tweetId: '1', folderIds: [f.id, 'other'], savedAt: 0, snapshot: {} } };
+    data.bookmarks = { 'unknown:1': { accountId: 'unknown', tweetId: '1', folderIds: [f.id, 'other'], savedAt: 0, snapshot: {} } };
     await deleteFolder(f.id);
     expect((await listFolders()).length).toBe(1);
-    expect((data.bookmarks as any)['1'].folderIds).toEqual(['other']);
+    expect((data.bookmarks as any)['unknown:1'].folderIds).toEqual(['other']);
     await expect(deleteFolder(f.id)).rejects.toThrow();
   });
 });

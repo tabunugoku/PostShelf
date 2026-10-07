@@ -454,5 +454,111 @@
   },
   "diagPreparing": {
     "message": "Preparando…"
+  },
+  "saveTo": {
+    "message": "Guardar en: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "No se puede saber qué cuenta ha iniciado sesión, así que no se puede guardar. Recarga la página de x.com."
+  },
+  "collectNoAccount": {
+    "message": "No se puede importar: cuenta desconocida"
+  },
+  "accountUnknownName": {
+    "message": "Sin cuenta asignada"
+  },
+  "accountSwitchLabel": {
+    "message": "Cuenta que se muestra"
+  },
+  "accountSwitchNote": {
+    "message": "Cambiar aquí no cambia la sesión de X. Cambia de cuenta de X en x.com."
+  },
+  "accountSwitched": {
+    "message": "Cambiado a $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "Con sesión en x.com"
+  },
+  "accountAssign": {
+    "message": "Reasignar…"
+  },
+  "accountAssignTitle": {
+    "message": "Reasignar datos"
+  },
+  "accountAssignDesc": {
+    "message": "Mueve los datos guardados de $NAME$ ($COUNT$ publicaciones) a la cuenta que elijas. Si la misma publicación ya existe, se fusionan las carpetas.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "Mover a"
+  },
+  "accountAssignNone": {
+    "message": "No hay ninguna cuenta de destino. Abre x.com con la sesión iniciada y la cuenta aparecerá aquí."
+  },
+  "accountAssignDone": {
+    "message": "Se reasignaron $COUNT$ publicaciones",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "Eliminar los datos de esta cuenta"
+  },
+  "accountDeleteConfirm": {
+    "message": "¿Eliminar los datos guardados de $NAME$ ($COUNT$ publicaciones y sus carpetas)? No se puede deshacer. Tus marcadores de X no cambian.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "Hay $COUNT$ publicaciones en «Sin cuenta asignada». Indica a qué cuenta pertenecen.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "Cuenta: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "No se puede saber qué cuenta tiene la sesión en x.com, así que no se puede guardar. Recarga la página de x.com."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "La cuenta que se muestra no coincide con $NAME$, que tiene la sesión en x.com, así que no se puede guardar. Cambia de cuenta arriba.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }
