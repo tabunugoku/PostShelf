@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PostShelf in Chrome mockup</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+.cw{border:.5px solid var(--border-strong);border-radius:12px;overflow:hidden;background:var(--surface-2);max-width:900px}
+.tabs{display:flex;align-items:flex-end;gap:2px;padding:6px 8px 0;background:var(--surface-1)}
+.tab{padding:6px 12px;border-radius:8px 8px 0 0;cursor:pointer;color:var(--text-secondary);display:flex;gap:6px;align-items:center;max-width:180px}
+.tab.on{background:var(--surface-2);color:var(--text-primary)}
+.tool{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:.5px solid var(--border)}
+.url{flex:1;background:var(--surface-1);border-radius:16px;padding:4px 12px;color:var(--text-secondary)}
+.ext{position:relative;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+.ext:hover{background:var(--fill-ghost-hover)}
+.badge{position:absolute;right:-2px;bottom:-2px;background:var(--fill-accent);color:var(--on-accent);font-size:10px;border-radius:8px;padding:0 4px}
+.page{position:relative;min-height:380px;padding:12px 16px}
+.pop{position:absolute;background:var(--surface-3);border:.5px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-popover);padding:8px;z-index:5}
+.pr{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
+.pr:hover{background:var(--fill-ghost-hover)}
+.hint{position:absolute;font-size:12px;background:var(--bg-accent);color:var(--text-accent);padding:2px 8px;border-radius:8px;z-index:6;white-space:nowrap}
+.post{display:flex;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
+.av{width:36px;height:36px;border-radius:50%;background:var(--fill-control);flex:none}
+.act{display:flex;gap:20px;margin-top:8px;color:var(--text-muted);align-items:center}
+</style></head><body>
+<h1>Chrome 全体での見え方</h1>
+<p class="note">1) ツールバーのアイコン → popup  2) ポストのブックマーク横「v」→ フォルダ選択ポップオーバー  3) 上のタブで manager。外観の基準モック。</p>
+<div class="cw">
+ <div class="tabs">
+  <div class="tab on" id="t1" onclick="tab(1)"><i class="ti ti-brand-x"></i>ホーム / X</div>
+  <div class="tab" id="t2" onclick="tab(2)"><i class="ti ti-bookmarks"></i>PostShelf</div>
+ </div>
+ <div class="tool">
+  <i class="ti ti-arrow-left"></i><i class="ti ti-arrow-right"></i><i class="ti ti-refresh"></i>
+  <div class="url" id="url">x.com/home</div>
+  <div class="ext" onclick="popup()" aria-label="PostShelf" title="PostShelf" style="color:var(--text-accent)"><i class="ti ti-books"></i><span class="badge">128</span></div>
+  <i class="ti ti-puzzle" style="color:var(--text-muted)"></i><i class="ti ti-dots-vertical"></i>
+ </div>
+ <div class="page" id="pg"></div>
+</div>
+<script>
+var FO=[['開発ネタ','ti-code','#378ADD',1],['あとで読む','ti-book','#BA7517',0],['デザイン','ti-folder','#D4537E',0],['レシピ','ti-folder','#639922',0]];
+var cur=1,pop=false,pick=false;
+function tab(n){cur=n;pop=false;pick=false;render()}
+function popup(){pop=!pop;pick=false;render()}
+function pickF(){pick=!pick;pop=false;render()}
+function toggle(i){FO[i][3]=FO[i][3]?0:1;render()}
+function folderRows(){return FO.map(function(f,i){return '<div class="pr" onclick="toggle('+i+')"><i class="ti '+f[1]+'" style="font-size:18px;color:'+f[2]+'"></i><span style="flex:1">'+f[0]+'</span><i class="ti '+(f[3]?'ti-square-check':'ti-square')+'" style="font-size:18px;color:'+(f[3]?'var(--text-accent)':'var(--text-muted)')+'"></i></div>'}).join('')}
+function popupHtml(){return '<div class="pop" style="right:8px;top:0;width:260px"><div style="display:flex;align-items:center;gap:8px;padding:4px 8px 8px"><i class="ti ti-books" style="font-size:20px;color:var(--text-accent)"></i><span style="font-weight:500;font-size:14px">PostShelf</span></div><div style="padding:0 8px 8px;color:var(--text-secondary)">128 件 · 4 フォルダ</div><div class="pr"><i class="ti ti-clock"></i>最近保存した 3 件</div><div class="pr" onclick="tab(2)" style="color:var(--text-accent)"><i class="ti ti-external-link"></i>管理画面を開く</div><div class="pr"><i class="ti ti-settings"></i>設定</div></div>'}
+function xPage(){
+ var p='<div style="max-width:520px;margin:0 auto"><div style="display:flex;gap:16px;border-bottom:.5px solid var(--border);padding-bottom:8px;font-weight:500"><span>おすすめ</span><span style="color:var(--text-muted);font-weight:400">フォロー中</span></div>';
+ p+='<div class="post"><div class="av"></div><div style="flex:1"><div style="font-weight:500">@devtips <span style="font-weight:400;color:var(--text-muted)">· 2h</span></div><div style="line-height:1.5">Chrome拡張のservice workerを長持ちさせる小技まとめ</div><div class="act" style="position:relative"><i class="ti ti-message-circle"></i><i class="ti ti-repeat"></i><i class="ti ti-heart"></i><span style="display:flex;align-items:center;gap:2px"><i class="ti ti-bookmark" style="color:var(--text-accent);cursor:pointer" onclick="pickF()" title="フォルダに保存"></i><i class="ti ti-chevron-down" style="font-size:12px;color:var(--text-accent);cursor:pointer" onclick="pickF()"></i></span><i class="ti ti-share"></i>'+(pick?'<div class="pop" style="left:140px;top:26px;width:230px">'+folderRows()+'<div class="pr" style="color:var(--text-accent)"><i class="ti ti-plus"></i>新しいフォルダ</div></div>':'<span class="hint" style="left:150px;top:-4px">PostShelf: フォルダ選択</span>')+'</div></div></div>';
+ p+='<div class="post"><div class="av"></div><div style="flex:1"><div style="font-weight:500">@uidaily <span style="font-weight:400;color:var(--text-muted)">· 5h</span></div><div style="line-height:1.5">余白とタイポグラフィだけで画面が締まる理由</div><div class="act"><i class="ti ti-message-circle"></i><i class="ti ti-repeat"></i><i class="ti ti-heart"></i><i class="ti ti-bookmark"></i><i class="ti ti-share"></i></div></div></div></div>';
+ return p}
+function mgr(){
+ return '<div style="display:grid;grid-template-columns:170px minmax(0,1fr);gap:12px"><div>'+FO.map(function(f,i){return '<div class="pr"'+(i==0?' style="background:var(--fill-ghost-selected)"':'')+'><i class="ti '+f[1]+'" style="font-size:18px;color:'+f[2]+'"></i>'+f[0]+'</div>'}).join('')+'<div class="pr" style="color:var(--text-muted)"><i class="ti ti-plus"></i>新しいフォルダ</div></div><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i class="ti ti-code" style="font-size:20px;color:#378ADD"></i><span style="font-size:16px;font-weight:500">開発ネタ</span><i class="ti ti-edit" style="color:var(--text-muted)"></i><span style="margin-left:auto;border:.5px solid var(--border-strong);border-radius:8px;padding:2px 10px">ポスト / リスト</span></div><div class="post"><div class="av"></div><div>@devtips<br>Chrome拡張のservice workerを長持ちさせる小技まとめ</div></div><div class="post"><div class="av"></div><div>@jsnotes<br>IndexedDBを薄くラップするだけで十分だった話</div></div></div></div>'}
+function render(){
+ document.getElementById('t1').className='tab'+(cur==1?' on':'');document.getElementById('t2').className='tab'+(cur==2?' on':'');
+ document.getElementById('url').textContent=cur==1?'x.com/home':'chrome-extension://postshelf/manager.html';
+ var h=cur==1?xPage():mgr();if(pop)h+=popupHtml();
+ document.getElementById('pg').innerHTML=h;
+}
+render();
+</script></body></html>

@@ -4,6 +4,9 @@ Chrome 拡張 (Manifest V3)。x.com (旧 Twitter) のブックマークを独自
 
 詳細な計画は `docs/PLAN.md`。最初に読むこと。
 
+## 現在のタスク
+`docs/TASK_V2.md` を最優先で実施する (外観を `docs/mockups/` に寄せる + 日英 i18n)。
+
 ## 機能要件
 1. ポスト (tweet) のブックマーク先をフォルダ分けできる (1 ポストが複数フォルダ可)
 2. 保存済みポストを「リスト表示」と「ポスト表示 (X 風カード)」で見られる
@@ -35,7 +38,7 @@ Bookmark { tweetId: string; folderIds: string[]; savedAt: number;
 - X の非公開 API / GraphQL を直接呼ばない。自動スクロールで大量取得しない。ユーザーが見ている画面の DOM のみ読む
 - 外部サーバーへの送信なし。解析/トラッキングなし
 - 不確かな X の DOM 構造は推測で断定せず、fixture とコメントで前提を明記する
-- UI 文言は日本語 (i18n は将来対応でよいが、文字列は `src/shared/strings.ts` にまとめる)
+- 対応言語は日本語と英語 (`chrome.i18n`, `_locales/{ja,en}`)。UI 文字列は直書きせず `t()` 経由
 
 ## 実装順 (マイルストーン)
 1. M1 骨組み: manifest.json, ビルド, `models.ts`, `storage.ts`, フォルダ CRUD (名前/アイコン/色) と単体テスト
