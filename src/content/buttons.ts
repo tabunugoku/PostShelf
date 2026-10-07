@@ -1,4 +1,5 @@
-import { SEL, bookmarkButtonSelector } from '../shared/selectors';
+import { closestFirst, queryAllFirst, queryFirst } from '../shared/selectors';
+import { isBroken, subscribeHealth } from './health';
 import { t } from '../shared/strings';
 import { getBookmark, onDataChanged, listFolders } from '../shared/storage';
 import { getSettings, onSettingsChanged, type ButtonMode } from '../shared/settings';
@@ -79,9 +80,8 @@ function setSaved(host: HTMLElement, folders: Folder[]): void {
 }
 
 async function refreshArticle(article: Element): Promise<void> {
-  const host = article.querySelector<HTMLElement>(`[${BTN_ATTR}], [${BADGE_ATTR}]`)?.closest<HTMLElement>(
-    `[${BTN_ATTR}], ${bookmarkButtonSelector}`,
-  );
+  const marker = article.querySelector<HTMLElement>(`[${BTN_ATTR}], [${BADGE_ATTR}]`);
+  const host = marker?.closest<HTMLElement>(`[${BTN_ATTR}]`) ?? (marker ? closestFirst<HTMLElement>(marker, 'bookmarkButton')?.el : undefined);
   const ex = extractTweet(article);
   if (!host || !ex) return;
   const bm = await getBookmark(ex.tweetId);
@@ -90,15 +90,16 @@ async function refreshArticle(article: Element): Promise<void> {
 }
 
 export async function refreshAll(): Promise<void> {
-  await Promise.all([...document.querySelectorAll(SEL.tweet)].map(refreshArticle));
+  await Promise.all(queryAllFirst(document, 'tweet').els.map(refreshArticle));
 }
 
 /** 画面上のポストに、現在のモードに応じたボタン/バッジを付ける (何度呼んでも二重にならない) */
 export function injectButtons(root: ParentNode = document): void {
   ensureIconCss();
   ensureStyle();
-  for (const article of root.querySelectorAll(SEL.tweet)) {
-    const bm = article.querySelector<HTMLElement>(bookmarkButtonSelector);
+  if (isBroken()) return; // X の画面構造が変わっているときはボタンを挿入しない
+  for (const article of queryAllFirst(root, 'tweet').els) {
+    const bm = queryFirst<HTMLElement>(article, 'bookmarkButton')?.el;
     if (!bm) continue;
     if (mode === 'separate') {
       if (article.querySelector(`[${BTN_ATTR}]`)) continue;
@@ -122,12 +123,13 @@ export function injectButtons(root: ParentNode = document): void {
 /** 置き換えモード: 標準ブックマークボタンのクリックを capture で横取りして PostShelf のフォルダ選択を開く */
 function onCaptureClick(e: MouseEvent): void {
   if (e.shiftKey) return; // Shift+クリックは X 標準の動作
+  if (isBroken()) return; // 画面構造が変わっているとき (broken) は横取りせず X 標準の動作に任せる
   if (isOwnNativeClick()) return; // 連動モードによる自分自身のプログラム的クリックは素通し (無限ループ防止)
   const target = e.target;
   if (!(target instanceof Element)) return;
-  const btn = target.closest<HTMLElement>(bookmarkButtonSelector);
+  const btn = closestFirst<HTMLElement>(target, 'bookmarkButton')?.el;
   if (!btn) return;
-  const article = btn.closest(SEL.tweet);
+  const article = closestFirst(btn, 'tweet')?.el;
   // ポストを特定できないなど、横取りできない状況では何もせず X 標準の動作に任せる
   if (!article || !extractTweet(article)) return;
   e.preventDefault();
@@ -156,6 +158,13 @@ function removeBadges(): void {
 export function applyButtonMode(next: ButtonMode): void {
   mode = next;
   setPopoverMode(next);
+  if (isBroken()) {
+    // X の画面構造が変わっている: PostShelf の UI を外し、X 標準の動作に一切触れない
+    removeSeparate();
+    removeBadges();
+    document.removeEventListener('click', onCaptureClick, true);
+    return;
+  }
   if (next === 'replace') {
     removeSeparate();
     document.addEventListener('click', onCaptureClick, true); // 同一関数なので重複登録されない
@@ -167,6 +176,7 @@ export function applyButtonMode(next: ButtonMode): void {
 }
 
 export function initButtons(): void {
+  subscribeHealth(() => applyButtonMode(mode)); // broken になったら UI を外し、戻ったら付け直す
   void getSettings().then((s) => applyButtonMode(s.buttonMode));
   onSettingsChanged((s) => applyButtonMode(s.buttonMode));
   onDataChanged(() => void refreshAll());

@@ -52,3 +52,23 @@ export async function requestNativeSync(tabId: number, tweetId: string, want: bo
     /* 何もしない */
   }
 }
+
+/** x.com / twitter.com のタブ (アクティブなものを優先)。host 権限があるので tabs 権限なしで URL 一致の検索ができる */
+async function findXTab(): Promise<number | null> {
+  if (typeof chrome === 'undefined' || !chrome.tabs?.query) return null;
+  const tabs = await chrome.tabs.query({ url: ['https://x.com/*', 'https://twitter.com/*'] });
+  const tab = tabs.find((t) => t.active) ?? tabs[0];
+  return tab?.id ?? null;
+}
+
+/** x.com のタブの content script に診断情報を作ってもらう。タブが無い / 応答が無いときは null */
+export async function requestDiagnostics(): Promise<string | null> {
+  try {
+    const id = await findXTab();
+    if (id === null) return null;
+    const r = (await chrome.tabs.sendMessage(id, { type: 'getDiagnostics' })) as { ok?: boolean; report?: string } | undefined;
+    return r?.ok && typeof r.report === 'string' ? r.report : null;
+  } catch {
+    return null;
+  }
+}

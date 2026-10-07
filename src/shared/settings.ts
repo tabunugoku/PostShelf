@@ -91,3 +91,38 @@ export function onImportHintChanged(cb: () => void): () => void {
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);
 }
+
+// ---- X の画面構造の自己診断結果 (content script が保存し、popup / 設定が表示する。外部には送らない) ----
+
+export type HealthState = 'ok' | 'degraded' | 'broken';
+
+export interface Health {
+  state: HealthState;
+  /** 検査時刻 (ms) */
+  checkedAt: number;
+  /** 見つからなかった要素のキー (broken のとき) */
+  missing: string[];
+  /** 2 番目以降の候補 (フォールバック) で見つかった要素のキー (degraded のとき) */
+  fallback: string[];
+}
+
+const HEALTH_KEY = 'health';
+
+export async function getHealth(): Promise<Health | null> {
+  const res = await chrome.storage.local.get(HEALTH_KEY);
+  const h = res[HEALTH_KEY] as Partial<Health> | undefined;
+  if (!h || !['ok', 'degraded', 'broken'].includes(h.state as string)) return null;
+  return { state: h.state as HealthState, checkedAt: Number(h.checkedAt) || 0, missing: h.missing ?? [], fallback: h.fallback ?? [] };
+}
+
+export async function saveHealth(h: Health): Promise<void> {
+  await chrome.storage.local.set({ [HEALTH_KEY]: h });
+}
+
+export function onHealthChanged(cb: () => void): () => void {
+  const listener = (changes: Record<string, unknown>, area: string) => {
+    if (area === 'local' && HEALTH_KEY in changes) cb();
+  };
+  chrome.storage.onChanged?.addListener(listener as never);
+  return () => chrome.storage.onChanged?.removeListener(listener as never);
+}

@@ -1,6 +1,7 @@
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
+import { HealthNotice } from '../manager/HealthNotice';
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
 import type { Bookmark } from '../shared/models';
 import { t } from '../shared/strings';
@@ -27,6 +28,7 @@ function Popup() {
       <div class="sub">
         {counts.posts} {t('popupPosts')} · {counts.folders} {t('popupFolders')}
       </div>
+      <HealthNotice onDiagnose={() => openManager('#diagnostics')} />
       <div class="rec">
         <div>{t('recent')}</div>
         {recent.map((b) => (
@@ -50,6 +52,10 @@ function Popup() {
           {t('openSidePanel')}
         </button>
       )}
+      <button class="pr" onClick={() => openManager('#diagnostics')}>
+        <Icon name="ti-stethoscope" />
+        {t('copyDiag')}
+      </button>
       <button class="pr" onClick={() => openManager('#settings')}>
         <Icon name="ti-settings" />
         {t('settings')}

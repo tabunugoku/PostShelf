@@ -3,11 +3,14 @@ import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
 import { getSettings, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
 import { exportData, importData } from '../shared/storage';
+import { DiagnosticsDialog } from './Diagnostics';
+import { HealthNotice } from './HealthNotice';
 
 export function SettingsPage({ onChanged }: { onChanged: () => void }) {
   const [sync, setSync] = useState(false);
   const [bmode, setBmode] = useState<ButtonMode>('separate');
   const [amode, setAmode] = useState<ActionMode>('popup');
+  const [diag, setDiag] = useState(location.hash === '#diagnostics');
   useEffect(() => {
     void getSettings().then((s) => {
       setSync(s.syncNative);
@@ -64,6 +67,15 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
         <p class="muted setting-desc">{t('actionModeNote')}</p>
       </fieldset>
       <fieldset class="setting-group">
+        <legend>{t('healthTitle')}</legend>
+        <HealthNotice showOk onDiagnose={() => setDiag(true)} />
+        <div class="io">
+          <button onClick={() => setDiag(true)}>
+            <Icon name="ti-stethoscope" /> {t('copyDiag')}
+          </button>
+        </div>
+      </fieldset>
+      <fieldset class="setting-group">
         <legend>{t('dataSection')}</legend>
         <div class="io">
           <button onClick={() => downloadJson(exportData)}>{t('exportBtn')}</button>
@@ -89,6 +101,7 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
           </label>
         </div>
       </fieldset>
+      {diag && <DiagnosticsDialog onClose={() => setDiag(false)} />}
     </section>
   );
 }

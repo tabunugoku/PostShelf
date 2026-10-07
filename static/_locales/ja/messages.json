@@ -409,5 +409,50 @@
   },
   "saveCurrentFail": {
     "message": "このポストを読み取れませんでした。ページを再読み込みしてから、もう一度お試しください。"
+  },
+  "healthTitle": {
+    "message": "X の画面構造"
+  },
+  "healthOkAt": {
+    "message": "正常 (最終確認: $NAME$)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "未確認 (x.com を開くと確認します)"
+  },
+  "healthDegraded": {
+    "message": "X の画面構造が一部変わっています。動作は続いています。"
+  },
+  "healthBroken": {
+    "message": "X の画面構造が変わったため、一部の機能を止めています。診断情報を送ってもらえると直せます。"
+  },
+  "copyDiag": {
+    "message": "診断情報をコピー"
+  },
+  "diagTitle": {
+    "message": "診断情報"
+  },
+  "diagNotice": {
+    "message": "この内容がクリップボードにコピーされます。個人情報は含まれません。"
+  },
+  "diagCopy": {
+    "message": "コピー"
+  },
+  "diagCopied": {
+    "message": "コピーしました"
+  },
+  "diagCopyFail": {
+    "message": "コピーできませんでした。内容を選択してコピーしてください。"
+  },
+  "diagReport": {
+    "message": "GitHub で報告"
+  },
+  "diagPreparing": {
+    "message": "作成中…"
   }
 }

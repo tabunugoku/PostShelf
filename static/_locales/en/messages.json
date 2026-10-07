@@ -409,5 +409,50 @@
   },
   "saveCurrentFail": {
     "message": "Could not read this post. Reload the page and try again."
+  },
+  "healthTitle": {
+    "message": "X page structure"
+  },
+  "healthOkAt": {
+    "message": "OK (last checked: $NAME$)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "Not checked yet (it is checked when you open x.com)"
+  },
+  "healthDegraded": {
+    "message": "Parts of the X page structure have changed. PostShelf is still working."
+  },
+  "healthBroken": {
+    "message": "The X page structure has changed, so some features are paused. Sending diagnostic info helps us fix it."
+  },
+  "copyDiag": {
+    "message": "Copy diagnostic info"
+  },
+  "diagTitle": {
+    "message": "Diagnostic info"
+  },
+  "diagNotice": {
+    "message": "This content will be copied to the clipboard. It contains no personal information."
+  },
+  "diagCopy": {
+    "message": "Copy"
+  },
+  "diagCopied": {
+    "message": "Copied"
+  },
+  "diagCopyFail": {
+    "message": "Could not copy. Please select the text and copy it manually."
+  },
+  "diagReport": {
+    "message": "Report on GitHub"
+  },
+  "diagPreparing": {
+    "message": "Preparing…"
   }
 }

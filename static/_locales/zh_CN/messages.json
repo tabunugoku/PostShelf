@@ -409,5 +409,50 @@
   },
   "saveCurrentFail": {
     "message": "无法读取此帖子。请刷新页面后重试。"
+  },
+  "healthTitle": {
+    "message": "X 页面结构"
+  },
+  "healthOkAt": {
+    "message": "正常（上次检查：$NAME$）",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "尚未检查（打开 x.com 时会检查）"
+  },
+  "healthDegraded": {
+    "message": "X 的页面结构有部分变化，PostShelf 仍在正常工作。"
+  },
+  "healthBroken": {
+    "message": "X 的页面结构已变化，部分功能已暂停。提供诊断信息可帮助我们修复。"
+  },
+  "copyDiag": {
+    "message": "复制诊断信息"
+  },
+  "diagTitle": {
+    "message": "诊断信息"
+  },
+  "diagNotice": {
+    "message": "此内容将复制到剪贴板，不包含个人信息。"
+  },
+  "diagCopy": {
+    "message": "复制"
+  },
+  "diagCopied": {
+    "message": "已复制"
+  },
+  "diagCopyFail": {
+    "message": "无法复制，请手动选择文本并复制。"
+  },
+  "diagReport": {
+    "message": "在 GitHub 上报告"
+  },
+  "diagPreparing": {
+    "message": "生成中…"
   }
 }

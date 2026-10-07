@@ -1,4 +1,4 @@
-import { SEL } from '../shared/selectors';
+import { queryFirst } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { extractTweet } from './snapshot';
 import { getBookmark, listFolders, setBookmarkFolders } from '../shared/storage';
@@ -59,7 +59,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   });
   pop.append(picker.el);
   // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
-  if (mode === 'replace' && article.querySelector(SEL.removeBookmark)) {
+  if (mode === 'replace' && queryFirst(article, 'removeBookmark')) {
     const rel = document.createElement('button');
     rel.type = 'button';
     rel.textContent = t('releaseNative');

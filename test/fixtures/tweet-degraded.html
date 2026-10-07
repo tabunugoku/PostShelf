@@ -1,0 +1,10 @@
+<!-- フォールバック用: data-testid が別名になった想定 (推測)。article[role=article]、投稿者は先頭リンク、本文は div[lang]。
+     ブックマークボタンの data-testid は目印が他に無いので、そのまま残している -->
+<article role="article" data-testid="postCard">
+  <a role="link" href="/yamada"><span>山田 太郎</span></a>
+  <a href="/yamada/status/1234567890"><time datetime="2026-10-01T12:00:00.000Z">10月1日</time></a>
+  <div lang="ja" dir="auto"><span>こんにちは</span> <span>世界</span></div>
+  <div role="group">
+    <div><button data-testid="bookmark" aria-label="ブックマーク"></button></div>
+  </div>
+</article>

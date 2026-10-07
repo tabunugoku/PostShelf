@@ -31,6 +31,7 @@ export function installPanelMock() {
   c.tabs = { create: async () => ({}) };
   const handlers: any[] = [];
   c.runtime = {
+    getManifest: () => ({ version: '9.9.9' }),
     getURL: (p: string) => `chrome-extension://x/${p}`,
     sendMessage: async (m: unknown) => void calls.messages.push(m),
     onInstalled: { addListener: (h: any) => handlers.push(h) },
@@ -44,6 +45,7 @@ export function installChromeMock(lang = 'ja'): Record<string, unknown> {
   const listeners = new Set<(c: Record<string, unknown>, area: string) => void>();
   (globalThis as any).chrome = {
     i18n: { getMessage: makeGetMessage(loadMessages(lang)), getUILanguage: () => lang },
+    runtime: { getManifest: () => ({ version: '9.9.9' }), getURL: (p: string) => `chrome-extension://x/${p}` },
     storage: {
       local: {
         async get(key: string) {

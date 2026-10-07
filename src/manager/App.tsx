@@ -71,7 +71,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>({});
-  const [page, setPage] = useState<'bookmarks' | 'settings'>(location.hash === '#settings' ? 'settings' : 'bookmarks');
+  const [page, setPage] = useState<'bookmarks' | 'settings'>(location.hash === '#settings' || location.hash === '#diagnostics' ? 'settings' : 'bookmarks');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [anchor, setAnchor] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
@@ -248,7 +248,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   const editNode = (f: Folder) =>
     editing === f.id && (
-      <Dropdown onClose={() => setEditing(null)} label={t('folderMore')} class="menu-wide">
+      <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-edit">
         <FolderEdit folder={f} onSaved={() => void reload()} onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }} />
       </Dropdown>
     );

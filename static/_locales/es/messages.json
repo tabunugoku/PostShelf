@@ -409,5 +409,50 @@
   },
   "saveCurrentFail": {
     "message": "No se pudo leer esta publicación. Recarga la página e inténtalo de nuevo."
+  },
+  "healthTitle": {
+    "message": "Estructura de la página de X"
+  },
+  "healthOkAt": {
+    "message": "Correcto (última comprobación: $NAME$)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "Aún sin comprobar (se comprueba al abrir x.com)"
+  },
+  "healthDegraded": {
+    "message": "Parte de la estructura de la página de X ha cambiado. PostShelf sigue funcionando."
+  },
+  "healthBroken": {
+    "message": "La estructura de la página de X ha cambiado y se han pausado algunas funciones. Enviar la información de diagnóstico nos ayuda a corregirlo."
+  },
+  "copyDiag": {
+    "message": "Copiar información de diagnóstico"
+  },
+  "diagTitle": {
+    "message": "Información de diagnóstico"
+  },
+  "diagNotice": {
+    "message": "Este contenido se copiará al portapapeles. No contiene información personal."
+  },
+  "diagCopy": {
+    "message": "Copiar"
+  },
+  "diagCopied": {
+    "message": "Copiado"
+  },
+  "diagCopyFail": {
+    "message": "No se pudo copiar. Selecciona el texto y cópialo manualmente."
+  },
+  "diagReport": {
+    "message": "Informar en GitHub"
+  },
+  "diagPreparing": {
+    "message": "Preparando…"
   }
 }

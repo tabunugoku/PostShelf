@@ -409,5 +409,50 @@
   },
   "saveCurrentFail": {
     "message": "無法讀取此貼文。請重新整理頁面後再試一次。"
+  },
+  "healthTitle": {
+    "message": "X 頁面結構"
+  },
+  "healthOkAt": {
+    "message": "正常（上次檢查：$NAME$）",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "尚未檢查（開啟 x.com 時會檢查）"
+  },
+  "healthDegraded": {
+    "message": "X 的頁面結構有部分變化，PostShelf 仍在正常運作。"
+  },
+  "healthBroken": {
+    "message": "X 的頁面結構已變化，部分功能已暫停。提供診斷資訊可協助我們修復。"
+  },
+  "copyDiag": {
+    "message": "複製診斷資訊"
+  },
+  "diagTitle": {
+    "message": "診斷資訊"
+  },
+  "diagNotice": {
+    "message": "此內容將複製到剪貼簿，不包含個人資訊。"
+  },
+  "diagCopy": {
+    "message": "複製"
+  },
+  "diagCopied": {
+    "message": "已複製"
+  },
+  "diagCopyFail": {
+    "message": "無法複製，請手動選取文字並複製。"
+  },
+  "diagReport": {
+    "message": "在 GitHub 上回報"
+  },
+  "diagPreparing": {
+    "message": "產生中…"
   }
 }

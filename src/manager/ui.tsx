@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 import { createFolderPicker } from '../shared/folderPicker';
 import { displayName, type Folder } from '../shared/models';
@@ -78,8 +78,20 @@ export function Toast(props: { message: string; onUndo: () => void }) {
 }
 
 /** 外側クリック / Esc で閉じるドロップダウンの枠 */
-export function Dropdown(props: { onClose: () => void; children: ComponentChildren; label?: string; class?: string }) {
+export function Dropdown(props: { onClose: () => void; children: ComponentChildren; label?: string; class?: string; fixed?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
+  // fixed: スクロール領域 (サイドバー) の中でも切れないよう、画面基準で開く位置を計算する (画面端ではみ出さない)
+  useLayoutEffect(() => {
+    if (!props.fixed || !ref.current) return;
+    const el = ref.current;
+    const r = (el.parentElement ?? el).getBoundingClientRect();
+    const vw = document.documentElement.clientWidth || window.innerWidth;
+    const vh = document.documentElement.clientHeight || window.innerHeight;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    el.style.left = `${Math.max(8, Math.min(r.left, vw - w - 8))}px`;
+    el.style.top = `${r.bottom + 4 + h > vh - 8 && r.top - 4 - h >= 8 ? r.top - 4 - h : r.bottom + 4}px`;
+  }, []);
   useEffect(() => {
     const down = (e: MouseEvent) => {
       // 開くボタン (親の .menu-anchor 内) の mousedown では閉じない。ボタン側のトグルに任せる
@@ -97,7 +109,7 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
     };
   }, []);
   return (
-    <div ref={ref} class={`menu ${props.class ?? ''}`} role="dialog" aria-label={props.label}>
+    <div ref={ref} class={`menu${props.fixed ? ' fixed' : ''} ${props.class ?? ''}`} role="dialog" aria-label={props.label}>
       {props.children}
     </div>
   );

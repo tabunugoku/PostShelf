@@ -1,4 +1,4 @@
-import { SEL } from '../shared/selectors';
+import { queryAllFirst } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
 import { recordPending } from '../shared/settings';
@@ -10,7 +10,7 @@ export const isBookmarksPage = (path = location.pathname) => path === '/i/bookma
 /** 今画面に表示されているポストだけを読む (自動スクロール・API 呼び出しはしない) */
 export function collectVisible(root: ParentNode = document): Extracted[] {
   const seen = new Map<string, Extracted>();
-  for (const a of root.querySelectorAll(SEL.tweet)) {
+  for (const a of queryAllFirst(root, 'tweet').els) {
     const ex = extractTweet(a);
     if (ex) seen.set(ex.tweetId, ex);
   }
