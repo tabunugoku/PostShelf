@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PostShelf 管理画面の改善案 (タブ / サイドパネル)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+:root{--tx:#0f1419;--tx2:#536471;--tx3:#6b7a86;--s0:#f7f9f9;--s1:#fff;--s2:#f7f9f9;--bd:#eff3f4;--bd2:#cfd9de;--hv:rgba(15,20,25,.06);--sel:rgba(15,20,25,.12);--ac:#1d9bf0;--acfill:#0f6fb3;--acbg:#e8f5fe;--sh:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08)}
+@media (prefers-color-scheme:dark){:root{--tx:#e7e9ea;--tx2:#9aa4ad;--tx3:#8a949d;--s0:#000;--s1:#000;--s2:#16181c;--bd:#2f3336;--bd2:#536471;--hv:rgba(231,233,234,.08);--sel:rgba(231,233,234,.16);--ac:#1d9bf0;--acfill:#0f6fb3;--acbg:#031018;--sh:0 8px 24px rgba(0,0,0,.5)}}
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:var(--s0);color:var(--tx);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif;color-scheme:light dark}
+h1{font-size:18px;margin:0 0 4px;font-weight:600}h2{font-size:15px;margin:32px 0 6px;font-weight:600}
+.lead{color:var(--tx2);margin:0 0 16px;max-width:760px}
+button{font:inherit;color:inherit;background:transparent;border:1px solid var(--bd2);border-radius:8px;padding:5px 11px;min-height:32px;cursor:pointer}
+button:hover{background:var(--hv)}
+input{font:inherit;color:inherit;background:var(--s1);border:1px solid var(--bd2);border-radius:8px;padding:5px 10px;min-height:32px}
+.frame{border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--s1)}
+.wrap{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.tab{display:grid;grid-template-columns:230px minmax(0,1fr);width:920px;max-width:100%;min-height:560px}
+.side{background:var(--s2);border-right:1px solid var(--bd);padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.sec{font-size:12px;color:var(--tx3);padding:10px 10px 4px}
+.fr{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;cursor:pointer;position:relative}
+.fr:hover{background:var(--hv)}.fr.on{background:var(--sel);font-weight:600}
+.fr i.ic{font-size:18px}.fr .n{margin-left:auto;font-size:12px;color:var(--tx3)}
+.fr .more{display:none;margin-left:6px;color:var(--tx2)}.fr:hover .more{display:inline}.fr:hover .n{margin-left:0}
+.badge{background:var(--acfill);color:#fff;border-radius:10px;font-size:11px;padding:0 7px}
+.main{padding:16px 20px}
+.top{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.search{flex:1;min-width:160px;display:flex;align-items:center;gap:6px;border:1px solid var(--bd2);border-radius:20px;padding:0 12px;min-height:34px;background:var(--s1)}
+.search input{border:0;background:transparent;flex:1;padding:0;min-height:30px;outline:none}
+.seg{display:flex;border:1px solid var(--bd2);border-radius:8px;overflow:hidden}.seg button{border:0;border-radius:0;min-height:32px}.seg .on{background:var(--sel);font-weight:600}
+.banner{display:flex;align-items:center;gap:10px;background:var(--acbg);border-radius:10px;padding:8px 12px;margin-bottom:12px}
+.banner i{color:var(--ac);font-size:18px}
+.chips{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--bd2);border-radius:16px;padding:2px 10px;font-size:13px;display:inline-flex;gap:5px;align-items:center;cursor:pointer;background:var(--s1)}
+.chip.on{background:var(--sel);font-weight:600}
+.card{display:flex;gap:12px;padding:12px 8px;border-top:1px solid var(--bd);position:relative;border-radius:8px}
+.card:hover{background:var(--hv)}
+.cb{width:18px;height:18px;margin-top:10px;opacity:0;accent-color:var(--ac)}.card:hover .cb,.card.sel .cb{opacity:1}
+.card.sel{background:var(--acbg)}
+.av{width:40px;height:40px;border-radius:50%;background:var(--bd2);flex:none;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+.nm{font-weight:600}.mut{color:var(--tx2);font-weight:400}
+.body{flex:1;min-width:0}
+.media{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:8px;border-radius:12px;overflow:hidden;max-width:420px}
+.media div{height:90px;background:var(--bd2)}
+.acts{position:absolute;right:8px;top:8px;display:none;gap:4px;background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:2px}
+.card:hover .acts{display:flex}.acts button{border:0;padding:2px 7px;min-height:28px}
+.fchips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.fchip{font-size:12px;color:var(--tx2);border:1px solid var(--bd);border-radius:12px;padding:0 8px;display:inline-flex;gap:4px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.gc{border:1px solid var(--bd);border-radius:12px;padding:10px;font-size:13px}
+.bulk{display:flex;align-items:center;gap:8px;background:var(--sel);border-radius:10px;padding:6px 10px;margin-bottom:10px}
+.panel{width:400px;max-width:100%;min-height:640px;display:flex;flex-direction:column}
+.phead{padding:10px 12px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:8px;background:var(--s1)}
+.row{display:flex;gap:6px;align-items:center}
+.scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.scroll .chip{white-space:nowrap}
+.pbody{padding:4px 12px;flex:1}
+.pcard{padding:10px 0;border-top:1px solid var(--bd);display:flex;gap:10px}
+.pcard .av{width:32px;height:32px;font-size:11px}
+.pfoot{border-top:1px solid var(--bd);padding:10px 12px;background:var(--s2)}
+.cta{width:100%;background:var(--acfill);color:#fff;border:0;display:flex;gap:8px;align-items:center;justify-content:center}
+.cta:hover{background:var(--acfill);filter:brightness(1.08)}
+ol.notes{margin:8px 0 0;padding-left:20px;color:var(--tx2);max-width:760px}ol.notes li{margin:4px 0}
+.tag{display:inline-block;font-size:11px;border:1px solid var(--bd2);border-radius:10px;padding:0 7px;margin-left:6px;color:var(--tx2)}
+</style></head><body>
+<h1>PostShelf 管理画面の改善案</h1>
+<p class="lead">タブ版 (幅 920px) とサイドパネル版 (幅 400px) の提案です。操作できる部分: フォルダの選択、表示切替 (ポスト/リスト/グリッド)、検索、カードの選択。数字は下の説明に対応します。</p>
+
+<h2>1. タブ版 (manager.html)</h2>
+<div class="frame tab" id="tab">
+  <div class="side">
+    <div class="sec">スマートビュー</div>
+    <div class="fr on" data-f="all"><i class="ti ic ti-bookmarks"></i>すべて<span class="n">128</span></div>
+    <div class="fr" data-f="inbox"><i class="ti ic ti-inbox"></i>未分類<span class="badge">12</span></div>
+    <div class="fr" data-f="recent"><i class="ti ic ti-clock"></i>最近の 7 日<span class="n">9</span></div>
+    <div class="sec">フォルダ <span style="float:right;cursor:grab">並べ替えはドラッグ</span></div>
+    <div class="fr" data-f="dev"><i class="ti ic ti-code" style="color:#378ADD"></i>開発ネタ<span class="n">41</span><i class="ti ti-dots more" title="名前・アイコン・色を変更"></i></div>
+    <div class="fr" data-f="read"><i class="ti ic ti-book" style="color:#BA7517"></i>あとで読む<span class="n">33</span><i class="ti ti-dots more"></i></div>
+    <div class="fr" data-f="design"><i class="ti ic ti-folder" style="color:#D4537E"></i>デザイン<span class="n">27</span><i class="ti ti-dots more"></i></div>
+    <div class="fr" style="color:var(--tx2)"><i class="ti ic ti-plus"></i>新しいフォルダ</div>
+    <div style="flex:1"></div>
+    <div class="fr" style="color:var(--tx2)"><i class="ti ic ti-layout-sidebar-right"></i>サイドパネルで開く</div>
+    <div class="fr" style="color:var(--tx2)"><i class="ti ic ti-settings"></i>設定</div>
+  </div>
+  <div class="main">
+    <div class="top">
+      <i id="hi" class="ti ti-bookmarks" style="font-size:22px"></i><span id="hn" style="font-size:18px;font-weight:600">すべて</span><span id="hc" class="mut"> 128 件</span>
+      <div class="search" style="margin-left:12px"><i class="ti ti-search"></i><input id="q" placeholder="本文、@ユーザー名で検索"></div>
+      <button title="並べ替え"><i class="ti ti-arrows-sort"></i> 保存が新しい順</button>
+      <div class="seg" id="vs"><button data-v="post" class="on" title="ポスト表示"><i class="ti ti-layout-list"></i></button><button data-v="list" title="リスト表示"><i class="ti ti-list"></i></button><button data-v="grid" title="グリッド表示"><i class="ti ti-layout-grid"></i></button></div>
+    </div>
+    <div class="banner"><i class="ti ti-download"></i><span>x.com の「ブックマーク」から取り込めるポストが <b>12 件</b> あります</span><button style="margin-left:auto">取り込み方法</button></div>
+    <div class="chips"><span class="chip on">すべて</span><span class="chip"><i class="ti ti-photo"></i>画像あり</span><span class="chip"><i class="ti ti-video"></i>動画あり</span><span class="chip"><i class="ti ti-link"></i>リンクあり</span><span class="chip"><i class="ti ti-user"></i>投稿者で絞り込み</span></div>
+    <div class="bulk" id="bulk" style="display:none"><b id="bn">1 件選択中</b><button><i class="ti ti-folder-plus"></i> フォルダに追加</button><button><i class="ti ti-folder-minus"></i> 外す</button><button style="color:#e24b4a"><i class="ti ti-trash"></i> 削除</button><button style="margin-left:auto" id="bc">選択解除</button></div>
+    <div id="list"></div>
+  </div>
+</div>
+<ol class="notes">
+  <li>左: 先頭に「スマートビュー」(すべて / 未分類 / 最近の 7 日)。未分類の件数をバッジで目立たせ、整理の入口にする</li>
+  <li>フォルダ行の「…」から名前・アイコン・色を変更。ヘッダーの編集パネルは廃止し、一覧に集中できる</li>
+  <li>上部に検索を常設。並べ替えはアイコン付きの 1 ボタン。表示はポスト / リスト / グリッドの 3 種</li>
+  <li>取り込み案内のバナー (未取り込み件数)。閉じると次回の新着まで出ない</li>
+  <li>絞り込みチップ (画像 / 動画 / リンク / 投稿者)</li>
+  <li>カードは hover でチェックボックスと操作 (移動・開く・削除) が出る。選択すると上部に一括操作バー</li>
+</ol>
+
+<h2>2. サイドパネル版 (幅 400px)</h2>
+<div class="wrap">
+<div class="frame panel" id="panel">
+  <div class="phead">
+    <div class="row"><button style="flex:1;justify-content:space-between;display:flex;align-items:center;font-weight:600"><span><i class="ti ti-code" style="color:#378ADD"></i> 開発ネタ <span class="mut">41</span></span><i class="ti ti-chevron-down"></i></button>
+      <button title="検索"><i class="ti ti-search"></i></button>
+      <button title="タブで開く"><i class="ti ti-external-link"></i></button></div>
+    <div class="scroll"><span class="chip on"><i class="ti ti-bookmarks"></i>すべて</span><span class="chip"><i class="ti ti-inbox"></i>未分類 <span class="badge">12</span></span><span class="chip"><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ</span><span class="chip"><i class="ti ti-book" style="color:#BA7517"></i>あとで読む</span><span class="chip"><i class="ti ti-folder" style="color:#D4537E"></i>デザイン</span></div>
+  </div>
+  <div class="pbody">
+    <div class="pcard"><div class="av">AI</div><div class="body"><div class="nm">Dev Tips <span class="mut">@devtips · 2h</span></div><div>Chrome拡張の service worker を長持ちさせる小技まとめ</div><div class="fchips"><span class="fchip"><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ</span></div></div><i class="ti ti-dots-vertical" style="color:var(--tx2)"></i></div>
+    <div class="pcard"><div class="av">MH</div><div class="body"><div class="nm">Maho <span class="mut">@maho · 5h</span></div><div>長文スレッド: 個人開発で 3 年続けて学んだこと</div><div class="media" style="max-width:100%"><div></div><div></div></div><div class="fchips"><span class="fchip"><i class="ti ti-book" style="color:#BA7517"></i>あとで読む</span><span class="fchip"><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ</span></div></div><i class="ti ti-dots-vertical" style="color:var(--tx2)"></i></div>
+    <div class="pcard"><div class="av">JS</div><div class="body"><div class="nm">JS Notes <span class="mut">@jsnotes · 1d</span></div><div>IndexedDB を薄くラップするだけで十分だった話</div><div class="fchips"><span class="fchip"><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ</span></div></div><i class="ti ti-dots-vertical" style="color:var(--tx2)"></i></div>
+  </div>
+  <div class="pfoot"><button class="cta"><i class="ti ti-folder-plus"></i>いま開いているポストを保存…</button><div class="mut" style="font-size:12px;margin-top:6px;text-align:center">x.com のポストを開いているときに表示</div></div>
+</div>
+<div style="flex:1;min-width:260px">
+<ol class="notes" style="margin-top:0">
+  <li>ヘッダー: 現在のフォルダを 1 つのボタンにまとめ、押すとフォルダ一覧が開く。件数も同じ行に表示</li>
+  <li>その下に、横スクロールのフォルダチップ。未分類は件数バッジ。サイドバーは出さない (幅が足りないため)</li>
+  <li>カードは余白を詰め、操作は右端の「⋮」に集約 (移動・開く・削除)。複数選択は長押しまたは「⋮」から開始</li>
+  <li>下部の固定ボタン: x.com でポストを開いているタブのとき、そのポストを保存してフォルダを選べる。サイドパネルから離れずに整理できる <span class="tag">新機能案</span></li>
+  <li>「タブで開く」ボタンで、同じ画面を広い管理画面に切り替え</li>
+  <li>幅が 520px を超えたらタブ版のレイアウトに切り替わる (同じ画面部品を共用)</li>
+</ol></div>
+</div>
+
+<h2>3. グリッド表示 (タブ版の第 3 の表示)</h2>
+<div class="frame" style="padding:14px;max-width:920px"><div class="grid">
+  <div class="gc"><b>@devtips</b><div>Chrome拡張の service worker を…</div><div class="fchips"><span class="fchip"><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ</span></div></div>
+  <div class="gc"><b>@maho</b><div>長文スレッド: 個人開発で 3 年…</div><div class="media" style="max-width:100%;margin-top:6px"><div></div><div></div></div></div>
+  <div class="gc"><b>@uidaily</b><div>余白とタイポグラフィだけで画面が…</div><div class="fchips"><span class="fchip"><i class="ti ti-folder" style="color:#D4537E"></i>デザイン</span></div></div>
+</div></div>
+<ol class="notes"><li>画像付きポストを俯瞰したいとき用。カードの高さをそろえて 3 列に並べる</li></ol>
+
+<script>
+var F={all:['すべて','ti-bookmarks',null,128],inbox:['未分類','ti-inbox',null,12],recent:['最近の 7 日','ti-clock',null,9],dev:['開発ネタ','ti-code','#378ADD',41],read:['あとで読む','ti-book','#BA7517',33],design:['デザイン','ti-folder','#D4537E',27]};
+var P=[['AI','Dev Tips','@devtips','2h','Chrome拡張の service worker を長持ちさせる小技まとめ','dev',0],['MH','Maho','@maho','5h','長文スレッド: 個人開発で 3 年続けて学んだこと','read',1],['UI','UI Daily','@uidaily','1d','余白とタイポグラフィだけで画面が締まる理由','design',0],['JS','JS Notes','@jsnotes','1d','IndexedDB を薄くラップするだけで十分だった話','dev',0]];
+var cur='all',view='post',sel={};
+function show(){
+ var q=document.getElementById('q').value.toLowerCase();
+ var items=P.filter(function(p){return (cur=='all'||cur=='inbox'||cur=='recent'||p[5]==cur)&&(p[4]+p[2]).toLowerCase().indexOf(q)>=0});
+ var h='';
+ items.forEach(function(p,i){var f=F[p[5]];var chip='<div class="fchips"><span class="fchip"><i class="ti '+f[1]+'" style="color:'+(f[2]||'inherit')+'"></i>'+f[0]+'</span></div>';
+  var media=p[6]?'<div class="media"><div></div><div></div></div>':'';
+  var acts='<div class="acts"><button title="フォルダを変更"><i class="ti ti-folder-plus"></i></button><button title="元のポストを開く"><i class="ti ti-external-link"></i></button><button title="削除"><i class="ti ti-trash"></i></button></div>';
+  if(view=='post')h+='<div class="card'+(sel[i]?' sel':'')+'" data-i="'+i+'"><input type="checkbox" class="cb" '+(sel[i]?'checked':'')+'><div class="av">'+p[0]+'</div><div class="body"><div><span class="nm">'+p[1]+'</span> <span class="mut">'+p[2]+' · '+p[3]+'</span></div><div>'+p[4]+'</div>'+media+chip+'</div>'+acts+'</div>';
+  else if(view=='list')h+='<div class="card'+(sel[i]?' sel':'')+'" data-i="'+i+'" style="padding:6px 8px;align-items:center"><input type="checkbox" class="cb" style="margin-top:0" '+(sel[i]?'checked':'')+'><i class="ti '+f[1]+'" style="color:'+(f[2]||'inherit')+';font-size:18px"></i><span class="mut" style="width:90px">'+p[2]+'</span><span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p[4]+'</span><span class="mut">'+p[3]+'</span>'+acts+'</div>';
+  else h+=(i==0?'<div class="grid">':'')+'<div class="gc"><b>'+p[2]+'</b><div>'+p[4]+'</div>'+chip+'</div>'+(i==items.length-1?'</div>':'');
+ });
+ if(!items.length)h='<div style="text-align:center;padding:48px 0;color:var(--tx2)"><i class="ti ti-search" style="font-size:32px"></i><div style="font-weight:600;margin-top:6px">見つかりませんでした</div><div>検索語を変えるか、絞り込みを外してください。</div></div>';
+ document.getElementById('list').innerHTML=h;
+ var n=Object.keys(sel).filter(function(k){return sel[k]}).length;
+ document.getElementById('bulk').style.display=n?'flex':'none';document.getElementById('bn').textContent=n+' 件選択中';
+}
+document.querySelectorAll('#tab .fr[data-f]').forEach(function(e){e.onclick=function(){cur=e.dataset.f;sel={};document.querySelectorAll('#tab .fr').forEach(function(x){x.classList.remove('on')});e.classList.add('on');var f=F[cur];var hi=document.getElementById('hi');hi.className='ti '+f[1];hi.style.color=f[2]||'';document.getElementById('hn').textContent=f[0];document.getElementById('hc').textContent=' '+f[3]+' 件';show()}});
+document.querySelectorAll('#vs button').forEach(function(b){b.onclick=function(){view=b.dataset.v;document.querySelectorAll('#vs button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');show()}});
+document.getElementById('q').oninput=show;document.getElementById('bc').onclick=function(){sel={};show()};
+document.getElementById('list').onclick=function(e){var c=e.target.closest('.card');if(!c||e.target.closest('.acts'))return;var i=c.dataset.i;sel[i]=!sel[i];show()};
+show();
+</script></body></html>
