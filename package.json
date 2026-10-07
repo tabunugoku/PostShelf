@@ -1,0 +1,19 @@
+{
+  "name": "postshelf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.300",
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.0.0",
+    "preact": "^10.26.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

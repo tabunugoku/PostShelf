@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "PostShelf",
+  "version": "0.1.0",
+  "description": "x.com のブックマークを独自フォルダに分類します。データは端末内のみに保存されます。",
+  "permissions": ["storage", "unlimitedStorage"],
+  "host_permissions": ["https://x.com/*", "https://twitter.com/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://twitter.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_title": "PostShelf", "default_popup": "popup.html" }
+}
