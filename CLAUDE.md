@@ -5,7 +5,7 @@ Chrome 拡張 (Manifest V3)。x.com (旧 Twitter) のブックマークを独自
 詳細な計画は `docs/PLAN.md`。最初に読むこと。
 
 ## 現在のタスク
-`docs/TASK_V2.md` を最優先で実施する (外観を `docs/mockups/` に寄せる + 日英 i18n)。
+v2 (`docs/TASK_V2.md`: 外観 + 日英 i18n) は実装済み。次は `docs/TASK_V3.md` (X 連動モード / 言語追加 / CI) を実施する。
 
 ## 機能要件
 1. ポスト (tweet) のブックマーク先をフォルダ分けできる (1 ポストが複数フォルダ可)
