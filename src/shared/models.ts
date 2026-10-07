@@ -30,7 +30,7 @@ export const ALL_FOLDER_ID = 'all';
 export const ALL_FOLDER: Folder = {
   id: ALL_FOLDER_ID,
   name: STRINGS.allFolderName,
-  icon: 'ti-stack-2',
+  icon: 'ti-bookmarks',
   order: -1,
 };
 

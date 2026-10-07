@@ -43,22 +43,39 @@ export function App() {
   const folderName = (id: string) => folders.find((f) => f.id === id);
 
   return (
-    <div class="layout">
-      <aside class="sidebar">
-        <h2>{MGR.folders}</h2>
+    <div class="ps">
+      <aside class="side">
+        <div class="side-title">{MGR.folders}</div>
         {folders.map((f) => (
-          <button
+          <div
             key={f.id}
-            class={`folder-item${f.id === current ? ' active' : ''}`}
+            class={`fr${f.id === current ? ' on' : ''}`}
+            role="button"
+            tabIndex={0}
             onClick={() => {
               setCurrent(f.id);
               setEditing(false);
             }}
           >
-            <Icon name={f.icon} color={f.color} /> <span class="grow">{f.name}</span>
-            <span class="count">{countFolder(bookmarks, f.id)}</span>
-          </button>
+            <Icon name={f.icon} color={f.color} />
+            <span class="fr-name">{f.name}</span>
+            <span class="n">{countFolder(bookmarks, f.id)}</span>
+          </div>
         ))}
+        <div
+          class="fr add"
+          role="button"
+          tabIndex={0}
+          onClick={async () => {
+            const f = await createFolder({ name: MGR.newFolder });
+            await reload();
+            setCurrent(f.id);
+            setEditing(true);
+          }}
+        >
+          <Icon name="ti-plus" />
+          {MGR.newFolder}
+        </div>
         <div class="io">
           <button onClick={() => downloadJson(exportData)}>{IO.export}</button>
           <label class="file-btn">
@@ -82,31 +99,26 @@ export function App() {
             />
           </label>
         </div>
-        <button
-          class="folder-item"
-          onClick={async () => {
-            const f = await createFolder({ name: MGR.newFolder });
-            await reload();
-            setCurrent(f.id);
-            setEditing(true);
-          }}
-        >
-          <Icon name="ti-plus" /> {MGR.newFolder}
-        </button>
       </aside>
-      <main>
-        <header class="header">
-          {folder && (
-            <h1>
-              <Icon name={folder.icon} color={folder.color} /> {folder.name}
-            </h1>
-          )}
+      <main class="main">
+        <div class="bar">
+          {folder && <Icon name={folder.icon} color={folder.color} />}
+          {folder && <span class="bar-name">{folder.name}</span>}
           {folder && !isBuiltinFolder(folder.id) && (
-            <button onClick={() => setEditing(!editing)}>
-              <Icon name="ti-pencil" /> {MGR.edit}
+            <button class="icon-only" aria-label={MGR.edit} title={MGR.edit} onClick={() => setEditing(!editing)}>
+              <Icon name="ti-edit" />
             </button>
           )}
-          <span class="grow" />
+          <div class="seg">
+            <button class={view === 'post' ? 'on' : ''} onClick={() => setView('post')}>
+              {MGR.postView}
+            </button>
+            <button class={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>
+              {MGR.listView}
+            </button>
+          </div>
+        </div>
+        <div class="tools">
           <input
             type="search"
             placeholder={MGR.search}
@@ -118,15 +130,7 @@ export function App() {
               <option value={k}>{l}</option>
             ))}
           </select>
-          <div class="toggle">
-            <button class={view === 'post' ? 'on' : ''} onClick={() => setView('post')}>
-              {MGR.postView}
-            </button>
-            <button class={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>
-              {MGR.listView}
-            </button>
-          </div>
-        </header>
+        </div>
         {editing && folder && !isBuiltinFolder(folder.id) && (
           <EditPanel
             key={folder.id}
@@ -139,19 +143,9 @@ export function App() {
           />
         )}
         {shown.length === 0 && <p class="empty">{MGR.empty}</p>}
-        {view === 'post' ? (
-          <div class="posts">
-            {shown.map((b) => (
-              <PostCard b={b} folderOf={folderName} />
-            ))}
-          </div>
-        ) : (
-          <ul class="list">
-            {shown.map((b) => (
-              <ListRow b={b} />
-            ))}
-          </ul>
-        )}
+        {view === 'post'
+          ? shown.map((b) => <PostCard b={b} folderOf={folderName} />)
+          : shown.map((b) => <ListRow b={b} folderOf={folderName} />)}
       </main>
     </div>
   );
@@ -160,49 +154,55 @@ export function App() {
 function PostCard({ b, folderOf }: { b: Bookmark; folderOf: (id: string) => Folder | undefined }) {
   const s = b.snapshot;
   return (
-    <article class="card">
-      <div class="card-head">
-        {s.avatar ? <img class="avatar" src={s.avatar} alt="" /> : <span class="avatar" />}
-        <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
-        {s.createdAt && <span class="muted"> · {new Date(s.createdAt).toLocaleDateString('ja-JP')}</span>}
-        <a class="grow-end" href={s.url} target="_blank" rel="noreferrer" title={MGR.openOnX}>
-          <Icon name="ti-external-link" />
-        </a>
-      </div>
-      <p class="text">{s.text}</p>
-      {s.media.length > 0 && (
-        <div class="media">
-          {s.media.map((m) => (
-            <img src={m} alt="" loading="lazy" />
-          ))}
+    <article class="post">
+      {s.avatar ? <img class="av" src={s.avatar} alt="" /> : <span class="av">{initials(s.author)}</span>}
+      <div class="post-body">
+        <div class="post-head">
+          <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
+          {s.createdAt && <span class="muted"> · {new Date(s.createdAt).toLocaleDateString('ja-JP')}</span>}
         </div>
-      )}
-      <div class="tags">
-        {b.folderIds.map((id) => {
-          const f = folderOf(id);
-          return f ? (
-            <span class="tag">
-              <Icon name={f.icon} color={f.color} /> {f.name}
-            </span>
-          ) : null;
-        })}
+        <div class="text">{s.text}</div>
+        {s.media.length > 0 && (
+          <div class="media">
+            {s.media.map((m) => (
+              <img src={m} alt="" loading="lazy" />
+            ))}
+          </div>
+        )}
+        <div class="act">
+          {b.folderIds.map((id) => {
+            const f = folderOf(id);
+            return f ? (
+              <span class="tag" style={f.color ? { color: f.color } : undefined}>
+                <Icon name={f.icon} /> {f.name}
+              </span>
+            ) : null;
+          })}
+          <a class="ext-link" href={s.url} target="_blank" rel="noreferrer" title={MGR.openOnX} aria-label={MGR.openOnX}>
+            <Icon name="ti-external-link" />
+          </a>
+        </div>
       </div>
     </article>
   );
 }
 
-function ListRow({ b }: { b: Bookmark }) {
+function ListRow({ b, folderOf }: { b: Bookmark; folderOf: (id: string) => Folder | undefined }) {
   const s = b.snapshot;
+  const f = folderOf(b.folderIds[0]);
   return (
-    <li class="row">
-      <span class="muted">{s.handle}</span>
-      <span class="text-1line">{s.text}</span>
-      <a href={s.url} target="_blank" rel="noreferrer" title={MGR.openOnX}>
+    <div class="mini">
+      {f ? <Icon name={f.icon} color={f.color} /> : <Icon name="ti-bookmark" />}
+      <span class="handle">{s.handle}</span>
+      <span class="t">{s.text}</span>
+      <a class="ext-link" href={s.url} target="_blank" rel="noreferrer" title={MGR.openOnX} aria-label={MGR.openOnX}>
         <Icon name="ti-external-link" />
       </a>
-    </li>
+    </div>
   );
 }
+
+const initials = (name: string) => [...name.trim()].slice(0, 2).join('').toUpperCase();
 
 function EditPanel({ folder, onDone }: { folder: Folder; onDone: (deleted?: boolean) => void }) {
   const [name, setName] = useState(folder.name);
@@ -221,37 +221,34 @@ function EditPanel({ folder, onDone }: { folder: Folder; onDone: (deleted?: bool
   };
 
   return (
-    <section class="edit-panel">
-      <label>
-        {MGR.name} <input value={name} onInput={(e) => setName((e.target as HTMLInputElement).value)} />
-      </label>
-      <div>
-        {MGR.icon}
-        <div class="grid">
-          {ICONS.map((i) => (
-            <button class={`icon-btn${i === icon ? ' on' : ''}`} aria-label={i} onClick={() => setIcon(i)}>
-              <Icon name={i} />
-            </button>
-          ))}
-        </div>
+    <section class="edit">
+      <div class="erow">
+        <span class="elabel">{MGR.name}</span>
+        <input class="grow" value={name} onInput={(e) => setName((e.target as HTMLInputElement).value)} />
       </div>
-      <div class={colorOk ? '' : 'disabled'} title={colorOk ? '' : MGR.colorOnlyFolder}>
-        {MGR.color}
-        <div class="grid">
-          {COLORS.map((c) => (
-            <button
-              class={`swatch${c === color ? ' on' : ''}`}
-              style={{ background: c }}
-              aria-label={c}
-              disabled={!colorOk}
-              onClick={() => setColor(c)}
-            />
-          ))}
-        </div>
+      <div class="erow wrap">
+        <span class="elabel">{MGR.icon}</span>
+        {ICONS.slice(0, 8).map((i) => (
+          <button class={`ic${i === icon ? ' on' : ''}`} aria-label={i} onClick={() => setIcon(i)}>
+            <Icon name={i} />
+          </button>
+        ))}
+      </div>
+      <div class={`erow${colorOk ? '' : ' disabled'}`} title={colorOk ? '' : MGR.colorOnlyFolder}>
+        <span class="elabel">{MGR.color}</span>
+        {COLORS.map((c) => (
+          <button
+            class={`sw${c === color ? ' on' : ''}`}
+            style={{ background: c }}
+            aria-label={c}
+            disabled={!colorOk}
+            onClick={() => setColor(c)}
+          />
+        ))}
       </div>
       {error && <p class="error">{error}</p>}
-      <div class="actions">
-        <button onClick={save}>{MGR.save}</button>
+      <div class="erow">
+        <button class="primary" onClick={save}>{MGR.save}</button>
         <button onClick={() => onDone()}>{MGR.cancel}</button>
         <button
           class="danger"

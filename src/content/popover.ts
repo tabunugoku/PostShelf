@@ -9,9 +9,20 @@ import {
   StorageError,
 } from '../shared/storage';
 import { isBuiltinFolder } from '../shared/models';
+import { xTheme } from './theme';
 
 const BTN_ATTR = 'data-postshelf-btn';
 const POP_CLASS = 'postshelf-popover';
+
+/** ポップオーバーのアイコン用に、同梱の Tabler Icons CSS を 1 度だけ読み込む (拡張内ファイル。外部通信なし) */
+function ensureIconCss(): void {
+  if (document.getElementById('postshelf-icons')) return;
+  const link = document.createElement('link');
+  link.id = 'postshelf-icons';
+  link.rel = 'stylesheet';
+  link.href = chrome.runtime?.getURL?.('icons/tabler-icons.min.css') ?? '';
+  if (link.href) document.head.append(link);
+}
 
 export function injectButtons(root: ParentNode = document): void {
   for (const article of root.querySelectorAll(SEL.tweet)) {
@@ -25,7 +36,7 @@ export function injectButtons(root: ParentNode = document): void {
     btn.title = UI.openFolders;
     btn.setAttribute('aria-label', UI.openFolders);
     btn.textContent = '▾';
-    btn.style.cssText = 'background:none;border:0;cursor:pointer;color:#71767b;font-size:14px;padding:4px';
+    btn.style.cssText = 'background:none;border:0;cursor:pointer;color:#1d9bf0;font-size:12px;padding:4px';
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -41,6 +52,7 @@ function closePopovers(): void {
 
 export async function openPopover(article: Element, anchor: HTMLElement): Promise<HTMLElement | null> {
   closePopovers();
+  ensureIconCss();
   const ex = extractTweet(article);
   if (!ex) return null;
   const { tweetId, snapshot } = ex;
@@ -51,7 +63,8 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   pop.className = POP_CLASS;
   pop.setAttribute('role', 'dialog');
   const r = anchor.getBoundingClientRect();
-  pop.style.cssText = `position:fixed;z-index:2147483647;top:${r.bottom + 4}px;left:${Math.max(8, r.left - 100)}px;min-width:220px;background:#fff;color:#0f1419;border:1px solid #cfd9de;border-radius:8px;padding:8px;box-shadow:0 2px 12px rgba(0,0,0,.25);font:14px sans-serif`;
+  const th = xTheme();
+  pop.style.cssText = `position:fixed;z-index:2147483647;top:${r.bottom + 4}px;left:${Math.max(8, r.left - 100)}px;min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif`;
   pop.addEventListener('click', (e) => e.stopPropagation());
 
   const save = () => setBookmarkFolders(tweetId, [...selected], snapshot);
@@ -65,10 +78,16 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     }
     for (const f of list) {
       const label = document.createElement('label');
-      label.style.cssText = 'display:flex;gap:6px;align-items:center;padding:4px 0;cursor:pointer';
+      label.style.cssText = 'display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer';
+      label.addEventListener('mouseenter', () => (label.style.background = th.hover));
+      label.addEventListener('mouseleave', () => (label.style.background = ''));
+      const ico = document.createElement('i');
+      ico.className = `ti ${f.icon}`;
+      ico.style.cssText = `font-size:18px;color:${f.color ?? th.fg}`;
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.checked = selected.has(f.id);
+      cb.style.cssText = `accent-color:${th.accent};width:16px;height:16px;margin:0`;
       cb.addEventListener('change', () => {
         if (cb.checked) selected.add(f.id);
         else selected.delete(f.id);
@@ -76,18 +95,20 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
       });
       const name = document.createElement('span');
       name.textContent = f.name;
-      label.append(cb, name);
+      name.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      label.append(ico, name, cb);
       pop.append(label);
     }
     const row = document.createElement('form');
-    row.style.cssText = 'display:flex;gap:4px;margin-top:6px';
+    row.style.cssText = `display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:.5px solid ${th.border}`;
     const input = document.createElement('input');
     input.placeholder = UI.newFolderPlaceholder;
     input.setAttribute('aria-label', UI.newFolder);
-    input.style.cssText = 'flex:1;min-width:0';
+    input.style.cssText = `flex:1;min-width:0;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;padding:4px 8px`;
     const add = document.createElement('button');
     add.type = 'submit';
     add.textContent = UI.add;
+    add.style.cssText = `background:${th.accent};color:#fff;border:0;border-radius:8px;padding:4px 10px;cursor:pointer`;
     row.append(input, add);
     row.addEventListener('submit', async (e) => {
       e.preventDefault();

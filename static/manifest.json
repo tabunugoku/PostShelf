@@ -3,15 +3,43 @@
   "name": "PostShelf",
   "version": "0.1.0",
   "description": "x.com のブックマークを独自フォルダに分類します。データは端末内のみに保存されます。",
-  "permissions": ["storage", "unlimitedStorage"],
-  "host_permissions": ["https://x.com/*", "https://twitter.com/*"],
-  "background": { "service_worker": "background.js" },
+  "permissions": [
+    "storage",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "https://x.com/*",
+    "https://twitter.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://x.com/*", "https://twitter.com/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
-  "action": { "default_title": "PostShelf", "default_popup": "popup.html" }
+  "action": {
+    "default_title": "PostShelf",
+    "default_popup": "popup.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/tabler-icons.min.css",
+        "icons/fonts/*"
+      ],
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ]
+    }
+  ]
 }

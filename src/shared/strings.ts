@@ -43,7 +43,9 @@ export const MGR = {
   empty: '保存されたポストはありません',
   openOnX: 'X で開く',
   newFolder: '新しいフォルダ',
-  popupBookmarks: '保存したポスト',
+  popupBookmarks: '件',
+  recent: '最近保存した 3 件',
+  settings: '設定',
   popupFolders: 'フォルダ',
   openManager: '管理画面を開く',
 } as const;
