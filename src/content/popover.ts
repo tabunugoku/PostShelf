@@ -1,4 +1,4 @@
-import { SEL, bookmarkButtonSelector } from '../shared/selectors';
+import { SEL } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { extractTweet } from './snapshot';
 import {
@@ -11,41 +11,23 @@ import {
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
 import { setNativeBookmark } from './native';
-import { getSettings } from '../shared/settings';
+import { getSettings, type ButtonMode } from '../shared/settings';
 
-const BTN_ATTR = 'data-postshelf-btn';
 const POP_CLASS = 'postshelf-popover';
 
+let mode: ButtonMode = 'separate';
+export const setPopoverMode = (m: ButtonMode): void => {
+  mode = m;
+};
+
 /** ポップオーバーのアイコン用に、同梱の Tabler Icons CSS を 1 度だけ読み込む (拡張内ファイル。外部通信なし) */
-function ensureIconCss(): void {
+export function ensureIconCss(): void {
   if (document.getElementById('postshelf-icons')) return;
   const link = document.createElement('link');
   link.id = 'postshelf-icons';
   link.rel = 'stylesheet';
   link.href = chrome.runtime?.getURL?.('icons/tabler-icons.min.css') ?? '';
   if (link.href) document.head.append(link);
-}
-
-export function injectButtons(root: ParentNode = document): void {
-  for (const article of root.querySelectorAll(SEL.tweet)) {
-    if (article.querySelector(`[${BTN_ATTR}]`)) continue;
-    const bm = article.querySelector(bookmarkButtonSelector);
-    const host = bm?.parentElement;
-    if (!bm || !host) continue;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.setAttribute(BTN_ATTR, '');
-    btn.title = t('openFolders');
-    btn.setAttribute('aria-label', t('openFolders'));
-    btn.textContent = '▾';
-    btn.style.cssText = 'background:none;border:0;cursor:pointer;color:#1d9bf0;font-size:12px;padding:4px';
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      void openPopover(article, btn);
-    });
-    bm.insertAdjacentElement('afterend', btn);
-  }
 }
 
 function closePopovers(): void {
@@ -64,9 +46,8 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   const pop = document.createElement('div');
   pop.className = POP_CLASS;
   pop.setAttribute('role', 'dialog');
-  const r = anchor.getBoundingClientRect();
   const th = xTheme();
-  pop.style.cssText = `position:fixed;z-index:2147483647;top:${r.bottom + 4}px;left:${Math.max(8, r.left - 100)}px;min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif`;
+  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif`;
   pop.addEventListener('click', (e) => e.stopPropagation());
 
   const save = async () => {
@@ -105,6 +86,18 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
       label.append(ico, name, cb);
       pop.append(label);
     }
+    // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
+    if (mode === 'replace' && article.querySelector(SEL.removeBookmark)) {
+      const rel = document.createElement('button');
+      rel.type = 'button';
+      rel.textContent = t('releaseNative');
+      rel.style.cssText = `display:block;width:100%;text-align:left;margin-top:6px;padding:6px 8px;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;cursor:pointer`;
+      rel.addEventListener('click', () => {
+        setNativeBookmark(article, false);
+        rel.remove();
+      });
+      pop.append(rel);
+    }
     const row = document.createElement('form');
     row.style.cssText = `display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:.5px solid ${th.border}`;
     const input = document.createElement('input');
@@ -133,7 +126,22 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   };
   render(folders);
   document.body.append(pop);
+  position(pop, anchor);
   return pop;
+}
+
+/** ボタンの真下に出し、画面端ではみ出さないよう補正する (下に収まらなければ上に出す) */
+function position(pop: HTMLElement, anchor: HTMLElement): void {
+  const r = anchor.getBoundingClientRect();
+  const w = pop.offsetWidth;
+  const h = pop.offsetHeight;
+  const vw = document.documentElement.clientWidth || window.innerWidth;
+  const vh = document.documentElement.clientHeight || window.innerHeight;
+  const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), Math.max(8, vw - w - 8));
+  let top = r.bottom + 4;
+  if (h && top + h > vh - 8 && r.top - 4 - h >= 8) top = r.top - 4 - h;
+  pop.style.left = `${left}px`;
+  pop.style.top = `${top}px`;
 }
 
 export function installGlobalHandlers(): void {

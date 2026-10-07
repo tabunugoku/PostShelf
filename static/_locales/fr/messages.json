@@ -160,5 +160,29 @@
   },
   "syncNativeDesc": {
     "message": "Quand vous enregistrez un post dans un dossier, il est aussi ajouté aux favoris sur X ; quand vous le retirez de tous les dossiers, le favori X est retiré aussi. Le bouton de favori à l'écran n'est cliqué qu'une seule fois par post concerné. Désactivé par défaut."
+  },
+  "savedBadgeTitle": {
+    "message": "Enregistré dans $COUNT$ dossier(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "Retirer aussi le favori X"
+  },
+  "buttonModeHeading": {
+    "message": "Comportement du bouton de favori standard"
+  },
+  "buttonModeSeparate": {
+    "message": "Ajouter un bouton PostShelf distinct (sans toucher au bouton standard)"
+  },
+  "buttonModeReplace": {
+    "message": "Remplacer le bouton standard (Maj+clic pour le comportement de X)"
+  },
+  "buttonModeNote": {
+    "message": "Peut cesser de fonctionner après une mise à jour de X ; le comportement standard est alors utilisé."
   }
 }

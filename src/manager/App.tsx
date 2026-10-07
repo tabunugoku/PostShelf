@@ -12,7 +12,7 @@ import {
 } from '../shared/models';
 import { countFolder, queryBookmarks, type SortKey } from '../shared/query';
 import { formatDate, t } from '../shared/strings';
-import { getSettings, updateSettings } from '../shared/settings';
+import { getSettings, updateSettings, type ButtonMode } from '../shared/settings';
 import { createFolder, deleteFolder, exportData, importData, listBookmarks, listFolders, updateFolder } from '../shared/storage';
 
 const sorts = (): [SortKey, string][] => [
@@ -173,8 +173,12 @@ export function App() {
 
 function SettingsPage() {
   const [sync, setSync] = useState(false);
+  const [bmode, setBmode] = useState<ButtonMode>('separate');
   useEffect(() => {
-    void getSettings().then((s) => setSync(s.syncNative));
+    void getSettings().then((s) => {
+      setSync(s.syncNative);
+      setBmode(s.buttonMode);
+    });
   }, []);
   return (
     <section>
@@ -194,6 +198,21 @@ function SettingsPage() {
           <span class="muted setting-desc">{t('syncNativeDesc')}</span>
         </span>
       </label>
+      <fieldset class="setting-group">
+        <legend>{t('buttonModeHeading')}</legend>
+        {(['separate', 'replace'] as const).map((m) => (
+          <label class="setting">
+            <input
+              type="radio"
+              name="buttonMode"
+              checked={bmode === m}
+              onChange={async () => setBmode((await updateSettings({ buttonMode: m })).buttonMode)}
+            />
+            <span>{t(m === 'separate' ? 'buttonModeSeparate' : 'buttonModeReplace')}</span>
+          </label>
+        ))}
+        <p class="muted setting-desc">{t('buttonModeNote')}</p>
+      </fieldset>
     </section>
   );
 }

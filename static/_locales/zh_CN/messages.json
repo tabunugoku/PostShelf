@@ -160,5 +160,29 @@
   },
   "syncNativeDesc": {
     "message": "将帖子保存到文件夹时，同时在 X 上添加书签；从所有文件夹中移除时，也会移除 X 上的书签。对你操作的每条帖子，只会点击一次屏幕上的书签按钮。默认关闭。"
+  },
+  "savedBadgeTitle": {
+    "message": "已保存到 $COUNT$ 个文件夹",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "同时取消 X 书签"
+  },
+  "buttonModeHeading": {
+    "message": "标准书签按钮的行为"
+  },
+  "buttonModeSeparate": {
+    "message": "另外添加 PostShelf 按钮（不改动标准按钮）"
+  },
+  "buttonModeReplace": {
+    "message": "替换标准按钮的行为（Shift+点击使用 X 默认行为）"
+  },
+  "buttonModeNote": {
+    "message": "X 更新后可能失效，失效时会恢复为标准行为。"
   }
 }

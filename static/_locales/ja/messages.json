@@ -160,5 +160,29 @@
   },
   "syncNativeDesc": {
     "message": "フォルダに保存したとき X 本来のブックマークも付け、すべてのフォルダから外したとき X 側のブックマークも外します。操作したポスト 1 件につき 1 回だけ、画面上のブックマークボタンを押します。初期値はオフです。"
+  },
+  "savedBadgeTitle": {
+    "message": "$COUNT$ 個のフォルダに保存済み",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "X のブックマークも解除"
+  },
+  "buttonModeHeading": {
+    "message": "標準ブックマークボタンの動作"
+  },
+  "buttonModeSeparate": {
+    "message": "別ボタンを追加する (標準ボタンには触らない)"
+  },
+  "buttonModeReplace": {
+    "message": "標準ボタンの動作を置き換える (Shift+クリックで X 標準)"
+  },
+  "buttonModeNote": {
+    "message": "X の更新で動かなくなることがあります。その場合は標準の動作に戻ります。"
   }
 }

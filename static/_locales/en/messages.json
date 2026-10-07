@@ -160,5 +160,29 @@
   },
   "syncNativeDesc": {
     "message": "When you save a post to a folder, also bookmark it on X; when you remove it from all folders, remove the X bookmark too. It presses the on-screen bookmark button once per post you act on. Off by default."
+  },
+  "savedBadgeTitle": {
+    "message": "Saved in $COUNT$ folder(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "Also remove the X bookmark"
+  },
+  "buttonModeHeading": {
+    "message": "Behavior of the standard bookmark button"
+  },
+  "buttonModeSeparate": {
+    "message": "Add a separate PostShelf button (leave the standard button alone)"
+  },
+  "buttonModeReplace": {
+    "message": "Replace the standard button (Shift+click for X default)"
+  },
+  "buttonModeNote": {
+    "message": "This may stop working after X updates. If it does, the standard behavior is used instead."
   }
 }

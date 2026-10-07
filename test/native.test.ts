@@ -3,7 +3,8 @@ import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { setNativeBookmark } from '../src/content/native';
-import { injectButtons, openPopover } from '../src/content/popover';
+import { openPopover } from '../src/content/popover';
+import { injectButtons } from '../src/content/buttons';
 import { createFolder } from '../src/shared/storage';
 import { getSettings, updateSettings } from '../src/shared/settings';
 

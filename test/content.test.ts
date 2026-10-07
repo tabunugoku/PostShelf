@@ -3,7 +3,8 @@ import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { extractTweet } from '../src/content/snapshot';
-import { injectButtons, openPopover } from '../src/content/popover';
+import { openPopover } from '../src/content/popover';
+import { injectButtons } from '../src/content/buttons';
 import { createFolder, getBookmark } from '../src/shared/storage';
 
 const html = readFileSync(resolve(process.cwd(), 'test/fixtures/tweet.html'), 'utf8');

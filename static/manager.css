@@ -68,3 +68,5 @@ button:disabled{cursor:not-allowed}
 .setting{display:flex;gap:10px;align-items:flex-start;padding:10px 0;cursor:pointer}
 .setting input{margin-top:4px;accent-color:var(--fill-accent)}
 .setting-desc{display:block;font-size:13px;margin-top:2px}
+.setting-group{border:.5px solid var(--border);border-radius:12px;margin:12px 0;padding:4px 12px 8px}
+.setting-group legend{padding:0 6px;font-weight:500}

@@ -160,5 +160,29 @@
   },
   "syncNativeDesc": {
     "message": "Al guardar una publicación en una carpeta, también se añade a los marcadores de X; al quitarla de todas las carpetas, se quita también el marcador de X. Pulsa el botón de marcador en pantalla una sola vez por cada publicación. Desactivado por defecto."
+  },
+  "savedBadgeTitle": {
+    "message": "Guardado en $COUNT$ carpeta(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "Quitar también el marcador de X"
+  },
+  "buttonModeHeading": {
+    "message": "Comportamiento del botón de marcador estándar"
+  },
+  "buttonModeSeparate": {
+    "message": "Añadir un botón de PostShelf aparte (sin tocar el estándar)"
+  },
+  "buttonModeReplace": {
+    "message": "Reemplazar el botón estándar (Mayús+clic para el comportamiento de X)"
+  },
+  "buttonModeNote": {
+    "message": "Puede dejar de funcionar tras una actualización de X; en ese caso se usa el comportamiento estándar."
   }
 }

@@ -10,6 +10,15 @@ import { SEL } from '../shared/selectors';
 export function setNativeBookmark(article: Element, want: boolean): boolean {
   const btn = article.querySelector<HTMLElement>(want ? SEL.bookmark : SEL.removeBookmark);
   if (!btn) return false;
-  btn.click();
+  ownClick = true; // 置き換えモードの横取りリスナーが自分のクリックを拾って無限ループしないよう印を付ける
+  try {
+    btn.click();
+  } finally {
+    ownClick = false;
+  }
   return true;
 }
+
+let ownClick = false;
+/** いま PostShelf 自身が標準ボタンをプログラム的に click している最中か */
+export const isOwnNativeClick = (): boolean => ownClick;

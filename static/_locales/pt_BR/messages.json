@@ -160,5 +160,29 @@
   },
   "syncNativeDesc": {
     "message": "Ao salvar um post em uma pasta, ele também é adicionado aos favoritos do X; ao removê-lo de todas as pastas, o favorito do X também é removido. O botão de favorito na tela é clicado uma única vez por post em que você age. Desativado por padrão."
+  },
+  "savedBadgeTitle": {
+    "message": "Salvo em $COUNT$ pasta(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "Remover também o favorito do X"
+  },
+  "buttonModeHeading": {
+    "message": "Comportamento do botão de favorito padrão"
+  },
+  "buttonModeSeparate": {
+    "message": "Adicionar um botão PostShelf separado (sem mexer no padrão)"
+  },
+  "buttonModeReplace": {
+    "message": "Substituir o botão padrão (Shift+clique para o padrão do X)"
+  },
+  "buttonModeNote": {
+    "message": "Pode parar de funcionar após atualizações do X; nesse caso o comportamento padrão é usado."
   }
 }

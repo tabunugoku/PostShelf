@@ -20,6 +20,7 @@ export function makeGetMessage(dict: Dict) {
 /** chrome.storage.local のインメモリ実装 + i18n (既定 ja) */
 export function installChromeMock(lang = 'ja'): Record<string, unknown> {
   const data: Record<string, unknown> = {};
+  const listeners = new Set<(c: Record<string, unknown>, area: string) => void>();
   (globalThis as any).chrome = {
     i18n: { getMessage: makeGetMessage(loadMessages(lang)), getUILanguage: () => lang },
     storage: {
@@ -29,8 +30,10 @@ export function installChromeMock(lang = 'ja'): Record<string, unknown> {
         },
         async set(items: Record<string, unknown>) {
           for (const [k, v] of Object.entries(items)) data[k] = structuredClone(v);
+          for (const l of listeners) l(Object.fromEntries(Object.keys(items).map((k) => [k, {}])), 'local');
         },
       },
+      onChanged: { addListener: (l: any) => listeners.add(l), removeListener: (l: any) => listeners.delete(l) },
     },
   };
   return data;

@@ -224,3 +224,12 @@ export async function addCollected(items: { tweetId: string; snapshot: Bookmark[
   return added;
 }
 
+
+/** フォルダ/ブックマークが変わったら呼ばれる (別タブ・manager からの変更も拾う)。解除関数を返す */
+export function onDataChanged(cb: () => void): () => void {
+  const listener = (changes: Record<string, unknown>, area: string) => {
+    if (area === 'local' && (KEY_FOLDERS in changes || KEY_BOOKMARKS in changes)) cb();
+  };
+  chrome.storage.onChanged?.addListener(listener as never);
+  return () => chrome.storage.onChanged?.removeListener(listener as never);
+}

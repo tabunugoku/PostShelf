@@ -1,16 +1,9 @@
+import { initButtons } from './buttons';
 import { ensureCollectButton } from './collect';
-import { injectButtons, installGlobalHandlers } from './popover';
+import { installGlobalHandlers } from './popover';
 
 installGlobalHandlers();
-injectButtons();
+initButtons();
 ensureCollectButton();
-let scheduled = false;
-new MutationObserver(() => {
-  if (scheduled) return;
-  scheduled = true;
-  requestAnimationFrame(() => {
-    scheduled = false;
-    injectButtons();
-    ensureCollectButton();
-  });
-}).observe(document.body, { childList: true, subtree: true });
+// /i/bookmarks への SPA 遷移を拾って収集ボタンを出し入れする
+new MutationObserver(() => ensureCollectButton()).observe(document.body, { childList: true, subtree: true });
