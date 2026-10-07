@@ -63,11 +63,11 @@ export function createFolderPicker(opts: {
     const input = document.createElement('input');
     input.placeholder = t('newFolderPlaceholder');
     input.setAttribute('aria-label', t('newFolder'));
-    input.style.cssText = `flex:1;min-width:0;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;padding:4px 8px`;
+    input.style.cssText = `flex:1;min-width:0;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;padding:4px 8px;min-height:32px`;
     const add = document.createElement('button');
     add.type = 'submit';
     add.textContent = t('add');
-    add.style.cssText = `background:${th.accent};color:#fff;border:0;border-radius:8px;padding:4px 10px;cursor:pointer`;
+    add.style.cssText = 'background:#0b6fb8;color:#fff;border:0;border-radius:8px;padding:4px 12px;min-height:32px;cursor:pointer'; // 白文字で 4.5:1 以上になる濃い青
     row.append(input, add);
     row.addEventListener('submit', async (e) => {
       e.preventDefault();

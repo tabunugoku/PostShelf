@@ -566,12 +566,12 @@ function Row(props: {
             const only = b.folderIds.length === 1 && id === INBOX_ID; // 未分類しか無いときは外す意味がない
             const label = t('removeFromFolder', displayName(f));
             return only ? (
-              <span class="tag" style={f.color ? { color: f.color } : undefined}>
-                <Icon name={f.icon} /> {displayName(f)}
+              <span class="tag">
+                <Icon name={f.icon} color={f.color} /> {displayName(f)}
               </span>
             ) : (
-              <button class="tag chip" style={f.color ? { color: f.color } : undefined} title={label} aria-label={label} onClick={() => props.onRemoveFromFolder(id)}>
-                <Icon name={f.icon} /> {displayName(f)} <Icon name="ti-x" />
+              <button class="tag chip" title={label} aria-label={label} onClick={() => props.onRemoveFromFolder(id)}>
+                <Icon name={f.icon} color={f.color} /> {displayName(f)} <Icon name="ti-x" />
               </button>
             );
           })}
@@ -609,7 +609,7 @@ function EditPanel({ folder, onDone, onRequestDelete }: { folder: Folder; onDone
       <div class="erow wrap">
         <span class="elabel">{t('icon')}</span>
         {ICONS.slice(0, 8).map((i) => (
-          <button class={`ic${i === icon ? ' on' : ''}`} aria-label={i} onClick={() => setIcon(i)}>
+          <button class={`ic${i === icon ? ' on' : ''}`} aria-label={i} aria-pressed={i === icon} onClick={() => setIcon(i)}>
             <Icon name={i} />
           </button>
         ))}
@@ -621,6 +621,7 @@ function EditPanel({ folder, onDone, onRequestDelete }: { folder: Folder; onDone
             class={`sw${c === color ? ' on' : ''}`}
             style={{ background: c }}
             aria-label={c}
+            aria-pressed={c === color}
             disabled={!colorOk}
             onClick={() => setColor(c)}
           />
