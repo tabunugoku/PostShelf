@@ -18,6 +18,15 @@ npm run typecheck
 ```
 `chrome://extensions` → デベロッパーモード → 「パッケージ化されていない拡張機能を読み込む」で `dist/` を選択。
 
+## CI の成果物から読み込む (Node.js 不要)
+GitHub Actions が push / PR ごとにビルドし、`dist/` を zip にして保存します。
+
+1. リポジトリの **Actions** タブで、対象コミットの CI 実行を開く
+2. 下部の **Artifacts** から `postshelf-dist` をダウンロードして展開 (中に `postshelf-dist.zip`、さらに展開すると `manifest.json` がある)
+3. `chrome://extensions` → デベロッパーモードをオン → 「パッケージ化されていない拡張機能を読み込む」で、展開したフォルダを選択
+
+テスト・型チェックが失敗した実行では成果物は作られません。成果物の保存期間は GitHub の既定 (90 日) です。
+
 ## 構成
 - `src/shared`: models / storage (chrome.storage はここだけ) / selectors (X の DOM セレクタ) / strings (UI 文言)
 - `src/content`: ポストのボタンとポップオーバー、スナップショット抽出、ブックマーク画面の収集
