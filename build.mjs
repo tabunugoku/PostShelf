@@ -22,3 +22,11 @@ await build({
 });
 
 await cp('static', 'dist', { recursive: true });
+
+// Tabler Icons (outline) をローカル同梱 (CDN 禁止)
+const tabler = 'node_modules/@tabler/icons-webfont/dist';
+await mkdir('dist/icons/fonts', { recursive: true });
+await cp(`${tabler}/tabler-icons.min.css`, 'dist/icons/tabler-icons.min.css');
+for (const ext of ['woff2', 'woff', 'ttf']) {
+  await cp(`${tabler}/fonts/tabler-icons.${ext}`, `dist/icons/fonts/tabler-icons.${ext}`);
+}

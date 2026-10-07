@@ -1,2 +1,4 @@
-// M3 で実装
-export {};
+import { render } from 'preact';
+import { App } from './App';
+
+render(<App />, document.getElementById('app')!);

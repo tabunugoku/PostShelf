@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@tabler/icons-webfont": "^3.49.0",
     "@types/chrome": "^0.0.300",
     "@types/node": "^26.6.4",
     "esbuild": "^0.25.0",
