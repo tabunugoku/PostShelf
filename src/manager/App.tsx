@@ -7,21 +7,22 @@ import {
   isBuiltinFolder,
   supportsColor,
   type Bookmark,
+  displayName,
   type Folder,
 } from '../shared/models';
 import { countFolder, queryBookmarks, type SortKey } from '../shared/query';
-import { MGR } from '../shared/strings';
+import { formatDate, t } from '../shared/strings';
 import { createFolder, deleteFolder, exportData, importData, listBookmarks, listFolders, updateFolder } from '../shared/storage';
-import { IO } from '../shared/strings';
 
-const SORTS: [SortKey, string][] = [
-  ['savedDesc', MGR.sortSavedDesc],
-  ['savedAsc', MGR.sortSavedAsc],
-  ['postedDesc', MGR.sortPostedDesc],
-  ['postedAsc', MGR.sortPostedAsc],
+const sorts = (): [SortKey, string][] => [
+  ['savedDesc', t('sortSavedDesc')],
+  ['savedAsc', t('sortSavedAsc')],
+  ['postedDesc', t('sortPostedDesc')],
+  ['postedAsc', t('sortPostedAsc')],
 ];
 
 export function App() {
+  const SORTS = sorts();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [current, setCurrent] = useState(ALL_FOLDER_ID);
@@ -45,7 +46,7 @@ export function App() {
   return (
     <div class="ps">
       <aside class="side">
-        <div class="side-title">{MGR.folders}</div>
+        <div class="side-title">{t('foldersHeading')}</div>
         {folders.map((f) => (
           <div
             key={f.id}
@@ -58,7 +59,7 @@ export function App() {
             }}
           >
             <Icon name={f.icon} color={f.color} />
-            <span class="fr-name">{f.name}</span>
+            <span class="fr-name">{displayName(f)}</span>
             <span class="n">{countFolder(bookmarks, f.id)}</span>
           </div>
         ))}
@@ -67,19 +68,19 @@ export function App() {
           role="button"
           tabIndex={0}
           onClick={async () => {
-            const f = await createFolder({ name: MGR.newFolder });
+            const f = await createFolder({ name: t('newFolder') });
             await reload();
             setCurrent(f.id);
             setEditing(true);
           }}
         >
           <Icon name="ti-plus" />
-          {MGR.newFolder}
+          {t('newFolder')}
         </div>
         <div class="io">
-          <button onClick={() => downloadJson(exportData)}>{IO.export}</button>
+          <button onClick={() => downloadJson(exportData)}>{t('exportBtn')}</button>
           <label class="file-btn">
-            {IO.import}
+            {t('importBtn')}
             <input
               type="file"
               accept="application/json,.json"
@@ -89,9 +90,9 @@ export function App() {
                 const file = input.files?.[0];
                 if (!file) return;
                 try {
-                  alert(IO.importDone(await importData(JSON.parse(await file.text()))));
+                  alert(t('importDone', await importData(JSON.parse(await file.text()))));
                 } catch {
-                  alert(IO.importFail);
+                  alert(t('importFail'));
                 }
                 input.value = '';
                 await reload();
@@ -103,25 +104,25 @@ export function App() {
       <main class="main">
         <div class="bar">
           {folder && <Icon name={folder.icon} color={folder.color} />}
-          {folder && <span class="bar-name">{folder.name}</span>}
+          {folder && <span class="bar-name">{displayName(folder)}</span>}
           {folder && !isBuiltinFolder(folder.id) && (
-            <button class="icon-only" aria-label={MGR.edit} title={MGR.edit} onClick={() => setEditing(!editing)}>
+            <button class="icon-only" aria-label={t('edit')} title={t('edit')} onClick={() => setEditing(!editing)}>
               <Icon name="ti-edit" />
             </button>
           )}
           <div class="seg">
             <button class={view === 'post' ? 'on' : ''} onClick={() => setView('post')}>
-              {MGR.postView}
+              {t('postView')}
             </button>
             <button class={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>
-              {MGR.listView}
+              {t('listView')}
             </button>
           </div>
         </div>
         <div class="tools">
           <input
             type="search"
-            placeholder={MGR.search}
+            placeholder={t('search')}
             value={search}
             onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
           />
@@ -142,7 +143,7 @@ export function App() {
             }}
           />
         )}
-        {shown.length === 0 && <p class="empty">{MGR.empty}</p>}
+        {shown.length === 0 && <p class="empty">{t('empty')}</p>}
         {view === 'post'
           ? shown.map((b) => <PostCard b={b} folderOf={folderName} />)
           : shown.map((b) => <ListRow b={b} folderOf={folderName} />)}
@@ -159,7 +160,7 @@ function PostCard({ b, folderOf }: { b: Bookmark; folderOf: (id: string) => Fold
       <div class="post-body">
         <div class="post-head">
           <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
-          {s.createdAt && <span class="muted"> · {new Date(s.createdAt).toLocaleDateString('ja-JP')}</span>}
+          {s.createdAt && <span class="muted"> · {formatDate(s.createdAt)}</span>}
         </div>
         <div class="text">{s.text}</div>
         {s.media.length > 0 && (
@@ -174,11 +175,11 @@ function PostCard({ b, folderOf }: { b: Bookmark; folderOf: (id: string) => Fold
             const f = folderOf(id);
             return f ? (
               <span class="tag" style={f.color ? { color: f.color } : undefined}>
-                <Icon name={f.icon} /> {f.name}
+                <Icon name={f.icon} /> {displayName(f)}
               </span>
             ) : null;
           })}
-          <a class="ext-link" href={s.url} target="_blank" rel="noreferrer" title={MGR.openOnX} aria-label={MGR.openOnX}>
+          <a class="ext-link" href={s.url} target="_blank" rel="noreferrer" title={t('openOnX')} aria-label={t('openOnX')}>
             <Icon name="ti-external-link" />
           </a>
         </div>
@@ -195,7 +196,7 @@ function ListRow({ b, folderOf }: { b: Bookmark; folderOf: (id: string) => Folde
       {f ? <Icon name={f.icon} color={f.color} /> : <Icon name="ti-bookmark" />}
       <span class="handle">{s.handle}</span>
       <span class="t">{s.text}</span>
-      <a class="ext-link" href={s.url} target="_blank" rel="noreferrer" title={MGR.openOnX} aria-label={MGR.openOnX}>
+      <a class="ext-link" href={s.url} target="_blank" rel="noreferrer" title={t('openOnX')} aria-label={t('openOnX')}>
         <Icon name="ti-external-link" />
       </a>
     </div>
@@ -205,7 +206,7 @@ function ListRow({ b, folderOf }: { b: Bookmark; folderOf: (id: string) => Folde
 const initials = (name: string) => [...name.trim()].slice(0, 2).join('').toUpperCase();
 
 function EditPanel({ folder, onDone }: { folder: Folder; onDone: (deleted?: boolean) => void }) {
-  const [name, setName] = useState(folder.name);
+  const [name, setName] = useState(displayName(folder));
   const [icon, setIcon] = useState(folder.icon);
   const [color, setColor] = useState<string | undefined>(folder.color);
   const [error, setError] = useState('');
@@ -223,19 +224,19 @@ function EditPanel({ folder, onDone }: { folder: Folder; onDone: (deleted?: bool
   return (
     <section class="edit">
       <div class="erow">
-        <span class="elabel">{MGR.name}</span>
+        <span class="elabel">{t('name')}</span>
         <input class="grow" value={name} onInput={(e) => setName((e.target as HTMLInputElement).value)} />
       </div>
       <div class="erow wrap">
-        <span class="elabel">{MGR.icon}</span>
+        <span class="elabel">{t('icon')}</span>
         {ICONS.slice(0, 8).map((i) => (
           <button class={`ic${i === icon ? ' on' : ''}`} aria-label={i} onClick={() => setIcon(i)}>
             <Icon name={i} />
           </button>
         ))}
       </div>
-      <div class={`erow${colorOk ? '' : ' disabled'}`} title={colorOk ? '' : MGR.colorOnlyFolder}>
-        <span class="elabel">{MGR.color}</span>
+      <div class={`erow${colorOk ? '' : ' disabled'}`} title={colorOk ? '' : t('colorOnlyFolder')}>
+        <span class="elabel">{t('color')}</span>
         {COLORS.map((c) => (
           <button
             class={`sw${c === color ? ' on' : ''}`}
@@ -248,17 +249,17 @@ function EditPanel({ folder, onDone }: { folder: Folder; onDone: (deleted?: bool
       </div>
       {error && <p class="error">{error}</p>}
       <div class="erow">
-        <button class="primary" onClick={save}>{MGR.save}</button>
-        <button onClick={() => onDone()}>{MGR.cancel}</button>
+        <button class="primary" onClick={save}>{t('save')}</button>
+        <button onClick={() => onDone()}>{t('cancel')}</button>
         <button
           class="danger"
           onClick={async () => {
-            if (!confirm(MGR.confirmDelete)) return;
+            if (!confirm(t('confirmDelete'))) return;
             await deleteFolder(folder.id);
             onDone(true);
           }}
         >
-          {MGR.delete}
+          {t('delete')}
         </button>
       </div>
     </section>

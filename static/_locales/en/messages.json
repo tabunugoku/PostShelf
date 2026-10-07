@@ -1,0 +1,158 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "Organize your x.com bookmarks into your own folders. All data stays on your device."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "All"
+  },
+  "inboxName": {
+    "message": "Unsorted"
+  },
+  "newFolderDefaultName": {
+    "message": "New folder"
+  },
+  "errEmptyName": {
+    "message": "Please enter a folder name"
+  },
+  "errBuiltinImmutable": {
+    "message": "\"All\" cannot be changed or deleted"
+  },
+  "errNotFound": {
+    "message": "Folder not found"
+  },
+  "errInvalidIcon": {
+    "message": "This icon is not available"
+  },
+  "errInvalidColor": {
+    "message": "This color is not available"
+  },
+  "errInvalidImport": {
+    "message": "The file format is invalid"
+  },
+  "openFolders": {
+    "message": "Save to folder"
+  },
+  "newFolder": {
+    "message": "New folder"
+  },
+  "newFolderPlaceholder": {
+    "message": "Folder name"
+  },
+  "add": {
+    "message": "Add"
+  },
+  "noFolders": {
+    "message": "No folders yet"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "Bookmarks"
+  },
+  "edit": {
+    "message": "Edit"
+  },
+  "postView": {
+    "message": "Posts"
+  },
+  "listView": {
+    "message": "List"
+  },
+  "search": {
+    "message": "Search"
+  },
+  "sortSavedDesc": {
+    "message": "Saved: newest"
+  },
+  "sortSavedAsc": {
+    "message": "Saved: oldest"
+  },
+  "sortPostedDesc": {
+    "message": "Posted: newest"
+  },
+  "sortPostedAsc": {
+    "message": "Posted: oldest"
+  },
+  "name": {
+    "message": "Name"
+  },
+  "icon": {
+    "message": "Icon"
+  },
+  "color": {
+    "message": "Color"
+  },
+  "colorOnlyFolder": {
+    "message": "Color can only be set for the folder icon"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "confirmDelete": {
+    "message": "Delete this folder? (The posts themselves are kept.)"
+  },
+  "empty": {
+    "message": "No saved posts"
+  },
+  "openOnX": {
+    "message": "Open on X"
+  },
+  "popupPosts": {
+    "message": "posts"
+  },
+  "popupFolders": {
+    "message": "folders"
+  },
+  "recent": {
+    "message": "Recently saved (3)"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "openManager": {
+    "message": "Open manager"
+  },
+  "exportBtn": {
+    "message": "Export"
+  },
+  "importBtn": {
+    "message": "Import"
+  },
+  "importFail": {
+    "message": "The file format is invalid"
+  },
+  "collectTitle": {
+    "message": "Import posts on this page into PostShelf"
+  },
+  "importDone": {
+    "message": "Imported $COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "Imported $COUNT$ posts into \"Unsorted\"",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  }
+}

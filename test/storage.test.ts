@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { installChromeMock } from './chrome-mock';
-import { ALL_FOLDER_ID, COLORS } from '../src/shared/models';
+import { ALL_FOLDER_ID, COLORS, displayName } from '../src/shared/models';
 import { createFolder, deleteFolder, listFolders, updateFolder } from '../src/shared/storage';
 
 let data: Record<string, unknown>;
@@ -12,7 +12,7 @@ describe('folders', () => {
   it('starts with only the built-in "すべて" folder', async () => {
     const f = await listFolders();
     expect(f.map((x) => x.id)).toEqual([ALL_FOLDER_ID]);
-    expect(f[0].name).toBe('すべて');
+    expect(displayName(f[0])).toBe('すべて');
   });
 
   it('creates folders in order with default folder icon', async () => {
@@ -21,7 +21,7 @@ describe('folders', () => {
     expect(a.name).toBe('開発');
     expect(a.icon).toBe('ti-folder');
     expect(b.order).toBeGreaterThan(a.order);
-    expect((await listFolders()).map((x) => x.name)).toEqual(['すべて', '開発', '本']);
+    expect((await listFolders()).map(displayName)).toEqual(['すべて', '開発', '本']);
   });
 
   it('rejects empty names and unknown icons', async () => {

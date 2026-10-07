@@ -1,5 +1,5 @@
 import { SEL, bookmarkButtonSelector } from '../shared/selectors';
-import { UI } from '../shared/strings';
+import { t } from '../shared/strings';
 import { extractTweet } from './snapshot';
 import {
   createFolder,
@@ -8,7 +8,7 @@ import {
   setBookmarkFolders,
   StorageError,
 } from '../shared/storage';
-import { isBuiltinFolder } from '../shared/models';
+import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
 
 const BTN_ATTR = 'data-postshelf-btn';
@@ -33,8 +33,8 @@ export function injectButtons(root: ParentNode = document): void {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.setAttribute(BTN_ATTR, '');
-    btn.title = UI.openFolders;
-    btn.setAttribute('aria-label', UI.openFolders);
+    btn.title = t('openFolders');
+    btn.setAttribute('aria-label', t('openFolders'));
     btn.textContent = '▾';
     btn.style.cssText = 'background:none;border:0;cursor:pointer;color:#1d9bf0;font-size:12px;padding:4px';
     btn.addEventListener('click', (e) => {
@@ -73,7 +73,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     pop.replaceChildren();
     if (list.length === 0) {
       const empty = document.createElement('div');
-      empty.textContent = UI.noFolders;
+      empty.textContent = t('noFolders');
       pop.append(empty);
     }
     for (const f of list) {
@@ -94,7 +94,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
         void save();
       });
       const name = document.createElement('span');
-      name.textContent = f.name;
+      name.textContent = displayName(f);
       name.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
       label.append(ico, name, cb);
       pop.append(label);
@@ -102,12 +102,12 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     const row = document.createElement('form');
     row.style.cssText = `display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:.5px solid ${th.border}`;
     const input = document.createElement('input');
-    input.placeholder = UI.newFolderPlaceholder;
-    input.setAttribute('aria-label', UI.newFolder);
+    input.placeholder = t('newFolderPlaceholder');
+    input.setAttribute('aria-label', t('newFolder'));
     input.style.cssText = `flex:1;min-width:0;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;padding:4px 8px`;
     const add = document.createElement('button');
     add.type = 'submit';
-    add.textContent = UI.add;
+    add.textContent = t('add');
     add.style.cssText = `background:${th.accent};color:#fff;border:0;border-radius:8px;padding:4px 10px;cursor:pointer`;
     row.append(input, add);
     row.addEventListener('submit', async (e) => {

@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { collectVisible, isBookmarksPage } from '../src/content/collect';
+import { displayName } from '../src/shared/models';
 import { addCollected, createFolder, exportData, importData, listBookmarks, listFolders, setBookmarkFolders } from '../src/shared/storage';
 
 const snap = { text: 't', author: 'a', handle: '@a', media: [], url: 'u' };
@@ -15,7 +16,7 @@ describe('export/import', () => {
     const dump = JSON.parse(JSON.stringify(await exportData()));
     installChromeMock();
     expect(await importData(dump)).toBe(1);
-    expect((await listFolders()).map((x) => x.name)).toEqual(['すべて', 'x']);
+    expect((await listFolders()).map(displayName)).toEqual(['すべて', 'x']);
     expect((await listBookmarks())[0].tweetId).toBe('1');
   });
   it('rejects bad input and skips invalid entries', async () => {
@@ -34,7 +35,7 @@ describe('collect', () => {
     expect(items.length).toBe(1);
     expect(await addCollected(items)).toBe(1);
     expect(await addCollected(items)).toBe(0);
-    expect((await listFolders()).some((f) => f.name === '未分類')).toBe(true);
+    expect((await listFolders()).some((f) => displayName(f) === '未分類')).toBe(true);
   });
   it('detects the bookmarks page', () => {
     expect(isBookmarksPage('/i/bookmarks')).toBe(true);

@@ -7,12 +7,13 @@ import {
   COLORS,
   FOLDER_ICON,
   ICONS,
+  INBOX_ID,
   isBuiltinFolder,
   supportsColor,
   type Bookmark,
   type Folder,
 } from './models';
-import { STRINGS } from './strings';
+import { t } from './strings';
 
 const KEY_FOLDERS = 'folders';
 const KEY_BOOKMARKS = 'bookmarks';
@@ -36,16 +37,16 @@ function newId(): string {
 
 function normalizeName(name: string): string {
   const n = name.trim();
-  if (!n) throw new StorageError(STRINGS.errors.emptyName);
+  if (!n) throw new StorageError(t('errEmptyName'));
   return n;
 }
 
 function checkIcon(icon: string): void {
-  if (!(ICONS as readonly string[]).includes(icon)) throw new StorageError(STRINGS.errors.invalidIcon);
+  if (!(ICONS as readonly string[]).includes(icon)) throw new StorageError(t('errInvalidIcon'));
 }
 
 function checkColor(color: string): void {
-  if (!(COLORS as readonly string[]).includes(color)) throw new StorageError(STRINGS.errors.invalidColor);
+  if (!(COLORS as readonly string[]).includes(color)) throw new StorageError(t('errInvalidColor'));
 }
 
 /** 「すべて」+ 保存済みフォルダ (order 昇順) */
@@ -81,10 +82,10 @@ export async function updateFolder(
   id: string,
   patch: { name?: string; icon?: string; color?: string | null },
 ): Promise<Folder> {
-  if (isBuiltinFolder(id)) throw new StorageError(STRINGS.errors.builtinImmutable);
+  if (isBuiltinFolder(id)) throw new StorageError(t('errBuiltinImmutable'));
   const folders = await readFolders();
   const idx = folders.findIndex((f) => f.id === id);
-  if (idx < 0) throw new StorageError(STRINGS.errors.notFound);
+  if (idx < 0) throw new StorageError(t('errNotFound'));
   const next: Folder = { ...folders[idx] };
   if (patch.name !== undefined) next.name = normalizeName(patch.name);
   if (patch.icon !== undefined) {
@@ -107,9 +108,9 @@ export async function updateFolder(
 
 /** フォルダを削除し、ブックマークからも folderId を外す (ポスト自体は残す) */
 export async function deleteFolder(id: string): Promise<void> {
-  if (isBuiltinFolder(id)) throw new StorageError(STRINGS.errors.builtinImmutable);
+  if (isBuiltinFolder(id)) throw new StorageError(t('errBuiltinImmutable'));
   const folders = await readFolders();
-  if (!folders.some((f) => f.id === id)) throw new StorageError(STRINGS.errors.notFound);
+  if (!folders.some((f) => f.id === id)) throw new StorageError(t('errNotFound'));
   const bookmarks = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
   for (const b of Object.values(bookmarks)) b.folderIds = b.folderIds.filter((x) => x !== id);
   await write(KEY_FOLDERS, folders.filter((f) => f.id !== id));
@@ -188,7 +189,7 @@ function validBookmark(b: any): b is Bookmark {
 export async function importData(json: unknown): Promise<number> {
   const d = json as Partial<ExportData> | null;
   if (!d || d.app !== 'PostShelf' || !Array.isArray(d.folders) || !Array.isArray(d.bookmarks)) {
-    throw new StorageError(STRINGS.errors.invalidImport);
+    throw new StorageError(t('errInvalidImport'));
   }
   const folders = d.folders.filter(validFolder);
   const bookmarks = d.bookmarks.filter(validBookmark);
@@ -209,7 +210,7 @@ export async function addCollected(items: { tweetId: string; snapshot: Bookmark[
   const folders = await readFolders();
   let inbox = folders.find((f) => f.id === INBOX_ID);
   if (!inbox) {
-    inbox = { id: INBOX_ID, name: STRINGS.inboxName, icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1 };
+    inbox = { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1 };
     await write(KEY_FOLDERS, [...folders, inbox]);
   }
   const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
@@ -223,4 +224,3 @@ export async function addCollected(items: { tweetId: string; snapshot: Bookmark[
   return added;
 }
 
-const INBOX_ID = 'inbox';

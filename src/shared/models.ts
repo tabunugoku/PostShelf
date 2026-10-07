@@ -1,4 +1,4 @@
-import { STRINGS } from './strings';
+import { t } from './strings';
 
 export interface Folder {
   id: string;
@@ -27,9 +27,11 @@ export interface Bookmark {
 
 /** 組み込みフォルダ「すべて」。保存はせず、常に先頭に仮想的に存在する。 */
 export const ALL_FOLDER_ID = 'all';
+/** ページ収集の取り込み先。名前は保存せず '' にして表示時に解決する */
+export const INBOX_ID = 'inbox';
 export const ALL_FOLDER: Folder = {
   id: ALL_FOLDER_ID,
-  name: STRINGS.allFolderName,
+  name: '', // 表示時に displayName() で解決 (言語切替に追従)
   icon: 'ti-bookmarks',
   order: -1,
 };
@@ -60,6 +62,10 @@ export const COLORS = [
   '#D4537E',
   '#888780',
 ] as const;
+
+/** 表示名。組み込み「すべて」と、名前を保存していない「未分類」は t() で解決する */
+export const displayName = (f: Folder): string =>
+  f.id === ALL_FOLDER_ID ? t('allFolderName') : f.id === INBOX_ID && f.name === '' ? t('inboxName') : f.name;
 
 export const isBuiltinFolder = (id: string): boolean => id === ALL_FOLDER_ID;
 export const supportsColor = (icon: string): boolean => icon === FOLDER_ICON;

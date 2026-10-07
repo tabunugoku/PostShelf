@@ -1,5 +1,5 @@
 import { SEL } from '../shared/selectors';
-import { IO } from '../shared/strings';
+import { t } from '../shared/strings';
 import { addCollected } from '../shared/storage';
 import { extractTweet, type Extracted } from './snapshot';
 
@@ -22,11 +22,11 @@ export function ensureCollectButton(): void {
   if (existing) return;
   const btn = document.createElement('button');
   btn.className = 'postshelf-collect';
-  btn.textContent = IO.collectTitle;
+  btn.textContent = t('collectTitle');
   btn.addEventListener('click', async () => {
     const n = await addCollected(collectVisible());
-    btn.textContent = IO.collectDone(n);
-    setTimeout(() => (btn.textContent = IO.collectTitle), 3000);
+    btn.textContent = t('collectDone', n);
+    setTimeout(() => (btn.textContent = t('collectTitle')), 3000);
   });
   document.body.append(btn);
 }

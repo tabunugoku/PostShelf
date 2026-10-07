@@ -2,7 +2,7 @@ import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import type { Bookmark } from '../shared/models';
-import { MGR } from '../shared/strings';
+import { t } from '../shared/strings';
 import { listBookmarks, listFolders } from '../shared/storage';
 
 const openManager = () => void chrome.tabs.create({ url: chrome.runtime.getURL('manager.html') });
@@ -21,13 +21,13 @@ function Popup() {
     <div>
       <div class="hd">
         <Icon name="ti-books" />
-        <span>{MGR.title}</span>
+        <span>{t('appTitle')}</span>
       </div>
       <div class="sub">
-        {counts.posts} {MGR.popupBookmarks} · {counts.folders} {MGR.popupFolders}
+        {counts.posts} {t('popupPosts')} · {counts.folders} {t('popupFolders')}
       </div>
       <div class="rec">
-        <div>{MGR.recent}</div>
+        <div>{t('recent')}</div>
         {recent.map((b) => (
           <div title={b.snapshot.text}>
             {b.snapshot.handle} {b.snapshot.text}
@@ -36,11 +36,11 @@ function Popup() {
       </div>
       <button class="pr link" onClick={openManager}>
         <Icon name="ti-external-link" />
-        {MGR.openManager}
+        {t('openManager')}
       </button>
       <button class="pr" onClick={openManager}>
         <Icon name="ti-settings" />
-        {MGR.settings}
+        {t('settings')}
       </button>
     </div>
   );

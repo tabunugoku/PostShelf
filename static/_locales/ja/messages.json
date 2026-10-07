@@ -1,0 +1,158 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "x.com のブックマークを独自フォルダに分類します。データは端末内のみに保存されます。"
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "すべて"
+  },
+  "inboxName": {
+    "message": "未分類"
+  },
+  "newFolderDefaultName": {
+    "message": "新しいフォルダ"
+  },
+  "errEmptyName": {
+    "message": "フォルダ名を入力してください"
+  },
+  "errBuiltinImmutable": {
+    "message": "「すべて」は変更・削除できません"
+  },
+  "errNotFound": {
+    "message": "フォルダが見つかりません"
+  },
+  "errInvalidIcon": {
+    "message": "使用できないアイコンです"
+  },
+  "errInvalidColor": {
+    "message": "使用できない色です"
+  },
+  "errInvalidImport": {
+    "message": "ファイルの形式が正しくありません"
+  },
+  "openFolders": {
+    "message": "フォルダに保存"
+  },
+  "newFolder": {
+    "message": "新しいフォルダ"
+  },
+  "newFolderPlaceholder": {
+    "message": "フォルダ名"
+  },
+  "add": {
+    "message": "追加"
+  },
+  "noFolders": {
+    "message": "フォルダがありません"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "ブックマーク"
+  },
+  "edit": {
+    "message": "編集"
+  },
+  "postView": {
+    "message": "ポスト表示"
+  },
+  "listView": {
+    "message": "リスト表示"
+  },
+  "search": {
+    "message": "検索"
+  },
+  "sortSavedDesc": {
+    "message": "保存が新しい順"
+  },
+  "sortSavedAsc": {
+    "message": "保存が古い順"
+  },
+  "sortPostedDesc": {
+    "message": "投稿が新しい順"
+  },
+  "sortPostedAsc": {
+    "message": "投稿が古い順"
+  },
+  "name": {
+    "message": "名前"
+  },
+  "icon": {
+    "message": "アイコン"
+  },
+  "color": {
+    "message": "色"
+  },
+  "colorOnlyFolder": {
+    "message": "色はフォルダアイコンのときだけ選べます"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "cancel": {
+    "message": "キャンセル"
+  },
+  "delete": {
+    "message": "削除"
+  },
+  "confirmDelete": {
+    "message": "このフォルダを削除しますか？ (ポスト自体は残ります)"
+  },
+  "empty": {
+    "message": "保存されたポストはありません"
+  },
+  "openOnX": {
+    "message": "X で開く"
+  },
+  "popupPosts": {
+    "message": "件"
+  },
+  "popupFolders": {
+    "message": "フォルダ"
+  },
+  "recent": {
+    "message": "最近保存した 3 件"
+  },
+  "settings": {
+    "message": "設定"
+  },
+  "openManager": {
+    "message": "管理画面を開く"
+  },
+  "exportBtn": {
+    "message": "エクスポート"
+  },
+  "importBtn": {
+    "message": "インポート"
+  },
+  "importFail": {
+    "message": "ファイルの形式が正しくありません"
+  },
+  "collectTitle": {
+    "message": "このページのポストを PostShelf に取り込む"
+  },
+  "importDone": {
+    "message": "$COUNT$ 件のポストを取り込みました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "$COUNT$ 件を「未分類」として取り込みました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  }
+}
