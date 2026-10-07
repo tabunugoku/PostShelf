@@ -8,7 +8,6 @@ import {
   INBOX_ID,
   displayName,
   isBuiltinFolder,
-  supportsColor,
   type Bookmark,
   type Folder,
 } from '../shared/models';
@@ -589,11 +588,10 @@ function EditPanel({ folder, onDone, onRequestDelete }: { folder: Folder; onDone
   const [icon, setIcon] = useState(folder.icon);
   const [color, setColor] = useState<string | undefined>(folder.color);
   const [error, setError] = useState('');
-  const colorOk = supportsColor(icon);
 
   const save = async () => {
     try {
-      await updateFolder(folder.id, { name, icon, color: colorOk ? (color ?? null) : null });
+      await updateFolder(folder.id, { name, icon, color: color ?? null });
       onDone();
     } catch (e) {
       setError((e as Error).message);
@@ -614,15 +612,21 @@ function EditPanel({ folder, onDone, onRequestDelete }: { folder: Folder; onDone
           </button>
         ))}
       </div>
-      <div class={`erow${colorOk ? '' : ' disabled'}`} title={colorOk ? '' : t('colorOnlyFolder')}>
+      <div class="erow wrap">
         <span class="elabel">{t('color')}</span>
+        <button
+          class={`sw sw-none${color === undefined ? ' on' : ''}`}
+          aria-label={t('colorNone')}
+          title={t('colorNone')}
+          aria-pressed={color === undefined}
+          onClick={() => setColor(undefined)}
+        />
         {COLORS.map((c) => (
           <button
             class={`sw${c === color ? ' on' : ''}`}
             style={{ background: c }}
             aria-label={c}
             aria-pressed={c === color}
-            disabled={!colorOk}
             onClick={() => setColor(c)}
           />
         ))}

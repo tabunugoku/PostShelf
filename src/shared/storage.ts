@@ -9,7 +9,6 @@ import {
   ICONS,
   INBOX_ID,
   isBuiltinFolder,
-  supportsColor,
   type Bookmark,
   type Folder,
 } from './models';
@@ -72,7 +71,7 @@ export async function createFolder(input: {
     icon,
     order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1,
   };
-  if (input.color !== undefined && supportsColor(icon)) {
+  if (input.color !== undefined) {
     checkColor(input.color);
     folder.color = input.color;
   }
@@ -101,8 +100,6 @@ export async function updateFolder(
       next.color = patch.color;
     }
   }
-  // 色はフォルダアイコンのときだけ有効。他のアイコンでは破棄する。
-  if (!supportsColor(next.icon)) delete next.color;
   folders[idx] = next;
   await write(KEY_FOLDERS, folders);
   return next;

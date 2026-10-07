@@ -89,9 +89,6 @@
   "color": {
     "message": "Couleur"
   },
-  "colorOnlyFolder": {
-    "message": "La couleur ne peut être choisie qu'avec l'icône de dossier"
-  },
   "save": {
     "message": "Enregistrer"
   },
@@ -277,5 +274,8 @@
   },
   "sortLabel": {
     "message": "Trier"
+  },
+  "colorNone": {
+    "message": "Sans couleur (par défaut)"
   }
 }

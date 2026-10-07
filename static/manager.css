@@ -64,7 +64,6 @@ button:disabled{cursor:not-allowed}
 .sw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-shadow:0 0 3px rgba(0,0,0,.7)}
 .ic{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;font-size:18px;border:.5px solid var(--border);padding:0}
 .ic.on{background:var(--fill-ghost-selected);border:2px solid var(--text-primary)}
-.disabled{opacity:.45;pointer-events:none}
 .primary{background:var(--accent-strong);color:#fff;border-color:transparent}.primary:hover{background:var(--accent-strong);opacity:.9}
 .danger{color:var(--danger);margin-left:auto}.error{color:var(--danger);margin:0 0 8px}
 .empty{color:var(--text-secondary)}
@@ -112,3 +111,8 @@ body{font-size:14px;line-height:1.6}
 .sel:focus-visible,.fr:focus-visible{outline-offset:-2px}
 .fr{min-height:40px}
 .link-accent{color:var(--text-accent)}
+
+/* 色なし (既定): 斜線の丸。選ぶと color を削除して文字色で表示 */
+.sw-none{background:linear-gradient(to top right,transparent calc(50% - 1.5px),var(--text-secondary) calc(50% - 1.5px),var(--text-secondary) calc(50% + 1.5px),transparent calc(50% + 1.5px)),var(--surface-2)!important;background-clip:content-box!important;box-shadow:0 0 0 1.5px var(--text-secondary) inset}
+.sw-none.on{box-shadow:0 0 0 2.5px var(--text-primary) inset}
+.sw-none.on::after{content:none}

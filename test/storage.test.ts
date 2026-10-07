@@ -35,17 +35,32 @@ describe('folders', () => {
     expect(u).toMatchObject({ name: 'b', icon: 'ti-star' });
   });
 
-  it('allows color only for the folder icon', async () => {
-    const f = await createFolder({ name: 'a', color: COLORS[0] });
-    expect(f.color).toBe(COLORS[0]);
-    const star = await updateFolder(f.id, { icon: 'ti-star' });
-    expect(star.color).toBeUndefined();
-    const star2 = await createFolder({ name: 'b', icon: 'ti-star', color: COLORS[1] });
-    expect(star2.color).toBeUndefined();
-    const back = await updateFolder(star.id, { icon: 'ti-folder', color: COLORS[2] });
+  it('allows a color for any icon and keeps it when the icon changes', async () => {
+    const star = await createFolder({ name: 'b', icon: 'ti-star', color: COLORS[1] });
+    expect(star.color).toBe(COLORS[1]);
+    const code = await updateFolder(star.id, { icon: 'ti-code' });
+    expect(code.color).toBe(COLORS[1]); // アイコンを変えても色は消えない
+    const recolored = await updateFolder(star.id, { color: COLORS[2] });
+    expect(recolored).toMatchObject({ icon: 'ti-code', color: COLORS[2] });
+    const back = await updateFolder(star.id, { icon: 'ti-folder' });
     expect(back.color).toBe(COLORS[2]);
-    expect((await updateFolder(back.id, { color: null })).color).toBeUndefined();
-    await expect(updateFolder(back.id, { color: '#000000' })).rejects.toThrow();
+  });
+
+  it('can go back to "no color" and rejects colors outside the allow-list', async () => {
+    const f = await createFolder({ name: 'a', icon: 'ti-heart', color: COLORS[0] });
+    expect((await updateFolder(f.id, { color: null })).color).toBeUndefined();
+    await expect(updateFolder(f.id, { color: '#000000' })).rejects.toThrow();
+    await expect(createFolder({ name: 'x', color: 'red' })).rejects.toThrow();
+  });
+
+  it('reads legacy data (non-folder icon without color, or no color at all)', async () => {
+    data.folders = [
+      { id: 'o1', name: 'old', icon: 'ti-star', order: 0 },
+      { id: 'o2', name: 'old2', icon: 'ti-folder', order: 1 },
+    ];
+    const f = await listFolders();
+    expect(f.slice(1).map((x) => x.color)).toEqual([undefined, undefined]);
+    expect((await updateFolder('o1', { color: COLORS[3] })).color).toBe(COLORS[3]);
   });
 
   it('protects the built-in folder', async () => {

@@ -166,4 +166,22 @@ describe('manager organizing', () => {
     await click($$('.dialog-actions button')[1]);
     expect((await listFolders()).map((f) => f.id)).toEqual(['all', b]);
   });
+
+  it('edit panel: colors are always enabled; any icon can have a color; "no color" clears it', async () => {
+    await click(folderRow('Alpha'));
+    await click($('[aria-label=編集]'));
+    await click($('.ic[aria-label="ti-star"]'));
+    const sws = $$<HTMLButtonElement>('.edit .sw');
+    expect(sws.length).toBe(9); // 色なし + 8 色
+    expect(sws.every((x) => !x.disabled)).toBe(true);
+    await click($('.edit .sw[aria-label="#378ADD"]'));
+    await click($('.edit .primary'));
+    let f = (await listFolders()).find((x) => x.id === a)!;
+    expect(f).toMatchObject({ icon: 'ti-star', color: '#378ADD' });
+    await click($('[aria-label=編集]'));
+    await click($('.edit .sw-none'));
+    await click($('.edit .primary'));
+    f = (await listFolders()).find((x) => x.id === a)!;
+    expect(f.color).toBeUndefined();
+  });
 });

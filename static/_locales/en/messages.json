@@ -89,9 +89,6 @@
   "color": {
     "message": "Color"
   },
-  "colorOnlyFolder": {
-    "message": "Color can only be set for the folder icon"
-  },
   "save": {
     "message": "Save"
   },
@@ -277,5 +274,8 @@
   },
   "sortLabel": {
     "message": "Sort"
+  },
+  "colorNone": {
+    "message": "No color (default)"
   }
 }

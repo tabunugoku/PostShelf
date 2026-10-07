@@ -36,7 +36,7 @@ export const ALL_FOLDER: Folder = {
   order: -1,
 };
 
-/** 色を選べるのはこのアイコンのときだけ */
+/** 新規フォルダの既定アイコン (色はどのアイコンでも選べる。v5 で「folder のみ」から変更) */
 export const FOLDER_ICON = 'ti-folder';
 
 export const ICONS = [
@@ -68,4 +68,3 @@ export const displayName = (f: Folder): string =>
   f.id === ALL_FOLDER_ID ? t('allFolderName') : f.id === INBOX_ID && f.name === '' ? t('inboxName') : f.name;
 
 export const isBuiltinFolder = (id: string): boolean => id === ALL_FOLDER_ID;
-export const supportsColor = (icon: string): boolean => icon === FOLDER_ICON;

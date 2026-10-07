@@ -89,9 +89,6 @@
   "color": {
     "message": "色"
   },
-  "colorOnlyFolder": {
-    "message": "色はフォルダアイコンのときだけ選べます"
-  },
   "save": {
     "message": "保存"
   },
@@ -277,5 +274,8 @@
   },
   "sortLabel": {
     "message": "並べ替え"
+  },
+  "colorNone": {
+    "message": "色なし (既定)"
   }
 }

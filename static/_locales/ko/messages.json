@@ -89,9 +89,6 @@
   "color": {
     "message": "색"
   },
-  "colorOnlyFolder": {
-    "message": "색은 폴더 아이콘일 때만 설정할 수 있습니다"
-  },
   "save": {
     "message": "저장"
   },
@@ -277,5 +274,8 @@
   },
   "sortLabel": {
     "message": "정렬"
+  },
+  "colorNone": {
+    "message": "색 없음 (기본)"
   }
 }
