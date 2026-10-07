@@ -115,3 +115,38 @@ export async function deleteFolder(id: string): Promise<void> {
   await write(KEY_FOLDERS, folders.filter((f) => f.id !== id));
   await write(KEY_BOOKMARKS, bookmarks);
 }
+
+// ---- Bookmarks ----
+
+export async function listBookmarks(): Promise<Bookmark[]> {
+  const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
+  return Object.values(map);
+}
+
+export async function getBookmark(tweetId: string): Promise<Bookmark | undefined> {
+  const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
+  return map[tweetId];
+}
+
+/**
+ * ポストの所属フォルダを設定する。空配列ならブックマークごと削除する。
+ * 既存の savedAt / snapshot は、新規保存でなければ維持する。
+ */
+export async function setBookmarkFolders(
+  tweetId: string,
+  folderIds: string[],
+  snapshot: Bookmark['snapshot'],
+): Promise<Bookmark | undefined> {
+  const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
+  const ids = [...new Set(folderIds.filter((id) => !isBuiltinFolder(id)))];
+  if (ids.length === 0) {
+    delete map[tweetId];
+    await write(KEY_BOOKMARKS, map);
+    return undefined;
+  }
+  const prev = map[tweetId];
+  const b: Bookmark = { tweetId, folderIds: ids, savedAt: prev?.savedAt ?? Date.now(), snapshot };
+  map[tweetId] = b;
+  await write(KEY_BOOKMARKS, map);
+  return b;
+}

@@ -10,3 +10,11 @@ export const STRINGS = {
     invalidColor: '使用できない色です',
   },
 } as const;
+
+export const UI = {
+  openFolders: 'フォルダに保存',
+  newFolder: '新しいフォルダ',
+  newFolderPlaceholder: 'フォルダ名',
+  add: '追加',
+  noFolders: 'フォルダがありません',
+} as const;
