@@ -277,5 +277,23 @@
   },
   "colorNone": {
     "message": "No color (default)"
+  },
+  "openSidePanel": {
+    "message": "Open in side panel"
+  },
+  "openInTab": {
+    "message": "Open in a tab"
+  },
+  "actionModeHeading": {
+    "message": "When clicking the toolbar icon"
+  },
+  "actionModePopup": {
+    "message": "Open the popup"
+  },
+  "actionModeSidepanel": {
+    "message": "Open the side panel"
+  },
+  "actionModeNote": {
+    "message": "The side panel requires Chrome 114 or later."
   }
 }

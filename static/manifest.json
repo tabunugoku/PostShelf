@@ -5,7 +5,8 @@
   "description": "__MSG_extDescription__",
   "permissions": [
     "storage",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "sidePanel"
   ],
   "host_permissions": [
     "https://x.com/*",
@@ -42,5 +43,9 @@
       ]
     }
   ],
-  "default_locale": "en"
+  "default_locale": "en",
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "minimum_chrome_version": "114"
 }

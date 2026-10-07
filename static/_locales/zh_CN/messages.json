@@ -277,5 +277,23 @@
   },
   "colorNone": {
     "message": "无颜色（默认）"
+  },
+  "openSidePanel": {
+    "message": "在侧边栏中打开"
+  },
+  "openInTab": {
+    "message": "在标签页中打开"
+  },
+  "actionModeHeading": {
+    "message": "点击工具栏图标时的行为"
+  },
+  "actionModePopup": {
+    "message": "打开弹出窗口"
+  },
+  "actionModeSidepanel": {
+    "message": "打开侧边栏"
+  },
+  "actionModeNote": {
+    "message": "侧边栏需要 Chrome 114 或更高版本。"
   }
 }

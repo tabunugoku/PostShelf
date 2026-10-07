@@ -277,5 +277,23 @@
   },
   "colorNone": {
     "message": "無顏色（預設）"
+  },
+  "openSidePanel": {
+    "message": "在側邊欄中開啟"
+  },
+  "openInTab": {
+    "message": "在分頁中開啟"
+  },
+  "actionModeHeading": {
+    "message": "點擊工具列圖示時的行為"
+  },
+  "actionModePopup": {
+    "message": "開啟彈出視窗"
+  },
+  "actionModeSidepanel": {
+    "message": "開啟側邊欄"
+  },
+  "actionModeNote": {
+    "message": "側邊欄需要 Chrome 114 或更新版本。"
   }
 }

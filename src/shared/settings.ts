@@ -4,11 +4,15 @@ export interface Settings {
   syncNative: boolean;
   /** x.com の標準ブックマークボタンの扱い。separate: 横に PostShelf のボタンを足す / replace: 標準ボタンのクリックを PostShelf のフォルダ選択に差し替える */
   buttonMode: ButtonMode;
+  /** ツールバーアイコンのクリック時の動作。popup: ポップアップ / sidepanel: サイドパネルを開く */
+  actionMode: ActionMode;
 }
+
+export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate' };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup' };
 
 const KEY = 'settings';
 
@@ -17,6 +21,7 @@ export async function getSettings(): Promise<Settings> {
   const stored = (res[KEY] ?? {}) as Partial<Settings>;
   const merged = { ...DEFAULT_SETTINGS, ...stored };
   if (merged.buttonMode !== 'replace') merged.buttonMode = 'separate'; // 不正値は既定に戻す
+  if (merged.actionMode !== 'sidepanel') merged.actionMode = 'popup';
   return merged;
 }
 

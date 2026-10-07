@@ -13,7 +13,7 @@ import {
 } from '../shared/models';
 import { countFolder, queryBookmarks, type SortKey } from '../shared/query';
 import { formatDate, t } from '../shared/strings';
-import { getSettings, updateSettings, type ButtonMode } from '../shared/settings';
+import { getSettings, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
 import {
   addToFolders,
   createFolder,
@@ -32,6 +32,7 @@ import {
   updateFolder,
   type BookmarkUndo,
 } from '../shared/storage';
+import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, SortMenu, Toast } from './ui';
 
@@ -45,7 +46,7 @@ const sorts = (): [SortKey, string][] => [
 type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: string } | null;
 type ToastState = { key: number; message: string; undo: BookmarkUndo } | null;
 
-export function App() {
+export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const SORTS = sorts();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
@@ -177,7 +178,7 @@ export function App() {
   const removableFolders = realFolders.filter((f) => bookmarks.some((b) => selected.has(b.tweetId) && b.folderIds.includes(f.id)));
 
   return (
-    <div class="ps">
+    <div class={`ps surface-${surface}`}>
       <aside class="side">
         <div class="side-title">{t('foldersHeading')}</div>
         {folders.map((f) => {
@@ -281,6 +282,16 @@ export function App() {
               {folder && !isBuiltinFolder(folder.id) && (
                 <button class="icon-only" aria-label={t('edit')} title={t('edit')} onClick={() => setEditing(!editing)}>
                   <Icon name="ti-edit" />
+                </button>
+              )}
+              {surface === 'tab' && hasSidePanel() && (
+                <button class="icon-only bar-end" aria-label={t('openSidePanel')} title={t('openSidePanel')} onClick={() => void openSidePanel()}>
+                  <Icon name="ti-layout-sidebar-right" />
+                </button>
+              )}
+              {surface === 'sidepanel' && (
+                <button class="icon-only bar-end" aria-label={t('openInTab')} title={t('openInTab')} onClick={() => void openManagerTab()}>
+                  <Icon name="ti-browser" />
                 </button>
               )}
               <div class="seg">
@@ -429,10 +440,12 @@ export function App() {
 function SettingsPage() {
   const [sync, setSync] = useState(false);
   const [bmode, setBmode] = useState<ButtonMode>('separate');
+  const [amode, setAmode] = useState<ActionMode>('popup');
   useEffect(() => {
     void getSettings().then((s) => {
       setSync(s.syncNative);
       setBmode(s.buttonMode);
+      setAmode(s.actionMode);
     });
   }, []);
   return (
@@ -467,6 +480,21 @@ function SettingsPage() {
           </label>
         ))}
         <p class="muted setting-desc">{t('buttonModeNote')}</p>
+      </fieldset>
+      <fieldset class="setting-group">
+        <legend>{t('actionModeHeading')}</legend>
+        {(['popup', 'sidepanel'] as const).map((m) => (
+          <label class="setting">
+            <input
+              type="radio"
+              name="actionMode"
+              checked={amode === m}
+              onChange={async () => setAmode((await updateSettings({ actionMode: m })).actionMode)}
+            />
+            <span>{t(m === 'popup' ? 'actionModePopup' : 'actionModeSidepanel')}</span>
+          </label>
+        ))}
+        <p class="muted setting-desc">{t('actionModeNote')}</p>
       </fieldset>
     </section>
   );

@@ -277,5 +277,23 @@
   },
   "colorNone": {
     "message": "Sin color (predeterminado)"
+  },
+  "openSidePanel": {
+    "message": "Abrir en el panel lateral"
+  },
+  "openInTab": {
+    "message": "Abrir en una pestaña"
+  },
+  "actionModeHeading": {
+    "message": "Al hacer clic en el icono de la barra de herramientas"
+  },
+  "actionModePopup": {
+    "message": "Abrir la ventana emergente"
+  },
+  "actionModeSidepanel": {
+    "message": "Abrir el panel lateral"
+  },
+  "actionModeNote": {
+    "message": "El panel lateral requiere Chrome 114 o posterior."
   }
 }

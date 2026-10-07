@@ -277,5 +277,23 @@
   },
   "colorNone": {
     "message": "色なし (既定)"
+  },
+  "openSidePanel": {
+    "message": "サイドパネルで開く"
+  },
+  "openInTab": {
+    "message": "タブで開く"
+  },
+  "actionModeHeading": {
+    "message": "ツールバーアイコンのクリック時の動作"
+  },
+  "actionModePopup": {
+    "message": "ポップアップを開く"
+  },
+  "actionModeSidepanel": {
+    "message": "サイドパネルを開く"
+  },
+  "actionModeNote": {
+    "message": "サイドパネルは Chrome 114 以降で使えます。"
   }
 }

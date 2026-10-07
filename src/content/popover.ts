@@ -70,6 +70,16 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     });
     pop.append(rel);
   }
+  // サイドパネルで開く (content script からは直接開けないので background へ依頼する。ユーザーのクリック直後に送る)
+  const side = document.createElement('button');
+  side.type = 'button';
+  side.textContent = t('openSidePanel');
+  side.style.cssText = `display:block;width:100%;text-align:left;margin-top:6px;padding:6px 8px;min-height:32px;background:transparent;color:${th.fg};border:0;border-radius:8px;cursor:pointer`;
+  side.addEventListener('click', () => {
+    void chrome.runtime?.sendMessage?.({ type: 'openSidePanel' });
+    closePopovers();
+  });
+  pop.append(side);
   document.body.append(pop);
   position(pop, anchor);
   return pop;

@@ -1,2 +1,16 @@
-// 現状は処理なし (エクスポート/インポートは manager ページから storage を直接利用)。将来のメッセージ中継用。
-export {};
+import { applyActionMode } from '../shared/panel';
+import { getSettings, onSettingsChanged } from '../shared/settings';
+
+// ツールバーアイコンの動作 (popup / サイドパネル) は再起動で失われるので、service worker の起動ごとに反映する
+const apply = () => void getSettings().then((s) => applyActionMode(s.actionMode));
+apply();
+chrome.runtime.onInstalled.addListener(apply);
+chrome.runtime.onStartup?.addListener(apply);
+onSettingsChanged((s) => void applyActionMode(s.actionMode));
+
+// x.com のポップオーバーからの「サイドパネルで開く」。content script からは直接開けないので、ユーザー操作の直後にここで開く
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg?.type === 'openSidePanel' && sender.tab?.id !== undefined && chrome.sidePanel?.open) {
+    void chrome.sidePanel.open({ tabId: sender.tab.id }).catch(() => {});
+  }
+});

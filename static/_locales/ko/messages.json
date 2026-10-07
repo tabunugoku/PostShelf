@@ -277,5 +277,23 @@
   },
   "colorNone": {
     "message": "색 없음 (기본)"
+  },
+  "openSidePanel": {
+    "message": "사이드 패널에서 열기"
+  },
+  "openInTab": {
+    "message": "탭에서 열기"
+  },
+  "actionModeHeading": {
+    "message": "툴바 아이콘 클릭 시 동작"
+  },
+  "actionModePopup": {
+    "message": "팝업 열기"
+  },
+  "actionModeSidepanel": {
+    "message": "사이드 패널 열기"
+  },
+  "actionModeNote": {
+    "message": "사이드 패널은 Chrome 114 이상에서 사용할 수 있습니다."
   }
 }

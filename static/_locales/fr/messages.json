@@ -277,5 +277,23 @@
   },
   "colorNone": {
     "message": "Sans couleur (par défaut)"
+  },
+  "openSidePanel": {
+    "message": "Ouvrir dans le panneau latéral"
+  },
+  "openInTab": {
+    "message": "Ouvrir dans un onglet"
+  },
+  "actionModeHeading": {
+    "message": "Au clic sur l'icône de la barre d'outils"
+  },
+  "actionModePopup": {
+    "message": "Ouvrir la fenêtre contextuelle"
+  },
+  "actionModeSidepanel": {
+    "message": "Ouvrir le panneau latéral"
+  },
+  "actionModeNote": {
+    "message": "Le panneau latéral nécessite Chrome 114 ou version ultérieure."
   }
 }

@@ -1,11 +1,12 @@
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
+import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
 import type { Bookmark } from '../shared/models';
 import { t } from '../shared/strings';
 import { listBookmarks, listFolders } from '../shared/storage';
 
-const openManager = (hash = '') => void chrome.tabs.create({ url: chrome.runtime.getURL('manager.html') + hash });
+const openManager = (hash = '') => void openManagerTab(hash);
 
 function Popup() {
   const [counts, setCounts] = useState({ posts: 0, folders: 0 });
@@ -38,6 +39,17 @@ function Popup() {
         <Icon name="ti-external-link" />
         {t('openManager')}
       </button>
+      {hasSidePanel() && (
+        <button
+          class="pr link"
+          onClick={() => {
+            void openSidePanel().then(() => window.close());
+          }}
+        >
+          <Icon name="ti-layout-sidebar-right" />
+          {t('openSidePanel')}
+        </button>
+      )}
       <button class="pr" onClick={() => openManager('#settings')}>
         <Icon name="ti-settings" />
         {t('settings')}

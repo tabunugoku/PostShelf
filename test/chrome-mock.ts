@@ -18,6 +18,27 @@ export function makeGetMessage(dict: Dict) {
 }
 
 /** chrome.storage.local のインメモリ実装 + i18n (既定 ja) */
+/** サイドパネル/アクション/ウィンドウ API のスパイ付きモック (必要なテストだけ installPanelMock で追加する) */
+export function installPanelMock() {
+  const calls = { behavior: [] as unknown[], popup: [] as unknown[], open: [] as unknown[], messages: [] as unknown[] };
+  const c = (globalThis as any).chrome;
+  c.sidePanel = {
+    setPanelBehavior: async (v: unknown) => void calls.behavior.push(v),
+    open: async (v: unknown) => void calls.open.push(v),
+  };
+  c.action = { setPopup: async (v: unknown) => void calls.popup.push(v) };
+  c.windows = { getCurrent: async () => ({ id: 7 }) };
+  c.tabs = { create: async () => ({}) };
+  const handlers: any[] = [];
+  c.runtime = {
+    getURL: (p: string) => `chrome-extension://x/${p}`,
+    sendMessage: async (m: unknown) => void calls.messages.push(m),
+    onInstalled: { addListener: (h: any) => handlers.push(h) },
+    onMessage: { addListener: (h: any) => (calls as any).onMessage = h },
+  };
+  return calls as typeof calls & { onMessage?: (m: any, s: any) => void };
+}
+
 export function installChromeMock(lang = 'ja'): Record<string, unknown> {
   const data: Record<string, unknown> = {};
   const listeners = new Set<(c: Record<string, unknown>, area: string) => void>();
