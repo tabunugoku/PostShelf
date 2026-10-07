@@ -184,4 +184,31 @@ describe('manager organizing', () => {
     f = (await listFolders()).find((x) => x.id === a)!;
     expect(f.color).toBeUndefined();
   });
+
+  it('sort is an in-app listbox with aria and full keyboard support', async () => {
+    const btn = $<HTMLButtonElement>('.sort-btn');
+    expect(btn.getAttribute('aria-haspopup')).toBe('listbox');
+    expect(btn.getAttribute('aria-expanded')).toBe('false');
+    expect($$('select').length).toBe(0); // ネイティブ select は使わない
+    await click(btn);
+    const list = $('[role=listbox]');
+    expect(btn.getAttribute('aria-expanded')).toBe('true');
+    expect($$('[role=option]').length).toBe(4);
+    expect($('[role=option][aria-selected=true]').textContent).toContain('保存が新しい順');
+    expect(list.getAttribute('aria-activedescendant')).toBe($$('[role=option]')[0].id);
+    await key(list, 'ArrowDown');
+    expect(list.getAttribute('aria-activedescendant')).toBe($$('[role=option]')[1].id);
+    await key(list, 'End');
+    await key(list, 'Enter'); // 投稿が古い順
+    expect($$('[role=listbox]').length).toBe(0);
+    expect(btn.textContent).toContain('投稿が古い順');
+    expect(document.activeElement).toBe(btn);
+    await click(btn);
+    await key($('[role=listbox]'), 'Escape');
+    expect($$('[role=listbox]').length).toBe(0);
+    await key(btn, 'ArrowDown');
+    expect($$('[role=listbox]').length).toBe(1);
+    await click($$('[role=option]')[1]); // 保存が古い順
+    expect(rowIds()).toEqual(['1', '2', '3', '4']);
+  });
 });

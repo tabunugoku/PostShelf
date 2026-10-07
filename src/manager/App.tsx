@@ -33,7 +33,7 @@ import {
   type BookmarkUndo,
 } from '../shared/storage';
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
-import { Confirm, Dropdown, FolderMenu, FolderPickerHost, Toast } from './ui';
+import { Confirm, Dropdown, FolderMenu, FolderPickerHost, SortMenu, Toast } from './ui';
 
 const sorts = (): [SortKey, string][] => [
   ['savedDesc', t('sortSavedDesc')],
@@ -300,11 +300,7 @@ export function App() {
                 value={search}
                 onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
               />
-              <select aria-label={t('sortLabel')} value={sort} onChange={(e) => setSort((e.target as HTMLSelectElement).value as SortKey)}>
-                {SORTS.map(([k, l]) => (
-                  <option value={k}>{l}</option>
-                ))}
-              </select>
+              <SortMenu label={t('sortLabel')} value={sort} options={SORTS} onChange={setSort} />
             </div>
             {selected.size > 0 && (
               <div class="bulk" role="toolbar">

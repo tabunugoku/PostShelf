@@ -42,7 +42,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   pop.className = POP_CLASS;
   pop.setAttribute('role', 'dialog');
   const th = xTheme();
-  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif`;
+  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif`;
   pop.addEventListener('click', (e) => e.stopPropagation());
 
   const save = async () => {

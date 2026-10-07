@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 import { createFolderPicker } from '../shared/folderPicker';
 import { displayName, type Folder } from '../shared/models';
@@ -102,4 +102,98 @@ export function FolderPickerHost(props: { folders: Folder[]; selected: string[];
     host.current?.replaceChildren(picker.el);
   }, []);
   return <div ref={host} class="picker-host" />;
+}
+
+/**
+ * 並べ替え用のアプリ内 listbox。ネイティブ select のポップアップは OS 任せで配色が読めなくなることがあるため置き換えた。
+ * キーボード: ボタンで Enter/Space/↓ で開く。開いている間は ↑↓/Home/End で移動、Enter/Space で決定、Esc で閉じる。
+ */
+export function SortMenu<T extends string>(props: { value: T; options: [T, string][]; label: string; onChange: (v: T) => void }) {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const btn = useRef<HTMLButtonElement>(null);
+  const list = useRef<HTMLDivElement>(null);
+  const uid = useRef(`sort-${Math.random().toString(36).slice(2, 7)}`).current;
+  const cur = props.options.find(([v]) => v === props.value);
+
+  const openMenu = () => {
+    setActive(Math.max(0, props.options.findIndex(([v]) => v === props.value)));
+    setOpen(true);
+  };
+  const close = (refocus = true) => {
+    setOpen(false);
+    if (refocus) btn.current?.focus();
+  };
+  const choose = (i: number) => {
+    props.onChange(props.options[i][0]);
+    close();
+  };
+  useEffect(() => {
+    if (open) list.current?.focus();
+  }, [open]);
+  useEffect(() => {
+    if (!open) return;
+    const down = (e: MouseEvent) => {
+      const n = e.target as Node;
+      if (!list.current?.contains(n) && !btn.current?.contains(n)) close(false);
+    };
+    document.addEventListener('mousedown', down);
+    return () => document.removeEventListener('mousedown', down);
+  }, [open]);
+
+  const onBtnKey = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      openMenu();
+    }
+  };
+  const onListKey = (e: KeyboardEvent) => {
+    const n = props.options.length;
+    if (e.key === 'ArrowDown') setActive((a) => (a + 1) % n);
+    else if (e.key === 'ArrowUp') setActive((a) => (a - 1 + n) % n);
+    else if (e.key === 'Home') setActive(0);
+    else if (e.key === 'End') setActive(n - 1);
+    else if (e.key === 'Enter' || e.key === ' ') choose(active);
+    else if (e.key === 'Escape') close();
+    else if (e.key === 'Tab') close(false);
+    else return;
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  return (
+    <div class="sortbox">
+      <button
+        ref={btn}
+        type="button"
+        class="sort-btn"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={uid}
+        aria-label={`${props.label}: ${cur?.[1] ?? ''}`}
+        onClick={() => (open ? close() : openMenu())}
+        onKeyDown={onBtnKey}
+      >
+        <span>{cur?.[1]}</span>
+        <Icon name="ti-chevron-down" />
+      </button>
+      {open && (
+        <div ref={list} id={uid} class="listbox" role="listbox" tabIndex={-1} aria-label={props.label} aria-activedescendant={`${uid}-${active}`} onKeyDown={onListKey}>
+          {props.options.map(([v, l], i) => (
+            <div
+              id={`${uid}-${i}`}
+              role="option"
+              class={`option${i === active ? ' active' : ''}`}
+              aria-selected={v === props.value}
+              onMouseEnter={() => setActive(i)}
+              onClick={() => choose(i)}
+            >
+              <span>{l}</span>
+              {v === props.value && <Icon name="ti-check" />}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

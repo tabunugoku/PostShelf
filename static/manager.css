@@ -15,6 +15,9 @@
   --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
   --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;
 }}
+/* OS のダーク/ライトにフォーム部品 (input, button, スクロールバー等) を追従させる */
+:root{color-scheme:light dark}
+option,optgroup{background:var(--surface-2);color:var(--text-primary)}
 *{box-sizing:border-box}
 body{margin:0;padding:24px;background:var(--surface-1);color:var(--text-primary);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif}
 h1{font-size:16px;font-weight:500;margin:0 0 4px}
@@ -69,7 +72,7 @@ button:disabled{cursor:not-allowed}
 .empty{color:var(--text-secondary)}
 @media (max-width:640px){.ps{grid-template-columns:1fr}.side{border-right:0;border-bottom:.5px solid var(--border)}}
 .setting{display:flex;gap:10px;align-items:flex-start;padding:10px 0;cursor:pointer}
-.setting input{margin-top:4px;accent-color:var(--fill-accent)}
+.setting input{min-height:0;width:20px;height:20px;margin-top:4px;accent-color:var(--accent-strong);flex:none}
 .setting-desc{display:block;font-size:14px;margin-top:2px}
 .setting-group{border:.5px solid var(--border);border-radius:12px;margin:12px 0;padding:4px 12px 8px}
 .setting-group legend{padding:0 6px;font-weight:500}
@@ -78,8 +81,10 @@ button:disabled{cursor:not-allowed}
 .post,.mini{position:relative}
 .post{align-items:flex-start}
 .post.selected,.mini.selected{background:var(--bg-accent);box-shadow:inset 3px 0 0 var(--fill-accent)}
-.sel{width:18px;height:18px;margin:8px 0 0;padding:0;flex:none;accent-color:var(--fill-accent);cursor:pointer}
-.mini .sel{margin:0}
+.sel{appearance:none;-webkit-appearance:none;position:relative;width:32px;height:32px;min-height:32px;margin:0;padding:0;border:0;flex:none;background:transparent;cursor:pointer}
+.sel::before{content:'';position:absolute;inset:7px;border:2px solid var(--text-secondary);border-radius:4px;background:var(--surface-2)}
+.sel:checked::before{background:var(--accent-strong);border-color:var(--accent-strong)}
+.sel:checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;line-height:1}
 .row-actions{display:flex;gap:2px;margin-left:auto;align-items:center;flex:none}
 .icon-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:50%;color:var(--text-secondary);font-size:18px;text-decoration:none;cursor:pointer}
 .icon-btn:hover{background:var(--fill-ghost-hover);color:var(--text-primary)}
@@ -116,3 +121,13 @@ body{font-size:14px;line-height:1.6}
 .sw-none{background:linear-gradient(to top right,transparent calc(50% - 1.5px),var(--text-secondary) calc(50% - 1.5px),var(--text-secondary) calc(50% + 1.5px),transparent calc(50% + 1.5px)),var(--surface-2)!important;background-clip:content-box!important;box-shadow:0 0 0 1.5px var(--text-secondary) inset}
 .sw-none.on{box-shadow:0 0 0 2.5px var(--text-primary) inset}
 .sw-none.on::after{content:none}
+
+/* 並べ替え: ネイティブ select ではなくアプリ内の listbox (ポップアップが OS 任せで読めなくなるのを避ける) */
+.sortbox{position:relative}
+.sort-btn{display:inline-flex;align-items:center;gap:8px;min-width:180px;justify-content:space-between}
+.listbox{position:absolute;z-index:20;top:100%;right:0;min-width:100%;margin-top:4px;padding:6px;background:var(--surface-3);border:.5px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-popover);outline:none}
+.listbox:focus-visible{outline:2px solid var(--fill-accent);outline-offset:2px}
+.option{display:flex;align-items:center;gap:8px;min-height:32px;padding:4px 10px;border-radius:8px;cursor:pointer;white-space:nowrap;color:var(--text-primary)}
+.option.active{background:var(--fill-ghost-hover);box-shadow:inset 0 0 0 1.5px var(--border-stronger)}
+.option[aria-selected=true]{font-weight:700;background:var(--fill-ghost-selected)}
+.option .ti-check{margin-left:auto;font-size:16px}
