@@ -5,7 +5,7 @@ import type { Bookmark } from '../shared/models';
 import { t } from '../shared/strings';
 import { listBookmarks, listFolders } from '../shared/storage';
 
-const openManager = () => void chrome.tabs.create({ url: chrome.runtime.getURL('manager.html') });
+const openManager = (hash = '') => void chrome.tabs.create({ url: chrome.runtime.getURL('manager.html') + hash });
 
 function Popup() {
   const [counts, setCounts] = useState({ posts: 0, folders: 0 });
@@ -34,11 +34,11 @@ function Popup() {
           </div>
         ))}
       </div>
-      <button class="pr link" onClick={openManager}>
+      <button class="pr link" onClick={() => openManager()}>
         <Icon name="ti-external-link" />
         {t('openManager')}
       </button>
-      <button class="pr" onClick={openManager}>
+      <button class="pr" onClick={() => openManager('#settings')}>
         <Icon name="ti-settings" />
         {t('settings')}
       </button>

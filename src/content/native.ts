@@ -1,0 +1,15 @@
+import { SEL } from '../shared/selectors';
+
+/**
+ * 連動モード: X 本来のブックマークボタンの現在状態を読み、目的の状態でなければ 1 回だけ click する。
+ * - 状態は SEL.bookmark (未保存) / SEL.removeBookmark (保存済み) の存在で判定する
+ * - すでに目的の状態、またはボタンが見つからない場合は何もしない (X の DOM 変更に備え、エラーも出さない)
+ * - ループ・一括・タイマー実行はしない。呼び出しはユーザーの 1 操作につき 1 回
+ * @returns click したかどうか
+ */
+export function setNativeBookmark(article: Element, want: boolean): boolean {
+  const btn = article.querySelector<HTMLElement>(want ? SEL.bookmark : SEL.removeBookmark);
+  if (!btn) return false;
+  btn.click();
+  return true;
+}

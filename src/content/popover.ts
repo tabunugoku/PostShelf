@@ -10,6 +10,8 @@ import {
 } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
+import { setNativeBookmark } from './native';
+import { getSettings } from '../shared/settings';
 
 const BTN_ATTR = 'data-postshelf-btn';
 const POP_CLASS = 'postshelf-popover';
@@ -67,7 +69,11 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   pop.style.cssText = `position:fixed;z-index:2147483647;top:${r.bottom + 4}px;left:${Math.max(8, r.left - 100)}px;min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif`;
   pop.addEventListener('click', (e) => e.stopPropagation());
 
-  const save = () => setBookmarkFolders(tweetId, [...selected], snapshot);
+  const save = async () => {
+    const saved = await setBookmarkFolders(tweetId, [...selected], snapshot);
+    // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
+    if ((await getSettings()).syncNative) setNativeBookmark(article, saved !== undefined);
+  };
 
   const render = (list: typeof folders) => {
     pop.replaceChildren();

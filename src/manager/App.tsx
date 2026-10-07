@@ -12,6 +12,7 @@ import {
 } from '../shared/models';
 import { countFolder, queryBookmarks, type SortKey } from '../shared/query';
 import { formatDate, t } from '../shared/strings';
+import { getSettings, updateSettings } from '../shared/settings';
 import { createFolder, deleteFolder, exportData, importData, listBookmarks, listFolders, updateFolder } from '../shared/storage';
 
 const sorts = (): [SortKey, string][] => [
@@ -30,6 +31,7 @@ export function App() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortKey>('savedDesc');
   const [editing, setEditing] = useState(false);
+  const [page, setPage] = useState<'bookmarks' | 'settings'>(location.hash === '#settings' ? 'settings' : 'bookmarks');
 
   const reload = async () => {
     setFolders(await listFolders());
@@ -56,6 +58,7 @@ export function App() {
             onClick={() => {
               setCurrent(f.id);
               setEditing(false);
+              setPage('bookmarks');
             }}
           >
             <Icon name={f.icon} color={f.color} />
@@ -72,10 +75,20 @@ export function App() {
             await reload();
             setCurrent(f.id);
             setEditing(true);
+            setPage('bookmarks');
           }}
         >
           <Icon name="ti-plus" />
           {t('newFolder')}
+        </div>
+        <div
+          class={`fr${page === 'settings' ? ' on' : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={() => setPage('settings')}
+        >
+          <Icon name="ti-settings" />
+          {t('settings')}
         </div>
         <div class="io">
           <button onClick={() => downloadJson(exportData)}>{t('exportBtn')}</button>
@@ -102,6 +115,10 @@ export function App() {
         </div>
       </aside>
       <main class="main">
+        {page === 'settings' ? (
+          <SettingsPage />
+        ) : (
+          <>
         <div class="bar">
           {folder && <Icon name={folder.icon} color={folder.color} />}
           {folder && <span class="bar-name">{displayName(folder)}</span>}
@@ -147,8 +164,37 @@ export function App() {
         {view === 'post'
           ? shown.map((b) => <PostCard b={b} folderOf={folderName} />)
           : shown.map((b) => <ListRow b={b} folderOf={folderName} />)}
+          </>
+        )}
       </main>
     </div>
+  );
+}
+
+function SettingsPage() {
+  const [sync, setSync] = useState(false);
+  useEffect(() => {
+    void getSettings().then((s) => setSync(s.syncNative));
+  }, []);
+  return (
+    <section>
+      <div class="bar">
+        <Icon name="ti-settings" />
+        <span class="bar-name">{t('settings')}</span>
+      </div>
+      <label class="setting">
+        <input
+          type="checkbox"
+          role="switch"
+          checked={sync}
+          onChange={async (e) => setSync((await updateSettings({ syncNative: (e.target as HTMLInputElement).checked })).syncNative)}
+        />
+        <span>
+          <strong>{t('syncNativeLabel')}</strong>
+          <span class="muted setting-desc">{t('syncNativeDesc')}</span>
+        </span>
+      </label>
+    </section>
   );
 }
 

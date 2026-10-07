@@ -154,5 +154,11 @@
         "example": "5"
       }
     }
+  },
+  "syncNativeLabel": {
+    "message": "Sync with X bookmarks"
+  },
+  "syncNativeDesc": {
+    "message": "When you save a post to a folder, also bookmark it on X; when you remove it from all folders, remove the X bookmark too. It presses the on-screen bookmark button once per post you act on. Off by default."
   }
 }
