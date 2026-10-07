@@ -1,0 +1,164 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "x.com 북마크를 나만의 폴더로 정리합니다. 모든 데이터는 기기 안에만 저장됩니다."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "전체"
+  },
+  "inboxName": {
+    "message": "미분류"
+  },
+  "newFolderDefaultName": {
+    "message": "새 폴더"
+  },
+  "errEmptyName": {
+    "message": "폴더 이름을 입력하세요"
+  },
+  "errBuiltinImmutable": {
+    "message": "'전체'는 변경하거나 삭제할 수 없습니다"
+  },
+  "errNotFound": {
+    "message": "폴더를 찾을 수 없습니다"
+  },
+  "errInvalidIcon": {
+    "message": "사용할 수 없는 아이콘입니다"
+  },
+  "errInvalidColor": {
+    "message": "사용할 수 없는 색입니다"
+  },
+  "errInvalidImport": {
+    "message": "파일 형식이 올바르지 않습니다"
+  },
+  "openFolders": {
+    "message": "폴더에 저장"
+  },
+  "newFolder": {
+    "message": "새 폴더"
+  },
+  "newFolderPlaceholder": {
+    "message": "폴더 이름"
+  },
+  "add": {
+    "message": "추가"
+  },
+  "noFolders": {
+    "message": "폴더가 없습니다"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "북마크"
+  },
+  "edit": {
+    "message": "편집"
+  },
+  "postView": {
+    "message": "게시물 보기"
+  },
+  "listView": {
+    "message": "목록 보기"
+  },
+  "search": {
+    "message": "검색"
+  },
+  "sortSavedDesc": {
+    "message": "저장일: 최신순"
+  },
+  "sortSavedAsc": {
+    "message": "저장일: 오래된순"
+  },
+  "sortPostedDesc": {
+    "message": "게시일: 최신순"
+  },
+  "sortPostedAsc": {
+    "message": "게시일: 오래된순"
+  },
+  "name": {
+    "message": "이름"
+  },
+  "icon": {
+    "message": "아이콘"
+  },
+  "color": {
+    "message": "색"
+  },
+  "colorOnlyFolder": {
+    "message": "색은 폴더 아이콘일 때만 설정할 수 있습니다"
+  },
+  "save": {
+    "message": "저장"
+  },
+  "cancel": {
+    "message": "취소"
+  },
+  "delete": {
+    "message": "삭제"
+  },
+  "confirmDelete": {
+    "message": "이 폴더를 삭제할까요? (게시물은 그대로 남습니다.)"
+  },
+  "empty": {
+    "message": "저장된 게시물이 없습니다"
+  },
+  "openOnX": {
+    "message": "X에서 열기"
+  },
+  "popupPosts": {
+    "message": "개 게시물"
+  },
+  "popupFolders": {
+    "message": "개 폴더"
+  },
+  "recent": {
+    "message": "최근 저장한 3개"
+  },
+  "settings": {
+    "message": "설정"
+  },
+  "openManager": {
+    "message": "관리 페이지 열기"
+  },
+  "exportBtn": {
+    "message": "내보내기"
+  },
+  "importBtn": {
+    "message": "가져오기"
+  },
+  "importFail": {
+    "message": "파일 형식이 올바르지 않습니다"
+  },
+  "collectTitle": {
+    "message": "이 페이지의 게시물을 PostShelf로 가져오기"
+  },
+  "importDone": {
+    "message": "게시물 $COUNT$개를 가져왔습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "게시물 $COUNT$개를 '미분류'로 가져왔습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "X 북마크와 연동"
+  },
+  "syncNativeDesc": {
+    "message": "게시물을 폴더에 저장하면 X에서도 북마크하고, 모든 폴더에서 제외하면 X 북마크도 해제합니다. 조작한 게시물 1개당 화면의 북마크 버튼을 한 번만 누릅니다. 기본값은 꺼짐입니다."
+  }
+}

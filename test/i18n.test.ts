@@ -7,11 +7,29 @@ import { ALL_FOLDER, displayName, INBOX_ID } from '../src/shared/models';
 import { addCollected, listFolders } from '../src/shared/storage';
 
 describe('locales', () => {
-  it('ja and en have identical key sets and non-empty messages', () => {
-    const ja = loadMessages('ja');
+  const langs = readdirSync(resolve(process.cwd(), 'static/_locales'));
+
+  it('ships the expected languages', () => {
+    expect(langs.sort()).toEqual(['en', 'es', 'fr', 'ja', 'ko', 'pt_BR', 'zh_CN', 'zh_TW']);
+  });
+
+  it.each(langs)('%s has the same keys and placeholders as en, and no empty messages', (lang) => {
     const en = loadMessages('en');
-    expect(Object.keys(en).sort()).toEqual(Object.keys(ja).sort());
-    for (const d of [ja, en]) for (const v of Object.values(d)) expect(v.message.trim()).not.toBe('');
+    const d = loadMessages(lang);
+    expect(Object.keys(d).sort()).toEqual(Object.keys(en).sort());
+    for (const [k, v] of Object.entries(d)) {
+      expect(v.message.trim(), `${lang}.${k}`).not.toBe('');
+      expect(v.placeholders, `${lang}.${k} placeholders`).toEqual(en[k].placeholders);
+      for (const name of Object.keys(en[k].placeholders ?? {})) {
+        expect(v.message.toLowerCase(), `${lang}.${k} uses $${name}$`).toContain(`$${name}$`);
+      }
+    }
+  });
+
+  it.each(langs)('%s substitutes the count in t()', (lang) => {
+    installChromeMock(lang);
+    expect(t('importDone', 7)).toContain('7');
+    expect(t('importDone', 7)).not.toContain('$');
   });
 
   it('every t(...) key used in src and manifest __MSG_ exists', () => {

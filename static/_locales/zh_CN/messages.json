@@ -1,0 +1,164 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "将 x.com 书签整理到你自己的文件夹中。所有数据仅保存在你的设备上。"
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "全部"
+  },
+  "inboxName": {
+    "message": "未分类"
+  },
+  "newFolderDefaultName": {
+    "message": "新建文件夹"
+  },
+  "errEmptyName": {
+    "message": "请输入文件夹名称"
+  },
+  "errBuiltinImmutable": {
+    "message": "“全部”无法修改或删除"
+  },
+  "errNotFound": {
+    "message": "找不到文件夹"
+  },
+  "errInvalidIcon": {
+    "message": "此图标不可用"
+  },
+  "errInvalidColor": {
+    "message": "此颜色不可用"
+  },
+  "errInvalidImport": {
+    "message": "文件格式无效"
+  },
+  "openFolders": {
+    "message": "保存到文件夹"
+  },
+  "newFolder": {
+    "message": "新建文件夹"
+  },
+  "newFolderPlaceholder": {
+    "message": "文件夹名称"
+  },
+  "add": {
+    "message": "添加"
+  },
+  "noFolders": {
+    "message": "还没有文件夹"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "书签"
+  },
+  "edit": {
+    "message": "编辑"
+  },
+  "postView": {
+    "message": "帖子视图"
+  },
+  "listView": {
+    "message": "列表视图"
+  },
+  "search": {
+    "message": "搜索"
+  },
+  "sortSavedDesc": {
+    "message": "保存时间：最新"
+  },
+  "sortSavedAsc": {
+    "message": "保存时间：最早"
+  },
+  "sortPostedDesc": {
+    "message": "发布时间：最新"
+  },
+  "sortPostedAsc": {
+    "message": "发布时间：最早"
+  },
+  "name": {
+    "message": "名称"
+  },
+  "icon": {
+    "message": "图标"
+  },
+  "color": {
+    "message": "颜色"
+  },
+  "colorOnlyFolder": {
+    "message": "只有文件夹图标可以设置颜色"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "delete": {
+    "message": "删除"
+  },
+  "confirmDelete": {
+    "message": "要删除此文件夹吗？（帖子本身会保留。）"
+  },
+  "empty": {
+    "message": "没有已保存的帖子"
+  },
+  "openOnX": {
+    "message": "在 X 上打开"
+  },
+  "popupPosts": {
+    "message": "条帖子"
+  },
+  "popupFolders": {
+    "message": "个文件夹"
+  },
+  "recent": {
+    "message": "最近保存的 3 条"
+  },
+  "settings": {
+    "message": "设置"
+  },
+  "openManager": {
+    "message": "打开管理页面"
+  },
+  "exportBtn": {
+    "message": "导出"
+  },
+  "importBtn": {
+    "message": "导入"
+  },
+  "importFail": {
+    "message": "文件格式无效"
+  },
+  "collectTitle": {
+    "message": "将此页面上的帖子导入 PostShelf"
+  },
+  "importDone": {
+    "message": "已导入 $COUNT$ 条帖子",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "已将 $COUNT$ 条帖子导入“未分类”",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "与 X 书签同步"
+  },
+  "syncNativeDesc": {
+    "message": "将帖子保存到文件夹时，同时在 X 上添加书签；从所有文件夹中移除时，也会移除 X 上的书签。对你操作的每条帖子，只会点击一次屏幕上的书签按钮。默认关闭。"
+  }
+}

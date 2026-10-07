@@ -1,0 +1,164 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "Organize seus favoritos do x.com em pastas próprias. Todos os dados ficam apenas no seu dispositivo."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "Todos"
+  },
+  "inboxName": {
+    "message": "Sem categoria"
+  },
+  "newFolderDefaultName": {
+    "message": "Nova pasta"
+  },
+  "errEmptyName": {
+    "message": "Digite um nome para a pasta"
+  },
+  "errBuiltinImmutable": {
+    "message": "\"Todos\" não pode ser alterado nem excluído"
+  },
+  "errNotFound": {
+    "message": "Pasta não encontrada"
+  },
+  "errInvalidIcon": {
+    "message": "Este ícone não está disponível"
+  },
+  "errInvalidColor": {
+    "message": "Esta cor não está disponível"
+  },
+  "errInvalidImport": {
+    "message": "O formato do arquivo é inválido"
+  },
+  "openFolders": {
+    "message": "Salvar na pasta"
+  },
+  "newFolder": {
+    "message": "Nova pasta"
+  },
+  "newFolderPlaceholder": {
+    "message": "Nome da pasta"
+  },
+  "add": {
+    "message": "Adicionar"
+  },
+  "noFolders": {
+    "message": "Nenhuma pasta ainda"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "Favoritos"
+  },
+  "edit": {
+    "message": "Editar"
+  },
+  "postView": {
+    "message": "Posts"
+  },
+  "listView": {
+    "message": "Lista"
+  },
+  "search": {
+    "message": "Pesquisar"
+  },
+  "sortSavedDesc": {
+    "message": "Salvo: mais recente"
+  },
+  "sortSavedAsc": {
+    "message": "Salvo: mais antigo"
+  },
+  "sortPostedDesc": {
+    "message": "Publicado: mais recente"
+  },
+  "sortPostedAsc": {
+    "message": "Publicado: mais antigo"
+  },
+  "name": {
+    "message": "Nome"
+  },
+  "icon": {
+    "message": "Ícone"
+  },
+  "color": {
+    "message": "Cor"
+  },
+  "colorOnlyFolder": {
+    "message": "A cor só pode ser definida para o ícone de pasta"
+  },
+  "save": {
+    "message": "Salvar"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "delete": {
+    "message": "Excluir"
+  },
+  "confirmDelete": {
+    "message": "Excluir esta pasta? (Os posts em si são mantidos.)"
+  },
+  "empty": {
+    "message": "Nenhum post salvo"
+  },
+  "openOnX": {
+    "message": "Abrir no X"
+  },
+  "popupPosts": {
+    "message": "posts"
+  },
+  "popupFolders": {
+    "message": "pastas"
+  },
+  "recent": {
+    "message": "Salvos recentemente (3)"
+  },
+  "settings": {
+    "message": "Configurações"
+  },
+  "openManager": {
+    "message": "Abrir o gerenciador"
+  },
+  "exportBtn": {
+    "message": "Exportar"
+  },
+  "importBtn": {
+    "message": "Importar"
+  },
+  "importFail": {
+    "message": "O formato do arquivo é inválido"
+  },
+  "collectTitle": {
+    "message": "Importar para o PostShelf os posts desta página"
+  },
+  "importDone": {
+    "message": "$COUNT$ posts importados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "$COUNT$ posts importados para \"Sem categoria\"",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "Sincronizar com os favoritos do X"
+  },
+  "syncNativeDesc": {
+    "message": "Ao salvar um post em uma pasta, ele também é adicionado aos favoritos do X; ao removê-lo de todas as pastas, o favorito do X também é removido. O botão de favorito na tela é clicado uma única vez por post em que você age. Desativado por padrão."
+  }
+}

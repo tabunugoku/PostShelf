@@ -1,0 +1,164 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "Organiza tus marcadores de x.com en tus propias carpetas. Todos los datos se quedan en tu dispositivo."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "Todos"
+  },
+  "inboxName": {
+    "message": "Sin clasificar"
+  },
+  "newFolderDefaultName": {
+    "message": "Nueva carpeta"
+  },
+  "errEmptyName": {
+    "message": "Introduce un nombre de carpeta"
+  },
+  "errBuiltinImmutable": {
+    "message": "«Todos» no se puede modificar ni eliminar"
+  },
+  "errNotFound": {
+    "message": "No se encontró la carpeta"
+  },
+  "errInvalidIcon": {
+    "message": "Este icono no está disponible"
+  },
+  "errInvalidColor": {
+    "message": "Este color no está disponible"
+  },
+  "errInvalidImport": {
+    "message": "El formato del archivo no es válido"
+  },
+  "openFolders": {
+    "message": "Guardar en carpeta"
+  },
+  "newFolder": {
+    "message": "Nueva carpeta"
+  },
+  "newFolderPlaceholder": {
+    "message": "Nombre de la carpeta"
+  },
+  "add": {
+    "message": "Añadir"
+  },
+  "noFolders": {
+    "message": "Aún no hay carpetas"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "Marcadores"
+  },
+  "edit": {
+    "message": "Editar"
+  },
+  "postView": {
+    "message": "Publicaciones"
+  },
+  "listView": {
+    "message": "Lista"
+  },
+  "search": {
+    "message": "Buscar"
+  },
+  "sortSavedDesc": {
+    "message": "Guardado: más reciente"
+  },
+  "sortSavedAsc": {
+    "message": "Guardado: más antiguo"
+  },
+  "sortPostedDesc": {
+    "message": "Publicado: más reciente"
+  },
+  "sortPostedAsc": {
+    "message": "Publicado: más antiguo"
+  },
+  "name": {
+    "message": "Nombre"
+  },
+  "icon": {
+    "message": "Icono"
+  },
+  "color": {
+    "message": "Color"
+  },
+  "colorOnlyFolder": {
+    "message": "El color solo se puede elegir con el icono de carpeta"
+  },
+  "save": {
+    "message": "Guardar"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "delete": {
+    "message": "Eliminar"
+  },
+  "confirmDelete": {
+    "message": "¿Eliminar esta carpeta? (Las publicaciones se conservan.)"
+  },
+  "empty": {
+    "message": "No hay publicaciones guardadas"
+  },
+  "openOnX": {
+    "message": "Abrir en X"
+  },
+  "popupPosts": {
+    "message": "publicaciones"
+  },
+  "popupFolders": {
+    "message": "carpetas"
+  },
+  "recent": {
+    "message": "Guardadas recientemente (3)"
+  },
+  "settings": {
+    "message": "Ajustes"
+  },
+  "openManager": {
+    "message": "Abrir el administrador"
+  },
+  "exportBtn": {
+    "message": "Exportar"
+  },
+  "importBtn": {
+    "message": "Importar"
+  },
+  "importFail": {
+    "message": "El formato del archivo no es válido"
+  },
+  "collectTitle": {
+    "message": "Importar a PostShelf las publicaciones de esta página"
+  },
+  "importDone": {
+    "message": "Se importaron $COUNT$ publicaciones",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "Se importaron $COUNT$ publicaciones a «Sin clasificar»",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "Sincronizar con los marcadores de X"
+  },
+  "syncNativeDesc": {
+    "message": "Al guardar una publicación en una carpeta, también se añade a los marcadores de X; al quitarla de todas las carpetas, se quita también el marcador de X. Pulsa el botón de marcador en pantalla una sola vez por cada publicación. Desactivado por defecto."
+  }
+}

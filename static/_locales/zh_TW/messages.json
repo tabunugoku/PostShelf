@@ -1,0 +1,164 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "將 x.com 書籤整理到你自己的資料夾中。所有資料僅儲存在你的裝置上。"
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "全部"
+  },
+  "inboxName": {
+    "message": "未分類"
+  },
+  "newFolderDefaultName": {
+    "message": "新增資料夾"
+  },
+  "errEmptyName": {
+    "message": "請輸入資料夾名稱"
+  },
+  "errBuiltinImmutable": {
+    "message": "「全部」無法修改或刪除"
+  },
+  "errNotFound": {
+    "message": "找不到資料夾"
+  },
+  "errInvalidIcon": {
+    "message": "此圖示無法使用"
+  },
+  "errInvalidColor": {
+    "message": "此顏色無法使用"
+  },
+  "errInvalidImport": {
+    "message": "檔案格式無效"
+  },
+  "openFolders": {
+    "message": "儲存到資料夾"
+  },
+  "newFolder": {
+    "message": "新增資料夾"
+  },
+  "newFolderPlaceholder": {
+    "message": "資料夾名稱"
+  },
+  "add": {
+    "message": "新增"
+  },
+  "noFolders": {
+    "message": "尚無資料夾"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "書籤"
+  },
+  "edit": {
+    "message": "編輯"
+  },
+  "postView": {
+    "message": "貼文檢視"
+  },
+  "listView": {
+    "message": "清單檢視"
+  },
+  "search": {
+    "message": "搜尋"
+  },
+  "sortSavedDesc": {
+    "message": "儲存時間：最新"
+  },
+  "sortSavedAsc": {
+    "message": "儲存時間：最舊"
+  },
+  "sortPostedDesc": {
+    "message": "發佈時間：最新"
+  },
+  "sortPostedAsc": {
+    "message": "發佈時間：最舊"
+  },
+  "name": {
+    "message": "名稱"
+  },
+  "icon": {
+    "message": "圖示"
+  },
+  "color": {
+    "message": "顏色"
+  },
+  "colorOnlyFolder": {
+    "message": "只有資料夾圖示可以設定顏色"
+  },
+  "save": {
+    "message": "儲存"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "delete": {
+    "message": "刪除"
+  },
+  "confirmDelete": {
+    "message": "要刪除此資料夾嗎？（貼文本身會保留。）"
+  },
+  "empty": {
+    "message": "沒有已儲存的貼文"
+  },
+  "openOnX": {
+    "message": "在 X 上開啟"
+  },
+  "popupPosts": {
+    "message": "則貼文"
+  },
+  "popupFolders": {
+    "message": "個資料夾"
+  },
+  "recent": {
+    "message": "最近儲存的 3 則"
+  },
+  "settings": {
+    "message": "設定"
+  },
+  "openManager": {
+    "message": "開啟管理頁面"
+  },
+  "exportBtn": {
+    "message": "匯出"
+  },
+  "importBtn": {
+    "message": "匯入"
+  },
+  "importFail": {
+    "message": "檔案格式無效"
+  },
+  "collectTitle": {
+    "message": "將此頁面上的貼文匯入 PostShelf"
+  },
+  "importDone": {
+    "message": "已匯入 $COUNT$ 則貼文",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "已將 $COUNT$ 則貼文匯入「未分類」",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "與 X 書籤同步"
+  },
+  "syncNativeDesc": {
+    "message": "將貼文儲存到資料夾時，同時在 X 上加入書籤；從所有資料夾中移除時，也會移除 X 上的書籤。對你操作的每則貼文，只會點擊一次畫面上的書籤按鈕。預設為關閉。"
+  }
+}
