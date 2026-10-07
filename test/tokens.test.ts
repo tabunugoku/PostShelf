@@ -56,6 +56,15 @@ describe('design tokens follow the X palette', () => {
           for (const fg of ['text-primary', 'text-secondary']) expect(ratio(rgb(t[fg]), sel), `${fg} on selected/${base}`).toBeGreaterThanOrEqual(4.5);
         }
       });
+      it('v9-D: the selected row is clearly darker/lighter than both a plain row and a hovered row (not just a thin edge line)', () => {
+        for (const base of ['surface-1', 'surface-2']) {
+          const plain = rgb(t[base]);
+          const hover = over(t['fill-ghost-hover'].replace(/\s/g, ''), plain);
+          const sel = over(t['fill-ghost-selected'].replace(/\s/g, ''), plain);
+          expect(ratio(sel, plain), `selected vs plain/${base}`).toBeGreaterThanOrEqual(1.1);
+          expect(ratio(sel, hover), `selected vs hover/${base}`).toBeGreaterThanOrEqual(1.05);
+        }
+      });
       it('white on accent-strong and on danger-solid', () => {
         expect(ratio([255, 255, 255], rgb(t['accent-strong']))).toBeGreaterThanOrEqual(4.5);
         expect(ratio([255, 255, 255], rgb(t['danger-solid']))).toBeGreaterThanOrEqual(4.5);

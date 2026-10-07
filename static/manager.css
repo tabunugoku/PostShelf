@@ -9,6 +9,8 @@
   --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0f6fb3;
   --accent-strong:#0f6fb3;--danger:#c0302f;--danger-solid:#c0302f;
   --shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);--radius:8px;
+  /* ポスト表示 (X 風カード) の列の上限幅。広い画面で横に伸びすぎて読みづらくならないよう、ここ 1 か所で調整する */
+  --post-col-max:720px;
 }
 @media (prefers-color-scheme:dark){:root{
   --text-primary:#e7e9ea;--text-secondary:#9aa4ad;--text-muted:#9aa4ad;
@@ -41,12 +43,12 @@ button:disabled{cursor:not-allowed}
 
 /* ---- アプリ全体 ---- */
 .app{min-height:100vh}
-.layout-wide{display:grid;grid-template-columns:240px minmax(0,1fr);max-width:1200px;margin:0 auto}
+.layout-wide{display:grid;grid-template-columns:240px minmax(0,1fr)}
 .side{z-index:30;position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;background:var(--surface-1);border-right:1px solid var(--border);padding:14px 10px;display:flex;flex-direction:column;gap:2px}
 .sec{font-size:14px;color:var(--text-secondary);padding:10px 10px 4px}
 .fr{position:relative;display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;cursor:pointer}
 .fr:hover{background:var(--fill-ghost-hover)}
-.fr.on{background:var(--fill-ghost-selected);font-weight:700;box-shadow:inset 3px 0 0 var(--text-primary)}
+.fr.on{background:var(--fill-ghost-selected);font-weight:700}
 .fr i{font-size:18px}
 .fr .n{margin-left:auto;font-size:14px;color:var(--text-secondary)}
 .fr.on .n{color:var(--text-primary)}
@@ -70,7 +72,7 @@ button:disabled{cursor:not-allowed}
 .search input:focus-visible{outline:none}
 .seg{display:flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden}
 .seg button{border:0;border-radius:0;min-width:36px}
-.seg button.on{background:var(--fill-ghost-selected);box-shadow:inset 0 -3px 0 var(--text-primary)}
+.seg button.on{background:var(--fill-ghost-selected)}
 .icon-only,.icon-btn{display:inline-flex;align-items:center;justify-content:center;min-width:32px;width:32px;height:32px;min-height:32px;padding:0;border:0;border-radius:50%;color:var(--text-secondary);font-size:18px;text-decoration:none;cursor:pointer}
 .icon-btn.bordered{border:1px solid var(--border-strong);border-radius:8px}
 .icon-btn:hover{background:var(--fill-ghost-hover);color:var(--text-primary)}
@@ -102,7 +104,7 @@ button:disabled{cursor:not-allowed}
 .rows{position:relative}
 .post{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px 8px;border-top:1px solid var(--border);border-radius:8px}
 .post:hover{background:var(--fill-ghost-hover)}
-.post.selected,.mini.selected,.gc.selected{background:var(--bg-accent);box-shadow:inset 3px 0 0 var(--fill-accent)}
+.post.selected,.mini.selected,.gc.selected{background:var(--bg-accent)}
 .post:focus-visible,.mini:focus-visible,.gc:focus-visible{outline-offset:-2px}
 .av{width:40px;height:40px;border-radius:50%;background:var(--fill-control);flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;object-fit:cover}
 .post-body{min-width:0;flex:1}
@@ -132,7 +134,9 @@ button:disabled{cursor:not-allowed}
 .mini:hover{background:var(--fill-ghost-hover)}
 .mini .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .handle{color:var(--text-secondary);width:110px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.view-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:10px}
+.view-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));grid-auto-rows:1fr;gap:10px}
+/* ポスト表示は列に上限幅をつけて左に寄せる (中央寄せにしない)。リスト・グリッド・ツールバーはメインの幅いっぱい */
+.layout-wide .view-post{max-width:var(--post-col-max)}
 .gc{position:relative;display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--border);border-radius:12px;min-height:180px;overflow:hidden}
 .gc:hover{background:var(--fill-ghost-hover)}
 .gc .sel{position:absolute;top:6px;left:6px;z-index:1}
