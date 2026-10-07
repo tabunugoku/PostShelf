@@ -254,3 +254,10 @@ button:disabled{cursor:not-allowed}
 .acct-note{margin:6px 8px 4px;font-size:14px}
 .assign-targets{margin:0 0 16px}
 .layout-narrow .acct{margin-bottom:0}
+
+/* ---- 設定の初期化 / 危険な操作 (v9-F) ---- */
+.danger-zone{border-color:var(--danger)}
+.type-confirm{display:flex;flex-direction:column;gap:4px;margin:0 0 16px}
+.type-confirm input{width:100%}
+.dialog .error{margin:0 0 16px}
+.danger-solid:disabled,.primary:disabled,.danger-solid:disabled:hover,.primary:disabled:hover{opacity:.45}

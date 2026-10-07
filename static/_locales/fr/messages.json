@@ -560,5 +560,66 @@
         "content": "$1"
       }
     }
+  },
+  "settingsResetHeading": {
+    "message": "Réinitialiser les réglages"
+  },
+  "settingsResetBtn": {
+    "message": "Rétablir les valeurs initiales des réglages"
+  },
+  "settingsResetDesc": {
+    "message": "Seuls les réglages sont réinitialisés : mode lié, comportement du bouton natif, mode d'ouverture, affichage et tri, etc. Les dossiers, posts enregistrés et informations de compte sont conservés."
+  },
+  "settingsResetConfirm": {
+    "message": "Rétablir les valeurs initiales des réglages ? Les posts enregistrés et les dossiers ne sont pas supprimés."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "Réinitialiser"
+  },
+  "settingsResetDone": {
+    "message": "Réglages réinitialisés"
+  },
+  "dangerHeading": {
+    "message": "Zone dangereuse"
+  },
+  "deleteAllBtn": {
+    "message": "Supprimer toutes les données"
+  },
+  "deleteAllDesc": {
+    "message": "Supprime tous les dossiers, posts enregistrés et informations de compte. Les réglages sont conservés. Action irréversible."
+  },
+  "deleteAllCounts": {
+    "message": "Seront supprimés : $FOLDERS$ dossiers, $POSTS$ posts, $ACCOUNTS$ comptes",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "Exporter d'abord une sauvegarde JSON"
+  },
+  "deleteAllWarn": {
+    "message": "Action irréversible. Vos favoris X ne sont pas modifiés. Pour continuer, saisissez « $WORD$ » ci-dessous.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "supprimer"
+  },
+  "deleteAllInputLabel": {
+    "message": "Saisie de confirmation"
+  },
+  "deleteAllDone": {
+    "message": "Toutes les données ont été supprimées"
   }
 }

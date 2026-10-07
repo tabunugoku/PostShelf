@@ -221,7 +221,7 @@ describe('health notices', () => {
   });
   it('settings page: has the status section and the copy button', async () => {
     await saveHealth({ state: 'ok', checkedAt: 5, missing: [], fallback: [] });
-    await show(<SettingsPage onChanged={() => {}} />);
+    await show(<SettingsPage onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} />);
     expect($('.setting-group legend + *') || $('legend')).toBeTruthy();
     expect($$('legend').map((l) => l.textContent)).toContain('X の画面構造');
     const btn = $$('button').find((b) => b.textContent?.includes('診断情報をコピー'))!;

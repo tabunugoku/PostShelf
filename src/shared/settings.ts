@@ -148,3 +148,43 @@ export function onHealthChanged(cb: () => void): () => void {
   return () => chrome.storage.onChanged?.removeListener(listener as never);
 }
 
+
+// ---- 設定の初期化 (v9-F) ----
+
+/** 初期化の取り消し用: 初期化前の保存内容 (undefined = キーがなかった) */
+export interface SettingsBackup {
+  settings: unknown;
+  hints: unknown;
+}
+
+/**
+ * 設定を DEFAULT_SETTINGS (唯一の初期値) に戻し、取り込みバナーの非表示記録 (dismissed) も 0 に戻す。
+ * 戻さないもの: フォルダ、保存したポスト、アカウント情報、lastSeenAccount (どれも別のキーなので、ここでは触らない)。
+ * `settings` キーの内容を丸ごと置き換えるので、設定の項目が増えても漏れない。取り消し用に初期化前の内容を返す。
+ */
+export async function resetSettings(): Promise<SettingsBackup> {
+  const backup: SettingsBackup = {
+    settings: (await chrome.storage.local.get(KEY))[KEY],
+    hints: (await chrome.storage.local.get(HINT_KEY))[HINT_KEY],
+  };
+  const cleared = Object.fromEntries(Object.entries(await readHints()).map(([id, h]) => [id, { pending: Number(h.pending) || 0, dismissed: 0 }]));
+  // updateSettings と同じ待ち行列に載せ、進行中の更新と順序が入れ替わらないようにする
+  const run = queue.then(() => chrome.storage.local.set({ [KEY]: { ...DEFAULT_SETTINGS }, [HINT_KEY]: cleared }));
+  queue = run.catch(() => undefined);
+  await run;
+  return backup;
+}
+
+/** resetSettings の取り消し */
+export async function restoreSettings(b: SettingsBackup): Promise<void> {
+  const run = queue.then(async () => {
+    const items: Record<string, unknown> = {};
+    if (b.settings !== undefined) items[KEY] = b.settings;
+    if (b.hints !== undefined) items[HINT_KEY] = b.hints;
+    if (Object.keys(items).length) await chrome.storage.local.set(items);
+    if (b.settings === undefined) await chrome.storage.local.remove?.(KEY);
+    if (b.hints === undefined) await chrome.storage.local.remove?.(HINT_KEY);
+  });
+  queue = run.catch(() => undefined);
+  await run;
+}

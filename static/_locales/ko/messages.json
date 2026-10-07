@@ -560,5 +560,66 @@
         "content": "$1"
       }
     }
+  },
+  "settingsResetHeading": {
+    "message": "설정 초기화"
+  },
+  "settingsResetBtn": {
+    "message": "설정을 기본값으로 되돌리기"
+  },
+  "settingsResetDesc": {
+    "message": "연동 모드, 기본 버튼 동작, 여는 방식, 보기 방식 등의 설정만 되돌립니다. 폴더, 저장한 게시물, 계정 정보는 지워지지 않습니다."
+  },
+  "settingsResetConfirm": {
+    "message": "설정을 기본값으로 되돌릴까요? 저장한 게시물과 폴더는 지워지지 않습니다."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "되돌리기"
+  },
+  "settingsResetDone": {
+    "message": "설정을 기본값으로 되돌렸습니다"
+  },
+  "dangerHeading": {
+    "message": "위험한 작업"
+  },
+  "deleteAllBtn": {
+    "message": "모든 데이터 삭제"
+  },
+  "deleteAllDesc": {
+    "message": "모든 폴더, 저장한 게시물, 계정 정보를 삭제합니다. 설정은 남습니다. 되돌릴 수 없습니다."
+  },
+  "deleteAllCounts": {
+    "message": "삭제되는 항목: 폴더 $FOLDERS$개, 게시물 $POSTS$개, 계정 $ACCOUNTS$개",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "먼저 JSON 내보내기"
+  },
+  "deleteAllWarn": {
+    "message": "되돌릴 수 없습니다. X의 북마크는 바뀌지 않습니다. 계속하려면 아래에 \"$WORD$\"를 입력하세요.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "삭제"
+  },
+  "deleteAllInputLabel": {
+    "message": "확인용 입력"
+  },
+  "deleteAllDone": {
+    "message": "모든 데이터를 삭제했습니다"
   }
 }

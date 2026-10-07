@@ -62,7 +62,7 @@ const sorts = (): [SortKey, string][] => [
 
 type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: string } | { kind: 'account'; id: string } | null;
 /** undo の無いトースト (アカウントの切替・割り当ての通知) もある */
-type ToastState = { key: number; message: string; undo?: BookmarkUndo } | null;
+type ToastState = { key: number; message: string; undo?: BookmarkUndo; /** 設定の初期化の取り消しなど、ポスト以外の「元に戻す」 */ action?: () => Promise<void> } | null;
 
 /** 「未分類」は保存データにまだ無くても常にスマートビューに出す。アイコンは受け皿らしく inbox に統一する */
 const inboxView = (stored?: Folder): Folder => ({ id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color });
@@ -168,6 +168,19 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     switchTo(next.id);
     if (prev !== null) setToast({ key: Date.now(), message: t('accountSwitched', accountLabel(next)) });
   };
+  /** 設定の初期化 / 取り消し / 全データ削除のあと、保存されている設定とデータから表示を作り直す (リロード不要) */
+  const reapplySettings = async () => {
+    const [s, accs] = await Promise.all([getSettings(), listAccounts()]);
+    setView(s.viewMode);
+    setSort(s.sortKey);
+    lastRef.current = await getLastSeenAccount();
+    setLastSeen(lastRef.current);
+    applyView(resolveViewAccount(s.viewAccount, lastRef.current, accs));
+    setCurrent(s.lastFolderId);
+    setFilters({});
+    setSelected(new Set());
+    await Promise.all([reload(), loadHint()]);
+  };
   /** 表示アカウントを切り替えて、データと表示状態を読み直す */
   const switchTo = (id: string) => {
     applyView(id);
@@ -260,6 +273,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     if (n > 0) setToast({ key: Date.now(), message: t(msgKey, n), undo });
   };
   const doUndo = async () => {
+    if (toast?.action) {
+      const act = toast.action;
+      setToast(null);
+      await act();
+      return;
+    }
     if (!toast?.undo) return;
     await restoreBookmarks(toast.undo);
     setToast(null);
@@ -683,13 +702,19 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         />
       )}
       {showHow && <InfoDialog title={t('importHowTitle')} body={t('importHowSteps')} onClose={() => setShowHow(false)} />}
-      {toast && <Toast message={toast.message} onUndo={toast.undo ? () => void doUndo() : undefined} />}
+      {toast && <Toast message={toast.message} onUndo={toast.undo || toast.action ? () => void doUndo() : undefined} />}
     </>
   );
 
   if (!ready) return <div class={`app surface-${surface}`} />;
 
-  const settingsPage = <SettingsPage onChanged={() => void reload()} />;
+  const settingsPage = (
+    <SettingsPage
+      onChanged={() => void reload()}
+      onApplied={() => void reapplySettings()}
+      onNotice={(message, action) => setToast({ key: Date.now(), message, action })}
+    />
+  );
 
   // ===== 狭いレイアウト (サイドパネル向け): 1 つのフォルダボタン + 検索 + 横スクロールのチップ =====
   if (compact) {

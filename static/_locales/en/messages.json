@@ -560,5 +560,66 @@
         "content": "$1"
       }
     }
+  },
+  "settingsResetHeading": {
+    "message": "Reset settings"
+  },
+  "settingsResetBtn": {
+    "message": "Reset settings to defaults"
+  },
+  "settingsResetDesc": {
+    "message": "Only settings are reset: sync mode, native button behavior, how PostShelf opens, view and sort, and so on. Folders, saved posts and account info are kept."
+  },
+  "settingsResetConfirm": {
+    "message": "Reset settings to their defaults? Your saved posts and folders will not be deleted."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "Reset"
+  },
+  "settingsResetDone": {
+    "message": "Settings were reset"
+  },
+  "dangerHeading": {
+    "message": "Danger zone"
+  },
+  "deleteAllBtn": {
+    "message": "Delete all data"
+  },
+  "deleteAllDesc": {
+    "message": "Deletes all folders, saved posts and account info. Settings are kept. This cannot be undone."
+  },
+  "deleteAllCounts": {
+    "message": "Will be deleted: $FOLDERS$ folders, $POSTS$ posts, $ACCOUNTS$ accounts",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "Export a JSON backup first"
+  },
+  "deleteAllWarn": {
+    "message": "This cannot be undone. Your X bookmarks are not changed. To continue, type \"$WORD$\" below.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "delete"
+  },
+  "deleteAllInputLabel": {
+    "message": "Type to confirm"
+  },
+  "deleteAllDone": {
+    "message": "All data was deleted"
   }
 }

@@ -37,6 +37,46 @@ export function Confirm(props: { message: string; confirmLabel: string; onConfir
   );
 }
 
+/**
+ * 取り消せない操作の確認: 決められた言葉を入力しないと実行できない (一致するまで実行ボタンは無効)。
+ * children に件数などの説明を入れる。Esc / 外側クリック / キャンセルで閉じる。
+ */
+export function TypeToConfirm(props: { title: string; word: string; confirmLabel: string; children: ComponentChildren; onConfirm: () => void; onCancel: () => void }) {
+  const [value, setValue] = useState('');
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    input.current?.focus();
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') props.onCancel();
+    };
+    document.addEventListener('keydown', key);
+    return () => {
+      document.removeEventListener('keydown', key);
+      prev?.focus?.();
+    };
+  }, []);
+  const ok = value.trim().toLowerCase() === props.word.trim().toLowerCase();
+  return (
+    <div class="overlay" onClick={props.onCancel}>
+      <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="danger-title" onClick={(e) => e.stopPropagation()}>
+        <h2 id="danger-title" class="dialog-title">{props.title}</h2>
+        {props.children}
+        <label class="type-confirm">
+          <span class="muted">{t('deleteAllInputLabel')}</span>
+          <input ref={input} value={value} autocomplete="off" onInput={(e) => setValue((e.target as HTMLInputElement).value)} />
+        </label>
+        <div class="dialog-actions">
+          <button onClick={props.onCancel}>{t('cancel')}</button>
+          <button class="danger-solid" disabled={!ok} onClick={() => ok && props.onConfirm()}>
+            {props.confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** 閉じるだけの案内ダイアログ (本文は改行を保って表示) */
 export function InfoDialog(props: { title: string; body: string; onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);

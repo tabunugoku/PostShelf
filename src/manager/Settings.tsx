@@ -1,23 +1,56 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
-import { getSettings, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
-import { exportData, importData } from '../shared/storage';
+import { getSettings, resetSettings, restoreSettings, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
+import { countAllData, deleteAllData, exportData, importData, type DataCounts } from '../shared/storage';
+import { Confirm, TypeToConfirm } from './ui';
 import { DiagnosticsDialog } from './Diagnostics';
 import { HealthNotice } from './HealthNotice';
 
-export function SettingsPage({ onChanged }: { onChanged: () => void }) {
+export function SettingsPage({ onChanged, onApplied, onNotice }: {
+  /** データが変わった (インポートなど) */
+  onChanged: () => void;
+  /** 設定やデータが変わって、開いている画面の表示を作り直す必要がある (初期化 / 取り消し / 全削除) */
+  onApplied: () => void;
+  /** 「元に戻す」付きのお知らせ (5 秒)。undo が無ければ通知だけ */
+  onNotice: (message: string, undo?: () => Promise<void>) => void;
+}) {
   const [sync, setSync] = useState(false);
   const [bmode, setBmode] = useState<ButtonMode>('separate');
   const [amode, setAmode] = useState<ActionMode>('popup');
   const [diag, setDiag] = useState(location.hash === '#diagnostics');
-  useEffect(() => {
+  const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
+  const [counts, setCounts] = useState<DataCounts | null>(null);
+  const load = () =>
     void getSettings().then((s) => {
       setSync(s.syncNative);
       setBmode(s.buttonMode);
       setAmode(s.actionMode);
     });
-  }, []);
+  useEffect(load, []);
+
+  const doReset = async () => {
+    setDialog(null);
+    const backup = await resetSettings();
+    load();
+    onApplied();
+    // 直後の 5 秒間は、初期化前の設定に戻せる
+    onNotice(t('settingsResetDone'), async () => {
+      await restoreSettings(backup);
+      load();
+      onApplied();
+    });
+  };
+  const openDeleteAll = async () => {
+    setCounts(await countAllData());
+    setDialog('deleteAll');
+  };
+  const doDeleteAll = async () => {
+    setDialog(null);
+    await deleteAllData();
+    onApplied();
+    onNotice(t('deleteAllDone'));
+  };
   return (
     <section>
       <div class="bar">
@@ -101,7 +134,39 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
           </label>
         </div>
       </fieldset>
+      <fieldset class="setting-group">
+        <legend>{t('settingsResetHeading')}</legend>
+        <p class="muted setting-desc">{t('settingsResetDesc')}</p>
+        <div class="io">
+          <button onClick={() => setDialog('reset')}>
+            <Icon name="ti-restore" /> {t('settingsResetBtn')}
+          </button>
+        </div>
+      </fieldset>
+      <fieldset class="setting-group danger-zone">
+        <legend class="danger-text">{t('dangerHeading')}</legend>
+        <p class="muted setting-desc">{t('deleteAllDesc')}</p>
+        <div class="io">
+          <button class="danger" onClick={() => void openDeleteAll()}>
+            <Icon name="ti-trash" /> {t('deleteAllBtn')}
+          </button>
+        </div>
+      </fieldset>
       {diag && <DiagnosticsDialog onClose={() => setDiag(false)} />}
+      {dialog === 'reset' && (
+        <Confirm message={t('settingsResetConfirm')} confirmLabel={t('settingsResetConfirmBtn')} onCancel={() => setDialog(null)} onConfirm={() => void doReset()} />
+      )}
+      {dialog === 'deleteAll' && counts && (
+        <TypeToConfirm title={t('deleteAllBtn')} word={t('deleteAllWord')} confirmLabel={t('delete')} onCancel={() => setDialog(null)} onConfirm={() => void doDeleteAll()}>
+          <p>{t('deleteAllCounts', counts.folders, counts.posts, counts.accounts)}</p>
+          <p>
+            <button onClick={() => void downloadJson(exportData)}>
+              <Icon name="ti-download" /> {t('deleteAllExport')}
+            </button>
+          </p>
+          <p class="error">{t('deleteAllWarn', t('deleteAllWord'))}</p>
+        </TypeToConfirm>
+      )}
     </section>
   );
 }

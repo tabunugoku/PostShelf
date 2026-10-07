@@ -560,5 +560,66 @@
         "content": "$1"
       }
     }
+  },
+  "settingsResetHeading": {
+    "message": "重設設定"
+  },
+  "settingsResetBtn": {
+    "message": "將設定恢復為預設值"
+  },
+  "settingsResetDesc": {
+    "message": "只重設設定：連動模式、標準按鈕的行為、開啟方式、顯示方式等。資料夾、已儲存的貼文和帳號資訊不會被刪除。"
+  },
+  "settingsResetConfirm": {
+    "message": "要將設定恢復為預設值嗎？已儲存的貼文和資料夾不會被刪除。"
+  },
+  "settingsResetConfirmBtn": {
+    "message": "恢復預設值"
+  },
+  "settingsResetDone": {
+    "message": "已將設定恢復為預設值"
+  },
+  "dangerHeading": {
+    "message": "危險操作"
+  },
+  "deleteAllBtn": {
+    "message": "刪除所有資料"
+  },
+  "deleteAllDesc": {
+    "message": "刪除所有資料夾、已儲存的貼文和帳號資訊。設定會保留。此操作無法復原。"
+  },
+  "deleteAllCounts": {
+    "message": "將被刪除：資料夾 $FOLDERS$ 個、貼文 $POSTS$ 則、帳號 $ACCOUNTS$ 個",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "先匯出 JSON 備份"
+  },
+  "deleteAllWarn": {
+    "message": "此操作無法復原。X 上的書籤不會改變。要繼續，請在下方輸入「$WORD$」。",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "刪除"
+  },
+  "deleteAllInputLabel": {
+    "message": "確認輸入"
+  },
+  "deleteAllDone": {
+    "message": "已刪除所有資料"
   }
 }

@@ -560,5 +560,66 @@
         "content": "$1"
       }
     }
+  },
+  "settingsResetHeading": {
+    "message": "重置设置"
+  },
+  "settingsResetBtn": {
+    "message": "将设置恢复为默认值"
+  },
+  "settingsResetDesc": {
+    "message": "只重置设置：联动模式、标准按钮的行为、打开方式、显示方式等。文件夹、已保存的帖子和账号信息不会被删除。"
+  },
+  "settingsResetConfirm": {
+    "message": "要将设置恢复为默认值吗？已保存的帖子和文件夹不会被删除。"
+  },
+  "settingsResetConfirmBtn": {
+    "message": "恢复默认值"
+  },
+  "settingsResetDone": {
+    "message": "已将设置恢复为默认值"
+  },
+  "dangerHeading": {
+    "message": "危险操作"
+  },
+  "deleteAllBtn": {
+    "message": "删除所有数据"
+  },
+  "deleteAllDesc": {
+    "message": "删除所有文件夹、已保存的帖子和账号信息。设置会保留。此操作无法撤销。"
+  },
+  "deleteAllCounts": {
+    "message": "将被删除：文件夹 $FOLDERS$ 个、帖子 $POSTS$ 条、账号 $ACCOUNTS$ 个",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "先导出 JSON 备份"
+  },
+  "deleteAllWarn": {
+    "message": "此操作无法撤销。X 上的书签不会改变。要继续，请在下方输入“$WORD$”。",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "删除"
+  },
+  "deleteAllInputLabel": {
+    "message": "确认输入"
+  },
+  "deleteAllDone": {
+    "message": "已删除所有数据"
   }
 }

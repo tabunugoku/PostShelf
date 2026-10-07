@@ -560,5 +560,66 @@
         "content": "$1"
       }
     }
+  },
+  "settingsResetHeading": {
+    "message": "設定の初期化"
+  },
+  "settingsResetBtn": {
+    "message": "設定を初期の値に戻す"
+  },
+  "settingsResetDesc": {
+    "message": "連動モード、標準ボタンの動作、開き方、表示形式などの設定だけを戻します。フォルダ、保存したポスト、アカウント情報は消えません。"
+  },
+  "settingsResetConfirm": {
+    "message": "設定を初期の値に戻しますか？ 保存したポストとフォルダは消えません。"
+  },
+  "settingsResetConfirmBtn": {
+    "message": "初期の値に戻す"
+  },
+  "settingsResetDone": {
+    "message": "設定を初期の値に戻しました"
+  },
+  "dangerHeading": {
+    "message": "危険な操作"
+  },
+  "deleteAllBtn": {
+    "message": "すべてのデータを削除"
+  },
+  "deleteAllDesc": {
+    "message": "フォルダ、保存したポスト、アカウント情報をすべて削除します。設定は残ります。取り消しはできません。"
+  },
+  "deleteAllCounts": {
+    "message": "削除されるもの: フォルダ $FOLDERS$ 個、ポスト $POSTS$ 件、アカウント $ACCOUNTS$ 件",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "先に JSON を書き出す"
+  },
+  "deleteAllWarn": {
+    "message": "取り消しはできません。X のブックマークは変更されません。続けるには、下の欄に「$WORD$」と入力してください。",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "削除"
+  },
+  "deleteAllInputLabel": {
+    "message": "確認のための入力"
+  },
+  "deleteAllDone": {
+    "message": "すべてのデータを削除しました"
   }
 }

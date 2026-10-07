@@ -560,5 +560,66 @@
         "content": "$1"
       }
     }
+  },
+  "settingsResetHeading": {
+    "message": "Restablecer ajustes"
+  },
+  "settingsResetBtn": {
+    "message": "Restablecer los ajustes a sus valores iniciales"
+  },
+  "settingsResetDesc": {
+    "message": "Solo se restablecen los ajustes: modo vinculado, comportamiento del botón nativo, forma de abrir, vista y orden, etc. Las carpetas, las publicaciones guardadas y la información de cuentas se conservan."
+  },
+  "settingsResetConfirm": {
+    "message": "¿Restablecer los ajustes a sus valores iniciales? Las publicaciones guardadas y las carpetas no se eliminan."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "Restablecer"
+  },
+  "settingsResetDone": {
+    "message": "Ajustes restablecidos"
+  },
+  "dangerHeading": {
+    "message": "Zona de peligro"
+  },
+  "deleteAllBtn": {
+    "message": "Eliminar todos los datos"
+  },
+  "deleteAllDesc": {
+    "message": "Elimina todas las carpetas, publicaciones guardadas e información de cuentas. Los ajustes se conservan. No se puede deshacer."
+  },
+  "deleteAllCounts": {
+    "message": "Se eliminarán: $FOLDERS$ carpetas, $POSTS$ publicaciones, $ACCOUNTS$ cuentas",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "Exportar antes una copia JSON"
+  },
+  "deleteAllWarn": {
+    "message": "No se puede deshacer. Tus marcadores de X no cambian. Para continuar, escribe «$WORD$» abajo.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "eliminar"
+  },
+  "deleteAllInputLabel": {
+    "message": "Escribe para confirmar"
+  },
+  "deleteAllDone": {
+    "message": "Se eliminaron todos los datos"
   }
 }

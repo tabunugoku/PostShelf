@@ -560,5 +560,66 @@
         "content": "$1"
       }
     }
+  },
+  "settingsResetHeading": {
+    "message": "Redefinir configurações"
+  },
+  "settingsResetBtn": {
+    "message": "Redefinir as configurações para os valores iniciais"
+  },
+  "settingsResetDesc": {
+    "message": "Apenas as configurações são redefinidas: modo vinculado, comportamento do botão nativo, forma de abrir, visualização e ordem etc. Pastas, posts salvos e informações de contas são mantidos."
+  },
+  "settingsResetConfirm": {
+    "message": "Redefinir as configurações para os valores iniciais? Os posts salvos e as pastas não serão excluídos."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "Redefinir"
+  },
+  "settingsResetDone": {
+    "message": "Configurações redefinidas"
+  },
+  "dangerHeading": {
+    "message": "Zona de perigo"
+  },
+  "deleteAllBtn": {
+    "message": "Excluir todos os dados"
+  },
+  "deleteAllDesc": {
+    "message": "Exclui todas as pastas, posts salvos e informações de contas. As configurações são mantidas. Não é possível desfazer."
+  },
+  "deleteAllCounts": {
+    "message": "Seront supprimés : $FOLDERS$ dossiers, $POSTS$ posts, $ACCOUNTS$ comptes",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "Exportar um backup JSON antes"
+  },
+  "deleteAllWarn": {
+    "message": "Não é possível desfazer. Seus favoritos do X não são alterados. Para continuar, digite \"$WORD$\" abaixo.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "excluir"
+  },
+  "deleteAllInputLabel": {
+    "message": "Digite para confirmar"
+  },
+  "deleteAllDone": {
+    "message": "Todos os dados foram excluídos"
   }
 }
