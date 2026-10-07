@@ -29,3 +29,5 @@ main { flex:1; padding:12px 20px; max-width:760px; }
 .text-1line { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .empty { color:var(--muted); }
 .popup { width:220px; padding:8px; }
+.io { display:flex; gap:6px; margin:8px 0; } .file-btn { border:1px solid var(--line); border-radius:6px; padding:4px 8px; cursor:pointer; }
+.postshelf-collect { position:fixed; right:16px; bottom:16px; z-index:2147483647; }

@@ -11,7 +11,8 @@ import {
 } from '../shared/models';
 import { countFolder, queryBookmarks, type SortKey } from '../shared/query';
 import { MGR } from '../shared/strings';
-import { createFolder, deleteFolder, listBookmarks, listFolders, updateFolder } from '../shared/storage';
+import { createFolder, deleteFolder, exportData, importData, listBookmarks, listFolders, updateFolder } from '../shared/storage';
+import { IO } from '../shared/strings';
 
 const SORTS: [SortKey, string][] = [
   ['savedDesc', MGR.sortSavedDesc],
@@ -58,6 +59,29 @@ export function App() {
             <span class="count">{countFolder(bookmarks, f.id)}</span>
           </button>
         ))}
+        <div class="io">
+          <button onClick={() => downloadJson(exportData)}>{IO.export}</button>
+          <label class="file-btn">
+            {IO.import}
+            <input
+              type="file"
+              accept="application/json,.json"
+              hidden
+              onChange={async (e) => {
+                const input = e.target as HTMLInputElement;
+                const file = input.files?.[0];
+                if (!file) return;
+                try {
+                  alert(IO.importDone(await importData(JSON.parse(await file.text()))));
+                } catch {
+                  alert(IO.importFail);
+                }
+                input.value = '';
+                await reload();
+              }}
+            />
+          </label>
+        </div>
         <button
           class="folder-item"
           onClick={async () => {
@@ -242,4 +266,13 @@ function EditPanel({ folder, onDone }: { folder: Folder; onDone: (deleted?: bool
       </div>
     </section>
   );
+}
+
+async function downloadJson(make: typeof exportData): Promise<void> {
+  const blob = new Blob([JSON.stringify(await make(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `postshelf-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }

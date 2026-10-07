@@ -150,3 +150,77 @@ export async function setBookmarkFolders(
   await write(KEY_BOOKMARKS, map);
   return b;
 }
+
+// ---- Export / Import ----
+
+export interface ExportData {
+  app: 'PostShelf';
+  version: 1;
+  exportedAt: number;
+  folders: Folder[];
+  bookmarks: Bookmark[];
+}
+
+export async function exportData(): Promise<ExportData> {
+  return {
+    app: 'PostShelf',
+    version: 1,
+    exportedAt: Date.now(),
+    folders: await readFolders(),
+    bookmarks: await listBookmarks(),
+  };
+}
+
+const isStr = (v: unknown): v is string => typeof v === 'string';
+
+function validFolder(f: any): f is Folder {
+  return f && isStr(f.id) && isStr(f.name) && isStr(f.icon) && typeof f.order === 'number' && !isBuiltinFolder(f.id);
+}
+function validBookmark(b: any): b is Bookmark {
+  return (
+    b && isStr(b.tweetId) && Array.isArray(b.folderIds) && b.folderIds.every(isStr) &&
+    typeof b.savedAt === 'number' && b.snapshot && isStr(b.snapshot.text) && isStr(b.snapshot.url) &&
+    Array.isArray(b.snapshot.media)
+  );
+}
+
+/** JSON を検証してマージ取り込みする (同 ID は上書き)。不正なら StorageError。 */
+export async function importData(json: unknown): Promise<number> {
+  const d = json as Partial<ExportData> | null;
+  if (!d || d.app !== 'PostShelf' || !Array.isArray(d.folders) || !Array.isArray(d.bookmarks)) {
+    throw new StorageError(STRINGS.errors.invalidImport);
+  }
+  const folders = d.folders.filter(validFolder);
+  const bookmarks = d.bookmarks.filter(validBookmark);
+  const curFolders = new Map((await readFolders()).map((f) => [f.id, f]));
+  for (const f of folders) curFolders.set(f.id, f);
+  const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
+  for (const b of bookmarks) map[b.tweetId] = b;
+  await write(KEY_FOLDERS, [...curFolders.values()]);
+  await write(KEY_BOOKMARKS, map);
+  return bookmarks.length;
+}
+
+/**
+ * フォルダ未所属で取り込む (ページ収集用)。既存ポストは触らない。
+ * ブックマークは folderIds が空だと消える仕様なので、専用の「未分類」フォルダへ入れる。
+ */
+export async function addCollected(items: { tweetId: string; snapshot: Bookmark['snapshot'] }[]): Promise<number> {
+  const folders = await readFolders();
+  let inbox = folders.find((f) => f.id === INBOX_ID);
+  if (!inbox) {
+    inbox = { id: INBOX_ID, name: STRINGS.inboxName, icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1 };
+    await write(KEY_FOLDERS, [...folders, inbox]);
+  }
+  const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
+  let added = 0;
+  for (const it of items) {
+    if (map[it.tweetId]) continue;
+    map[it.tweetId] = { tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: Date.now(), snapshot: it.snapshot };
+    added++;
+  }
+  await write(KEY_BOOKMARKS, map);
+  return added;
+}
+
+const INBOX_ID = 'inbox';

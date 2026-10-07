@@ -1,6 +1,7 @@
 /** UI 文言 (日本語)。将来の i18n に備えてここへ集約する。 */
 export const STRINGS = {
   allFolderName: 'すべて',
+  inboxName: '未分類',
   newFolderDefaultName: '新しいフォルダ',
   errors: {
     emptyName: 'フォルダ名を入力してください',
@@ -8,6 +9,7 @@ export const STRINGS = {
     notFound: 'フォルダが見つかりません',
     invalidIcon: '使用できないアイコンです',
     invalidColor: '使用できない色です',
+    invalidImport: 'ファイルの形式が正しくありません',
   },
 } as const;
 
@@ -44,4 +46,13 @@ export const MGR = {
   popupBookmarks: '保存したポスト',
   popupFolders: 'フォルダ',
   openManager: '管理画面を開く',
+} as const;
+
+export const IO = {
+  export: 'エクスポート',
+  import: 'インポート',
+  importDone: (n: number) => `${n} 件のポストを取り込みました`,
+  importFail: 'ファイルの形式が正しくありません',
+  collectTitle: 'このページのポストを PostShelf に取り込む',
+  collectDone: (n: number) => `${n} 件を「未分類」として取り込みました`,
 } as const;
