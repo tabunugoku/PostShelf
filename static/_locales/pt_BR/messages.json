@@ -99,7 +99,7 @@
     "message": "Excluir"
   },
   "confirmDelete": {
-    "message": "Excluir esta pasta? (Os posts em si são mantidos.)"
+    "message": "Excluir esta pasta? Os posts salvos não serão excluídos."
   },
   "empty": {
     "message": "Nenhum post salvo"
@@ -156,7 +156,7 @@
     "message": "Sincronizar com os favoritos do X"
   },
   "syncNativeDesc": {
-    "message": "Ao salvar um post em uma pasta, ele também é adicionado aos favoritos do X; ao removê-lo de todas as pastas, o favorito do X também é removido. O botão de favorito na tela é clicado uma única vez por post em que você age. Desativado por padrão."
+    "message": "Ao salvar um post em uma pasta, o PostShelf também o adiciona aos favoritos padrão do X; ao removê-lo de todas as pastas, o favorito do X também é removido. O PostShelf clica no botão de favorito da tela apenas uma vez por post em que você age. Desativado por padrão."
   },
   "savedBadgeTitle": {
     "message": "Salvo em $COUNT$ pasta(s)",
@@ -429,7 +429,7 @@
     "message": "Parte da estrutura da página do X mudou. O PostShelf continua funcionando."
   },
   "healthBroken": {
-    "message": "A estrutura da página do X mudou, então alguns recursos foram pausados. Enviar as informações de diagnóstico ajuda a corrigir."
+    "message": "A estrutura da página do X mudou, então alguns recursos foram pausados. Copie as informações de diagnóstico e relate no GitHub."
   },
   "copyDiag": {
     "message": "Copiar informações de diagnóstico"
@@ -438,7 +438,7 @@
     "message": "Informações de diagnóstico"
   },
   "diagNotice": {
-    "message": "Este conteúdo será copiado para a área de transferência. Não contém informações pessoais."
+    "message": "Este conteúdo será copiado para a área de transferência. Não inclui o texto dos posts, nomes de usuário nem URLs. Inclui a versão da extensão, informações do navegador, o idioma de exibição e o esboço da estrutura da página do X."
   },
   "diagCopy": {
     "message": "Copiar"

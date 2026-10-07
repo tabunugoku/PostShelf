@@ -47,6 +47,13 @@ describe('locales', () => {
     for (const k of used) expect(keys.has(k), k).toBe(true);
   });
 
+  it('ja uses full-width （ ） for supplementary parentheses (no half-width ones, no space before a bracket)', () => {
+    for (const [k, v] of Object.entries(loadMessages('ja'))) {
+      expect(v.message, k).not.toMatch(/[()]/);
+      expect(v.message, k).not.toMatch(/ （/);
+    }
+  });
+
   it('manifest uses default_locale en', () => {
     expect(JSON.parse(readFileSync(resolve(process.cwd(), 'static/manifest.json'), 'utf8')).default_locale).toBe('en');
   });

@@ -99,7 +99,7 @@
     "message": "Eliminar"
   },
   "confirmDelete": {
-    "message": "¿Eliminar esta carpeta? (Las publicaciones se conservan.)"
+    "message": "¿Eliminar esta carpeta? Las publicaciones guardadas no se eliminarán."
   },
   "empty": {
     "message": "No hay publicaciones guardadas"
@@ -156,7 +156,7 @@
     "message": "Sincronizar con los marcadores de X"
   },
   "syncNativeDesc": {
-    "message": "Al guardar una publicación en una carpeta, también se añade a los marcadores de X; al quitarla de todas las carpetas, se quita también el marcador de X. Pulsa el botón de marcador en pantalla una sola vez por cada publicación. Desactivado por defecto."
+    "message": "Al guardar una publicación en una carpeta, PostShelf también la añade a tus marcadores estándar de X; al quitarla de todas las carpetas, también se quita el marcador de X. PostShelf pulsa el botón de marcador de la pantalla solo una vez por cada publicación sobre la que actúas. Desactivado por defecto."
   },
   "savedBadgeTitle": {
     "message": "Guardado en $COUNT$ carpeta(s)",
@@ -429,7 +429,7 @@
     "message": "Parte de la estructura de la página de X ha cambiado. PostShelf sigue funcionando."
   },
   "healthBroken": {
-    "message": "La estructura de la página de X ha cambiado y se han pausado algunas funciones. Enviar la información de diagnóstico nos ayuda a corregirlo."
+    "message": "La estructura de la página de X ha cambiado y se han pausado algunas funciones. Copia la información de diagnóstico e infórmalo en GitHub."
   },
   "copyDiag": {
     "message": "Copiar información de diagnóstico"
@@ -438,7 +438,7 @@
     "message": "Información de diagnóstico"
   },
   "diagNotice": {
-    "message": "Este contenido se copiará al portapapeles. No contiene información personal."
+    "message": "Este contenido se copiará al portapapeles. No incluye el texto de las publicaciones, los nombres de usuario ni las URL. Sí incluye la versión de la extensión, la información del navegador, el idioma de visualización y el esquema de la estructura de la página de X."
   },
   "diagCopy": {
     "message": "Copiar"

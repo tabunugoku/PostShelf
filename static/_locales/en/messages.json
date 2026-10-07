@@ -99,7 +99,7 @@
     "message": "Delete"
   },
   "confirmDelete": {
-    "message": "Delete this folder? (The posts themselves are kept.)"
+    "message": "Delete this folder? The saved posts will not be deleted."
   },
   "empty": {
     "message": "No saved posts"
@@ -156,7 +156,7 @@
     "message": "Sync with X bookmarks"
   },
   "syncNativeDesc": {
-    "message": "When you save a post to a folder, also bookmark it on X; when you remove it from all folders, remove the X bookmark too. It presses the on-screen bookmark button once per post you act on. Off by default."
+    "message": "When you save a post to a folder, PostShelf also adds it to your standard X bookmarks; when you remove it from all folders, the X bookmark is removed too. PostShelf presses the on-screen bookmark button only once per post you act on. Off by default."
   },
   "savedBadgeTitle": {
     "message": "Saved in $COUNT$ folder(s)",
@@ -429,7 +429,7 @@
     "message": "Parts of the X page structure have changed. PostShelf is still working."
   },
   "healthBroken": {
-    "message": "The X page structure has changed, so some features are paused. Sending diagnostic info helps us fix it."
+    "message": "The X page structure has changed, so some features are paused. Please copy the diagnostic info and report it on GitHub."
   },
   "copyDiag": {
     "message": "Copy diagnostic info"
@@ -438,7 +438,7 @@
     "message": "Diagnostic info"
   },
   "diagNotice": {
-    "message": "This content will be copied to the clipboard. It contains no personal information."
+    "message": "This content will be copied to the clipboard. It does not include post text, usernames, or URLs. It does include the extension version, browser information, display language, and the outline of X's page structure."
   },
   "diagCopy": {
     "message": "Copy"

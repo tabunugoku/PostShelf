@@ -99,7 +99,7 @@
     "message": "Supprimer"
   },
   "confirmDelete": {
-    "message": "Supprimer ce dossier ? (Les posts sont conservés.)"
+    "message": "Supprimer ce dossier ? Les posts enregistrés ne seront pas supprimés."
   },
   "empty": {
     "message": "Aucun post enregistré"
@@ -156,7 +156,7 @@
     "message": "Synchroniser avec les favoris X"
   },
   "syncNativeDesc": {
-    "message": "Quand vous enregistrez un post dans un dossier, il est aussi ajouté aux favoris sur X ; quand vous le retirez de tous les dossiers, le favori X est retiré aussi. Le bouton de favori à l'écran n'est cliqué qu'une seule fois par post concerné. Désactivé par défaut."
+    "message": "Quand vous enregistrez un post dans un dossier, PostShelf l'ajoute aussi aux favoris standard de X ; quand vous le retirez de tous les dossiers, le favori X est retiré aussi. PostShelf ne clique sur le bouton de favori à l'écran qu'une seule fois par post concerné. Désactivé par défaut."
   },
   "savedBadgeTitle": {
     "message": "Enregistré dans $COUNT$ dossier(s)",
@@ -429,7 +429,7 @@
     "message": "Une partie de la structure de la page X a changé. PostShelf continue de fonctionner."
   },
   "healthBroken": {
-    "message": "La structure de la page X a changé : certaines fonctions sont suspendues. Envoyer les informations de diagnostic nous aide à corriger."
+    "message": "La structure de la page X a changé : certaines fonctions sont suspendues. Copiez les informations de diagnostic et signalez-le sur GitHub."
   },
   "copyDiag": {
     "message": "Copier les informations de diagnostic"
@@ -438,7 +438,7 @@
     "message": "Informations de diagnostic"
   },
   "diagNotice": {
-    "message": "Ce contenu sera copié dans le presse-papiers. Il ne contient aucune information personnelle."
+    "message": "Ce contenu sera copié dans le presse-papiers. Il n'inclut ni le texte des posts, ni les noms d'utilisateur, ni les URL. Il inclut la version de l'extension, les informations sur le navigateur, la langue d'affichage et le squelette de la structure de la page X."
   },
   "diagCopy": {
     "message": "Copier"

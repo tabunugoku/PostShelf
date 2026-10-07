@@ -99,7 +99,7 @@
     "message": "删除"
   },
   "confirmDelete": {
-    "message": "要删除此文件夹吗？（帖子本身会保留。）"
+    "message": "要删除此文件夹吗？已保存的帖子不会被删除。"
   },
   "empty": {
     "message": "没有已保存的帖子"
@@ -156,7 +156,7 @@
     "message": "与 X 书签同步"
   },
   "syncNativeDesc": {
-    "message": "将帖子保存到文件夹时，同时在 X 上添加书签；从所有文件夹中移除时，也会移除 X 上的书签。对你操作的每条帖子，只会点击一次屏幕上的书签按钮。默认关闭。"
+    "message": "将帖子保存到文件夹时，PostShelf 也会将其添加到 X 标准书签；从所有文件夹中移除时，也会取消 X 上的书签。PostShelf 对你操作的每条帖子，只会点击一次屏幕上的书签按钮。默认关闭。"
   },
   "savedBadgeTitle": {
     "message": "已保存到 $COUNT$ 个文件夹",
@@ -429,7 +429,7 @@
     "message": "X 的页面结构有部分变化，PostShelf 仍在正常工作。"
   },
   "healthBroken": {
-    "message": "X 的页面结构已变化，部分功能已暂停。提供诊断信息可帮助我们修复。"
+    "message": "X 的页面结构已变化，部分功能已暂停。请复制诊断信息，并在 GitHub 上报告。"
   },
   "copyDiag": {
     "message": "复制诊断信息"
@@ -438,7 +438,7 @@
     "message": "诊断信息"
   },
   "diagNotice": {
-    "message": "此内容将复制到剪贴板，不包含个人信息。"
+    "message": "此内容将复制到剪贴板。不包含帖子正文、用户名和 URL。包含的内容有：扩展版本、浏览器信息、显示语言，以及 X 页面结构的骨架。"
   },
   "diagCopy": {
     "message": "复制"
