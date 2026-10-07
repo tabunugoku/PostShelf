@@ -295,5 +295,17 @@
   },
   "actionModeNote": {
     "message": "サイドパネルは Chrome 114 以降で使えます。"
+  },
+  "collectPending": {
+    "message": "未取り込み $COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "すべて取り込み済み"
   }
 }

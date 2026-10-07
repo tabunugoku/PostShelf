@@ -35,6 +35,7 @@ GitHub Actions が push / PR ごとにビルドし、`dist/` を zip にして�
 
 ## X の仕様変更への備え
 DOM セレクタは `src/shared/selectors.ts` に集約。壊れたらそこだけ直す。X の非公開 API は使わず、自動スクロールもしない。
+よくある質問 (モバイルのブックマークの取り込み、別端末への移行など) は [docs/FAQ.md](docs/FAQ.md)。
 実機確認項目は [docs/MANUAL_TEST.md](docs/MANUAL_TEST.md)、計画は [docs/PLAN.md](docs/PLAN.md)。
 
 ## 注意

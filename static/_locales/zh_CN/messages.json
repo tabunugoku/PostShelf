@@ -295,5 +295,17 @@
   },
   "actionModeNote": {
     "message": "侧边栏需要 Chrome 114 或更高版本。"
+  },
+  "collectPending": {
+    "message": "未导入 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "全部已导入"
   }
 }

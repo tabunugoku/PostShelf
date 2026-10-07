@@ -295,5 +295,17 @@
   },
   "actionModeNote": {
     "message": "側邊欄需要 Chrome 114 或更新版本。"
+  },
+  "collectPending": {
+    "message": "尚未匯入 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "全部已匯入"
   }
 }

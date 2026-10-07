@@ -123,6 +123,11 @@ export async function listBookmarks(): Promise<Bookmark[]> {
   return Object.values(map);
 }
 
+/** 保存済みポストの tweetId 一覧 (取り込み件数の計算用) */
+export async function getSavedIds(): Promise<Set<string>> {
+  return new Set(Object.keys(await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {})));
+}
+
 export async function getBookmark(tweetId: string): Promise<Bookmark | undefined> {
   const map = await read<Record<string, Bookmark>>(KEY_BOOKMARKS, {});
   return map[tweetId];

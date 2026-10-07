@@ -295,5 +295,17 @@
   },
   "actionModeNote": {
     "message": "El panel lateral requiere Chrome 114 o posterior."
+  },
+  "collectPending": {
+    "message": "$COUNT$ sin importar",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "Todo importado"
   }
 }

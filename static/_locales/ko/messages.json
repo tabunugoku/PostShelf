@@ -295,5 +295,17 @@
   },
   "actionModeNote": {
     "message": "사이드 패널은 Chrome 114 이상에서 사용할 수 있습니다."
+  },
+  "collectPending": {
+    "message": "미가져옴 $COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "모두 가져옴"
   }
 }

@@ -295,5 +295,17 @@
   },
   "actionModeNote": {
     "message": "The side panel requires Chrome 114 or later."
+  },
+  "collectPending": {
+    "message": "$COUNT$ not yet imported",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "All imported"
   }
 }

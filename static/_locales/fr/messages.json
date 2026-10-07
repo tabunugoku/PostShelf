@@ -295,5 +295,17 @@
   },
   "actionModeNote": {
     "message": "Le panneau latéral nécessite Chrome 114 ou version ultérieure."
+  },
+  "collectPending": {
+    "message": "$COUNT$ non importé(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "Tout est importé"
   }
 }
