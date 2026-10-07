@@ -79,3 +79,13 @@ export function closestFirst<T extends Element = Element>(el: Element, key: SelK
   }
   return null;
 }
+
+/**
+ * ブックマーク一覧のパス (取り込みボタンを出すページ)。X の URL 変更時はここだけ直す。
+ * 実機確認 (2026-10): 左メニュー「履歴」→「ブックマーク」タブ = /i/history。/i/bookmarks はそこへリダイレクトされる。
+ * いいね (/i/history/likes) はブックマークではないので含めない。
+ */
+export const BOOKMARK_PATHS: readonly string[] = ['/i/history', '/i/bookmarks'];
+
+/** 末尾のスラッシュは無視して完全一致で判定する (クエリ・ハッシュは pathname に含まれない) */
+export const isBookmarksPath = (path: string): boolean => BOOKMARK_PATHS.includes(path.replace(/\/+$/, '') || '/');

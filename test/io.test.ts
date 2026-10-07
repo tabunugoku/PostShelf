@@ -38,7 +38,9 @@ describe('collect', () => {
     expect((await listFolders()).some((f) => displayName(f) === '未分類')).toBe(true);
   });
   it('detects the bookmarks page', () => {
+    expect(isBookmarksPage('/i/history')).toBe(true);
     expect(isBookmarksPage('/i/bookmarks')).toBe(true);
+    expect(isBookmarksPage('/i/history/likes')).toBe(false);
     expect(isBookmarksPage('/home')).toBe(false);
   });
 });

@@ -295,7 +295,7 @@ describe('v7 manager layout', () => {
     await flush();
     expect($('.banner').textContent).toContain('12 件');
     await click($('.banner-btn'));
-    expect($('[role=dialog] .pre').textContent).toContain('/i/bookmarks');
+    expect($('[role=dialog] .pre').textContent).toContain('x.com/i/history');
     await key(document.body, 'Escape');
     await click($('.banner [aria-label=閉じる]'));
     expect($$('.banner').length).toBe(0);

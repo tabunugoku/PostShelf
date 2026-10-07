@@ -348,7 +348,7 @@
     "message": "Importar seus favoritos do x.com"
   },
   "importHowSteps": {
-    "message": "1. Abra os Favoritos do x.com (/i/bookmarks) no Chrome\n2. Role você mesmo até os posts aparecerem na tela (o PostShelf nunca rola sozinho)\n3. Clique no botão \"N não importados\" no canto inferior direito\n4. Os posts importados vão para \"Sem categoria\""
+    "message": "1. No Chrome, abra \"Histórico\" no menu esquerdo do x.com e escolha a aba \"Favoritos\" (x.com/i/history)\n2. Role você mesmo até os posts aparecerem na tela (o PostShelf nunca rola sozinho)\n3. Clique no botão \"N não importados\" no canto inferior direito\n4. Os posts importados vão para \"Sem categoria\""
   },
   "dismiss": {
     "message": "Fechar"

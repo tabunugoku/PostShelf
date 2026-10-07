@@ -348,7 +348,7 @@
     "message": "Importer vos favoris x.com"
   },
   "importHowSteps": {
-    "message": "1. Ouvrez vos Favoris x.com (/i/bookmarks) dans Chrome\n2. Faites défiler vous-même jusqu'à ce que les posts apparaissent à l'écran (PostShelf ne défile jamais seul)\n3. Cliquez sur le bouton « N non importé(s) » en bas à droite\n4. Les posts importés vont dans « Non classés »"
+    "message": "1. Dans Chrome, ouvrez « Historique » dans le menu de gauche de x.com et choisissez l'onglet « Favoris » (x.com/i/history)\n2. Faites défiler vous-même jusqu'à ce que les posts apparaissent à l'écran (PostShelf ne défile jamais seul)\n3. Cliquez sur le bouton « N non importé(s) » en bas à droite\n4. Les posts importés vont dans « Non classés »"
   },
   "dismiss": {
     "message": "Fermer"

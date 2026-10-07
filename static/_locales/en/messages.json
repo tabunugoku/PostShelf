@@ -348,7 +348,7 @@
     "message": "Importing your x.com bookmarks"
   },
   "importHowSteps": {
-    "message": "1. Open your x.com Bookmarks (/i/bookmarks) in Chrome\n2. Scroll yourself until the posts you want are on screen (PostShelf never auto-scrolls)\n3. Press the \"N not yet imported\" button at the bottom right\n4. Imported posts go to \"Unsorted\""
+    "message": "1. In Chrome, open \"History\" in the x.com left menu and choose the \"Bookmarks\" tab (x.com/i/history)\n2. Scroll yourself until the posts you want are on screen (PostShelf never auto-scrolls)\n3. Press the \"N not yet imported\" button at the bottom right\n4. Imported posts go to \"Unsorted\""
   },
   "dismiss": {
     "message": "Dismiss"

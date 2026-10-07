@@ -348,7 +348,7 @@
     "message": "Importar tus marcadores de x.com"
   },
   "importHowSteps": {
-    "message": "1. Abre los Marcadores de x.com (/i/bookmarks) en Chrome\n2. Desplázate tú mismo hasta que las publicaciones aparezcan en pantalla (PostShelf nunca se desplaza solo)\n3. Pulsa el botón «N sin importar» de la esquina inferior derecha\n4. Las publicaciones importadas van a «Sin clasificar»"
+    "message": "1. En Chrome, abre «Historial» en el menú izquierdo de x.com y elige la pestaña «Marcadores» (x.com/i/history)\n2. Desplázate tú mismo hasta que las publicaciones aparezcan en pantalla (PostShelf nunca se desplaza solo)\n3. Pulsa el botón «N sin importar» de la esquina inferior derecha\n4. Las publicaciones importadas van a «Sin clasificar»"
   },
   "dismiss": {
     "message": "Cerrar"

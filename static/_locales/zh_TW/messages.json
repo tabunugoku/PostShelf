@@ -348,7 +348,7 @@
     "message": "匯入 x.com 書籤"
   },
   "importHowSteps": {
-    "message": "1. 在 Chrome 中開啟 x.com 的「書籤」(/i/bookmarks)\n2. 自行捲動頁面，直到想匯入的貼文顯示在畫面上（不會自動捲動）\n3. 點擊右下角的「尚未匯入 N 則」按鈕\n4. 匯入的貼文會進入「未分類」"
+    "message": "1. 在 Chrome 中開啟 x.com 左側選單的「歷史記錄」，選擇「書籤」分頁(x.com/i/history)\n2. 自行捲動頁面，直到想匯入的貼文顯示在畫面上（不會自動捲動）\n3. 點擊右下角的「尚未匯入 N 則」按鈕\n4. 匯入的貼文會進入「未分類」"
   },
   "dismiss": {
     "message": "關閉"

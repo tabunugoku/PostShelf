@@ -1,11 +1,11 @@
-import { queryAllFirst } from '../shared/selectors';
+import { isBookmarksPath, queryAllFirst } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
 import { recordPending } from '../shared/settings';
 import { xTheme } from './theme';
 import { extractTweet, type Extracted } from './snapshot';
 
-export const isBookmarksPage = (path = location.pathname) => path === '/i/bookmarks';
+export const isBookmarksPage = (path = location.pathname) => isBookmarksPath(path);
 
 /** 今画面に表示されているポストだけを読む (自動スクロール・API 呼び出しはしない) */
 export function collectVisible(root: ParentNode = document): Extracted[] {
@@ -38,7 +38,7 @@ export async function refreshCollectButton(): Promise<void> {
   btn.title = t('collectTitle');
 }
 
-/** /i/bookmarks 上に収集ボタンを出す。ユーザーが押したときだけ取り込む。 */
+/** ブックマーク一覧 (/i/history など。判定は selectors.ts) 上に収集ボタンを出す。ユーザーが押したときだけ取り込む。 */
 export function ensureCollectButton(): void {
   const existing = document.querySelector('.postshelf-collect');
   if (!isBookmarksPage()) return existing?.remove();
@@ -72,3 +72,23 @@ export function scheduleCollectRefresh(): void {
 }
 
 export const watchCollectData = (): (() => void) => onDataChanged(() => void refreshCollectButton());
+
+/**
+ * SPA 遷移 (pushState) で URL だけが変わり DOM の変化が少ない場合でも、ボタンを出し入れできるようにパスの変化を見張る。
+ * content script は isolated world なので history.pushState を差し替えられない。軽い比較 (500ms ごと) と popstate で拾う。
+ */
+export function watchPath(intervalMs = 500): () => void {
+  let last = location.pathname;
+  const check = () => {
+    if (location.pathname === last) return;
+    last = location.pathname;
+    ensureCollectButton();
+    scheduleCollectRefresh();
+  };
+  const id = setInterval(check, intervalMs);
+  window.addEventListener('popstate', check);
+  return () => {
+    clearInterval(id);
+    window.removeEventListener('popstate', check);
+  };
+}

@@ -52,7 +52,7 @@ export async function updateSettings(patch: Partial<Settings>): Promise<Settings
 }
 
 // ---- 取り込み案内 (manager のバナー用) ----
-// /i/bookmarks を開いたときに content script が「画面に出ている未取り込みの件数」を記録する。manager はそれを読んで案内を出す。
+// ブックマーク一覧 (/i/history) を開いたときに content script が「画面に出ている未取り込みの件数」を記録する。manager はそれを読んで案内を出す。
 // 閉じた時点の件数 (dismissed) を保存し、記録された件数がそれを超えたときだけ再表示する。
 
 export interface ImportHint {
@@ -104,6 +104,8 @@ export interface Health {
   missing: string[];
   /** 2 番目以降の候補 (フォールバック) で見つかった要素のキー (degraded のとき) */
   fallback: string[];
+  /** 検査したときの x.com のパス (クエリなし。ユーザー名・ID は ? に伏せる = safePath 済み) */
+  path?: string;
 }
 
 const HEALTH_KEY = 'health';
@@ -112,7 +114,7 @@ export async function getHealth(): Promise<Health | null> {
   const res = await chrome.storage.local.get(HEALTH_KEY);
   const h = res[HEALTH_KEY] as Partial<Health> | undefined;
   if (!h || !['ok', 'degraded', 'broken'].includes(h.state as string)) return null;
-  return { state: h.state as HealthState, checkedAt: Number(h.checkedAt) || 0, missing: h.missing ?? [], fallback: h.fallback ?? [] };
+  return { state: h.state as HealthState, checkedAt: Number(h.checkedAt) || 0, missing: h.missing ?? [], fallback: h.fallback ?? [], path: typeof h.path === 'string' ? h.path : undefined };
 }
 
 export async function saveHealth(h: Health): Promise<void> {

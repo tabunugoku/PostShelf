@@ -26,6 +26,6 @@
 - 不正値は読み込み時に既定値へ戻す
 
 ## `importHint`: `{ pending, dismissed }` (v7)
-- `pending`: `/i/bookmarks` を開いたときに content script が記録した「画面に出ている未取り込み件数」(最後の観測値)
+- `pending`: ブックマーク一覧 (`/i/history`) を開いたときに content script が記録した「画面に出ている未取り込み件数」(最後の観測値)
 - `dismissed`: manager の取り込み案内バナーを閉じた時点の `pending`。`pending > dismissed` のときだけバナーを出す
 - 件数が減ったとき (取り込んだ等) は `dismissed` も下げ、次の増加で再び案内する

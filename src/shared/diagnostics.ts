@@ -88,11 +88,28 @@ export function blockedWords(article: Element): string[] {
   return [...out];
 }
 
+/** パスの各区間で、そのまま残してよい単語 (X の画面名)。それ以外 (ユーザー名・ID・検索語) は ? に置き換える */
+const PATH_WORDS = new Set(
+  'i history likes bookmarks home explore notifications messages search settings status compose lists communities topics following followers flow grok jobs premium verified'.split(' '),
+);
+
+/**
+ * 診断情報に入れる「現在のパス (クエリ・ハッシュなし)」。
+ * 例: /i/history → そのまま / /someone/status/123 → /?/status/?  (ユーザー名と ID は含めない)
+ */
+export function safePath(pathname: string): string {
+  const segs = pathname.split('/').filter(Boolean).slice(0, 5);
+  if (segs.length === 0) return '/';
+  return '/' + segs.map((s) => (PATH_WORDS.has(s.toLowerCase()) ? s.toLowerCase() : '?')).join('/');
+}
+
 export interface ReportInput {
   version: string;
   userAgent: string;
   uiLanguage: string;
-  health: { state: string; checkedAt: number; missing: string[]; fallback: string[] } | null;
+  health: { state: string; checkedAt: number; missing: string[]; fallback: string[]; path?: string } | null;
+  /** 診断を作った時点の x.com のパス (safePath 済み)。x.com のタブから取れなければ health.path を使う */
+  path?: string | null;
   /** x.com のタブから取れなかったときは null */
   skeleton: string | null;
 }
@@ -107,6 +124,7 @@ export function buildReport(r: ReportInput): string {
     h
       ? `health: ${h.state} (checked ${new Date(h.checkedAt).toISOString()}) missing=[${h.missing.join(',')}] fallback=[${h.fallback.join(',')}]`
       : 'health: unknown',
+    `path: ${r.path ?? h?.path ?? '(unknown)'}`,
     '',
     'article structure (tag / role / data-testid / aria-* names only):',
     r.skeleton ?? '(no x.com tab was available)',

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
-import { collectVisible, ensureCollectButton, refreshCollectButton, unsavedItems } from '../src/content/collect';
+import { collectVisible, ensureCollectButton, refreshCollectButton, unsavedItems, watchPath } from '../src/content/collect';
 import { createFolder, getSavedIds, setBookmarkFolders } from '../src/shared/storage';
 
 const fixture = readFileSync(resolve(process.cwd(), 'test/fixtures/tweet.html'), 'utf8');
@@ -14,7 +14,7 @@ const btn = () => document.querySelector<HTMLButtonElement>('.postshelf-collect'
 
 beforeEach(() => {
   installChromeMock();
-  history.pushState({}, '', '/i/bookmarks');
+  history.pushState({}, '', '/i/history');
 });
 afterEach(() => {
   document.querySelector('.postshelf-collect')?.remove();
@@ -81,10 +81,45 @@ describe('collect button', () => {
     expect(btn().textContent).toBe('未取り込み 3 件');
   });
 
-  it('is not shown outside /i/bookmarks', () => {
+  it('is not shown outside the bookmarks page', () => {
     history.pushState({}, '', '/home');
     document.body.innerHTML = fixture;
     ensureCollectButton();
     expect(document.querySelector('.postshelf-collect')).toBeNull();
+  });
+});
+
+describe('bookmarks page URLs (v9-A)', () => {
+  const at = (path: string) => {
+    history.pushState({}, '', path);
+    document.body.innerHTML = article(1);
+    ensureCollectButton();
+    return !!document.querySelector('.postshelf-collect');
+  };
+  it('shows on /i/history (with or without a trailing slash) and on the legacy /i/bookmarks', () => {
+    expect(at('/i/history')).toBe(true);
+    document.querySelector('.postshelf-collect')?.remove();
+    expect(at('/i/history/')).toBe(true);
+    document.querySelector('.postshelf-collect')?.remove();
+    expect(at('/i/bookmarks')).toBe(true);
+  });
+  it('does not show on the likes tab or on other pages', () => {
+    expect(at('/i/history/likes')).toBe(false);
+    expect(at('/home')).toBe(false);
+    expect(at('/i/historyx')).toBe(false);
+  });
+  it('follows SPA navigation between the tabs: gone on likes, back on bookmarks', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'setInterval'] });
+    document.body.innerHTML = article(1);
+    ensureCollectButton();
+    expect(!!document.querySelector('.postshelf-collect')).toBe(true);
+    const stop = watchPath(100);
+    history.pushState({}, '', '/i/history/likes');
+    await vi.advanceTimersByTimeAsync(150);
+    expect(document.querySelector('.postshelf-collect')).toBeNull();
+    history.pushState({}, '', '/i/history');
+    await vi.advanceTimersByTimeAsync(150);
+    expect(!!document.querySelector('.postshelf-collect')).toBe(true);
+    stop();
   });
 });

@@ -2,11 +2,12 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
-import { THROTTLE_MS, getLocalHealth, inspect, isBroken, resetHealth, runHealthCheck, scheduleHealthCheck } from '../src/content/health';
+import { EMPTY_GRACE_MS, THROTTLE_MS, getLocalHealth, inspect, isBroken, resetHealth, runHealthCheck, scheduleHealthCheck } from '../src/content/health';
 import { applyButtonMode, injectButtons } from '../src/content/buttons';
 import { installGlobalHandlers } from '../src/content/popover';
 import { setNativeBookmark } from '../src/content/native';
 import { getHealth } from '../src/shared/settings';
+import { buildReport, safePath } from '../src/shared/diagnostics';
 import { queryFirst } from '../src/shared/selectors';
 
 const fx = (n: string) => readFileSync(resolve(process.cwd(), `test/fixtures/${n}.html`), 'utf8');
@@ -84,7 +85,7 @@ describe('runHealthCheck stores the result locally', () => {
     document.body.innerHTML = DEGRADED;
     const h = runHealthCheck(document, 1_000)!;
     await tick();
-    expect(await getHealth()).toEqual({ state: 'degraded', checkedAt: 1_000, missing: [], fallback: h.fallback });
+    expect(await getHealth()).toEqual({ state: 'degraded', checkedAt: 1_000, missing: [], fallback: h.fallback, path: '/' });
     const set = vi.spyOn(chrome.storage.local, 'set');
     runHealthCheck(document, 2_000); // 変化なし
     await tick();
@@ -176,5 +177,57 @@ describe('broken disables every PostShelf action and leaves X alone', () => {
     runHealthCheck();
     applyButtonMode('separate');
     expect(document.querySelectorAll('[data-postshelf-btn]').length).toBe(1);
+  });
+});
+
+describe('v9-C: no posts on the bookmarks page', () => {
+  afterEach(() => history.pushState({}, '', '/'));
+
+  it('inspect: 0 posts on /i/history is degraded (emptyBookmarks); other pages stay "no judgement"', () => {
+    document.body.innerHTML = '<main></main>';
+    expect(inspect(document, '/i/history')).toMatchObject({ state: 'degraded', emptyBookmarks: true, fallback: ['bookmarkPosts'] });
+    expect(inspect(document, '/i/history/')).toMatchObject({ state: 'degraded' });
+    expect(inspect(document, '/i/history/likes')).toBeNull();
+    expect(inspect(document, '/home')).toBeNull();
+  });
+
+  it('runHealthCheck waits for the grace period (loading) before reporting degraded, then recovers when posts appear', async () => {
+    history.pushState({}, '', '/i/history');
+    document.body.innerHTML = '<main></main>';
+    vi.useFakeTimers();
+    expect(runHealthCheck(document, 1_000)).toBeNull(); // 読み込み中かもしれない
+    expect(getLocalHealth()).toBeNull();
+    vi.setSystemTime(1_000 + EMPTY_GRACE_MS);
+    const h = runHealthCheck(document, 1_000 + EMPTY_GRACE_MS)!;
+    expect(h).toMatchObject({ state: 'degraded', fallback: ['bookmarkPosts'], path: '/i/history' });
+    document.body.innerHTML = NORMAL;
+    expect(runHealthCheck(document, 2_000 + EMPTY_GRACE_MS)!.state).toBe('ok');
+  });
+
+  it('the empty timer is reset when the user leaves the page', () => {
+    history.pushState({}, '', '/i/history');
+    document.body.innerHTML = '<main></main>';
+    runHealthCheck(document, 1_000);
+    history.pushState({}, '', '/home');
+    runHealthCheck(document, 5_000); // 判定なし → 計測をやり直す
+    history.pushState({}, '', '/i/history');
+    expect(runHealthCheck(document, 1_000 + EMPTY_GRACE_MS)).toBeNull(); // 5_000 から数え直し
+  });
+});
+
+describe('v9-C: the diagnostics path never contains user names or ids', () => {
+  it('keeps known screen names and masks everything else', () => {
+    expect(safePath('/i/history')).toBe('/i/history');
+    expect(safePath('/i/history/likes')).toBe('/i/history/likes');
+    expect(safePath('/')).toBe('/');
+    expect(safePath('/someone/status/123456')).toBe('/?/status/?');
+    expect(safePath('/search')).toBe('/search');
+    expect(safePath('/tabunugoku_dev')).toBe('/?');
+  });
+  it('the report includes the path line', () => {
+    const r = buildReport({ version: '1', userAgent: 'ua', uiLanguage: 'ja', health: null, path: '/i/history', skeleton: null });
+    expect(r).toContain('path: /i/history');
+    const fromHealth = buildReport({ version: '1', userAgent: 'ua', uiLanguage: 'ja', health: { state: 'degraded', checkedAt: 0, missing: [], fallback: [], path: '/i/history' }, skeleton: null });
+    expect(fromHealth).toContain('path: /i/history');
   });
 });

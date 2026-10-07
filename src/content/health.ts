@@ -7,7 +7,8 @@
  * - broken のとき: PostShelf のボタンを挿入せず、置き換えモードの横取りも、連動モードのクリックもしない (X 標準の動作に一切触れない)
  * - DOM の変化のたびに検査するが、実行は 10 秒以上の間隔にスロットルする
  */
-import { queryAllFirst, queryFirst, type SelKey } from '../shared/selectors';
+import { isBookmarksPath, queryAllFirst, queryFirst, type SelKey } from '../shared/selectors';
+import { safePath } from '../shared/diagnostics';
 import { saveHealth, type Health, type HealthState } from '../shared/settings';
 
 /**
@@ -27,17 +28,25 @@ export interface HealthResult {
   fallback: string[];
   /** 検査したポスト数 */
   articles: number;
+  /** ブックマーク一覧 (取り込みボタンを出すページ) なのにポスト要素が 0 件。URL や構造の変更の兆候 (猶予を置いて degraded にする) */
+  emptyBookmarks?: boolean;
 }
+
+/** ブックマーク一覧でポストが 0 件のまま、これだけ続いたら degraded (読み込み中・本当に空の一覧を誤検出しないため) */
+export const EMPTY_GRACE_MS = 15_000;
+/** 診断情報の fallback に入れるキー */
+export const EMPTY_BOOKMARKS_KEY = 'bookmarkPosts';
 
 /**
  * 純粋な検査。ポスト (tweet) が 1 件も見えなければ null (判定しない)。
  * ただし「ポストへのリンク付きの time はあるのに tweet の容器が見つからない」ときは broken。
  */
-export function inspect(root: ParentNode = document): HealthResult | null {
+export function inspect(root: ParentNode = document, path: string = location.pathname): HealthResult | null {
   const tweets = queryAllFirst(root, 'tweet');
   if (tweets.els.length === 0) {
     const looksLikePosts = root.querySelector('a[href*="/status/"] time') !== null;
-    return looksLikePosts ? { state: 'broken', missing: ['tweet'], fallback: [], articles: 0 } : null;
+    if (looksLikePosts) return { state: 'broken', missing: ['tweet'], fallback: [], articles: 0 };
+    return isBookmarksPath(path) ? { state: 'degraded', missing: [], fallback: [EMPTY_BOOKMARKS_KEY], articles: 0, emptyBookmarks: true } : null;
   }
   const missing: string[] = [];
   const fallback: string[] = [];
@@ -73,6 +82,7 @@ let current: Health | null = null;
 let lastRun = 0;
 let lastSaved = 0;
 let timer: ReturnType<typeof setTimeout> | undefined;
+let emptySince: number | null = null;
 const listeners = new Set<() => void>();
 
 export const getLocalHealth = (): Health | null => current;
@@ -89,6 +99,7 @@ export function resetHealth(): void {
   current = null;
   lastRun = 0;
   lastSaved = 0;
+  emptySince = null;
   clearTimeout(timer);
   timer = undefined;
 }
@@ -99,10 +110,24 @@ const SAVE_EVERY_MS = 5 * 60_000;
 export function runHealthCheck(root: ParentNode = document, now = Date.now()): Health | null {
   lastRun = now;
   const r = inspect(root);
+  if (!r?.emptyBookmarks) emptySince = null;
   if (!r) return current;
-  const next: Health = { state: r.state, checkedAt: now, missing: r.missing, fallback: r.fallback };
+  if (r.emptyBookmarks) {
+    emptySince ??= now;
+    const wait = emptySince + EMPTY_GRACE_MS - now;
+    if (wait > 0) {
+      // まだ読み込み中かもしれない: 猶予が過ぎたらもう一度だけ検査する
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = undefined;
+        runHealthCheck(root);
+      }, wait);
+      return current;
+    }
+  }
+  const next: Health = { state: r.state, checkedAt: now, missing: r.missing, fallback: r.fallback, path: safePath(location.pathname) };
   const prev = current;
-  const changed = !prev || prev.state !== next.state || prev.missing.join() !== next.missing.join() || prev.fallback.join() !== next.fallback.join();
+  const changed = !prev || prev.state !== next.state || prev.missing.join() !== next.missing.join() || prev.fallback.join() !== next.fallback.join() || prev.path !== next.path;
   current = next;
   if (changed || now - lastSaved >= SAVE_EVERY_MS) {
     lastSaved = now;

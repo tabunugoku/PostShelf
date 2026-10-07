@@ -3,7 +3,7 @@ import { getHealth, getSettings } from '../shared/settings';
 import { extractTweet } from './snapshot';
 import { setNativeBookmark } from './native';
 import { getLocalHealth } from './health';
-import { blockedWords, buildReport, skeleton } from '../shared/diagnostics';
+import { blockedWords, buildReport, safePath, skeleton } from '../shared/diagnostics';
 
 /** 表示中のポストのうち tweetId が一致する article (個別ページでは本体のポスト) */
 export function findArticle(tweetId: string, root: ParentNode = document): Element | null {
@@ -48,6 +48,7 @@ export async function buildLocalReport(): Promise<string> {
     userAgent: navigator.userAgent,
     uiLanguage: chrome.i18n.getUILanguage(),
     health,
+    path: safePath(location.pathname),
     skeleton: article ? skeleton(article, blockedWords(article)) : null,
   });
 }

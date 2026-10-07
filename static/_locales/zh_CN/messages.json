@@ -348,7 +348,7 @@
     "message": "导入 x.com 书签"
   },
   "importHowSteps": {
-    "message": "1. 在 Chrome 中打开 x.com 的“书签”(/i/bookmarks)\n2. 自己滚动页面，直到想导入的帖子显示在屏幕上（不会自动滚动）\n3. 点击右下角的“未导入 N 条”按钮\n4. 导入的帖子会进入“未分类”"
+    "message": "1. 在 Chrome 中打开 x.com 左侧菜单的“历史记录”，选择“书签”标签页(x.com/i/history)\n2. 自己滚动页面，直到想导入的帖子显示在屏幕上（不会自动滚动）\n3. 点击右下角的“未导入 N 条”按钮\n4. 导入的帖子会进入“未分类”"
   },
   "dismiss": {
     "message": "关闭"
