@@ -3,8 +3,8 @@
 <title>PostShelf 管理画面の改善案 (タブ / サイドパネル)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <style>
-:root{--tx:#0f1419;--tx2:#536471;--tx3:#6b7a86;--s0:#f7f9f9;--s1:#fff;--s2:#f1f4f5;--bd:#e3e8eb;--bd2:#cfd9de;--hv:rgba(15,20,25,.06);--sel:rgba(15,20,25,.12);--ac:#2F5FD8;--acbg:#e9efff;--sh:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08)}
-@media (prefers-color-scheme:dark){:root{--tx:#e7e9ea;--tx2:#9aa4ad;--tx3:#8a949d;--s0:#0b0d0f;--s1:#000;--s2:#16181c;--bd:#2f3336;--bd2:#536471;--hv:rgba(231,233,234,.08);--sel:rgba(231,233,234,.16);--ac:#7da2ff;--acbg:#14213f;--sh:0 8px 24px rgba(0,0,0,.5)}}
+:root{--tx:#0f1419;--tx2:#536471;--tx3:#6b7a86;--s0:#f7f9f9;--s1:#fff;--s2:#f7f9f9;--bd:#eff3f4;--bd2:#cfd9de;--hv:rgba(15,20,25,.06);--sel:rgba(15,20,25,.12);--ac:#1d9bf0;--acfill:#0f6fb3;--acbg:#e8f5fe;--sh:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08)}
+@media (prefers-color-scheme:dark){:root{--tx:#e7e9ea;--tx2:#9aa4ad;--tx3:#8a949d;--s0:#000;--s1:#000;--s2:#16181c;--bd:#2f3336;--bd2:#536471;--hv:rgba(231,233,234,.08);--sel:rgba(231,233,234,.16);--ac:#1d9bf0;--acfill:#0f6fb3;--acbg:#031018;--sh:0 8px 24px rgba(0,0,0,.5)}}
 *{box-sizing:border-box}
 body{margin:0;padding:24px;background:var(--s0);color:var(--tx);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif;color-scheme:light dark}
 h1{font-size:18px;margin:0 0 4px;font-weight:600}h2{font-size:15px;margin:32px 0 6px;font-weight:600}
@@ -21,7 +21,7 @@ input{font:inherit;color:inherit;background:var(--s1);border:1px solid var(--bd2
 .fr:hover{background:var(--hv)}.fr.on{background:var(--sel);font-weight:600}
 .fr i.ic{font-size:18px}.fr .n{margin-left:auto;font-size:12px;color:var(--tx3)}
 .fr .more{display:none;margin-left:6px;color:var(--tx2)}.fr:hover .more{display:inline}.fr:hover .n{margin-left:0}
-.badge{background:var(--ac);color:#fff;border-radius:10px;font-size:11px;padding:0 7px}
+.badge{background:var(--acfill);color:#fff;border-radius:10px;font-size:11px;padding:0 7px}
 .main{padding:16px 20px}
 .top{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
 .search{flex:1;min-width:160px;display:flex;align-items:center;gap:6px;border:1px solid var(--bd2);border-radius:20px;padding:0 12px;min-height:34px;background:var(--s1)}
@@ -56,8 +56,8 @@ input{font:inherit;color:inherit;background:var(--s1);border:1px solid var(--bd2
 .pcard{padding:10px 0;border-top:1px solid var(--bd);display:flex;gap:10px}
 .pcard .av{width:32px;height:32px;font-size:11px}
 .pfoot{border-top:1px solid var(--bd);padding:10px 12px;background:var(--s2)}
-.cta{width:100%;background:var(--ac);color:#fff;border:0;display:flex;gap:8px;align-items:center;justify-content:center}
-.cta:hover{background:var(--ac);filter:brightness(1.08)}
+.cta{width:100%;background:var(--acfill);color:#fff;border:0;display:flex;gap:8px;align-items:center;justify-content:center}
+.cta:hover{background:var(--acfill);filter:brightness(1.08)}
 ol.notes{margin:8px 0 0;padding-left:20px;color:var(--tx2);max-width:760px}ol.notes li{margin:4px 0}
 .tag{display:inline-block;font-size:11px;border:1px solid var(--bd2);border-radius:10px;padding:0 7px;margin-left:6px;color:var(--tx2)}
 </style></head><body>
