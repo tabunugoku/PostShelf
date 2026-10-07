@@ -1,3 +1,5 @@
+import { ACCENT } from '../shared/tokens';
+
 export interface XTheme {
   bg: string;
   fg: string;
@@ -20,7 +22,7 @@ function parse(rgb: string): [number, number, number] | null {
 export function xTheme(): XTheme {
   const rgb = parse(getComputedStyle(document.body).backgroundColor);
   const lum = rgb ? (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255 : 1;
-  const accent = '#1d9bf0';
+  const accent = ACCENT;
   if (lum > 0.5) return { bg: '#ffffff', fg: '#0f1419', border: '#cfd9de', hover: 'rgba(15,20,25,.06)', accent, scheme: 'light' };
   // ダーク青 (dim) は青みがある (b > r)。それ以外 (lights out) は黒系。
   const dim = !!rgb && rgb[2] - rgb[0] > 15;

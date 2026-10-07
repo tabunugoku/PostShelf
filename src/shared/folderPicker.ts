@@ -6,6 +6,7 @@
 import { displayName, type Folder } from './models';
 import { createFolder, StorageError } from './storage';
 import { t } from './strings';
+import { ACCENT_FILL } from './tokens';
 
 export interface PickerTheme {
   fg: string;
@@ -67,7 +68,7 @@ export function createFolderPicker(opts: {
     const add = document.createElement('button');
     add.type = 'submit';
     add.textContent = t('add');
-    add.style.cssText = 'background:#0b6fb8;color:#fff;border:0;border-radius:8px;padding:4px 12px;min-height:32px;cursor:pointer'; // 白文字で 4.5:1 以上になる濃い青
+    add.style.cssText = `background:${ACCENT_FILL};color:#fff;border:0;border-radius:8px;padding:4px 12px;min-height:32px;cursor:pointer`;
     row.append(input, add);
     row.addEventListener('submit', async (e) => {
       e.preventDefault();

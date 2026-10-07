@@ -6,11 +6,11 @@ import { extractTweet } from './snapshot';
 import { ensureIconCss, openPopover, setPopoverMode } from './popover';
 import { isOwnNativeClick } from './native';
 import type { Folder } from '../shared/models';
+import { ACCENT, ACCENT_FILL } from '../shared/tokens';
 
 const BTN_ATTR = 'data-postshelf-btn';
 const BADGE_ATTR = 'data-postshelf-badge';
 const STYLE_ID = 'postshelf-style';
-const ACCENT = '#1d9bf0';
 /** X の操作アイコンに合わせたクリック判定 (34px 以上) と、標準ボタンとの余白 (4px 以上) */
 const HIT = 34;
 const GAP = 4;
@@ -36,7 +36,7 @@ function savedColor(folders: Folder[]): string {
 function makeBadge(): HTMLElement {
   const b = document.createElement('span');
   b.setAttribute(BADGE_ATTR, '');
-  b.style.cssText = `position:absolute;right:-2px;top:-2px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:7px;background:${ACCENT};color:#fff;font:700 10px/14px system-ui,sans-serif;text-align:center;pointer-events:none;display:none`;
+  b.style.cssText = `position:absolute;right:-2px;top:-2px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:7px;background:${ACCENT_FILL};color:#fff;font:700 10px/14px system-ui,sans-serif;text-align:center;pointer-events:none;display:none`;
   return b;
 }
 
@@ -74,7 +74,7 @@ function setSaved(host: HTMLElement, folders: Folder[]): void {
   if (badge) {
     badge.textContent = n > 0 ? String(n) : '';
     badge.style.display = n > 0 ? 'block' : 'none';
-    if (n > 0) badge.style.background = savedColor(folders);
+    if (n > 0) badge.style.background = ACCENT_FILL; // 白文字が載るので固定の濃い青 (フォルダ色だとコントラストが足りないことがある)
   }
 }
 

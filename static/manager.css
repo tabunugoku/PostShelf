@@ -1,19 +1,22 @@
 @import url("icons/tabler-icons.min.css");
 :root{
-  --text-primary:#0f1419;--text-secondary:#4a5560;--text-muted:#536471;
-  --surface-1:#f7f9f9;--surface-2:#fff;--surface-3:#fff;
+  /* ---- デザイントークン (X の画面に揃えた配色。manager / サイドパネル / popup で共有) ---- */
+  --text-primary:#0f1419;--text-secondary:#536471;--text-muted:#536471;
+  --surface-1:#f7f9f9;--surface-2:#ffffff;--surface-3:#ffffff;
   --border:#eff3f4;--border-strong:#cfd9de;--border-stronger:#8b98a5;
   --fill-ghost-hover:rgba(15,20,25,.06);--fill-ghost-selected:rgba(15,20,25,.12);--fill-control:#cfd9de;
-  --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0b6fb8;
-  --accent-strong:#0b6fb8;--danger:#c0302f;--danger-solid:#c0302f;
+  /* アクセント: アイコン・リンク・選択の強調は --fill-accent、文字の載る塗りは白文字で 4.5:1 以上の --accent-strong */
+  --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0f6fb3;
+  --accent-strong:#0f6fb3;--danger:#c0302f;--danger-solid:#c0302f;
   --shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);--radius:8px;
 }
 @media (prefers-color-scheme:dark){:root{
-  --text-primary:#e7e9ea;--text-secondary:#9aa2a8;--text-muted:#8b98a5;
-  --surface-1:#16181c;--surface-2:#000;--surface-3:#16181c;
+  --text-primary:#e7e9ea;--text-secondary:#9aa4ad;--text-muted:#9aa4ad;
+  --surface-1:#16181c;--surface-2:#000000;--surface-3:#16181c;
   --border:#2f3336;--border-strong:#536471;--border-stronger:#71767b;
   --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
   --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;
+  --shadow-popover:0 8px 24px rgba(0,0,0,.5);
 }}
 /* OS のダーク/ライトにフォーム部品 (input, button, スクロールバー等) を追従させる */
 :root{color-scheme:light dark}
