@@ -400,5 +400,14 @@
   },
   "dataSection": {
     "message": "資料"
+  },
+  "saveCurrentPost": {
+    "message": "儲存目前開啟的貼文…"
+  },
+  "saveCurrentHint": {
+    "message": "在 x.com 開啟貼文時顯示"
+  },
+  "saveCurrentFail": {
+    "message": "無法讀取此貼文。請重新整理頁面後再試一次。"
   }
 }

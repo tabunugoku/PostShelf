@@ -41,6 +41,7 @@ import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from '.
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card } from './Cards';
 import { FolderEdit } from './FolderEdit';
+import { SaveCurrent } from './SaveCurrent';
 import { SettingsPage } from './Settings';
 import { useCompact } from './useCompact';
 
@@ -648,6 +649,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             </>
           )}
         </main>
+        {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} onSaved={() => void reload()} />}
         {dialogs}
       </div>
     );
@@ -695,6 +697,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </>
         )}
       </main>
+      {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} onSaved={() => void reload()} />}
       {dialogs}
     </div>
   );

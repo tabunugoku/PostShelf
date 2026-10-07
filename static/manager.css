@@ -216,3 +216,6 @@ button:disabled{cursor:not-allowed}
 .cta{width:100%;display:flex;gap:8px;align-items:center;justify-content:center;background:var(--accent-strong);color:#fff;border-color:transparent}
 .cta:hover{background:var(--accent-strong);opacity:.92}
 .pfoot .menu{bottom:100%;top:auto;left:0;right:0;max-width:none;margin:0 0 4px}
+.menu-anchor.block{display:block}
+.pfoot-note{margin-top:6px;font-size:14px;text-align:center}
+.layout-wide .pfoot{position:fixed;left:0;right:0;bottom:0}

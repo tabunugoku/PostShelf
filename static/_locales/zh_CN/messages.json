@@ -400,5 +400,14 @@
   },
   "dataSection": {
     "message": "数据"
+  },
+  "saveCurrentPost": {
+    "message": "保存当前打开的帖子…"
+  },
+  "saveCurrentHint": {
+    "message": "在 x.com 打开帖子时显示"
+  },
+  "saveCurrentFail": {
+    "message": "无法读取此帖子。请刷新页面后重试。"
   }
 }

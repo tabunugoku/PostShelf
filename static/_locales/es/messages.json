@@ -400,5 +400,14 @@
   },
   "dataSection": {
     "message": "Datos"
+  },
+  "saveCurrentPost": {
+    "message": "Guardar la publicación abierta…"
+  },
+  "saveCurrentHint": {
+    "message": "Se muestra mientras hay una publicación abierta en x.com"
+  },
+  "saveCurrentFail": {
+    "message": "No se pudo leer esta publicación. Recarga la página e inténtalo de nuevo."
   }
 }

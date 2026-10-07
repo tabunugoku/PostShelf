@@ -400,5 +400,14 @@
   },
   "dataSection": {
     "message": "Dados"
+  },
+  "saveCurrentPost": {
+    "message": "Salvar o post aberto…"
+  },
+  "saveCurrentHint": {
+    "message": "Exibido enquanto um post está aberto no x.com"
+  },
+  "saveCurrentFail": {
+    "message": "Não foi possível ler este post. Recarregue a página e tente novamente."
   }
 }

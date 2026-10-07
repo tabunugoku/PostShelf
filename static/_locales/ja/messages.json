@@ -400,5 +400,14 @@
   },
   "dataSection": {
     "message": "データ"
+  },
+  "saveCurrentPost": {
+    "message": "いま開いているポストを保存…"
+  },
+  "saveCurrentHint": {
+    "message": "x.com のポストを開いているときに表示"
+  },
+  "saveCurrentFail": {
+    "message": "このポストを読み取れませんでした。ページを再読み込みしてから、もう一度お試しください。"
   }
 }

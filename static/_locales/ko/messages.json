@@ -400,5 +400,14 @@
   },
   "dataSection": {
     "message": "데이터"
+  },
+  "saveCurrentPost": {
+    "message": "지금 열려 있는 게시물 저장…"
+  },
+  "saveCurrentHint": {
+    "message": "x.com에서 게시물을 열었을 때 표시됩니다"
+  },
+  "saveCurrentFail": {
+    "message": "이 게시물을 읽을 수 없습니다. 페이지를 새로고침한 뒤 다시 시도하세요."
   }
 }
