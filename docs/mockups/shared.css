@@ -1,0 +1,21 @@
+:root{
+  --text-primary:#0f1419;--text-secondary:#536471;--text-muted:#8b98a5;
+  --surface-1:#f7f9f9;--surface-2:#fff;--surface-3:#fff;
+  --border:#eff3f4;--border-strong:#cfd9de;--border-stronger:#8b98a5;
+  --fill-ghost-hover:rgba(15,20,25,.06);--fill-ghost-selected:rgba(15,20,25,.12);--fill-control:#cfd9de;
+  --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#1a8cd8;
+  --shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);--radius:8px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --text-primary:#e7e9ea;--text-secondary:#71767b;--text-muted:#536471;
+  --surface-1:#16181c;--surface-2:#000;--surface-3:#16181c;
+  --border:#2f3336;--border-strong:#536471;--border-stronger:#71767b;
+  --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
+  --bg-accent:#031018;--text-accent:#1d9bf0;
+}}
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:var(--surface-1);color:var(--text-primary);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif}
+h1{font-size:16px;font-weight:500;margin:0 0 4px}
+.note{color:var(--text-secondary);font-size:12px;margin:0 0 16px}
+button,input{font:inherit;color:inherit;background:transparent;border:.5px solid var(--border-strong);border-radius:var(--radius);padding:4px 10px;cursor:pointer}
+input{cursor:text}
