@@ -21,7 +21,7 @@ function Popup() {
   return (
     <div>
       <div class="hd">
-        <Icon name="ti-books" />
+        <img class="brand" src="brand/icon-32.png" width="24" height="24" alt="" />
         <span>{t('appTitle')}</span>
       </div>
       <div class="sub">

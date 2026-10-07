@@ -1,5 +1,5 @@
 body{margin:0;padding:8px;width:260px}
-.hd{display:flex;align-items:center;gap:8px;padding:4px 8px 8px}.hd i{font-size:20px;color:var(--text-accent)}.hd span{font-weight:500}
+.hd{display:flex;align-items:center;gap:8px;padding:4px 8px 8px}.hd .brand{border-radius:6px;flex:none}.hd span{font-weight:500}
 .sub{padding:0 8px 8px;color:var(--text-secondary)}
 .pr{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer;width:100%;border:0;text-align:left}
 .pr:hover{background:var(--fill-ghost-hover)}.pr.link{color:var(--text-accent)}
