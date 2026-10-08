@@ -23,18 +23,21 @@ describe('v13-D: install docs', () => {
     // 起動時の確認は、断定しない書き方
     expect(ja).toContain('Chrome のバージョンによって');
   });
-  it('PUBLISH.md is rewritten for manual installation and keeps the store items under a separate heading; the license is left to the user', () => {
+  it('PUBLISH.md is rewritten for manual installation and keeps the store items under a separate heading; the license is MIT', () => {
     const p = read('docs/PUBLISH.md');
     expect(p.indexOf('# リリースの手順') >= 0 || p.indexOf('## リリースの手順') >= 0).toBe(true);
     expect(p.indexOf('# いまは行わない (参考)')).toBeGreaterThan(p.indexOf('## リリースの手順'));
     expect(p.slice(p.indexOf('# いまは行わない (参考)'))).toContain('Chrome Web Store で「PostShelf」の同名拡張がないか');
-    expect(p).toContain('ユーザーの判断待ち');
+    expect(p).toContain('MIT に決定済み');
     expect(p).toContain('MIT');
     expect(p).toContain('1.0.0');
   });
-  it('the license is not decided on our own: there is no LICENSE file and package.json has no license', () => {
-    expect(() => readFileSync(resolve(process.cwd(), 'LICENSE'))).toThrow();
-    expect(JSON.parse(read('package.json')).license).toBeUndefined();
+  it('the license is MIT: LICENSE exists, package.json says MIT, README states the scope and disclaimer', () => {
+    expect(read('LICENSE')).toContain('MIT License');
+    expect(JSON.parse(read('package.json')).license).toBe('MIT');
+    const r = read('README.md');
+    expect(r).toContain('## ライセンスと免責');
+    expect(r).toContain('X との提携はありません');
   });
   it('README has an install section that points to INSTALL.md', () => {
     expect(read('README.md')).toMatch(/## インストール[\s\S]*docs\/INSTALL\.md/);
