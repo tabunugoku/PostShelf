@@ -356,6 +356,12 @@
   "dismiss": {
     "message": "閉じる"
   },
+  "showMore": {
+    "message": "さらに表示"
+  },
+  "viewFullOnX": {
+    "message": "全文は X で見る"
+  },
   "noticeMore": {
     "message": "他に $COUNT$ 件",
     "placeholders": {

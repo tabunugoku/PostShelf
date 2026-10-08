@@ -6,6 +6,7 @@ import { formatDate, t } from '../shared/strings';
 import type { ViewMode } from '../shared/settings';
 import { Dropdown } from './ui';
 import { MediaImg } from './MediaImg';
+import { PostText } from './PostText';
 import type { Snapshot } from '../shared/models';
 
 /**
@@ -275,7 +276,7 @@ export function Card(props: CardProps) {
           <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
           {s.createdAt && <span class="muted"> · {formatDate(s.createdAt)}</span>}
         </div>
-        <div class="text">{s.text}</div>
+        <PostText s={s} />
         {s.hasVideo === true ? (
           <div class="media m1">
             <MediaTile card={props} kind="video" />

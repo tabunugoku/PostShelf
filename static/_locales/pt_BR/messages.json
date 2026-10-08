@@ -356,6 +356,12 @@
   "dismiss": {
     "message": "Fechar"
   },
+  "showMore": {
+    "message": "Mostrar mais"
+  },
+  "viewFullOnX": {
+    "message": "Ver o texto completo no X"
+  },
   "noticeMore": {
     "message": "mais $COUNT$",
     "placeholders": {

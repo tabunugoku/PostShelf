@@ -356,6 +356,12 @@
   "dismiss": {
     "message": "关闭"
   },
+  "showMore": {
+    "message": "显示更多"
+  },
+  "viewFullOnX": {
+    "message": "在 X 上查看全文"
+  },
   "noticeMore": {
     "message": "另有 $COUNT$ 条",
     "placeholders": {

@@ -392,3 +392,11 @@ input[type=number]{width:110px}
 .link-btn:hover{background:var(--fill-ghost-hover)}
 .link-btn i{font-size:18px}
 .link-btn i:last-child{font-size:14px;color:var(--text-secondary)}
+
+/* ポストの本文: 6 行でたたむ / リンク / 「さらに表示」 (v24) */
+.text.clamp{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.tl{color:var(--text-accent);text-decoration:none;overflow-wrap:anywhere}
+.tl:hover{text-decoration:underline}
+.more-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.more-btn{min-height:28px;padding:0;border:0;background:transparent;color:var(--text-accent);font:inherit;text-decoration:none;cursor:pointer}
+.more-btn:hover{background:transparent;text-decoration:underline}

@@ -356,6 +356,12 @@
   "dismiss": {
     "message": "닫기"
   },
+  "showMore": {
+    "message": "더 보기"
+  },
+  "viewFullOnX": {
+    "message": "X에서 전문 보기"
+  },
   "noticeMore": {
     "message": "외 $COUNT$건",
     "placeholders": {
