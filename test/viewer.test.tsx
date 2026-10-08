@@ -173,7 +173,7 @@ describe('manager: image viewer and video guide', () => {
   it('video: thumbnail tile with play mark and badge; click opens the guide with a link to the post', async () => {
     const v = tile('2');
     expect(v.querySelector('.play')).toBeTruthy();
-    expect(v.querySelector('.badge')!.textContent).toBe('動画');
+    expect(v.querySelector('.badge')!.textContent?.trim()).toBe('動画');
     expect(v.querySelector('img')!.getAttribute('src')).toContain('amplify_video_thumb');
     await click(v);
     const dlg = $('[role=dialog].viewer');

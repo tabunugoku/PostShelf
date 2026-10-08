@@ -681,6 +681,15 @@
   "videoBadge": {
     "message": "동영상"
   },
+  "mediaImages": {
+    "message": "이미지 $COUNT$장",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "동영상 안내 표시"
   },

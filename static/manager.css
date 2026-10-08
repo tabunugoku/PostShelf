@@ -129,11 +129,16 @@ button:disabled{cursor:not-allowed}
 .ph.v{cursor:pointer;background:linear-gradient(135deg,#14171a,#3b4a57)}
 .ph:hover::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.08);pointer-events:none}
 .ph:focus-visible{outline:3px solid var(--fill-accent);outline-offset:-3px}
-.ph .hint{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.7);color:#fff;border-radius:999px;font-size:14px;padding:0 10px;line-height:24px;opacity:0;transition:opacity .12s;pointer-events:none}
+.ph .hint{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.7);color:#fff;border-radius:999px;font-size:14px;padding:0 10px;line-height:24px;opacity:0;transition:opacity .12s;pointer-events:none}
 .ph:hover .hint,.ph:focus-visible .hint{opacity:1}
 .play{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(0,0,0,.65);border:2px solid #fff;display:grid;place-items:center;pointer-events:none}
 .play::before{content:'';border-left:18px solid #fff;border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px}
-.ph .badge{position:absolute;left:8px;bottom:8px;margin:0;background:rgba(0,0,0,.7);color:#fff;border-radius:4px;font-size:14px;padding:0 6px;line-height:22px}
+.ph .badge,.ph .cnt{position:absolute;bottom:8px;margin:0;display:inline-flex;gap:4px;align-items:center;background:rgba(0,0,0,.7);color:#fff;border-radius:6px;font-size:14px;font-weight:700;padding:0 6px;line-height:22px;pointer-events:none}
+.ph .badge{left:8px}
+.ph .cnt{right:8px}
+/* リスト表示の、行の右端の札 (動画は青い塗り。画像は枠だけ) */
+.mk{display:inline-flex;flex:none;gap:4px;align-items:center;border:1px solid var(--border-strong);border-radius:6px;padding:0 6px;font-size:14px;line-height:22px;color:var(--text-secondary);white-space:nowrap}
+.mk.v{color:#fff;background:var(--accent-strong);border-color:var(--accent-strong)}
 .ph .more{position:absolute;inset:0;background:rgba(0,0,0,.55);color:#fff;font-size:24px;font-weight:700;display:grid;place-items:center;pointer-events:none}
 .act{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
 .tag{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0 8px;border:1px solid var(--border-strong);border-radius:12px;font-size:14px;color:var(--text-secondary)}

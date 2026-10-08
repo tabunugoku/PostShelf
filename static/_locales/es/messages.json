@@ -681,6 +681,15 @@
   "videoBadge": {
     "message": "Vídeo"
   },
+  "mediaImages": {
+    "message": "$COUNT$ imágenes",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "Mostrar cómo reproducir este vídeo"
   },

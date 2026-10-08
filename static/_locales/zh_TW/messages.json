@@ -681,6 +681,15 @@
   "videoBadge": {
     "message": "影片"
   },
+  "mediaImages": {
+    "message": "$COUNT$ 張圖片",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "顯示影片播放說明"
   },
