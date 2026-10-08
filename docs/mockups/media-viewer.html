@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PostShelf 画像・動画ビューア案</title>
+<style>
+:root{--bg:#fff;--s1:#f7f9f9;--s2:#fff;--bd:#eff3f4;--bd2:#cfd9de;--tx:#0f1419;--tx2:#536471;--acc:#1d9bf0;--accd:#0f6fb3;--hv:rgba(15,20,25,.06);--sel:rgba(15,20,25,.12)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#000;--s1:#16181c;--s2:#000;--bd:#2f3336;--bd2:#536471;--tx:#e7e9ea;--tx2:#8b98a5;--hv:rgba(231,233,234,.08);--sel:rgba(231,233,234,.16)}}
+:root[data-theme=dark]{--bg:#000;--s1:#16181c;--s2:#000;--bd:#2f3336;--bd2:#536471;--tx:#e7e9ea;--tx2:#8b98a5;--hv:rgba(231,233,234,.08);--sel:rgba(231,233,234,.16)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 system-ui,"Hiragino Sans","Yu Gothic UI",sans-serif}
+.page{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:36px 0 6px}
+.lead{color:var(--tx2);margin:0 0 12px}
+.top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+button{font:inherit;color:inherit;background:transparent;border:1px solid var(--bd2);border-radius:8px;min-height:32px;padding:4px 12px;cursor:pointer}
+button:hover{background:var(--hv)}
+.cols{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.note{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font-size:14px}
+.note b{display:block;margin-bottom:2px}
+.note ul{margin:6px 0 0;padding-left:20px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:0 8px;border-radius:999px;border:1px solid var(--bd2);margin-right:6px}
+.tag.ok{background:var(--accd);border-color:var(--accd);color:#fff}
+/* ポストカード */
+.card{border:1px solid var(--bd);border-radius:12px;padding:14px;display:flex;gap:12px;background:var(--s2)}
+.av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1d9bf0,#7856ff);flex:none}
+.name{font-weight:700}.sub{color:var(--tx2)}
+.body{min-width:0;flex:1}
+.media{display:grid;gap:3px;margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid var(--bd)}
+.media.m4,.media.m2{grid-template-columns:1fr 1fr}
+.ph{position:relative;aspect-ratio:16/10;border:0;border-radius:0;padding:0;min-height:0;cursor:zoom-in;display:block;width:100%;overflow:hidden}
+.media.m4 .ph{aspect-ratio:16/9}
+.ph.a{background:linear-gradient(135deg,#0f6fb3,#1d9bf0 55%,#8ecdf7)}
+.ph.b{background:linear-gradient(135deg,#2b2d31,#5a6470)}
+.ph.c{background:linear-gradient(135deg,#7856ff,#f91880)}
+.ph.d{background:linear-gradient(135deg,#00ba7c,#1d9bf0)}
+.ph.v{background:linear-gradient(135deg,#14171a,#3b4a57);cursor:pointer}
+.ph:hover::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.08)}
+.ph:focus-visible{outline:3px solid var(--acc);outline-offset:-3px}
+.ph .hint{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.65);color:#fff;border-radius:999px;font-size:12px;padding:0 8px;line-height:22px;opacity:0;transition:opacity .12s}
+.ph:hover .hint,.ph:focus-visible .hint{opacity:1}
+.play{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(0,0,0,.65);border:2px solid #fff;display:grid;place-items:center}
+.play::before{content:'';border-left:18px solid #fff;border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px}
+.badge{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.65);color:#fff;border-radius:4px;font-size:12px;padding:0 6px;line-height:20px}
+.more{position:absolute;inset:0;background:rgba(0,0,0,.55);color:#fff;font-size:24px;font-weight:700;display:grid;place-items:center}
+.actions{display:flex;gap:6px;margin-top:10px;color:var(--tx2);font-size:14px}
+/* ビューア */
+.stage{position:relative;height:560px;border-radius:12px;overflow:hidden;background:#000;color:#fff}
+.stage .bar{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:linear-gradient(#000a,#0000);z-index:2}
+.stage .foot{position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px 12px;background:linear-gradient(#0000,#000b);z-index:2}
+.stage button{color:#fff;border-color:#ffffff66;background:#0008}
+.stage button:hover{background:#fff2}
+.stage .primary{background:var(--accd);border-color:var(--accd)}
+.stage .primary:hover{background:#0c5a94}
+.round{width:40px;height:40px;border-radius:50%;padding:0;display:grid;place-items:center;font-size:18px}
+.nav{position:absolute;top:50%;margin-top:-20px;z-index:2}.nav.l{left:12px}.nav.r{right:12px}
+.img{position:absolute;inset:56px 64px 64px;border-radius:6px}
+.count{font-size:14px}
+.center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px}
+.center p{margin:6px 0 0;color:#cfd9de;max-width:360px}
+.cap{margin:8px 0 0;font-size:13px;color:var(--tx2)}
+.switch{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.switch button.on{background:var(--sel);font-weight:700}
+.q{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:700px){.q{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;align-items:center;min-height:32px;cursor:pointer}
+.row input{width:18px;height:18px;margin:0;accent-color:var(--accd)}
+.rowflex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field{margin:12px 0}.lab{font-weight:700;margin-bottom:2px}
+.dirbox{margin:6px 0 0 26px;padding:10px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--s1);display:grid;gap:8px}
+.warn{border:1px solid var(--bd2);border-radius:8px;padding:8px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.solid{background:var(--accd);border-color:var(--accd);color:#fff}.solid:hover{background:#0c5a94}
+.danger{color:#f4212e;border-color:#f4212e66}
+select{font:inherit;color:inherit;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;min-height:32px;padding:2px 8px}
+.meter{height:10px;border-radius:999px;background:var(--bd);overflow:hidden;margin-top:8px;border:1px solid var(--bd2)}
+.meter i{display:block;height:100%;background:var(--accd)}
+code{font:13px ui-monospace,monospace;background:var(--hv);padding:1px 6px;border-radius:4px}
+kbd{font:12px/1 ui-monospace,monospace;border:1px solid var(--bd2);border-bottom-width:2px;border-radius:4px;padding:2px 5px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div>
+      <h1>画像と動画をクリックしたとき (案)</h1>
+      <p class="lead">管理画面 (タブ / サイドパネル共通) のポストで、画像・動画をクリックしたときの表示です。左のカードでクリックを試せます。</p>
+    </div>
+    <div><button id="theme">ライト / ダーク切替</button></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="card">
+        <div class="av"></div>
+        <div class="body">
+          <div><span class="name">サンプルさん</span> <span class="sub">@sample_user ・ 10月6日</span></div>
+          <div>画像 4 枚つきのポスト。画像を押すと大きく表示されます。</div>
+          <div class="media m4" id="grid4">
+            <button class="ph a" data-i="0" aria-label="画像 1 / 4 を大きく表示"><span class="hint">拡大</span></button>
+            <button class="ph b" data-i="1" aria-label="画像 2 / 4 を大きく表示"><span class="hint">拡大</span></button>
+            <button class="ph c" data-i="2" aria-label="画像 3 / 4 を大きく表示"><span class="hint">拡大</span></button>
+            <button class="ph d" data-i="3" aria-label="画像 4 / 4 を大きく表示"><span class="hint">拡大</span></button>
+          </div>
+          <div class="actions"><span>フォルダ: 資料 / あとで読む</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="av" style="background:linear-gradient(135deg,#00ba7c,#1d9bf0)"></div>
+        <div class="body">
+          <div><span class="name">動画のポスト</span> <span class="sub">@video_user ・ 10月5日</span></div>
+          <div>動画つきのポスト。サムネイルを押すと案内が出ます。</div>
+          <div class="media m1">
+            <button class="ph v" id="vid" aria-label="動画の案内を表示"><span class="play"></span><span class="badge">動画</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="switch" role="tablist" aria-label="ビューアの状態">
+        <button class="on" data-s="img">画像を拡大</button>
+        <button data-s="vid">動画をクリック</button>
+        <button data-s="fail">画像が読み込めない</button>
+      </div>
+      <div class="stage" id="stage"></div>
+      <p class="cap" id="cap"></p>
+    </div>
+  </div>
+
+  <h2>できること・できないこと</h2>
+  <div class="q">
+    <div class="note"><span class="tag ok">できる</span><b>画像</b>
+      PostShelf は、画像の URL を保存しています。クリックしたときは、X の画像サーバーにある大きいサイズ (<code>name=orig</code> など) を読み込んで表示します。新しい通信先は増えません (いまのサムネイルも同じサーバーから読んでいます)。
+      <ul>
+        <li>複数枚は <kbd>←</kbd> <kbd>→</kbd> で前後、<kbd>Esc</kbd> で閉じる</li>
+        <li>「元のサイズで開く」は新しいタブで画像だけを開く</li>
+        <li>「X でポストを開く」で元のポストへ</li>
+      </ul>
+    </div>
+    <div class="note"><span class="tag">制限あり</span><b>動画</b>
+      動画の実体 (再生用のファイル) は、X の画面から正規の方法で取り出せません。保存できるのはサムネイルだけです。そのため、動画はクリックすると「X で再生」へ案内します (X の非公開 API を呼ばない方針は変えません)。
+      <ul>
+        <li>サムネイルは、新しいポストから保存します (古い保存分は動画アイコンの枠のみ)</li>
+        <li>元のポストが削除されると、画像が表示できなくなることがあります (右の「読み込めない」の表示)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>設定: 画像のキャッシュ (案)</h2>
+  <p class="lead">保存した画像を PostShelf 側にも残す機能です。初期値はオフ。保存先と最大容量を選べます。設定画面の「データ」の近くに置きます。</p>
+  <div class="cols" style="grid-template-columns:minmax(0,560px) minmax(0,1fr)">
+    <div class="card" style="display:block">
+      <label class="row"><input type="checkbox" id="cOn" checked> <b>画像をキャッシュする</b></label>
+      <p class="sub" style="margin:2px 0 12px 26px">ポストを保存するときに、画像を端末に残します。X 側で消えても見られます。動画はサムネイルだけです。</p>
+      <div id="cBody">
+        <div class="field"><div class="lab">保存先</div>
+          <label class="row"><input type="radio" name="dst" value="idb" checked> ブラウザの中 <span class="sub">(拡張機能のデータ領域。おすすめ)</span></label>
+          <label class="row"><input type="radio" name="dst" value="dir"> 自分で選んだフォルダ <span class="sub">(PC の好きな場所)</span></label>
+          <div id="dirBox" class="dirbox" hidden>
+            <div class="rowflex"><code>D:\PostShelf-images</code><button>フォルダを選び直す…</button></div>
+            <div class="warn"><b>許可が必要です</b> Chrome を再起動すると、フォルダへのアクセス許可が外れることがあります。 <button class="solid">許可する</button></div>
+            <div class="sub">フォルダの選択はタブ版の管理画面で行います (サイドパネルでは選べません)。</div>
+          </div>
+        </div>
+        <div class="field"><div class="lab">最大容量</div>
+          <div class="rowflex">
+            <select id="cap2"><option>500 MB</option><option selected>1 GB</option><option>2 GB</option><option>5 GB</option><option>10 GB</option><option>指定…</option></select>
+            <span class="sub">使用中 <b id="used">412 MB</b> / 1 GB (画像 1,284 枚)</span>
+          </div>
+          <div class="meter" aria-hidden="true"><i id="mt" style="width:41%"></i></div>
+        </div>
+        <div class="field"><div class="lab">画質</div>
+          <label class="row"><input type="radio" name="q" checked> 標準 <span class="sub">(1 枚あたり約 0.2〜0.5 MB。表示には十分)</span></label>
+          <label class="row"><input type="radio" name="q"> 元のサイズ <span class="sub">(1 枚あたり約 1〜5 MB。容量が早く減ります)</span></label>
+        </div>
+        <div class="field"><div class="lab">容量がいっぱいになったら</div>
+          <label class="row"><input type="radio" name="full" checked> 古いものから消す <span class="sub">(保存日が古いポストの画像から)</span></label>
+          <label class="row"><input type="radio" name="full"> 新しい画像を保存しない</label>
+        </div>
+        <div class="rowflex" style="margin-top:6px">
+          <button>保存済みのポストの画像をまとめてキャッシュ</button>
+          <button class="danger">キャッシュを削除</button>
+        </div>
+        <div class="sub" style="margin-top:6px">まとめてキャッシュは、1 枚ずつ順に読み込みます (進捗を表示。いつでも止められます)。ポストを削除すると、そのポストの画像も消えます。</div>
+      </div>
+    </div>
+    <div>
+      <div class="note"><b>初めてオンにするとき</b>
+        Chrome が「pbs.twimg.com (X の画像サーバー) へのアクセス」の許可を求めます。許可は、この機能をオンにしたときだけ求めます (拡張機能の更新だけで求められることはありません)。
+      </div>
+      <div class="note" style="margin-top:10px"><b>ルール</b>
+        <ul>
+          <li>保存した画像は、この PC の中だけに置きます。外部へ送りません</li>
+          <li>JSON のエクスポートに画像は入りません (URL のみ)</li>
+          <li>表示するとき、キャッシュがあればそれを使い、無いときだけ X の画像サーバーから読みます</li>
+          <li>最大容量を下げたときは、すぐに古いものから整理します (確認の画面を出します)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>決めたいこと</h2>
+  <div class="note">
+    <b>この設定の見た目と項目でよいですか？</b>
+    よければ、モックアップのままクラウドに渡します。足したい項目 (例: 画像をまとめて書き出す) や、いらない項目があれば教えてください。
+  </div>
+</div>
+
+<script>
+var $=function(s,r){return (r||document).querySelector(s)};
+var colors=['a','b','c','d'];
+var stage=$('#stage'),cap=$('#cap'),cur=0,state='img';
+function render(){
+  var h='';
+  if(state==='img'){
+    h='<div class="bar"><span class="count">'+(cur+1)+' / 4</span><button class="round" id="x" aria-label="閉じる (Esc)">✕</button></div>'
+     +'<button class="round nav l" id="pv" aria-label="前の画像">‹</button><button class="round nav r" id="nx" aria-label="次の画像">›</button>'
+     +'<div class="img ph '+colors[cur]+'" style="cursor:default"></div>'
+     +'<div class="foot"><button class="primary">元のサイズで開く ↗</button><button>X でポストを開く ↗</button></div>';
+    cap.textContent='画像 4 枚のポスト。背景を押す、✕、Esc で閉じます。';
+  }else if(state==='vid'){
+    h='<div class="bar"><span class="count">動画</span><button class="round" id="x" aria-label="閉じる (Esc)">✕</button></div>'
+     +'<div class="img ph v" style="cursor:default"><span class="play"></span></div>'
+     +'<div class="center" style="align-content:end;padding-bottom:90px"><div><b>動画は X で再生します</b><p>動画の再生用のファイルは保存できないため、PostShelf では再生できません。</p></div></div>'
+     +'<div class="foot"><button class="primary">X で動画を再生 ↗</button></div>';
+    cap.textContent='動画のクリック。サムネイルを残し、X のポストへ案内します。';
+  }else{
+    h='<div class="bar"><span class="count">1 / 4</span><button class="round" id="x" aria-label="閉じる (Esc)">✕</button></div>'
+     +'<div class="center"><div><div style="font-size:40px">🖼</div><b>画像を読み込めませんでした</b><p>元のポストが削除されたか、X 側で画像の場所が変わった可能性があります。</p></div></div>'
+     +'<div class="foot"><button class="primary">X でポストを開く ↗</button><button>保存してある小さい画像を表示</button></div>';
+    cap.textContent='読み込み失敗時の表示。保存済みの小さいサムネイルは、そのまま見られるようにします。';
+  }
+  stage.innerHTML=h;
+  var pv=$('#pv'),nx=$('#nx');
+  if(pv)pv.onclick=function(){cur=(cur+3)%4;render()};
+  if(nx)nx.onclick=function(){cur=(cur+1)%4;render()};
+}
+function setState(s){state=s;document.querySelectorAll('.switch button').forEach(function(b){b.classList.toggle('on',b.dataset.s===s)});render()}
+document.querySelectorAll('.switch button').forEach(function(b){b.onclick=function(){setState(b.dataset.s)}});
+document.querySelectorAll('#grid4 .ph').forEach(function(b){b.onclick=function(){cur=+b.dataset.i;setState('img');stage.scrollIntoView({block:'nearest',behavior:'smooth'})}});
+$('#vid').onclick=function(){setState('vid');stage.scrollIntoView({block:'nearest',behavior:'smooth'})};
+document.addEventListener('keydown',function(e){if(state==='img'&&e.key==='ArrowRight'){cur=(cur+1)%4;render()}if(state==='img'&&e.key==='ArrowLeft'){cur=(cur+3)%4;render()}});
+$('#theme').onclick=function(){var r=document.documentElement,d=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=d?'light':'dark'};
+render();
+document.querySelectorAll('input[name=dst]').forEach(function(r){r.onchange=function(){$('#dirBox').hidden=r.value!=='dir'||!r.checked}});
+$('#cOn').onchange=function(){$('#cBody').style.opacity=this.checked?1:.4;$('#cBody').style.pointerEvents=this.checked?'':'none'};
+</script>
+</body>
+</html>
