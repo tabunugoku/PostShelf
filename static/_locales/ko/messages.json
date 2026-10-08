@@ -1,0 +1,928 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "x.com 북마크를 나만의 폴더로 정리합니다. 모든 데이터는 기기 안에만 저장됩니다."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "전체"
+  },
+  "inboxName": {
+    "message": "미분류"
+  },
+  "newFolderDefaultName": {
+    "message": "새 폴더"
+  },
+  "errEmptyName": {
+    "message": "폴더 이름을 입력하세요"
+  },
+  "errBuiltinImmutable": {
+    "message": "'전체'는 변경하거나 삭제할 수 없습니다"
+  },
+  "errNotFound": {
+    "message": "폴더를 찾을 수 없습니다"
+  },
+  "errInvalidIcon": {
+    "message": "사용할 수 없는 아이콘입니다"
+  },
+  "errInvalidColor": {
+    "message": "사용할 수 없는 색입니다"
+  },
+  "errInvalidImport": {
+    "message": "파일 형식이 올바르지 않습니다"
+  },
+  "openFolders": {
+    "message": "폴더에 저장"
+  },
+  "newFolder": {
+    "message": "새 폴더"
+  },
+  "newFolderPlaceholder": {
+    "message": "폴더 이름"
+  },
+  "add": {
+    "message": "추가"
+  },
+  "noFolders": {
+    "message": "폴더가 없습니다"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "북마크"
+  },
+  "edit": {
+    "message": "편집"
+  },
+  "postView": {
+    "message": "게시물 보기"
+  },
+  "listView": {
+    "message": "목록 보기"
+  },
+  "search": {
+    "message": "검색"
+  },
+  "sortSavedDesc": {
+    "message": "저장일: 최신순"
+  },
+  "sortSavedAsc": {
+    "message": "저장일: 오래된순"
+  },
+  "sortPostedDesc": {
+    "message": "게시일: 최신순"
+  },
+  "sortPostedAsc": {
+    "message": "게시일: 오래된순"
+  },
+  "name": {
+    "message": "이름"
+  },
+  "icon": {
+    "message": "아이콘"
+  },
+  "color": {
+    "message": "색"
+  },
+  "save": {
+    "message": "저장"
+  },
+  "cancel": {
+    "message": "취소"
+  },
+  "delete": {
+    "message": "삭제"
+  },
+  "confirmDelete": {
+    "message": "이 폴더를 삭제할까요? 저장한 게시물은 삭제되지 않습니다."
+  },
+  "empty": {
+    "message": "저장된 게시물이 없습니다"
+  },
+  "openOnX": {
+    "message": "X에서 열기"
+  },
+  "popupPosts": {
+    "message": "개 게시물"
+  },
+  "popupFolders": {
+    "message": "개 폴더"
+  },
+  "recent": {
+    "message": "최근 저장한 3개"
+  },
+  "settings": {
+    "message": "설정"
+  },
+  "openManager": {
+    "message": "관리 페이지 열기"
+  },
+  "exportBtn": {
+    "message": "내보내기"
+  },
+  "importBtn": {
+    "message": "가져오기"
+  },
+  "importFail": {
+    "message": "파일 형식이 올바르지 않습니다"
+  },
+  "collectTitle": {
+    "message": "이 페이지의 게시물을 PostShelf로 가져오기"
+  },
+  "importDone": {
+    "message": "게시물 $COUNT$개를 가져왔습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "게시물 $COUNT$개를 '미분류'로 가져왔습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "X 북마크와 연동"
+  },
+  "syncNativeDesc": {
+    "message": "게시물을 폴더에 저장하면 PostShelf가 X 표준 북마크에도 추가하고, 모든 폴더에서 제외하면 X 북마크도 해제합니다. PostShelf가 화면의 북마크 버튼을 누르는 것은 조작한 게시물 1개당 한 번뿐입니다. 기본값은 꺼짐입니다."
+  },
+  "savedBadgeTitle": {
+    "message": "폴더 $COUNT$개에 저장됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "X 북마크도 해제"
+  },
+  "buttonModeHeading": {
+    "message": "기본 북마크 버튼 동작"
+  },
+  "buttonModeSeparate": {
+    "message": "별도의 PostShelf 버튼 추가 (기본 버튼은 그대로)"
+  },
+  "buttonModeReplace": {
+    "message": "기본 버튼 동작 대체 (Shift+클릭하면 X 기본 동작)"
+  },
+  "buttonModeNote": {
+    "message": "X 업데이트 후 동작하지 않을 수 있으며, 그 경우 기본 동작으로 돌아갑니다."
+  },
+  "selectedCount": {
+    "message": "$COUNT$개 선택됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "폴더에 추가"
+  },
+  "bulkRemove": {
+    "message": "폴더에서 제외"
+  },
+  "clearSelection": {
+    "message": "선택 해제"
+  },
+  "changeFolder": {
+    "message": "폴더 변경"
+  },
+  "removeFromFolder": {
+    "message": "\"$NAME$\"에서 제외",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "PostShelf에서 삭제"
+  },
+  "confirmDeletePosts": {
+    "message": "게시물 $COUNT$개를 PostShelf에서 삭제할까요? X 북마크는 바뀌지 않습니다.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "실행 취소"
+  },
+  "toastDeleted": {
+    "message": "$COUNT$개 삭제됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "$COUNT$개 이동됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "$COUNT$개를 폴더에서 제외했습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "$COUNT$개를 폴더에 추가했습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "이 게시물 선택"
+  },
+  "pickFolder": {
+    "message": "폴더 선택"
+  },
+  "dragHint": {
+    "message": "드래그해서 추가 (Alt는 이동)"
+  },
+  "sortLabel": {
+    "message": "정렬"
+  },
+  "colorNone": {
+    "message": "색 없음 (기본)"
+  },
+  "openSidePanel": {
+    "message": "사이드 패널에서 열기"
+  },
+  "openInTab": {
+    "message": "탭에서 열기"
+  },
+  "actionModeHeading": {
+    "message": "툴바 아이콘 클릭 시 동작"
+  },
+  "actionModePopup": {
+    "message": "팝업 열기"
+  },
+  "actionModeSidepanel": {
+    "message": "사이드 패널 열기"
+  },
+  "actionModeNote": {
+    "message": "사이드 패널은 Chrome 114 이상에서 사용할 수 있습니다."
+  },
+  "collectPending": {
+    "message": "미가져옴 $COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "모두 가져옴"
+  },
+  "smartViews": {
+    "message": "스마트 보기"
+  },
+  "foldersSection": {
+    "message": "폴더"
+  },
+  "recent7": {
+    "message": "최근 7일"
+  },
+  "searchPlaceholder": {
+    "message": "본문, @사용자명으로 검색"
+  },
+  "gridView": {
+    "message": "그리드 보기"
+  },
+  "itemCount": {
+    "message": "$COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "x.com 북마크에서 가져올 수 있는 게시물이 $COUNT$개 있습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "가져오는 방법"
+  },
+  "importHowTitle": {
+    "message": "x.com 북마크 가져오기"
+  },
+  "importHowSteps": {
+    "message": "1. Chrome에서 x.com 왼쪽 메뉴의 \"기록\"을 열고 \"북마크\" 탭을 선택합니다 (x.com/i/history)\n2. 가져올 게시물이 화면에 보일 때까지 직접 스크롤합니다 (자동 스크롤은 하지 않습니다)\n3. 오른쪽 아래의 \"미가져옴 N개\" 버튼을 누릅니다\n4. 가져온 게시물은 \"미분류\"에 들어갑니다"
+  },
+  "dismiss": {
+    "message": "닫기"
+  },
+  "filterImage": {
+    "message": "이미지 있음"
+  },
+  "filterVideo": {
+    "message": "동영상 있음"
+  },
+  "filterLink": {
+    "message": "링크 있음"
+  },
+  "filterAuthor": {
+    "message": "작성자로 필터"
+  },
+  "clearFilters": {
+    "message": "필터 해제"
+  },
+  "notFoundTitle": {
+    "message": "찾을 수 없습니다"
+  },
+  "notFoundHint": {
+    "message": "검색어를 바꾸거나 필터를 해제해 보세요."
+  },
+  "noPostsTitle": {
+    "message": "아직 저장한 게시물이 없습니다"
+  },
+  "noPostsHint": {
+    "message": "x.com에서 게시물의 폴더 버튼을 눌러 저장합니다. 이미 북마크한 게시물은 x.com 기록의 \"북마크\"에서 가져올 수 있습니다."
+  },
+  "folderMore": {
+    "message": "이름·아이콘·색 변경"
+  },
+  "cardMenu": {
+    "message": "더보기"
+  },
+  "selectMode": {
+    "message": "선택"
+  },
+  "chooseFolderMenu": {
+    "message": "폴더 목록 열기"
+  },
+  "searchShow": {
+    "message": "검색 표시"
+  },
+  "viewLabel": {
+    "message": "보기 방식"
+  },
+  "dataSection": {
+    "message": "데이터"
+  },
+  "saveCurrentPost": {
+    "message": "지금 열려 있는 게시물 저장…"
+  },
+  "saveCurrentHint": {
+    "message": "x.com에서 게시물을 열었을 때 표시됩니다"
+  },
+  "saveCurrentFail": {
+    "message": "이 게시물을 읽을 수 없습니다. 페이지를 새로고침한 뒤 다시 시도하세요."
+  },
+  "healthTitle": {
+    "message": "X 화면 구조"
+  },
+  "healthOkAt": {
+    "message": "정상 (마지막 확인: $NAME$)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "아직 확인 전 (x.com을 열면 확인합니다)"
+  },
+  "healthDegraded": {
+    "message": "X 화면 구조가 일부 바뀌었습니다. 동작은 계속됩니다."
+  },
+  "healthBroken": {
+    "message": "X 화면 구조가 바뀌어 일부 기능을 멈췄습니다. 진단 정보를 복사해서 GitHub에 보고해 주세요."
+  },
+  "copyDiag": {
+    "message": "진단 정보 복사"
+  },
+  "diagTitle": {
+    "message": "진단 정보"
+  },
+  "diagNotice": {
+    "message": "이 내용이 클립보드에 복사됩니다. 게시물 본문, 사용자 이름, URL은 포함되지 않습니다. 포함되는 것은 확장 프로그램 버전, 브라우저 정보, 표시 언어, X 화면 구조의 뼈대입니다."
+  },
+  "diagCopy": {
+    "message": "복사"
+  },
+  "diagCopied": {
+    "message": "복사했습니다"
+  },
+  "diagCopyFail": {
+    "message": "복사하지 못했습니다. 내용을 선택해서 직접 복사하세요."
+  },
+  "diagReport": {
+    "message": "GitHub에 보고"
+  },
+  "diagPreparing": {
+    "message": "만드는 중…"
+  },
+  "saveTo": {
+    "message": "저장 위치: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "로그인한 계정을 확인할 수 없어 저장할 수 없습니다. x.com 페이지를 새로고침하세요."
+  },
+  "collectNoAccount": {
+    "message": "로그인한 계정을 확인할 수 없어 가져올 수 없습니다"
+  },
+  "accountUnknownName": {
+    "message": "계정 미설정"
+  },
+  "accountSwitchLabel": {
+    "message": "표시할 계정"
+  },
+  "accountSwitchNote": {
+    "message": "여기서 전환해도 X의 로그인 상태는 바뀌지 않습니다. X 계정은 x.com에서 전환하세요."
+  },
+  "accountSwitched": {
+    "message": "$NAME$(으)로 전환했습니다",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "x.com에서 로그인 중"
+  },
+  "accountAssign": {
+    "message": "다른 계정으로 이동…"
+  },
+  "accountAssignTitle": {
+    "message": "데이터 이동"
+  },
+  "accountAssignDesc": {
+    "message": "$NAME$의 저장 데이터($COUNT$개)를 선택한 계정으로 옮깁니다. 같은 게시물이 이미 있으면, 그 게시물이 들어 있는 폴더를 합칩니다.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "이동할 계정"
+  },
+  "accountAssignNone": {
+    "message": "이동할 계정이 없습니다. 로그인한 상태에서 x.com을 열면 여기서 이동할 계정으로 선택할 수 있게 됩니다."
+  },
+  "accountAssignDone": {
+    "message": "$COUNT$개를 옮겼습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "이 계정의 데이터 삭제"
+  },
+  "accountDeleteConfirm": {
+    "message": "$NAME$의 저장 데이터(게시물 $COUNT$개와 폴더)를 삭제할까요? 되돌릴 수 없습니다. X의 북마크는 바뀌지 않습니다.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "\"계정 미설정\"에 게시물 $COUNT$개가 있습니다. 어느 계정의 것인지 선택하고 \"다른 계정으로 이동…\"을 누르세요.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "계정: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "x.com에서 로그인한 계정을 확인할 수 없어 저장할 수 없습니다. x.com 페이지를 새로고침하세요."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "PostShelf에 표시 중인 계정이 x.com에서 로그인한 $NAME$ 과(와) 달라 저장할 수 없습니다. 여기에 표시하는 계정을 $NAME$(으)로 전환하세요.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsResetHeading": {
+    "message": "설정 초기화"
+  },
+  "settingsResetBtn": {
+    "message": "설정을 기본값으로 되돌리기"
+  },
+  "settingsResetDesc": {
+    "message": "연동 모드, 기본 버튼 동작, 여는 방식, 보기 방식 등의 설정만 되돌립니다. 폴더, 저장한 게시물, 계정 정보는 지워지지 않습니다."
+  },
+  "settingsResetConfirm": {
+    "message": "설정을 기본값으로 되돌릴까요? 저장한 게시물과 폴더는 지워지지 않습니다."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "되돌리기"
+  },
+  "settingsResetDone": {
+    "message": "설정을 기본값으로 되돌렸습니다"
+  },
+  "dangerHeading": {
+    "message": "위험한 작업"
+  },
+  "deleteAllBtn": {
+    "message": "모든 데이터 삭제"
+  },
+  "deleteAllDesc": {
+    "message": "모든 폴더, 저장한 게시물, 계정 정보를 삭제합니다. 설정은 남습니다. 되돌릴 수 없습니다."
+  },
+  "deleteAllCounts": {
+    "message": "삭제되는 항목: 폴더 $FOLDERS$개, 게시물 $POSTS$개, 계정 $ACCOUNTS$개",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "먼저 JSON 내보내기"
+  },
+  "deleteAllWarn": {
+    "message": "되돌릴 수 없습니다. X의 북마크는 바뀌지 않습니다. 계속하려면 아래에 \"$WORD$\"를 입력하세요.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "삭제"
+  },
+  "deleteAllInputLabel": {
+    "message": "확인용 입력"
+  },
+  "deleteAllDone": {
+    "message": "모든 데이터를 삭제했습니다"
+  },
+  "viewImage": {
+    "message": "이미지 $N$ / $M$ 크게 보기",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "확대"
+  },
+  "viewerLabel": {
+    "message": "이미지 뷰어"
+  },
+  "viewerClose": {
+    "message": "닫기(Esc)"
+  },
+  "viewerPrev": {
+    "message": "이전 이미지"
+  },
+  "viewerNext": {
+    "message": "다음 이미지"
+  },
+  "viewerOpenOriginal": {
+    "message": "원본 크기로 열기 ↗"
+  },
+  "viewerOpenPost": {
+    "message": "X에서 게시물 열기 ↗"
+  },
+  "viewerFailTitle": {
+    "message": "이미지를 불러오지 못했습니다"
+  },
+  "viewerFailReason": {
+    "message": "원래 게시물이 삭제되었거나 X에서 이미지 위치가 바뀌었을 수 있습니다."
+  },
+  "viewerShowSmall": {
+    "message": "저장해 둔 작은 이미지 표시"
+  },
+  "videoBadge": {
+    "message": "동영상"
+  },
+  "videoOpenLabel": {
+    "message": "동영상 안내 표시"
+  },
+  "videoDialogTitle": {
+    "message": "동영상은 X에서 재생합니다"
+  },
+  "videoDialogBody": {
+    "message": "동영상 재생용 파일은 저장할 수 없어 PostShelf에서는 재생할 수 없습니다."
+  },
+  "videoPlayOnX": {
+    "message": "X에서 동영상 재생 ↗"
+  },
+  "cacheTitle": {
+    "message": "이미지 캐시"
+  },
+  "cacheEnable": {
+    "message": "이미지를 캐시하기"
+  },
+  "cacheEnableDesc": {
+    "message": "게시물을 저장할 때 이미지를 이 컴퓨터에도 남깁니다. X에서 삭제되어도 볼 수 있습니다. 동영상은 썸네일만 남깁니다."
+  },
+  "cachePermNote": {
+    "message": "처음 켤 때 Chrome이 pbs.twimg.com(X의 이미지 서버) 접근 권한을 요청합니다. 이 기능을 켤 때만 요청합니다."
+  },
+  "cachePermDenied": {
+    "message": "이미지 서버 접근이 허용되지 않아 켤 수 없었습니다. 다시 켜고 허용해 주세요."
+  },
+  "cachePermMissing": {
+    "message": "이미지 서버(pbs.twimg.com) 접근 권한이 없습니다."
+  },
+  "cacheGrant": {
+    "message": "허용"
+  },
+  "cacheDest": {
+    "message": "저장 위치"
+  },
+  "cacheDestIdb": {
+    "message": "브라우저 내부(확장 프로그램의 데이터 영역, 권장)"
+  },
+  "cacheDestDir": {
+    "message": "직접 고른 폴더(PC의 원하는 위치)"
+  },
+  "cacheDirNone": {
+    "message": "선택한 폴더가 없습니다"
+  },
+  "cacheDirPick": {
+    "message": "폴더 선택…"
+  },
+  "cacheDirRepick": {
+    "message": "폴더 다시 선택…"
+  },
+  "cacheDirRescan": {
+    "message": "다시 검사"
+  },
+  "cacheDirRescanDone": {
+    "message": "이미지 $COUNT$개를 다시 셌습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "권한이 필요합니다"
+  },
+  "cacheDirPermNote": {
+    "message": "Chrome을 다시 시작하면 폴더 접근 권한이 해제될 수 있습니다. 다시 허용할 때까지 이미지는 폴더에 쓰지 않고 X의 이미지 서버에서 불러옵니다."
+  },
+  "cacheDirTabOnly": {
+    "message": "폴더 선택은 탭 버전 관리 화면에서 합니다(사이드 패널에서는 선택할 수 없습니다). 탭 버전에서 선택해 주세요."
+  },
+  "cacheDirUnsupported": {
+    "message": "이 확장 프로그램 페이지에서는 폴더를 선택할 수 없었습니다. \"브라우저 내부\"를 사용해 주세요."
+  },
+  "cacheDirReadme": {
+    "message": "PostShelf의 이미지 캐시입니다. 지워도 PostShelf 본체의 데이터는 지워지지 않습니다.\n\"images\" 폴더 안에 게시물 ID별 폴더가 있습니다."
+  },
+  "cacheDirNonEmpty": {
+    "message": "이 폴더는 PostShelf가 만든 것이 아니며 이미 다른 파일이 들어 있습니다. 여기에 \".postshelf\", \"README.txt\", \"images\" 폴더를 만들어도 될까요? 폴더에 있는 다른 파일은 건드리지 않습니다."
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "만들기"
+  },
+  "cacheMax": {
+    "message": "최대 용량"
+  },
+  "cacheMaxCustom": {
+    "message": "직접 지정…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "최대 용량(MB, 100 이상)"
+  },
+  "cacheMaxMin": {
+    "message": "최대 용량은 100MB 이상이어야 합니다."
+  },
+  "cacheUsage": {
+    "message": "사용 중 $USED$ / $MAX$(이미지 $COUNT$개)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "화질"
+  },
+  "cacheQualityLarge": {
+    "message": "표준(1장당 예상 0.2~0.5MB, 보기에 충분)"
+  },
+  "cacheQualityOrig": {
+    "message": "원본 크기(1장당 예상 1~5MB, 용량이 빨리 줄어듭니다)"
+  },
+  "cacheFull": {
+    "message": "용량이 가득 차면"
+  },
+  "cacheFullEvict": {
+    "message": "오래된 것부터 삭제(저장일이 오래된 게시물의 이미지부터)"
+  },
+  "cacheFullStop": {
+    "message": "새 이미지를 저장하지 않음"
+  },
+  "cacheBulk": {
+    "message": "저장한 게시물의 이미지를 한꺼번에 캐시"
+  },
+  "cacheBulkProgress": {
+    "message": "이미지 가져오는 중: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "중지"
+  },
+  "cacheBulkDone": {
+    "message": "이미지 $COUNT$개를 캐시했습니다(실패 $FAILED$개)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "캐시할 이미지가 없습니다"
+  },
+  "cacheBulkBlocked": {
+    "message": "저장 위치에 쓸 수 없어 중간에 멈췄습니다. 권한과 폴더를 확인해 주세요."
+  },
+  "cacheBulkFull": {
+    "message": "용량이 가득 차서 중간에 멈췄습니다."
+  },
+  "cacheBulkHelp": {
+    "message": "한꺼번에 캐시는 이미지를 한 장씩 순서대로 불러옵니다. 진행 상황을 표시하며, 언제든 중지할 수 있습니다. 중지해도 다음에 누르면 이어서 진행합니다. 게시물을 삭제하면 그 게시물의 이미지도 삭제됩니다."
+  },
+  "cacheClear": {
+    "message": "캐시 삭제"
+  },
+  "cacheClearConfirm": {
+    "message": "캐시한 이미지($COUNT$개)를 삭제할까요? 게시물 데이터는 지워지지 않습니다. 이미지는 X의 이미지 서버에서 불러옵니다.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "캐시를 삭제했습니다"
+  },
+  "cacheLowerConfirm": {
+    "message": "최대 용량을 낮추면 저장일이 오래된 게시물 $COUNT$건의 이미지가 바로 삭제됩니다. 계속할까요?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "낮추고 정리"
+  },
+  "cacheSwitchTitle": {
+    "message": "저장 위치 전환"
+  },
+  "cacheSwitchBody": {
+    "message": "현재 저장 위치에 이미지가 $COUNT$개 있습니다. 새 저장 위치로 옮길까요?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "옮기기"
+  },
+  "cacheSwitchKeep": {
+    "message": "옮기지 않음"
+  },
+  "cacheSwitchProgress": {
+    "message": "이미지 옮기는 중: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "이미지를 옮기지 못했습니다. 저장 위치의 권한을 확인해 주세요."
+  },
+  "cacheCleanupNeeded": {
+    "message": "삭제한 게시물 중 이미지가 아직 지워지지 않은 것이 있습니다. 저장 위치의 권한을 확인한 뒤 \"지금 정리\"를 눌러 주세요."
+  },
+  "cacheCleanupNow": {
+    "message": "지금 정리"
+  },
+  "cacheRules": {
+    "message": "저장한 이미지는 이 PC 안에만 두며 외부로 보내지 않습니다. 확장 프로그램을 삭제하면 브라우저 내부의 캐시도 삭제됩니다(직접 고른 폴더는 삭제되지 않습니다). 정말 남기고 싶은 이미지는 \"직접 고른 폴더\"에 저장하세요. 저장 데이터 자체의 백업에는 JSON 내보내기를 사용하세요(이미지는 포함되지 않고 URL만 들어갑니다)."
+  },
+  "updateNotice": {
+    "message": "PostShelf를 업데이트했습니다($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "버전 $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "업데이트할 때: 먼저 \"내보내기\"로 데이터를 저장한 뒤, 같은 폴더에 새 버전을 덮어쓰고 확장 프로그램의 \"새로고침\"을 누르세요. 확장 프로그램은 삭제하지 마세요(저장한 데이터도 함께 삭제됩니다)."
+  },
+  "installGuideLink": {
+    "message": "업데이트 및 수동 설치 방법"
+  },
+  "errorStorage": {
+    "message": "저장 또는 불러오기에 실패했습니다. 다시 시도해 주세요. 계속되면 설정의 \"데이터\"에서 \"내보내기\"로 저장한 뒤 확장 프로그램을 새로고침하세요."
+  }
+}

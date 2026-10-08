@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "version": "0.1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAutLADcpVbaQ/2wkv72XZ3ONK9KYNSHPaN8VMWukvYIjvAEsAcR5A0Q+1LigDcsZ4xt0t1rARtlY1Otwi54mrsXNOvet23R+Iqf0sOPegpuJkOTQO5G9ocCzcqeak+GEyVMF3be42dlapineK1cNl5KVuzcscgr28/9yW9t3FcgdpbgmDOPRgvjE74gb2qf2hPs3Zbf+T/xV4CZP7BrUSEoOBldYT9DsLCDyqDMRrbhN8bq8Vi5LWRu1WvNfj/tgXrAeESYIFqTdcfwbW2mBVZ2a5drey0M6oDZsBHpyDzSUTvvJO11kOwL4s4I5RSEm4H1UWH2ooX9asqPVrY5Z97wIDAQAB",
+  "description": "__MSG_extDescription__",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://x.com/*",
+    "https://twitter.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://pbs.twimg.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "__MSG_extActionTitle__",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "brand/icon-16.png",
+      "32": "brand/icon-32.png",
+      "48": "brand/icon-48.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/tabler-icons.min.css",
+        "icons/fonts/*"
+      ],
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ]
+    }
+  ],
+  "default_locale": "en",
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "minimum_chrome_version": "114",
+  "icons": {
+    "16": "brand/icon-16.png",
+    "32": "brand/icon-32.png",
+    "48": "brand/icon-48.png",
+    "128": "brand/icon-128.png"
+  }
+}

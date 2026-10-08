@@ -1,0 +1,928 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "Organize seus favoritos do x.com em pastas próprias. Todos os dados ficam apenas no seu dispositivo."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "Todos"
+  },
+  "inboxName": {
+    "message": "Sem categoria"
+  },
+  "newFolderDefaultName": {
+    "message": "Nova pasta"
+  },
+  "errEmptyName": {
+    "message": "Digite um nome para a pasta"
+  },
+  "errBuiltinImmutable": {
+    "message": "\"Todos\" não pode ser alterado nem excluído"
+  },
+  "errNotFound": {
+    "message": "Pasta não encontrada"
+  },
+  "errInvalidIcon": {
+    "message": "Este ícone não está disponível"
+  },
+  "errInvalidColor": {
+    "message": "Esta cor não está disponível"
+  },
+  "errInvalidImport": {
+    "message": "O formato do arquivo é inválido"
+  },
+  "openFolders": {
+    "message": "Salvar na pasta"
+  },
+  "newFolder": {
+    "message": "Nova pasta"
+  },
+  "newFolderPlaceholder": {
+    "message": "Nome da pasta"
+  },
+  "add": {
+    "message": "Adicionar"
+  },
+  "noFolders": {
+    "message": "Nenhuma pasta ainda"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "Favoritos"
+  },
+  "edit": {
+    "message": "Editar"
+  },
+  "postView": {
+    "message": "Posts"
+  },
+  "listView": {
+    "message": "Lista"
+  },
+  "search": {
+    "message": "Pesquisar"
+  },
+  "sortSavedDesc": {
+    "message": "Salvo: mais recente"
+  },
+  "sortSavedAsc": {
+    "message": "Salvo: mais antigo"
+  },
+  "sortPostedDesc": {
+    "message": "Publicado: mais recente"
+  },
+  "sortPostedAsc": {
+    "message": "Publicado: mais antigo"
+  },
+  "name": {
+    "message": "Nome"
+  },
+  "icon": {
+    "message": "Ícone"
+  },
+  "color": {
+    "message": "Cor"
+  },
+  "save": {
+    "message": "Salvar"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "delete": {
+    "message": "Excluir"
+  },
+  "confirmDelete": {
+    "message": "Excluir esta pasta? Os posts salvos não serão excluídos."
+  },
+  "empty": {
+    "message": "Nenhum post salvo"
+  },
+  "openOnX": {
+    "message": "Abrir no X"
+  },
+  "popupPosts": {
+    "message": "posts"
+  },
+  "popupFolders": {
+    "message": "pastas"
+  },
+  "recent": {
+    "message": "Salvos recentemente (3)"
+  },
+  "settings": {
+    "message": "Configurações"
+  },
+  "openManager": {
+    "message": "Abrir o gerenciador"
+  },
+  "exportBtn": {
+    "message": "Exportar"
+  },
+  "importBtn": {
+    "message": "Importar"
+  },
+  "importFail": {
+    "message": "O formato do arquivo é inválido"
+  },
+  "collectTitle": {
+    "message": "Importar para o PostShelf os posts desta página"
+  },
+  "importDone": {
+    "message": "$COUNT$ posts importados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "$COUNT$ posts importados para \"Sem categoria\"",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "Sincronizar com os favoritos do X"
+  },
+  "syncNativeDesc": {
+    "message": "Ao salvar um post em uma pasta, o PostShelf também o adiciona aos favoritos padrão do X; ao removê-lo de todas as pastas, o favorito do X também é removido. O PostShelf clica no botão de favorito da tela apenas uma vez por post em que você age. Desativado por padrão."
+  },
+  "savedBadgeTitle": {
+    "message": "Salvo em $COUNT$ pasta(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "Remover também o favorito do X"
+  },
+  "buttonModeHeading": {
+    "message": "Comportamento do botão de favorito padrão"
+  },
+  "buttonModeSeparate": {
+    "message": "Adicionar um botão PostShelf separado (sem mexer no padrão)"
+  },
+  "buttonModeReplace": {
+    "message": "Substituir o botão padrão (Shift+clique para o padrão do X)"
+  },
+  "buttonModeNote": {
+    "message": "Pode parar de funcionar após atualizações do X; nesse caso o comportamento padrão é usado."
+  },
+  "selectedCount": {
+    "message": "$COUNT$ selecionados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "Adicionar à pasta"
+  },
+  "bulkRemove": {
+    "message": "Remover da pasta"
+  },
+  "clearSelection": {
+    "message": "Limpar seleção"
+  },
+  "changeFolder": {
+    "message": "Alterar pastas"
+  },
+  "removeFromFolder": {
+    "message": "Remover de \"$NAME$\"",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "Excluir do PostShelf"
+  },
+  "confirmDeletePosts": {
+    "message": "Excluir $COUNT$ post(s) do PostShelf? Seus favoritos no X não são alterados.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "Desfazer"
+  },
+  "toastDeleted": {
+    "message": "$COUNT$ excluído(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "$COUNT$ movido(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "$COUNT$ removido(s) da pasta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "$COUNT$ adicionado(s) à pasta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "Selecionar este post"
+  },
+  "pickFolder": {
+    "message": "Escolher pasta"
+  },
+  "dragHint": {
+    "message": "Arraste para adicionar (Alt para mover)"
+  },
+  "sortLabel": {
+    "message": "Ordenar"
+  },
+  "colorNone": {
+    "message": "Sem cor (padrão)"
+  },
+  "openSidePanel": {
+    "message": "Abrir no painel lateral"
+  },
+  "openInTab": {
+    "message": "Abrir em uma guia"
+  },
+  "actionModeHeading": {
+    "message": "Ao clicar no ícone da barra de ferramentas"
+  },
+  "actionModePopup": {
+    "message": "Abrir o pop-up"
+  },
+  "actionModeSidepanel": {
+    "message": "Abrir o painel lateral"
+  },
+  "actionModeNote": {
+    "message": "O painel lateral requer o Chrome 114 ou posterior."
+  },
+  "collectPending": {
+    "message": "$COUNT$ não importados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "Tudo importado"
+  },
+  "smartViews": {
+    "message": "Visualizações inteligentes"
+  },
+  "foldersSection": {
+    "message": "Pastas"
+  },
+  "recent7": {
+    "message": "Últimos 7 dias"
+  },
+  "searchPlaceholder": {
+    "message": "Buscar texto ou @usuário"
+  },
+  "gridView": {
+    "message": "Visualização em grade"
+  },
+  "itemCount": {
+    "message": "$COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "Há $COUNT$ posts dos seus Favoritos do x.com que podem ser importados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "Como importar"
+  },
+  "importHowTitle": {
+    "message": "Importar seus favoritos do x.com"
+  },
+  "importHowSteps": {
+    "message": "1. No Chrome, abra \"Histórico\" no menu esquerdo do x.com e escolha a aba \"Favoritos\" (x.com/i/history)\n2. Role você mesmo até os posts aparecerem na tela (o PostShelf nunca rola sozinho)\n3. Clique no botão \"N não importados\" no canto inferior direito\n4. Os posts importados vão para \"Sem categoria\""
+  },
+  "dismiss": {
+    "message": "Fechar"
+  },
+  "filterImage": {
+    "message": "Com imagens"
+  },
+  "filterVideo": {
+    "message": "Com vídeo"
+  },
+  "filterLink": {
+    "message": "Com links"
+  },
+  "filterAuthor": {
+    "message": "Filtrar por autor"
+  },
+  "clearFilters": {
+    "message": "Limpar filtros"
+  },
+  "notFoundTitle": {
+    "message": "Nada encontrado"
+  },
+  "notFoundHint": {
+    "message": "Tente outra busca ou limpe os filtros."
+  },
+  "noPostsTitle": {
+    "message": "Ainda não há posts salvos"
+  },
+  "noPostsHint": {
+    "message": "Pressione o botão de pasta de um post no x.com para salvá-lo. Os posts que você já salvou nos favoritos podem ser importados de Favoritos no histórico do x.com."
+  },
+  "folderMore": {
+    "message": "Alterar nome, ícone, cor"
+  },
+  "cardMenu": {
+    "message": "Mais ações"
+  },
+  "selectMode": {
+    "message": "Selecionar"
+  },
+  "chooseFolderMenu": {
+    "message": "Abrir lista de pastas"
+  },
+  "searchShow": {
+    "message": "Mostrar busca"
+  },
+  "viewLabel": {
+    "message": "Visualização"
+  },
+  "dataSection": {
+    "message": "Dados"
+  },
+  "saveCurrentPost": {
+    "message": "Salvar o post aberto…"
+  },
+  "saveCurrentHint": {
+    "message": "Exibido enquanto um post está aberto no x.com"
+  },
+  "saveCurrentFail": {
+    "message": "Não foi possível ler este post. Recarregue a página e tente novamente."
+  },
+  "healthTitle": {
+    "message": "Estrutura da página do X"
+  },
+  "healthOkAt": {
+    "message": "Normal (última verificação: $NAME$)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "Ainda não verificado (é verificado ao abrir o x.com)"
+  },
+  "healthDegraded": {
+    "message": "Parte da estrutura da página do X mudou. O PostShelf continua funcionando."
+  },
+  "healthBroken": {
+    "message": "A estrutura da página do X mudou, então alguns recursos foram pausados. Copie as informações de diagnóstico e relate no GitHub."
+  },
+  "copyDiag": {
+    "message": "Copiar informações de diagnóstico"
+  },
+  "diagTitle": {
+    "message": "Informações de diagnóstico"
+  },
+  "diagNotice": {
+    "message": "Este conteúdo será copiado para a área de transferência. Não inclui o texto dos posts, nomes de usuário nem URLs. Inclui a versão da extensão, informações do navegador, o idioma de exibição e o esboço da estrutura da página do X."
+  },
+  "diagCopy": {
+    "message": "Copiar"
+  },
+  "diagCopied": {
+    "message": "Copiado"
+  },
+  "diagCopyFail": {
+    "message": "Não foi possível copiar. Selecione o texto e copie manualmente."
+  },
+  "diagReport": {
+    "message": "Relatar no GitHub"
+  },
+  "diagPreparing": {
+    "message": "Preparando…"
+  },
+  "saveTo": {
+    "message": "Salvar em: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "Não foi possível identificar a conta conectada, então nada pode ser salvo. Recarregue a página do x.com."
+  },
+  "collectNoAccount": {
+    "message": "Não foi possível identificar a conta conectada, então nada pode ser importado"
+  },
+  "accountUnknownName": {
+    "message": "Sem conta definida"
+  },
+  "accountSwitchLabel": {
+    "message": "Conta exibida"
+  },
+  "accountSwitchNote": {
+    "message": "Trocar aqui não muda a conta conectada no X. Troque a conta do X no x.com."
+  },
+  "accountSwitched": {
+    "message": "Alterado para $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "Conectada no x.com"
+  },
+  "accountAssign": {
+    "message": "Reatribuir…"
+  },
+  "accountAssignTitle": {
+    "message": "Reatribuir dados"
+  },
+  "accountAssignDesc": {
+    "message": "Move os dados salvos de $NAME$ ($COUNT$ posts) para a conta escolhida. Se o mesmo post já existir lá, as pastas em que esse post está são combinadas.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "Mover para"
+  },
+  "accountAssignNone": {
+    "message": "Não há conta de destino. Abra o x.com conectado e você poderá escolher a conta aqui."
+  },
+  "accountAssignDone": {
+    "message": "$COUNT$ posts reatribuídos",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "Excluir os dados desta conta"
+  },
+  "accountDeleteConfirm": {
+    "message": "Excluir os dados salvos de $NAME$ ($COUNT$ posts e pastas)? Não é possível desfazer. Seus favoritos do X não são alterados.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "Há $COUNT$ posts em \"Sem conta definida\". Escolha a qual conta pertencem e use \"Reatribuir…\".",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "Conta: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "Não foi possível identificar a conta conectada no x.com, então nada pode ser salvo. Recarregue a página do x.com."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "A conta exibida no PostShelf é diferente de $NAME$, conectada no x.com, então nada pode ser salvo. Troque a conta exibida aqui para $NAME$.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsResetHeading": {
+    "message": "Redefinir configurações"
+  },
+  "settingsResetBtn": {
+    "message": "Redefinir as configurações para os valores iniciais"
+  },
+  "settingsResetDesc": {
+    "message": "Apenas as configurações são redefinidas: modo vinculado, comportamento do botão nativo, forma de abrir, visualização e ordem etc. Pastas, posts salvos e informações de contas são mantidos."
+  },
+  "settingsResetConfirm": {
+    "message": "Redefinir as configurações para os valores iniciais? Os posts salvos e as pastas não serão excluídos."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "Redefinir"
+  },
+  "settingsResetDone": {
+    "message": "Configurações redefinidas"
+  },
+  "dangerHeading": {
+    "message": "Zona de perigo"
+  },
+  "deleteAllBtn": {
+    "message": "Excluir todos os dados"
+  },
+  "deleteAllDesc": {
+    "message": "Exclui todas as pastas, posts salvos e informações de contas. As configurações são mantidas. Não é possível desfazer."
+  },
+  "deleteAllCounts": {
+    "message": "Seront supprimés : $FOLDERS$ dossiers, $POSTS$ posts, $ACCOUNTS$ comptes",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "Exportar um backup JSON antes"
+  },
+  "deleteAllWarn": {
+    "message": "Não é possível desfazer. Seus favoritos do X não são alterados. Para continuar, digite \"$WORD$\" abaixo.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "excluir"
+  },
+  "deleteAllInputLabel": {
+    "message": "Digite para confirmar"
+  },
+  "deleteAllDone": {
+    "message": "Todos os dados foram excluídos"
+  },
+  "viewImage": {
+    "message": "Ver a imagem $N$ de $M$ ampliada",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "Ampliar"
+  },
+  "viewerLabel": {
+    "message": "Visualizador de imagens"
+  },
+  "viewerClose": {
+    "message": "Fechar (Esc)"
+  },
+  "viewerPrev": {
+    "message": "Imagem anterior"
+  },
+  "viewerNext": {
+    "message": "Próxima imagem"
+  },
+  "viewerOpenOriginal": {
+    "message": "Abrir no tamanho original ↗"
+  },
+  "viewerOpenPost": {
+    "message": "Abrir o post no X ↗"
+  },
+  "viewerFailTitle": {
+    "message": "Não foi possível carregar a imagem"
+  },
+  "viewerFailReason": {
+    "message": "O post original pode ter sido excluído ou o X pode ter mudado o local da imagem."
+  },
+  "viewerShowSmall": {
+    "message": "Mostrar a imagem pequena salva"
+  },
+  "videoBadge": {
+    "message": "Vídeo"
+  },
+  "videoOpenLabel": {
+    "message": "Mostrar como reproduzir este vídeo"
+  },
+  "videoDialogTitle": {
+    "message": "Os vídeos são reproduzidos no X"
+  },
+  "videoDialogBody": {
+    "message": "O PostShelf não pode reproduzir vídeos porque o arquivo de vídeo não pode ser salvo."
+  },
+  "videoPlayOnX": {
+    "message": "Reproduzir o vídeo no X ↗"
+  },
+  "cacheTitle": {
+    "message": "Cache de imagens"
+  },
+  "cacheEnable": {
+    "message": "Guardar imagens em cache"
+  },
+  "cacheEnableDesc": {
+    "message": "Ao salvar um post, as imagens também ficam neste computador, então você ainda as vê se sumirem do X. Dos vídeos, só a miniatura é mantida."
+  },
+  "cachePermNote": {
+    "message": "Na primeira vez que ativar, o Chrome pedirá permissão para acessar pbs.twimg.com (o servidor de imagens do X). A permissão só é pedida ao ativar este recurso."
+  },
+  "cachePermDenied": {
+    "message": "Não foi possível ativar porque o acesso ao servidor de imagens não foi permitido. Ative novamente e permita o acesso."
+  },
+  "cachePermMissing": {
+    "message": "Não há permissão para acessar o servidor de imagens (pbs.twimg.com)."
+  },
+  "cacheGrant": {
+    "message": "Permitir"
+  },
+  "cacheDest": {
+    "message": "Onde guardar"
+  },
+  "cacheDestIdb": {
+    "message": "Dentro do navegador (área de dados da extensão; recomendado)"
+  },
+  "cacheDestDir": {
+    "message": "Uma pasta que eu escolher (em qualquer lugar do PC)"
+  },
+  "cacheDirNone": {
+    "message": "Nenhuma pasta escolhida"
+  },
+  "cacheDirPick": {
+    "message": "Escolher uma pasta…"
+  },
+  "cacheDirRepick": {
+    "message": "Escolher outra pasta…"
+  },
+  "cacheDirRescan": {
+    "message": "Verificar novamente"
+  },
+  "cacheDirRescanDone": {
+    "message": "$COUNT$ imagens recontadas",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "Permissão necessária"
+  },
+  "cacheDirPermNote": {
+    "message": "Depois de reiniciar o Chrome, o acesso à pasta pode ser revogado. Até você permitir de novo, as imagens não são gravadas na pasta e são carregadas do servidor de imagens do X."
+  },
+  "cacheDirTabOnly": {
+    "message": "A pasta é escolhida na versão em aba da página de gerenciamento (não é possível no painel lateral). Escolha lá."
+  },
+  "cacheDirUnsupported": {
+    "message": "Não foi possível escolher uma pasta nesta página da extensão. Use \"Dentro do navegador\"."
+  },
+  "cacheDirReadme": {
+    "message": "Este é o cache de imagens do PostShelf. Apagá-lo não apaga os dados do PostShelf.\nA pasta \"images\" contém uma pasta para cada ID de post."
+  },
+  "cacheDirNonEmpty": {
+    "message": "Esta pasta não foi criada pelo PostShelf e já contém outros arquivos. O PostShelf pode criar aqui \".postshelf\", \"README.txt\" e uma pasta \"images\"? Os outros arquivos da pasta não serão tocados."
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "Criar"
+  },
+  "cacheMax": {
+    "message": "Tamanho máximo"
+  },
+  "cacheMaxCustom": {
+    "message": "Personalizado…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "Tamanho máximo (MB, 100 ou mais)"
+  },
+  "cacheMaxMin": {
+    "message": "O tamanho máximo deve ser de pelo menos 100 MB."
+  },
+  "cacheUsage": {
+    "message": "Em uso: $USED$ de $MAX$ ($COUNT$ imagens)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "Qualidade da imagem"
+  },
+  "cacheQualityLarge": {
+    "message": "Padrão (estimativa de 0,2–0,5 MB cada; suficiente para visualizar)"
+  },
+  "cacheQualityOrig": {
+    "message": "Tamanho original (estimativa de 1–5 MB cada; ocupa espaço mais rápido)"
+  },
+  "cacheFull": {
+    "message": "Quando o limite for atingido"
+  },
+  "cacheFullEvict": {
+    "message": "Apagar os mais antigos primeiro (imagens dos posts salvos há mais tempo)"
+  },
+  "cacheFullStop": {
+    "message": "Não salvar novas imagens"
+  },
+  "cacheBulk": {
+    "message": "Guardar em cache as imagens dos posts salvos"
+  },
+  "cacheBulkProgress": {
+    "message": "Obtendo imagens: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "Parar"
+  },
+  "cacheBulkDone": {
+    "message": "$COUNT$ imagens guardadas em cache ($FAILED$ falharam)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "Não há imagens para guardar em cache"
+  },
+  "cacheBulkBlocked": {
+    "message": "Interrompido porque não foi possível gravar no destino. Verifique a permissão e a pasta."
+  },
+  "cacheBulkFull": {
+    "message": "Interrompido porque o limite de tamanho foi atingido."
+  },
+  "cacheBulkHelp": {
+    "message": "Guardar tudo em cache carrega as imagens uma a uma. O progresso é exibido e você pode parar a qualquer momento. Se parar, da próxima vez continua de onde parou. Ao excluir um post, suas imagens também são excluídas."
+  },
+  "cacheClear": {
+    "message": "Excluir o cache"
+  },
+  "cacheClearConfirm": {
+    "message": "Excluir as imagens em cache ($COUNT$ imagens)? Os posts salvos são mantidos. As imagens serão carregadas do servidor de imagens do X.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "O cache foi excluído"
+  },
+  "cacheLowerConfirm": {
+    "message": "Reduzir o tamanho máximo excluirá imediatamente as imagens dos $COUNT$ posts salvos mais antigos. Continuar?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "Reduzir e limpar"
+  },
+  "cacheSwitchTitle": {
+    "message": "Trocar onde as imagens ficam"
+  },
+  "cacheSwitchBody": {
+    "message": "Há $COUNT$ imagens no local atual. Mover para o novo local?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "Mover"
+  },
+  "cacheSwitchKeep": {
+    "message": "Não mover"
+  },
+  "cacheSwitchProgress": {
+    "message": "Movendo imagens: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "Não foi possível mover as imagens. Verifique a permissão do destino."
+  },
+  "cacheCleanupNeeded": {
+    "message": "Algumas imagens dos posts excluídos ainda não foram excluídas. Verifique a permissão do destino e pressione \"Limpar agora\"."
+  },
+  "cacheCleanupNow": {
+    "message": "Limpar agora"
+  },
+  "cacheRules": {
+    "message": "As imagens salvas ficam somente neste PC e nunca são enviadas para fora. Se você remover a extensão, o cache dentro do navegador também é excluído (uma pasta escolhida por você não é). Guarde as imagens que realmente quer manter em \"Uma pasta que eu escolher\". Para fazer backup dos dados salvos, use a exportação JSON (contém apenas as URLs das imagens, não as imagens)."
+  },
+  "updateNotice": {
+    "message": "O PostShelf foi atualizado ($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Versão $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "Para atualizar: primeiro salve seus dados com \"Exportar\", depois sobrescreva a mesma pasta com a nova versão e pressione \"Recarregar\" na extensão. Não remova a extensão (os dados salvos também seriam apagados)."
+  },
+  "installGuideLink": {
+    "message": "Passos de atualização e instalação manual"
+  },
+  "errorStorage": {
+    "message": "Falha ao salvar ou carregar. Tente novamente. Se continuar, salve seus dados com \"Exportar\" em Configurações e recarregue a extensão."
+  }
+}

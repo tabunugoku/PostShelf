@@ -1,0 +1,928 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "將 x.com 書籤整理到你自己的資料夾中。所有資料僅儲存在你的裝置上。"
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "全部"
+  },
+  "inboxName": {
+    "message": "未分類"
+  },
+  "newFolderDefaultName": {
+    "message": "新增資料夾"
+  },
+  "errEmptyName": {
+    "message": "請輸入資料夾名稱"
+  },
+  "errBuiltinImmutable": {
+    "message": "「全部」無法修改或刪除"
+  },
+  "errNotFound": {
+    "message": "找不到資料夾"
+  },
+  "errInvalidIcon": {
+    "message": "此圖示無法使用"
+  },
+  "errInvalidColor": {
+    "message": "此顏色無法使用"
+  },
+  "errInvalidImport": {
+    "message": "檔案格式無效"
+  },
+  "openFolders": {
+    "message": "儲存到資料夾"
+  },
+  "newFolder": {
+    "message": "新增資料夾"
+  },
+  "newFolderPlaceholder": {
+    "message": "資料夾名稱"
+  },
+  "add": {
+    "message": "新增"
+  },
+  "noFolders": {
+    "message": "尚無資料夾"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "書籤"
+  },
+  "edit": {
+    "message": "編輯"
+  },
+  "postView": {
+    "message": "貼文檢視"
+  },
+  "listView": {
+    "message": "清單檢視"
+  },
+  "search": {
+    "message": "搜尋"
+  },
+  "sortSavedDesc": {
+    "message": "儲存時間：最新"
+  },
+  "sortSavedAsc": {
+    "message": "儲存時間：最舊"
+  },
+  "sortPostedDesc": {
+    "message": "發佈時間：最新"
+  },
+  "sortPostedAsc": {
+    "message": "發佈時間：最舊"
+  },
+  "name": {
+    "message": "名稱"
+  },
+  "icon": {
+    "message": "圖示"
+  },
+  "color": {
+    "message": "顏色"
+  },
+  "save": {
+    "message": "儲存"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "delete": {
+    "message": "刪除"
+  },
+  "confirmDelete": {
+    "message": "要刪除此資料夾嗎？已儲存的貼文不會被刪除。"
+  },
+  "empty": {
+    "message": "沒有已儲存的貼文"
+  },
+  "openOnX": {
+    "message": "在 X 上開啟"
+  },
+  "popupPosts": {
+    "message": "則貼文"
+  },
+  "popupFolders": {
+    "message": "個資料夾"
+  },
+  "recent": {
+    "message": "最近儲存的 3 則"
+  },
+  "settings": {
+    "message": "設定"
+  },
+  "openManager": {
+    "message": "開啟管理頁面"
+  },
+  "exportBtn": {
+    "message": "匯出"
+  },
+  "importBtn": {
+    "message": "匯入"
+  },
+  "importFail": {
+    "message": "檔案格式無效"
+  },
+  "collectTitle": {
+    "message": "將此頁面上的貼文匯入 PostShelf"
+  },
+  "importDone": {
+    "message": "已匯入 $COUNT$ 則貼文",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "已將 $COUNT$ 則貼文匯入「未分類」",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "與 X 書籤同步"
+  },
+  "syncNativeDesc": {
+    "message": "將貼文儲存到資料夾時，PostShelf 也會將其加入 X 標準書籤；從所有資料夾中移除時，也會取消 X 上的書籤。PostShelf 對你操作的每則貼文，只會點擊一次畫面上的書籤按鈕。預設為關閉。"
+  },
+  "savedBadgeTitle": {
+    "message": "已儲存到 $COUNT$ 個資料夾",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "同時取消 X 書籤"
+  },
+  "buttonModeHeading": {
+    "message": "標準書籤按鈕的行為"
+  },
+  "buttonModeSeparate": {
+    "message": "另外新增 PostShelf 按鈕（不更動標準按鈕）"
+  },
+  "buttonModeReplace": {
+    "message": "取代標準按鈕的行為（Shift+點擊使用 X 預設行為）"
+  },
+  "buttonModeNote": {
+    "message": "X 更新後可能失效，失效時會恢復為標準行為。"
+  },
+  "selectedCount": {
+    "message": "已選取 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "加入資料夾"
+  },
+  "bulkRemove": {
+    "message": "從資料夾移除"
+  },
+  "clearSelection": {
+    "message": "取消選取"
+  },
+  "changeFolder": {
+    "message": "變更資料夾"
+  },
+  "removeFromFolder": {
+    "message": "從「$NAME$」移除",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "從 PostShelf 刪除"
+  },
+  "confirmDeletePosts": {
+    "message": "要從 PostShelf 刪除 $COUNT$ 則貼文嗎？X 上的書籤不會改變。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "復原"
+  },
+  "toastDeleted": {
+    "message": "已刪除 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "已移動 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "已將 $COUNT$ 則移出資料夾",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "已將 $COUNT$ 則加入資料夾",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "選取此貼文"
+  },
+  "pickFolder": {
+    "message": "選擇資料夾"
+  },
+  "dragHint": {
+    "message": "拖曳以加入（按住 Alt 為移動）"
+  },
+  "sortLabel": {
+    "message": "排序"
+  },
+  "colorNone": {
+    "message": "無顏色（預設）"
+  },
+  "openSidePanel": {
+    "message": "在側邊欄中開啟"
+  },
+  "openInTab": {
+    "message": "在分頁中開啟"
+  },
+  "actionModeHeading": {
+    "message": "點擊工具列圖示時的行為"
+  },
+  "actionModePopup": {
+    "message": "開啟彈出視窗"
+  },
+  "actionModeSidepanel": {
+    "message": "開啟側邊欄"
+  },
+  "actionModeNote": {
+    "message": "側邊欄需要 Chrome 114 或更新版本。"
+  },
+  "collectPending": {
+    "message": "尚未匯入 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "全部已匯入"
+  },
+  "smartViews": {
+    "message": "智慧檢視"
+  },
+  "foldersSection": {
+    "message": "資料夾"
+  },
+  "recent7": {
+    "message": "最近 7 天"
+  },
+  "searchPlaceholder": {
+    "message": "依內文或 @使用者名稱搜尋"
+  },
+  "gridView": {
+    "message": "格狀檢視"
+  },
+  "itemCount": {
+    "message": "$COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "x.com「書籤」中有 $COUNT$ 則貼文可以匯入",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "匯入方法"
+  },
+  "importHowTitle": {
+    "message": "匯入 x.com 書籤"
+  },
+  "importHowSteps": {
+    "message": "1. 在 Chrome 中開啟 x.com 左側選單的「歷史記錄」，選擇「書籤」分頁(x.com/i/history)\n2. 自行捲動頁面，直到想匯入的貼文顯示在畫面上（不會自動捲動）\n3. 點擊右下角的「尚未匯入 N 則」按鈕\n4. 匯入的貼文會進入「未分類」"
+  },
+  "dismiss": {
+    "message": "關閉"
+  },
+  "filterImage": {
+    "message": "含圖片"
+  },
+  "filterVideo": {
+    "message": "含影片"
+  },
+  "filterLink": {
+    "message": "含連結"
+  },
+  "filterAuthor": {
+    "message": "依作者篩選"
+  },
+  "clearFilters": {
+    "message": "清除篩選"
+  },
+  "notFoundTitle": {
+    "message": "找不到"
+  },
+  "notFoundHint": {
+    "message": "請更換搜尋字詞或清除篩選。"
+  },
+  "noPostsTitle": {
+    "message": "還沒有儲存的貼文"
+  },
+  "noPostsHint": {
+    "message": "在 x.com 上點擊貼文的資料夾按鈕即可儲存。已經加入書籤的貼文，可以從 x.com 歷史記錄中的「書籤」匯入。"
+  },
+  "folderMore": {
+    "message": "變更名稱、圖示、顏色"
+  },
+  "cardMenu": {
+    "message": "更多操作"
+  },
+  "selectMode": {
+    "message": "選取"
+  },
+  "chooseFolderMenu": {
+    "message": "開啟資料夾清單"
+  },
+  "searchShow": {
+    "message": "顯示搜尋"
+  },
+  "viewLabel": {
+    "message": "檢視"
+  },
+  "dataSection": {
+    "message": "資料"
+  },
+  "saveCurrentPost": {
+    "message": "儲存目前開啟的貼文…"
+  },
+  "saveCurrentHint": {
+    "message": "在 x.com 開啟貼文時顯示"
+  },
+  "saveCurrentFail": {
+    "message": "無法讀取此貼文。請重新整理頁面後再試一次。"
+  },
+  "healthTitle": {
+    "message": "X 頁面結構"
+  },
+  "healthOkAt": {
+    "message": "正常（上次檢查：$NAME$）",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "尚未檢查（開啟 x.com 時會檢查）"
+  },
+  "healthDegraded": {
+    "message": "X 的頁面結構有部分變化，PostShelf 仍在正常運作。"
+  },
+  "healthBroken": {
+    "message": "X 的頁面結構已變化，部分功能已暫停。請複製診斷資訊，並在 GitHub 上回報。"
+  },
+  "copyDiag": {
+    "message": "複製診斷資訊"
+  },
+  "diagTitle": {
+    "message": "診斷資訊"
+  },
+  "diagNotice": {
+    "message": "此內容將複製到剪貼簿。不包含貼文內文、使用者名稱和 URL。包含的內容有：擴充功能版本、瀏覽器資訊、顯示語言，以及 X 頁面結構的骨架。"
+  },
+  "diagCopy": {
+    "message": "複製"
+  },
+  "diagCopied": {
+    "message": "已複製"
+  },
+  "diagCopyFail": {
+    "message": "無法複製，請手動選取文字並複製。"
+  },
+  "diagReport": {
+    "message": "在 GitHub 上回報"
+  },
+  "diagPreparing": {
+    "message": "產生中…"
+  },
+  "saveTo": {
+    "message": "儲存到：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "無法判斷目前登入的帳號，因此無法儲存。請重新載入 x.com 頁面。"
+  },
+  "collectNoAccount": {
+    "message": "無法判斷目前登入的帳號，因此無法匯入"
+  },
+  "accountUnknownName": {
+    "message": "未設定帳號"
+  },
+  "accountSwitchLabel": {
+    "message": "要顯示的帳號"
+  },
+  "accountSwitchNote": {
+    "message": "在這裡切換不會改變 X 的登入狀態。請在 x.com 上切換 X 帳號。"
+  },
+  "accountSwitched": {
+    "message": "已切換到 $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "x.com 上已登入"
+  },
+  "accountAssign": {
+    "message": "重新指定…"
+  },
+  "accountAssignTitle": {
+    "message": "重新指定資料"
+  },
+  "accountAssignDesc": {
+    "message": "將 $NAME$ 的已儲存資料（$COUNT$ 則）移到所選帳號。如果目標帳號中已有相同的貼文，會把該貼文所在的資料夾合併起來。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "移到"
+  },
+  "accountAssignNone": {
+    "message": "沒有可指定的帳號。登入後開啟 x.com，該帳號就可以在這裡選為目標帳號。"
+  },
+  "accountAssignDone": {
+    "message": "已重新指定 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "刪除此帳號的資料"
+  },
+  "accountDeleteConfirm": {
+    "message": "要刪除 $NAME$ 的已儲存資料（$COUNT$ 則貼文及資料夾）嗎？此操作無法復原。X 上的書籤不會改變。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "「未設定帳號」下有 $COUNT$ 則貼文。請選擇它們屬於哪個帳號，並點擊「重新指定…」。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "帳號：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "無法判斷 x.com 上登入的帳號，因此無法儲存。請重新載入 x.com 頁面。"
+  },
+  "saveCurrentWrongAccount": {
+    "message": "PostShelf 中顯示的帳號與 x.com 上登入的 $NAME$ 不同，因此無法儲存。請將此處顯示的帳號切換為 $NAME$。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsResetHeading": {
+    "message": "重設設定"
+  },
+  "settingsResetBtn": {
+    "message": "將設定恢復為預設值"
+  },
+  "settingsResetDesc": {
+    "message": "只重設設定：連動模式、標準按鈕的行為、開啟方式、顯示方式等。資料夾、已儲存的貼文和帳號資訊不會被刪除。"
+  },
+  "settingsResetConfirm": {
+    "message": "要將設定恢復為預設值嗎？已儲存的貼文和資料夾不會被刪除。"
+  },
+  "settingsResetConfirmBtn": {
+    "message": "恢復預設值"
+  },
+  "settingsResetDone": {
+    "message": "已將設定恢復為預設值"
+  },
+  "dangerHeading": {
+    "message": "危險操作"
+  },
+  "deleteAllBtn": {
+    "message": "刪除所有資料"
+  },
+  "deleteAllDesc": {
+    "message": "刪除所有資料夾、已儲存的貼文和帳號資訊。設定會保留。此操作無法復原。"
+  },
+  "deleteAllCounts": {
+    "message": "將被刪除：資料夾 $FOLDERS$ 個、貼文 $POSTS$ 則、帳號 $ACCOUNTS$ 個",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "先匯出 JSON 備份"
+  },
+  "deleteAllWarn": {
+    "message": "此操作無法復原。X 上的書籤不會改變。要繼續，請在下方輸入「$WORD$」。",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "刪除"
+  },
+  "deleteAllInputLabel": {
+    "message": "確認輸入"
+  },
+  "deleteAllDone": {
+    "message": "已刪除所有資料"
+  },
+  "viewImage": {
+    "message": "放大顯示第 $N$ / $M$ 張圖片",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "放大"
+  },
+  "viewerLabel": {
+    "message": "圖片檢視器"
+  },
+  "viewerClose": {
+    "message": "關閉（Esc）"
+  },
+  "viewerPrev": {
+    "message": "上一張圖片"
+  },
+  "viewerNext": {
+    "message": "下一張圖片"
+  },
+  "viewerOpenOriginal": {
+    "message": "以原始尺寸開啟 ↗"
+  },
+  "viewerOpenPost": {
+    "message": "在 X 上開啟貼文 ↗"
+  },
+  "viewerFailTitle": {
+    "message": "無法載入圖片"
+  },
+  "viewerFailReason": {
+    "message": "原貼文可能已被刪除，或 X 變更了圖片的位置。"
+  },
+  "viewerShowSmall": {
+    "message": "顯示已儲存的小圖"
+  },
+  "videoBadge": {
+    "message": "影片"
+  },
+  "videoOpenLabel": {
+    "message": "顯示影片播放說明"
+  },
+  "videoDialogTitle": {
+    "message": "影片請在 X 上播放"
+  },
+  "videoDialogBody": {
+    "message": "無法儲存影片的播放檔案，因此 PostShelf 無法播放影片。"
+  },
+  "videoPlayOnX": {
+    "message": "在 X 上播放影片 ↗"
+  },
+  "cacheTitle": {
+    "message": "圖片快取"
+  },
+  "cacheEnable": {
+    "message": "快取圖片"
+  },
+  "cacheEnableDesc": {
+    "message": "儲存貼文時，會把圖片也保留在本機。即使 X 上刪除了也能檢視。影片只保留縮圖。"
+  },
+  "cachePermNote": {
+    "message": "首次開啟時，Chrome 會要求存取 pbs.twimg.com（X 的圖片伺服器）的權限。只有在開啟此功能時才會要求。"
+  },
+  "cachePermDenied": {
+    "message": "由於未允許存取圖片伺服器，無法開啟。請再次開啟並允許存取。"
+  },
+  "cachePermMissing": {
+    "message": "沒有存取圖片伺服器（pbs.twimg.com）的權限。"
+  },
+  "cacheGrant": {
+    "message": "允許"
+  },
+  "cacheDest": {
+    "message": "儲存位置"
+  },
+  "cacheDestIdb": {
+    "message": "瀏覽器內部（擴充功能的資料區域，建議）"
+  },
+  "cacheDestDir": {
+    "message": "自己選擇的資料夾（電腦上的任意位置）"
+  },
+  "cacheDirNone": {
+    "message": "尚未選擇資料夾"
+  },
+  "cacheDirPick": {
+    "message": "選擇資料夾…"
+  },
+  "cacheDirRepick": {
+    "message": "重新選擇資料夾…"
+  },
+  "cacheDirRescan": {
+    "message": "重新掃描"
+  },
+  "cacheDirRescanDone": {
+    "message": "已重新統計 $COUNT$ 張圖片",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "需要授權"
+  },
+  "cacheDirPermNote": {
+    "message": "重新啟動 Chrome 後，對資料夾的存取權限可能會失效。在重新允許之前，圖片不會寫入資料夾，而是從 X 的圖片伺服器載入。"
+  },
+  "cacheDirTabOnly": {
+    "message": "資料夾需要在分頁版的管理頁面中選擇（側邊面板中無法選擇）。請在分頁版中選擇。"
+  },
+  "cacheDirUnsupported": {
+    "message": "在此擴充功能頁面中無法選擇資料夾。請使用「瀏覽器內部」。"
+  },
+  "cacheDirReadme": {
+    "message": "這是 PostShelf 的圖片快取。刪除它不會刪除 PostShelf 本身的資料。\n「images」資料夾中有依貼文 ID 劃分的資料夾。"
+  },
+  "cacheDirNonEmpty": {
+    "message": "此資料夾不是 PostShelf 建立的，裡面已有其他檔案。是否允許在此建立「.postshelf」「README.txt」和「images」資料夾？資料夾中的其他檔案不會被更動。"
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "建立"
+  },
+  "cacheMax": {
+    "message": "最大容量"
+  },
+  "cacheMaxCustom": {
+    "message": "自訂…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "最大容量（MB，至少 100）"
+  },
+  "cacheMaxMin": {
+    "message": "最大容量不能小於 100 MB。"
+  },
+  "cacheUsage": {
+    "message": "已使用 $USED$ / $MAX$（$COUNT$ 張圖片）",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "畫質"
+  },
+  "cacheQualityLarge": {
+    "message": "標準（每張預估 0.2–0.5 MB，足夠檢視）"
+  },
+  "cacheQualityOrig": {
+    "message": "原始尺寸（每張預估 1–5 MB，容量消耗更快）"
+  },
+  "cacheFull": {
+    "message": "容量滿了之後"
+  },
+  "cacheFullEvict": {
+    "message": "從舊的開始刪除（先刪除儲存日期較早的貼文的圖片）"
+  },
+  "cacheFullStop": {
+    "message": "不再儲存新圖片"
+  },
+  "cacheBulk": {
+    "message": "批次快取已儲存貼文的圖片"
+  },
+  "cacheBulkProgress": {
+    "message": "正在取得圖片：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "停止"
+  },
+  "cacheBulkDone": {
+    "message": "已快取 $COUNT$ 張圖片（失敗 $FAILED$ 張）",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "沒有需要快取的圖片"
+  },
+  "cacheBulkBlocked": {
+    "message": "由於無法寫入儲存位置，已中途停止。請檢查權限和資料夾。"
+  },
+  "cacheBulkFull": {
+    "message": "由於容量已滿，已中途停止。"
+  },
+  "cacheBulkHelp": {
+    "message": "批次快取會逐張載入圖片。會顯示進度，可隨時停止。停止後再次點擊會從中斷處繼續。刪除貼文時，其圖片也會一併刪除。"
+  },
+  "cacheClear": {
+    "message": "刪除快取"
+  },
+  "cacheClearConfirm": {
+    "message": "要刪除已快取的圖片（$COUNT$ 張）嗎？已儲存的貼文不會被刪除。圖片將改為從 X 的圖片伺服器載入。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "已刪除快取"
+  },
+  "cacheLowerConfirm": {
+    "message": "降低最大容量會立即刪除儲存日期最早的 $COUNT$ 則貼文的圖片。要繼續嗎？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "降低並清理"
+  },
+  "cacheSwitchTitle": {
+    "message": "切換儲存位置"
+  },
+  "cacheSwitchBody": {
+    "message": "目前位置有 $COUNT$ 張圖片。要移到新位置嗎？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "移動"
+  },
+  "cacheSwitchKeep": {
+    "message": "不移動"
+  },
+  "cacheSwitchProgress": {
+    "message": "正在移動圖片：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "無法移動圖片。請檢查儲存位置的權限。"
+  },
+  "cacheCleanupNeeded": {
+    "message": "已刪除的貼文中，有些圖片尚未刪除。請檢查儲存位置的權限，然後點擊「立即清理」。"
+  },
+  "cacheCleanupNow": {
+    "message": "立即清理"
+  },
+  "cacheRules": {
+    "message": "儲存的圖片只放在這台電腦裡，不會傳送到外部。移除擴充功能後，瀏覽器內部的快取也會被刪除（自己選擇的資料夾不會被刪除）。真正想保留的圖片請儲存到「自己選擇的資料夾」。儲存資料本身的備份請使用 JSON 匯出（不含圖片，僅含 URL）。"
+  },
+  "updateNotice": {
+    "message": "PostShelf 已更新（$VERSION$）",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "版本 $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "更新時：請先用「匯出」儲存資料，然後用新版本覆蓋同一個資料夾，再點擊擴充功能的「重新載入」。請不要移除擴充功能（已儲存的資料也會一併刪除）。"
+  },
+  "installGuideLink": {
+    "message": "更新和手動安裝的步驟"
+  },
+  "errorStorage": {
+    "message": "儲存或讀取失敗。請再試一次。若持續發生，請先在設定的「資料」中用「匯出」儲存資料，然後重新載入擴充功能。"
+  }
+}

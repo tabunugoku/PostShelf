@@ -26,8 +26,9 @@ v2〜v5 は実装済み。次は `docs/TASK_V6.md` (アイコン組み込み) �
 
 ## データモデル (`src/shared/models.ts`)
 ```ts
-Folder   { id: string; name: string; icon: string; color?: string; order: number }
-Bookmark { tweetId: string; folderIds: string[]; savedAt: number;
+Folder   { id: string; name: string; icon: string; color?: string; order: number; accountId?: string }
+Account  { id: string; handle: string; displayName?: string; avatar?: string; lastSeenAt: number }  // v9: id = 小文字のハンドル
+Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: number;  // v9: 保存キーは accountId:tweetId
            snapshot: { text: string; author: string; handle: string; avatar?: string;
                        media: string[]; createdAt?: string; url: string } }
 ```
@@ -44,7 +45,7 @@ Bookmark { tweetId: string; folderIds: string[]; savedAt: number;
 1. M1 骨組み: manifest.json, ビルド, `models.ts`, `storage.ts`, フォルダ CRUD (名前/アイコン/色) と単体テスト
 2. M2 content script: ブックマークボタン横のポップオーバー、スナップショット保存 (fixture でテスト)
 3. M3 manager ページ: ポスト表示/リスト表示、フォルダ編集 UI、検索、並べ替え
-4. M4 `/i/bookmarks` 閲覧時の DOM 収集、JSON エクスポート/インポート
+4. M4 ブックマーク一覧 (`/i/history`。旧 `/i/bookmarks`) 閲覧時の DOM 収集、JSON エクスポート/インポート
 5. M5 README、セレクタ耐性、公開準備メモ
 
 各マイルストーンごとにコミットし、`npm test` と `npm run build` が通る状態を保つ。

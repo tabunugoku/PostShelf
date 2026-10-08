@@ -1,0 +1,928 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "x.com のブックマークを独自フォルダに分類します。データは端末内のみに保存されます。"
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "すべて"
+  },
+  "inboxName": {
+    "message": "未分類"
+  },
+  "newFolderDefaultName": {
+    "message": "新しいフォルダ"
+  },
+  "errEmptyName": {
+    "message": "フォルダ名を入力してください"
+  },
+  "errBuiltinImmutable": {
+    "message": "「すべて」は変更・削除できません"
+  },
+  "errNotFound": {
+    "message": "フォルダが見つかりません"
+  },
+  "errInvalidIcon": {
+    "message": "使用できないアイコンです"
+  },
+  "errInvalidColor": {
+    "message": "使用できない色です"
+  },
+  "errInvalidImport": {
+    "message": "ファイルの形式が正しくありません"
+  },
+  "openFolders": {
+    "message": "フォルダに保存"
+  },
+  "newFolder": {
+    "message": "新しいフォルダ"
+  },
+  "newFolderPlaceholder": {
+    "message": "フォルダ名"
+  },
+  "add": {
+    "message": "追加"
+  },
+  "noFolders": {
+    "message": "フォルダがありません"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "ブックマーク"
+  },
+  "edit": {
+    "message": "編集"
+  },
+  "postView": {
+    "message": "ポスト表示"
+  },
+  "listView": {
+    "message": "リスト表示"
+  },
+  "search": {
+    "message": "検索"
+  },
+  "sortSavedDesc": {
+    "message": "保存が新しい順"
+  },
+  "sortSavedAsc": {
+    "message": "保存が古い順"
+  },
+  "sortPostedDesc": {
+    "message": "投稿が新しい順"
+  },
+  "sortPostedAsc": {
+    "message": "投稿が古い順"
+  },
+  "name": {
+    "message": "名前"
+  },
+  "icon": {
+    "message": "アイコン"
+  },
+  "color": {
+    "message": "色"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "cancel": {
+    "message": "キャンセル"
+  },
+  "delete": {
+    "message": "削除"
+  },
+  "confirmDelete": {
+    "message": "このフォルダを削除しますか？ 保存したポストは削除されません。"
+  },
+  "empty": {
+    "message": "保存されたポストはありません"
+  },
+  "openOnX": {
+    "message": "X で開く"
+  },
+  "popupPosts": {
+    "message": "件"
+  },
+  "popupFolders": {
+    "message": "フォルダ"
+  },
+  "recent": {
+    "message": "最近保存した 3 件"
+  },
+  "settings": {
+    "message": "設定"
+  },
+  "openManager": {
+    "message": "管理画面を開く"
+  },
+  "exportBtn": {
+    "message": "エクスポート"
+  },
+  "importBtn": {
+    "message": "インポート"
+  },
+  "importFail": {
+    "message": "ファイルの形式が正しくありません"
+  },
+  "collectTitle": {
+    "message": "このページのポストを PostShelf に取り込む"
+  },
+  "importDone": {
+    "message": "$COUNT$ 件のポストを取り込みました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "$COUNT$ 件を「未分類」として取り込みました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "X のブックマークと連動する"
+  },
+  "syncNativeDesc": {
+    "message": "フォルダに保存したとき X 標準のブックマークも付け、すべてのフォルダから外したとき X 側のブックマークも外します。PostShelf が画面上のブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。初期値はオフです。"
+  },
+  "savedBadgeTitle": {
+    "message": "$COUNT$ 個のフォルダに保存済み",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "X のブックマークも解除"
+  },
+  "buttonModeHeading": {
+    "message": "標準ブックマークボタンの動作"
+  },
+  "buttonModeSeparate": {
+    "message": "別ボタンを追加する（標準ボタンには触らない）"
+  },
+  "buttonModeReplace": {
+    "message": "標準ボタンの動作を置き換える（Shift+クリックで X 標準）"
+  },
+  "buttonModeNote": {
+    "message": "X の更新で動かなくなることがあります。その場合は標準の動作に戻ります。"
+  },
+  "selectedCount": {
+    "message": "$COUNT$ 件選択中",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "フォルダに追加"
+  },
+  "bulkRemove": {
+    "message": "フォルダから外す"
+  },
+  "clearSelection": {
+    "message": "選択解除"
+  },
+  "changeFolder": {
+    "message": "フォルダを変更"
+  },
+  "removeFromFolder": {
+    "message": "「$NAME$」から外す",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "PostShelf から削除"
+  },
+  "confirmDeletePosts": {
+    "message": "$COUNT$ 件のポストを PostShelf から削除しますか？ X のブックマークは変更されません。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "元に戻す"
+  },
+  "toastDeleted": {
+    "message": "$COUNT$ 件を削除しました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "$COUNT$ 件を移動しました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "$COUNT$ 件をフォルダから外しました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "$COUNT$ 件をフォルダに追加しました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "このポストを選択"
+  },
+  "pickFolder": {
+    "message": "フォルダを選ぶ"
+  },
+  "dragHint": {
+    "message": "ドラッグで追加（Alt で移動）"
+  },
+  "sortLabel": {
+    "message": "並べ替え"
+  },
+  "colorNone": {
+    "message": "色なし（既定）"
+  },
+  "openSidePanel": {
+    "message": "サイドパネルで開く"
+  },
+  "openInTab": {
+    "message": "タブで開く"
+  },
+  "actionModeHeading": {
+    "message": "ツールバーアイコンのクリック時の動作"
+  },
+  "actionModePopup": {
+    "message": "ポップアップを開く"
+  },
+  "actionModeSidepanel": {
+    "message": "サイドパネルを開く"
+  },
+  "actionModeNote": {
+    "message": "サイドパネルは Chrome 114 以降で使えます。"
+  },
+  "collectPending": {
+    "message": "未取り込み $COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "すべて取り込み済み"
+  },
+  "smartViews": {
+    "message": "スマートビュー"
+  },
+  "foldersSection": {
+    "message": "フォルダ"
+  },
+  "recent7": {
+    "message": "最近の 7 日"
+  },
+  "searchPlaceholder": {
+    "message": "本文、@ユーザー名で検索"
+  },
+  "gridView": {
+    "message": "グリッド表示"
+  },
+  "itemCount": {
+    "message": "$COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "x.com の「ブックマーク」から取り込めるポストが $COUNT$ 件あります",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "取り込み方法"
+  },
+  "importHowTitle": {
+    "message": "x.com のブックマークを取り込むには"
+  },
+  "importHowSteps": {
+    "message": "1. Chrome で x.com の左メニュー「履歴」を開き、「ブックマーク」タブを選ぶ（x.com/i/history）\n2. 取り込みたいポストが画面に出るまで、自分でスクロールする（自動スクロールはしません）\n3. 画面右下の「未取り込み N 件」ボタンを押す\n4. 取り込まれたポストは「未分類」に入ります"
+  },
+  "dismiss": {
+    "message": "閉じる"
+  },
+  "filterImage": {
+    "message": "画像あり"
+  },
+  "filterVideo": {
+    "message": "動画あり"
+  },
+  "filterLink": {
+    "message": "リンクあり"
+  },
+  "filterAuthor": {
+    "message": "投稿者で絞り込み"
+  },
+  "clearFilters": {
+    "message": "絞り込みを外す"
+  },
+  "notFoundTitle": {
+    "message": "見つかりませんでした"
+  },
+  "notFoundHint": {
+    "message": "検索語を変えるか、絞り込みを外してください。"
+  },
+  "noPostsTitle": {
+    "message": "まだ保存したポストがありません"
+  },
+  "noPostsHint": {
+    "message": "x.com でポストのフォルダボタンを押して保存します。すでにブックマークしてあるポストは、x.com の履歴の「ブックマーク」から取り込めます。"
+  },
+  "folderMore": {
+    "message": "名前・アイコン・色を変更"
+  },
+  "cardMenu": {
+    "message": "その他の操作"
+  },
+  "selectMode": {
+    "message": "選択"
+  },
+  "chooseFolderMenu": {
+    "message": "フォルダ一覧を開く"
+  },
+  "searchShow": {
+    "message": "検索を表示"
+  },
+  "viewLabel": {
+    "message": "表示形式"
+  },
+  "dataSection": {
+    "message": "データ"
+  },
+  "saveCurrentPost": {
+    "message": "いま開いているポストを保存…"
+  },
+  "saveCurrentHint": {
+    "message": "x.com のポストを開いているときに表示"
+  },
+  "saveCurrentFail": {
+    "message": "このポストを読み取れませんでした。ページを再読み込みしてから、もう一度お試しください。"
+  },
+  "healthTitle": {
+    "message": "X の画面構造"
+  },
+  "healthOkAt": {
+    "message": "正常（最終確認: $NAME$）",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "未確認です。x.com を開くと確認します。"
+  },
+  "healthDegraded": {
+    "message": "X の画面構造が一部変わっています。動作は続いています。"
+  },
+  "healthBroken": {
+    "message": "X の画面構造が変わったため、一部の機能を止めています。診断情報をコピーして GitHub で報告してください。"
+  },
+  "copyDiag": {
+    "message": "診断情報をコピー"
+  },
+  "diagTitle": {
+    "message": "診断情報"
+  },
+  "diagNotice": {
+    "message": "この内容がクリップボードにコピーされます。ポストの本文、ユーザー名、URL は含まれません。含まれるのは、拡張のバージョン、ブラウザの情報、表示言語、X の画面構造の骨組みです。"
+  },
+  "diagCopy": {
+    "message": "コピー"
+  },
+  "diagCopied": {
+    "message": "コピーしました"
+  },
+  "diagCopyFail": {
+    "message": "コピーできませんでした。内容を選択してコピーしてください。"
+  },
+  "diagReport": {
+    "message": "GitHub で報告"
+  },
+  "diagPreparing": {
+    "message": "作成中…"
+  },
+  "saveTo": {
+    "message": "保存先: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "ログイン中のアカウントを判定できないため、保存できません。x.com のページを開き直してください。"
+  },
+  "collectNoAccount": {
+    "message": "ログイン中のアカウントを判定できないため、取り込めません"
+  },
+  "accountUnknownName": {
+    "message": "アカウント未設定"
+  },
+  "accountSwitchLabel": {
+    "message": "表示するアカウント"
+  },
+  "accountSwitchNote": {
+    "message": "ここで切り替えても、X のログイン状態は変わりません。X のアカウントは x.com で切り替えてください。"
+  },
+  "accountSwitched": {
+    "message": "$NAME$ に切り替えました",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "x.com でログイン中"
+  },
+  "accountAssign": {
+    "message": "割り当て…"
+  },
+  "accountAssignTitle": {
+    "message": "データの割り当て"
+  },
+  "accountAssignDesc": {
+    "message": "$NAME$ の保存データ（$COUNT$ 件）を、選んだアカウントへ移します。同じポストがすでにある場合は、そのポストが入っているフォルダを合わせます。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "移動先"
+  },
+  "accountAssignNone": {
+    "message": "割り当て先のアカウントがありません。x.com を開いてログインすると、割り当て先として選べるようになります。"
+  },
+  "accountAssignDone": {
+    "message": "$COUNT$ 件を割り当てました",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "このアカウントのデータを削除"
+  },
+  "accountDeleteConfirm": {
+    "message": "$NAME$ の保存データ（$COUNT$ 件のポストとフォルダ）を削除しますか？ 取り消しはできません。X のブックマークは変更されません。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "「アカウント未設定」に $COUNT$ 件のポストがあります。どのアカウントのものかを選んで、割り当ててください。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "アカウント: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "x.com でログイン中のアカウントを判定できないため、保存できません。x.com のページを開き直してください。"
+  },
+  "saveCurrentWrongAccount": {
+    "message": "表示中のアカウントと、x.com でログイン中の $NAME$ が異なるため保存できません。表示するアカウントを $NAME$ に切り替えてください。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsResetHeading": {
+    "message": "設定の初期化"
+  },
+  "settingsResetBtn": {
+    "message": "設定を初期の値に戻す"
+  },
+  "settingsResetDesc": {
+    "message": "連動モード、標準ボタンの動作、開き方、表示形式などの設定だけを戻します。フォルダ、保存したポスト、アカウント情報は消えません。"
+  },
+  "settingsResetConfirm": {
+    "message": "設定を初期の値に戻しますか？ 保存したポストとフォルダは消えません。"
+  },
+  "settingsResetConfirmBtn": {
+    "message": "初期の値に戻す"
+  },
+  "settingsResetDone": {
+    "message": "設定を初期の値に戻しました"
+  },
+  "dangerHeading": {
+    "message": "危険な操作"
+  },
+  "deleteAllBtn": {
+    "message": "すべてのデータを削除"
+  },
+  "deleteAllDesc": {
+    "message": "フォルダ、保存したポスト、アカウント情報をすべて削除します。設定は残ります。取り消しはできません。"
+  },
+  "deleteAllCounts": {
+    "message": "削除されるもの: フォルダ $FOLDERS$ 個、ポスト $POSTS$ 件、アカウント $ACCOUNTS$ 件",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "先に JSON を書き出す"
+  },
+  "deleteAllWarn": {
+    "message": "取り消しはできません。X のブックマークは変更されません。続けるには、下の欄に「$WORD$」と入力してください。",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "削除"
+  },
+  "deleteAllInputLabel": {
+    "message": "確認のための入力"
+  },
+  "deleteAllDone": {
+    "message": "すべてのデータを削除しました"
+  },
+  "viewImage": {
+    "message": "画像 $N$ / $M$ を大きく表示",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "拡大"
+  },
+  "viewerLabel": {
+    "message": "画像ビューア"
+  },
+  "viewerClose": {
+    "message": "閉じる（Esc）"
+  },
+  "viewerPrev": {
+    "message": "前の画像"
+  },
+  "viewerNext": {
+    "message": "次の画像"
+  },
+  "viewerOpenOriginal": {
+    "message": "元のサイズで開く ↗"
+  },
+  "viewerOpenPost": {
+    "message": "X でポストを開く ↗"
+  },
+  "viewerFailTitle": {
+    "message": "画像を読み込めませんでした"
+  },
+  "viewerFailReason": {
+    "message": "元のポストが削除されたか、X 側で画像の場所が変わった可能性があります。"
+  },
+  "viewerShowSmall": {
+    "message": "保存してある小さい画像を表示"
+  },
+  "videoBadge": {
+    "message": "動画"
+  },
+  "videoOpenLabel": {
+    "message": "動画の案内を表示"
+  },
+  "videoDialogTitle": {
+    "message": "動画は X で再生します"
+  },
+  "videoDialogBody": {
+    "message": "動画の再生用のファイルは保存できないため、PostShelf では再生できません。"
+  },
+  "videoPlayOnX": {
+    "message": "X で動画を再生 ↗"
+  },
+  "cacheTitle": {
+    "message": "画像のキャッシュ"
+  },
+  "cacheEnable": {
+    "message": "画像をキャッシュする"
+  },
+  "cacheEnableDesc": {
+    "message": "ポストを保存するときに、画像を端末に残します。X 側で消えても見られます。動画はサムネイルだけです。"
+  },
+  "cachePermNote": {
+    "message": "初めてオンにするとき、Chrome が「pbs.twimg.com（X の画像サーバー）へのアクセス」の許可を求めます。許可は、この機能をオンにしたときだけ求めます。"
+  },
+  "cachePermDenied": {
+    "message": "画像サーバーへのアクセスが許可されなかったため、オンにできませんでした。もう一度オンにして、許可してください。"
+  },
+  "cachePermMissing": {
+    "message": "画像サーバー（pbs.twimg.com）へのアクセス許可がありません。"
+  },
+  "cacheGrant": {
+    "message": "許可する"
+  },
+  "cacheDest": {
+    "message": "保存先"
+  },
+  "cacheDestIdb": {
+    "message": "ブラウザの中（拡張機能のデータ領域。おすすめ）"
+  },
+  "cacheDestDir": {
+    "message": "自分で選んだフォルダ（PC の好きな場所）"
+  },
+  "cacheDirNone": {
+    "message": "フォルダが選ばれていません"
+  },
+  "cacheDirPick": {
+    "message": "フォルダを選ぶ…"
+  },
+  "cacheDirRepick": {
+    "message": "フォルダを選び直す…"
+  },
+  "cacheDirRescan": {
+    "message": "再スキャン"
+  },
+  "cacheDirRescanDone": {
+    "message": "$COUNT$ 枚を数え直しました",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "許可が必要です"
+  },
+  "cacheDirPermNote": {
+    "message": "Chrome を再起動すると、フォルダへのアクセス許可が外れることがあります。許可するまで、画像はフォルダに書き込まず、X の画像サーバーから読みます。"
+  },
+  "cacheDirTabOnly": {
+    "message": "フォルダの選択はタブ版の管理画面で行います（サイドパネルでは選べません）。タブ版で選んでください。"
+  },
+  "cacheDirUnsupported": {
+    "message": "このブラウザの拡張機能のページでは、フォルダを選べませんでした。保存先は「ブラウザの中」を使ってください。"
+  },
+  "cacheDirReadme": {
+    "message": "PostShelf の画像キャッシュです。消しても、PostShelf 本体のデータは消えません。\n「images」フォルダの中に、ポスト ID ごとのフォルダがあります。"
+  },
+  "cacheDirNonEmpty": {
+    "message": "このフォルダは PostShelf が作ったものではなく、すでに別のファイルが入っています。ここに「.postshelf」「README.txt」「images」フォルダを作ってよいですか？ 選んだフォルダにある他のファイルには触りません。"
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "作成する"
+  },
+  "cacheMax": {
+    "message": "最大容量"
+  },
+  "cacheMaxCustom": {
+    "message": "指定…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "最大容量（MB、100 以上）"
+  },
+  "cacheMaxMin": {
+    "message": "最大容量は 100 MB 以上にしてください。"
+  },
+  "cacheUsage": {
+    "message": "使用中 $USED$ / $MAX$（画像 $COUNT$ 枚）",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "画質"
+  },
+  "cacheQualityLarge": {
+    "message": "標準（1 枚あたりの目安 0.2〜0.5 MB。表示には十分）"
+  },
+  "cacheQualityOrig": {
+    "message": "元のサイズ（1 枚あたりの目安 1〜5 MB。容量が早く減ります）"
+  },
+  "cacheFull": {
+    "message": "容量がいっぱいになったら"
+  },
+  "cacheFullEvict": {
+    "message": "古いものから消す（保存日が古いポストの画像から）"
+  },
+  "cacheFullStop": {
+    "message": "新しい画像を保存しない"
+  },
+  "cacheBulk": {
+    "message": "保存済みのポストの画像をまとめてキャッシュ"
+  },
+  "cacheBulkProgress": {
+    "message": "$DONE$ / $TOTAL$ 枚を取得しています",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "中止"
+  },
+  "cacheBulkDone": {
+    "message": "$COUNT$ 枚をキャッシュしました（失敗 $FAILED$ 枚）",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "キャッシュする画像はありません"
+  },
+  "cacheBulkBlocked": {
+    "message": "保存先に書き込めないため、途中で止めました。許可やフォルダを確認してください。"
+  },
+  "cacheBulkFull": {
+    "message": "容量がいっぱいのため、途中で止めました。"
+  },
+  "cacheBulkHelp": {
+    "message": "まとめてキャッシュは、1 枚ずつ順に読み込みます。進捗を表示し、いつでも止められます。止めても、次に押すと続きから始まります。ポストを削除すると、そのポストの画像も消えます。"
+  },
+  "cacheClear": {
+    "message": "キャッシュを削除"
+  },
+  "cacheClearConfirm": {
+    "message": "キャッシュした画像（$COUNT$ 枚）を削除しますか？ ポストのデータは消えません。画像は X の画像サーバーから読み込まれます。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "キャッシュを削除しました"
+  },
+  "cacheLowerConfirm": {
+    "message": "最大容量を下げると、保存日が古い $COUNT$ 件のポストの画像がすぐに消えます。続けますか？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "下げて整理する"
+  },
+  "cacheSwitchTitle": {
+    "message": "保存先を切り替えます"
+  },
+  "cacheSwitchBody": {
+    "message": "いまの保存先に画像が $COUNT$ 枚あります。新しい保存先へ移しますか？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "移す"
+  },
+  "cacheSwitchKeep": {
+    "message": "移さない"
+  },
+  "cacheSwitchProgress": {
+    "message": "$DONE$ / $TOTAL$ 枚を移しています",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "画像を移せませんでした。保存先の許可を確認してください。"
+  },
+  "cacheCleanupNeeded": {
+    "message": "削除したポストのうち、画像の削除が済んでいないものがあります。保存先の許可を確認してから、「今すぐ整理」を押してください。"
+  },
+  "cacheCleanupNow": {
+    "message": "今すぐ整理"
+  },
+  "cacheRules": {
+    "message": "保存した画像は、この PC の中だけに置き、外部へは送りません。拡張機能を削除すると、ブラウザの中のキャッシュも消えます（選んだフォルダは消えません）。本当に残したい画像は「自分で選んだフォルダ」に保存してください。保存データ本体の備えには、JSON のエクスポートを使ってください（画像は含まれず、URL のみです）。"
+  },
+  "updateNotice": {
+    "message": "PostShelf を更新しました（$VERSION$）",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "バージョン $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "更新するとき: 先に「エクスポート」で保存してから、同じフォルダに新しい版を上書きして、拡張機能の「再読み込み」を押してください。拡張機能は削除しないでください（保存したデータも消えます）。"
+  },
+  "installGuideLink": {
+    "message": "更新と手動インストールの手順"
+  },
+  "errorStorage": {
+    "message": "保存または読み込みに失敗しました。もう一度試してください。続くときは、設定の「データ」から「エクスポート」で保存してから、拡張機能を再読み込みしてください。"
+  }
+}

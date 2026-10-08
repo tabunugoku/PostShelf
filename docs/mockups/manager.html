@@ -23,7 +23,7 @@
 .ic.on{background:var(--fill-ghost-selected);border-color:var(--border-stronger)}
 </style></head><body>
 <h1>manager ページ (chrome-extension://.../manager.html)</h1>
-<p class="note">外観の基準モック。編集ボタンで編集パネルが開く。色はアイコンが folder のときのみ有効。実装はこれに寄せる (Preact 化)。</p>
+<p class="note">外観の基準モック。編集ボタンで編集パネルが開く。色はどのアイコンでも選べる (先頭の斜線の丸 = 色なし)。実装はこれに寄せる (Preact 化)。</p>
 <div class="ps">
  <div class="side">
   <div style="font-size:12px;color:var(--text-muted);padding:4px 10px">ブックマーク</div>
@@ -64,8 +64,7 @@ function render(){
  document.getElementById('posts').innerHTML=o;
  document.getElementById('nm').value=f.n;document.getElementById('nm').disabled=!!f.fixed;
  document.getElementById('icons').innerHTML=ICONS.map(function(i){return '<span class="ic'+(f.i==i?' on':'')+'" onclick="setI(\''+i+'\')"><i class="ti '+i+'"></i></span>'}).join('');
- document.getElementById('cols').innerHTML=COL.map(function(c){return '<span class="sw'+(f.c==c?' on':'')+'" style="background:'+c+'" onclick="setC(\''+c+'\')"></span>'}).join('');
- document.getElementById('colrow').style.opacity=f.i=='ti-folder'?1:0.45;
+ document.getElementById('cols').innerHTML='<span class="sw" title="色なし" style="background:linear-gradient(to top right,transparent 46%,var(--text-secondary) 46%,var(--text-secondary) 54%,transparent 54%);border:1.5px solid var(--text-secondary)'+(!f.c?';outline:2px solid var(--text-primary)':'')+'" onclick="setC(null)"></span>'+COL.map(function(c){return '<span class="sw'+(f.c==c?' on':'')+'" style="background:'+c+'" onclick="setC(\''+c+'\')"></span>'}).join('');
  document.getElementById('v1').className=view=='post'?'on':'';document.getElementById('v2').className=view=='list'?'on':'';
  document.getElementById('edit').style.display=ed&&!f.fixed?'block':'none';
 }

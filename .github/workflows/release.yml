@@ -1,0 +1,39 @@
+name: Release
+
+# タグ v* を push したときだけ動く。release:check を通し、タグと manifest の version が一致することを確かめてから、
+# zip を GitHub Release に添付する (zip の直下に manifest.json があり、展開したフォルダをそのまま「読み込む」ことができる)
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - name: Check that the tag matches the manifest version
+        run: |
+          manifest_version=$(node -p "require('./static/manifest.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${manifest_version}" ]; then
+            echo "タグ ${GITHUB_REF_NAME} が manifest の version (v${manifest_version}) と一致しません" >&2
+            exit 1
+          fi
+      - run: npm run release:check
+      - name: Create the GitHub Release with the zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "${GITHUB_REF_NAME}" "release/postshelf-${version}.zip" \
+            --title "PostShelf ${version}" \
+            --notes "手動インストールと更新の手順は docs/INSTALL.md を参照してください。更新の前に、設定の「データ」から必ずエクスポートしてください。" \
+            --verify-tag

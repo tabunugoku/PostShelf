@@ -1,0 +1,928 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "Classez vos favoris x.com dans vos propres dossiers. Toutes les données restent sur votre appareil."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "Tous"
+  },
+  "inboxName": {
+    "message": "Non classés"
+  },
+  "newFolderDefaultName": {
+    "message": "Nouveau dossier"
+  },
+  "errEmptyName": {
+    "message": "Saisissez un nom de dossier"
+  },
+  "errBuiltinImmutable": {
+    "message": "« Tous » ne peut être ni modifié ni supprimé"
+  },
+  "errNotFound": {
+    "message": "Dossier introuvable"
+  },
+  "errInvalidIcon": {
+    "message": "Cette icône n'est pas disponible"
+  },
+  "errInvalidColor": {
+    "message": "Cette couleur n'est pas disponible"
+  },
+  "errInvalidImport": {
+    "message": "Le format du fichier n'est pas valide"
+  },
+  "openFolders": {
+    "message": "Enregistrer dans un dossier"
+  },
+  "newFolder": {
+    "message": "Nouveau dossier"
+  },
+  "newFolderPlaceholder": {
+    "message": "Nom du dossier"
+  },
+  "add": {
+    "message": "Ajouter"
+  },
+  "noFolders": {
+    "message": "Aucun dossier pour l'instant"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "Favoris"
+  },
+  "edit": {
+    "message": "Modifier"
+  },
+  "postView": {
+    "message": "Posts"
+  },
+  "listView": {
+    "message": "Liste"
+  },
+  "search": {
+    "message": "Rechercher"
+  },
+  "sortSavedDesc": {
+    "message": "Enregistrés : plus récents"
+  },
+  "sortSavedAsc": {
+    "message": "Enregistrés : plus anciens"
+  },
+  "sortPostedDesc": {
+    "message": "Publiés : plus récents"
+  },
+  "sortPostedAsc": {
+    "message": "Publiés : plus anciens"
+  },
+  "name": {
+    "message": "Nom"
+  },
+  "icon": {
+    "message": "Icône"
+  },
+  "color": {
+    "message": "Couleur"
+  },
+  "save": {
+    "message": "Enregistrer"
+  },
+  "cancel": {
+    "message": "Annuler"
+  },
+  "delete": {
+    "message": "Supprimer"
+  },
+  "confirmDelete": {
+    "message": "Supprimer ce dossier ? Les posts enregistrés ne seront pas supprimés."
+  },
+  "empty": {
+    "message": "Aucun post enregistré"
+  },
+  "openOnX": {
+    "message": "Ouvrir sur X"
+  },
+  "popupPosts": {
+    "message": "posts"
+  },
+  "popupFolders": {
+    "message": "dossiers"
+  },
+  "recent": {
+    "message": "Enregistrés récemment (3)"
+  },
+  "settings": {
+    "message": "Réglages"
+  },
+  "openManager": {
+    "message": "Ouvrir le gestionnaire"
+  },
+  "exportBtn": {
+    "message": "Exporter"
+  },
+  "importBtn": {
+    "message": "Importer"
+  },
+  "importFail": {
+    "message": "Le format du fichier n'est pas valide"
+  },
+  "collectTitle": {
+    "message": "Importer dans PostShelf les posts de cette page"
+  },
+  "importDone": {
+    "message": "$COUNT$ posts importés",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "$COUNT$ posts importés dans « Non classés »",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "Synchroniser avec les favoris X"
+  },
+  "syncNativeDesc": {
+    "message": "Quand vous enregistrez un post dans un dossier, PostShelf l'ajoute aussi aux favoris standard de X ; quand vous le retirez de tous les dossiers, le favori X est retiré aussi. PostShelf ne clique sur le bouton de favori à l'écran qu'une seule fois par post concerné. Désactivé par défaut."
+  },
+  "savedBadgeTitle": {
+    "message": "Enregistré dans $COUNT$ dossier(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "Retirer aussi le favori X"
+  },
+  "buttonModeHeading": {
+    "message": "Comportement du bouton de favori standard"
+  },
+  "buttonModeSeparate": {
+    "message": "Ajouter un bouton PostShelf distinct (sans toucher au bouton standard)"
+  },
+  "buttonModeReplace": {
+    "message": "Remplacer le bouton standard (Maj+clic pour le comportement de X)"
+  },
+  "buttonModeNote": {
+    "message": "Peut cesser de fonctionner après une mise à jour de X ; le comportement standard est alors utilisé."
+  },
+  "selectedCount": {
+    "message": "$COUNT$ sélectionnés",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "Ajouter au dossier"
+  },
+  "bulkRemove": {
+    "message": "Retirer du dossier"
+  },
+  "clearSelection": {
+    "message": "Tout désélectionner"
+  },
+  "changeFolder": {
+    "message": "Changer de dossiers"
+  },
+  "removeFromFolder": {
+    "message": "Retirer de « $NAME$ »",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "Supprimer de PostShelf"
+  },
+  "confirmDeletePosts": {
+    "message": "Supprimer $COUNT$ post(s) de PostShelf ? Vos favoris X ne sont pas modifiés.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "Annuler"
+  },
+  "toastDeleted": {
+    "message": "$COUNT$ supprimé(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "$COUNT$ déplacé(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "$COUNT$ retiré(s) du dossier",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "$COUNT$ ajouté(s) au dossier",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "Sélectionner ce post"
+  },
+  "pickFolder": {
+    "message": "Choisir un dossier"
+  },
+  "dragHint": {
+    "message": "Glisser pour ajouter (Alt pour déplacer)"
+  },
+  "sortLabel": {
+    "message": "Trier"
+  },
+  "colorNone": {
+    "message": "Sans couleur (par défaut)"
+  },
+  "openSidePanel": {
+    "message": "Ouvrir dans le panneau latéral"
+  },
+  "openInTab": {
+    "message": "Ouvrir dans un onglet"
+  },
+  "actionModeHeading": {
+    "message": "Au clic sur l'icône de la barre d'outils"
+  },
+  "actionModePopup": {
+    "message": "Ouvrir la fenêtre contextuelle"
+  },
+  "actionModeSidepanel": {
+    "message": "Ouvrir le panneau latéral"
+  },
+  "actionModeNote": {
+    "message": "Le panneau latéral nécessite Chrome 114 ou version ultérieure."
+  },
+  "collectPending": {
+    "message": "$COUNT$ non importé(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "Tout est importé"
+  },
+  "smartViews": {
+    "message": "Vues intelligentes"
+  },
+  "foldersSection": {
+    "message": "Dossiers"
+  },
+  "recent7": {
+    "message": "7 derniers jours"
+  },
+  "searchPlaceholder": {
+    "message": "Rechercher texte ou @compte"
+  },
+  "gridView": {
+    "message": "Vue en grille"
+  },
+  "itemCount": {
+    "message": "$COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "$COUNT$ posts de vos Favoris x.com peuvent être importés",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "Comment importer"
+  },
+  "importHowTitle": {
+    "message": "Importer vos favoris x.com"
+  },
+  "importHowSteps": {
+    "message": "1. Dans Chrome, ouvrez « Historique » dans le menu de gauche de x.com et choisissez l'onglet « Favoris » (x.com/i/history)\n2. Faites défiler vous-même jusqu'à ce que les posts apparaissent à l'écran (PostShelf ne défile jamais seul)\n3. Cliquez sur le bouton « N non importé(s) » en bas à droite\n4. Les posts importés vont dans « Non classés »"
+  },
+  "dismiss": {
+    "message": "Fermer"
+  },
+  "filterImage": {
+    "message": "Avec images"
+  },
+  "filterVideo": {
+    "message": "Avec vidéo"
+  },
+  "filterLink": {
+    "message": "Avec liens"
+  },
+  "filterAuthor": {
+    "message": "Filtrer par auteur"
+  },
+  "clearFilters": {
+    "message": "Retirer les filtres"
+  },
+  "notFoundTitle": {
+    "message": "Aucun résultat"
+  },
+  "notFoundHint": {
+    "message": "Modifiez la recherche ou retirez les filtres."
+  },
+  "noPostsTitle": {
+    "message": "Aucun post enregistré pour l'instant"
+  },
+  "noPostsHint": {
+    "message": "Cliquez sur le bouton de dossier d'un post sur x.com pour l'enregistrer. Les posts déjà mis en favoris peuvent être importés depuis Favoris dans l'historique de x.com."
+  },
+  "folderMore": {
+    "message": "Modifier nom, icône, couleur"
+  },
+  "cardMenu": {
+    "message": "Plus d'actions"
+  },
+  "selectMode": {
+    "message": "Sélectionner"
+  },
+  "chooseFolderMenu": {
+    "message": "Ouvrir la liste des dossiers"
+  },
+  "searchShow": {
+    "message": "Afficher la recherche"
+  },
+  "viewLabel": {
+    "message": "Affichage"
+  },
+  "dataSection": {
+    "message": "Données"
+  },
+  "saveCurrentPost": {
+    "message": "Enregistrer le post ouvert…"
+  },
+  "saveCurrentHint": {
+    "message": "Affiché quand un post est ouvert sur x.com"
+  },
+  "saveCurrentFail": {
+    "message": "Impossible de lire ce post. Rechargez la page puis réessayez."
+  },
+  "healthTitle": {
+    "message": "Structure de la page X"
+  },
+  "healthOkAt": {
+    "message": "Normal (dernière vérification : $NAME$)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "Pas encore vérifié (vérifié à l'ouverture de x.com)"
+  },
+  "healthDegraded": {
+    "message": "Une partie de la structure de la page X a changé. PostShelf continue de fonctionner."
+  },
+  "healthBroken": {
+    "message": "La structure de la page X a changé : certaines fonctions sont suspendues. Copiez les informations de diagnostic et signalez-le sur GitHub."
+  },
+  "copyDiag": {
+    "message": "Copier les informations de diagnostic"
+  },
+  "diagTitle": {
+    "message": "Informations de diagnostic"
+  },
+  "diagNotice": {
+    "message": "Ce contenu sera copié dans le presse-papiers. Il n'inclut ni le texte des posts, ni les noms d'utilisateur, ni les URL. Il inclut la version de l'extension, les informations sur le navigateur, la langue d'affichage et le squelette de la structure de la page X."
+  },
+  "diagCopy": {
+    "message": "Copier"
+  },
+  "diagCopied": {
+    "message": "Copié"
+  },
+  "diagCopyFail": {
+    "message": "Copie impossible. Sélectionnez le texte et copiez-le manuellement."
+  },
+  "diagReport": {
+    "message": "Signaler sur GitHub"
+  },
+  "diagPreparing": {
+    "message": "Préparation…"
+  },
+  "saveTo": {
+    "message": "Enregistrer pour : $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "Impossible de savoir quel compte est connecté : rien ne peut être enregistré. Rechargez la page x.com."
+  },
+  "collectNoAccount": {
+    "message": "Impossible de savoir quel compte est connecté : rien ne peut être importé"
+  },
+  "accountUnknownName": {
+    "message": "Aucun compte défini"
+  },
+  "accountSwitchLabel": {
+    "message": "Compte affiché"
+  },
+  "accountSwitchNote": {
+    "message": "Changer ici ne modifie pas la connexion à X. Changez de compte X sur x.com."
+  },
+  "accountSwitched": {
+    "message": "Passé à $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "Connecté sur x.com"
+  },
+  "accountAssign": {
+    "message": "Réaffecter…"
+  },
+  "accountAssignTitle": {
+    "message": "Réaffecter les données"
+  },
+  "accountAssignDesc": {
+    "message": "Déplace les données enregistrées de $NAME$ ($COUNT$ posts) vers le compte choisi. Si le même post existe déjà, les dossiers dans lesquels ce post se trouve sont combinés.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "Déplacer vers"
+  },
+  "accountAssignNone": {
+    "message": "Aucun compte de destination. Ouvrez x.com en étant connecté et vous pourrez choisir le compte ici."
+  },
+  "accountAssignDone": {
+    "message": "$COUNT$ posts réaffectés",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "Supprimer les données de ce compte"
+  },
+  "accountDeleteConfirm": {
+    "message": "Supprimer les données enregistrées de $NAME$ ($COUNT$ posts et dossiers) ? Action irréversible. Vos favoris X ne sont pas modifiés.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "$COUNT$ posts sont enregistrés sous « Aucun compte défini ». Choisissez à quel compte ils appartiennent et utilisez « Réaffecter… ».",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "Compte : $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "Impossible de savoir quel compte est connecté sur x.com : rien ne peut être enregistré. Rechargez la page x.com."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "Le compte affiché dans PostShelf est différent de $NAME$, connecté sur x.com : rien ne peut être enregistré. Changez le compte affiché ici pour $NAME$.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsResetHeading": {
+    "message": "Réinitialiser les réglages"
+  },
+  "settingsResetBtn": {
+    "message": "Rétablir les valeurs initiales des réglages"
+  },
+  "settingsResetDesc": {
+    "message": "Seuls les réglages sont réinitialisés : mode lié, comportement du bouton natif, mode d'ouverture, affichage et tri, etc. Les dossiers, posts enregistrés et informations de compte sont conservés."
+  },
+  "settingsResetConfirm": {
+    "message": "Rétablir les valeurs initiales des réglages ? Les posts enregistrés et les dossiers ne sont pas supprimés."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "Réinitialiser"
+  },
+  "settingsResetDone": {
+    "message": "Réglages réinitialisés"
+  },
+  "dangerHeading": {
+    "message": "Zone dangereuse"
+  },
+  "deleteAllBtn": {
+    "message": "Supprimer toutes les données"
+  },
+  "deleteAllDesc": {
+    "message": "Supprime tous les dossiers, posts enregistrés et informations de compte. Les réglages sont conservés. Action irréversible."
+  },
+  "deleteAllCounts": {
+    "message": "Seront supprimés : $FOLDERS$ dossiers, $POSTS$ posts, $ACCOUNTS$ comptes",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "Exporter d'abord une sauvegarde JSON"
+  },
+  "deleteAllWarn": {
+    "message": "Action irréversible. Vos favoris X ne sont pas modifiés. Pour continuer, saisissez « $WORD$ » ci-dessous.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "supprimer"
+  },
+  "deleteAllInputLabel": {
+    "message": "Saisie de confirmation"
+  },
+  "deleteAllDone": {
+    "message": "Toutes les données ont été supprimées"
+  },
+  "viewImage": {
+    "message": "Agrandir l'image $N$ sur $M$",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "Agrandir"
+  },
+  "viewerLabel": {
+    "message": "Visionneuse d'images"
+  },
+  "viewerClose": {
+    "message": "Fermer (Échap)"
+  },
+  "viewerPrev": {
+    "message": "Image précédente"
+  },
+  "viewerNext": {
+    "message": "Image suivante"
+  },
+  "viewerOpenOriginal": {
+    "message": "Ouvrir en taille d'origine ↗"
+  },
+  "viewerOpenPost": {
+    "message": "Ouvrir le post sur X ↗"
+  },
+  "viewerFailTitle": {
+    "message": "Impossible de charger l'image"
+  },
+  "viewerFailReason": {
+    "message": "Le post d'origine a peut-être été supprimé, ou X a déplacé l'image."
+  },
+  "viewerShowSmall": {
+    "message": "Afficher la petite image enregistrée"
+  },
+  "videoBadge": {
+    "message": "Vidéo"
+  },
+  "videoOpenLabel": {
+    "message": "Afficher comment lire cette vidéo"
+  },
+  "videoDialogTitle": {
+    "message": "Les vidéos se lisent sur X"
+  },
+  "videoDialogBody": {
+    "message": "PostShelf ne peut pas lire les vidéos, car le fichier vidéo lui-même ne peut pas être enregistré."
+  },
+  "videoPlayOnX": {
+    "message": "Lire la vidéo sur X ↗"
+  },
+  "cacheTitle": {
+    "message": "Cache d'images"
+  },
+  "cacheEnable": {
+    "message": "Mettre les images en cache"
+  },
+  "cacheEnableDesc": {
+    "message": "Quand vous enregistrez un post, ses images sont aussi conservées sur cet ordinateur : vous les voyez même si elles disparaissent de X. Pour les vidéos, seule la miniature est conservée."
+  },
+  "cachePermNote": {
+    "message": "La première fois, Chrome demande l'autorisation d'accéder à pbs.twimg.com (le serveur d'images de X). L'autorisation n'est demandée que lorsque vous activez cette fonction."
+  },
+  "cachePermDenied": {
+    "message": "Impossible d'activer la fonction : l'accès au serveur d'images n'a pas été autorisé. Réactivez-la et autorisez l'accès."
+  },
+  "cachePermMissing": {
+    "message": "L'accès au serveur d'images (pbs.twimg.com) n'est pas autorisé."
+  },
+  "cacheGrant": {
+    "message": "Autoriser"
+  },
+  "cacheDest": {
+    "message": "Emplacement"
+  },
+  "cacheDestIdb": {
+    "message": "Dans le navigateur (zone de données de l'extension ; recommandé)"
+  },
+  "cacheDestDir": {
+    "message": "Un dossier de mon choix (n'importe où sur ce PC)"
+  },
+  "cacheDirNone": {
+    "message": "Aucun dossier choisi"
+  },
+  "cacheDirPick": {
+    "message": "Choisir un dossier…"
+  },
+  "cacheDirRepick": {
+    "message": "Choisir un autre dossier…"
+  },
+  "cacheDirRescan": {
+    "message": "Réanalyser"
+  },
+  "cacheDirRescanDone": {
+    "message": "$COUNT$ images recomptées",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "Autorisation requise"
+  },
+  "cacheDirPermNote": {
+    "message": "Après un redémarrage de Chrome, l'accès au dossier peut être révoqué. Tant que vous ne l'autorisez pas à nouveau, les images ne sont pas écrites dans le dossier et sont chargées depuis le serveur d'images de X."
+  },
+  "cacheDirTabOnly": {
+    "message": "Le dossier se choisit dans la version en onglet de la page de gestion (impossible dans le panneau latéral). Choisissez-le là-bas."
+  },
+  "cacheDirUnsupported": {
+    "message": "Impossible de choisir un dossier sur cette page de l'extension. Utilisez « Dans le navigateur »."
+  },
+  "cacheDirReadme": {
+    "message": "Ceci est le cache d'images de PostShelf. Le supprimer n'efface pas les données de PostShelf.\nLe dossier « images » contient un dossier par ID de post."
+  },
+  "cacheDirNonEmpty": {
+    "message": "Ce dossier n'a pas été créé par PostShelf et contient déjà d'autres fichiers. PostShelf peut-il y créer « .postshelf », « README.txt » et un dossier « images » ? Les autres fichiers du dossier ne sont pas touchés."
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "Créer"
+  },
+  "cacheMax": {
+    "message": "Taille maximale"
+  },
+  "cacheMaxCustom": {
+    "message": "Personnalisé…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "Taille maximale (Mo, 100 ou plus)"
+  },
+  "cacheMaxMin": {
+    "message": "La taille maximale doit être d'au moins 100 Mo."
+  },
+  "cacheUsage": {
+    "message": "Utilisé : $USED$ sur $MAX$ ($COUNT$ images)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "Qualité des images"
+  },
+  "cacheQualityLarge": {
+    "message": "Standard (estimation de 0,2 à 0,5 Mo chacune ; suffisant pour l'affichage)"
+  },
+  "cacheQualityOrig": {
+    "message": "Taille d'origine (estimation de 1 à 5 Mo chacune ; occupe l'espace plus vite)"
+  },
+  "cacheFull": {
+    "message": "Quand la limite est atteinte"
+  },
+  "cacheFullEvict": {
+    "message": "Supprimer les plus anciennes d'abord (images des posts enregistrés le plus tôt)"
+  },
+  "cacheFullStop": {
+    "message": "Ne plus enregistrer de nouvelles images"
+  },
+  "cacheBulk": {
+    "message": "Mettre en cache les images des posts enregistrés"
+  },
+  "cacheBulkProgress": {
+    "message": "Récupération des images : $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "Arrêter"
+  },
+  "cacheBulkDone": {
+    "message": "$COUNT$ images mises en cache ($FAILED$ échecs)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "Aucune image à mettre en cache"
+  },
+  "cacheBulkBlocked": {
+    "message": "Arrêté car l'écriture à l'emplacement a échoué. Vérifiez l'autorisation et le dossier."
+  },
+  "cacheBulkFull": {
+    "message": "Arrêté car la limite de taille a été atteinte."
+  },
+  "cacheBulkHelp": {
+    "message": "La mise en cache groupée charge les images une par une. La progression est affichée et vous pouvez arrêter à tout moment. Si vous arrêtez, la fois suivante reprend là où elle s'était arrêtée. Supprimer un post supprime aussi ses images."
+  },
+  "cacheClear": {
+    "message": "Supprimer le cache"
+  },
+  "cacheClearConfirm": {
+    "message": "Supprimer les images en cache ($COUNT$ images) ? Les posts enregistrés sont conservés. Les images seront chargées depuis le serveur d'images de X.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "Le cache a été supprimé"
+  },
+  "cacheLowerConfirm": {
+    "message": "Réduire la taille maximale supprimera immédiatement les images des $COUNT$ posts enregistrés les plus anciens. Continuer ?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "Réduire et nettoyer"
+  },
+  "cacheSwitchTitle": {
+    "message": "Changer l'emplacement"
+  },
+  "cacheSwitchBody": {
+    "message": "Il y a $COUNT$ images à l'emplacement actuel. Les déplacer vers le nouvel emplacement ?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "Déplacer"
+  },
+  "cacheSwitchKeep": {
+    "message": "Ne pas déplacer"
+  },
+  "cacheSwitchProgress": {
+    "message": "Déplacement des images : $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "Impossible de déplacer les images. Vérifiez l'autorisation de l'emplacement."
+  },
+  "cacheCleanupNeeded": {
+    "message": "Certaines images des posts supprimés n'ont pas encore été supprimées. Vérifiez l'autorisation de l'emplacement, puis cliquez sur « Nettoyer maintenant »."
+  },
+  "cacheCleanupNow": {
+    "message": "Nettoyer maintenant"
+  },
+  "cacheRules": {
+    "message": "Les images enregistrées restent sur ce PC et ne sont jamais envoyées ailleurs. Si vous supprimez l'extension, le cache dans le navigateur est aussi supprimé (un dossier que vous avez choisi ne l'est pas). Conservez les images qui comptent vraiment dans « Un dossier de mon choix ». Pour sauvegarder vos données enregistrées, utilisez l'export JSON (il ne contient que les URL des images, pas les images)."
+  },
+  "updateNotice": {
+    "message": "PostShelf a été mis à jour ($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Version $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "Pour mettre à jour : enregistrez d'abord vos données avec « Exporter », puis écrasez le même dossier avec la nouvelle version et cliquez sur « Recharger » pour l'extension. Ne supprimez pas l'extension (vos données enregistrées seraient aussi supprimées)."
+  },
+  "installGuideLink": {
+    "message": "Étapes de mise à jour et d'installation manuelle"
+  },
+  "errorStorage": {
+    "message": "Échec de l'enregistrement ou du chargement. Réessayez. Si cela continue, enregistrez vos données avec « Exporter » dans les Réglages, puis rechargez l'extension."
+  }
+}

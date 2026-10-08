@@ -1,0 +1,928 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "将 x.com 书签整理到你自己的文件夹中。所有数据仅保存在你的设备上。"
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "全部"
+  },
+  "inboxName": {
+    "message": "未分类"
+  },
+  "newFolderDefaultName": {
+    "message": "新建文件夹"
+  },
+  "errEmptyName": {
+    "message": "请输入文件夹名称"
+  },
+  "errBuiltinImmutable": {
+    "message": "“全部”无法修改或删除"
+  },
+  "errNotFound": {
+    "message": "找不到文件夹"
+  },
+  "errInvalidIcon": {
+    "message": "此图标不可用"
+  },
+  "errInvalidColor": {
+    "message": "此颜色不可用"
+  },
+  "errInvalidImport": {
+    "message": "文件格式无效"
+  },
+  "openFolders": {
+    "message": "保存到文件夹"
+  },
+  "newFolder": {
+    "message": "新建文件夹"
+  },
+  "newFolderPlaceholder": {
+    "message": "文件夹名称"
+  },
+  "add": {
+    "message": "添加"
+  },
+  "noFolders": {
+    "message": "还没有文件夹"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "书签"
+  },
+  "edit": {
+    "message": "编辑"
+  },
+  "postView": {
+    "message": "帖子视图"
+  },
+  "listView": {
+    "message": "列表视图"
+  },
+  "search": {
+    "message": "搜索"
+  },
+  "sortSavedDesc": {
+    "message": "保存时间：最新"
+  },
+  "sortSavedAsc": {
+    "message": "保存时间：最早"
+  },
+  "sortPostedDesc": {
+    "message": "发布时间：最新"
+  },
+  "sortPostedAsc": {
+    "message": "发布时间：最早"
+  },
+  "name": {
+    "message": "名称"
+  },
+  "icon": {
+    "message": "图标"
+  },
+  "color": {
+    "message": "颜色"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "delete": {
+    "message": "删除"
+  },
+  "confirmDelete": {
+    "message": "要删除此文件夹吗？已保存的帖子不会被删除。"
+  },
+  "empty": {
+    "message": "没有已保存的帖子"
+  },
+  "openOnX": {
+    "message": "在 X 上打开"
+  },
+  "popupPosts": {
+    "message": "条帖子"
+  },
+  "popupFolders": {
+    "message": "个文件夹"
+  },
+  "recent": {
+    "message": "最近保存的 3 条"
+  },
+  "settings": {
+    "message": "设置"
+  },
+  "openManager": {
+    "message": "打开管理页面"
+  },
+  "exportBtn": {
+    "message": "导出"
+  },
+  "importBtn": {
+    "message": "导入"
+  },
+  "importFail": {
+    "message": "文件格式无效"
+  },
+  "collectTitle": {
+    "message": "将此页面上的帖子导入 PostShelf"
+  },
+  "importDone": {
+    "message": "已导入 $COUNT$ 条帖子",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "已将 $COUNT$ 条帖子导入“未分类”",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "与 X 书签同步"
+  },
+  "syncNativeDesc": {
+    "message": "将帖子保存到文件夹时，PostShelf 也会将其添加到 X 标准书签；从所有文件夹中移除时，也会取消 X 上的书签。PostShelf 对你操作的每条帖子，只会点击一次屏幕上的书签按钮。默认关闭。"
+  },
+  "savedBadgeTitle": {
+    "message": "已保存到 $COUNT$ 个文件夹",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "同时取消 X 书签"
+  },
+  "buttonModeHeading": {
+    "message": "标准书签按钮的行为"
+  },
+  "buttonModeSeparate": {
+    "message": "另外添加 PostShelf 按钮（不改动标准按钮）"
+  },
+  "buttonModeReplace": {
+    "message": "替换标准按钮的行为（Shift+点击使用 X 默认行为）"
+  },
+  "buttonModeNote": {
+    "message": "X 更新后可能失效，失效时会恢复为标准行为。"
+  },
+  "selectedCount": {
+    "message": "已选择 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "添加到文件夹"
+  },
+  "bulkRemove": {
+    "message": "从文件夹移除"
+  },
+  "clearSelection": {
+    "message": "取消选择"
+  },
+  "changeFolder": {
+    "message": "更改文件夹"
+  },
+  "removeFromFolder": {
+    "message": "从“$NAME$”移除",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "从 PostShelf 删除"
+  },
+  "confirmDeletePosts": {
+    "message": "要从 PostShelf 删除 $COUNT$ 条帖子吗？X 上的书签不会改变。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "撤销"
+  },
+  "toastDeleted": {
+    "message": "已删除 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "已移动 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "已将 $COUNT$ 条移出文件夹",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "已将 $COUNT$ 条添加到文件夹",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "选择此帖子"
+  },
+  "pickFolder": {
+    "message": "选择文件夹"
+  },
+  "dragHint": {
+    "message": "拖动以添加（按住 Alt 为移动）"
+  },
+  "sortLabel": {
+    "message": "排序"
+  },
+  "colorNone": {
+    "message": "无颜色（默认）"
+  },
+  "openSidePanel": {
+    "message": "在侧边栏中打开"
+  },
+  "openInTab": {
+    "message": "在标签页中打开"
+  },
+  "actionModeHeading": {
+    "message": "点击工具栏图标时的行为"
+  },
+  "actionModePopup": {
+    "message": "打开弹出窗口"
+  },
+  "actionModeSidepanel": {
+    "message": "打开侧边栏"
+  },
+  "actionModeNote": {
+    "message": "侧边栏需要 Chrome 114 或更高版本。"
+  },
+  "collectPending": {
+    "message": "未导入 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "全部已导入"
+  },
+  "smartViews": {
+    "message": "智能视图"
+  },
+  "foldersSection": {
+    "message": "文件夹"
+  },
+  "recent7": {
+    "message": "最近 7 天"
+  },
+  "searchPlaceholder": {
+    "message": "按正文或 @用户名搜索"
+  },
+  "gridView": {
+    "message": "网格视图"
+  },
+  "itemCount": {
+    "message": "$COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "x.com“书签”中有 $COUNT$ 条帖子可以导入",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "导入方法"
+  },
+  "importHowTitle": {
+    "message": "导入 x.com 书签"
+  },
+  "importHowSteps": {
+    "message": "1. 在 Chrome 中打开 x.com 左侧菜单的“历史记录”，选择“书签”标签页(x.com/i/history)\n2. 自己滚动页面，直到想导入的帖子显示在屏幕上（不会自动滚动）\n3. 点击右下角的“未导入 N 条”按钮\n4. 导入的帖子会进入“未分类”"
+  },
+  "dismiss": {
+    "message": "关闭"
+  },
+  "filterImage": {
+    "message": "含图片"
+  },
+  "filterVideo": {
+    "message": "含视频"
+  },
+  "filterLink": {
+    "message": "含链接"
+  },
+  "filterAuthor": {
+    "message": "按作者筛选"
+  },
+  "clearFilters": {
+    "message": "清除筛选"
+  },
+  "notFoundTitle": {
+    "message": "没有找到"
+  },
+  "notFoundHint": {
+    "message": "请更换搜索词或清除筛选。"
+  },
+  "noPostsTitle": {
+    "message": "还没有保存的帖子"
+  },
+  "noPostsHint": {
+    "message": "在 x.com 上点击帖子的文件夹按钮即可保存。已经加入书签的帖子，可以从 x.com 历史记录中的“书签”导入。"
+  },
+  "folderMore": {
+    "message": "更改名称、图标、颜色"
+  },
+  "cardMenu": {
+    "message": "更多操作"
+  },
+  "selectMode": {
+    "message": "选择"
+  },
+  "chooseFolderMenu": {
+    "message": "打开文件夹列表"
+  },
+  "searchShow": {
+    "message": "显示搜索"
+  },
+  "viewLabel": {
+    "message": "视图"
+  },
+  "dataSection": {
+    "message": "数据"
+  },
+  "saveCurrentPost": {
+    "message": "保存当前打开的帖子…"
+  },
+  "saveCurrentHint": {
+    "message": "在 x.com 打开帖子时显示"
+  },
+  "saveCurrentFail": {
+    "message": "无法读取此帖子。请刷新页面后重试。"
+  },
+  "healthTitle": {
+    "message": "X 页面结构"
+  },
+  "healthOkAt": {
+    "message": "正常（上次检查：$NAME$）",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "尚未检查（打开 x.com 时会检查）"
+  },
+  "healthDegraded": {
+    "message": "X 的页面结构有部分变化，PostShelf 仍在正常工作。"
+  },
+  "healthBroken": {
+    "message": "X 的页面结构已变化，部分功能已暂停。请复制诊断信息，并在 GitHub 上报告。"
+  },
+  "copyDiag": {
+    "message": "复制诊断信息"
+  },
+  "diagTitle": {
+    "message": "诊断信息"
+  },
+  "diagNotice": {
+    "message": "此内容将复制到剪贴板。不包含帖子正文、用户名和 URL。包含的内容有：扩展版本、浏览器信息、显示语言，以及 X 页面结构的骨架。"
+  },
+  "diagCopy": {
+    "message": "复制"
+  },
+  "diagCopied": {
+    "message": "已复制"
+  },
+  "diagCopyFail": {
+    "message": "无法复制，请手动选择文本并复制。"
+  },
+  "diagReport": {
+    "message": "在 GitHub 上报告"
+  },
+  "diagPreparing": {
+    "message": "生成中…"
+  },
+  "saveTo": {
+    "message": "保存到：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "无法判断当前登录的账号，因此无法保存。请重新载入 x.com 页面。"
+  },
+  "collectNoAccount": {
+    "message": "无法判断当前登录的账号，因此无法导入"
+  },
+  "accountUnknownName": {
+    "message": "未设置账号"
+  },
+  "accountSwitchLabel": {
+    "message": "要显示的账号"
+  },
+  "accountSwitchNote": {
+    "message": "在这里切换不会改变 X 的登录状态。请在 x.com 上切换 X 账号。"
+  },
+  "accountSwitched": {
+    "message": "已切换到 $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "x.com 上已登录"
+  },
+  "accountAssign": {
+    "message": "分配…"
+  },
+  "accountAssignTitle": {
+    "message": "分配数据"
+  },
+  "accountAssignDesc": {
+    "message": "将 $NAME$ 的已保存数据（$COUNT$ 条）移动到所选账号。如果目标账号中已有相同的帖子，会把该帖子所在的文件夹合并起来。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "移动到"
+  },
+  "accountAssignNone": {
+    "message": "没有可分配的账号。登录后打开 x.com，该账号就可以在这里选为目标账号。"
+  },
+  "accountAssignDone": {
+    "message": "已分配 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "删除此账号的数据"
+  },
+  "accountDeleteConfirm": {
+    "message": "要删除 $NAME$ 的已保存数据（$COUNT$ 条帖子及文件夹）吗？此操作无法撤销。X 上的书签不会改变。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "“未设置账号”下有 $COUNT$ 条帖子。请选择它们属于哪个账号，并点击“分配…”。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "账号：$NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "无法判断 x.com 上登录的账号，因此无法保存。请重新载入 x.com 页面。"
+  },
+  "saveCurrentWrongAccount": {
+    "message": "PostShelf 中显示的账号与 x.com 上登录的 $NAME$ 不同，因此无法保存。请将此处显示的账号切换为 $NAME$。",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsResetHeading": {
+    "message": "重置设置"
+  },
+  "settingsResetBtn": {
+    "message": "将设置恢复为默认值"
+  },
+  "settingsResetDesc": {
+    "message": "只重置设置：联动模式、标准按钮的行为、打开方式、显示方式等。文件夹、已保存的帖子和账号信息不会被删除。"
+  },
+  "settingsResetConfirm": {
+    "message": "要将设置恢复为默认值吗？已保存的帖子和文件夹不会被删除。"
+  },
+  "settingsResetConfirmBtn": {
+    "message": "恢复默认值"
+  },
+  "settingsResetDone": {
+    "message": "已将设置恢复为默认值"
+  },
+  "dangerHeading": {
+    "message": "危险操作"
+  },
+  "deleteAllBtn": {
+    "message": "删除所有数据"
+  },
+  "deleteAllDesc": {
+    "message": "删除所有文件夹、已保存的帖子和账号信息。设置会保留。此操作无法撤销。"
+  },
+  "deleteAllCounts": {
+    "message": "将被删除：文件夹 $FOLDERS$ 个、帖子 $POSTS$ 条、账号 $ACCOUNTS$ 个",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "先导出 JSON 备份"
+  },
+  "deleteAllWarn": {
+    "message": "此操作无法撤销。X 上的书签不会改变。要继续，请在下方输入“$WORD$”。",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "删除"
+  },
+  "deleteAllInputLabel": {
+    "message": "确认输入"
+  },
+  "deleteAllDone": {
+    "message": "已删除所有数据"
+  },
+  "viewImage": {
+    "message": "放大显示第 $N$ / $M$ 张图片",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "放大"
+  },
+  "viewerLabel": {
+    "message": "图片查看器"
+  },
+  "viewerClose": {
+    "message": "关闭（Esc）"
+  },
+  "viewerPrev": {
+    "message": "上一张图片"
+  },
+  "viewerNext": {
+    "message": "下一张图片"
+  },
+  "viewerOpenOriginal": {
+    "message": "以原始尺寸打开 ↗"
+  },
+  "viewerOpenPost": {
+    "message": "在 X 上打开帖子 ↗"
+  },
+  "viewerFailTitle": {
+    "message": "无法加载图片"
+  },
+  "viewerFailReason": {
+    "message": "原帖可能已被删除，或 X 更改了图片的位置。"
+  },
+  "viewerShowSmall": {
+    "message": "显示已保存的小图"
+  },
+  "videoBadge": {
+    "message": "视频"
+  },
+  "videoOpenLabel": {
+    "message": "显示视频播放说明"
+  },
+  "videoDialogTitle": {
+    "message": "视频请在 X 上播放"
+  },
+  "videoDialogBody": {
+    "message": "无法保存视频的播放文件，因此 PostShelf 无法播放视频。"
+  },
+  "videoPlayOnX": {
+    "message": "在 X 上播放视频 ↗"
+  },
+  "cacheTitle": {
+    "message": "图片缓存"
+  },
+  "cacheEnable": {
+    "message": "缓存图片"
+  },
+  "cacheEnableDesc": {
+    "message": "保存帖子时，会把图片也保留在本机。即使 X 上删除了也能查看。视频只保留缩略图。"
+  },
+  "cachePermNote": {
+    "message": "首次开启时，Chrome 会请求访问 pbs.twimg.com（X 的图片服务器）的权限。只有在开启此功能时才会请求。"
+  },
+  "cachePermDenied": {
+    "message": "由于未允许访问图片服务器，无法开启。请再次开启并允许访问。"
+  },
+  "cachePermMissing": {
+    "message": "没有访问图片服务器（pbs.twimg.com）的权限。"
+  },
+  "cacheGrant": {
+    "message": "允许"
+  },
+  "cacheDest": {
+    "message": "保存位置"
+  },
+  "cacheDestIdb": {
+    "message": "浏览器内部（扩展程序的数据区域，推荐）"
+  },
+  "cacheDestDir": {
+    "message": "自己选择的文件夹（电脑上的任意位置）"
+  },
+  "cacheDirNone": {
+    "message": "尚未选择文件夹"
+  },
+  "cacheDirPick": {
+    "message": "选择文件夹…"
+  },
+  "cacheDirRepick": {
+    "message": "重新选择文件夹…"
+  },
+  "cacheDirRescan": {
+    "message": "重新扫描"
+  },
+  "cacheDirRescanDone": {
+    "message": "已重新统计 $COUNT$ 张图片",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "需要授权"
+  },
+  "cacheDirPermNote": {
+    "message": "重启 Chrome 后，对文件夹的访问权限可能会失效。在重新允许之前，图片不会写入文件夹，而是从 X 的图片服务器加载。"
+  },
+  "cacheDirTabOnly": {
+    "message": "文件夹需要在标签页版的管理页面中选择（侧边栏中无法选择）。请在标签页版中选择。"
+  },
+  "cacheDirUnsupported": {
+    "message": "在此扩展程序页面中无法选择文件夹。请使用“浏览器内部”。"
+  },
+  "cacheDirReadme": {
+    "message": "这是 PostShelf 的图片缓存。删除它不会删除 PostShelf 本身的数据。\n“images”文件夹中有按帖子 ID 划分的文件夹。"
+  },
+  "cacheDirNonEmpty": {
+    "message": "此文件夹不是 PostShelf 创建的，里面已有其他文件。是否允许在此创建“.postshelf”“README.txt”和“images”文件夹？文件夹中的其他文件不会被改动。"
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "创建"
+  },
+  "cacheMax": {
+    "message": "最大容量"
+  },
+  "cacheMaxCustom": {
+    "message": "自定义…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "最大容量（MB，至少 100）"
+  },
+  "cacheMaxMin": {
+    "message": "最大容量不能小于 100 MB。"
+  },
+  "cacheUsage": {
+    "message": "已使用 $USED$ / $MAX$（$COUNT$ 张图片）",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "画质"
+  },
+  "cacheQualityLarge": {
+    "message": "标准（每张预估 0.2–0.5 MB，足够查看）"
+  },
+  "cacheQualityOrig": {
+    "message": "原始尺寸（每张预估 1–5 MB，容量消耗更快）"
+  },
+  "cacheFull": {
+    "message": "容量满了之后"
+  },
+  "cacheFullEvict": {
+    "message": "从旧的开始删除（先删除保存日期较早的帖子的图片）"
+  },
+  "cacheFullStop": {
+    "message": "不再保存新图片"
+  },
+  "cacheBulk": {
+    "message": "批量缓存已保存帖子的图片"
+  },
+  "cacheBulkProgress": {
+    "message": "正在获取图片：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "停止"
+  },
+  "cacheBulkDone": {
+    "message": "已缓存 $COUNT$ 张图片（失败 $FAILED$ 张）",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "没有需要缓存的图片"
+  },
+  "cacheBulkBlocked": {
+    "message": "由于无法写入保存位置，已中途停止。请检查权限和文件夹。"
+  },
+  "cacheBulkFull": {
+    "message": "由于容量已满，已中途停止。"
+  },
+  "cacheBulkHelp": {
+    "message": "批量缓存会逐张加载图片。会显示进度，可随时停止。停止后再次点击会从中断处继续。删除帖子时，其图片也会一并删除。"
+  },
+  "cacheClear": {
+    "message": "删除缓存"
+  },
+  "cacheClearConfirm": {
+    "message": "要删除已缓存的图片（$COUNT$ 张）吗？已保存的帖子不会被删除。图片将改为从 X 的图片服务器加载。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "已删除缓存"
+  },
+  "cacheLowerConfirm": {
+    "message": "降低最大容量会立即删除保存日期最早的 $COUNT$ 条帖子的图片。要继续吗？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "降低并清理"
+  },
+  "cacheSwitchTitle": {
+    "message": "切换保存位置"
+  },
+  "cacheSwitchBody": {
+    "message": "当前位置有 $COUNT$ 张图片。要移动到新位置吗？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "移动"
+  },
+  "cacheSwitchKeep": {
+    "message": "不移动"
+  },
+  "cacheSwitchProgress": {
+    "message": "正在移动图片：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "无法移动图片。请检查保存位置的权限。"
+  },
+  "cacheCleanupNeeded": {
+    "message": "已删除的帖子中，有些图片尚未删除。请检查保存位置的权限，然后点击“立即清理”。"
+  },
+  "cacheCleanupNow": {
+    "message": "立即清理"
+  },
+  "cacheRules": {
+    "message": "保存的图片只放在这台电脑里，不会发送到外部。卸载扩展程序后，浏览器内部的缓存也会被删除（自己选择的文件夹不会被删除）。真正想保留的图片请保存到“自己选择的文件夹”。保存数据本身的备份请使用 JSON 导出（不含图片，仅含 URL）。"
+  },
+  "updateNotice": {
+    "message": "PostShelf 已更新（$VERSION$）",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "版本 $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "更新时：请先用“导出”保存数据，然后用新版本覆盖同一个文件夹，再点击扩展程序的“重新加载”。请不要删除扩展程序（已保存的数据也会一并删除）。"
+  },
+  "installGuideLink": {
+    "message": "更新和手动安装的步骤"
+  },
+  "errorStorage": {
+    "message": "保存或读取失败。请重试。如果问题持续出现，请先在设置的“数据”中用“导出”保存数据，然后重新加载扩展程序。"
+  }
+}

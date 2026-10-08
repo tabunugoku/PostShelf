@@ -1,0 +1,928 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "Organiza tus marcadores de x.com en tus propias carpetas. Todos los datos se quedan en tu dispositivo."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "Todos"
+  },
+  "inboxName": {
+    "message": "Sin clasificar"
+  },
+  "newFolderDefaultName": {
+    "message": "Nueva carpeta"
+  },
+  "errEmptyName": {
+    "message": "Introduce un nombre de carpeta"
+  },
+  "errBuiltinImmutable": {
+    "message": "«Todos» no se puede modificar ni eliminar"
+  },
+  "errNotFound": {
+    "message": "No se encontró la carpeta"
+  },
+  "errInvalidIcon": {
+    "message": "Este icono no está disponible"
+  },
+  "errInvalidColor": {
+    "message": "Este color no está disponible"
+  },
+  "errInvalidImport": {
+    "message": "El formato del archivo no es válido"
+  },
+  "openFolders": {
+    "message": "Guardar en carpeta"
+  },
+  "newFolder": {
+    "message": "Nueva carpeta"
+  },
+  "newFolderPlaceholder": {
+    "message": "Nombre de la carpeta"
+  },
+  "add": {
+    "message": "Añadir"
+  },
+  "noFolders": {
+    "message": "Aún no hay carpetas"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "Marcadores"
+  },
+  "edit": {
+    "message": "Editar"
+  },
+  "postView": {
+    "message": "Publicaciones"
+  },
+  "listView": {
+    "message": "Lista"
+  },
+  "search": {
+    "message": "Buscar"
+  },
+  "sortSavedDesc": {
+    "message": "Guardado: más reciente"
+  },
+  "sortSavedAsc": {
+    "message": "Guardado: más antiguo"
+  },
+  "sortPostedDesc": {
+    "message": "Publicado: más reciente"
+  },
+  "sortPostedAsc": {
+    "message": "Publicado: más antiguo"
+  },
+  "name": {
+    "message": "Nombre"
+  },
+  "icon": {
+    "message": "Icono"
+  },
+  "color": {
+    "message": "Color"
+  },
+  "save": {
+    "message": "Guardar"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "delete": {
+    "message": "Eliminar"
+  },
+  "confirmDelete": {
+    "message": "¿Eliminar esta carpeta? Las publicaciones guardadas no se eliminarán."
+  },
+  "empty": {
+    "message": "No hay publicaciones guardadas"
+  },
+  "openOnX": {
+    "message": "Abrir en X"
+  },
+  "popupPosts": {
+    "message": "publicaciones"
+  },
+  "popupFolders": {
+    "message": "carpetas"
+  },
+  "recent": {
+    "message": "Guardadas recientemente (3)"
+  },
+  "settings": {
+    "message": "Ajustes"
+  },
+  "openManager": {
+    "message": "Abrir el administrador"
+  },
+  "exportBtn": {
+    "message": "Exportar"
+  },
+  "importBtn": {
+    "message": "Importar"
+  },
+  "importFail": {
+    "message": "El formato del archivo no es válido"
+  },
+  "collectTitle": {
+    "message": "Importar a PostShelf las publicaciones de esta página"
+  },
+  "importDone": {
+    "message": "Se importaron $COUNT$ publicaciones",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "Se importaron $COUNT$ publicaciones a «Sin clasificar»",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "Sincronizar con los marcadores de X"
+  },
+  "syncNativeDesc": {
+    "message": "Al guardar una publicación en una carpeta, PostShelf también la añade a tus marcadores estándar de X; al quitarla de todas las carpetas, también se quita el marcador de X. PostShelf pulsa el botón de marcador de la pantalla solo una vez por cada publicación sobre la que actúas. Desactivado por defecto."
+  },
+  "savedBadgeTitle": {
+    "message": "Guardado en $COUNT$ carpeta(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "Quitar también el marcador de X"
+  },
+  "buttonModeHeading": {
+    "message": "Comportamiento del botón de marcador estándar"
+  },
+  "buttonModeSeparate": {
+    "message": "Añadir un botón de PostShelf aparte (sin tocar el estándar)"
+  },
+  "buttonModeReplace": {
+    "message": "Reemplazar el botón estándar (Mayús+clic para el comportamiento de X)"
+  },
+  "buttonModeNote": {
+    "message": "Puede dejar de funcionar tras una actualización de X; en ese caso se usa el comportamiento estándar."
+  },
+  "selectedCount": {
+    "message": "$COUNT$ seleccionadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "Añadir a carpeta"
+  },
+  "bulkRemove": {
+    "message": "Quitar de carpeta"
+  },
+  "clearSelection": {
+    "message": "Deseleccionar"
+  },
+  "changeFolder": {
+    "message": "Cambiar carpetas"
+  },
+  "removeFromFolder": {
+    "message": "Quitar de «$NAME$»",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "Eliminar de PostShelf"
+  },
+  "confirmDeletePosts": {
+    "message": "¿Eliminar $COUNT$ publicación(es) de PostShelf? Tus marcadores de X no cambian.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "Deshacer"
+  },
+  "toastDeleted": {
+    "message": "Se eliminaron $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "Se movieron $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "Se quitaron $COUNT$ de la carpeta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "Se añadieron $COUNT$ a la carpeta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "Seleccionar esta publicación"
+  },
+  "pickFolder": {
+    "message": "Elegir carpeta"
+  },
+  "dragHint": {
+    "message": "Arrastra para añadir (Alt para mover)"
+  },
+  "sortLabel": {
+    "message": "Ordenar"
+  },
+  "colorNone": {
+    "message": "Sin color (predeterminado)"
+  },
+  "openSidePanel": {
+    "message": "Abrir en el panel lateral"
+  },
+  "openInTab": {
+    "message": "Abrir en una pestaña"
+  },
+  "actionModeHeading": {
+    "message": "Al hacer clic en el icono de la barra de herramientas"
+  },
+  "actionModePopup": {
+    "message": "Abrir la ventana emergente"
+  },
+  "actionModeSidepanel": {
+    "message": "Abrir el panel lateral"
+  },
+  "actionModeNote": {
+    "message": "El panel lateral requiere Chrome 114 o posterior."
+  },
+  "collectPending": {
+    "message": "$COUNT$ sin importar",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "Todo importado"
+  },
+  "smartViews": {
+    "message": "Vistas inteligentes"
+  },
+  "foldersSection": {
+    "message": "Carpetas"
+  },
+  "recent7": {
+    "message": "Últimos 7 días"
+  },
+  "searchPlaceholder": {
+    "message": "Buscar texto o @usuario"
+  },
+  "gridView": {
+    "message": "Vista de cuadrícula"
+  },
+  "itemCount": {
+    "message": "$COUNT$ publicaciones",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "Hay $COUNT$ publicaciones de tus Marcadores de x.com que se pueden importar",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "Cómo importar"
+  },
+  "importHowTitle": {
+    "message": "Importar tus marcadores de x.com"
+  },
+  "importHowSteps": {
+    "message": "1. En Chrome, abre «Historial» en el menú izquierdo de x.com y elige la pestaña «Marcadores» (x.com/i/history)\n2. Desplázate tú mismo hasta que las publicaciones aparezcan en pantalla (PostShelf nunca se desplaza solo)\n3. Pulsa el botón «N sin importar» de la esquina inferior derecha\n4. Las publicaciones importadas van a «Sin clasificar»"
+  },
+  "dismiss": {
+    "message": "Cerrar"
+  },
+  "filterImage": {
+    "message": "Con imágenes"
+  },
+  "filterVideo": {
+    "message": "Con vídeo"
+  },
+  "filterLink": {
+    "message": "Con enlaces"
+  },
+  "filterAuthor": {
+    "message": "Filtrar por autor"
+  },
+  "clearFilters": {
+    "message": "Quitar filtros"
+  },
+  "notFoundTitle": {
+    "message": "No se encontró nada"
+  },
+  "notFoundHint": {
+    "message": "Prueba otra búsqueda o quita los filtros."
+  },
+  "noPostsTitle": {
+    "message": "Aún no hay publicaciones guardadas"
+  },
+  "noPostsHint": {
+    "message": "Pulsa el botón de carpeta de una publicación en x.com para guardarla. Las publicaciones que ya marcaste se pueden importar desde Marcadores en el historial de x.com."
+  },
+  "folderMore": {
+    "message": "Cambiar nombre, icono, color"
+  },
+  "cardMenu": {
+    "message": "Más acciones"
+  },
+  "selectMode": {
+    "message": "Seleccionar"
+  },
+  "chooseFolderMenu": {
+    "message": "Abrir lista de carpetas"
+  },
+  "searchShow": {
+    "message": "Mostrar búsqueda"
+  },
+  "viewLabel": {
+    "message": "Vista"
+  },
+  "dataSection": {
+    "message": "Datos"
+  },
+  "saveCurrentPost": {
+    "message": "Guardar la publicación abierta…"
+  },
+  "saveCurrentHint": {
+    "message": "Se muestra mientras hay una publicación abierta en x.com"
+  },
+  "saveCurrentFail": {
+    "message": "No se pudo leer esta publicación. Recarga la página e inténtalo de nuevo."
+  },
+  "healthTitle": {
+    "message": "Estructura de la página de X"
+  },
+  "healthOkAt": {
+    "message": "Correcto (última comprobación: $NAME$)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "Aún sin comprobar (se comprueba al abrir x.com)"
+  },
+  "healthDegraded": {
+    "message": "Parte de la estructura de la página de X ha cambiado. PostShelf sigue funcionando."
+  },
+  "healthBroken": {
+    "message": "La estructura de la página de X ha cambiado y se han pausado algunas funciones. Copia la información de diagnóstico e infórmalo en GitHub."
+  },
+  "copyDiag": {
+    "message": "Copiar información de diagnóstico"
+  },
+  "diagTitle": {
+    "message": "Información de diagnóstico"
+  },
+  "diagNotice": {
+    "message": "Este contenido se copiará al portapapeles. No incluye el texto de las publicaciones, los nombres de usuario ni las URL. Sí incluye la versión de la extensión, la información del navegador, el idioma de visualización y el esquema de la estructura de la página de X."
+  },
+  "diagCopy": {
+    "message": "Copiar"
+  },
+  "diagCopied": {
+    "message": "Copiado"
+  },
+  "diagCopyFail": {
+    "message": "No se pudo copiar. Selecciona el texto y cópialo manualmente."
+  },
+  "diagReport": {
+    "message": "Informar en GitHub"
+  },
+  "diagPreparing": {
+    "message": "Preparando…"
+  },
+  "saveTo": {
+    "message": "Guardar en: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "No se puede saber qué cuenta ha iniciado sesión, así que no se puede guardar. Recarga la página de x.com."
+  },
+  "collectNoAccount": {
+    "message": "No se puede saber qué cuenta ha iniciado sesión, así que no se puede importar"
+  },
+  "accountUnknownName": {
+    "message": "Sin cuenta asignada"
+  },
+  "accountSwitchLabel": {
+    "message": "Cuenta que se muestra"
+  },
+  "accountSwitchNote": {
+    "message": "Cambiar aquí no cambia la sesión de X. Cambia de cuenta de X en x.com."
+  },
+  "accountSwitched": {
+    "message": "Cambiado a $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "Con sesión en x.com"
+  },
+  "accountAssign": {
+    "message": "Reasignar…"
+  },
+  "accountAssignTitle": {
+    "message": "Reasignar datos"
+  },
+  "accountAssignDesc": {
+    "message": "Mueve los datos guardados de $NAME$ ($COUNT$ publicaciones) a la cuenta que elijas. Si la misma publicación ya existe allí, se combinan las carpetas en las que está esa publicación.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "Mover a"
+  },
+  "accountAssignNone": {
+    "message": "No hay ninguna cuenta de destino. Abre x.com con la sesión iniciada y podrás elegir la cuenta aquí."
+  },
+  "accountAssignDone": {
+    "message": "Se reasignaron $COUNT$ publicaciones",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "Eliminar los datos de esta cuenta"
+  },
+  "accountDeleteConfirm": {
+    "message": "¿Eliminar los datos guardados de $NAME$ ($COUNT$ publicaciones y sus carpetas)? No se puede deshacer. Tus marcadores de X no cambian.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "Hay $COUNT$ publicaciones en «Sin cuenta asignada». Elige a qué cuenta pertenecen y usa «Reasignar…».",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "Cuenta: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "No se puede saber qué cuenta tiene la sesión en x.com, así que no se puede guardar. Recarga la página de x.com."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "La cuenta que se muestra en PostShelf es distinta de $NAME$, que tiene la sesión en x.com, así que no se puede guardar. Cambia la cuenta que se muestra aquí a $NAME$.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsResetHeading": {
+    "message": "Restablecer ajustes"
+  },
+  "settingsResetBtn": {
+    "message": "Restablecer los ajustes a sus valores iniciales"
+  },
+  "settingsResetDesc": {
+    "message": "Solo se restablecen los ajustes: modo vinculado, comportamiento del botón nativo, forma de abrir, vista y orden, etc. Las carpetas, las publicaciones guardadas y la información de cuentas se conservan."
+  },
+  "settingsResetConfirm": {
+    "message": "¿Restablecer los ajustes a sus valores iniciales? Las publicaciones guardadas y las carpetas no se eliminan."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "Restablecer"
+  },
+  "settingsResetDone": {
+    "message": "Ajustes restablecidos"
+  },
+  "dangerHeading": {
+    "message": "Zona de peligro"
+  },
+  "deleteAllBtn": {
+    "message": "Eliminar todos los datos"
+  },
+  "deleteAllDesc": {
+    "message": "Elimina todas las carpetas, publicaciones guardadas e información de cuentas. Los ajustes se conservan. No se puede deshacer."
+  },
+  "deleteAllCounts": {
+    "message": "Se eliminarán: $FOLDERS$ carpetas, $POSTS$ publicaciones, $ACCOUNTS$ cuentas",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "Exportar antes una copia JSON"
+  },
+  "deleteAllWarn": {
+    "message": "No se puede deshacer. Tus marcadores de X no cambian. Para continuar, escribe «$WORD$» abajo.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "eliminar"
+  },
+  "deleteAllInputLabel": {
+    "message": "Escribe para confirmar"
+  },
+  "deleteAllDone": {
+    "message": "Se eliminaron todos los datos"
+  },
+  "viewImage": {
+    "message": "Ver la imagen $N$ de $M$ en grande",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "Ampliar"
+  },
+  "viewerLabel": {
+    "message": "Visor de imágenes"
+  },
+  "viewerClose": {
+    "message": "Cerrar (Esc)"
+  },
+  "viewerPrev": {
+    "message": "Imagen anterior"
+  },
+  "viewerNext": {
+    "message": "Imagen siguiente"
+  },
+  "viewerOpenOriginal": {
+    "message": "Abrir en tamaño original ↗"
+  },
+  "viewerOpenPost": {
+    "message": "Abrir la publicación en X ↗"
+  },
+  "viewerFailTitle": {
+    "message": "No se pudo cargar la imagen"
+  },
+  "viewerFailReason": {
+    "message": "Puede que la publicación original se haya eliminado o que X haya cambiado la ubicación de la imagen."
+  },
+  "viewerShowSmall": {
+    "message": "Mostrar la imagen pequeña guardada"
+  },
+  "videoBadge": {
+    "message": "Vídeo"
+  },
+  "videoOpenLabel": {
+    "message": "Mostrar cómo reproducir este vídeo"
+  },
+  "videoDialogTitle": {
+    "message": "Los vídeos se reproducen en X"
+  },
+  "videoDialogBody": {
+    "message": "PostShelf no puede reproducir vídeos porque no se puede guardar el archivo de vídeo."
+  },
+  "videoPlayOnX": {
+    "message": "Reproducir el vídeo en X ↗"
+  },
+  "cacheTitle": {
+    "message": "Caché de imágenes"
+  },
+  "cacheEnable": {
+    "message": "Guardar imágenes en caché"
+  },
+  "cacheEnableDesc": {
+    "message": "Al guardar una publicación, sus imágenes también se conservan en este equipo, así que podrás verlas aunque desaparezcan de X. De los vídeos solo se conserva la miniatura."
+  },
+  "cachePermNote": {
+    "message": "La primera vez que lo actives, Chrome pedirá permiso para acceder a pbs.twimg.com (el servidor de imágenes de X). El permiso solo se pide al activar esta función."
+  },
+  "cachePermDenied": {
+    "message": "No se pudo activar porque no se permitió el acceso al servidor de imágenes. Actívalo de nuevo y permite el acceso."
+  },
+  "cachePermMissing": {
+    "message": "No hay permiso para acceder al servidor de imágenes (pbs.twimg.com)."
+  },
+  "cacheGrant": {
+    "message": "Permitir"
+  },
+  "cacheDest": {
+    "message": "Dónde guardar"
+  },
+  "cacheDestIdb": {
+    "message": "Dentro del navegador (área de datos de la extensión; recomendado)"
+  },
+  "cacheDestDir": {
+    "message": "Una carpeta que elijo (en cualquier lugar del equipo)"
+  },
+  "cacheDirNone": {
+    "message": "No se ha elegido ninguna carpeta"
+  },
+  "cacheDirPick": {
+    "message": "Elegir una carpeta…"
+  },
+  "cacheDirRepick": {
+    "message": "Elegir otra carpeta…"
+  },
+  "cacheDirRescan": {
+    "message": "Volver a analizar"
+  },
+  "cacheDirRescanDone": {
+    "message": "Se volvieron a contar $COUNT$ imágenes",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "Se necesita permiso"
+  },
+  "cacheDirPermNote": {
+    "message": "Al reiniciar Chrome, el acceso a la carpeta puede revocarse. Hasta que lo permitas de nuevo, las imágenes no se escriben en la carpeta y se cargan desde el servidor de imágenes de X."
+  },
+  "cacheDirTabOnly": {
+    "message": "La carpeta se elige en la versión en pestaña de la página de gestión (no se puede elegir en el panel lateral). Elígela allí."
+  },
+  "cacheDirUnsupported": {
+    "message": "No se pudo elegir una carpeta en esta página de la extensión. Usa «Dentro del navegador»."
+  },
+  "cacheDirReadme": {
+    "message": "Esta es la caché de imágenes de PostShelf. Borrarla no borra los datos de PostShelf.\nLa carpeta «images» contiene una carpeta por cada ID de publicación."
+  },
+  "cacheDirNonEmpty": {
+    "message": "Esta carpeta no la creó PostShelf y ya contiene otros archivos. ¿Puede PostShelf crear aquí «.postshelf», «README.txt» y una carpeta «images»? Los demás archivos de la carpeta no se tocan."
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "Crear"
+  },
+  "cacheMax": {
+    "message": "Tamaño máximo"
+  },
+  "cacheMaxCustom": {
+    "message": "Personalizado…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "Tamaño máximo (MB, 100 o más)"
+  },
+  "cacheMaxMin": {
+    "message": "El tamaño máximo debe ser de al menos 100 MB."
+  },
+  "cacheUsage": {
+    "message": "En uso: $USED$ de $MAX$ ($COUNT$ imágenes)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "Calidad de imagen"
+  },
+  "cacheQualityLarge": {
+    "message": "Estándar (estimado de 0,2–0,5 MB cada una; suficiente para ver)"
+  },
+  "cacheQualityOrig": {
+    "message": "Tamaño original (estimado de 1–5 MB cada una; ocupa espacio más rápido)"
+  },
+  "cacheFull": {
+    "message": "Cuando se llene"
+  },
+  "cacheFullEvict": {
+    "message": "Borrar primero lo más antiguo (imágenes de las publicaciones guardadas hace más tiempo)"
+  },
+  "cacheFullStop": {
+    "message": "No guardar imágenes nuevas"
+  },
+  "cacheBulk": {
+    "message": "Guardar en caché las imágenes de las publicaciones guardadas"
+  },
+  "cacheBulkProgress": {
+    "message": "Obteniendo imágenes: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "Detener"
+  },
+  "cacheBulkDone": {
+    "message": "Se guardaron $COUNT$ imágenes en caché ($FAILED$ fallidas)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "No hay imágenes que guardar en caché"
+  },
+  "cacheBulkBlocked": {
+    "message": "Se detuvo porque no se pudo escribir en el destino. Comprueba el permiso y la carpeta."
+  },
+  "cacheBulkFull": {
+    "message": "Se detuvo porque se alcanzó el tamaño máximo."
+  },
+  "cacheBulkHelp": {
+    "message": "Guardar todo en caché carga las imágenes una a una. Se muestra el progreso y puedes detenerlo en cualquier momento. Si lo detienes, la próxima vez continúa donde se quedó. Al eliminar una publicación también se eliminan sus imágenes."
+  },
+  "cacheClear": {
+    "message": "Eliminar la caché"
+  },
+  "cacheClearConfirm": {
+    "message": "¿Eliminar las imágenes en caché ($COUNT$ imágenes)? Las publicaciones guardadas se conservan. Las imágenes se cargarán desde el servidor de imágenes de X.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "Se eliminó la caché"
+  },
+  "cacheLowerConfirm": {
+    "message": "Al reducir el tamaño máximo se eliminarán de inmediato las imágenes de las $COUNT$ publicaciones guardadas más antiguas. ¿Continuar?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "Reducir y limpiar"
+  },
+  "cacheSwitchTitle": {
+    "message": "Cambiar dónde se guardan"
+  },
+  "cacheSwitchBody": {
+    "message": "Hay $COUNT$ imágenes en la ubicación actual. ¿Moverlas a la nueva?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "Mover"
+  },
+  "cacheSwitchKeep": {
+    "message": "No mover"
+  },
+  "cacheSwitchProgress": {
+    "message": "Moviendo imágenes: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "No se pudieron mover las imágenes. Comprueba el permiso del destino."
+  },
+  "cacheCleanupNeeded": {
+    "message": "Algunas imágenes de las publicaciones eliminadas aún no se han eliminado. Comprueba el permiso del destino y pulsa «Limpiar ahora»."
+  },
+  "cacheCleanupNow": {
+    "message": "Limpiar ahora"
+  },
+  "cacheRules": {
+    "message": "Las imágenes guardadas se quedan en este equipo y nunca se envían a ningún sitio. Si eliminas la extensión, la caché dentro del navegador también se elimina (una carpeta que hayas elegido no). Guarda las imágenes que quieras conservar de verdad en «Una carpeta que elijo». Para respaldar los datos guardados, usa la exportación JSON (solo contiene las URL de las imágenes, no las imágenes)."
+  },
+  "updateNotice": {
+    "message": "PostShelf se ha actualizado ($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Versión $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "Para actualizar: primero guarda tus datos con «Exportar», luego sobrescribe la misma carpeta con la nueva versión y pulsa «Volver a cargar» en la extensión. No elimines la extensión (se borrarían también tus datos guardados)."
+  },
+  "installGuideLink": {
+    "message": "Pasos de actualización e instalación manual"
+  },
+  "errorStorage": {
+    "message": "Error al guardar o cargar. Inténtalo de nuevo. Si sigue ocurriendo, guarda tus datos con «Exportar» en Ajustes y vuelve a cargar la extensión."
+  }
+}

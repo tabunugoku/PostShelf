@@ -1,0 +1,928 @@
+{
+  "extName": {
+    "message": "PostShelf"
+  },
+  "extDescription": {
+    "message": "Organize your x.com bookmarks into your own folders. All data stays on your device."
+  },
+  "extActionTitle": {
+    "message": "PostShelf"
+  },
+  "allFolderName": {
+    "message": "All"
+  },
+  "inboxName": {
+    "message": "Unsorted"
+  },
+  "newFolderDefaultName": {
+    "message": "New folder"
+  },
+  "errEmptyName": {
+    "message": "Please enter a folder name"
+  },
+  "errBuiltinImmutable": {
+    "message": "\"All\" cannot be changed or deleted"
+  },
+  "errNotFound": {
+    "message": "Folder not found"
+  },
+  "errInvalidIcon": {
+    "message": "This icon is not available"
+  },
+  "errInvalidColor": {
+    "message": "This color is not available"
+  },
+  "errInvalidImport": {
+    "message": "The file format is invalid"
+  },
+  "openFolders": {
+    "message": "Save to folder"
+  },
+  "newFolder": {
+    "message": "New folder"
+  },
+  "newFolderPlaceholder": {
+    "message": "Folder name"
+  },
+  "add": {
+    "message": "Add"
+  },
+  "noFolders": {
+    "message": "No folders yet"
+  },
+  "appTitle": {
+    "message": "PostShelf"
+  },
+  "foldersHeading": {
+    "message": "Bookmarks"
+  },
+  "edit": {
+    "message": "Edit"
+  },
+  "postView": {
+    "message": "Posts"
+  },
+  "listView": {
+    "message": "List"
+  },
+  "search": {
+    "message": "Search"
+  },
+  "sortSavedDesc": {
+    "message": "Saved: newest"
+  },
+  "sortSavedAsc": {
+    "message": "Saved: oldest"
+  },
+  "sortPostedDesc": {
+    "message": "Posted: newest"
+  },
+  "sortPostedAsc": {
+    "message": "Posted: oldest"
+  },
+  "name": {
+    "message": "Name"
+  },
+  "icon": {
+    "message": "Icon"
+  },
+  "color": {
+    "message": "Color"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "confirmDelete": {
+    "message": "Delete this folder? The saved posts will not be deleted."
+  },
+  "empty": {
+    "message": "No saved posts"
+  },
+  "openOnX": {
+    "message": "Open on X"
+  },
+  "popupPosts": {
+    "message": "posts"
+  },
+  "popupFolders": {
+    "message": "folders"
+  },
+  "recent": {
+    "message": "Recently saved (3)"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "openManager": {
+    "message": "Open manager"
+  },
+  "exportBtn": {
+    "message": "Export"
+  },
+  "importBtn": {
+    "message": "Import"
+  },
+  "importFail": {
+    "message": "The file format is invalid"
+  },
+  "collectTitle": {
+    "message": "Import posts on this page into PostShelf"
+  },
+  "importDone": {
+    "message": "Imported $COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "collectDone": {
+    "message": "Imported $COUNT$ posts into \"Unsorted\"",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "syncNativeLabel": {
+    "message": "Sync with X bookmarks"
+  },
+  "syncNativeDesc": {
+    "message": "When you save a post to a folder, PostShelf also adds it to your standard X bookmarks; when you remove it from all folders, the X bookmark is removed too. PostShelf presses the on-screen bookmark button only once per post you act on. Off by default."
+  },
+  "savedBadgeTitle": {
+    "message": "Saved in $COUNT$ folder(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "releaseNative": {
+    "message": "Also remove the X bookmark"
+  },
+  "buttonModeHeading": {
+    "message": "Behavior of the standard bookmark button"
+  },
+  "buttonModeSeparate": {
+    "message": "Add a separate PostShelf button (leave the standard button alone)"
+  },
+  "buttonModeReplace": {
+    "message": "Replace the standard button (Shift+click for X default)"
+  },
+  "buttonModeNote": {
+    "message": "This may stop working after X updates. If it does, the standard behavior is used instead."
+  },
+  "selectedCount": {
+    "message": "$COUNT$ selected",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "bulkAdd": {
+    "message": "Add to folder"
+  },
+  "bulkRemove": {
+    "message": "Remove from folder"
+  },
+  "clearSelection": {
+    "message": "Clear selection"
+  },
+  "changeFolder": {
+    "message": "Change folders"
+  },
+  "removeFromFolder": {
+    "message": "Remove from \"$NAME$\"",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "deletePost": {
+    "message": "Delete from PostShelf"
+  },
+  "confirmDeletePosts": {
+    "message": "Delete $COUNT$ post(s) from PostShelf? Your X bookmarks are not changed.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "undo": {
+    "message": "Undo"
+  },
+  "toastDeleted": {
+    "message": "Deleted $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastMoved": {
+    "message": "Moved $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastRemoved": {
+    "message": "Removed $COUNT$ from folder",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "toastAdded": {
+    "message": "Added $COUNT$ to folder",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "selectPost": {
+    "message": "Select this post"
+  },
+  "pickFolder": {
+    "message": "Choose a folder"
+  },
+  "dragHint": {
+    "message": "Drag to add (Alt to move)"
+  },
+  "sortLabel": {
+    "message": "Sort"
+  },
+  "colorNone": {
+    "message": "No color (default)"
+  },
+  "openSidePanel": {
+    "message": "Open in side panel"
+  },
+  "openInTab": {
+    "message": "Open in a tab"
+  },
+  "actionModeHeading": {
+    "message": "When clicking the toolbar icon"
+  },
+  "actionModePopup": {
+    "message": "Open the popup"
+  },
+  "actionModeSidepanel": {
+    "message": "Open the side panel"
+  },
+  "actionModeNote": {
+    "message": "The side panel requires Chrome 114 or later."
+  },
+  "collectPending": {
+    "message": "$COUNT$ not yet imported",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "collectAllDone": {
+    "message": "All imported"
+  },
+  "smartViews": {
+    "message": "Smart views"
+  },
+  "foldersSection": {
+    "message": "Folders"
+  },
+  "recent7": {
+    "message": "Last 7 days"
+  },
+  "searchPlaceholder": {
+    "message": "Search text or @handle"
+  },
+  "gridView": {
+    "message": "Grid view"
+  },
+  "itemCount": {
+    "message": "$COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importBanner": {
+    "message": "$COUNT$ posts on your x.com Bookmarks can be imported",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "importHow": {
+    "message": "How to import"
+  },
+  "importHowTitle": {
+    "message": "Importing your x.com bookmarks"
+  },
+  "importHowSteps": {
+    "message": "1. In Chrome, open \"History\" in the x.com left menu and choose the \"Bookmarks\" tab (x.com/i/history)\n2. Scroll yourself until the posts you want are on screen (PostShelf never auto-scrolls)\n3. Press the \"N not yet imported\" button at the bottom right\n4. Imported posts go to \"Unsorted\""
+  },
+  "dismiss": {
+    "message": "Dismiss"
+  },
+  "filterImage": {
+    "message": "With images"
+  },
+  "filterVideo": {
+    "message": "With video"
+  },
+  "filterLink": {
+    "message": "With links"
+  },
+  "filterAuthor": {
+    "message": "Filter by author"
+  },
+  "clearFilters": {
+    "message": "Clear filters"
+  },
+  "notFoundTitle": {
+    "message": "Nothing found"
+  },
+  "notFoundHint": {
+    "message": "Try a different search or clear the filters."
+  },
+  "noPostsTitle": {
+    "message": "No saved posts yet"
+  },
+  "noPostsHint": {
+    "message": "Press the folder button on a post on x.com to save it. Posts you have already bookmarked can be imported from Bookmarks in your x.com history."
+  },
+  "folderMore": {
+    "message": "Change name, icon, color"
+  },
+  "cardMenu": {
+    "message": "More actions"
+  },
+  "selectMode": {
+    "message": "Select"
+  },
+  "chooseFolderMenu": {
+    "message": "Open folder list"
+  },
+  "searchShow": {
+    "message": "Show search"
+  },
+  "viewLabel": {
+    "message": "View"
+  },
+  "dataSection": {
+    "message": "Data"
+  },
+  "saveCurrentPost": {
+    "message": "Save the open post…"
+  },
+  "saveCurrentHint": {
+    "message": "Shown while a post is open on x.com"
+  },
+  "saveCurrentFail": {
+    "message": "Could not read this post. Reload the page and try again."
+  },
+  "healthTitle": {
+    "message": "X page structure"
+  },
+  "healthOkAt": {
+    "message": "OK (last checked: $NAME$)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Dev"
+      }
+    }
+  },
+  "healthUnknown": {
+    "message": "Not checked yet (it is checked when you open x.com)"
+  },
+  "healthDegraded": {
+    "message": "Parts of the X page structure have changed. PostShelf is still working."
+  },
+  "healthBroken": {
+    "message": "The X page structure has changed, so some features are paused. Please copy the diagnostic info and report it on GitHub."
+  },
+  "copyDiag": {
+    "message": "Copy diagnostic info"
+  },
+  "diagTitle": {
+    "message": "Diagnostic info"
+  },
+  "diagNotice": {
+    "message": "This content will be copied to the clipboard. It does not include post text, usernames, or URLs. It does include the extension version, browser information, display language, and the outline of X's page structure."
+  },
+  "diagCopy": {
+    "message": "Copy"
+  },
+  "diagCopied": {
+    "message": "Copied"
+  },
+  "diagCopyFail": {
+    "message": "Could not copy. Please select the text and copy it manually."
+  },
+  "diagReport": {
+    "message": "Report on GitHub"
+  },
+  "diagPreparing": {
+    "message": "Preparing…"
+  },
+  "saveTo": {
+    "message": "Save to: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountUnknown": {
+    "message": "Can't tell which account is logged in, so nothing can be saved. Please reload the x.com page."
+  },
+  "collectNoAccount": {
+    "message": "Can't tell which account is logged in, so nothing can be imported"
+  },
+  "accountUnknownName": {
+    "message": "No account set"
+  },
+  "accountSwitchLabel": {
+    "message": "Account to show"
+  },
+  "accountSwitchNote": {
+    "message": "Switching here does not change who is logged in on X. Switch your X account on x.com."
+  },
+  "accountSwitched": {
+    "message": "Switched to $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountLoggedIn": {
+    "message": "Logged in on x.com"
+  },
+  "accountAssign": {
+    "message": "Reassign…"
+  },
+  "accountAssignTitle": {
+    "message": "Reassign data"
+  },
+  "accountAssignDesc": {
+    "message": "Moves the saved data of $NAME$ ($COUNT$ posts) to the account you choose. If the same post already exists there, the folders that post is in are combined.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountAssignTo": {
+    "message": "Move to"
+  },
+  "accountAssignNone": {
+    "message": "There is no account to move to. Open x.com while logged in, and the account becomes available to choose here."
+  },
+  "accountAssignDone": {
+    "message": "Reassigned $COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "accountDelete": {
+    "message": "Delete this account's data"
+  },
+  "accountDeleteConfirm": {
+    "message": "Delete the saved data of $NAME$ ($COUNT$ posts and its folders)? This cannot be undone. Your X bookmarks are not changed.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "accountUnknownBanner": {
+    "message": "$COUNT$ posts are saved under \"No account set\". Choose which account they belong to and use \"Reassign…\".",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupAccount": {
+    "message": "Account: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "saveCurrentNoAccount": {
+    "message": "Can't tell which account is logged in on x.com, so nothing can be saved. Reload the x.com page."
+  },
+  "saveCurrentWrongAccount": {
+    "message": "The account shown in PostShelf differs from $NAME$, who is logged in on x.com, so nothing can be saved. Switch the account shown here to $NAME$.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsResetHeading": {
+    "message": "Reset settings"
+  },
+  "settingsResetBtn": {
+    "message": "Reset settings to defaults"
+  },
+  "settingsResetDesc": {
+    "message": "Only settings are reset: sync mode, native button behavior, how PostShelf opens, view and sort, and so on. Folders, saved posts and account info are kept."
+  },
+  "settingsResetConfirm": {
+    "message": "Reset settings to their defaults? Your saved posts and folders will not be deleted."
+  },
+  "settingsResetConfirmBtn": {
+    "message": "Reset"
+  },
+  "settingsResetDone": {
+    "message": "Settings were reset"
+  },
+  "dangerHeading": {
+    "message": "Danger zone"
+  },
+  "deleteAllBtn": {
+    "message": "Delete all data"
+  },
+  "deleteAllDesc": {
+    "message": "Deletes all folders, saved posts and account info. Settings are kept. This cannot be undone."
+  },
+  "deleteAllCounts": {
+    "message": "Will be deleted: $FOLDERS$ folders, $POSTS$ posts, $ACCOUNTS$ accounts",
+    "placeholders": {
+      "folders": {
+        "content": "$1"
+      },
+      "posts": {
+        "content": "$2"
+      },
+      "accounts": {
+        "content": "$3"
+      }
+    }
+  },
+  "deleteAllExport": {
+    "message": "Export a JSON backup first"
+  },
+  "deleteAllWarn": {
+    "message": "This cannot be undone. Your X bookmarks are not changed. To continue, type \"$WORD$\" below.",
+    "placeholders": {
+      "word": {
+        "content": "$1"
+      }
+    }
+  },
+  "deleteAllWord": {
+    "message": "delete"
+  },
+  "deleteAllInputLabel": {
+    "message": "Type to confirm"
+  },
+  "deleteAllDone": {
+    "message": "All data was deleted"
+  },
+  "viewImage": {
+    "message": "View image $N$ of $M$ larger",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "Zoom"
+  },
+  "viewerLabel": {
+    "message": "Image viewer"
+  },
+  "viewerClose": {
+    "message": "Close (Esc)"
+  },
+  "viewerPrev": {
+    "message": "Previous image"
+  },
+  "viewerNext": {
+    "message": "Next image"
+  },
+  "viewerOpenOriginal": {
+    "message": "Open original size ↗"
+  },
+  "viewerOpenPost": {
+    "message": "Open the post on X ↗"
+  },
+  "viewerFailTitle": {
+    "message": "The image could not be loaded"
+  },
+  "viewerFailReason": {
+    "message": "The original post may have been deleted, or X may have moved the image."
+  },
+  "viewerShowSmall": {
+    "message": "Show the saved small image"
+  },
+  "videoBadge": {
+    "message": "Video"
+  },
+  "videoOpenLabel": {
+    "message": "Show how to play this video"
+  },
+  "videoDialogTitle": {
+    "message": "Videos play on X"
+  },
+  "videoDialogBody": {
+    "message": "PostShelf cannot play videos because the video file itself cannot be saved."
+  },
+  "videoPlayOnX": {
+    "message": "Play the video on X ↗"
+  },
+  "cacheTitle": {
+    "message": "Image cache"
+  },
+  "cacheEnable": {
+    "message": "Cache images"
+  },
+  "cacheEnableDesc": {
+    "message": "When you save a post, its images are also kept on this computer, so you can still see them if they disappear from X. For videos, only the thumbnail is kept."
+  },
+  "cachePermNote": {
+    "message": "The first time you turn this on, Chrome asks for permission to access pbs.twimg.com (X's image server). Permission is requested only when you turn this feature on."
+  },
+  "cachePermDenied": {
+    "message": "Image caching could not be turned on because access to the image server was not allowed. Turn it on again and allow access."
+  },
+  "cachePermMissing": {
+    "message": "Access to the image server (pbs.twimg.com) is not allowed."
+  },
+  "cacheGrant": {
+    "message": "Allow"
+  },
+  "cacheDest": {
+    "message": "Where to keep images"
+  },
+  "cacheDestIdb": {
+    "message": "Inside the browser (the extension's data area; recommended)"
+  },
+  "cacheDestDir": {
+    "message": "A folder I choose (anywhere on this PC)"
+  },
+  "cacheDirNone": {
+    "message": "No folder selected"
+  },
+  "cacheDirPick": {
+    "message": "Choose a folder…"
+  },
+  "cacheDirRepick": {
+    "message": "Choose another folder…"
+  },
+  "cacheDirRescan": {
+    "message": "Rescan"
+  },
+  "cacheDirRescanDone": {
+    "message": "Recounted $COUNT$ images",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "Permission needed"
+  },
+  "cacheDirPermNote": {
+    "message": "After Chrome restarts, access to the folder may be revoked. Until you allow it again, images are not written to the folder and are loaded from X's image server instead."
+  },
+  "cacheDirTabOnly": {
+    "message": "The folder is chosen on the tab version of the manager page (it cannot be chosen in the side panel). Please choose it there."
+  },
+  "cacheDirUnsupported": {
+    "message": "A folder could not be chosen on this extension page. Please use \"Inside the browser\" instead."
+  },
+  "cacheDirReadme": {
+    "message": "This is the PostShelf image cache. Deleting it does not delete PostShelf's own data.\nThe \"images\" folder contains one folder per post ID."
+  },
+  "cacheDirNonEmpty": {
+    "message": "This folder was not created by PostShelf and already contains other files. May PostShelf create \".postshelf\", \"README.txt\" and an \"images\" folder here? Other files in the folder are left untouched."
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "Create"
+  },
+  "cacheMax": {
+    "message": "Maximum size"
+  },
+  "cacheMaxCustom": {
+    "message": "Custom…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "Maximum size (MB, 100 or more)"
+  },
+  "cacheMaxMin": {
+    "message": "The maximum size must be at least 100 MB."
+  },
+  "cacheUsage": {
+    "message": "Using $USED$ of $MAX$ ($COUNT$ images)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "Image quality"
+  },
+  "cacheQualityLarge": {
+    "message": "Standard (estimated 0.2–0.5 MB each; enough for viewing)"
+  },
+  "cacheQualityOrig": {
+    "message": "Original size (estimated 1–5 MB each; uses up space faster)"
+  },
+  "cacheFull": {
+    "message": "When the size limit is reached"
+  },
+  "cacheFullEvict": {
+    "message": "Delete the oldest first (images of the earliest saved posts)"
+  },
+  "cacheFullStop": {
+    "message": "Stop saving new images"
+  },
+  "cacheBulk": {
+    "message": "Cache images of all saved posts"
+  },
+  "cacheBulkProgress": {
+    "message": "Fetching images: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "Stop"
+  },
+  "cacheBulkDone": {
+    "message": "Cached $COUNT$ images ($FAILED$ failed)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "There are no images to cache"
+  },
+  "cacheBulkBlocked": {
+    "message": "Stopped because the destination could not be written to. Please check the permission and the folder."
+  },
+  "cacheBulkFull": {
+    "message": "Stopped because the size limit was reached."
+  },
+  "cacheBulkHelp": {
+    "message": "Caching all posts loads images one by one. Progress is shown, and you can stop at any time. If you stop, the next run continues where it left off. Deleting a post also deletes its images."
+  },
+  "cacheClear": {
+    "message": "Delete the cache"
+  },
+  "cacheClearConfirm": {
+    "message": "Delete the cached images ($COUNT$ images)? Your saved posts are kept. Images will be loaded from X's image server instead.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "The cache was deleted"
+  },
+  "cacheLowerConfirm": {
+    "message": "Lowering the maximum size will immediately delete the images of the $COUNT$ oldest saved posts. Continue?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "Lower and clean up"
+  },
+  "cacheSwitchTitle": {
+    "message": "Switch where images are kept"
+  },
+  "cacheSwitchBody": {
+    "message": "There are $COUNT$ images in the current location. Move them to the new location?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "Move"
+  },
+  "cacheSwitchKeep": {
+    "message": "Don't move"
+  },
+  "cacheSwitchProgress": {
+    "message": "Moving images: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "The images could not be moved. Please check the permission for the destination."
+  },
+  "cacheCleanupNeeded": {
+    "message": "Some images of deleted posts have not been deleted yet. Check the permission for the destination, then press \"Clean up now\"."
+  },
+  "cacheCleanupNow": {
+    "message": "Clean up now"
+  },
+  "cacheRules": {
+    "message": "Saved images stay on this PC and are never sent anywhere. If you remove the extension, the cache inside the browser is deleted too (a folder you chose is not). Keep images you really want in \"a folder I choose\". For backing up your saved data itself, use the JSON export (it contains image URLs only, not the images)."
+  },
+  "updateNotice": {
+    "message": "PostShelf was updated ($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Version $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "To update: first save your data with \"Export\", then overwrite the same folder with the new version and press \"Reload\" for the extension. Do not remove the extension (your saved data would be deleted too)."
+  },
+  "installGuideLink": {
+    "message": "Steps for updating and manual installation"
+  },
+  "errorStorage": {
+    "message": "Saving or loading failed. Please try again. If it keeps happening, save your data with \"Export\" in Settings, then reload the extension."
+  }
+}
