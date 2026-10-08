@@ -352,7 +352,7 @@ export async function noteRunVersion(current: string): Promise<string | null> {
 // collectRun: 取り込みの状態 (設定の初期化の対象外)。collectCommand: manager → x.com のタブへの 1 回限りの指示。
 
 export type CollectStatus = 'countdown' | 'running' | 'paused' | 'limit' | 'stopped' | 'done';
-export type CollectReason = 'user' | 'hidden' | 'account' | 'cap' | 'reload' | 'limit' | 'page' | 'refused-account' | 'refused-unknown';
+export type CollectReason = 'user' | 'hidden' | 'account' | 'cap' | 'time' | 'reload' | 'limit' | 'page' | 'refused-account' | 'refused-unknown';
 
 export interface CollectRun {
   status: CollectStatus;
@@ -367,6 +367,10 @@ export interface CollectRun {
   cap: CollectCap;
   reason?: CollectReason;
   updatedAt: number;
+  /** 取り込みを動かしているタブの ID (タブごとに作る乱数)。複数のタブで同じ取り込みを動かさないための印 (v18) */
+  owner?: string;
+  /** この取り込みを始めた開始コマンドの ID。同じコマンドで二重に始めないための印 (v18) */
+  commandId?: string;
 }
 
 const RUN_KEY = 'collectRun';
@@ -387,6 +391,8 @@ export async function getCollectRun(): Promise<CollectRun | null> {
     cap: r.cap === 100 || r.cap === 0 ? r.cap : 300,
     reason: r.reason,
     updatedAt: Number(r.updatedAt) || 0,
+    owner: typeof r.owner === 'string' ? r.owner : undefined,
+    commandId: typeof r.commandId === 'string' ? r.commandId : undefined,
   };
 }
 export const saveCollectRun = (r: CollectRun): Promise<void> => chrome.storage.local.set({ [RUN_KEY]: r });

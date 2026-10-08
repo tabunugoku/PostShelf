@@ -12,12 +12,12 @@
  * 実機未確認 (docs/MANUAL_TEST.md): X の一覧の仮想化への追従、終わりの判定、制限・エラー表示のセレクタ。
  * 判定の条件は定数にして、調整しやすくしてある。
  */
-import { isBookmarksPath, queryFirst } from '../shared/selectors';
+import { isBookmarksPath, queryFirst, timelineLoading } from '../shared/selectors';
 import {
-  clearCollectCommand, clearCollectRun, getCollectRun, getSettings, onCollectCommand, peekCollectCommand, saveCollectRun, setCollectOffer,
+  clearCollectCommand, clearCollectRun, getCollectRun, getSettings, onCollectCommand, onCollectRunChanged, peekCollectCommand, saveCollectRun, setCollectOffer,
   type CollectCap, type CollectCommand, type CollectReason, type CollectRun, type CollectSpeed,
 } from '../shared/settings';
-import { addCollected, getSavedIds } from '../shared/storage';
+import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible } from './collect';
 import type { Extracted } from './snapshot';
@@ -36,6 +36,10 @@ export const LOAD_WAIT_MS = 8000;
 export const LOAD_POLL_MS = 500;
 /** 「15 分後に再開する」の待ち時間 */
 export const LIMIT_RESUME_MS = 15 * 60 * 1000;
+/** 動かない (scrollY が増えない) うえに新しいポストも出ない状態がこの回数続いたら、読み込み中の表示があっても終わりとみなす */
+export const STALL_END = 3;
+/** 「止めない」を選んだときの、一度の取り込みの時間の上限 */
+export const MAX_RUN_MS = 2 * 60 * 60 * 1000;
 /** 開始のコマンドが有効な時間 (これより古いコマンドは捨てる) */
 export const COMMAND_TTL_MS = 2 * 60 * 1000;
 
@@ -52,6 +56,8 @@ export interface CollectDeps {
   random(): number;
   scrollBy(px: number): void;
   scrollToTop(): void;
+  /** いまのスクロール位置 (動かなくなったことの判定用) */
+  scrollY(): number;
   viewportHeight(): number;
   visible(): Extracted[];
   isLoading(): boolean;
@@ -61,6 +67,10 @@ export interface CollectDeps {
   isHidden(): boolean;
   accountId(): string | null;
   savedIds(): Promise<Set<string>>;
+  /** 保存データが (他の場所で) 変わったら呼ばれる。解除関数を返す */
+  onDataChanged?(cb: () => void): () => void;
+  /** 保存してある取り込みの記録 (owner / commandId の確認用) */
+  loadRun?(): Promise<CollectRun | null>;
   /** seq = 画面に出た順の全ポスト。保存の savedAt は一覧での位置から決める (ordering.ts) */
   addCollected(seq: Extracted[], startedAt: number): Promise<number>;
   saveRun(run: CollectRun): Promise<void>;
@@ -74,14 +84,17 @@ export function defaultDeps(): CollectDeps {
     random: () => Math.random(),
     scrollBy: (px) => window.scrollBy({ top: px, left: 0, behavior: 'instant' as ScrollBehavior }),
     scrollToTop: () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }),
+    scrollY: () => window.scrollY,
     viewportHeight: () => window.innerHeight,
     visible: () => collectVisible(),
-    isLoading: () => !!queryFirst(document, 'loadingIndicator'),
+    isLoading: () => timelineLoading(document),
     hasLimit: () => !!queryFirst(document, 'xError'),
     pageOk: () => isBookmarksPath(location.pathname),
     isHidden: () => document.visibilityState === 'hidden',
     accountId: () => getCurrentAccount()?.id ?? null,
     savedIds: () => getSavedIds(),
+    onDataChanged: (cb) => onDataChanged(cb),
+    loadRun: () => getCollectRun(),
     addCollected: (seq, startedAt) => addCollected(seq, startedAt),
     saveRun: (run) => saveCollectRun(run),
     clearRun: () => clearCollectRun(),
@@ -102,8 +115,23 @@ export class AutoCollector {
   private rewind = false;
   private flushing: Promise<void> = Promise.resolve();
   private listeners = new Set<(s: CollectState | null) => void>();
+  /** このタブの ID。保存データの取り込みの記録 (collectRun) に owner として残し、複数のタブで同じ取り込みを動かさない (v18) */
+  readonly owner = `t_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+  /** 保存済みのポストの ID。開始のときに 1 回だけ読み、あとは自分が保存した分を足す。他の場所で変更があったら読み直す (null = 未読み込み) */
+  private saved: Set<string> | null = null;
+  /** 自分の保存の最中か (その間の変更の通知では、読み直さない) */
+  private writing = false;
+  /** 動かない (scrollY が増えない) うえに新しいポストも出ない回数 */
+  private stalled = 0;
+  private moved = true;
+  /** この区間 (開始 / 再開) の始まり。「止めない」のときの時間の上限の基準 */
+  private segmentStart = 0;
 
-  constructor(private d: CollectDeps) {}
+  constructor(private d: CollectDeps) {
+    d.onDataChanged?.(() => {
+      if (!this.writing) this.saved = null;
+    });
+  }
 
   subscribe(cb: (s: CollectState | null) => void): () => void {
     this.listeners.add(cb);
@@ -114,7 +142,7 @@ export class AutoCollector {
     const s = this.state;
     if (s && persist && s.status !== 'countdown') {
       const { countdown: _c, resumeAt: _r, ...run } = s;
-      void this.d.saveRun({ ...run, updatedAt: this.d.now() }).catch(() => {});
+      void this.d.saveRun({ ...run, owner: this.owner, updatedAt: this.d.now() }).catch(() => {});
     }
     this.listeners.forEach((l) => l(s ? { ...s } : null));
   }
@@ -126,7 +154,7 @@ export class AutoCollector {
   }
 
   /** 開始。同意 (consent) の無いコマンド、ブックマークのタブ以外、アカウントを判定できない / 違うときは始めない */
-  async start(cmd: Pick<CollectCommand, 'consent' | 'speed' | 'cap' | 'accountId'>): Promise<boolean> {
+  async start(cmd: Pick<CollectCommand, 'consent' | 'speed' | 'cap' | 'accountId'> & { id?: string }): Promise<boolean> {
     if (cmd.consent !== true) return false;
     if (this.state && ['countdown', 'running'].includes(this.state.status)) return false;
     if (!this.d.pageOk()) return false;
@@ -136,9 +164,20 @@ export class AutoCollector {
     if (!account) return this.refuse('refused-unknown', cmd.accountId ?? '', speed, cap);
     if (cmd.accountId && cmd.accountId !== account) return this.refuse('refused-account', account, speed, cap);
 
+    // 同じ開始コマンドを、複数のタブが同時に受け取っても、始めるのは 1 つだけ (先に印を付けたほう)
+    if (cmd.id) {
+      const cur = await this.d.loadRun?.().catch(() => null);
+      if (cur?.commandId === cmd.id && cur.owner && cur.owner !== this.owner) return false;
+    }
     const token = ++this.token;
     this.resumeToken++;
-    this.state = { status: 'countdown', accountId: account, startedAt: this.d.now(), imported: 0, skipped: 0, failed: 0, speed, cap, countdown: COUNTDOWN_SECONDS, updatedAt: this.d.now() };
+    this.state = { status: 'countdown', accountId: account, startedAt: this.d.now(), imported: 0, skipped: 0, failed: 0, speed, cap, countdown: COUNTDOWN_SECONDS, updatedAt: this.d.now(), owner: this.owner, commandId: cmd.id };
+    if (cmd.id && !(await this.claim())) {
+      this.state = null;
+      this.emit(false);
+      return false;
+    }
+    if (token !== this.token) return false;
     // 同意したあとの取り消し用に、開始の 3 秒前に表示する
     for (let sec = COUNTDOWN_SECONDS; sec > 0; sec--) {
       this.state.countdown = sec;
@@ -148,6 +187,18 @@ export class AutoCollector {
     }
     this.begin(token, true, true);
     return true;
+  }
+
+  /** 開始コマンドの ID と owner を保存データに書き、読み戻して自分のものか確かめる (同時に書いた別のタブがあれば、後から書いたほうが残る) */
+  private async claim(): Promise<boolean> {
+    const { countdown: _c, resumeAt: _r, ...run } = this.state!;
+    try {
+      await this.d.saveRun({ ...run, owner: this.owner, updatedAt: this.d.now() });
+      const back = await this.d.loadRun?.();
+      return !back?.owner || back.owner === this.owner;
+    } catch {
+      return true; // 記録できなくても、このタブでの取り込みは続ける
+    }
   }
 
   /** rewind: 一覧の先頭から読み直す (開始と、ページの再読み込みのあとの再開)。そうでなければ、いまの位置から続ける */
@@ -169,6 +220,9 @@ export class AutoCollector {
       this.d.scrollToTop(); // 一覧の先頭から、同じ順にスクロールしていく (取り込み済みは読み飛ばす)
     }
     this.streak = 0;
+    this.stalled = 0;
+    this.moved = true;
+    this.segmentStart = this.d.now();
     this.base = s.imported;
     this.emit();
     void this.loop(token);
@@ -180,6 +234,7 @@ export class AutoCollector {
     this.pending = [];
     this.streak = 0;
     this.rewind = false;
+    this.saved = null; // 取り込みの開始のときに、保存済みの ID を 1 回読む
   }
 
   private guard(): CollectReason | null {
@@ -204,25 +259,31 @@ export class AutoCollector {
       const fresh = await this.readVisible(token);
       if (!alive()) return;
       this.streak = fresh > 0 ? 0 : this.streak + 1;
+      this.stalled = fresh === 0 && !this.moved ? this.stalled + 1 : 0;
       if (this.pending.length >= FLUSH_EVERY) await this.flush();
       if (!alive()) return;
       this.emit();
       if (this.d.hasLimit()) return void (await this.pause('limit'));
       const s = this.state!;
       if (s.cap > 0 && s.imported - this.base >= s.cap) return void (await this.pause('cap'));
-      if (this.streak >= END_STREAK && !this.d.isLoading()) return void (await this.finish());
+      // 「止めない」でも、一度の取り込みの時間には上限を設ける
+      if (s.cap === 0 && this.d.now() - this.segmentStart >= MAX_RUN_MS) return void (await this.pause('time'));
+      // 読み込み中の表示が出たままでも、動かず新しいポストも出ない状態が続いたら、終わりとみなす (実機未確認)
+      if ((this.streak >= END_STREAK && !this.d.isLoading()) || this.stalled >= STALL_END) return void (await this.finish());
+      const y0 = this.d.scrollY();
       this.d.scrollBy(Math.round(this.d.viewportHeight() * SCROLL_RATIO));
       await this.d.sleep(this.delay());
       if (!alive()) return;
       // X の一覧は下端で追加のポストを読み込む。読み込み中の表示が消えるまで (上限つきで) 待つ
       for (let waited = 0; alive() && waited < LOAD_WAIT_MS && this.d.isLoading(); waited += LOAD_POLL_MS) await this.d.sleep(LOAD_POLL_MS);
+      this.moved = this.d.scrollY() > y0;
     }
   }
 
   /** 画面に出ているポストを読む。X は画面外のポストを DOM から外す (仮想化) ので、スクロールのたびに読む。新しく見つけた件数を返す */
   private async readVisible(token: number): Promise<number> {
     const items = this.d.visible();
-    const saved = await this.d.savedIds();
+    const saved = (this.saved ??= await this.d.savedIds());
     if (token !== this.token) return 0;
     const s = this.state!;
     let fresh = 0;
@@ -242,17 +303,27 @@ export class AutoCollector {
     return fresh;
   }
 
-  /** たまった新しいポストを保存する (一覧の位置から savedAt を決める)。保存は 1 つずつ順に行う */
-  private flush(): Promise<void> {
+  /**
+   * たまった新しいポストを保存する (一覧の位置から savedAt を決める)。保存は 1 つずつ順に行う。
+   * 保存できなかった分は pending に戻し、次の保存で (seq ごと) もう一度保存する。
+   * 「失敗」に数えるのは、final (一時停止・停止・完了の保存) でも保存できなかった分だけ。
+   */
+  private flush(final = false): Promise<void> {
     this.flushing = this.flushing.then(async () => {
       const batch = this.pending;
       this.pending = [];
       if (batch.length === 0 || !this.state) return;
+      this.writing = true;
       try {
         await this.d.addCollected(this.seq, this.state.startedAt);
+        for (const it of batch) this.saved?.add(it.tweetId);
       } catch {
-        this.state.failed += batch.length; // 保存できなかった分は、取り込めなかったものとして数える
-        this.state.imported -= batch.length;
+        if (final) {
+          this.state.failed += batch.length;
+          this.state.imported -= batch.length;
+        } else this.pending = [...batch, ...this.pending];
+      } finally {
+        this.writing = false;
       }
     });
     return this.flushing;
@@ -262,7 +333,7 @@ export class AutoCollector {
     const s = this.state;
     if (!s || s.status !== 'running') return;
     this.token++;
-    await this.flush();
+    await this.flush(true);
     s.status = reason === 'limit' ? 'limit' : 'paused';
     s.reason = reason;
     this.emit();
@@ -290,7 +361,11 @@ export class AutoCollector {
     this.emit(false);
     await this.d.sleep(ms);
     if (my !== this.resumeToken) return;
-    await this.resume();
+    if (!(await this.resume())) {
+      // 予約の時刻に再開できなかった (タブが見えていない、など)。予約の表示を消し、止まったままにする (「再開」は押せる)
+      s.resumeAt = undefined;
+      this.emit(false);
+    }
   }
 
   /** 停止 / ここで終了: そこまでの分は保存する */
@@ -307,7 +382,7 @@ export class AutoCollector {
     if (['stopped', 'done'].includes(s.status)) return;
     this.token++;
     this.resumeToken++;
-    await this.flush();
+    await this.flush(true);
     s.status = 'stopped';
     s.reason = 'user';
     s.resumeAt = undefined;
@@ -317,7 +392,7 @@ export class AutoCollector {
   private async finish(): Promise<void> {
     const s = this.state!;
     this.token++;
-    await this.flush();
+    await this.flush(true);
     s.status = 'done';
     s.reason = undefined;
     this.emit();
@@ -344,10 +419,38 @@ export class AutoCollector {
   /** ページを読み込み直したあと、前回の状態 (保存済み) を引き継ぐ。動いていたものは、止まっている扱いにする */
   adopt(run: CollectRun | null): void {
     if (!run || this.state) return;
+    if (this.d.isHidden()) return; // 見えているタブだけが引き継ぐ (見えるようになったら onVisible)
     if (!['countdown', 'running', 'paused', 'limit'].includes(run.status)) return;
     this.state = { ...run, status: run.status === 'limit' ? 'limit' : 'paused', reason: run.status === 'limit' ? 'limit' : 'reload' };
     this.rewind = true;
-    this.emit();
+    this.emit(); // owner を自分の ID に書き換えて保存する
+  }
+
+  /** タブが見えるようになった: まだ引き継いでいなければ、保存してある取り込みを引き継ぐ */
+  onVisible(): void {
+    if (this.state || !this.d.loadRun) return;
+    void this.d.loadRun().then((run) => this.adopt(run)).catch(() => {});
+  }
+
+  /**
+   * 保存してある取り込みの記録が変わった。別のタブが引き継いだ (owner が自分でない) なら、
+   * 自分の取り込みを止めて状態を消し、パネルを閉じる。
+   */
+  onRunChanged(run: CollectRun | null): void {
+    if (!this.state || !run?.owner || run.owner === this.owner) return;
+    this.token++;
+    this.resumeToken++;
+    this.pending = [];
+    this.state = null;
+    this.emit(false);
+  }
+
+  /** 保存してある記録の owner が、このタブか (記録が無い / owner が無いときは、このタブ) */
+  async ownsRun(): Promise<boolean> {
+    const run = await (this.d.loadRun?.() ?? getCollectRun()).catch(() => null);
+    if (!run?.owner || run.owner === this.owner) return true;
+    this.onRunChanged(run);
+    return false;
   }
 
   get needsRewind(): boolean {
@@ -374,6 +477,7 @@ export async function handleCollectCommand(c: AutoCollector, d: Pick<CollectDeps
     return;
   }
   if (!c.state) return;
+  if (!(await c.ownsRun())) return; // 取り込みを動かしているのは別のタブ。そのタブが実行する
   await clearCollectCommand();
   if (cmd.type === 'pause') await c.pause('user');
   else if (cmd.type === 'resume') await c.resume();
@@ -396,7 +500,9 @@ export function installAutoCollect(onState: (s: CollectState | null, c: AutoColl
   });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') c.onHidden();
+    else c.onVisible();
   });
+  onCollectRunChanged(() => void getCollectRun().then((run) => c.onRunChanged(run)).catch(() => {}));
   subscribeAccount((a) => c.onAccountChanged(a?.id ?? null));
   const tick = () => void handleCollectCommand(c, d).catch(() => {});
   onCollectCommand(tick);

@@ -1001,6 +1001,9 @@
       }
     }
   },
+  "acReasonTime": {
+    "message": "Arrêt : la limite de 2 heures par importation est atteinte"
+  },
   "acReasonReload": {
     "message": "Arrêt : la page a été rechargée"
   },

@@ -15,7 +15,7 @@ const post = (n: number): Extracted => ({
 
 /** x.com のブックマークの一覧の模擬: p1 が先頭 (新しく追加した順)。画面に出るのは 6 件ずつで、スクロールで 5 件進む (画面外は DOM から外れる = 仮想化) */
 function world(total: number, opts: { loadingAt?: (scrolls: number) => boolean } = {}) {
-  const w = { start: 0, scrolls: 0, toTop: 0, sleeps: [] as number[], hook: undefined as undefined | ((n: number) => void | Promise<void>), saved: new Set<string>(), seq: 0, releaseLong: undefined as undefined | (() => void) };
+  const w = { start: 0, scrolls: 0, toTop: 0, sleeps: [] as number[], hook: undefined as undefined | ((n: number) => void | Promise<void>), saved: new Set<string>(), seq: 0, extraY: 0, grow: false, releaseLong: undefined as undefined | (() => void) };
   const rnd = [0, 1, 0.5];
   const deps: CollectDeps & { limit: boolean; hidden: boolean; page: boolean; account: string | null; loading: boolean } = {
     now: () => Date.now(),
@@ -29,12 +29,14 @@ function world(total: number, opts: { loadingAt?: (scrolls: number) => boolean }
     random: () => rnd[w.sleeps.length % 3],
     scrollBy: () => {
       w.scrolls++;
+      if (w.grow) w.extraY += 100; // 読み込み中の表示のまま、ページが伸び続けている
       w.start = Math.min(w.start + 5, total);
     },
     scrollToTop: () => {
       w.toTop++;
       w.start = 0;
     },
+    scrollY: () => w.start * 100 + w.extraY,
     viewportHeight: () => 1000,
     visible: () => Array.from({ length: Math.max(0, Math.min(6, total - w.start)) }, (_, i) => post(w.start + i + 1)),
     isLoading: () => deps.loading || !!opts.loadingAt?.(w.scrolls),
@@ -213,6 +215,7 @@ describe('scrolling, pausing and finishing', () => {
     const { w, deps } = world(12);
     const c = new AutoCollector(deps);
     deps.loading = true; // 末尾まで来ても、読み込み中の表示が出ている間は終わらない
+    w.grow = true; // (位置が進み続けている間)
     await c.start(consent);
     for (let i = 0; i < 400; i++) await flushAsync();
     expect(c.state!.status).toBe('running');
@@ -220,6 +223,16 @@ describe('scrolling, pausing and finishing', () => {
     deps.loading = false;
     await until(c, (s) => s.status === 'done');
     expect(c.state!.imported).toBe(12);
+  });
+
+  it('B-4: if the position does not move and no new post appears 3 times in a row, it finishes even while the loading indicator stays on', async () => {
+    const { w, deps } = world(12);
+    const c = new AutoCollector(deps);
+    deps.loading = true; // 読み込み中の表示が出たまま (動画の読み込みなど)。位置は末尾で止まる
+    await c.start(consent);
+    await until(c, (s) => s.status === 'done');
+    expect(c.state!.imported).toBe(12);
+    expect(w.scrolls).toBeLessThan(3 + END_STREAK + 4);
   });
 
   it('the oldest post date seen is recorded', async () => {

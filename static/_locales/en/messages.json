@@ -1001,6 +1001,9 @@
       }
     }
   },
+  "acReasonTime": {
+    "message": "Stopped because it reached the 2-hour limit for one import"
+  },
   "acReasonReload": {
     "message": "Stopped because the page was reloaded"
   },

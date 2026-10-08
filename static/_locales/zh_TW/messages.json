@@ -1001,6 +1001,9 @@
       }
     }
   },
+  "acReasonTime": {
+    "message": "已達到單次匯入 2 小時的上限，已暫停"
+  },
   "acReasonReload": {
     "message": "因為頁面已重新載入，已暫停"
   },

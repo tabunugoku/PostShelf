@@ -1001,6 +1001,9 @@
       }
     }
   },
+  "acReasonTime": {
+    "message": "1회 상한인 2시간에 도달해서 멈췄습니다"
+  },
   "acReasonReload": {
     "message": "페이지를 다시 불러와서 멈춰 있습니다"
   },

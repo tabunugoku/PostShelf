@@ -1001,6 +1001,9 @@
       }
     }
   },
+  "acReasonTime": {
+    "message": "1 回の上限の 2 時間に達したため、止めました"
+  },
   "acReasonReload": {
     "message": "ページが読み込み直されたため、止まっています"
   },

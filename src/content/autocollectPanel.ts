@@ -91,7 +91,7 @@ export function viewOf(s: CollectState): PanelView {
         buttons: [{ label: t('acBtnPause'), action: 'pause' }, { label: t('acBtnStop'), action: 'stop', danger: true }],
       };
     case 'paused': {
-      const why = { user: 'acReasonUser', hidden: 'acReasonHidden', account: 'acReasonAccount', reload: 'acReasonReload', page: 'acReasonPage' }[s.reason as string];
+      const why = { user: 'acReasonUser', hidden: 'acReasonHidden', account: 'acReasonAccount', reload: 'acReasonReload', page: 'acReasonPage', time: 'acReasonTime' }[s.reason as string];
       const sub = s.reason === 'cap' ? t('acReasonCap', cap) : why ? t(why) : t('acReasonUser');
       return {
         title: t('acPanelPaused'), sub, dot: 'pause', bar: 'fix', note: s.reason === 'reload' ? t('acNoteReload') : t('acNotePaused'), alert: '',

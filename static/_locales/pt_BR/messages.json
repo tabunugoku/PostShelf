@@ -1001,6 +1001,9 @@
       }
     }
   },
+  "acReasonTime": {
+    "message": "Parou ao atingir o limite de 2 horas por importação"
+  },
   "acReasonReload": {
     "message": "Parado porque a página foi recarregada"
   },

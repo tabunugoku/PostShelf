@@ -1001,6 +1001,9 @@
       }
     }
   },
+  "acReasonTime": {
+    "message": "已达到单次导入 2 小时的上限，已暂停"
+  },
   "acReasonReload": {
     "message": "因为页面已重新加载，已暂停"
   },
