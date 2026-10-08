@@ -83,6 +83,7 @@ export class FullTextQueue {
   private pending: FullTextItem[] = [];
   private looping = false;
   private aborted = false;
+  private userStopped = false;
   private run: FullTextRun = { running: false, kind: 'save', total: 0, done: 0, failed: 0, updatedAt: 0 };
   private failures = 0;
 
@@ -103,6 +104,8 @@ export class FullTextQueue {
   /** 取得の依頼を入れる。設定がオフなら何もしない。依頼が入ったら、動いていなければ動かし始める (完了を待つ Promise を返す) */
   async enqueue(items: FullTextItem[], kind: FullTextKind): Promise<void> {
     if (items.length === 0 || !(await this.d.enabled())) return;
+    // 止める操作の直後の依頼は、止め終わってから受け付ける (後始末で黙って捨てられないように)
+    while (this.userStopped) await this.finished.catch(() => {});
     const known = new Set(this.pending.map(keyOf));
     const fresh = items.filter((it) => !known.has(keyOf(it)));
     if (fresh.length === 0) return this.finished;
@@ -122,8 +125,11 @@ export class FullTextQueue {
   async stop(reason: FullTextStop = 'user'): Promise<void> {
     this.aborted = true;
     this.pending = [];
-    if (this.looping) await this.publish({ stopReason: reason });
-    else await this.publish({ running: false, stopReason: reason });
+    if (this.looping) {
+      this.userStopped = true;
+      await this.publish({ stopReason: reason });
+      await this.finished.catch(() => {}); // いまのタブを閉じ、実行中の記録を終えるまで待つ
+    } else await this.publish({ running: false, stopReason: reason });
   }
 
   private async loop(): Promise<void> {
@@ -151,6 +157,9 @@ export class FullTextQueue {
         } else if (r === 'limit') {
           await this.publish({ failed: this.run.failed + 1 });
           await this.stopWith('limit');
+        } else if (r === 'skip' || r === 'abort') {
+          // skip: 読めたが、すでに全文が入っている / ポストが無い (成功でも失敗でもない)。abort: 止める操作による中断 (失敗に数えない)
+          if (r === 'skip') await this.publish({ done: this.run.done + 1 });
         } else {
           this.failures++;
           await this.publish({ failed: this.run.failed + 1 });
@@ -159,6 +168,7 @@ export class FullTextQueue {
       }
     } finally {
       this.looping = false;
+      this.userStopped = false;
       this.pending = [];
       await this.publish({ running: false });
     }
@@ -171,7 +181,7 @@ export class FullTextQueue {
   }
 
   /** 1 件: 裏のタブで開き、読めるまで待ち (15 秒まで)、閉じる。閉じ忘れを残さない */
-  private async fetchOne(item: FullTextItem, url: string): Promise<'ok' | 'fail' | 'limit'> {
+  private async fetchOne(item: FullTextItem, url: string): Promise<'ok' | 'fail' | 'limit' | 'skip' | 'abort'> {
     let tab: number | null = null;
     try {
       tab = await this.d.openTab(url);
@@ -180,16 +190,20 @@ export class FullTextQueue {
       while (this.d.now() < deadline && !this.aborted) {
         try {
           const r = await this.d.ask(tab, item.tweetId);
-          if (r?.ok) return (await this.d.refresh(item, { text: r.text, segments: r.segments })) ? 'ok' : 'fail';
+          if (r?.ok) {
+            if (await this.d.refresh(item, { text: r.text, segments: r.segments })) return 'ok';
+            // 更新されなかった: 裏のタブの content script が先に更新した / すでにたたまれていない / 削除済み、なら失敗ではない
+            return (await this.d.lookup(item)) ? 'fail' : 'skip';
+          }
           if (r && !r.ok && r.reason === 'limit') return 'limit';
         } catch {
           /* まだ読み込み中 (受け取り側がない) */
         }
         await this.d.sleep(POLL_MS);
       }
-      return 'fail';
+      return this.aborted ? 'abort' : 'fail';
     } catch {
-      return 'fail';
+      return this.aborted ? 'abort' : 'fail';
     } finally {
       if (tab !== null) await this.d.closeTab(tab);
       await this.d.setTab(null).catch(() => {});
