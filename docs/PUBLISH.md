@@ -1,4 +1,44 @@
-# 公開準備メモ
+# 配布とリリースの手順 (手動インストール)
+
+配布は Chrome Web Store ではなく、デベロッパーモードでの手動インストールです。利用者向けの手順は [INSTALL.md](INSTALL.md) ([English](INSTALL.en.md))。
+このページは、リリースする人 (開発者) 向けです。ストア公開のための項目は、末尾に「いまは行わない (参考)」として残しています。
+
+## 拡張機能 ID (固定)
+- 拡張機能 ID: `aglgbnegdnodlmbmlfmaagjkneokagnc`
+- `static/manifest.json` の `key` (RSA 2048 の公開鍵。DER を base64 にした値) から決まります。ID は、公開鍵の SHA-256 の先頭 128 bit を a〜p の 32 文字に変えたものです (`scripts/lib.mjs` の `extensionIdFromKey`。テストと `release:check` が `docs/INSTALL.md` の ID と一致することを確かめます)。
+- 秘密鍵は、手動インストールでは使わないので、リポジトリにも手元にも残していません。**`key` を変えると ID が変わり、利用者のデータが引き継がれません**。変えないでください。
+- ID を決めた版への切り替えは、利用者が 1 回だけエクスポート / インポートを行う必要があります (`docs/INSTALL.md` の 3)。以降の更新では、ID が変わらないので、データは残ります。
+
+## リリースの手順
+1. **バージョンを揃える**: `package.json` と `static/manifest.json` の `version` を同じ値にする。
+   - 実機確認 (`docs/MANUAL_TEST.md`) を済ませてから `1.0.0` にします。それまでは `0.1.0` のままです。
+2. `npm run release:check` を実行する。typecheck / テスト / ビルド / パッケージに加えて、次を確かめます。
+   - manifest の version が `package.json` と一致している
+   - 必須の `permissions` / `host_permissions` が現在の一覧と完全に同じ (増えていたら失敗)
+   - 全 8 言語の `messages.json` のキーとプレースホルダーが一致している
+   - `dist` の JavaScript に、外部のスクリプトの URL・`eval`・`new Function`・リモートコードの読み込みが無い
+   - manifest が指すファイル (アイコンなど) がすべて zip に入っている
+   - `key` から求めた拡張機能 ID が `docs/INSTALL.md` の ID と同じ
+3. **タグを打つ**: `git tag v0.1.0 && git push origin v0.1.0` (タグは `v` + manifest の version)。
+4. **ワークフローが zip を作る**: `.github/workflows/release.yml` が、タグと manifest の version の一致を確かめ、`release:check` を通してから、`postshelf-<version>.zip` を GitHub Release に添付します。
+5. **zip を取得して、固定のフォルダに上書き**: Release から zip を保存し、`docs/INSTALL.md` の「2. 更新するとき」の手順で、同じフォルダに上書きして「再読み込み」を押す。更新の前に、設定の「データ」から必ずエクスポートします。
+
+手元で zip だけ作るときは `npm run build && npm run package` (`release/postshelf-<version>.zip`。`release/` は `.gitignore`)。
+
+## 同梱している第三者の部品
+`THIRD_PARTY_NOTICES.md` に、名前・版・ライセンス全文を載せています (ビルドで `dist/` にも入ります)。部品を足したり版を上げたりしたら、ここも更新します。
+
+## ライセンス (ユーザーの判断待ち)
+PostShelf 自身のコードの `LICENSE` は、まだありません。**他の人に配る場合だけ必要**です。選ぶのは、ユーザーです (まだ決めていません)。選択肢の違いは次のとおりです。
+- **MIT**: いちばん短く、緩い。使う・改変する・再配布する・商用に使うのを、著作権表示を残す条件で自由に認める。無保証。
+- **Apache-2.0**: MIT と同じく緩い。特許のライセンスを明示し、改変したときはその旨を書く必要がある。文書が長い。
+- **GPL-3.0**: 改変したものを配るときも、同じ GPL で公開する必要がある (コピーレフト)。他人が非公開の改変版を配ることを防ぎたいときに向く。
+- **ライセンスなし (全権利留保)**: 自分で使うだけ、または配る相手が決まっているなら、これでも構わない。ただし、他の人は、法的には使う・改変する・再配布することができない。
+決まったら、`LICENSE` を足し、`README.md`・`THIRD_PARTY_NOTICES.md` の「ライセンスは未定」の記述を直します。
+
+# いまは行わない (参考): Chrome Web Store への公開
+
+以下は、Chrome Web Store に公開する場合の準備メモです。配布は手動インストールなので、いまは行いません。
 
 - [ ] 実機確認 (`docs/MANUAL_TEST.md`) を全項目実施
 - [ ] Chrome Web Store で「PostShelf」の同名拡張がないか再確認
