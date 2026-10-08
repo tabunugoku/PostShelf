@@ -26,7 +26,7 @@ PostShelf is not distributed on the Chrome Web Store. You use it by loading an u
 4. Open `chrome://extensions` and press "Reload" (↻) on PostShelf.
 5. Open the manager. A notice "PostShelf was updated (x.y.z)" appears at the top, and the version is shown under Settings → "Data".
 
-Do not:
+Do not do either of these two things.
 - **Remove** the extension (this deletes your data too).
 - **Change the folder** (use overwrite every time).
 
@@ -57,4 +57,4 @@ When Chrome starts with an extension loaded in developer mode, it may show a con
   - Different ID → you are looking at an old version (from before the ID was fixed). Export from it and import into the new version (see section 3).
   - Same ID → check the account shown at the top left of the manager (you may be viewing another account's data).
 - **Updated but nothing changed**: make sure you pressed "Reload" (↻) on PostShelf. Reload open x.com tabs (F5).
-- If the display breaks because X changed its layout: copy the diagnostic information from Settings → "X page structure" and report it.
+- If the display looks wrong because X changed its layout: copy the diagnostic information from Settings → "X page structure" and report it.
