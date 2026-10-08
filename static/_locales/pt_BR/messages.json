@@ -591,6 +591,46 @@
       }
     }
   },
+  "triageStart": {
+    "message": "Modo organizar"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "Pular"
+  },
+  "triageBack": {
+    "message": "Voltar"
+  },
+  "triageHint": {
+    "message": "1–9 adicionar · Esc sair"
+  },
+  "triageDone": {
+    "message": "Organização concluída"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ organizados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "Outras pastas"
+  },
   "saveCurrentFail": {
     "message": "Não foi possível ler este post. Recarregue a página e tente novamente."
   },

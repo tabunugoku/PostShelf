@@ -591,6 +591,46 @@
       }
     }
   },
+  "triageStart": {
+    "message": "Sort mode"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "Skip"
+  },
+  "triageBack": {
+    "message": "Back"
+  },
+  "triageHint": {
+    "message": "1–9 add · Esc finish"
+  },
+  "triageDone": {
+    "message": "Sorting finished"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ sorted",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "Other folders"
+  },
   "saveCurrentFail": {
     "message": "Could not read this post. Reload the page and try again."
   },

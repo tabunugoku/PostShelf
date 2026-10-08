@@ -591,6 +591,46 @@
       }
     }
   },
+  "triageStart": {
+    "message": "Mode tri"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "Passer"
+  },
+  "triageBack": {
+    "message": "Retour"
+  },
+  "triageHint": {
+    "message": "1–9 ajouter · Échap quitter"
+  },
+  "triageDone": {
+    "message": "Tri terminé"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ triés",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "Autres dossiers"
+  },
   "saveCurrentFail": {
     "message": "Impossible de lire ce post. Rechargez la page puis réessayez."
   },

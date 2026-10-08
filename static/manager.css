@@ -420,3 +420,24 @@ input[type=number]{width:110px}
 .nav-chip{min-height:32px;padding:2px 12px;border-radius:16px;font-size:14px;background:var(--surface-2)}
 .set-h{margin:20px 0 0;font-size:14px;font-weight:700;color:var(--text-secondary);scroll-margin-top:56px}
 .set-h:focus-visible{outline:2px solid var(--fill-accent);outline-offset:2px}
+
+/* ---- 未分類の仕分けモード (v29) ---- */
+.triage{display:flex;flex-direction:column;gap:10px;width:min(680px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;outline:none;word-break:auto-phrase;line-break:strict}
+.triage-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.triage-top .dialog-title{margin:0}
+.triage-progress{white-space:nowrap}
+.triage-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
+.triage-bar i{display:block;height:100%;background:var(--accent-strong)}
+.triage-post{padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-1);font-size:16px}
+.triage-meta{margin-bottom:6px}
+.triage-media img{display:block;max-width:100%;max-height:220px;margin-top:8px;border-radius:10px;object-fit:cover}
+.triage-folders{display:flex;flex-wrap:wrap;gap:8px}
+.triage-folder{display:inline-flex;gap:6px;align-items:center;min-height:40px;max-width:100%;padding:2px 12px;border:1px solid var(--border-strong);border-radius:20px;background:var(--surface-2);cursor:pointer;white-space:nowrap}
+.triage-folder.on{background:var(--fill-ghost-selected);font-weight:700;border-color:var(--text-primary)}
+.triage-folder kbd{font:inherit;font-size:12px;min-width:18px;padding:0 4px;text-align:center;border:1px solid var(--border-strong);border-radius:4px;color:var(--text-secondary)}
+.triage-folder-name{overflow:hidden;text-overflow:ellipsis;max-width:10em}
+.triage-actions{align-items:center}
+.triage-hint{font-size:13px;white-space:nowrap}
+.triage-start{display:inline-flex;gap:4px;align-items:center;white-space:nowrap;min-height:32px;margin-right:4px}
+.triage-new{padding-top:4px}
+@media (prefers-reduced-motion:no-preference){.triage-bar i{transition:width .15s}}

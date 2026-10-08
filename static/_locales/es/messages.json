@@ -591,6 +591,46 @@
       }
     }
   },
+  "triageStart": {
+    "message": "Modo ordenar"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "Omitir"
+  },
+  "triageBack": {
+    "message": "Atrás"
+  },
+  "triageHint": {
+    "message": "1–9 añadir · Esc salir"
+  },
+  "triageDone": {
+    "message": "Orden terminado"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ ordenadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "Otras carpetas"
+  },
   "saveCurrentFail": {
     "message": "No se pudo leer esta publicación. Recarga la página e inténtalo de nuevo."
   },

@@ -62,6 +62,7 @@ import { AccountSwitcher, AssignDialog, resolveViewAccount } from './Accounts';
 import { FolderEdit } from './FolderEdit';
 import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
+import { Triage } from './Triage';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
 import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
@@ -82,10 +83,11 @@ type ToastState = { key: number; message: string; undo?: BookmarkUndo; /** 設�
 
 /** 「未分類」は保存データにまだ無くても常にスマートビューに出す。アイコンは受け皿らしく inbox に統一する */
 /** ポップアップからの入口: #inbox (未分類で開く) と #q=<検索語> (検索語を入れて開く)。読み取ったらハッシュを消す。ほかのハッシュは触らない */
-export function takeEntryHash(): { inbox?: boolean; q?: string } | null {
+export function takeEntryHash(): { inbox?: boolean; triage?: boolean; q?: string } | null {
   const h = location.hash;
-  let out: { inbox?: boolean; q?: string } | null = null;
+  let out: { inbox?: boolean; triage?: boolean; q?: string } | null = null;
   if (h === '#inbox') out = { inbox: true };
+  else if (h === '#triage') out = { inbox: true, triage: true };
   else if (h.startsWith('#q=')) {
     try {
       out = { q: decodeURIComponent(h.slice(3)) };
@@ -124,6 +126,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [noticeIdx, setNoticeIdx] = useState(0);
   /** 自動取り込みの開始の指示が、x.com のブックマークの一覧で受け取られなかった */
   const [startMissed, setStartMissed] = useState(false);
+  /** 未分類の仕分けモード (v29): 始めた時点のキュー。#triage で開かれたときは、データが読めてから始める */
+  const [triage, setTriage] = useState<Bookmark[] | null>(null);
+  const [triageWanted, setTriageWanted] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
@@ -180,6 +185,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       await Promise.all([reload(), loadHint()]);
       const ver = currentVersion();
       if (await noteRunVersion(ver)) setUpdated(ver);
+      if (entry?.triage) setTriageWanted(true);
       setCurrent(entry?.inbox ? INBOX_ID : entry?.q !== undefined ? ALL_FOLDER_ID : s.lastFolderId);
       if (entry?.q !== undefined) {
         setSearch(entry.q);
@@ -194,7 +200,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     });
     const onHash = () => {
       const e = takeEntryHash();
-      if (e?.inbox) chooseView(INBOX_ID);
+      if (e?.inbox) {
+        chooseView(INBOX_ID);
+        if (e.triage) setTriageWanted(true);
+      }
       else if (e?.q !== undefined) {
         chooseView(ALL_FOLDER_ID);
         setSearch(e.q);
@@ -675,6 +684,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   );
 
   const searching = search.trim() !== '' || hasActiveFilters(filters);
+  /** 始めた時点の未分類を、いまの並び順で固定した列にして、仕分けモードを始める。未分類が 0 件なら始めない */
+  const startTriage = () => {
+    const queue = queryBookmarks(bookmarks, { folderId: INBOX_ID, search: '', sort, filters: {}, now: Date.now() });
+    if (queue.length) setTriage(queue);
+  };
+  useEffect(() => {
+    if (!triageWanted || !ready) return;
+    setTriageWanted(false);
+    startTriage();
+  }, [triageWanted, ready, bookmarks]);
   const clearAll = () => {
     setSearch('');
     setFilters({});
@@ -815,6 +834,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   const dialogs = (
     <>
+      {triage && (
+        <Triage
+          queue={triage}
+          live={new Set(bookmarks.map((b) => b.tweetId))}
+          folders={userFolders}
+          pickerFolders={pickerFolders}
+          onChanged={() => reload()}
+          onClose={() => setTriage(null)}
+        />
+      )}
       {confirmState && (
         <Confirm
           message={confirmMessage(confirmState)}
@@ -1012,6 +1041,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               <Icon name={curFolder.icon} color={curFolder.color} />
               <span class="bar-name">{viewName}</span>
               <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
+              {curFolder.id === INBOX_ID && count(INBOX_ID) > 0 && (
+                <button class="triage-start" onClick={startTriage}>
+                  <Icon name="ti-bolt" /> {t('triageStart')}
+                </button>
+              )}
               {searching && (
                 <button class="bar-clear" onClick={clearAll}>
                   {t('clearFilters')}

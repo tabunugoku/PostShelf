@@ -591,6 +591,46 @@
       }
     }
   },
+  "triageStart": {
+    "message": "整理模式"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "稍後"
+  },
+  "triageBack": {
+    "message": "返回"
+  },
+  "triageHint": {
+    "message": "1–9 加入 · Esc 結束"
+  },
+  "triageDone": {
+    "message": "整理完成了"
+  },
+  "triageDoneSub": {
+    "message": "已整理 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "其他資料夾"
+  },
   "saveCurrentFail": {
     "message": "無法讀取此貼文。請重新整理頁面後再試一次。"
   },

@@ -591,6 +591,46 @@
       }
     }
   },
+  "triageStart": {
+    "message": "仕分けモード"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "あとで"
+  },
+  "triageBack": {
+    "message": "戻る"
+  },
+  "triageHint": {
+    "message": "1〜9 入れる · Esc 終わる"
+  },
+  "triageDone": {
+    "message": "仕分けが終わりました"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ 件を仕分けました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "他のフォルダ"
+  },
   "saveCurrentFail": {
     "message": "このポストを読み取れませんでした。ページを再読み込みしてから、もう一度お試しください。"
   },

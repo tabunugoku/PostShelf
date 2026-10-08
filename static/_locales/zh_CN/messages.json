@@ -591,6 +591,46 @@
       }
     }
   },
+  "triageStart": {
+    "message": "整理模式"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "稍后"
+  },
+  "triageBack": {
+    "message": "返回"
+  },
+  "triageHint": {
+    "message": "1–9 加入 · Esc 结束"
+  },
+  "triageDone": {
+    "message": "整理完成了"
+  },
+  "triageDoneSub": {
+    "message": "已整理 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "其他文件夹"
+  },
   "saveCurrentFail": {
     "message": "无法读取此帖子。请刷新页面后重试。"
   },

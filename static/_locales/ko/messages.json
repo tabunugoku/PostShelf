@@ -591,6 +591,46 @@
       }
     }
   },
+  "triageStart": {
+    "message": "분류 모드"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "나중에"
+  },
+  "triageBack": {
+    "message": "이전"
+  },
+  "triageHint": {
+    "message": "1–9 추가 · Esc 종료"
+  },
+  "triageDone": {
+    "message": "분류가 끝났습니다"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$개를 분류했습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "다른 폴더"
+  },
   "saveCurrentFail": {
     "message": "이 게시물을 읽을 수 없습니다. 페이지를 새로고침한 뒤 다시 시도하세요."
   },
