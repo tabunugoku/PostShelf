@@ -21,7 +21,7 @@
 ul{margin:4px 0;padding-left:20px}
 </style></head><body><div class="wrap">
 <h1>設定画面の項目順 (モック)</h1>
-<p class="lead">「データ」欄を分けると、欄の数が増えます。そこで、<b>順番を、使う頻度と、関係の近さで組み直し</b>、<b>6 つの見出しのグループ</b>にまとめ、<b>上にジャンプのリンク</b>を置く案です。v24 で増える「長いポストの全文を取得する」も含めています。</p>
+<p class="lead" style="margin-bottom:6px"><b>訂正</b>: 最初の案で、「標準ボタンの動作は連動のときだけ意味がある」と書きましたが、確認したところ、2 つは独立した設定でした。入れ子にせず、別々の欄に直しています。</p><p class="lead">「データ」欄を分けると、欄の数が増えます。そこで、<b>順番を、使う頻度と、関係の近さで組み直し</b>、<b>6 つの見出しのグループ</b>にまとめ、<b>上にジャンプのリンク</b>を置く案です。v24 で増える「長いポストの全文を取得する」も含めています。</p>
 
 <h2>before (いま + v24 の追加を、いまの流儀で足した場合)</h2>
 <div class="pair"><div><span class="tag">before</span><div class="stage">
@@ -31,7 +31,7 @@ ul{margin:4px 0;padding-left:20px}
  <div class="card"><b><span class="n">4</span>画像のキャッシュ</b></div>
  <div class="card"><b><span class="n">5</span>データ <span class="muted">(エクスポート / インポート / 自動取り込み / バージョン / GitHub)</span></b></div>
  <div class="card"><b><span class="n">6</span>長いポストの全文を取得する <span class="new">v24 で追加</span></b></div>
- <div class="card"><b><span class="n">7</span>X の画面構造</b></div>
+ <div class="card"><b><span class="n">8</span>X の画面構造</b></div>
  <div class="card"><b><span class="n">8</span>設定の初期化</b></div>
  <div class="card dg"><b><span class="n">9</span>危険な操作</b></div>
 </div></div>
@@ -44,28 +44,29 @@ ul{margin:4px 0;padding-left:20px}
 <div class="pair"><div><span class="tag">after</span><div class="stage">
  <div class="toc"><span>保存</span><span>取り込み</span><span>表示と動作</span><span>データ</span><span>情報</span><span>初期化と削除</span></div>
  <div class="grp">保存</div>
- <div class="card"><b><span class="n">1</span>X との連携</b><div class="sub">連動のスイッチ → オンのときの「標準ボタンの動作」(別ボタン / 置き換え) を、ここにまとめる</div></div>
- <div class="card"><b><span class="n">2</span>長いポストの全文 <span class="new">v24</span></b></div>
- <div class="card"><b><span class="n">3</span>画像のキャッシュ</b></div>
+ <div class="card"><b><span class="n">1</span>X のブックマークと連動する</b></div>
+ <div class="card"><b><span class="n">2</span>標準ブックマークボタンの動作</b></div>
+ <div class="card"><b><span class="n">3</span>長いポストの全文 <span class="new">v24</span></b></div>
+ <div class="card"><b><span class="n">4</span>画像のキャッシュ</b></div>
  <div class="grp">取り込み</div>
- <div class="card"><b><span class="n">4</span>ブックマークの自動取り込み</b></div>
+ <div class="card"><b><span class="n">5</span>ブックマークの自動取り込み</b></div>
  <div class="grp">表示と動作</div>
- <div class="card"><b><span class="n">5</span>ツールバーアイコンのクリック時の動作</b></div>
+ <div class="card"><b><span class="n">6</span>ツールバーアイコンのクリック時の動作</b></div>
  <div class="grp">データ</div>
- <div class="card"><b><span class="n">6</span>データの保存と移行</b> <span class="muted">(エクスポート / インポート)</span></div>
+ <div class="card"><b><span class="n">7</span>データの保存と移行</b> <span class="muted">(エクスポート / インポート)</span></div>
  <div class="grp">情報</div>
  <div class="card"><b><span class="n">7</span>X の画面構造</b></div>
- <div class="card"><b><span class="n">8</span>PostShelf について</b></div>
+ <div class="card"><b><span class="n">9</span>PostShelf について</b></div>
  <div class="grp">初期化と削除</div>
- <div class="card"><b><span class="n">9</span>設定の初期化</b></div>
- <div class="card dg"><b><span class="n">10</span>危険な操作</b></div>
+ <div class="card"><b><span class="n">10</span>設定の初期化</b></div>
+ <div class="card dg"><b><span class="n">11</span>危険な操作</b></div>
 </div></div>
 <div class="ev" style="margin:0"><b>組み直しの考え方</b>
  <ul><li><b>よく触る順に、上から</b>: 保存まわり (連携、全文、画像) を最初に置く。初めて設定する人が、まず見る所です。</li>
- <li><b>関係の近い項目を、同じ見出しの下に</b>: 「標準ボタンの動作」は、連動をオンにしたときだけ意味があるので、連動の欄の中に入れ子にします (オフのときは、畳んで 1 行のヒントだけ。v19 のキャッシュの畳みと同じ形)。</li>
+ <li><b>関係の近い項目を、同じ見出しの下に</b>: 連動、標準ボタンの動作、全文、画像のキャッシュは、どれも「ポストを保存するとき」に関わるので、「保存」にまとめます。</li>
  <li><b>めったに使わない欄は下に</b>: 情報、初期化、危険な操作の順に、下へ。危険な操作は、一番下のままです。</li>
  <li><b>見出しのグループ (小さな文字) と、上のジャンプのリンク</b>で、欄が増えても、目的の所に 1 回で行けます。左のメニューに項目は増やしません。</li>
- <li>欄の数は 9 → <b>10</b> (全文の取得を足し、連動と標準ボタンの動作を 1 つにまとめ、データを 3 つに分けた結果)。</li></ul></div></div>
+ <li>欄の数は 9 → <b>11</b> (全文の取得を足し、「データ」を 3 つに分けた結果)。見出しのグループとジャンプのリンクで、探しやすさを保ちます。</li></ul></div></div>
 
 <div class="ev"><b>確認したい点 (2 つ)</b>
  <ul><li>ツールバーアイコンの動作を、「表示と動作」という、1 項目だけのグループに置いています。「保存」のグループの最後に入れる (グループを 5 つにする) 案もあります。どちらが良いですか。</li>
