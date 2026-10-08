@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ja" data-theme="auto"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PostShelf: X のブックマークを、フォルダに整理する (GitHub Pages モック)</title>
+<meta name="description" content="X のブックマークを自分のフォルダに分けて整理する、無料の Chrome 拡張機能。データは端末の中だけに保存します。">
+<style>
+:root{--bg:#fff;--fg:#0f1419;--mu:#536471;--bd:#e1e8ed;--card:#f7f9f9;--ac:#1d9bf0;--ac2:#7856ff;--glass:rgba(255,255,255,.7);--sh:0 10px 40px rgba(15,20,25,.12)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#05070a;--fg:#e7e9ea;--mu:#8b98a5;--bd:#26292d;--card:#101317;--glass:rgba(5,7,10,.7);--sh:0 10px 40px rgba(0,0,0,.6)}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.75 system-ui,"Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.note{background:#ffefc2;color:#4a3b00;font-size:13px;padding:8px 16px;text-align:center}
+nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:var(--glass);border-bottom:1px solid var(--bd)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:58px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;text-decoration:none;font-size:18px}
+.brand i{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:grid;place-items:center}
+.brand svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+nav .links{margin-left:auto;display:flex;gap:18px;font-size:14px;color:var(--mu)}nav .links a{text-decoration:none}nav .links a:hover{color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 20px;font-weight:700;text-decoration:none;font-size:15px;border:1px solid var(--bd);transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:var(--sh)}.btn.pri{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border:0}
+.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:760px){nav .links{display:none}nav .btn{margin-left:auto}}
+.hero{position:relative;overflow:hidden;padding:72px 0 40px}
+.hero:before{content:"";position:absolute;inset:-20% -10% auto auto;width:640px;height:640px;background:radial-gradient(circle,rgba(120,86,255,.28),transparent 65%);filter:blur(10px);animation:float 12s ease-in-out infinite alternate}
+.hero:after{content:"";position:absolute;inset:auto auto -30% -10%;width:560px;height:560px;background:radial-gradient(circle,rgba(29,155,240,.25),transparent 65%);animation:float 14s ease-in-out infinite alternate-reverse}
+@keyframes float{to{transform:translate(-40px,30px) scale(1.08)}}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
+@media(max-width:900px){.hero .wrap{grid-template-columns:1fr}}
+.pill{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--bd);border-radius:999px;padding:3px 14px;font-size:13px;color:var(--mu);background:var(--card)}
+.pill b{width:8px;height:8px;border-radius:50%;background:#00ba7c;animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(0,186,124,.18)}}
+h1{font-size:clamp(34px,5.4vw,60px);line-height:1.15;margin:18px 0 14px;letter-spacing:-.02em}
+h1 em{font-style:normal;background:linear-gradient(120deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:18px;color:var(--mu);max-width:34em}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 8px}
+.meta{font-size:13px;color:var(--mu)}
+.stage{position:relative;height:380px;border:1px solid var(--bd);border-radius:24px;background:var(--card);box-shadow:var(--sh);overflow:hidden}
+.pc{position:absolute;left:18px;width:58%;background:var(--bg);border:1px solid var(--bd);border-radius:14px;padding:10px 12px;font-size:12.5px;line-height:1.45;box-shadow:0 4px 14px rgba(0,0,0,.08);animation:fly 9s infinite cubic-bezier(.6,0,.3,1)}
+.pc i{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--bd);vertical-align:middle;margin-right:6px}
+.pc small{color:var(--mu)}
+.pc:nth-child(1){top:22px;--tx:150%;--ty:20px}.pc:nth-child(2){top:116px;--tx:150%;--ty:104px;animation-delay:1.4s}.pc:nth-child(3){top:210px;--tx:150%;--ty:-4px;animation-delay:2.8s}
+@keyframes fly{0%,12%{transform:none;opacity:1}38%{transform:translate(var(--tx),var(--ty)) scale(.5);opacity:1}46%,100%{transform:translate(var(--tx),var(--ty)) scale(.2);opacity:0}}
+.fd{position:absolute;right:18px;width:34%;display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;border:1px solid var(--bd);background:var(--bg);font-weight:700;font-size:13.5px}
+.fd svg{width:20px;height:20px;fill:none;stroke:var(--c);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fd.f1{top:30px;--c:#1d9bf0;animation:bump 9s infinite}.fd.f2{top:124px;--c:#f4a300;animation:bump 9s 1.4s infinite}.fd.f3{top:218px;--c:#f91880;animation:bump 9s 2.8s infinite}
+@keyframes bump{0%,30%{transform:none}40%{transform:scale(1.08);box-shadow:0 0 0 6px rgba(120,86,255,.16)}55%,100%{transform:none;box-shadow:none}}
+.cap{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:12px;color:var(--mu)}
+section{padding:84px 0}section.alt{background:var(--card);border-block:1px solid var(--bd)}
+h2{font-size:clamp(26px,3.6vw,38px);line-height:1.25;margin:0 0 10px;letter-spacing:-.01em}.sub{color:var(--mu);max-width:40em;margin:0 0 36px}
+.kick{font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--ac);margin-bottom:8px}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s,transform .7s}.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}html{scroll-behavior:auto}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px;text-align:center}.stat b{font-size:34px;display:block;line-height:1.2;background:linear-gradient(120deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}.stat span{font-size:13px;color:var(--mu)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:900px){.grid3{grid-template-columns:1fr 1fr}}@media(max-width:600px){.grid3{grid-template-columns:1fr}}
+.fc{background:var(--bg);border:1px solid var(--bd);border-radius:20px;padding:22px;transition:transform .25s,box-shadow .25s}.fc:hover{transform:translateY(-4px);box-shadow:var(--sh)}
+.fc .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(29,155,240,.16),rgba(120,86,255,.16));margin-bottom:12px}
+.fc .ic svg{width:22px;height:22px;fill:none;stroke:var(--ac);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fc h3{margin:0 0 4px;font-size:17px}.fc p{margin:0;color:var(--mu);font-size:14.5px;line-height:1.65}
+.show{display:grid;grid-template-columns:1fr 1.5fr;gap:34px;align-items:center;margin:34px 0}.show.rev{grid-template-columns:1.5fr 1fr}.show.rev .tx{order:2}
+@media(max-width:900px){.show,.show.rev{grid-template-columns:1fr}.show.rev .tx{order:0}}
+.shot{border:1px solid var(--bd);border-radius:18px;overflow:hidden;box-shadow:var(--sh);background:var(--card)}.shot img{display:block;width:100%;height:auto}
+.dk{display:none}@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .lt{display:none}:root:not([data-theme=light]) .dk{display:block}}
+.tx h3{font-size:22px;margin:0 0 8px}.tx p{color:var(--mu);margin:0 0 10px}.tx ul{margin:0;padding-left:20px;color:var(--mu)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:s}@media(max-width:900px){.steps{grid-template-columns:1fr 1fr}}@media(max-width:560px){.steps{grid-template-columns:1fr}}
+.st{position:relative;border:1px solid var(--bd);border-radius:18px;padding:22px 18px 18px;background:var(--bg);counter-increment:s}
+.st:before{content:counter(s);position:absolute;top:-14px;left:16px;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.st h3{margin:6px 0 4px;font-size:16px}.st p{margin:0;color:var(--mu);font-size:14px;line-height:1.6}
+code{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:1px 6px;font-size:.9em}
+.warn{margin-top:22px;border:1px solid var(--bd);border-left:4px solid #f4a300;border-radius:12px;padding:12px 16px;background:var(--bg);font-size:14px;color:var(--mu)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tabs label{border:1px solid var(--bd);border-radius:999px;padding:6px 16px;cursor:pointer;font-size:14px;font-weight:600;color:var(--mu)}
+.use input{position:absolute;opacity:0}.use .pane{display:none;border:1px solid var(--bd);border-radius:18px;padding:22px;background:var(--bg)}
+#u1:checked~.tabs label[for=u1],#u2:checked~.tabs label[for=u2],#u3:checked~.tabs label[for=u3]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+#u1:checked~.p1,#u2:checked~.p2,#u3:checked~.p3{display:block}.pane ol{margin:0;padding-left:22px}.pane li{margin:6px 0}
+.use input:focus-visible~.tabs label{outline:2px solid var(--ac)}
+.tw{overflow-x:auto;border:1px solid var(--bd);border-radius:18px;background:var(--bg)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}th,td{padding:12px 14px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--mu);font-weight:700;background:var(--card)}tr:last-child td{border-bottom:0}
+td.me,th.me{background:linear-gradient(180deg,rgba(29,155,240,.10),rgba(120,86,255,.08));font-weight:700}
+.y{color:#00a06a;font-weight:800}.n{color:var(--mu)}.t{color:#c77d00}
+.src{font-size:12.5px;color:var(--mu);margin-top:10px}
+.au{display:flex;gap:24px;align-items:center;border:1px solid var(--bd);border-radius:24px;padding:28px;background:var(--card)}
+.au img{width:96px;height:96px;border-radius:50%;border:3px solid var(--bg);box-shadow:var(--sh);background:var(--bd)}
+.au h3{margin:0;font-size:22px}.au p{margin:4px 0 12px;color:var(--mu)}@media(max-width:640px){.au{flex-direction:column;text-align:center}}
+footer{padding:40px 0;border-top:1px solid var(--bd);color:var(--mu);font-size:13px}footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="gh" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></symbol>
+<symbol id="fo" viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></symbol>
+<symbol id="bm" viewBox="0 0 24 24"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2"/></symbol>
+<symbol id="dl" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM11 16a1 1 0 1 0 2 0 1 1 0 1 0-2 0M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="lay" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></symbol>
+<symbol id="sr" viewBox="0 0 24 24"><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6"/></symbol>
+<symbol id="us" viewBox="0 0 24 24"><path d="M5 7a4 4 0 1 0 8 0 4 4 0 1 0-8 0M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.85"/></symbol>
+<symbol id="pl" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+<symbol id="tx" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></symbol>
+<symbol id="gl" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 1 0-18 0M3.6 9h16.8M3.6 15h16.8M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18"/></symbol>
+</defs></svg>
+<div class="note">これは GitHub Pages の<b>モックアップ</b>です。文章・数字・比較表は、公開前に事実を再確認します。作者の紹介文は、ご本人の記入待ちです。</div>
+
+<nav><div class="wrap"><a class="brand" href="#top"><i><svg><use href="#bm"/></svg></i>PostShelf</a>
+ <div class="links"><a href="#features">機能</a><a href="#install">インストール</a><a href="#usage">使い方</a><a href="#compare">比較</a><a href="#author">作者</a></div>
+ <a class="btn pri" href="#install"><svg><use href="#dl"/></svg>入手する</a></div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+ <div>
+  <span class="pill"><b></b>v1.1.0 公開中 · 無料 · MIT ライセンス</span>
+  <h1>X のブックマークを、<br><em>自分の棚</em>に並べる。</h1>
+  <p class="lead">ポストを、好きな名前・アイコン・色のフォルダに分けられる Chrome 拡張機能です。データは、あなたのパソコンの中だけに保存します。</p>
+  <div class="cta"><a class="btn pri" href="#install"><svg><use href="#dl"/></svg>インストール方法を見る</a><a class="btn" href="https://github.com/tabunugoku/PostShelf"><svg><use href="#gh"/></svg>GitHub で見る</a></div>
+  <div class="meta">Chrome 114 以降 · 手動インストール (Chrome ウェブストアでは配布していません)</div>
+ </div>
+ <div class="stage" aria-hidden="true">
+  <div class="pc"><i></i><b>Dev Tips</b> <small>@devtips</small><br>service worker を長持ちさせる小技まとめ</div>
+  <div class="pc"><i></i><b>UI Daily</b> <small>@uidaily</small><br>余白とタイポグラフィだけで画面が締まる理由</div>
+  <div class="pc"><i></i><b>Maho</b> <small>@maho</small><br>個人開発で 3 年続けて学んだこと</div>
+  <div class="fd f1"><svg><use href="#fo"/></svg>開発ネタ</div><div class="fd f2"><svg><use href="#fo"/></svg>あとで読む</div><div class="fd f3"><svg><use href="#fo"/></svg>デザイン</div>
+  <div class="cap">ポストが、フォルダに収まっていく (イメージ)</div>
+ </div></div></header>
+
+<section style="padding-top:30px"><div class="wrap">
+ <div class="stats reveal"><div class="stat"><b data-n="0">0</b><span>円 · 件数の上限なし</span></div><div class="stat"><b data-n="0">0</b><span>外部サーバーへの送信</span></div><div class="stat"><b data-n="8">0</b><span>言語に対応</span></div><div class="stat"><b data-n="3">0</b><span>つの権限だけ</span></div></div>
+</div></section>
+
+<section id="features" class="alt"><div class="wrap">
+ <div class="kick">FEATURES</div><h2 class="reveal">整理に必要なものを、ひと通り。</h2><p class="sub reveal">見た目は X に近く、操作は迷わない。データは端末の中。</p>
+ <div class="grid3">
+  <div class="fc reveal"><div class="ic"><svg><use href="#fo"/></svg></div><h3>自由なフォルダ</h3><p>名前・アイコン・色を自由に選べます。1 つのポストを、複数のフォルダに入れることもできます。</p></div>
+  <div class="fc reveal"><div class="ic"><svg><use href="#bm"/></svg></div><h3>x.com でそのまま保存</h3><p>ブックマークボタンの横に、フォルダを選ぶ小さなメニューが出ます。画面を離れずに分類できます。</p></div>
+  <div class="fc reveal"><div class="ic"><svg><use href="#lay"/></svg></div><h3>3 つの表示</h3><p>X 風のカード、リスト、グリッドを切り替えられます。サイドパネルでも使えます。</p></div>
+  <div class="fc reveal"><div class="ic"><svg><use href="#sr"/></svg></div><h3>探しやすい</h3><p>本文と投稿者の検索、並べ替え、「画像あり」「動画あり」「リンクあり」の絞り込み、最近 7 日のスマートビュー。</p></div>
+  <div class="fc reveal"><div class="ic"><svg><use href="#pl"/></svg></div><h3>動画と画像が見分けられる</h3><p>動画には再生ボタンと「動画」の札、複数枚の画像には枚数の札が付きます。</p></div>
+  <div class="fc reveal"><div class="ic"><svg><use href="#tx"/></svg></div><h3>長いポストも全文で</h3><p>たたまれたポストの全文を読み取り、PostShelf でたたむ・広げるを切り替えられます。本文中のリンクも開けます。</p></div>
+  <div class="fc reveal"><div class="ic"><svg><use href="#us"/></svg></div><h3>複数アカウント</h3><p>X のアカウントごとに、フォルダとポストを分けて管理します。</p></div>
+  <div class="fc reveal"><div class="ic"><svg><use href="#dl"/></svg></div><h3>取り込みと書き出し</h3><p>既存のブックマークを、確認のうえで自動取り込み (任意)。JSON でのエクスポート / インポートにも対応します。</p></div>
+  <div class="fc reveal"><div class="ic"><svg><use href="#lock"/></svg></div><h3>データは端末の中だけ</h3><p>保存先はブラウザの中だけ。外部への送信も、解析も、アカウント登録もありません。</p></div>
+ </div>
+</div></section>
+
+<section id="gallery"><div class="wrap">
+ <div class="kick">SCREENSHOTS</div><h2 class="reveal">画面を、見てみる。</h2><p class="sub reveal">実際の画面です (画面のポストは、サンプルのデータです)。</p>
+ <div class="show reveal"><div class="tx"><h3>X 風のカードで一覧</h3><p>フォルダと件数を、左に。ポストは、X に近い見た目で読めます。</p><ul><li>複数フォルダへの所属がタグで分かる</li><li>長いポストは、たたんで表示</li></ul></div>
+  <div class="shot"><img class="lt" src="../screenshots/tab-post-light.png" alt="カード表示の管理画面" loading="lazy"><img class="dk" src="../screenshots/tab-post-dark.png" alt="カード表示の管理画面 (ダーク)" loading="lazy"></div></div>
+ <div class="show rev reveal"><div class="tx"><h3>画像が並ぶグリッド</h3><p>画像を眺めながら選べます。動画と複数枚の画像は、札で見分けられます。</p></div>
+  <div class="shot"><img class="lt" src="../screenshots/tab-grid-light.png" alt="グリッド表示" loading="lazy"><img class="dk" src="../screenshots/tab-grid-dark.png" alt="グリッド表示 (ダーク)" loading="lazy"></div></div>
+ <div class="show reveal"><div class="tx"><h3>x.com の中で、そのまま分類</h3><p>ブックマークボタンの横から、フォルダを選ぶ・作る。</p></div>
+  <div class="shot"><img class="lt" src="../screenshots/popover-create-folder-light.png" alt="フォルダを作成するメニュー" loading="lazy"><img class="dk" src="../screenshots/popover-create-folder-dark.png" alt="フォルダを作成するメニュー (ダーク)" loading="lazy"></div></div>
+</div></section>
+
+<section id="install" class="alt"><div class="wrap">
+ <div class="kick">INSTALL</div><h2 class="reveal">インストールは、4 ステップ。</h2><p class="sub reveal">Chrome ウェブストアでは配布していないため、ZIP を取得して手動で読み込みます (約 3 分)。</p>
+ <div class="steps reveal">
+  <div class="st"><h3>ZIP を取得</h3><p>GitHub の <b>Releases</b> から <code>postshelf-1.1.0.zip</code> をダウンロードします。</p></div>
+  <div class="st"><h3>展開して置く</h3><p>固定の場所のフォルダに展開します。<b>削除や移動をしない</b>場所にしてください。</p></div>
+  <div class="st"><h3>デベロッパーモード</h3><p><code>chrome://extensions</code> を開き、右上の「デベロッパー モード」をオンにします。</p></div>
+  <div class="st"><h3>読み込む</h3><p>「パッケージ化されていない拡張機能を読み込む」で、展開したフォルダを選びます。</p></div>
+ </div>
+ <div class="warn"><b>更新するとき:</b> 先に設定の「データ」からエクスポートで保存してから、同じフォルダに新しい版を上書きし、「再読み込み」を押します。拡張機能は<b>削除しないでください</b> (保存したデータも消えます)。</div>
+ <div style="margin-top:22px"><a class="btn pri" href="https://github.com/tabunugoku/PostShelf/releases/latest"><svg><use href="#dl"/></svg>最新版をダウンロード</a></div>
+</div></section>
+
+<section id="usage"><div class="wrap">
+ <div class="kick">HOW TO USE</div><h2 class="reveal">使い方。</h2><p class="sub reveal">3 つの場面ごとに、手順を示します。</p>
+ <div class="use reveal">
+  <input type="radio" name="u" id="u1" checked><input type="radio" name="u" id="u2"><input type="radio" name="u" id="u3">
+  <div class="tabs"><label for="u1">ポストを保存する</label><label for="u2">整理して探す</label><label for="u3">ブックマークを取り込む</label></div>
+  <div class="pane p1"><ol><li>x.com で、ポストのブックマークボタンの横にある PostShelf のボタンを押します。</li><li>入れたいフォルダにチェックを付けます (複数可)。決めない場合は「未分類」です。</li><li>新しいフォルダは、メニューの「フォルダを追加」から、名前・アイコン・色を決めて作れます。</li></ol></div>
+  <div class="pane p2"><ol><li>ツールバーのアイコンから、管理画面かサイドパネルを開きます。</li><li>左のフォルダを選び、カード・リスト・グリッドで見ます。</li><li>検索、並べ替え、「画像あり」などの絞り込みで、目的のポストを探します。複数選択して、まとめて移動もできます。</li></ol></div>
+  <div class="pane p3"><ol><li>設定の「ブックマークの自動取り込み」から、始めます (確認の画面で、内容を読んで同意します)。</li><li>速度と、1 回の上限を選びます。一時停止・停止は、いつでもできます。</li><li>X が制限や警告を出したときは、自動で止まります。<br><span style="color:var(--mu)">自動スクロールは、X の規約上の「自動化されたアクセス」とみなされる可能性があります。</span></li></ol></div>
+ </div>
+</div></section>
+
+<section id="compare" class="alt"><div class="wrap">
+ <div class="kick">COMPARISON</div><h2 class="reveal">ほかのツールとの比較。</h2><p class="sub reveal">得意なことと、苦手なことを、そのまま書きます。2026-10-08 時点で、各ツールの公開ページに書かれていた内容に基づきます。</p>
+ <div class="tw reveal"><table>
+  <tr><th></th><th class="me">PostShelf</th><th>小さなローカル型<br><small>(ufofo、XOrganize など)</small></th><th>クラウド型<br><small>(Dewey、Tweetsmash など)</small></th></tr>
+  <tr><td>価格</td><td class="me y">無料、件数の上限なし</td><td>無料が中心</td><td class="t">無料枠に上限あり。有料プランあり</td></tr>
+  <tr><td>データの置き場所</td><td class="me y">端末の中だけ</td><td>端末の中が中心</td><td class="t">クラウド、アカウントが必要</td></tr>
+  <tr><td>フォルダの名前・アイコン・色</td><td class="me y">すべて自由</td><td class="n">名前が中心 (記載なし)</td><td class="n">フォルダ・タグ (アイコンや色は記載なし)</td></tr>
+  <tr><td>1 ポストを複数フォルダに</td><td class="me y">できる</td><td class="n">記載なし</td><td class="n">ツールによる</td></tr>
+  <tr><td>表示</td><td class="me y">カード / リスト / グリッド、サイドパネル</td><td class="n">記載なし</td><td class="n">Web アプリ中心</td></tr>
+  <tr><td>複数の X アカウント</td><td class="me y">アカウントごとに分けて管理</td><td class="n">記載なし</td><td class="t">プランにより上限</td></tr>
+  <tr><td>クラウド同期 · モバイル · AI</td><td class="me n">ない</td><td class="n">ない</td><td class="y">ある (一部は有料)</td></tr>
+  <tr><td>書き出し形式</td><td class="me t">JSON のみ</td><td class="t">JSON / CSV など</td><td class="y">CSV / PDF / Notion ほか</td></tr>
+  <tr><td>過去のブックマークの取り込み</td><td class="me t">自動取り込み (任意、1 回の上限あり)</td><td class="t">自動スクロール型もあり</td><td class="y">全件の取り込みに対応するものが多い</td></tr>
+  <tr><td>配布方法</td><td class="me t">手動インストール (Chrome 114+ のみ)</td><td class="t">Chrome ウェブストアが中心</td><td class="t">Chrome ウェブストアが中心</td></tr>
+  <tr><td>ソースコード</td><td class="me y">MIT で公開</td><td class="n">記載なしが多い</td><td class="n">非公開が多い</td></tr>
+ </table></div>
+ <p class="src">表の「記載なし」は、公開ページに書かれていなかったという意味で、機能がないことの証明ではありません。X の仕様や各ツールの内容は変わります。<span style="color:#c77d00">(モック: 公開前に、各ツールの現在の内容と照らして確認します)</span></p>
+</div></section>
+
+<section id="author"><div class="wrap">
+ <div class="kick">AUTHOR</div><h2 class="reveal">作った人。</h2>
+ <div class="au reveal"><img src="https://github.com/tabunugoku.png" alt="tabunugoku のアイコン"><div>
+  <h3>tabunugoku</h3><p>(紹介文は、ご本人が記入します。例: 何をしている人か、なぜ PostShelf を作ったか、連絡先)</p>
+  <a class="btn" href="https://github.com/tabunugoku"><svg><use href="#gh"/></svg>@tabunugoku</a> <a class="btn" href="https://github.com/tabunugoku/PostShelf/issues"><svg><use href="#gl"/></svg>不具合・要望を送る</a></div></div>
+</div></section>
+
+<footer><div class="wrap"><span>© 2026 tabunugoku · MIT License</span><span>PostShelf は X (旧 Twitter) の公式のものではなく、X との提携もありません。利用者は、X の規約を守る責任を負います。</span></div></footer>
+<script>
+(function(){
+ var els=document.querySelectorAll('.reveal');
+ if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});}
+ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});els.forEach(function(e){io.observe(e)});}
+ var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ document.querySelectorAll('.stat b').forEach(function(b){var n=+b.dataset.n;if(reduce||!n){b.textContent=n;return}
+  var s=0,t=setInterval(function(){s++;b.textContent=s;if(s>=n)clearInterval(t)},160)});
+})();
+</script>
+</body></html>
