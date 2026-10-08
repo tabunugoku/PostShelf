@@ -111,3 +111,6 @@ export const displayName = (f: Folder): string =>
   f.id === ALL_FOLDER_ID ? t('allFolderName') : f.id === INBOX_ID && f.name === '' ? t('inboxName') : f.name;
 
 export const isBuiltinFolder = (id: string): boolean => id === ALL_FOLDER_ID;
+
+/** ユーザーが作ったフォルダだけ (「すべて」と「未分類」は含めない)。管理画面の左のメニューとポップアップの「フォルダ」の数は、これで数える */
+export const userFoldersOf = (folders: Folder[]): Folder[] => folders.filter((f) => !isBuiltinFolder(f.id) && f.id !== INBOX_ID);

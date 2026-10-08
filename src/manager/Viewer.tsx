@@ -54,29 +54,21 @@ function Shell(props: { label: string; counter?: string; onClose: () => void; on
   );
 }
 
-/** 画像の全面表示。保存済みの URL (小さいサイズ) を大きいサイズに差し替えて読む。読めなければ失敗の表示 */
+/**
+ * 画像の全面表示。保存済みの URL (小さいサイズ) を大きいサイズに差し替えて読む。読めなければ失敗の表示。
+ * media が空のときは何も描かない (開く入口でも止めている)。
+ */
 export function ImageViewer(props: { tweetId: string; urls: string[]; index: number; postUrl: string; onIndex: (i: number) => void; onClose: () => void }) {
-  const { urls, index } = props;
+  const { urls } = props;
   const n = urls.length;
-  const stored = urls[index];
-  const cands = viewerCandidates(stored);
-  const [attempt, setAttempt] = useState(0);
-  const [failed, setFailed] = useState(false);
-  const [small, setSmall] = useState(false);
-  const [smallFailed, setSmallFailed] = useState(false);
-  useEffect(() => {
-    setAttempt(0);
-    setFailed(false);
-    setSmall(false);
-    setSmallFailed(false);
-  }, [index]);
+  if (n === 0) return null;
+  const index = Math.min(Math.max(props.index, 0), n - 1);
   const go = (d: number) => props.onIndex((index + d + n) % n); // 端で循環する
   const onKey = (e: KeyboardEvent) => {
     if (n > 1 && e.key === 'ArrowRight') return go(1), true;
     if (n > 1 && e.key === 'ArrowLeft') return go(-1), true;
     return false;
   };
-  const showFail = failed && (!small || smallFailed);
   return (
     <Shell label={t('viewerLabel')} counter={`${index + 1} / ${n}`} onClose={props.onClose} onKey={onKey}>
       {n > 1 && (
@@ -89,6 +81,22 @@ export function ImageViewer(props: { tweetId: string; urls: string[]; index: num
           </button>
         </>
       )}
+      {/* 読み込みの状態 (試した候補・失敗) は、画像ごとに持つ。key を変えて作り直すので、切り替えの最初の描画から初期値になる */}
+      <ImageBody key={`${index}:${urls[index]}`} tweetId={props.tweetId} index={index} stored={urls[index]} postUrl={props.postUrl} />
+    </Shell>
+  );
+}
+
+function ImageBody(props: { tweetId: string; index: number; stored: string; postUrl: string }) {
+  const { index, stored } = props;
+  const cands = viewerCandidates(stored);
+  const [attempt, setAttempt] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const [small, setSmall] = useState(false);
+  const [smallFailed, setSmallFailed] = useState(false);
+  const showFail = failed && (!small || smallFailed);
+  return (
+    <>
       {showFail ? (
         <div class="viewer-center" role="alert">
           <div>
@@ -121,7 +129,7 @@ export function ImageViewer(props: { tweetId: string; urls: string[]; index: num
           </button>
         )}
       </div>
-    </Shell>
+    </>
   );
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Icon } from '../shared/Icon';
-import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, type Account, type Bookmark, type Folder } from '../shared/models';
+import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
 import {
   RECENT_ID,
   authorHandles,
@@ -259,7 +259,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   }, [toast?.key]);
 
   const storedInbox = folders.find((f) => f.id === INBOX_ID);
-  const userFolders = folders.filter((f) => !isBuiltinFolder(f.id) && f.id !== INBOX_ID);
+  const userFolders = userFoldersOf(folders);
   const smartViews: Folder[] = [folders[0] ?? { id: ALL_FOLDER_ID, name: '', icon: 'ti-bookmarks', order: -1 }, inboxView(storedInbox), recentView()];
   const allViews = [...smartViews, ...userFolders];
   const curFolder = allViews.find((f) => f.id === current) ?? smartViews[0];
@@ -687,7 +687,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           folderOf={folderOf}
           pickerOpen={picker === b.tweetId}
           onSelect={(shift) => toggleSelect(b.tweetId, shift)}
-          onOpenImage={(index) => setViewer({ kind: 'image', tweetId: b.tweetId, index })}
+          onOpenImage={(index) => b.snapshot.media.length > 0 && setViewer({ kind: 'image', tweetId: b.tweetId, index })}
           onOpenVideo={() => setViewer({ kind: 'video', tweetId: b.tweetId })}
           onFocus={() => setFocusId(b.tweetId)}
           onRemoveFromFolder={(fid) => void run(removeFromFolders([b.tweetId], [fid]), 'toastRemoved')}
@@ -826,7 +826,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           }}
         />
       )}
-      {viewerBookmark && viewer?.kind === 'image' && (
+      {viewerBookmark && viewer?.kind === 'image' && viewerBookmark.snapshot.media.length > 0 && (
         <ImageViewer
           tweetId={viewerBookmark.tweetId}
           urls={viewerBookmark.snapshot.media}
