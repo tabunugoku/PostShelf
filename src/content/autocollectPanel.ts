@@ -88,7 +88,7 @@ export function viewOf(s: CollectState): PanelView {
         title: t('acPanelRunning'),
         sub: s.oldestSeenPostDate ? t('acSubRunningDate', speedName(s), dateOf(s.oldestSeenPostDate)) : t('acSubRunning', speedName(s)),
         dot: 'run', bar: 'ind', note: t('acNoteRunning'), alert: '',
-        buttons: [{ label: t('acBtnPause'), action: 'pause' }, { label: t('acBtnStop'), action: 'stop', danger: true }],
+        buttons: [{ label: t('acBtnPause'), action: 'pause' }, { label: t('acBtnStop'), action: 'stop' }], // 停止しても、そこまでの分は保存される。赤は、データが消える操作だけに使う
       };
     case 'paused': {
       const why = { user: 'acReasonUser', hidden: 'acReasonHidden', account: 'acReasonAccount', reload: 'acReasonReload', page: 'acReasonPage', time: 'acReasonTime' }[s.reason as string];

@@ -618,13 +618,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         class={`chip filter fbtn${filterCount ? ' on' : ''}`}
         aria-haspopup="true"
         aria-expanded={filterOpen}
+        aria-label={t('filterButton')}
+        title={t('filterButton')}
         onClick={() => setFilterOpen(!filterOpen)}
       >
-        <Icon name="ti-adjustments-horizontal" /> {t('filterButton')}
+        <Icon name="ti-adjustments-horizontal" /> <span class="fbtn-label">{t('filterButton')}</span>
         {filterCount > 0 && <span class="count-badge">{filterCount}</span>}
       </button>
       {filterOpen && (
-        <Dropdown onClose={() => setFilterOpen(false)} label={t('filterButton')} class="menu-filter menu-left">
+        <Dropdown fixed onClose={() => setFilterOpen(false)} label={t('filterButton')} class="menu-filter">
           <div class="chips" role="group" aria-label={t('filterButton')}>
             {filterItems}
           </div>

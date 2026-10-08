@@ -92,9 +92,9 @@ button:disabled{cursor:not-allowed}
 /* ---- バナー / チップ / 一括操作 ---- */
 .banner{display:flex;align-items:center;gap:10px;background:var(--bg-accent);border:1px solid var(--border);border-radius:10px;padding:6px 8px 6px 12px;margin-bottom:12px}
 .banner>i{color:var(--text-accent);font-size:18px}
-.banner-btn{margin-left:auto}
+.banner-btn{margin-left:auto;flex:none;white-space:nowrap}
 .banner-text{flex:1 1 auto;min-width:0}
-.banner-more{display:inline-flex;gap:4px;align-items:center;color:var(--text-secondary);white-space:nowrap}
+.banner-more{display:inline-flex;flex:none;gap:4px;align-items:center;color:var(--text-secondary);white-space:nowrap}
 .chips,.scroll{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .scroll{flex-wrap:nowrap;overflow-x:auto;margin-bottom:0;padding-bottom:2px}
 .chip.filter,.scroll .chip{display:inline-flex;gap:6px;align-items:center;min-height:32px;padding:2px 12px;border:1px solid var(--border-strong);border-radius:16px;background:var(--surface-2);cursor:pointer;white-space:nowrap}
@@ -248,10 +248,18 @@ button:disabled{cursor:not-allowed}
 .fb-main{display:flex;gap:8px;align-items:center;min-width:0}
 .fb-main .muted{font-weight:400}
 .pbody{flex:1;padding:8px 12px 80px;min-width:0}
-.layout-narrow .tools{display:flex;gap:8px;align-items:center}
+.layout-narrow .tools{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}
+.layout-narrow .tools .sortbox{min-width:0;flex:0 1 auto}
+.layout-narrow .tools .sort-btn{max-width:100%;gap:4px;padding:4px 8px;white-space:nowrap}
+.layout-narrow .tools .sort-btn>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.layout-narrow .tools .fbtn{flex:none;padding:2px 10px;gap:4px}
+.layout-narrow .tools .seg{flex:none}
+.layout-narrow .tools .seg button{min-width:32px;padding:4px 6px}
+/* 幅 380px 以下 (サイドパネルの最小幅) では、並べ替えの文言を欠けさせないよう、「絞り込み」はアイコン (と件数のバッジ) だけにする */
+@media (max-width:380px){.layout-narrow .tools .fbtn-label{display:none}.layout-narrow .tools .fbtn{padding:2px 8px}}
 .fbtn{position:relative}
 .count-badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent-strong);color:#fff;font-size:12px;font-weight:700;line-height:1}
-.menu-filter{min-width:min(280px,calc(100vw - 24px))}
+.menu-filter{width:min(300px,calc(100vw - 16px))}
 .menu-filter .chips{flex-wrap:wrap;overflow:visible;margin:0}
 .layout-narrow .post{gap:8px;padding:10px 0}
 .layout-narrow .av{width:32px;height:32px;font-size:14px}

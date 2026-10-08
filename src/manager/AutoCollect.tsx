@@ -94,6 +94,8 @@ export function AutoCollectDialog(props: {
         ) : (
           <p class="muted">{t('acDlgIntro', props.accountName)}</p>
         )}
+        {/* 順: 説明 → 規約の注意 (黄色い枠) → 速度と 1 回の上限 → 並び順の図 → 同意 → 始める */}
+        <div class="ac-alert" role="note">{t('acRisk')}</div>
         <fieldset class="ac-field">
           <legend>{t('acSpeedLabel')}</legend>
           <label class="setting">
@@ -124,7 +126,6 @@ export function AutoCollectDialog(props: {
             <span class="ac-ok">{t('acOrderSame')}</span>
           </div>
         </div>
-        <div class="ac-alert" role="note">{t('acRisk')}</div>
         <label class="setting">
           <input type="checkbox" checked={agreed} onChange={(e) => setAgreed((e.target as HTMLInputElement).checked)} />
           <span>{t('acConsent')}</span>
