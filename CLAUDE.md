@@ -36,7 +36,8 @@ Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: num
 
 ## 守ること
 - X の DOM セレクタは `src/shared/selectors.ts` の 1 ファイルに集約 (`data-testid` 優先: `tweet`, `bookmark`, `removeBookmark`, `User-Name`, `tweetText` など)。X の仕様変更はここだけ直せばよい構造にする
-- X の非公開 API / GraphQL を直接呼ばない。自動スクロールで大量取得しない。ユーザーが見ている画面の DOM のみ読む
+- X の非公開 API / GraphQL を直接呼ばない。ユーザーが見ている画面の DOM のみ読む
+- 自動スクロールによる取り込みは、ユーザーが確認ダイアログで同意して開始した取り込みに限る (速度を抑え、一時停止・停止ができ、X の制限を検知したら止める)。それ以外の自動スクロールは入れない。インストール直後・アカウント切替直後・ページを開いただけでは自動では始めない (案内を出すだけ)。実装は `src/content/autocollect.ts`。設定「自動取り込みを使う」をオフにすれば、案内も開始ボタンも出ない
 - 外部サーバーへの送信なし。解析/トラッキングなし
 - 不確かな X の DOM 構造は推測で断定せず、fixture とコメントで前提を明記する
 - 対応言語は日本語と英語 (`chrome.i18n`, `_locales/{ja,en}`)。UI 文字列は直書きせず `t()` 経由

@@ -42,6 +42,12 @@ export const CANDIDATES = {
   // 1 番目: 左メニュー下部のアカウント切替ボタン。実機では表示名と @ハンドルが出ている
   // 2 番目: 左メニューの「プロフィール」リンク (href が /ハンドル)
   // 3 番目: 左メニュー内のアバター (data-testid が UserAvatar-Container-ハンドル)
+  // 自動取り込み (v15) で使う。いずれも実機未確認の推測 (docs/MANUAL_TEST.md に未確認として書く):
+  // 読み込み中の表示 (スクロールの下端に出るスピナー)。role="progressbar" を持つ (推測)
+  loadingIndicator: ['[role="progressbar"]'],
+  // X が出すエラーや制限の表示 (「問題が発生しました」「Rate limit exceeded」と再試行ボタン)。data-testid は推測。
+  // 誤検知で止めすぎないよう、文言 (表示言語で変わる) には頼らず、エラー専用らしい data-testid だけを候補にする
+  xError: ['[data-testid="error-detail"]', '[data-testid="retry"]'],
   accountSwitcher: [
     '[data-testid="SideNav_AccountSwitcher_Button"]',
     '[data-testid="AppTabBar_Profile_Link"]',

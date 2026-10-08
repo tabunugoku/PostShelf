@@ -25,6 +25,7 @@ import {
   type Folder,
 } from './models';
 import { t } from './strings';
+import { assignOrder } from './ordering';
 
 const KEY_FOLDERS = 'folders';
 const KEY_BOOKMARKS = 'bookmarks';
@@ -349,20 +350,26 @@ export async function importData(json: unknown): Promise<number> {
 
 /**
  * フォルダ未所属で取り込む (ページ収集用)。既存ポストは触らない。
- * ブックマークは folderIds が空だと消える仕様なので、専用の「未分類」フォルダへ入れる。
+ * 取り込んだポストは専用の「未分類」フォルダへ入れる。
+ *
+ * items は x.com の一覧の並び (上から下 = 新しい追加順) のまま渡す。savedAt は取り込んだ時刻ではなく、
+ * 一覧での位置から決めるので (src/shared/ordering.ts)、「保存が新しい順」が x.com のブックマークの並びと一致する。
+ * 取り込み済みのポストは、並びの基準 (すぐ上・すぐ下) として使うだけで、変更しない。
+ * @param startedAt 取り込みの開始時刻 (いちばん上の区間の基準)
  */
-export async function addCollected(items: { tweetId: string; snapshot: Bookmark['snapshot'] }[]): Promise<number> {
-  const folders = await readFolders();
-  let inbox = folders.find((f) => f.id === INBOX_ID);
-  if (!inbox) {
-    inbox = { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: scope };
-    await writeFolders([...folders, inbox]);
-  }
+export async function addCollected(items: { tweetId: string; snapshot: Bookmark['snapshot'] }[], startedAt: number = Date.now()): Promise<number> {
   const map = await readMap();
+  const order = assignOrder(
+    items.map((it) => ({ id: it.tweetId, savedAt: map[key(it.tweetId)]?.savedAt })),
+    startedAt,
+  );
+  const fresh = items.filter((it) => !map[key(it.tweetId)] && order.has(it.tweetId));
+  if (fresh.length === 0) return 0;
+  await ensureInboxFolder();
   let added = 0;
-  for (const it of items) {
+  for (const it of fresh) {
     if (map[key(it.tweetId)]) continue;
-    map[key(it.tweetId)] = { accountId: scope, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: Date.now(), snapshot: it.snapshot };
+    map[key(it.tweetId)] = { accountId: scope, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot };
     added++;
   }
   await write(KEY_BOOKMARKS, map);
