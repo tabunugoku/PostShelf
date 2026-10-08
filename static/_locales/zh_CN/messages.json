@@ -927,5 +927,286 @@
   },
   "removeFromPostShelf": {
     "message": "从 PostShelf 中移除"
+  },
+  "acPanelLabel": {
+    "message": "书签自动导入"
+  },
+  "acPanelRunning": {
+    "message": "正在导入书签"
+  },
+  "acPanelPaused": {
+    "message": "已暂停"
+  },
+  "acPanelLimit": {
+    "message": "已自动停止"
+  },
+  "acPanelDone": {
+    "message": "导入已完成"
+  },
+  "acPanelStopped": {
+    "message": "导入已结束"
+  },
+  "acPanelCountdown": {
+    "message": "$SEC$ 秒后开始",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "以“$SPEED$”速度读取中",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "$SPEED$。正在读取 $DATE$ 前后的帖子",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "慢速"
+  },
+  "acSpeedNormal": {
+    "message": "标准"
+  },
+  "acReasonUser": {
+    "message": "已暂停"
+  },
+  "acReasonHidden": {
+    "message": "因为切换到了其他标签页，已自动暂停"
+  },
+  "acReasonAccount": {
+    "message": "因为账号已切换，已暂停"
+  },
+  "acReasonCap": {
+    "message": "已达到 $COUNT$ 条的上限，已暂停",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonReload": {
+    "message": "因为页面已重新加载，已暂停"
+  },
+  "acReasonLimit": {
+    "message": "X 可能显示了限制"
+  },
+  "acReasonPage": {
+    "message": "因为离开了书签页面，已暂停"
+  },
+  "acReasonRefusedAccount": {
+    "message": "无法开始：管理页面中选择的账号与 x.com 上的账号不一致"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "无法开始：无法判断 x.com 上的账号"
+  },
+  "acSubDone": {
+    "message": "已读取到最早的书签"
+  },
+  "acSubStopped": {
+    "message": "此前的内容已保存"
+  },
+  "acNoteRunning": {
+    "message": "请保持此标签页打开。切换到其他标签页会自动暂停。"
+  },
+  "acNotePaused": {
+    "message": "继续后会从中断处接着导入。已导入的帖子会被跳过，并按 X 书签的顺序排列。"
+  },
+  "acNoteReload": {
+    "message": "继续后会从列表开头重新读取。已导入的帖子会被跳过。"
+  },
+  "acNoteDone": {
+    "message": "已按 X 的顺序整理。可以在“未分类”中分到各个文件夹。"
+  },
+  "acLimitAlert": {
+    "message": "X 的页面出现了错误或限制提示，已停止。请至少等待 15 分钟后再继续。连续尝试可能会让限制持续更久。"
+  },
+  "acResumeAt": {
+    "message": "将于 $TIME$ 继续（请保持此标签页打开）",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "已导入"
+  },
+  "acStatSkipped": {
+    "message": "已跳过"
+  },
+  "acStatFailed": {
+    "message": "失败"
+  },
+  "acOldest": {
+    "message": "最早的帖子：$DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "暂停"
+  },
+  "acBtnStop": {
+    "message": "停止"
+  },
+  "acBtnResume": {
+    "message": "继续"
+  },
+  "acBtnEnd": {
+    "message": "到此结束"
+  },
+  "acBtnResumeLater": {
+    "message": "15 分钟后继续"
+  },
+  "acBtnOpenManager": {
+    "message": "打开管理页面"
+  },
+  "acBtnClose": {
+    "message": "关闭"
+  },
+  "acBtnAuto": {
+    "message": "自动导入…"
+  },
+  "acBtnAutoTitle": {
+    "message": "自动滚动书签标签并全部导入（在管理页面中确认）"
+  },
+  "acManualTitle": {
+    "message": "只导入当前可见的部分"
+  },
+  "acOfferTitle": {
+    "message": "要导入你的 X 书签吗？"
+  },
+  "acOfferBody": {
+    "message": "你是第一次用 $ACCOUNT$ 使用 PostShelf。它会打开 x.com 的“历史记录”→“书签”，自动滚动页面并导入。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "开始导入…"
+  },
+  "acOfferLater": {
+    "message": "稍后"
+  },
+  "acOfferNever": {
+    "message": "此账号不再显示"
+  },
+  "acDlgTitle": {
+    "message": "自动导入"
+  },
+  "acDlgIntro": {
+    "message": "账号：$ACCOUNT$。将自动滚动 x.com 的书签标签并读取。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "速度"
+  },
+  "acSpeedSlowOpt": {
+    "message": "慢速（推荐）"
+  },
+  "acSpeedSlowHint": {
+    "message": "约每分钟 20–40 条"
+  },
+  "acSpeedNormalHint": {
+    "message": "约每分钟 40–80 条"
+  },
+  "acCapLabel": {
+    "message": "单次上限"
+  },
+  "acCap300": {
+    "message": "每 300 条暂停一次（推荐）"
+  },
+  "acCap100": {
+    "message": "每 100 条暂停一次"
+  },
+  "acCap0": {
+    "message": "不暂停"
+  },
+  "acOrderX": {
+    "message": "x.com 的书签"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf（导入后）"
+  },
+  "acOrderNewest": {
+    "message": "最新的帖子"
+  },
+  "acOrderPrev": {
+    "message": "之前的帖子"
+  },
+  "acOrderOld": {
+    "message": "……更早的帖子"
+  },
+  "acOrderSame": {
+    "message": "顺序相同"
+  },
+  "acRisk": {
+    "message": "自动滚动可能被视为 X 条款所禁止的“自动化访问”。即使账号受到限制等情况，PostShelf 的作者也无法承担责任。请仅依据你自己的判断，仅对你自己的账号进行导入。"
+  },
+  "acConsent": {
+    "message": "我已理解以上内容，并依据自己的判断执行"
+  },
+  "acDlgStart": {
+    "message": "开始导入"
+  },
+  "acProgressLine": {
+    "message": "已导入 $IMPORTED$ 条，已跳过 $SKIPPED$ 条",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "打开 x.com 标签页"
+  },
+  "acSettingsSwitch": {
+    "message": "使用自动导入"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "关闭后，将不再显示导入提示和开始按钮。即使开启，也不会自动开始。"
+  },
+  "acSettingsRun": {
+    "message": "自动导入书签…"
+  },
+  "acSettingsNote": {
+    "message": "自动滚动可能被视为 X 条款中的“自动化访问”。开始前请阅读确认页面中的内容。"
+  },
+  "acNoAccount": {
+    "message": "无法判断账号，因此无法开始。请打开 x.com 登录后再试一次。"
   }
 }

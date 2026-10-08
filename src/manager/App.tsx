@@ -17,6 +17,10 @@ import {
   getImportHint,
   getSettings,
   noteRunVersion,
+  onSettingsChanged,
+  setCollectOffer,
+  DEFAULT_AUTO_COLLECT,
+  type AutoCollectSettings,
   onImportHintChanged,
   shouldShowImportHint,
   updateSettings,
@@ -56,6 +60,7 @@ import { FolderEdit } from './FolderEdit';
 import { SaveCurrent } from './SaveCurrent';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
+import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun } from './AutoCollect';
 import { currentVersion } from '../shared/version';
 import { useCompact } from './useCompact';
 
@@ -101,6 +106,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   /** 更新した直後の最初の起動だけ出すお知らせ (更新後のバージョン) */
   const [updated, setUpdated] = useState<string | null>(null);
   const storageError = useStorageError();
+  /** ブックマークの自動取り込み (v15): 設定、確認ダイアログ、「あとで」(この画面を開いている間だけ案内を隠す)、取り込みの状態 */
+  const [autoCfg, setAutoCfg] = useState<AutoCollectSettings>(DEFAULT_AUTO_COLLECT);
+  const [autoOpen, setAutoOpen] = useState(location.hash === '#autocollect');
+  const [offerLater, setOfferLater] = useState(false);
+  const collectRun = useCollectRun();
+  const [runClosed, setRunClosed] = useState(0);
   const [pending, setPending] = useState(0);
   const [accounts, setAccounts] = useState<AccountSummary[]>([]);
   const [viewId, setViewId] = useState(UNKNOWN_ACCOUNT_ID);
@@ -136,6 +147,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts(), refreshCacheView()]).then((r) => [r[0], r[1], r[2]] as const);
       lastRef.current = last;
       setLastSeen(last);
+      setAutoCfg(s.autoCollect);
       applyView(resolveViewAccount(s.viewAccount, last, accs));
       await Promise.all([reload(), loadHint()]);
       const ver = currentVersion();
@@ -148,7 +160,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       reportStorageError(); // 読み込めなかったことを画面に出す (空の画面のままにしない)
       setReady(true);
     });
-    const offs = [onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
+    const onHash = () => {
+      if (location.hash === '#autocollect') setAutoOpen(true); // x.com の「自動で取り込む…」から開かれた
+    };
+    window.addEventListener('hashchange', onHash);
+    const offs = [() => window.removeEventListener('hashchange', onHash), onSettingsChanged((c) => setAutoCfg(c.autoCollect)), onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
     return () => offs.forEach((o) => o());
   }, []);
 
@@ -670,6 +686,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     </div>
   );
 
+  // 案内を出す条件: 自動取り込みを使う設定、判定できたアカウントを表示していて、そのアカウントのデータが 0 件、案内を閉じていない。
+  // 出すだけで、自動では始まらない (「始める」を押して確認ダイアログで同意したときだけ動く)
+  const runActive = !!collectRun && ['countdown', 'running', 'paused', 'limit'].includes(collectRun.status);
+  const offerShown =
+    page === 'bookmarks' && autoCfg.enabled && !!lastSeen && viewId === lastSeen.id && bookmarks.length === 0 && !autoCfg.offers[lastSeen.id] && !offerLater && !runActive;
   const notices = (
     <>
       {storageError && (
@@ -680,6 +701,17 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             <Icon name="ti-x" />
           </button>
         </div>
+      )}
+      {collectRun && collectRun.updatedAt !== runClosed && autoCfg.enabled && (
+        <ProgressBanner run={collectRun} onClose={() => setRunClosed(collectRun.updatedAt)} />
+      )}
+      {offerShown && lastSeen && (
+        <OfferBanner
+          accountName={accountLabel(lastSeen)}
+          onStart={() => setAutoOpen(true)}
+          onLater={() => setOfferLater(true)}
+          onNever={() => void setCollectOffer(lastSeen.id, 'dismissed')}
+        />
       )}
       {updated && (
         <div class="banner" role="status">
@@ -758,6 +790,22 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       {viewerBookmark && viewer?.kind === 'video' && (
         <VideoGuide tweetId={viewerBookmark.tweetId} poster={viewerBookmark.snapshot.videoPoster} postUrl={viewerBookmark.snapshot.url} onClose={() => setViewer(null)} />
       )}
+      {autoOpen && autoCfg.enabled && (
+        <AutoCollectDialog
+          accountName={lastSeen ? accountLabel(lastSeen) : null}
+          speed={autoCfg.speed}
+          cap={autoCfg.cap}
+          onCancel={() => {
+            setAutoOpen(false);
+            if (location.hash === '#autocollect') history.replaceState(null, '', location.pathname + location.search);
+          }}
+          onStart={(speed, cap) => {
+            setAutoOpen(false);
+            if (location.hash === '#autocollect') history.replaceState(null, '', location.pathname + location.search);
+            if (lastSeen) void startAutoCollect({ accountId: lastSeen.id, speed, cap });
+          }}
+        />
+      )}
       {showHow && <InfoDialog title={t('importHowTitle')} body={t('importHowSteps')} onClose={() => setShowHow(false)} />}
       {toast && <Toast message={toast.message} onUndo={toast.undo || toast.action ? () => void doUndo() : undefined} />}
     </>
@@ -772,6 +820,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         surface={surface}
         onChanged={() => void reload()}
         onApplied={() => void reapplySettings()}
+        onAutoCollect={() => setAutoOpen(true)}
         onNotice={(message, action) => setToast({ key: Date.now(), message, action })}
       />
     </>

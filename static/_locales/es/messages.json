@@ -927,5 +927,286 @@
   },
   "removeFromPostShelf": {
     "message": "Quitar de PostShelf"
+  },
+  "acPanelLabel": {
+    "message": "Importación automática de marcadores"
+  },
+  "acPanelRunning": {
+    "message": "Importando marcadores"
+  },
+  "acPanelPaused": {
+    "message": "En pausa"
+  },
+  "acPanelLimit": {
+    "message": "Se detuvo automáticamente"
+  },
+  "acPanelDone": {
+    "message": "Importación terminada"
+  },
+  "acPanelStopped": {
+    "message": "Importación finalizada"
+  },
+  "acPanelCountdown": {
+    "message": "Empieza en $SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "Cargando a velocidad «$SPEED$»",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "$SPEED$. Cargando publicaciones de alrededor del $DATE$",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "Lenta"
+  },
+  "acSpeedNormal": {
+    "message": "Normal"
+  },
+  "acReasonUser": {
+    "message": "Has pausado la importación"
+  },
+  "acReasonHidden": {
+    "message": "Se detuvo automáticamente porque cambiaste de pestaña"
+  },
+  "acReasonAccount": {
+    "message": "Se detuvo porque cambió la cuenta"
+  },
+  "acReasonCap": {
+    "message": "Se detuvo al llegar al límite de $COUNT$ publicaciones",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonReload": {
+    "message": "Detenido porque se recargó la página"
+  },
+  "acReasonLimit": {
+    "message": "X puede haber mostrado un límite"
+  },
+  "acReasonPage": {
+    "message": "Se detuvo porque saliste de la página de marcadores"
+  },
+  "acReasonRefusedAccount": {
+    "message": "No se puede empezar: la cuenta elegida en el gestor es distinta de la de x.com"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "No se puede empezar: no se pudo determinar la cuenta de x.com"
+  },
+  "acSubDone": {
+    "message": "Se llegó al marcador más antiguo"
+  },
+  "acSubStopped": {
+    "message": "Todo lo anterior ya está guardado"
+  },
+  "acNoteRunning": {
+    "message": "Mantén esta pestaña abierta. Si cambias a otra pestaña, la importación se pausa automáticamente."
+  },
+  "acNotePaused": {
+    "message": "Al reanudar, continúa desde donde se detuvo. Se omiten las publicaciones ya importadas y las nuevas se colocan según el orden de tus marcadores de X."
+  },
+  "acNoteReload": {
+    "message": "Al reanudar, se vuelve a leer la lista desde el principio. Se omiten las publicaciones ya importadas."
+  },
+  "acNoteDone": {
+    "message": "Organizado en el mismo orden que en X. Puedes repartirlos en carpetas desde «Sin clasificar»."
+  },
+  "acLimitAlert": {
+    "message": "Se detuvo porque X mostró un error o un límite. Espera al menos 15 minutos antes de reanudar. Si lo intentas enseguida, el límite puede durar más."
+  },
+  "acResumeAt": {
+    "message": "Se reanudará a las $TIME$ (mantén esta pestaña abierta)",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "Importadas"
+  },
+  "acStatSkipped": {
+    "message": "Omitidas"
+  },
+  "acStatFailed": {
+    "message": "Fallidas"
+  },
+  "acOldest": {
+    "message": "Publicación más antigua: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "Pausar"
+  },
+  "acBtnStop": {
+    "message": "Detener"
+  },
+  "acBtnResume": {
+    "message": "Reanudar"
+  },
+  "acBtnEnd": {
+    "message": "Terminar aquí"
+  },
+  "acBtnResumeLater": {
+    "message": "Reanudar en 15 minutos"
+  },
+  "acBtnOpenManager": {
+    "message": "Abrir el gestor"
+  },
+  "acBtnClose": {
+    "message": "Cerrar"
+  },
+  "acBtnAuto": {
+    "message": "Importar automáticamente…"
+  },
+  "acBtnAutoTitle": {
+    "message": "Desplaza automáticamente la pestaña de marcadores e importa todo (se confirma en el gestor)"
+  },
+  "acManualTitle": {
+    "message": "Importar solo lo que se ve ahora"
+  },
+  "acOfferTitle": {
+    "message": "¿Importar tus marcadores de X?"
+  },
+  "acOfferBody": {
+    "message": "Es la primera vez que usas PostShelf con $ACCOUNT$. Se abre «Historial» → «Marcadores» en x.com y se importa desplazando la página automáticamente.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "Empezar a importar…"
+  },
+  "acOfferLater": {
+    "message": "Más tarde"
+  },
+  "acOfferNever": {
+    "message": "No mostrar para esta cuenta"
+  },
+  "acDlgTitle": {
+    "message": "Importar automáticamente"
+  },
+  "acDlgIntro": {
+    "message": "Cuenta: $ACCOUNT$. La pestaña de marcadores de x.com se desplaza y se lee automáticamente.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "Velocidad"
+  },
+  "acSpeedSlowOpt": {
+    "message": "Lenta (recomendada)"
+  },
+  "acSpeedSlowHint": {
+    "message": "Unas 20–40 publicaciones por minuto"
+  },
+  "acSpeedNormalHint": {
+    "message": "Unas 40–80 publicaciones por minuto"
+  },
+  "acCapLabel": {
+    "message": "Límite por ejecución"
+  },
+  "acCap300": {
+    "message": "Pausar cada 300 publicaciones (recomendado)"
+  },
+  "acCap100": {
+    "message": "Pausar cada 100 publicaciones"
+  },
+  "acCap0": {
+    "message": "No pausar"
+  },
+  "acOrderX": {
+    "message": "Marcadores en x.com"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf (tras importar)"
+  },
+  "acOrderNewest": {
+    "message": "Publicación más reciente"
+  },
+  "acOrderPrev": {
+    "message": "La anterior"
+  },
+  "acOrderOld": {
+    "message": "… publicaciones más antiguas"
+  },
+  "acOrderSame": {
+    "message": "Mismo orden"
+  },
+  "acRisk": {
+    "message": "El desplazamiento automático puede considerarse «acceso automatizado», que prohíben las condiciones de X. Si se restringe tu cuenta o sucede algo similar, el autor de PostShelf no puede asumir responsabilidad. Importa solo bajo tu propio criterio y solo con tu propia cuenta."
+  },
+  "acConsent": {
+    "message": "Entiendo lo anterior y lo ejecuto bajo mi propio criterio"
+  },
+  "acDlgStart": {
+    "message": "Empezar a importar"
+  },
+  "acProgressLine": {
+    "message": "$IMPORTED$ importadas, $SKIPPED$ omitidas",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "Abrir la pestaña de x.com"
+  },
+  "acSettingsSwitch": {
+    "message": "Usar la importación automática"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "Si se desactiva, se ocultan el aviso de importación y los botones de inicio. Aunque esté activada, nada empieza por sí solo."
+  },
+  "acSettingsRun": {
+    "message": "Importar marcadores automáticamente…"
+  },
+  "acSettingsNote": {
+    "message": "El desplazamiento automático puede considerarse «acceso automatizado» según las condiciones de X. Lee la pantalla de confirmación antes de empezar."
+  },
+  "acNoAccount": {
+    "message": "No se puede empezar porque no se pudo determinar la cuenta. Abre x.com, inicia sesión e inténtalo de nuevo."
   }
 }

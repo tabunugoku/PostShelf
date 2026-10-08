@@ -927,5 +927,286 @@
   },
   "removeFromPostShelf": {
     "message": "Remover do PostShelf"
+  },
+  "acPanelLabel": {
+    "message": "Importação automática de favoritos"
+  },
+  "acPanelRunning": {
+    "message": "Importando favoritos"
+  },
+  "acPanelPaused": {
+    "message": "Pausado"
+  },
+  "acPanelLimit": {
+    "message": "Parou automaticamente"
+  },
+  "acPanelDone": {
+    "message": "Importação concluída"
+  },
+  "acPanelStopped": {
+    "message": "Importação encerrada"
+  },
+  "acPanelCountdown": {
+    "message": "Começa em $SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "Carregando na velocidade \"$SPEED$\"",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "$SPEED$. Carregando posts de por volta de $DATE$",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "Lenta"
+  },
+  "acSpeedNormal": {
+    "message": "Normal"
+  },
+  "acReasonUser": {
+    "message": "Você pausou a importação"
+  },
+  "acReasonHidden": {
+    "message": "Parou automaticamente porque você mudou de aba"
+  },
+  "acReasonAccount": {
+    "message": "Parou porque a conta mudou"
+  },
+  "acReasonCap": {
+    "message": "Parou ao atingir o limite de $COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonReload": {
+    "message": "Parado porque a página foi recarregada"
+  },
+  "acReasonLimit": {
+    "message": "O X pode ter exibido um limite"
+  },
+  "acReasonPage": {
+    "message": "Parou porque você saiu da página de favoritos"
+  },
+  "acReasonRefusedAccount": {
+    "message": "Não é possível iniciar: a conta escolhida no gerenciador é diferente da conta do x.com"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "Não é possível iniciar: não foi possível identificar a conta do x.com"
+  },
+  "acSubDone": {
+    "message": "Chegou ao favorito mais antigo"
+  },
+  "acSubStopped": {
+    "message": "Tudo até aqui já está salvo"
+  },
+  "acNoteRunning": {
+    "message": "Mantenha esta aba aberta. Ao mudar de aba, a importação pausa automaticamente."
+  },
+  "acNotePaused": {
+    "message": "Ao retomar, continua de onde parou. Posts já importados são ignorados e os novos são colocados na ordem dos seus favoritos do X."
+  },
+  "acNoteReload": {
+    "message": "Ao retomar, a lista é lida de novo desde o início. Posts já importados são ignorados."
+  },
+  "acNoteDone": {
+    "message": "Organizado na mesma ordem do X. Você pode separá-los em pastas a partir de \"Não classificados\"."
+  },
+  "acLimitAlert": {
+    "message": "Parou porque o X exibiu um erro ou um limite. Espere pelo menos 15 minutos antes de retomar. Tentar de novo logo pode prolongar o limite."
+  },
+  "acResumeAt": {
+    "message": "Será retomado às $TIME$ (mantenha esta aba aberta)",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "Importados"
+  },
+  "acStatSkipped": {
+    "message": "Ignorados"
+  },
+  "acStatFailed": {
+    "message": "Falhas"
+  },
+  "acOldest": {
+    "message": "Post mais antigo: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "Pausar"
+  },
+  "acBtnStop": {
+    "message": "Parar"
+  },
+  "acBtnResume": {
+    "message": "Retomar"
+  },
+  "acBtnEnd": {
+    "message": "Encerrar aqui"
+  },
+  "acBtnResumeLater": {
+    "message": "Retomar em 15 minutos"
+  },
+  "acBtnOpenManager": {
+    "message": "Abrir o gerenciador"
+  },
+  "acBtnClose": {
+    "message": "Fechar"
+  },
+  "acBtnAuto": {
+    "message": "Importar automaticamente…"
+  },
+  "acBtnAutoTitle": {
+    "message": "Rola automaticamente a aba de favoritos e importa tudo (confirmação no gerenciador)"
+  },
+  "acManualTitle": {
+    "message": "Importar só o que está visível agora"
+  },
+  "acOfferTitle": {
+    "message": "Importar seus favoritos do X?"
+  },
+  "acOfferBody": {
+    "message": "É a primeira vez que você usa o PostShelf com $ACCOUNT$. Ele abre \"Histórico\" → \"Favoritos\" no x.com e importa rolando a página automaticamente.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "Começar a importar…"
+  },
+  "acOfferLater": {
+    "message": "Depois"
+  },
+  "acOfferNever": {
+    "message": "Não mostrar para esta conta"
+  },
+  "acDlgTitle": {
+    "message": "Importar automaticamente"
+  },
+  "acDlgIntro": {
+    "message": "Conta: $ACCOUNT$. A aba de favoritos do x.com é rolada e lida automaticamente.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "Velocidade"
+  },
+  "acSpeedSlowOpt": {
+    "message": "Lenta (recomendado)"
+  },
+  "acSpeedSlowHint": {
+    "message": "Cerca de 20–40 posts por minuto"
+  },
+  "acSpeedNormalHint": {
+    "message": "Cerca de 40–80 posts por minuto"
+  },
+  "acCapLabel": {
+    "message": "Limite por execução"
+  },
+  "acCap300": {
+    "message": "Pausar a cada 300 posts (recomendado)"
+  },
+  "acCap100": {
+    "message": "Pausar a cada 100 posts"
+  },
+  "acCap0": {
+    "message": "Não pausar"
+  },
+  "acOrderX": {
+    "message": "Favoritos no x.com"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf (após importar)"
+  },
+  "acOrderNewest": {
+    "message": "Post mais recente"
+  },
+  "acOrderPrev": {
+    "message": "O anterior"
+  },
+  "acOrderOld": {
+    "message": "… posts mais antigos"
+  },
+  "acOrderSame": {
+    "message": "Mesma ordem"
+  },
+  "acRisk": {
+    "message": "A rolagem automática pode ser considerada \"acesso automatizado\", proibido pelos termos do X. Se sua conta for restringida ou algo semelhante ocorrer, o autor do PostShelf não pode assumir responsabilidade. Importe apenas por sua própria decisão e apenas na sua própria conta."
+  },
+  "acConsent": {
+    "message": "Entendo o que está acima e executo por minha própria decisão"
+  },
+  "acDlgStart": {
+    "message": "Começar a importar"
+  },
+  "acProgressLine": {
+    "message": "$IMPORTED$ importados, $SKIPPED$ ignorados",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "Abrir a aba do x.com"
+  },
+  "acSettingsSwitch": {
+    "message": "Usar a importação automática"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "Desativada, o aviso de importação e os botões de início ficam ocultos. Mesmo ativada, nada começa sozinho."
+  },
+  "acSettingsRun": {
+    "message": "Importar favoritos automaticamente…"
+  },
+  "acSettingsNote": {
+    "message": "A rolagem automática pode ser considerada \"acesso automatizado\" pelos termos do X. Leia a tela de confirmação antes de começar."
+  },
+  "acNoAccount": {
+    "message": "Não é possível iniciar porque a conta não pôde ser identificada. Abra o x.com, entre e tente de novo."
   }
 }

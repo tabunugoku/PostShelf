@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
-import { getSettings, resetSettings, restoreSettings, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
+import { getSettings, resetSettings, restoreSettings, updateAutoCollect, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
 import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
 import { Confirm, TypeToConfirm } from './ui';
 import { ImageCacheSection } from './ImageCache';
@@ -12,7 +12,9 @@ import { HealthNotice } from './HealthNotice';
 import { INSTALL_URL } from '../shared/links';
 import { currentVersion } from '../shared/version';
 
-export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }: {
+export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, surface = 'tab' }: {
+  /** 「ブックマークを自動で取り込む…」: 開始前の確認ダイアログを開く (ここでは始めない) */
+  onAutoCollect?: () => void;
   /** 画像キャッシュのフォルダを選べるのはタブ版だけ */
   surface?: 'tab' | 'sidepanel';
   /** データが変わった (インポートなど) */
@@ -25,6 +27,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
   const [sync, setSync] = useState(false);
   const [bmode, setBmode] = useState<ButtonMode>('separate');
   const [amode, setAmode] = useState<ActionMode>('popup');
+  const [autoOn, setAutoOn] = useState(true);
   const [diag, setDiag] = useState(location.hash === '#diagnostics');
   const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
   const [counts, setCounts] = useState<DataCounts | null>(null);
@@ -34,6 +37,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
       setSync(s.syncNative);
       setBmode(s.buttonMode);
       setAmode(s.actionMode);
+      setAutoOn(s.autoCollect.enabled);
     });
   useEffect(load, []);
 
@@ -139,6 +143,26 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
             />
           </label>
         </div>
+        <label class="setting ac-setting">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={autoOn}
+            onChange={async (e) => setAutoOn((await updateAutoCollect({ enabled: (e.target as HTMLInputElement).checked })).autoCollect.enabled)}
+          />
+          <span>
+            <strong>{t('acSettingsSwitch')}</strong>
+            <span class="muted setting-desc">{t('acSettingsSwitchDesc')}</span>
+          </span>
+        </label>
+        {autoOn && onAutoCollect && (
+          <div class="io">
+            <button onClick={onAutoCollect}>
+              <Icon name="ti-player-track-next" /> {t('acSettingsRun')}
+            </button>
+          </div>
+        )}
+        {autoOn && <p class="muted setting-desc">{t('acSettingsNote')}</p>}
         <p class="muted setting-desc version-info">
           <strong>{t('versionLabel', currentVersion())}</strong>
         </p>

@@ -927,5 +927,286 @@
   },
   "removeFromPostShelf": {
     "message": "從 PostShelf 中移除"
+  },
+  "acPanelLabel": {
+    "message": "書籤自動匯入"
+  },
+  "acPanelRunning": {
+    "message": "正在匯入書籤"
+  },
+  "acPanelPaused": {
+    "message": "已暫停"
+  },
+  "acPanelLimit": {
+    "message": "已自動停止"
+  },
+  "acPanelDone": {
+    "message": "匯入已完成"
+  },
+  "acPanelStopped": {
+    "message": "匯入已結束"
+  },
+  "acPanelCountdown": {
+    "message": "$SEC$ 秒後開始",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "以「$SPEED$」速度讀取中",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "$SPEED$。正在讀取 $DATE$ 前後的貼文",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "慢速"
+  },
+  "acSpeedNormal": {
+    "message": "標準"
+  },
+  "acReasonUser": {
+    "message": "已暫停"
+  },
+  "acReasonHidden": {
+    "message": "因為切換到其他分頁，已自動暫停"
+  },
+  "acReasonAccount": {
+    "message": "因為帳號已切換，已暫停"
+  },
+  "acReasonCap": {
+    "message": "已達到 $COUNT$ 則的上限，已暫停",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonReload": {
+    "message": "因為頁面已重新載入，已暫停"
+  },
+  "acReasonLimit": {
+    "message": "X 可能顯示了限制"
+  },
+  "acReasonPage": {
+    "message": "因為離開了書籤頁面，已暫停"
+  },
+  "acReasonRefusedAccount": {
+    "message": "無法開始：管理頁面中選擇的帳號與 x.com 上的帳號不一致"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "無法開始：無法判斷 x.com 上的帳號"
+  },
+  "acSubDone": {
+    "message": "已讀取到最早的書籤"
+  },
+  "acSubStopped": {
+    "message": "此前的內容已儲存"
+  },
+  "acNoteRunning": {
+    "message": "請保持此分頁開啟。切換到其他分頁會自動暫停。"
+  },
+  "acNotePaused": {
+    "message": "繼續後會從中斷處接著匯入。已匯入的貼文會被略過，並依 X 書籤的順序排列。"
+  },
+  "acNoteReload": {
+    "message": "繼續後會從清單開頭重新讀取。已匯入的貼文會被略過。"
+  },
+  "acNoteDone": {
+    "message": "已依 X 的順序整理。可以在「未分類」中分到各個資料夾。"
+  },
+  "acLimitAlert": {
+    "message": "X 的頁面出現了錯誤或限制提示，已停止。請至少等待 15 分鐘後再繼續。連續嘗試可能會讓限制持續更久。"
+  },
+  "acResumeAt": {
+    "message": "將於 $TIME$ 繼續（請保持此分頁開啟）",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "已匯入"
+  },
+  "acStatSkipped": {
+    "message": "已略過"
+  },
+  "acStatFailed": {
+    "message": "失敗"
+  },
+  "acOldest": {
+    "message": "最早的貼文：$DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "暫停"
+  },
+  "acBtnStop": {
+    "message": "停止"
+  },
+  "acBtnResume": {
+    "message": "繼續"
+  },
+  "acBtnEnd": {
+    "message": "到此結束"
+  },
+  "acBtnResumeLater": {
+    "message": "15 分鐘後繼續"
+  },
+  "acBtnOpenManager": {
+    "message": "開啟管理頁面"
+  },
+  "acBtnClose": {
+    "message": "關閉"
+  },
+  "acBtnAuto": {
+    "message": "自動匯入…"
+  },
+  "acBtnAutoTitle": {
+    "message": "自動捲動書籤分頁並全部匯入（在管理頁面中確認）"
+  },
+  "acManualTitle": {
+    "message": "只匯入目前可見的部分"
+  },
+  "acOfferTitle": {
+    "message": "要匯入你的 X 書籤嗎？"
+  },
+  "acOfferBody": {
+    "message": "你是第一次用 $ACCOUNT$ 使用 PostShelf。它會開啟 x.com 的「歷史記錄」→「書籤」，自動捲動頁面並匯入。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "開始匯入…"
+  },
+  "acOfferLater": {
+    "message": "稍後"
+  },
+  "acOfferNever": {
+    "message": "此帳號不再顯示"
+  },
+  "acDlgTitle": {
+    "message": "自動匯入"
+  },
+  "acDlgIntro": {
+    "message": "帳號：$ACCOUNT$。將自動捲動 x.com 的書籤分頁並讀取。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "速度"
+  },
+  "acSpeedSlowOpt": {
+    "message": "慢速（建議）"
+  },
+  "acSpeedSlowHint": {
+    "message": "約每分鐘 20–40 則"
+  },
+  "acSpeedNormalHint": {
+    "message": "約每分鐘 40–80 則"
+  },
+  "acCapLabel": {
+    "message": "單次上限"
+  },
+  "acCap300": {
+    "message": "每 300 則暫停一次（建議）"
+  },
+  "acCap100": {
+    "message": "每 100 則暫停一次"
+  },
+  "acCap0": {
+    "message": "不暫停"
+  },
+  "acOrderX": {
+    "message": "x.com 的書籤"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf（匯入後）"
+  },
+  "acOrderNewest": {
+    "message": "最新的貼文"
+  },
+  "acOrderPrev": {
+    "message": "之前的貼文"
+  },
+  "acOrderOld": {
+    "message": "……更早的貼文"
+  },
+  "acOrderSame": {
+    "message": "順序相同"
+  },
+  "acRisk": {
+    "message": "自動捲動可能被視為 X 條款所禁止的「自動化存取」。即使帳號受到限制等情況，PostShelf 的作者也無法承擔責任。請僅依據你自己的判斷，僅對你自己的帳號進行匯入。"
+  },
+  "acConsent": {
+    "message": "我已理解以上內容，並依據自己的判斷執行"
+  },
+  "acDlgStart": {
+    "message": "開始匯入"
+  },
+  "acProgressLine": {
+    "message": "已匯入 $IMPORTED$ 則，已略過 $SKIPPED$ 則",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "開啟 x.com 分頁"
+  },
+  "acSettingsSwitch": {
+    "message": "使用自動匯入"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "關閉後，將不再顯示匯入提示和開始按鈕。即使開啟，也不會自動開始。"
+  },
+  "acSettingsRun": {
+    "message": "自動匯入書籤…"
+  },
+  "acSettingsNote": {
+    "message": "自動捲動可能被視為 X 條款中的「自動化存取」。開始前請閱讀確認頁面中的內容。"
+  },
+  "acNoAccount": {
+    "message": "無法判斷帳號，因此無法開始。請開啟 x.com 登入後再試一次。"
   }
 }

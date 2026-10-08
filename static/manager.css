@@ -8,6 +8,7 @@
   /* アクセント: アイコン・リンク・選択の強調は --fill-accent、文字の載る塗りは白文字で 4.5:1 以上の --accent-strong */
   --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0f6fb3;
   --accent-strong:#0f6fb3;--danger:#c0302f;--danger-solid:#c0302f;
+  --warn-fg:#8a5a00;--warn-bg:#fff4d6;--ok:#00805a;
   --shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);--radius:8px;
   /* ポスト表示 (X 風カード) の列の上限幅。広い画面で横に伸びすぎて読みづらくならないよう、ここ 1 か所で調整する */
   --post-col-max:720px;
@@ -18,6 +19,7 @@
   --border:#2f3336;--border-strong:#536471;--border-stronger:#71767b;
   --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
   --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;
+  --warn-fg:#ffd277;--warn-bg:#3a2d0a;--ok:#4cd8a6;
   --shadow-popover:0 8px 24px rgba(0,0,0,.5);
 }}
 /* OS のダーク/ライトにフォーム部品 (input, button, スクロールバー等) を追従させる */
@@ -312,3 +314,29 @@ input[type=number]{width:110px}
 .banner-error{background:transparent;border-color:var(--danger)}
 .banner-error>i{color:var(--danger)}
 .version-info{margin-top:12px}
+
+/* ブックマークの自動取り込み (v15) */
+.ac-offer,.ac-progress{align-items:flex-start}
+.ac-offer-main{display:grid;gap:8px;flex:1;min-width:0}
+.ac-row{display:flex;gap:8px;flex-wrap:wrap}
+.ac-title{display:flex;align-items:center;gap:8px}
+.ac-dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--fill-accent)}
+.ac-dot.run{animation:ac-pulse 1.2s infinite}.ac-dot.pause{background:var(--warn-fg)}.ac-dot.done{background:var(--ok)}.ac-dot.ng{background:var(--danger)}
+@keyframes ac-pulse{50%{opacity:.35}}
+.ac-bar{height:8px;border-radius:999px;background:var(--border);overflow:hidden;border:1px solid var(--border-strong)}
+.ac-bar i{display:block;height:100%;width:35%;background:var(--accent-strong)}
+.ac-bar.ind i{animation:ac-slide 1.6s infinite linear}
+@keyframes ac-slide{0%{margin-left:-35%}100%{margin-left:100%}}
+.ac-alert{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:8px 10px;font-size:14px}
+.ac-dialog{display:grid;gap:10px;max-height:calc(100vh - 32px);overflow:auto}
+.ac-dialog p,.ac-dialog .dialog-title{margin:0}
+.ac-field{border:0;margin:0;padding:0;display:grid;gap:2px}
+.ac-field legend{font-weight:700;padding:0 0 2px}
+.ac-cap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ac-cap select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;min-height:32px;padding:2px 8px}
+.ac-order{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px}
+.ac-order>div{border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--surface-1)}
+.ac-order ol{margin:4px 0 0;padding-left:20px}
+.ac-ok{color:var(--ok);font-weight:700}
+@media (max-width:480px){.ac-order{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.ac-dot.run,.ac-bar.ind i{animation:none}}

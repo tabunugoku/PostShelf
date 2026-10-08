@@ -1,4 +1,4 @@
-import { applyActionMode } from '../shared/panel';
+import { applyActionMode, openManagerTab } from '../shared/panel';
 import { getSettings, onSettingsChanged } from '../shared/settings';
 import { afterPostsRemoved, cachePostById } from '../shared/cacheops';
 
@@ -14,6 +14,9 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   // 画像のキャッシュ (オフなら何もしない) と、保存から外したポストの画像の掃除
   if (msg?.type === 'cacheImages' && typeof msg.tweetId === 'string' && typeof msg.accountId === 'string') void cachePostById(msg.tweetId, msg.accountId).catch(() => {});
   if (msg?.type === 'pruneCache') void afterPostsRemoved();
+  // x.com の「自動で取り込む…」/ 進捗パネルの「管理画面を開く」: 管理画面を開く (開いていればそれを前面に出す)
+  if (msg?.type === 'openAutoCollect') void openManagerTab('#autocollect', true);
+  if (msg?.type === 'openManager') void openManagerTab('', true);
   if (msg?.type === 'openSidePanel' && sender.tab?.id !== undefined && chrome.sidePanel?.open) {
     void chrome.sidePanel.open({ tabId: sender.tab.id }).catch(() => {});
   }

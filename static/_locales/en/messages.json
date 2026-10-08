@@ -927,5 +927,286 @@
   },
   "removeFromPostShelf": {
     "message": "Remove from PostShelf"
+  },
+  "acPanelLabel": {
+    "message": "Automatic bookmark import"
+  },
+  "acPanelRunning": {
+    "message": "Importing bookmarks"
+  },
+  "acPanelPaused": {
+    "message": "Paused"
+  },
+  "acPanelLimit": {
+    "message": "Stopped automatically"
+  },
+  "acPanelDone": {
+    "message": "Import finished"
+  },
+  "acPanelStopped": {
+    "message": "Import ended"
+  },
+  "acPanelCountdown": {
+    "message": "Starting in $SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "Loading at $SPEED$ speed",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "$SPEED$ speed. Loading posts from around $DATE$",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "Slow"
+  },
+  "acSpeedNormal": {
+    "message": "Normal"
+  },
+  "acReasonUser": {
+    "message": "You paused the import"
+  },
+  "acReasonHidden": {
+    "message": "Stopped automatically because you switched to another tab"
+  },
+  "acReasonAccount": {
+    "message": "Stopped because the account changed"
+  },
+  "acReasonCap": {
+    "message": "Stopped because it reached the limit of $COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonReload": {
+    "message": "Stopped because the page was reloaded"
+  },
+  "acReasonLimit": {
+    "message": "X may have shown a limit"
+  },
+  "acReasonPage": {
+    "message": "Stopped because you left the bookmarks page"
+  },
+  "acReasonRefusedAccount": {
+    "message": "Cannot start: the account chosen in the manager is different from the account on x.com"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "Cannot start: the account on x.com could not be determined"
+  },
+  "acSubDone": {
+    "message": "Reached the oldest bookmark"
+  },
+  "acSubStopped": {
+    "message": "Everything up to that point is saved"
+  },
+  "acNoteRunning": {
+    "message": "Keep this tab open. Switching to another tab pauses the import automatically."
+  },
+  "acNotePaused": {
+    "message": "Resuming continues from where it stopped. Posts already imported are skipped, and new ones are placed to match the order of your X bookmarks."
+  },
+  "acNoteReload": {
+    "message": "Resuming reads the list again from the top. Posts already imported are skipped."
+  },
+  "acNoteDone": {
+    "message": "Organized in the same order as on X. You can sort them into folders from \"Unsorted\"."
+  },
+  "acLimitAlert": {
+    "message": "Stopped because X showed an error or a limit. Wait at least 15 minutes before resuming. Trying again right away may make the limit last longer."
+  },
+  "acResumeAt": {
+    "message": "Will resume at $TIME$ (keep this tab open)",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "Imported"
+  },
+  "acStatSkipped": {
+    "message": "Skipped"
+  },
+  "acStatFailed": {
+    "message": "Failed"
+  },
+  "acOldest": {
+    "message": "Oldest post: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "Pause"
+  },
+  "acBtnStop": {
+    "message": "Stop"
+  },
+  "acBtnResume": {
+    "message": "Resume"
+  },
+  "acBtnEnd": {
+    "message": "End here"
+  },
+  "acBtnResumeLater": {
+    "message": "Resume in 15 minutes"
+  },
+  "acBtnOpenManager": {
+    "message": "Open the manager"
+  },
+  "acBtnClose": {
+    "message": "Close"
+  },
+  "acBtnAuto": {
+    "message": "Import automatically…"
+  },
+  "acBtnAutoTitle": {
+    "message": "Scrolls the bookmarks tab automatically and imports everything (you confirm in the manager)"
+  },
+  "acManualTitle": {
+    "message": "Import only what is visible now"
+  },
+  "acOfferTitle": {
+    "message": "Import your X bookmarks?"
+  },
+  "acOfferBody": {
+    "message": "You are using PostShelf for the first time with $ACCOUNT$. It opens \"History\" → \"Bookmarks\" on x.com and imports while scrolling the page automatically.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "Start importing…"
+  },
+  "acOfferLater": {
+    "message": "Later"
+  },
+  "acOfferNever": {
+    "message": "Do not show for this account"
+  },
+  "acDlgTitle": {
+    "message": "Import automatically"
+  },
+  "acDlgIntro": {
+    "message": "Account: $ACCOUNT$. The bookmarks tab on x.com is scrolled automatically and read.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "Speed"
+  },
+  "acSpeedSlowOpt": {
+    "message": "Slow (recommended)"
+  },
+  "acSpeedSlowHint": {
+    "message": "About 20–40 posts per minute"
+  },
+  "acSpeedNormalHint": {
+    "message": "About 40–80 posts per minute"
+  },
+  "acCapLabel": {
+    "message": "Limit per run"
+  },
+  "acCap300": {
+    "message": "Pause every 300 posts (recommended)"
+  },
+  "acCap100": {
+    "message": "Pause every 100 posts"
+  },
+  "acCap0": {
+    "message": "Do not pause"
+  },
+  "acOrderX": {
+    "message": "Bookmarks on x.com"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf (after importing)"
+  },
+  "acOrderNewest": {
+    "message": "Newest post"
+  },
+  "acOrderPrev": {
+    "message": "The one before it"
+  },
+  "acOrderOld": {
+    "message": "… older posts"
+  },
+  "acOrderSame": {
+    "message": "Same order"
+  },
+  "acRisk": {
+    "message": "Automatic scrolling may be treated as \"automated access\", which X's terms prohibit. If your account is restricted or anything similar happens, PostShelf's author cannot take responsibility. Import only on your own judgment and only for your own account."
+  },
+  "acConsent": {
+    "message": "I understand the above and will run this on my own judgment"
+  },
+  "acDlgStart": {
+    "message": "Start importing"
+  },
+  "acProgressLine": {
+    "message": "$IMPORTED$ imported, $SKIPPED$ skipped",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "Open the x.com tab"
+  },
+  "acSettingsSwitch": {
+    "message": "Use automatic import"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "When off, the import prompt and the start buttons are hidden. Even when on, nothing starts by itself."
+  },
+  "acSettingsRun": {
+    "message": "Import bookmarks automatically…"
+  },
+  "acSettingsNote": {
+    "message": "Automatic scrolling may be treated as \"automated access\" under X's terms. Please read the confirmation screen before you start."
+  },
+  "acNoAccount": {
+    "message": "Cannot start because the account could not be determined. Open x.com, sign in, and try again."
   }
 }

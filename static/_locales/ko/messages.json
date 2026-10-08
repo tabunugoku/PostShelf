@@ -927,5 +927,286 @@
   },
   "removeFromPostShelf": {
     "message": "PostShelf에서 제거"
+  },
+  "acPanelLabel": {
+    "message": "북마크 자동 가져오기"
+  },
+  "acPanelRunning": {
+    "message": "북마크를 가져오는 중"
+  },
+  "acPanelPaused": {
+    "message": "일시 중지됨"
+  },
+  "acPanelLimit": {
+    "message": "자동으로 중지했습니다"
+  },
+  "acPanelDone": {
+    "message": "가져오기가 끝났습니다"
+  },
+  "acPanelStopped": {
+    "message": "가져오기를 종료했습니다"
+  },
+  "acPanelCountdown": {
+    "message": "$SEC$초 후에 시작합니다",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "$SPEED$ 속도로 불러오는 중",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "$SPEED$. $DATE$ 무렵의 게시물을 불러오는 중",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "느리게"
+  },
+  "acSpeedNormal": {
+    "message": "보통"
+  },
+  "acReasonUser": {
+    "message": "일시 중지했습니다"
+  },
+  "acReasonHidden": {
+    "message": "다른 탭으로 전환해서 자동으로 멈췄습니다"
+  },
+  "acReasonAccount": {
+    "message": "계정이 바뀌어서 멈췄습니다"
+  },
+  "acReasonCap": {
+    "message": "상한인 $COUNT$개에 도달해서 멈췄습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonReload": {
+    "message": "페이지를 다시 불러와서 멈춰 있습니다"
+  },
+  "acReasonLimit": {
+    "message": "X가 제한을 표시했을 수 있습니다"
+  },
+  "acReasonPage": {
+    "message": "북마크 화면에서 이동해서 멈췄습니다"
+  },
+  "acReasonRefusedAccount": {
+    "message": "시작할 수 없습니다. 관리 화면에서 선택한 계정과 x.com의 계정이 다릅니다"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "시작할 수 없습니다. x.com의 계정을 판단할 수 없습니다"
+  },
+  "acSubDone": {
+    "message": "가장 오래된 북마크까지 불러왔습니다"
+  },
+  "acSubStopped": {
+    "message": "그때까지의 분량은 저장되었습니다"
+  },
+  "acNoteRunning": {
+    "message": "이 탭을 열어 두세요. 다른 탭으로 전환하면 자동으로 일시 중지됩니다."
+  },
+  "acNotePaused": {
+    "message": "다시 시작하면 이어서 가져옵니다. 이미 가져온 게시물은 건너뛰고, X 북마크의 순서에 맞춰 정리합니다."
+  },
+  "acNoteReload": {
+    "message": "다시 시작하면 목록의 맨 위부터 다시 읽습니다. 이미 가져온 게시물은 건너뜁니다."
+  },
+  "acNoteDone": {
+    "message": "X의 순서대로 정리했습니다. \"미분류\"에서 폴더로 나눌 수 있습니다."
+  },
+  "acLimitAlert": {
+    "message": "X 화면에 오류 또는 제한 표시가 나타나서 멈췄습니다. 15분 이상 기다린 뒤에 다시 시작하세요. 계속 시도하면 제한이 길어질 수 있습니다."
+  },
+  "acResumeAt": {
+    "message": "$TIME$에 다시 시작합니다(이 탭을 열어 두세요)",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "가져옴"
+  },
+  "acStatSkipped": {
+    "message": "건너뜀"
+  },
+  "acStatFailed": {
+    "message": "실패"
+  },
+  "acOldest": {
+    "message": "가장 오래된 게시물: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "일시 중지"
+  },
+  "acBtnStop": {
+    "message": "중지"
+  },
+  "acBtnResume": {
+    "message": "다시 시작"
+  },
+  "acBtnEnd": {
+    "message": "여기서 종료"
+  },
+  "acBtnResumeLater": {
+    "message": "15분 후에 다시 시작"
+  },
+  "acBtnOpenManager": {
+    "message": "관리 화면 열기"
+  },
+  "acBtnClose": {
+    "message": "닫기"
+  },
+  "acBtnAuto": {
+    "message": "자동으로 가져오기…"
+  },
+  "acBtnAutoTitle": {
+    "message": "북마크 탭을 자동으로 스크롤해서 모두 가져옵니다(관리 화면에서 확인)"
+  },
+  "acManualTitle": {
+    "message": "지금 보이는 것만 가져오기"
+  },
+  "acOfferTitle": {
+    "message": "X 북마크를 가져올까요?"
+  },
+  "acOfferBody": {
+    "message": "$ACCOUNT$ 계정으로 PostShelf를 처음 사용합니다. x.com의 \"기록\" → \"북마크\"를 열고 화면을 자동으로 스크롤하면서 가져옵니다.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "가져오기 시작…"
+  },
+  "acOfferLater": {
+    "message": "나중에"
+  },
+  "acOfferNever": {
+    "message": "이 계정에서는 표시하지 않음"
+  },
+  "acDlgTitle": {
+    "message": "자동으로 가져오기"
+  },
+  "acDlgIntro": {
+    "message": "계정: $ACCOUNT$. x.com의 북마크 탭을 자동으로 스크롤해서 읽어 들입니다.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "속도"
+  },
+  "acSpeedSlowOpt": {
+    "message": "느리게(권장)"
+  },
+  "acSpeedSlowHint": {
+    "message": "1분에 약 20~40개 정도"
+  },
+  "acSpeedNormalHint": {
+    "message": "1분에 약 40~80개 정도"
+  },
+  "acCapLabel": {
+    "message": "1회 상한"
+  },
+  "acCap300": {
+    "message": "300개마다 한 번 멈춤(권장)"
+  },
+  "acCap100": {
+    "message": "100개마다 한 번 멈춤"
+  },
+  "acCap0": {
+    "message": "멈추지 않음"
+  },
+  "acOrderX": {
+    "message": "x.com의 북마크"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf(가져온 뒤)"
+  },
+  "acOrderNewest": {
+    "message": "최신 게시물"
+  },
+  "acOrderPrev": {
+    "message": "그 전의 게시물"
+  },
+  "acOrderOld": {
+    "message": "…오래된 게시물"
+  },
+  "acOrderSame": {
+    "message": "같은 순서로 나열됩니다"
+  },
+  "acRisk": {
+    "message": "자동 스크롤은 X의 약관이 금지하는 \"자동화된 접근\"으로 간주될 수 있습니다. 계정 제한 등이 발생해도 PostShelf의 제작자는 책임을 질 수 없습니다. 가져오기는 본인의 판단으로, 본인의 계정에 대해서만 하세요."
+  },
+  "acConsent": {
+    "message": "위 내용을 이해했으며 내 판단으로 실행합니다"
+  },
+  "acDlgStart": {
+    "message": "가져오기 시작"
+  },
+  "acProgressLine": {
+    "message": "$IMPORTED$개 가져옴, $SKIPPED$개 건너뜀",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "x.com 탭 열기"
+  },
+  "acSettingsSwitch": {
+    "message": "자동 가져오기 사용"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "끄면 가져오기 안내와 시작 버튼이 표시되지 않습니다. 켜 두어도 자동으로 시작되지 않습니다."
+  },
+  "acSettingsRun": {
+    "message": "북마크 자동으로 가져오기…"
+  },
+  "acSettingsNote": {
+    "message": "자동 스크롤은 X 약관상 \"자동화된 접근\"으로 간주될 수 있습니다. 시작하기 전에 확인 화면의 내용을 읽어 주세요."
+  },
+  "acNoAccount": {
+    "message": "계정을 판단할 수 없어서 시작할 수 없습니다. x.com을 열고 로그인한 뒤 다시 시도하세요."
   }
 }
