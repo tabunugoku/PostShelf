@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>設定画面の項目順 (モック)</title>
+<style>
+:root{--pg:#fff;--pgt:#0f1419;--mu:#536471;--bd:#cfd9de;--card:#f7f9f9;--ac:#1d9bf0;--dg:#c4161c;--nav:#eff3f4}
+@media (prefers-color-scheme:dark){:root{--pg:#0b0d10;--pgt:#e7e9ea;--mu:#8b98a5;--bd:#2f3336;--card:#16181c;--dg:#ff7b80;--nav:#202327}}
+*{box-sizing:border-box}body{margin:0;padding:24px 16px;background:var(--pg);color:var(--pgt);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic UI",sans-serif}
+.wrap{max-width:1100px;margin:0 auto}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 6px;border-top:1px solid var(--bd);padding-top:14px}
+.lead,.muted{color:var(--mu)}.muted{font-size:12.5px}
+.pair{display:grid;grid-template-columns:1fr 1.25fr;gap:16px;align-items:start}@media(max-width:860px){.pair{grid-template-columns:1fr}}
+.tag{display:inline-block;font-size:12px;font-weight:700;border:1px solid var(--bd);border-radius:999px;padding:0 10px;margin-bottom:6px}
+.stage{border:1px solid var(--bd);border-radius:14px;padding:12px 14px;background:var(--pg)}
+.card{border:1px solid var(--bd);border-radius:10px;padding:6px 12px;margin:6px 0;font-size:13px}
+.card b{display:block}.card.dg{border-color:var(--dg)}.card.dg b{color:var(--dg)}
+.grp{font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--mu);margin:14px 0 2px}
+.n{display:inline-block;min-width:20px;color:var(--mu);font-weight:400}
+.new{display:inline-block;font-size:11px;border:1px solid var(--ac);color:var(--ac);border-radius:999px;padding:0 6px;margin-left:6px}
+.sub{margin:2px 0 0 12px;padding-left:10px;border-left:2px solid var(--bd);font-size:12.5px;color:var(--mu)}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}.toc span{border:1px solid var(--bd);border-radius:999px;padding:1px 10px;font-size:12px;background:var(--nav)}
+.ev{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px}
+ul{margin:4px 0;padding-left:20px}
+</style></head><body><div class="wrap">
+<h1>設定画面の項目順 (モック)</h1>
+<p class="lead">「データ」欄を分けると、欄の数が増えます。そこで、<b>順番を、使う頻度と、関係の近さで組み直し</b>、<b>6 つの見出しのグループ</b>にまとめ、<b>上にジャンプのリンク</b>を置く案です。v24 で増える「長いポストの全文を取得する」も含めています。</p>
+
+<h2>before (いま + v24 の追加を、いまの流儀で足した場合)</h2>
+<div class="pair"><div><span class="tag">before</span><div class="stage">
+ <div class="card"><b><span class="n">1</span>X のブックマークと連動する</b></div>
+ <div class="card"><b><span class="n">2</span>標準ブックマークボタンの動作</b></div>
+ <div class="card"><b><span class="n">3</span>ツールバーアイコンのクリック時の動作</b></div>
+ <div class="card"><b><span class="n">4</span>画像のキャッシュ</b></div>
+ <div class="card"><b><span class="n">5</span>データ <span class="muted">(エクスポート / インポート / 自動取り込み / バージョン / GitHub)</span></b></div>
+ <div class="card"><b><span class="n">6</span>長いポストの全文を取得する <span class="new">v24 で追加</span></b></div>
+ <div class="card"><b><span class="n">7</span>X の画面構造</b></div>
+ <div class="card"><b><span class="n">8</span>設定の初期化</b></div>
+ <div class="card dg"><b><span class="n">9</span>危険な操作</b></div>
+</div></div>
+<div class="ev" style="margin:0"><b>困っている点</b>
+ <ul><li>関係の近い項目が離れている (連動と標準ボタンの動作は 1 と 2 だが、全文取得は 6)。</li>
+ <li>「データ」が、性質の違う 5 つを抱えている (今回の分割で解消)。</li>
+ <li>見出しが 9 つあり、下の項目へ行くのにスクロールが長い。</li></ul></div></div>
+
+<h2>after (提案)</h2>
+<div class="pair"><div><span class="tag">after</span><div class="stage">
+ <div class="toc"><span>保存</span><span>取り込み</span><span>表示と動作</span><span>データ</span><span>情報</span><span>初期化と削除</span></div>
+ <div class="grp">保存</div>
+ <div class="card"><b><span class="n">1</span>X との連携</b><div class="sub">連動のスイッチ → オンのときの「標準ボタンの動作」(別ボタン / 置き換え) を、ここにまとめる</div></div>
+ <div class="card"><b><span class="n">2</span>長いポストの全文 <span class="new">v24</span></b></div>
+ <div class="card"><b><span class="n">3</span>画像のキャッシュ</b></div>
+ <div class="grp">取り込み</div>
+ <div class="card"><b><span class="n">4</span>ブックマークの自動取り込み</b></div>
+ <div class="grp">表示と動作</div>
+ <div class="card"><b><span class="n">5</span>ツールバーアイコンのクリック時の動作</b></div>
+ <div class="grp">データ</div>
+ <div class="card"><b><span class="n">6</span>データの保存と移行</b> <span class="muted">(エクスポート / インポート)</span></div>
+ <div class="grp">情報</div>
+ <div class="card"><b><span class="n">7</span>X の画面構造</b></div>
+ <div class="card"><b><span class="n">8</span>PostShelf について</b></div>
+ <div class="grp">初期化と削除</div>
+ <div class="card"><b><span class="n">9</span>設定の初期化</b></div>
+ <div class="card dg"><b><span class="n">10</span>危険な操作</b></div>
+</div></div>
+<div class="ev" style="margin:0"><b>組み直しの考え方</b>
+ <ul><li><b>よく触る順に、上から</b>: 保存まわり (連携、全文、画像) を最初に置く。初めて設定する人が、まず見る所です。</li>
+ <li><b>関係の近い項目を、同じ見出しの下に</b>: 「標準ボタンの動作」は、連動をオンにしたときだけ意味があるので、連動の欄の中に入れ子にします (オフのときは、畳んで 1 行のヒントだけ。v19 のキャッシュの畳みと同じ形)。</li>
+ <li><b>めったに使わない欄は下に</b>: 情報、初期化、危険な操作の順に、下へ。危険な操作は、一番下のままです。</li>
+ <li><b>見出しのグループ (小さな文字) と、上のジャンプのリンク</b>で、欄が増えても、目的の所に 1 回で行けます。左のメニューに項目は増やしません。</li>
+ <li>欄の数は 9 → <b>10</b> (全文の取得を足し、連動と標準ボタンの動作を 1 つにまとめ、データを 3 つに分けた結果)。</li></ul></div></div>
+
+<div class="ev"><b>確認したい点 (2 つ)</b>
+ <ul><li>ツールバーアイコンの動作を、「表示と動作」という、1 項目だけのグループに置いています。「保存」のグループの最後に入れる (グループを 5 つにする) 案もあります。どちらが良いですか。</li>
+ <li>自動取り込みを、「保存」のグループに入れず、独立のグループにしました。保存と同じ並びにしたいときは、教えてください。</li></ul></div>
+</div></body></html>
