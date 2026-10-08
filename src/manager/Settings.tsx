@@ -85,7 +85,12 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
         />
         <span>
           <strong>{t('syncNativeLabel')}</strong>
-          <span class="muted setting-desc">{t('syncNativeDesc')}</span>
+          <span class="muted setting-desc desc-list">
+            {(['syncNativeDesc1', 'syncNativeDesc2', 'syncNativeDesc3'] as const).map((k) => (
+              <span class="desc-item">{t(k)}</span>
+            ))}
+          </span>
+          <span class="muted setting-desc desc-note">{t('syncNativeNote')}</span>
         </span>
       </label>
       <fieldset class="setting-group">

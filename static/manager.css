@@ -224,7 +224,12 @@ button:disabled{cursor:not-allowed}
 /* ---- 設定 ---- */
 .setting{display:flex;gap:10px;align-items:flex-start;padding:10px 0;cursor:pointer}
 .setting input{min-height:0;width:20px;height:20px;margin-top:4px;accent-color:var(--accent-strong);flex:none}
-.setting-desc{display:block;font-size:14px;margin-top:2px}
+.setting-desc{display:block;font-size:14px;margin-top:2px;max-width:40em}
+/* 説明は、短い文の箇条書きにする (v25) */
+.desc-list{display:grid;gap:2px}
+.desc-item{display:block;padding-left:1em;text-indent:-1em}
+.desc-item::before{content:'・'}
+.desc-note{margin-top:4px}
 /* 見出し (歯車のアイコンと文字の間に余白を空ける) */
 .bar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .bar>i{font-size:22px}

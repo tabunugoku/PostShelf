@@ -155,8 +155,17 @@
   "syncNativeLabel": {
     "message": "Sync with X bookmarks"
   },
-  "syncNativeDesc": {
-    "message": "When you save a post to a folder, PostShelf also adds it to your standard X bookmarks; when you remove it from all folders, the X bookmark is removed too. PostShelf presses the on-screen bookmark button only once per post you act on. Off by default."
+  "syncNativeDesc1": {
+    "message": "When you save a post to a folder, PostShelf also adds it to your standard X bookmarks."
+  },
+  "syncNativeDesc2": {
+    "message": "When you remove it from all folders, the X bookmark is removed too."
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf presses the on-screen bookmark button only once per post you act on."
+  },
+  "syncNativeNote": {
+    "message": "Off by default."
   },
   "savedBadgeTitle": {
     "message": "Saved in $COUNT$ folder(s)",

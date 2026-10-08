@@ -155,8 +155,17 @@
   "syncNativeLabel": {
     "message": "Synchroniser avec les favoris X"
   },
-  "syncNativeDesc": {
-    "message": "Quand vous enregistrez un post dans un dossier, PostShelf l'ajoute aussi aux favoris standard de X ; quand vous le retirez de tous les dossiers, le favori X est retiré aussi. PostShelf ne clique sur le bouton de favori à l'écran qu'une seule fois par post concerné. Désactivé par défaut."
+  "syncNativeDesc1": {
+    "message": "Quand vous enregistrez un post dans un dossier, PostShelf l'ajoute aussi aux favoris standard de X."
+  },
+  "syncNativeDesc2": {
+    "message": "Quand vous le retirez de tous les dossiers, le favori X est retiré aussi."
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf ne clique sur le bouton de favori à l'écran qu'une seule fois par post concerné."
+  },
+  "syncNativeNote": {
+    "message": "Désactivé par défaut."
   },
   "savedBadgeTitle": {
     "message": "Enregistré dans $COUNT$ dossier(s)",

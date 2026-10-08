@@ -155,8 +155,17 @@
   "syncNativeLabel": {
     "message": "X 북마크와 연동"
   },
-  "syncNativeDesc": {
-    "message": "게시물을 폴더에 저장하면 PostShelf가 X 표준 북마크에도 추가하고, 모든 폴더에서 제외하면 X 북마크도 해제합니다. PostShelf가 화면의 북마크 버튼을 누르는 것은 조작한 게시물 1개당 한 번뿐입니다. 기본값은 꺼짐입니다."
+  "syncNativeDesc1": {
+    "message": "게시물을 폴더에 저장하면 PostShelf가 X 표준 북마크에도 추가합니다."
+  },
+  "syncNativeDesc2": {
+    "message": "모든 폴더에서 제외하면 X 북마크도 해제합니다."
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf가 화면의 북마크 버튼을 누르는 것은 조작한 게시물 1개당 한 번뿐입니다."
+  },
+  "syncNativeNote": {
+    "message": "기본값은 꺼짐입니다."
   },
   "savedBadgeTitle": {
     "message": "폴더 $COUNT$개에 저장됨",

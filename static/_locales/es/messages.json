@@ -155,8 +155,17 @@
   "syncNativeLabel": {
     "message": "Sincronizar con los marcadores de X"
   },
-  "syncNativeDesc": {
-    "message": "Al guardar una publicación en una carpeta, PostShelf también la añade a tus marcadores estándar de X; al quitarla de todas las carpetas, también se quita el marcador de X. PostShelf pulsa el botón de marcador de la pantalla solo una vez por cada publicación sobre la que actúas. Desactivado por defecto."
+  "syncNativeDesc1": {
+    "message": "Al guardar una publicación en una carpeta, PostShelf también la añade a tus marcadores estándar de X."
+  },
+  "syncNativeDesc2": {
+    "message": "Al quitarla de todas las carpetas, también se quita el marcador de X."
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf pulsa el botón de marcador de la pantalla solo una vez por cada publicación sobre la que actúas."
+  },
+  "syncNativeNote": {
+    "message": "Desactivado por defecto."
   },
   "savedBadgeTitle": {
     "message": "Guardado en $COUNT$ carpeta(s)",

@@ -155,8 +155,17 @@
   "syncNativeLabel": {
     "message": "與 X 書籤同步"
   },
-  "syncNativeDesc": {
-    "message": "將貼文儲存到資料夾時，PostShelf 也會將其加入 X 標準書籤；從所有資料夾中移除時，也會取消 X 上的書籤。PostShelf 對你操作的每則貼文，只會點擊一次畫面上的書籤按鈕。預設為關閉。"
+  "syncNativeDesc1": {
+    "message": "將貼文儲存到資料夾時，PostShelf 也會將其加入 X 標準書籤。"
+  },
+  "syncNativeDesc2": {
+    "message": "從所有資料夾中移除時，也會取消 X 上的書籤。"
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf 對你操作的每則貼文，只會點擊一次畫面上的書籤按鈕。"
+  },
+  "syncNativeNote": {
+    "message": "預設為關閉。"
   },
   "savedBadgeTitle": {
     "message": "已儲存到 $COUNT$ 個資料夾",

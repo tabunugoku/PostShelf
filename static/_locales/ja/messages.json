@@ -155,8 +155,17 @@
   "syncNativeLabel": {
     "message": "X のブックマークと連動する"
   },
-  "syncNativeDesc": {
-    "message": "フォルダに保存したとき X 標準のブックマークも付け、すべてのフォルダから外したとき X 側のブックマークも外します。PostShelf が画面上のブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。初期値はオフです。"
+  "syncNativeDesc1": {
+    "message": "フォルダに保存したとき、X 標準のブックマークも付けます。"
+  },
+  "syncNativeDesc2": {
+    "message": "すべてのフォルダから外したとき、X 側のブックマークも外します。"
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf が画面上のブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。"
+  },
+  "syncNativeNote": {
+    "message": "初期値はオフです。"
   },
   "savedBadgeTitle": {
     "message": "$COUNT$ 個のフォルダに保存済み",

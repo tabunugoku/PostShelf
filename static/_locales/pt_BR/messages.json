@@ -155,8 +155,17 @@
   "syncNativeLabel": {
     "message": "Sincronizar com os favoritos do X"
   },
-  "syncNativeDesc": {
-    "message": "Ao salvar um post em uma pasta, o PostShelf também o adiciona aos favoritos padrão do X; ao removê-lo de todas as pastas, o favorito do X também é removido. O PostShelf clica no botão de favorito da tela apenas uma vez por post em que você age. Desativado por padrão."
+  "syncNativeDesc1": {
+    "message": "Ao salvar um post em uma pasta, o PostShelf também o adiciona aos favoritos padrão do X."
+  },
+  "syncNativeDesc2": {
+    "message": "Ao removê-lo de todas as pastas, o favorito do X também é removido."
+  },
+  "syncNativeDesc3": {
+    "message": "O PostShelf clica no botão de favorito da tela apenas uma vez por post em que você age."
+  },
+  "syncNativeNote": {
+    "message": "Desativado por padrão."
   },
   "savedBadgeTitle": {
     "message": "Salvo em $COUNT$ pasta(s)",

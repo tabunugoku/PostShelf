@@ -155,8 +155,17 @@
   "syncNativeLabel": {
     "message": "与 X 书签同步"
   },
-  "syncNativeDesc": {
-    "message": "将帖子保存到文件夹时，PostShelf 也会将其添加到 X 标准书签；从所有文件夹中移除时，也会取消 X 上的书签。PostShelf 对你操作的每条帖子，只会点击一次屏幕上的书签按钮。默认关闭。"
+  "syncNativeDesc1": {
+    "message": "将帖子保存到文件夹时，PostShelf 也会将其添加到 X 标准书签。"
+  },
+  "syncNativeDesc2": {
+    "message": "从所有文件夹中移除时，也会取消 X 上的书签。"
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf 对你操作的每条帖子，只会点击一次屏幕上的书签按钮。"
+  },
+  "syncNativeNote": {
+    "message": "默认关闭。"
   },
   "savedBadgeTitle": {
     "message": "已保存到 $COUNT$ 个文件夹",
