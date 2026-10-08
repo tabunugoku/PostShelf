@@ -944,7 +944,7 @@
     "message": "가져오기가 끝났습니다"
   },
   "acPanelStopped": {
-    "message": "가져오기를 마쳤습니다"
+    "message": "가져오기를 멈췄습니다"
   },
   "acPanelCountdown": {
     "message": "$SEC$초 후에 시작합니다",

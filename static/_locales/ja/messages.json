@@ -944,7 +944,7 @@
     "message": "取り込みが終わりました"
   },
   "acPanelStopped": {
-    "message": "取り込みを終えました"
+    "message": "取り込みを止めました"
   },
   "acPanelCountdown": {
     "message": "$SEC$ 秒後に始まります",
@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$で読み込み中。いま $DATE$ ごろの投稿です",
+    "message": "速度「$SPEED$」で読み込み中。いま $DATE$ ごろの投稿です",
     "placeholders": {
       "speed": {
         "content": "$1",

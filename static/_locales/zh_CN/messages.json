@@ -944,7 +944,7 @@
     "message": "导入已完成"
   },
   "acPanelStopped": {
-    "message": "导入已结束"
+    "message": "导入已停止"
   },
   "acPanelCountdown": {
     "message": "$SEC$ 秒后开始",

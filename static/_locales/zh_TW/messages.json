@@ -944,7 +944,7 @@
     "message": "匯入已完成"
   },
   "acPanelStopped": {
-    "message": "匯入已結束"
+    "message": "匯入已停止"
   },
   "acPanelCountdown": {
     "message": "$SEC$ 秒後開始",

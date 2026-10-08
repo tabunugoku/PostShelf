@@ -944,7 +944,7 @@
     "message": "Importação concluída"
   },
   "acPanelStopped": {
-    "message": "Importação encerrada"
+    "message": "Importação interrompida"
   },
   "acPanelCountdown": {
     "message": "Começa em $SEC$ s",
