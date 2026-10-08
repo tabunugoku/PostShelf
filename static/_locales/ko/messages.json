@@ -941,6 +941,12 @@
   "installGuideLink": {
     "message": "업데이트 및 수동 설치 방법"
   },
+  "githubLink": {
+    "message": "GitHub에서 보기"
+  },
+  "githubLinkAria": {
+    "message": "GitHub에서 보기(새 탭에서 열림)"
+  },
   "errorStorage": {
     "message": "저장 또는 불러오기에 실패했습니다. 다시 시도해 주세요. 계속되면 설정의 \"데이터\"에서 \"내보내기\"로 저장한 뒤 확장 프로그램을 새로고침하세요."
   },

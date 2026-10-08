@@ -941,6 +941,12 @@
   "installGuideLink": {
     "message": "Steps for updating and manual installation"
   },
+  "githubLink": {
+    "message": "View on GitHub"
+  },
+  "githubLinkAria": {
+    "message": "View on GitHub (opens in a new tab)"
+  },
   "errorStorage": {
     "message": "Saving or loading failed. Please try again. If it keeps happening, save your data with \"Export\" in Settings, then reload the extension."
   },

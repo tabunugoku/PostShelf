@@ -941,6 +941,12 @@
   "installGuideLink": {
     "message": "Étapes de mise à jour et d'installation manuelle"
   },
+  "githubLink": {
+    "message": "Voir sur GitHub"
+  },
+  "githubLinkAria": {
+    "message": "Voir sur GitHub (s’ouvre dans un nouvel onglet)"
+  },
   "errorStorage": {
     "message": "Échec de l'enregistrement ou du chargement. Réessayez. Si cela continue, enregistrez vos données avec « Exporter » dans les Réglages, puis rechargez l'extension."
   },

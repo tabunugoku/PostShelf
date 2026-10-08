@@ -941,6 +941,12 @@
   "installGuideLink": {
     "message": "更新と手動インストールの手順"
   },
+  "githubLink": {
+    "message": "GitHub で見る"
+  },
+  "githubLinkAria": {
+    "message": "GitHub で見る（新しいタブで開きます）"
+  },
   "errorStorage": {
     "message": "保存または読み込みに失敗しました。もう一度試してください。続くときは、設定の「データ」から「エクスポート」で保存してから、拡張機能を再読み込みしてください。"
   },

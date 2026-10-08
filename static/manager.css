@@ -385,3 +385,10 @@ input[type=number]{width:110px}
 .ac-ok{color:var(--ok);font-weight:700}
 @media (max-width:480px){.ac-order{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.ac-dot.run,.ac-bar.ind i{animation:none}}
+
+/* 設定の一番下の「GitHub で見る」 (枠のある丸いボタンの形のリンク) */
+.repo-link{margin:8px 0 4px}
+.link-btn{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border:1px solid var(--border-strong);border-radius:999px;color:var(--text-primary);text-decoration:none;font-weight:700}
+.link-btn:hover{background:var(--fill-ghost-hover)}
+.link-btn i{font-size:18px}
+.link-btn i:last-child{font-size:14px;color:var(--text-secondary)}

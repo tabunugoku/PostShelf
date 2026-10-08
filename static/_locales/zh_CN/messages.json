@@ -941,6 +941,12 @@
   "installGuideLink": {
     "message": "更新和手动安装的步骤"
   },
+  "githubLink": {
+    "message": "在 GitHub 上查看"
+  },
+  "githubLinkAria": {
+    "message": "在 GitHub 上查看（在新标签页中打开）"
+  },
   "errorStorage": {
     "message": "保存或读取失败。请重试。如果问题持续出现，请先在设置的“数据”中用“导出”保存数据，然后重新加载扩展程序。"
   },

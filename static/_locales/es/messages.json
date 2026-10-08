@@ -941,6 +941,12 @@
   "installGuideLink": {
     "message": "Pasos de actualización e instalación manual"
   },
+  "githubLink": {
+    "message": "Ver en GitHub"
+  },
+  "githubLinkAria": {
+    "message": "Ver en GitHub (se abre en una pestaña nueva)"
+  },
   "errorStorage": {
     "message": "Error al guardar o cargar. Inténtalo de nuevo. Si sigue ocurriendo, guarda tus datos con «Exportar» en Ajustes y vuelve a cargar la extensión."
   },

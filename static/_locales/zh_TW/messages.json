@@ -941,6 +941,12 @@
   "installGuideLink": {
     "message": "更新和手動安裝的步驟"
   },
+  "githubLink": {
+    "message": "在 GitHub 上查看"
+  },
+  "githubLinkAria": {
+    "message": "在 GitHub 上查看（在新分頁中開啟）"
+  },
   "errorStorage": {
     "message": "儲存或讀取失敗。請再試一次。若持續發生，請先在設定的「資料」中用「匯出」儲存資料，然後重新載入擴充功能。"
   },
