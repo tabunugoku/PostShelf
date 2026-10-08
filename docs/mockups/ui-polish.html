@@ -106,6 +106,40 @@ h1{font-size:21px;margin:0 0 4px}h2{font-size:17px;margin:40px 0 4px;padding-top
 .rad.on{border-color:var(--ac);box-shadow:inset 0 0 0 4px var(--bg),inset 0 0 0 9px var(--ac)}
 .gearb{display:inline-block;margin-right:0}
 .fold{display:flex;justify-content:space-between;align-items:center;color:var(--mu);font-size:12px;border-top:1px dashed var(--bd);margin-top:6px;padding-top:8px}
+
+/* ===== 追加 (5〜8) ===== */
+.mg{width:100%;max-width:520px;font-size:13px}
+.gc{position:relative;border:1px solid var(--bd);border-radius:12px;padding:10px 12px;min-height:130px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.gc .au{font-weight:700}.gc .au span{color:var(--mu);font-weight:400}
+.gc .chip{align-self:flex-start;border:1px solid var(--bd);border-radius:999px;padding:1px 10px;color:var(--mu)}
+.gc.hov{background:var(--hv)}
+.ovb{position:absolute;display:flex;gap:6px;align-items:center;background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:2px 6px}
+.cbx{width:16px;height:16px;border:1.5px solid var(--mu);border-radius:4px;display:inline-block}
+.gc .cbx2{position:absolute;top:-8px;left:-8px;width:20px;height:20px;border-radius:50%;background:var(--ac);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 2px var(--bg)}
+.gc .cbx2 svg{width:12px;height:12px;stroke-width:3.5}
+.gc .bt{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.gc .acts{display:flex;gap:2px;background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:1px 3px}
+.gc .acts svg{width:15px;height:15px}
+.ban{display:flex;gap:10px;align-items:center;border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:0 10px 8px;background:var(--s1)}
+.ban span.t{flex:1}
+.btn2{border:1px solid var(--bd);border-radius:8px;padding:3px 10px;white-space:nowrap;cursor:pointer}
+.btn2.p{background:#0f6fb3;border-color:#0f6fb3;color:#fff}
+.acm{width:300px;padding:10px;border:1px solid var(--bd);border-radius:12px;background:var(--s1)}
+.acm .it{display:flex;gap:8px;align-items:center;padding:6px;border-radius:8px}
+.acm .it .n{flex:1;min-width:0}.acm .it .n small{display:block;color:var(--mu)}
+.acm .ib2{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--mu);cursor:pointer}
+.acm .it.cur{background:var(--hv)}
+.acm .dr{font-size:12px;border:1px solid var(--bd);border-radius:6px;padding:1px 8px;color:var(--mu);white-space:nowrap}
+.acm .mn{border:1px solid var(--bd);border-radius:8px;background:var(--bg);padding:4px;margin:2px 0 4px 30px;display:none}
+.acm .mn div{padding:6px 8px;border-radius:6px;color:#f4212e;display:flex;gap:6px;align-items:center}
+.pu{width:300px;padding:12px;border:1px solid var(--bd);border-radius:12px;background:var(--bg)}
+.pu .hd2{display:flex;gap:8px;align-items:center;font-weight:700;margin-bottom:8px}
+.pu .tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.pu .tile{border:1px solid var(--bd);border-radius:10px;padding:8px;text-align:center}
+.pu .tile b{display:block;font-size:20px}.pu .tile span{color:var(--mu);font-size:12px}
+.pu .bigb{display:flex;gap:6px;align-items:center;justify-content:center;width:100%;border-radius:10px;padding:8px;background:#0f6fb3;color:#fff;font-weight:700}
+.pu .lk{display:flex;gap:6px;align-items:center;padding:6px 2px;color:var(--mu)}
+.pu .rec{color:var(--mu);margin:6px 0}
 </style>
 </head>
 <body>
@@ -276,12 +310,142 @@ h1{font-size:21px;margin:0 0 4px}h2{font-size:17px;margin:40px 0 4px;padding-top
  <p><b>評価</b> <span class="verdict go">採用を推奨</span> (スイッチと余白)。<span class="verdict hold">キャッシュを畳むのは、判断が分かれる</span>。画面は短くなるが、オフのままでは、どんな設定があるかが見えなくなる。畳むなら、案内の 1 行に、設定の概要を書いておく。</p>
 </div>
 
+
+<!-- ============ 5 ============ -->
+<h2>5. 管理画面のグリッド表示: ホバーで出るボタンが、投稿者名に重なる</h2>
+<p class="lead">スクリーンショット (<code>tab-grid-dark.png</code>) で、1 枚目のカードにマウスを乗せると、チェックと 3 つの操作ボタンが、投稿者名 (「Dev Tips @devtips」) の上に重なっています。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage"><div class="app mg"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px">
+   <div class="gc hov"><div class="au" style="padding-left:2px">Dev Tips <span>@devtips</span></div><div class="ovb" style="left:6px;right:6px;top:6px;justify-content:space-between"><i class="cbx"></i><span style="display:flex;gap:6px"><svg viewBox="0 0 24 24" style=""><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg><svg viewBox="0 0 24 24" style=""><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg><svg viewBox="0 0 24 24" style=""><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></span></div><div>Chrome拡張の manifest v3 で…</div><span class="chip">開発ネタ</span></div>
+   <div class="gc"><div class="au">UI Daily <span>@uidaily</span></div><div>余白とタイポグラフィだけで…</div><span class="chip">デザイン</span></div>
+  </div></div></div>
+ </div>
+ <div class="cell"><span class="tag after">after</span>
+  <div class="stage"><div class="app mg"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 12px 12px">
+   <div class="gc hov"><span class="cbx2"><svg viewBox="0 0 24 24" style=""><path d="M5 12l5 5l10-10"/></svg></span><div class="au">Dev Tips <span>@devtips</span></div><div>Chrome拡張の manifest v3 で…</div><div class="bt"><span class="chip">開発ネタ</span><span class="acts"><svg viewBox="0 0 24 24" style=""><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg><svg viewBox="0 0 24 24" style=""><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg><svg viewBox="0 0 24 24" style=""><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></span></div></div>
+   <div class="gc"><div class="au">UI Daily <span>@uidaily</span></div><div>余白とタイポグラフィだけで…</div><div class="bt"><span class="chip">デザイン</span><span></span></div></div>
+  </div></div></div>
+ </div>
+</div>
+<div class="ev">
+ <ul>
+  <li>チェックは、カードの左上の角に、丸いバッジとして出す (選択中だけ塗りつぶし)。ホバー時にだけ出る枠の中のチェックはやめる。</li>
+  <li>操作ボタン (フォルダ変更 / X で開く / 削除) は、本文の下の行、フォルダのチップと同じ行の右端に置く。ホバーとキーボードのフォーカスで出す。投稿者名・本文には重ならない。</li>
+  <li>ポスト表示・リスト表示は、いまのままで重ならないので、グリッドだけの変更。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict go">採用を推奨</span>。実際に重なっている不具合で、直し方も局所的 (カードの CSS)。削除ボタンが、チップのすぐ横に来るので、誤クリックには、取り消しの通知 (すでにある) で備える。</p>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2>6. 管理画面の上部: お知らせの帯が積み重なる</h2>
+<p class="lead">スクリーンショット (<code>tab-account-menu-dark.png</code>) で、「アカウント未設定のポストがあります」と「取り込めるポストが 12 件あります」の 2 本の帯が、並んで出ています。さらに絞り込みのチップ、複数選択時の操作バーが続き、一覧が始まるまで、縦に 4 段ぶん使います。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage"><div class="app mg" style="padding:8px 0">
+   <div class="ban"><span class="t">「アカウント未設定」に 1 件のポストがあります。</span><span class="btn2">割り当て…</span></div>
+   <div class="ban"><span class="t">x.com の「ブックマーク」から取り込めるポストが 12 件あります</span><span class="btn2">取り込み方法</span><span>×</span></div>
+   <div style="display:flex;gap:6px;padding:0 10px 8px"><span class="btn2">画像あり</span><span class="btn2">動画あり</span><span class="btn2">リンクあり</span><span class="btn2">投稿者</span></div>
+   <div class="ban"><span class="t"><b>1 件選択中</b>　フォルダに追加　フォルダから外す　削除</span><span class="btn2">選択解除</span></div>
+   <div style="padding:8px 14px;border-top:1px solid var(--bd)">Dev Tips @devtips …(一覧)</div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after (「他に 1 件」を押すと切り替わります)</span>
+  <div class="stage"><div class="app mg" style="padding:8px 0">
+   <div class="ban"><span class="t" id="bnt">「アカウント未設定」に 1 件のポストがあります。</span><span class="btn2" id="bnb">割り当て…</span><span class="btn2" id="bnm" style="color:var(--mu)">他に 1 件 ⌄</span></div>
+   <div style="display:flex;gap:6px;padding:0 10px 8px;align-items:center"><span class="btn2">画像あり</span><span class="btn2">動画あり</span><span class="btn2">リンクあり</span><span class="btn2">投稿者</span><span style="flex:1"></span><span class="btn2 p">1 件選択中 ⌄</span></div>
+   <div style="padding:8px 14px;border-top:1px solid var(--bd)">Dev Tips @devtips …(一覧)</div>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <ul>
+  <li>お知らせの帯は、いちばん大事な 1 本だけを出し、残りは「他に N 件」で開く (押すと、次の帯に切り替わる。優先順は、アカウント未設定 → 取り込み)。</li>
+  <li>複数選択の操作バーは、絞り込みの行の右端に置き換える (「1 件選択中」のボタンから、フォルダに追加 / 外す / 削除 / 選択解除を開く)。一覧が下へずれない。</li>
+  <li>一覧の最初のポストが、約 100px 上がる。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict hold">判断が分かれる</span>。縦の圧迫は確実に減る。ただし、複数選択のバーは、いまは 1 クリックで押せる操作が、メニューに入って 2 クリックになる。<b style="min-width:0">私の推奨は、お知らせの帯の統合だけ採用し、選択バーは、いまのまま (ただし、一覧の上に固定して、ずれないようにする)</b>。</p>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2>7. アカウントの切り替えメニュー: アイコンだけの操作と、隣り合う削除</h2>
+<p class="lead">スクリーンショット (<code>tab-account-menu-dark.png</code>) で、各行の右端に、矢印 (⇄) とごみ箱のアイコンだけが並んでいます。矢印の意味が分からず、アカウントのデータを削除するごみ箱が、すぐ隣にあります。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage"><div class="app acm">
+   <div class="it cur"><svg viewBox="0 0 24 24" style=""><path d="M12 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg><span class="n"><b>@tabunugoku_dev</b><small>x.com でログイン中</small></span><span>6</span><span class="ib2"><svg viewBox="0 0 24 24" style=""><path d="M20 17H4m0 0l4-4m-4 4l4 4M4 7h16m0 0l-4-4m4 4l-4 4"/></svg></span><span class="ib2"><svg viewBox="0 0 24 24" style=""><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></span></div>
+   <div class="it"><svg viewBox="0 0 24 24" style=""><path d="M12 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg><span class="n"><b>@sub_account</b></span><span>1</span><span class="ib2"><svg viewBox="0 0 24 24" style=""><path d="M20 17H4m0 0l4-4m-4 4l4 4M4 7h16m0 0l-4-4m4 4l-4 4"/></svg></span><span class="ib2"><svg viewBox="0 0 24 24" style=""><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></span></div>
+   <div class="it"><svg viewBox="0 0 24 24" style=""><path d="M12 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg><span class="n"><b>アカウント未設定</b></span><span>1</span><span class="ib2"><svg viewBox="0 0 24 24" style=""><path d="M20 17H4m0 0l4-4m-4 4l4 4M4 7h16m0 0l-4-4m4 4l-4 4"/></svg></span><span class="ib2"><svg viewBox="0 0 24 24" style=""><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></span></div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after (「…」を押すと削除が出ます)</span>
+  <div class="stage"><div class="app acm">
+   <div class="it cur"><svg viewBox="0 0 24 24" style=""><path d="M12 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg><span class="n"><b>@tabunugoku_dev</b><small>x.com でログイン中</small></span><span>6</span><span class="ib2 mo" data-m="m1"><svg viewBox="0 0 24 24" style=""><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg></span></div>
+   <div class="mn" id="m1"><div><svg viewBox="0 0 24 24" style=""><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>このアカウントのデータを削除…</div></div>
+   <div class="it"><svg viewBox="0 0 24 24" style=""><path d="M12 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg><span class="n"><b>@sub_account</b></span><span>1</span><span class="ib2 mo" data-m="m2"><svg viewBox="0 0 24 24" style=""><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg></span></div>
+   <div class="mn" id="m2"><div><svg viewBox="0 0 24 24" style=""><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>このアカウントのデータを削除…</div></div>
+   <div class="it"><svg viewBox="0 0 24 24" style=""><path d="M12 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg><span class="n"><b>アカウント未設定</b></span><span>1</span><span class="dr">割り当て…</span><span class="ib2 mo" data-m="m3"><svg viewBox="0 0 24 24" style=""><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg></span></div>
+   <div class="mn" id="m3"><div><svg viewBox="0 0 24 24" style=""><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>このアカウントのデータを削除…</div></div>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <ul>
+  <li>行をクリックすれば、そのアカウントの表示に切り替わる (いまの矢印のボタンは、行のクリックに統合)。</li>
+  <li>「アカウント未設定」の行にだけ、文字の「割り当て…」ボタンを出す。ほかのアカウントでは、割り当ては要らない。</li>
+  <li>ごみ箱は、「…」のメニューの中に入れる。メニューの項目も、確認の画面 (いまのもの) を経て削除する。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict go">採用を推奨</span>。意味が不明なアイコンをなくし、削除の誤操作の危険も下がる。確認の画面がすでにあるので、動作は変わらない。</p>
+</div>
+
+<!-- ============ 8 ============ -->
+<h2>8. ツールバーのポップアップ</h2>
+<p class="lead">スクリーンショット (<code>popup-light.png</code>) で、「アカウント: アカウント未設定」と、「アカウント」が重なります。件数が 1 行の文字で、主な操作の「管理画面を開く」が、ほかのリンクと同じ見た目です。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage"><div class="app pu">
+   <div class="hd2">PostShelf</div>
+   <div class="rec">アカウント: アカウント未設定</div><div class="rec">1 件 · 1 フォルダ</div>
+   <div class="rec">最近保存した 3 件<br>@devtips Chrome拡張の manifes…</div>
+   <div class="lk" style="color:#1d9bf0"><svg viewBox="0 0 24 24" style=""><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg>管理画面を開く</div><div class="lk" style="color:var(--tx)"><svg viewBox="0 0 24 24" style=""><path d="M6 4h-1a2 2 0 0 0-2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0-2-2h-1M8 15a6 6 0 1 0 12 0v-3M11 3v2M6 3v2M18 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></svg>診断情報をコピー</div><div class="lk" style="color:var(--tx)"><svg viewBox="0 0 24 24" style=""><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M10.3 4.3c.4-1.8 2.9-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.5-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.6c1.8.4 1.8 2.9 0 3.4a1.7 1.7 0 0 0-1.1 2.6c.9 1.5-.8 3.3-2.4 2.4a1.7 1.7 0 0 0-2.6 1.1c-.4 1.8-2.9 1.8-3.4 0a1.7 1.7 0 0 0-2.6-1.1c-1.5.9-3.3-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.6c-1.8-.4-1.8-2.9 0-3.4a1.7 1.7 0 0 0 1.1-2.6c-.9-1.5.8-3.3 2.4-2.4c1 .6 2.3.1 2.6-1.1"/></svg>設定</div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after</span>
+  <div class="stage"><div class="app pu">
+   <div class="hd2">PostShelf<span style="flex:1"></span><span style="font-weight:400;font-size:12px;border:1px solid var(--bd);border-radius:999px;padding:0 8px;color:var(--mu)">アカウント未設定</span></div>
+   <div class="tiles"><div class="tile"><b>1</b><span>ポスト</span></div><div class="tile"><b>1</b><span>フォルダ</span></div></div>
+   <div class="rec" style="margin:0 0 8px">最近保存: @devtips Chrome拡張の manifes…</div>
+   <div class="bigb"><svg viewBox="0 0 24 24" style=""><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg>管理画面を開く</div>
+   <div style="display:flex;gap:4px;margin-top:6px"><span class="lk" style="flex:1"><svg viewBox="0 0 24 24" style=""><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M10.3 4.3c.4-1.8 2.9-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.5-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.6c1.8.4 1.8 2.9 0 3.4a1.7 1.7 0 0 0-1.1 2.6c.9 1.5-.8 3.3-2.4 2.4a1.7 1.7 0 0 0-2.6 1.1c-.4 1.8-2.9 1.8-3.4 0a1.7 1.7 0 0 0-2.6-1.1c-1.5.9-3.3-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.6c-1.8-.4-1.8-2.9 0-3.4a1.7 1.7 0 0 0 1.1-2.6c-.9-1.5.8-3.3 2.4-2.4c1 .6 2.3.1 2.6-1.1"/></svg>設定</span><span class="lk" style="flex:1"><svg viewBox="0 0 24 24" style=""><path d="M6 4h-1a2 2 0 0 0-2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0-2-2h-1M8 15a6 6 0 1 0 12 0v-3M11 3v2M6 3v2M18 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></svg>診断情報をコピー</span></div>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <ul>
+  <li>アカウントは、右上の小さな札 1 つにまとめる (「アカウント: アカウント未設定」の重なりが消える)。</li>
+  <li>件数は、2 つのタイルにする。最近保存した 1 件は、1 行に残す。</li>
+  <li>「管理画面を開く」を、塗りつぶしのボタンにする。設定と診断情報は、下の 1 行にまとめる。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict go">採用を推奨</span> (軽い変更)。ツールバーの動作を「サイドパネルを開く」にしていると、このポップアップは見られないので、使う人は限られる。</p>
+</div>
+
+<h2>小さな改善案 (モックなし)</h2>
+<div class="ev">
+ <ul>
+  <li><b style="min-width:0">自動取り込みの停止ボタン</b>: 進捗パネルの「停止」が赤い枠で、データが消えるように見える。実際は「そこまでの分は保存される」ので、色は普通の枠にする。</li>
+  <li><b style="min-width:0">自動取り込みの確認ダイアログ</b>: 規約の注意 (黄色い枠) を、速度の設定より上に置き、注意 → 設定 → 同意 → 始める、の順にする。</li>
+  <li><b style="min-width:0">ビューア</b>: 見えている画面は問題なし (閉じる・前後・開くボタンが、はっきり見える)。変更は提案しない。</li>
+ </ul>
+</div>
+
 <h2>採用の判断 (そのまま返信できる形)</h2>
 <div class="ev">
- <p>1. 作成メニュー → <b style="min-width:0">採用</b> / 保留 / 見送り</p>
- <p>2. ポップオーバーの一覧と下部 → <b style="min-width:0">採用</b> / 保留 / 見送り</p>
- <p>3. サイドパネルの上部 → 絞り込みだけ畳む / フォルダも畳む / 見送り</p>
- <p>4. 設定画面 → スイッチと余白だけ採用 / キャッシュの畳みも採用 / 見送り</p>
+ <p>決定済み: 1 採用 / 2 採用 / 3 フォルダも畳む / 4 キャッシュの畳みも採用</p>
+ <p>5. グリッドのホバー → 採用 / 保留 / 見送り</p>
+ <p>6. 管理画面上部の帯 → 帯の統合だけ / 選択バーも / 見送り</p>
+ <p>7. アカウントメニュー → 採用 / 保留 / 見送り</p>
+ <p>8. ポップアップ → 採用 / 保留 / 見送り</p>
+ <p>小さな改善案 (停止ボタンの色、ダイアログの順) → 採用 / 見送り</p>
  <p style="color:var(--pg2)">実装は、<code>docs/TASK_V19.md</code> (v18 のあと) にまとめます。実機の見え方 (x.com のテーマ 3 種、幅 340px のサイドパネル) は、実装後に、ご確認をお願いします。</p>
 </div>
 </div>
@@ -333,6 +497,11 @@ fm.querySelectorAll('[data-f]').forEach(c=>c.onclick=()=>{c.classList.toggle('on
 document.querySelectorAll('[data-sw]').forEach(s=>s.onclick=()=>s.classList.toggle('on'));
 const cs=$('#cs'),cd=$('#cd'),cf=$('#cf');
 cs.onclick=()=>{cs.classList.toggle('on');const on=cs.classList.contains('on');cd.style.display=on?'block':'none';cf.style.display=on?'none':'flex'};
+
+// 6
+const bn=$('#bnm');if(bn){let k=0;const L=[['「アカウント未設定」に 1 件のポストがあります。','割り当て…'],['x.com の「ブックマーク」から取り込めるポストが 12 件あります','取り込み方法']];bn.onclick=()=>{k=1-k;$('#bnt').textContent=L[k][0];$('#bnb').textContent=L[k][1]}}
+// 7
+document.querySelectorAll('.mo').forEach(b=>b.onclick=()=>{const m=document.getElementById(b.dataset.m);m.style.display=m.style.display==='block'?'none':'block'});
 </script>
 </body>
 </html>
