@@ -4,7 +4,7 @@ import { extractTweet } from './snapshot';
 import { getBookmark, listFolders, removeBookmark, setBookmarkFolders } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
-import { createFolderPicker } from '../shared/folderPicker';
+import { createFolderPicker, divider, flatButton } from '../shared/folderPicker';
 import { setNativeBookmark } from './native';
 import { getSettings, type ButtonMode } from '../shared/settings';
 import { getCurrentAccount, subscribeAccount } from './account';
@@ -89,23 +89,26 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     if (getCurrentAccount()?.id !== account?.id) return closePopovers(); // 開いている間にアカウントが切り替わった
     await setBookmarkFolders(tweetId, [...selected], snapshot); // 「未分類」だけでも保存する (保存の解除は「PostShelf から外す」だけ)
     isSaved = true;
-    unsave.style.display = 'block';
+    showUnsave(true);
     if (account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
     // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
     if ((await getSettings()).syncNative) setNativeBookmark(article, true);
   };
-  // 保存の解除は、明示的な操作だけ (保存済みのときだけ表示)
-  const unsave = document.createElement('button');
-  unsave.type = 'button';
-  unsave.textContent = t('removeFromPostShelf');
-  unsave.style.cssText = `display:${isSaved ? 'block' : 'none'};width:100%;text-align:left;margin-top:6px;padding:6px 8px;min-height:32px;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;cursor:pointer`;
+  // 保存の解除は、明示的な操作だけ (保存済みのときだけ表示。区切り線の下に、赤い文字で置く)
+  const unsave = flatButton(th, t('removeFromPostShelf'), 'ti-trash', 'danger');
+  const unsaveLine = divider(th);
+  const showUnsave = (on: boolean) => {
+    unsave.style.display = on ? 'flex' : 'none';
+    unsaveLine.style.display = on ? 'block' : 'none';
+  };
+  showUnsave(isSaved);
   unsave.addEventListener('click', async () => {
     try {
       await removeBookmark(tweetId);
       isSaved = false;
       selected.clear();
       picker.sync();
-      unsave.style.display = 'none';
+      showUnsave(false);
       requestPrune();
       if ((await getSettings()).syncNative) setNativeBookmark(article, false);
       errorEl.style.display = 'none';
@@ -123,7 +126,6 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   });
   if (account) pop.append(picker.el);
   pop.append(errorEl);
-  if (account) pop.append(unsave);
   // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
   if (account && mode === 'replace' && queryFirst(article, 'removeBookmark')) {
     const rel = document.createElement('button');
@@ -137,15 +139,13 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     pop.append(rel);
   }
   // サイドパネルで開く (content script からは直接開けないので background へ依頼する。ユーザーのクリック直後に送る)
-  const side = document.createElement('button');
-  side.type = 'button';
-  side.textContent = t('openSidePanel');
-  side.style.cssText = `display:block;width:100%;text-align:left;margin-top:6px;padding:6px 8px;min-height:32px;background:transparent;color:${th.fg};border:0;border-radius:8px;cursor:pointer`;
+  const side = flatButton(th, t('openSidePanel'), 'ti-layout-sidebar-right', 'sub');
   side.addEventListener('click', () => {
     void chrome.runtime?.sendMessage?.({ type: 'openSidePanel' });
     closePopovers();
   });
   pop.append(side);
+  if (account) pop.append(unsaveLine, unsave);
   document.body.append(pop);
   position(pop, anchor);
   return pop;

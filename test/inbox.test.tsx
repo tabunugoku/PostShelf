@@ -103,13 +103,13 @@ describe('v15-A: save as 未分類', () => {
     const unsave = () => [...pop.querySelectorAll('button')].find((b) => b.textContent === 'PostShelf から外す')!;
     expect(unsave().style.display).toBe('none'); // 未保存のときは出ない
     await flip(boxes(pop)[1], true);
-    expect(unsave().style.display).toBe('block');
+    expect(unsave().style.display).toBe('flex');
     await flip(boxes(pop)[1], false);
     expect(boxes(pop).map((c) => c.checked)).toEqual([true, false]);
     expect((await getBookmark('1234567890'))?.folderIds).toEqual([INBOX_ID]);
     pop.remove();
     pop = (await openPopover(article, btn))!; // 開き直しても、保存済みなので出る
-    expect(unsave().style.display).toBe('block');
+    expect(unsave().style.display).toBe('flex');
     unsave().click();
     await tick();
     expect(await getBookmark('1234567890')).toBeUndefined();

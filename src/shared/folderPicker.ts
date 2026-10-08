@@ -27,6 +27,31 @@ export const inboxOf = (list: Folder[]): Folder => {
   return { id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color };
 };
 
+/**
+ * 下部の操作に使う、アイコン + 文の同じ形のボタン (「フォルダを追加」「サイドパネルで開く」「PostShelf から外す」)。
+ * x.com の CSS に引きずられないよう、余白とフォントを明示する。tone: 'sub' は控えめな色、'danger' は赤い文字。
+ */
+export function flatButton(th: PickerTheme, text: string, icon: string, tone: 'normal' | 'sub' | 'danger' = 'normal'): HTMLButtonElement {
+  const b = document.createElement('button');
+  b.type = 'button';
+  const color = tone === 'danger' ? '#f4212e' : th.fg;
+  b.style.cssText = `box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;width:100%;min-height:36px;padding:4px 8px;background:transparent;color:${color};border:0;border-radius:8px;cursor:pointer;font:inherit;line-height:1.4;text-align:left;opacity:${tone === 'sub' ? '.8' : '1'}`;
+  const ic = document.createElement('i');
+  ic.className = `ti ${icon}`;
+  ic.style.cssText = 'display:block;position:static;margin:0;padding:0;width:18px;height:18px;font-size:18px;line-height:1;font-style:normal;flex:none';
+  b.append(ic, document.createTextNode(text));
+  b.addEventListener('mouseenter', () => (b.style.background = th.hover));
+  b.addEventListener('mouseleave', () => (b.style.background = 'transparent'));
+  return b;
+}
+
+/** 区切り線 */
+export function divider(th: PickerTheme): HTMLElement {
+  const d = document.createElement('div');
+  d.style.cssText = `box-sizing:border-box;height:0;margin:4px 0;border:0;border-top:.5px solid ${th.border}`;
+  return d;
+}
+
 export function createFolderPicker(opts: {
   folders: Folder[];
   selected: Set<string>;
@@ -40,7 +65,12 @@ export function createFolderPicker(opts: {
   // 先頭に常に「未分類」の行を出す (フォルダが 1 つもなくても、チェックを入れるだけで保存できる)。
   // 「未分類」は他のフォルダと同時には選べない。最後のチェックを外したときは「未分類」に戻る (保存の解除ではない)。
   const boxes = new Map<string, HTMLInputElement>();
-  const sync = () => boxes.forEach((cb, id) => (cb.checked = selected.has(id)));
+  /** 行ごとの見た目の更新 (チェックの塗り / 選択中の行の薄い背景 / 印の data-checked) */
+  const paints = new Map<string, () => void>();
+  const sync = () => {
+    boxes.forEach((cb, id) => (cb.checked = selected.has(id)));
+    paints.forEach((p) => p());
+  };
   const normalize = (changed: string, on: boolean) => {
     if (on && changed === INBOX_ID) selected.clear();
     if (on) selected.add(changed);
@@ -90,45 +120,68 @@ export function createFolderPicker(opts: {
     addBtn.focus();
   };
 
-  const addBtn = document.createElement('button');
-  addBtn.type = 'button';
-  addBtn.style.cssText = `display:flex;gap:8px;align-items:center;width:100%;min-height:32px;margin-top:6px;padding:4px 8px;background:transparent;color:${th.fg};border:0;border-top:.5px solid ${th.border};border-radius:0 0 8px 8px;cursor:pointer;font:inherit;text-align:left`;
-  const addIcon = document.createElement('i');
-  addIcon.className = 'ti ti-folder-plus';
-  addIcon.style.cssText = 'font-size:18px';
-  addBtn.append(addIcon, document.createTextNode(t('addFolder')));
-  addBtn.addEventListener('mouseenter', () => (addBtn.style.background = th.hover));
-  addBtn.addEventListener('mouseleave', () => (addBtn.style.background = ''));
+  // 「フォルダを追加」: 一覧の下の区切り線のあと、他の下部の操作と同じ形のボタン
+  const addBtn = flatButton(th, t('addFolder'), 'ti-folder-plus');
   addBtn.addEventListener('click', openMenu);
 
   const render = () => {
     listEl.replaceChildren();
     boxes.clear();
+    paints.clear();
     const list = [inboxOf(folders), ...folders.filter((f) => f.id !== INBOX_ID)];
     for (const f of list) {
       const label = document.createElement('label');
-      label.style.cssText = 'display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
-      label.addEventListener('mouseenter', () => (label.style.background = th.hover));
-      label.addEventListener('mouseleave', () => (label.style.background = ''));
+      label.style.cssText = 'box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
+      let hovered = false;
       const ico = document.createElement('i');
       ico.className = `ti ${f.icon}`;
-      ico.style.cssText = `font-size:18px;color:${f.color ?? th.fg}`;
+      ico.style.cssText = `display:block;position:static;margin:0;padding:0;font-size:18px;line-height:1;font-style:normal;color:${f.color ?? th.fg}`;
+      // 自前のチェック (角の丸い四角。選択中はアクセント色で塗り、白いチェック)。実際の入力は input type=checkbox のまま
+      // (キーボードとスクリーンリーダーの操作はそのまま)。appearance:none で見た目だけを変える
+      const box = document.createElement('span');
+      box.style.cssText = 'box-sizing:border-box;position:relative;display:block;width:18px;height:18px;flex:none;margin:0;padding:0';
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.checked = selected.has(f.id);
-      cb.style.cssText = `accent-color:${th.accent};width:16px;height:16px;margin:0`;
+      cb.style.cssText = `box-sizing:border-box;-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border-radius:5px;cursor:pointer;color:${th.fg}`;
+      const tick = document.createElement('i');
+      tick.className = 'ti ti-check';
+      tick.setAttribute('aria-hidden', 'true');
+      tick.style.cssText = 'position:absolute;inset:0;display:none;align-items:center;justify-content:center;margin:0;padding:0;font-size:13px;line-height:1;font-style:normal;color:#fff;pointer-events:none';
+      box.append(cb, tick);
+      const paintRow = () => {
+        const on = selected.has(f.id);
+        label.setAttribute('data-checked', String(on));
+        cb.style.border = `1.5px solid ${on ? th.accent : th.fg}`;
+        cb.style.opacity = on ? '1' : '.6';
+        cb.style.background = on ? th.accent : 'transparent';
+        tick.style.display = on ? 'flex' : 'none';
+        label.style.background = on || hovered ? th.hover : '';
+      };
+      label.addEventListener('mouseenter', () => {
+        hovered = true;
+        paintRow();
+      });
+      label.addEventListener('mouseleave', () => {
+        hovered = false;
+        paintRow();
+      });
       boxes.set(f.id, cb);
+      paints.set(f.id, paintRow);
       cb.addEventListener('change', () => {
         normalize(f.id, cb.checked);
         void onChange(selected);
       });
+      cb.addEventListener('focus', () => (cb.style.outline = `2px solid ${th.accent}`));
+      cb.addEventListener('blur', () => (cb.style.outline = 'none'));
       const name = document.createElement('span');
       name.textContent = displayName(f);
-      name.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-      label.append(ico, name, cb);
+      name.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      label.append(ico, name, box);
       listEl.append(label);
+      paintRow();
     }
-    listEl.append(addBtn);
+    listEl.append(divider(th), addBtn);
   };
   el.append(menu.el);
   render();
