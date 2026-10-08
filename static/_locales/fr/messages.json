@@ -194,6 +194,25 @@
   "settingsJump": {
     "message": "Aller à un groupe de réglages"
   },
+  "settingsSearch": {
+    "message": "Rechercher un réglage"
+  },
+  "settingsMatchCount": {
+    "message": "$COUNT$ résultats pour « $QUERY$ »",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "Modifications enregistrées"
+  },
   "syncNativeSection": {
     "message": "Synchronisation avec les favoris X"
   },

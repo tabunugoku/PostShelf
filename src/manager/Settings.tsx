@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
-import { getSettings, resetSettings, restoreSettings, updateAutoCollect, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
+import { foldText } from '../shared/query';
+import { getSettings, onSettingsChanged, resetSettings, restoreSettings, updateAutoCollect, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
 import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
 import { Confirm, TypeToConfirm } from './ui';
 import { ImageCacheSection } from './ImageCache';
@@ -33,6 +34,12 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
   const [counts, setCounts] = useState<DataCounts | null>(null);
   const [cacheKey, setCacheKey] = useState(0);
+  const [query, setQuery] = useState('');
+  const [matchCount, setMatchCount] = useState(0);
+  /** 「変更を保存しました」: この画面でスイッチ・選択を変えたあとの 2 秒だけ出す */
+  const [flash, setFlash] = useState(false);
+  const root = useRef<HTMLElement>(null);
+  const changedAt = useRef(0);
   const load = () =>
     void getSettings().then((s) => {
       setSync(s.syncNative);
@@ -41,6 +48,32 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       setAutoOn(s.autoCollect.enabled);
     });
   useEffect(load, []);
+  // この画面での変更が保存されたとき (他のタブでの変更では出さない): 変更の直後 (3 秒以内) に設定が書き込まれたら出す
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const off = onSettingsChanged(() => {
+      if (Date.now() - changedAt.current > 3000) return;
+      changedAt.current = 0;
+      setFlash(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setFlash(false), 2000);
+    });
+    return () => {
+      off();
+      clearTimeout(timer);
+    };
+  }, []);
+  // 設定の検索: 一致しない行は hidden にする (要素は消さない。状態を失わないため)。子の部品が遅れて描かれても追従する
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const apply = () => setMatchCount(filterSettings(el, query));
+    apply();
+    if (!query.trim()) return;
+    const mo = new MutationObserver(apply);
+    mo.observe(el, { childList: true, subtree: true, characterData: true });
+    return () => mo.disconnect();
+  }, [query]);
 
   const doReset = async () => {
     setDialog(null);
@@ -92,10 +125,33 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     </h3>
   );
   return (
-    <section>
+    <section
+      ref={root}
+      class="settings-page"
+      onChange={(e) => {
+        const el = e.target as HTMLInputElement;
+        if (el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'radio' || el.type === 'range') changedAt.current = Date.now();
+      }}
+    >
       <div class="bar">
         <Icon name="ti-settings" />
         <span class="bar-name">{t('settings')}</span>
+        <span class="settings-saved muted" role="status" aria-live="polite">
+          {flash ? t('settingsSaved') : ''}
+        </span>
+      </div>
+      <label class="search settings-search">
+        <Icon name="ti-search" />
+        <input
+          type="search"
+          placeholder={t('settingsSearch')}
+          aria-label={t('settingsSearch')}
+          value={query}
+          onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
+        />
+      </label>
+      <div class="muted settings-match" role="status" aria-live="polite">
+        {query.trim() ? (matchCount > 0 ? t('settingsMatchCount', query.trim(), matchCount) : t('notFoundTitle')) : ''}
       </div>
       <nav class="settings-nav" aria-label={t('settingsJump')}>
         {groups.map(([id, key]) => (
@@ -268,6 +324,48 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       )}
     </section>
   );
+}
+
+/**
+ * 設定の検索。.setting の行は、項目名・説明の文字が一致するものだけを残す (グループの見出しが一致すれば、その中の行は残す)。
+ * 行のないグループ (書き出し・初期化など) は、グループ全体の文字で比べる。一致のないグループと、その見出し・目次の項目も隠す。
+ * 戻り値は、一致した行 (行のないグループは 1 件) の数。空の検索語では、すべて元に戻す。
+ */
+export function filterSettings(root: HTMLElement, raw: string): number {
+  const q = foldText(raw.trim());
+  const has = (el: Element) => foldText(el.textContent ?? '').includes(q);
+  const groups = [...root.querySelectorAll<HTMLElement>('fieldset.setting-group')];
+  let count = 0;
+  for (const g of groups) {
+    const rows = [...g.querySelectorAll<HTMLElement>('.setting')];
+    let shown = true;
+    if (q) {
+      const legend = g.querySelector('legend');
+      const titleHit = !!legend && has(legend);
+      if (rows.length) {
+        const hits = rows.map((r) => titleHit || has(r));
+        rows.forEach((r, i) => (r.hidden = !hits[i]));
+        shown = hits.some(Boolean);
+        count += hits.filter(Boolean).length;
+      } else {
+        shown = has(g);
+        if (shown) count++;
+      }
+    } else rows.forEach((r) => (r.hidden = false));
+    g.hidden = !shown;
+  }
+  // 見出しと目次: 次の見出しまでのグループが 1 つでも見えているものだけ残す
+  const heads = [...root.querySelectorAll<HTMLElement>('h3.set-h')];
+  heads.forEach((h) => {
+    let any = false;
+    for (let n = h.nextElementSibling; n && !n.matches('h3.set-h'); n = n.nextElementSibling) {
+      if (!(n as HTMLElement).hidden && (n.matches('fieldset.setting-group') || n.querySelector('fieldset.setting-group:not([hidden])'))) any = true;
+    }
+    h.hidden = !any;
+    const chip = [...root.querySelectorAll<HTMLElement>('.settings-nav .nav-chip')].find((c) => c.textContent === h.textContent);
+    if (chip) chip.hidden = !any;
+  });
+  return count;
 }
 
 async function downloadJson(make: typeof exportData): Promise<void> {

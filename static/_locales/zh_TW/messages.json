@@ -194,6 +194,25 @@
   "settingsJump": {
     "message": "跳到設定群組"
   },
+  "settingsSearch": {
+    "message": "搜尋設定"
+  },
+  "settingsMatchCount": {
+    "message": "與「$QUERY$」相符 $COUNT$ 項",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "已儲存變更"
+  },
   "syncNativeSection": {
     "message": "與 X 書籤連動"
   },

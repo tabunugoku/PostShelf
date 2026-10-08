@@ -194,6 +194,25 @@
   "settingsJump": {
     "message": "Jump to a settings group"
   },
+  "settingsSearch": {
+    "message": "Search settings"
+  },
+  "settingsMatchCount": {
+    "message": "$COUNT$ matches for \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "Changes saved"
+  },
   "syncNativeSection": {
     "message": "Sync with X bookmarks"
   },

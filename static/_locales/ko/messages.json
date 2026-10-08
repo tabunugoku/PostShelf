@@ -194,6 +194,25 @@
   "settingsJump": {
     "message": "설정 그룹으로 이동"
   },
+  "settingsSearch": {
+    "message": "설정 검색"
+  },
+  "settingsMatchCount": {
+    "message": "\"$QUERY$\" 일치 $COUNT$개",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "변경 사항을 저장했습니다"
+  },
   "syncNativeSection": {
     "message": "X 북마크와 연동"
   },

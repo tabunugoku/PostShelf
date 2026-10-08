@@ -40,18 +40,24 @@ export function inView(b: Bookmark, folderId: string, now = Date.now()): boolean
   return b.folderIds.includes(folderId);
 }
 
+/**
+ * 検索用の正規化: 1 文字ずつ NFKC (全角半角をそろえる) → 小文字。1 文字ずつなので、元の文字との対応が取れる (強調 highlight.ts)。
+ * 一覧の絞り込みと、設定の検索、本文の強調が、同じ判定を使う。
+ */
+export const foldText = (s: string): string => [...s].map((c) => c.normalize('NFKC').toLowerCase()).join('');
+
 /** ビュー (フォルダ / すべて / 最近の 7 日) で絞り込み → 検索 (本文/投稿者/ハンドル) → 絞り込みチップ (AND) → 並べ替え */
 export function queryBookmarks(
   all: Bookmark[],
   opts: { folderId: string; search: string; sort: SortKey; filters?: Filters; now?: number },
 ): Bookmark[] {
-  const q = opts.search.trim().toLowerCase();
+  const q = foldText(opts.search.trim());
   const out = all.filter((b) => {
     if (!inView(b, opts.folderId, opts.now)) return false;
     if (opts.filters && !matchesFilters(b, opts.filters)) return false;
     if (!q) return true;
     const s = b.snapshot;
-    return [s.text, s.author, s.handle].some((x) => x.toLowerCase().includes(q));
+    return [s.text, s.author, s.handle].some((x) => foldText(x).includes(q));
   });
   const cmp: Record<SortKey, (a: Bookmark, b: Bookmark) => number> = {
     savedDesc: (a, b) => b.savedAt - a.savedAt,

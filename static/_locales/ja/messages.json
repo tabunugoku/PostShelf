@@ -194,6 +194,25 @@
   "settingsJump": {
     "message": "設定のグループへ移動"
   },
+  "settingsSearch": {
+    "message": "設定を探す"
+  },
+  "settingsMatchCount": {
+    "message": "「$QUERY$」に一致 $COUNT$ 件",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "変更を保存しました"
+  },
   "syncNativeSection": {
     "message": "X のブックマークとの連動"
   },

@@ -194,6 +194,25 @@
   "settingsJump": {
     "message": "跳转到设置分组"
   },
+  "settingsSearch": {
+    "message": "搜索设置"
+  },
+  "settingsMatchCount": {
+    "message": "与“$QUERY$”匹配 $COUNT$ 项",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "已保存更改"
+  },
   "syncNativeSection": {
     "message": "与 X 书签联动"
   },

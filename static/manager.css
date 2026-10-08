@@ -441,3 +441,9 @@ input[type=number]{width:110px}
 .triage-start{display:inline-flex;gap:4px;align-items:center;white-space:nowrap;min-height:32px;margin-right:4px}
 .triage-new{padding-top:4px}
 @media (prefers-reduced-motion:no-preference){.triage-bar i{transition:width .15s}}
+
+/* ---- 設定の検索 / 保存の表示 (v30) ---- */
+.settings-page [hidden]{display:none!important}
+.settings-saved{margin-left:auto;min-width:11em;min-height:1.4em;text-align:right;font-size:13px;white-space:nowrap}
+.settings-search{display:flex;margin:0 0 6px}
+.settings-match{min-height:1.4em;margin:0 0 6px;font-size:13px}
