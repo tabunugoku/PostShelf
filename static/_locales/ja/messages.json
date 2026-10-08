@@ -1302,6 +1302,25 @@
   "acBtnPause": {
     "message": "一時停止"
   },
+  "acBtnCollapse": {
+    "message": "畳む"
+  },
+  "acBtnExpand": {
+    "message": "開く"
+  },
+  "acCollapsedLine": {
+    "message": "取り込み中 · 取り込み $IMPORTED$ · 失敗 $FAILED$",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "停止"
   },

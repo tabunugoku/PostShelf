@@ -1302,6 +1302,25 @@
   "acBtnPause": {
     "message": "일시 중지"
   },
+  "acBtnCollapse": {
+    "message": "접기"
+  },
+  "acBtnExpand": {
+    "message": "열기"
+  },
+  "acCollapsedLine": {
+    "message": "가져오는 중 · 가져옴 $IMPORTED$ · 실패 $FAILED$",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "중지"
   },

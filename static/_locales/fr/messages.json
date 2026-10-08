@@ -1302,6 +1302,25 @@
   "acBtnPause": {
     "message": "Pause"
   },
+  "acBtnCollapse": {
+    "message": "Réduire"
+  },
+  "acBtnExpand": {
+    "message": "Ouvrir"
+  },
+  "acCollapsedLine": {
+    "message": "Import en cours · $IMPORTED$ importés · $FAILED$ échecs",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "Arrêter"
   },

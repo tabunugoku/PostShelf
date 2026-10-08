@@ -1302,6 +1302,25 @@
   "acBtnPause": {
     "message": "暫停"
   },
+  "acBtnCollapse": {
+    "message": "收合"
+  },
+  "acBtnExpand": {
+    "message": "展開"
+  },
+  "acCollapsedLine": {
+    "message": "匯入中 · 已匯入 $IMPORTED$ · 失敗 $FAILED$",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "停止"
   },
