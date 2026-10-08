@@ -18,6 +18,11 @@ export interface Settings {
   imageCache: ImageCacheSettings;
   /** ブックマークの自動取り込み (v15)。ユーザーが確認ダイアログで同意して始めたときだけ動く */
   autoCollect: AutoCollectSettings;
+  /**
+   * 長いポストの全文を取得する (v24)。既定はオン。保存した時点で、たたまれたポストのページを裏のタブで開いて読む
+   * (間隔・上限あり。CLAUDE.md の「守ること」の例外)。オフのときは、たたまれた分だけを保存する。保存データに無くても、オンとして扱う
+   */
+  fullText: boolean;
 }
 
 export type CollectSpeed = 'slow' | 'normal';
@@ -89,7 +94,7 @@ export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true };
 
 const KEY = 'settings';
 
@@ -105,6 +110,7 @@ export async function getSettings(): Promise<Settings> {
   if (typeof merged.viewAccount !== 'string') merged.viewAccount = '';
   merged.imageCache = normalizeImageCache(stored.imageCache);
   merged.autoCollect = normalizeAutoCollect(stored.autoCollect);
+  merged.fullText = stored.fullText !== false; // 省略できる項目: 無ければオン
   return merged;
 }
 
@@ -437,4 +443,64 @@ export function onCollectCommand(cb: () => void): () => void {
   };
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);
+}
+
+// ---- 長いポストの全文の取得 (v24) の状態 ----
+// 裏方 (service worker) が書き、管理画面の設定が読む。キューそのものは保存せず (保存してある truncated のポストから作り直せる)、進み具合と止めた理由だけを残す。
+
+export type FullTextKind = 'save' | 'auto' | 'manual';
+export type FullTextStop = 'limit' | 'failures' | 'user';
+export interface FullTextRun {
+  running: boolean;
+  kind: FullTextKind;
+  total: number;
+  done: number;
+  failed: number;
+  /** 止めた理由 (limit: X が制限や警告を出した / failures: 連続で 3 件失敗 / user: 止めるボタン) */
+  stopReason?: FullTextStop;
+  updatedAt: number;
+}
+const FT_RUN_KEY = 'fullTextRun';
+const FT_TAB_KEY = 'fullTextTab';
+const FT_TRY_KEY = 'fullTextTries';
+
+export async function getFullTextRun(): Promise<FullTextRun | null> {
+  const r = (await chrome.storage.local.get(FT_RUN_KEY))[FT_RUN_KEY] as Partial<FullTextRun> | undefined;
+  if (!r || typeof r.running !== 'boolean') return null;
+  return {
+    running: r.running,
+    kind: r.kind === 'auto' || r.kind === 'manual' ? r.kind : 'save',
+    total: Number(r.total) || 0,
+    done: Number(r.done) || 0,
+    failed: Number(r.failed) || 0,
+    stopReason: r.stopReason === 'limit' || r.stopReason === 'failures' || r.stopReason === 'user' ? r.stopReason : undefined,
+    updatedAt: Number(r.updatedAt) || 0,
+  };
+}
+export const saveFullTextRun = (r: FullTextRun): Promise<void> => chrome.storage.local.set({ [FT_RUN_KEY]: r });
+export function onFullTextRunChanged(cb: () => void): () => void {
+  const listener = (changes: Record<string, unknown>, area: string) => {
+    if (area === 'local' && FT_RUN_KEY in changes) cb();
+  };
+  chrome.storage.onChanged?.addListener(listener as never);
+  return () => chrome.storage.onChanged?.removeListener(listener as never);
+}
+
+/** 取得のために開いた裏のタブの記録 (閉じ忘れを、起動時に閉じるため) */
+export async function getFullTextTab(): Promise<number | null> {
+  const v = (await chrome.storage.local.get(FT_TAB_KEY))[FT_TAB_KEY];
+  return typeof v === 'number' ? v : null;
+}
+export const setFullTextTab = (id: number | null): Promise<void> =>
+  id === null ? (chrome.storage.local.remove(FT_TAB_KEY) as Promise<void>) : chrome.storage.local.set({ [FT_TAB_KEY]: id });
+
+/** ポストごとの、最後に取りに行った時刻 (同じポストの再試行は 1 時間に 1 回まで)。古い記録は書くときに捨てる */
+export async function getFullTextTries(): Promise<Record<string, number>> {
+  return ((await chrome.storage.local.get(FT_TRY_KEY))[FT_TRY_KEY] ?? {}) as Record<string, number>;
+}
+export async function recordFullTextTry(key: string, now: number, keepMs: number): Promise<void> {
+  const cur = await getFullTextTries();
+  const next = Object.fromEntries(Object.entries(cur).filter(([, t]) => now - t < keepMs));
+  next[key] = now;
+  await chrome.storage.local.set({ [FT_TRY_KEY]: next });
 }

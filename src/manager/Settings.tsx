@@ -5,6 +5,7 @@ import { getSettings, resetSettings, restoreSettings, updateAutoCollect, updateS
 import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
 import { Confirm, TypeToConfirm } from './ui';
 import { ImageCacheSection } from './ImageCache';
+import { FullTextSection } from './FullText';
 import { deleteAllDataAndCache } from '../shared/cacheops';
 import { refreshCacheView } from './cacheView';
 import { DiagnosticsDialog } from './Diagnostics';
@@ -118,6 +119,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
         <p class="muted setting-desc">{t('actionModeNote')}</p>
       </fieldset>
       <ImageCacheSection surface={surface} reloadKey={cacheKey} />
+      <FullTextSection reloadKey={cacheKey} />
       <fieldset class="setting-group">
         <legend>{t('dataSection')}</legend>
         <div class="io">

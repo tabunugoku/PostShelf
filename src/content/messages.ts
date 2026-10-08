@@ -1,4 +1,4 @@
-import { queryAllFirst } from '../shared/selectors';
+import { queryAllFirst, queryFirst } from '../shared/selectors';
 import { getHealth, getSettings } from '../shared/settings';
 import { extractTweet } from './snapshot';
 import { setNativeBookmark } from './native';
@@ -31,6 +31,15 @@ export function handleMessage(msg: { type?: string; tweetId?: string; want?: boo
       sendResponse({ ok: true });
     });
     return true;
+  }
+  if (msg?.type === 'readFullText' && msg.tweetId) {
+    // 裏方が開いたポストのページ (v24)。主役のポストが全文で表示されていれば、本文を返す。読み込み中なら wait。X が制限や警告を出していれば limit
+    const a = findArticle(msg.tweetId);
+    const ex = a ? extractTweet(a) : null;
+    if (queryFirst(document, 'xError') && !ex) sendResponse({ ok: false, reason: 'limit' });
+    else if (!ex || ex.snapshot.truncated || !ex.snapshot.text) sendResponse({ ok: false, reason: queryFirst(document, 'xError') ? 'limit' : 'wait' });
+    else sendResponse({ ok: true, text: ex.snapshot.text, segments: ex.snapshot.segments });
+    return false;
   }
   if (msg?.type === 'getDiagnostics') {
     void buildLocalReport().then((report) => sendResponse({ ok: true, report }));

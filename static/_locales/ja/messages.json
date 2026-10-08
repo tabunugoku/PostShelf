@@ -917,6 +917,64 @@
   "cacheRules": {
     "message": "保存した画像は、この PC の中だけに置き、外部へは送りません。拡張機能を削除すると、ブラウザの中のキャッシュも消えます（選んだフォルダは消えません）。本当に残したい画像は「自分で選んだフォルダ」に保存してください。保存データ本体の備えには、JSON のエクスポートを使ってください（画像は含まれず、URL のみです）。"
   },
+  "fullTextTitle": {
+    "message": "長いポストの全文"
+  },
+  "fullTextSwitch": {
+    "message": "長いポストの全文を取得する"
+  },
+  "fullTextSwitchDesc": {
+    "message": "X で「さらに表示」とたたまれたポストを保存すると、そのポストのページを裏のタブで開いて全文を読み、閉じます。1 件ごとに 4〜8 秒の間隔をあけ、いま見ているタブには触れません。X の規約上、自動化されたアクセスとみなされる可能性があります（法的な助言ではありません）。オフにすると、たたまれた分だけを保存します。"
+  },
+  "fullTextPending": {
+    "message": "全文を取得していないポスト: $COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "いま取得する"
+  },
+  "fullTextConfirm": {
+    "message": "$COUNT$ 件の全文を取得します。1 件ごとに 4〜8 秒かかり、X のポストのページが、裏のタブで開いては閉じます。X の規約上、自動化されたアクセスとみなされる可能性があります。始めますか？",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "取得を始める"
+  },
+  "fullTextProgress": {
+    "message": "取得しています: $DONE$ / $TOTAL$ 件",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "止める"
+  },
+  "fullTextStopLimit": {
+    "message": "X が制限や警告を出したようなので、止めました。しばらくあけてから、もう一度試してください。"
+  },
+  "fullTextStopFailures": {
+    "message": "続けて 3 件取得できなかったので、止めました。"
+  },
+  "fullTextStopUser": {
+    "message": "取得を止めました。"
+  },
   "updateNotice": {
     "message": "PostShelf を更新しました（$VERSION$）",
     "placeholders": {

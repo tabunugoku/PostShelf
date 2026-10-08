@@ -8,7 +8,7 @@ import { createFolderPicker, divider, flatButton } from '../shared/folderPicker'
 import { setNativeBookmark } from './native';
 import { getSettings, type ButtonMode } from '../shared/settings';
 import { getCurrentAccount, subscribeAccount } from './account';
-import { requestCache, requestPrune } from '../shared/cacheRequest';
+import { requestCache, requestFullText, requestPrune } from '../shared/cacheRequest';
 
 const POP_CLASS = 'postshelf-popover';
 
@@ -91,6 +91,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     isSaved = true;
     showUnsave(true);
     if (account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
+    if (account && snapshot.truncated) requestFullText(tweetId, account.id); // たたまれた状態で保存したとき: 設定がオンなら、background が全文を取る (v24)
     // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
     if ((await getSettings()).syncNative) setNativeBookmark(article, true);
   };

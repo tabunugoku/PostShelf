@@ -917,6 +917,64 @@
   "cacheRules": {
     "message": "Saved images stay on this PC and are never sent anywhere. If you remove the extension, the cache inside the browser is deleted too (a folder you chose is not). Keep images you really want in \"a folder I choose\". For backing up your saved data itself, use the JSON export (it contains image URLs only, not the images)."
   },
+  "fullTextTitle": {
+    "message": "Full text of long posts"
+  },
+  "fullTextSwitch": {
+    "message": "Fetch the full text of long posts"
+  },
+  "fullTextSwitchDesc": {
+    "message": "When you save a post that X has collapsed behind “Show more”, PostShelf opens that post’s page in a background tab, reads the full text and closes the tab. It waits 4–8 seconds between posts and never touches the tab you are viewing. X’s terms may treat this as automated access (this is not legal advice). When off, only the collapsed text is saved."
+  },
+  "fullTextPending": {
+    "message": "Posts without full text: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "Fetch now"
+  },
+  "fullTextConfirm": {
+    "message": "This fetches the full text of $COUNT$ posts. Each takes 4–8 seconds, and X post pages are opened and closed in a background tab. X’s terms may treat this as automated access. Start?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "Start"
+  },
+  "fullTextProgress": {
+    "message": "Fetching: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "Stop"
+  },
+  "fullTextStopLimit": {
+    "message": "Stopped because X seems to have shown a limit or warning. Wait a while and try again."
+  },
+  "fullTextStopFailures": {
+    "message": "Stopped because 3 posts in a row could not be fetched."
+  },
+  "fullTextStopUser": {
+    "message": "Fetching was stopped."
+  },
   "updateNotice": {
     "message": "PostShelf was updated ($VERSION$)",
     "placeholders": {

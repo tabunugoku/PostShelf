@@ -18,6 +18,7 @@ import {
   type CollectCap, type CollectCommand, type CollectReason, type CollectRun, type CollectSpeed,
 } from '../shared/settings';
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
+import { requestFullTextBatch } from '../shared/cacheRequest';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible } from './collect';
 import type { Extracted } from './snapshot';
@@ -113,6 +114,8 @@ export class AutoCollector {
   private base = 0;
   /** ページの再読み込みのあとなので、再開は一覧の先頭からやり直す */
   private rewind = false;
+  /** この取り込みで取り込んだ、たたまれた (truncated) ポストの ID。終わってから、全文の取得を依頼する (v24) */
+  private truncatedIds: string[] = [];
   private flushing: Promise<void> = Promise.resolve();
   private listeners = new Set<(s: CollectState | null) => void>();
   /** このタブの ID。保存データの取り込みの記録 (collectRun) に owner として残し、複数のタブで同じ取り込みを動かさない (v18) */
@@ -205,6 +208,7 @@ export class AutoCollector {
   private begin(token: number, fresh: boolean, rewind: boolean): void {
     const s = this.state!;
     if (fresh) {
+      this.truncatedIds = [];
       s.startedAt = this.d.now();
       s.imported = 0;
       s.skipped = 0;
@@ -298,6 +302,7 @@ export class AutoCollector {
       else {
         this.pending.push(it);
         s.imported++;
+        if (it.snapshot.truncated) this.truncatedIds.push(it.tweetId);
       }
     }
     return fresh;
@@ -459,6 +464,13 @@ export class AutoCollector {
     return false;
   }
 
+  /** 取り込みで取り込んだ、たたまれたポストの ID を渡して、空にする (終わった / 止めたあとに 1 回) */
+  takeTruncated(): string[] {
+    const ids = this.truncatedIds;
+    this.truncatedIds = [];
+    return ids;
+  }
+
   get needsRewind(): boolean {
     return this.rewind;
   }
@@ -501,6 +513,8 @@ export function installAutoCollect(onState: (s: CollectState | null, c: AutoColl
   let lastStatus: string | undefined;
   c.subscribe((s) => {
     if (s?.status === 'done' && lastStatus !== 'done') void markOfferDone(s.accountId);
+    // 終わった / 止めたあとに、取り込んだ分のうち、たたまれていたものの全文を取る (動いている間は取らない。件数の上限は background が 30 件にする)
+    if ((s?.status === 'done' || s?.status === 'stopped') && lastStatus !== s.status) requestFullTextBatch(s.accountId, c.takeTruncated());
     lastStatus = s?.status;
     onState(s, c);
   });

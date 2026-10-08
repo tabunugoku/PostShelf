@@ -917,6 +917,64 @@
   "cacheRules": {
     "message": "儲存的圖片只放在這台電腦裡，不會傳送到外部。移除擴充功能後，瀏覽器內部的快取也會被刪除（自己選擇的資料夾不會被刪除）。真正想保留的圖片請儲存到「自己選擇的資料夾」。儲存資料本身的備份請使用 JSON 匯出（不含圖片，僅含 URL）。"
   },
+  "fullTextTitle": {
+    "message": "長貼文的全文"
+  },
+  "fullTextSwitch": {
+    "message": "取得長貼文的全文"
+  },
+  "fullTextSwitchDesc": {
+    "message": "儲存被 X 摺疊為「顯示更多」的貼文時，會在背景分頁中開啟該貼文的頁面，讀取全文後關閉。每則之間間隔 4～8 秒，不會操作您正在檢視的分頁。依 X 的條款，這可能被視為自動化存取（不構成法律建議）。關閉後，只儲存摺疊的部分。"
+  },
+  "fullTextPending": {
+    "message": "尚未取得全文的貼文：$COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "立即取得"
+  },
+  "fullTextConfirm": {
+    "message": "將取得 $COUNT$ 則貼文的全文。每則需要 4～8 秒，X 的貼文頁面會在背景分頁中開啟後關閉。依 X 的條款，這可能被視為自動化存取。要開始嗎？",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "開始取得"
+  },
+  "fullTextProgress": {
+    "message": "正在取得：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "停止"
+  },
+  "fullTextStopLimit": {
+    "message": "X 似乎顯示了限制或警告，已停止。請隔一段時間後再試。"
+  },
+  "fullTextStopFailures": {
+    "message": "連續 3 則取得失敗，已停止。"
+  },
+  "fullTextStopUser": {
+    "message": "已停止取得。"
+  },
   "updateNotice": {
     "message": "PostShelf 已更新（$VERSION$）",
     "placeholders": {

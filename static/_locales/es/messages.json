@@ -917,6 +917,64 @@
   "cacheRules": {
     "message": "Las imágenes guardadas se quedan en este equipo y nunca se envían a ningún sitio. Si eliminas la extensión, la caché dentro del navegador también se elimina (una carpeta que hayas elegido no). Guarda las imágenes que quieras conservar de verdad en «Una carpeta que elijo». Para respaldar los datos guardados, usa la exportación JSON (solo contiene las URL de las imágenes, no las imágenes)."
   },
+  "fullTextTitle": {
+    "message": "Texto completo de publicaciones largas"
+  },
+  "fullTextSwitch": {
+    "message": "Obtener el texto completo de publicaciones largas"
+  },
+  "fullTextSwitchDesc": {
+    "message": "Al guardar una publicación que X ha plegado tras «Mostrar más», PostShelf abre la página de esa publicación en una pestaña en segundo plano, lee el texto completo y la cierra. Espera de 4 a 8 segundos entre publicaciones y nunca toca la pestaña que estás viendo. Los términos de X podrían considerarlo acceso automatizado (no es asesoramiento legal). Si lo desactivas, solo se guarda el texto plegado."
+  },
+  "fullTextPending": {
+    "message": "Publicaciones sin texto completo: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "Obtener ahora"
+  },
+  "fullTextConfirm": {
+    "message": "Se obtendrá el texto completo de $COUNT$ publicaciones. Cada una tarda de 4 a 8 segundos y las páginas de X se abren y se cierran en una pestaña en segundo plano. Los términos de X podrían considerarlo acceso automatizado. ¿Empezar?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "Empezar"
+  },
+  "fullTextProgress": {
+    "message": "Obteniendo: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "Detener"
+  },
+  "fullTextStopLimit": {
+    "message": "Se detuvo porque X parece haber mostrado un límite o una advertencia. Espera un rato y vuelve a intentarlo."
+  },
+  "fullTextStopFailures": {
+    "message": "Se detuvo porque fallaron 3 publicaciones seguidas."
+  },
+  "fullTextStopUser": {
+    "message": "Se detuvo la obtención."
+  },
   "updateNotice": {
     "message": "PostShelf se ha actualizado ($VERSION$)",
     "placeholders": {

@@ -917,6 +917,64 @@
   "cacheRules": {
     "message": "저장한 이미지는 이 PC 안에만 두며 외부로 보내지 않습니다. 확장 프로그램을 삭제하면 브라우저 내부의 캐시도 삭제됩니다(직접 고른 폴더는 삭제되지 않습니다). 정말 남기고 싶은 이미지는 \"직접 고른 폴더\"에 저장하세요. 저장 데이터 자체의 백업에는 JSON 내보내기를 사용하세요(이미지는 포함되지 않고 URL만 들어갑니다)."
   },
+  "fullTextTitle": {
+    "message": "긴 게시물의 전문"
+  },
+  "fullTextSwitch": {
+    "message": "긴 게시물의 전문 가져오기"
+  },
+  "fullTextSwitchDesc": {
+    "message": "X에서 ‘더 보기’로 접힌 게시물을 저장하면, 그 게시물의 페이지를 백그라운드 탭에서 열어 전문을 읽고 닫습니다. 한 건마다 4~8초 간격을 두며, 지금 보고 있는 탭은 건드리지 않습니다. X의 약관상 자동화된 접근으로 간주될 수 있습니다(법률 자문이 아닙니다). 끄면 접힌 부분만 저장합니다."
+  },
+  "fullTextPending": {
+    "message": "전문을 가져오지 않은 게시물: $COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "지금 가져오기"
+  },
+  "fullTextConfirm": {
+    "message": "$COUNT$개 게시물의 전문을 가져옵니다. 한 건에 4~8초가 걸리며, X의 게시물 페이지가 백그라운드 탭에서 열렸다 닫힙니다. X의 약관상 자동화된 접근으로 간주될 수 있습니다. 시작할까요?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "가져오기 시작"
+  },
+  "fullTextProgress": {
+    "message": "가져오는 중: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "중지"
+  },
+  "fullTextStopLimit": {
+    "message": "X가 제한이나 경고를 표시한 것 같아 멈췄습니다. 잠시 후 다시 시도하세요."
+  },
+  "fullTextStopFailures": {
+    "message": "연속 3건을 가져오지 못해 멈췄습니다."
+  },
+  "fullTextStopUser": {
+    "message": "가져오기를 멈췄습니다."
+  },
   "updateNotice": {
     "message": "PostShelf를 업데이트했습니다($VERSION$)",
     "placeholders": {

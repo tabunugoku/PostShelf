@@ -917,6 +917,64 @@
   "cacheRules": {
     "message": "Les images enregistrées restent sur ce PC et ne sont jamais envoyées ailleurs. Si vous supprimez l'extension, le cache dans le navigateur est aussi supprimé (un dossier que vous avez choisi ne l'est pas). Conservez les images qui comptent vraiment dans « Un dossier de mon choix ». Pour sauvegarder vos données enregistrées, utilisez l'export JSON (il ne contient que les URL des images, pas les images)."
   },
+  "fullTextTitle": {
+    "message": "Texte complet des posts longs"
+  },
+  "fullTextSwitch": {
+    "message": "Récupérer le texte complet des posts longs"
+  },
+  "fullTextSwitchDesc": {
+    "message": "Quand vous enregistrez un post que X a replié derrière « Afficher plus », PostShelf ouvre la page de ce post dans un onglet en arrière-plan, lit le texte complet puis ferme l’onglet. Il attend 4 à 8 secondes entre deux posts et ne touche jamais l’onglet que vous consultez. Les conditions de X peuvent y voir un accès automatisé (ce n’est pas un avis juridique). Désactivé, seul le texte replié est enregistré."
+  },
+  "fullTextPending": {
+    "message": "Posts sans texte complet : $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "Récupérer maintenant"
+  },
+  "fullTextConfirm": {
+    "message": "Le texte complet de $COUNT$ posts va être récupéré. Chacun prend 4 à 8 secondes et les pages de X s’ouvrent puis se ferment dans un onglet en arrière-plan. Les conditions de X peuvent y voir un accès automatisé. Commencer ?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "Commencer"
+  },
+  "fullTextProgress": {
+    "message": "Récupération : $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "Arrêter"
+  },
+  "fullTextStopLimit": {
+    "message": "Arrêté, car X semble avoir affiché une limite ou un avertissement. Attendez un moment puis réessayez."
+  },
+  "fullTextStopFailures": {
+    "message": "Arrêté, car 3 posts de suite n’ont pas pu être récupérés."
+  },
+  "fullTextStopUser": {
+    "message": "La récupération a été arrêtée."
+  },
   "updateNotice": {
     "message": "PostShelf a été mis à jour ($VERSION$)",
     "placeholders": {

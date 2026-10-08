@@ -917,6 +917,64 @@
   "cacheRules": {
     "message": "As imagens salvas ficam somente neste PC e nunca são enviadas para fora. Se você remover a extensão, o cache dentro do navegador também é excluído (uma pasta escolhida por você não é). Guarde as imagens que realmente quer manter em \"Uma pasta que eu escolher\". Para fazer backup dos dados salvos, use a exportação JSON (contém apenas as URLs das imagens, não as imagens)."
   },
+  "fullTextTitle": {
+    "message": "Texto completo de posts longos"
+  },
+  "fullTextSwitch": {
+    "message": "Obter o texto completo de posts longos"
+  },
+  "fullTextSwitchDesc": {
+    "message": "Ao salvar um post que o X recolheu atrás de “Mostrar mais”, o PostShelf abre a página desse post em uma guia em segundo plano, lê o texto completo e fecha a guia. Espera de 4 a 8 segundos entre posts e nunca mexe na guia que você está vendo. Os termos do X podem tratar isso como acesso automatizado (não é aconselhamento jurídico). Desativado, só o texto recolhido é salvo."
+  },
+  "fullTextPending": {
+    "message": "Posts sem o texto completo: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "Obter agora"
+  },
+  "fullTextConfirm": {
+    "message": "Será obtido o texto completo de $COUNT$ posts. Cada um leva de 4 a 8 segundos e as páginas do X são abertas e fechadas em uma guia em segundo plano. Os termos do X podem tratar isso como acesso automatizado. Começar?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "Começar"
+  },
+  "fullTextProgress": {
+    "message": "Obtendo: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "Parar"
+  },
+  "fullTextStopLimit": {
+    "message": "Parou porque o X parece ter mostrado um limite ou aviso. Aguarde um pouco e tente de novo."
+  },
+  "fullTextStopFailures": {
+    "message": "Parou porque 3 posts seguidos não puderam ser obtidos."
+  },
+  "fullTextStopUser": {
+    "message": "A obtenção foi interrompida."
+  },
   "updateNotice": {
     "message": "O PostShelf foi atualizado ($VERSION$)",
     "placeholders": {
