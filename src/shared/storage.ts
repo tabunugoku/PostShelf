@@ -34,6 +34,7 @@ import {
 } from './models';
 import { t } from './strings';
 import { assignOrder } from './ordering';
+import { sanitizeSegments, type Segment } from './segments';
 
 const KEY_FOLDERS = 'folders';
 const KEY_BOOKMARKS = 'bookmarks';
@@ -346,10 +347,48 @@ export function setBookmarkFolders(
     if (ids.includes(INBOX_ID)) await ensureInboxFolder(); // 読んだあと書くまでの間に await を挟まない
     const map = await readMap();
     const prev = map[key(tweetId)];
-    const b: Bookmark = { accountId: scope, tweetId, folderIds: ids, savedAt: prev?.savedAt ?? Date.now(), snapshot };
+    const b: Bookmark = { accountId: scope, tweetId, folderIds: ids, savedAt: prev?.savedAt ?? Date.now(), snapshot: keepFullText(prev?.snapshot, snapshot) };
     map[key(tweetId)] = b;
     await write(KEY_BOOKMARKS, map);
     return b;
+  });
+}
+
+/**
+ * たたまれた状態の snapshot で保存し直すとき、すでに全文を取れている (truncated が偽で、本文が長い) 保存分の本文を、
+ * たたまれた短い本文で上書きしない (v24)。ほかの項目は、新しい snapshot を使う。
+ */
+export function keepFullText(prev: Bookmark['snapshot'] | undefined, next: Bookmark['snapshot']): Bookmark['snapshot'] {
+  if (!prev || next.truncated !== true || prev.truncated === true || prev.text.length < next.text.length) return next;
+  const { truncated: _t, segments: _s, ...rest } = next;
+  return { ...rest, text: prev.text, ...(prev.segments ? { segments: prev.segments } : {}), truncated: false };
+}
+
+/** 全文を取れていない (truncated が真の) 現在のアカウントのポスト */
+export async function listTruncated(): Promise<Bookmark[]> {
+  return (await listBookmarks()).filter((b) => b.snapshot.truncated === true);
+}
+
+/** 全アカウントの、全文を取れていないポスト (裏方の取得用。書き込み用ではない) */
+export async function listAllTruncated(): Promise<Bookmark[]> {
+  return (await listAllBookmarks()).filter((b) => b.snapshot.truncated === true);
+}
+
+/**
+ * 全文を取れたとき、保存してあるポストの text / segments / truncated だけを更新する (v24)。
+ * ほかの項目 (フォルダ、保存日時、メディアなど) は変えない。保存されていない / truncated が真でないポストは何もしない。
+ * アカウントは引数で指定する (裏方は、画面のアカウントの範囲とは無関係に動かすため)。更新したら true
+ */
+export function refreshFullText(accountId: string, tweetId: string, full: { text: string; segments?: Segment[] }): Promise<boolean> {
+  return serial(async () => {
+    const map = await readMap();
+    const k = bookmarkKey(accountId, tweetId);
+    const cur = map[k];
+    if (!cur || cur.snapshot.truncated !== true || !full.text) return false;
+    const { segments: _s, ...rest } = cur.snapshot;
+    map[k] = { ...cur, snapshot: { ...rest, text: full.text, ...(full.segments ? { segments: full.segments } : {}), truncated: false } };
+    await write(KEY_BOOKMARKS, map);
+    return true;
   });
 }
 
@@ -399,6 +438,12 @@ function validBookmark(b: any): b is Bookmark {
     Array.isArray(b.snapshot.media)
   );
 }
+/** 取り込んだ JSON の snapshot の、省略できる項目 (v24) を検証する。不正なら、その項目だけ捨てる (text で表示する) */
+function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
+  const { segments, truncated, ...rest } = s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown };
+  const seg = segments === undefined ? undefined : sanitizeSegments(segments);
+  return { ...rest, ...(seg ? { segments: seg } : {}), ...(typeof truncated === 'boolean' ? { truncated } : {}) };
+}
 function validAccount(a: any): a is Account {
   return a && isStr(a.id) && a.id !== '' && isStr(a.handle) && typeof a.lastSeenAt === 'number';
 }
@@ -416,7 +461,7 @@ export function importData(json: unknown): Promise<number> {
     const legacy = d.version === undefined || d.version < 2;
     const acc = (v: unknown) => (!legacy && isStr(v) && v ? (v === UNKNOWN_ACCOUNT_ID ? v : accountIdOf(v)) : UNKNOWN_ACCOUNT_ID);
     const folders = d.folders.filter(validFolder).map((f) => ({ ...f, accountId: acc(f.accountId) }));
-    const bookmarks = d.bookmarks.filter(validBookmark).map((b) => ({ ...b, accountId: acc(b.accountId) }));
+    const bookmarks = d.bookmarks.filter(validBookmark).map((b) => ({ ...b, snapshot: cleanSnapshot(b.snapshot), accountId: acc(b.accountId) }));
     const curFolders = new Map((await readAllFolders()).map((f) => [bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f]));
     for (const f of folders) curFolders.set(bookmarkKey(f.accountId, f.id), f);
     const map = await readMap();

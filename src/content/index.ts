@@ -6,12 +6,14 @@ import { handleCollectCommand, installAutoCollect } from './autocollect';
 import { AutoCollectPanel } from './autocollectPanel';
 import { installMessageHandler } from './messages';
 import { installGlobalHandlers } from './popover';
+import { installFullTextWatcher } from './fulltext';
 
 installGlobalHandlers();
 installMessageHandler();
 initAccount();
 initHealth();
 initButtons();
+installFullTextWatcher(); // 個別ページで全文が出ているとき、保存済みの「たたまれた」ポストを全文に更新する (v24)
 ensureCollectButton();
 // ブックマーク一覧 (/i/history) への SPA 遷移を拾って収集ボタンを出し入れする
 watchCollectData();

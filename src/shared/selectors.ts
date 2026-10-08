@@ -36,6 +36,9 @@ export const CANDIDATES = {
   video: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
   // 動画のサムネイル (poster 属性)。実機未確認の推測
   videoPoster: ['[data-testid="videoPlayer"] video[poster]', 'video[poster]'],
+  // 長いポストのたたみ (「さらに表示」)。ポストのページへのリンクで、たたまれたポストにだけある。実機未確認の推測 (docs/MANUAL_TEST.md)。
+  // 候補が 1 つだけ: data-testid 以外に目印が無い (文言は表示言語で変わる)
+  showMore: ['[data-testid="tweet-text-show-more-link"]'],
   // 候補が 1 つだけ: リンクカードは data-testid 以外に目印が無い
   linkCard: ['[data-testid="card.wrapper"]'],
   // 現在ログイン中のアカウント (v9)。いずれも実機未確認 (2026-10 時点):
