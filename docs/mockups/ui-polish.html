@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PostShelf 画面の改善案 (before / after)</title>
+<style>
+:root{--pg:#fff;--pgt:#0f1419;--pg2:#536471;--bd:#cfd9de;--card:#f7f9f9;--ok:#00805a;--ng:#c4161c}
+@media (prefers-color-scheme:dark){:root:not([data-page=light]){--pg:#0b0d10;--pgt:#e7e9ea;--pg2:#8b98a5;--bd:#2f3336;--card:#16181c;--ok:#4cd8a6;--ng:#ff7b80}}
+:root[data-page=dark]{--pg:#0b0d10;--pgt:#e7e9ea;--pg2:#8b98a5;--bd:#2f3336;--card:#16181c;--ok:#4cd8a6;--ng:#ff7b80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pg);color:var(--pgt);font:15px/1.65 system-ui,"Hiragino Sans","Yu Gothic UI",sans-serif}
+.page{max-width:1120px;margin:0 auto;padding:20px 16px 70px}
+h1{font-size:21px;margin:0 0 4px}h2{font-size:17px;margin:40px 0 4px;padding-top:14px;border-top:1px solid var(--bd)}
+.lead{color:var(--pg2);margin:0 0 10px}
+.top{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.tg{border:1px solid var(--bd);background:transparent;color:inherit;border-radius:8px;padding:4px 12px;font:inherit;cursor:pointer}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:10px}
+@media (max-width:860px){.pair{grid-template-columns:1fr}}
+.cell>.tag{display:inline-block;font-size:12px;font-weight:700;padding:0 10px;border-radius:999px;border:1px solid var(--bd);margin-bottom:6px}
+.cell>.tag.after{background:var(--pgt);color:var(--pg);border-color:var(--pgt)}
+.stage{border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;justify-content:center;align-items:flex-start;min-height:120px;overflow:hidden}
+.stage.x{background:#000}
+.stage.xl{background:#fff}
+.ev{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:14px}
+.ev b{display:inline-block;min-width:3.4em}
+.ev ul{margin:4px 0 0;padding-left:20px}
+.verdict{font-weight:700}
+.verdict.go{color:var(--ok)}.verdict.hold{color:var(--ng)}
+/* ===== X のポップオーバー (ダーク / ライト) ===== */
+.pop{--fg:#e7e9ea;--bg:#000;--bd:#2f3336;--hv:rgba(231,233,234,.1);--ac:#1d9bf0;--mut:#71767b;position:relative;width:300px;background:var(--bg);color:var(--fg);border:.5px solid var(--bd);border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);font:14px/1.4 system-ui,"Hiragino Sans","Yu Gothic UI",sans-serif}
+.light .pop{--fg:#0f1419;--bg:#fff;--bd:#cfd9de;--hv:rgba(15,20,25,.06);--mut:#536471;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.pop svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.pop .hd{display:flex;gap:6px;align-items:center;padding:2px 8px 8px;margin-bottom:6px;border-bottom:.5px solid var(--bd)}
+.pop .av{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#1d9bf0,#7856ff);flex:none}
+.pop .row{display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px}
+.pop .row:hover{background:var(--hv)}
+.pop .row span{flex:1;min-width:0}
+.pop .ln{border-top:.5px solid var(--bd);margin:4px 0}
+.pop button{font:inherit;color:var(--fg);cursor:pointer}
+.pop .btn{min-height:32px;padding:4px 12px;border-radius:8px;border:.5px solid var(--bd);background:transparent}
+.pop .pri{border:0;background:#0f6fb3;color:#fff}
+.pop .pri[disabled]{opacity:.5;cursor:not-allowed}
+.pop input[type=text]{width:100%;min-height:32px;background:transparent;color:var(--fg);border:.5px solid var(--bd);border-radius:8px;padding:4px 8px;font:inherit}
+.pop input[type=text]:focus{outline:2px solid var(--ac);outline-offset:-1px}
+/* --- 作成メニュー: before --- */
+.cm-b{display:grid;gap:8px}
+.cm-b .r{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cm-b .r>span{min-width:48px;opacity:.75;font-size:13px}
+.cm-b .ib{width:32px;height:32px;padding:0;border-radius:8px;border:.5px solid var(--bd);background:transparent;line-height:1}
+/* ガタつきの再現: アイコンが基準線に載り、枠の中央に来ない */
+.cm-b .ib i{display:inline-block;font-style:normal;position:relative;top:-3px;left:-3px;width:18px;height:18px}
+.cm-b .sw{width:20px;height:20px;padding:0;border-radius:50%;border:.5px solid var(--bd)}
+/* --- 作成メニュー: after --- */
+.cm-a{display:grid;gap:12px}
+.cm-a .lb{font-size:12px;color:var(--mut);margin-bottom:6px}
+.cm-a .ig{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.cm-a .ib{aspect-ratio:1;min-width:0;padding:0;border-radius:8px;border:.5px solid transparent;background:transparent;display:grid;place-items:center}
+.cm-a .ib svg{display:block}
+.cm-a .ib:hover{background:var(--hv)}
+.cm-a .ib.on{border-color:var(--ac);background:var(--hv);box-shadow:0 0 0 1px var(--ac) inset}
+.cm-a .sg{display:flex;gap:8px;align-items:center}
+.cm-a .sw{width:22px;height:22px;padding:0;border-radius:50%;border:.5px solid var(--bd);position:relative}
+.cm-a .sw.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ac)}
+.cm-a .acts{display:flex;gap:8px;justify-content:flex-end}
+.prev{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;background:var(--hv)}
+/* --- 保存ポップオーバーの一覧 --- */
+.chk-b{width:16px;height:16px;border:1px solid #6f7479;border-radius:2px;background:#3a3d41;flex:none}
+.chk-a{width:18px;height:18px;border:1.5px solid var(--mut);border-radius:5px;flex:none;display:grid;place-items:center}
+.chk-a.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.chk-a svg{width:12px;height:12px;stroke-width:3.5}
+.row.sel{background:var(--hv)}
+.flat{display:flex;gap:8px;align-items:center;width:100%;min-height:36px;padding:4px 8px;background:transparent;border:0;border-radius:8px;text-align:left}
+.flat:hover{background:var(--hv)}
+.flat.sub{color:var(--mut)}.flat.dng{color:#f4212e}
+/* ===== サイドパネル / 設定 (アプリ側のテーマ) ===== */
+.app{--bg:#000;--s1:#16181c;--bd:#2f3336;--tx:#e7e9ea;--mu:#8b98a5;--ac:#1d9bf0;--hv:rgba(231,233,234,.08);background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:12px;font-size:13px;overflow:hidden}
+.light .app{--bg:#fff;--s1:#f7f9f9;--bd:#eff3f4;--tx:#0f1419;--mu:#536471;--hv:rgba(15,20,25,.06)}
+.app svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sp{width:340px}
+.sp .rw{display:flex;gap:6px;align-items:center;padding:6px 10px}
+.sp .bx{border:1px solid var(--bd);border-radius:999px;padding:3px 10px;white-space:nowrap;display:inline-flex;gap:4px;align-items:center}
+.sp .bx.on{background:var(--hv);font-weight:700}
+.sp .sel{flex:1;border:1px solid var(--bd);border-radius:8px;padding:5px 10px;display:flex;justify-content:space-between}
+.sp .ic{border:1px solid var(--bd);border-radius:8px;width:30px;height:30px;display:grid;place-items:center}
+.sp .scr{display:flex;gap:6px;overflow:hidden;padding:6px 10px}
+.sp .post{padding:8px 10px;border-top:1px solid var(--bd);display:flex;gap:8px}
+.sp .post i{width:30px;height:30px;border-radius:50%;background:var(--hv);flex:none}
+.sp .post p{margin:0}
+.sp .badge{background:#1d9bf0;color:#fff;border-radius:999px;padding:0 6px;font-size:11px;font-weight:700}
+.sp .cut{opacity:.25}
+.ping{position:relative}
+.ping .menu{margin:0 10px 6px;border:1px solid var(--bd);border-radius:10px;background:var(--s1);padding:8px}
+.ping .menu b{display:block;font-size:12px;color:var(--mu);margin:2px 0 4px;font-weight:600}
+.st{width:100%;max-width:520px}
+.st .sec{border:1px solid var(--bd);border-radius:10px;margin:10px;padding:10px 12px}
+.st h3{margin:0 0 6px;font-size:13px}
+.st .help{color:var(--mu);font-size:12px;margin:2px 0 0}
+.st .line{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:6px 0}
+.st .line b{display:block}
+.sw2{width:38px;height:22px;border-radius:999px;background:#536471;position:relative;flex:none;margin-top:2px}
+.sw2::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.sw2.on{background:var(--ac)}.sw2.on::after{left:18px}
+.nat{width:16px;height:16px;border:1px solid #6f7479;border-radius:2px;background:#3a3d41;flex:none;margin-top:3px}
+.rad{width:18px;height:18px;border:1.5px solid var(--mu);border-radius:50%;flex:none;margin-top:2px}
+.rad.on{border-color:var(--ac);box-shadow:inset 0 0 0 4px var(--bg),inset 0 0 0 9px var(--ac)}
+.gearb{display:inline-block;margin-right:0}
+.fold{display:flex;justify-content:space-between;align-items:center;color:var(--mu);font-size:12px;border-top:1px dashed var(--bd);margin-top:6px;padding-top:8px}
+</style>
+</head>
+<body>
+<div class="page" id="pg">
+<div class="top">
+  <div><h1>PostShelf 画面の改善案 (before / after)</h1>
+  <p class="lead">スクリーンショット (<code>docs/screenshots/</code> とご提示の x.com の画像) を見て、直したほうが良い所を 4 つ選びました。それぞれに評価を付けています。採用するかどうかは、ご判断ください。</p></div>
+  <button class="tg" id="tg" type="button">ライト / ダーク</button>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2>1. 保存ポップオーバーの「フォルダを作成」メニュー</h2>
+<p class="lead">ご指摘の 2 点 (アイコンが 2 行になる、アイコンが枠の中央に来ない) を直します。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage x"><div class="pop">
+   <div class="hd"><span class="av"></span>保存先: @tabunugoku_dev</div>
+   <div class="cm-b">
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn" style="border:0;padding:4px 8px">← 戻る</button><strong>フォルダを作成</strong></div>
+    <input type="text" placeholder="フォルダ名">
+    <div class="r"><span>アイコン</span>
+     <button class="ib"><i><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg></i></button>
+     <button class="ib"><i><svg viewBox="0 0 24 24"><path d="M12 17.75l-6.172 3.245l1.179-6.873l-5-4.867l6.9-1l3.086-6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/></svg></i></button>
+     <button class="ib"><i><svg viewBox="0 0 24 24"><path d="M7 8l-4 4l4 4M17 8l4 4l-4 4M14 4l-4 16"/></svg></i></button>
+     <button class="ib"><i><svg viewBox="0 0 24 24"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6v13M12 6v13M21 6v13"/></svg></i></button>
+     <button class="ib"><i><svg viewBox="0 0 24 24"><path d="M3 12h1m8-9v1m8 8h1M5.6 5.6l.7.7m12.1-.7l-.7.7M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0-1 3a2 2 0 0 1-4 0a3.5 3.5 0 0 0-1-3M9.7 17h4.6"/></svg></i></button>
+     <button class="ib"><i><svg viewBox="0 0 24 24"><path d="M19.5 12.572l-7.5 7.428l-7.5-7.428a5 5 0 1 1 7.5-6.566a5 5 0 1 1 7.5 6.572"/></svg></i></button>
+     <button class="ib"><i><svg viewBox="0 0 24 24"><path d="M15 8h.01M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM3 16l5-5c.928-.893 2.072-.893 3 0l5 5M14 14l1-1c.928-.893 2.072-.893 3 0l3 3"/></svg></i></button>
+     <button class="ib"><i><svg viewBox="0 0 24 24"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1M3 13a20 20 0 0 0 18 0"/></svg></i></button>
+    </div>
+    <div class="r"><span>色</span><button class="sw" style="background:linear-gradient(135deg,transparent 45%,currentColor 46%,currentColor 54%,transparent 55%)"></button><button class="sw" style="background:#E24B4A"></button><button class="sw" style="background:#BA7517"></button><button class="sw" style="background:#639922"></button><button class="sw" style="background:#1D9E75"></button><button class="sw" style="background:#378ADD"></button><button class="sw" style="background:#7F77DD"></button><button class="sw" style="background:#D4537E"></button><button class="sw" style="background:#888780"></button></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn">キャンセル</button><button class="btn pri" disabled>作成</button></div>
+   </div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after</span>
+  <div class="stage x"><div class="pop" id="p1">
+   <div class="hd"><span class="av"></span>保存先: @tabunugoku_dev</div>
+   <div class="cm-a">
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn" style="border:0;padding:4px 8px">← 戻る</button><strong>フォルダを作成</strong></div>
+    <input type="text" placeholder="フォルダ名" id="nm">
+    <div><div class="lb">アイコン</div><div class="ig" id="ig"></div></div>
+    <div><div class="lb">色</div><div class="sg" id="sg"></div></div>
+    <div class="prev" id="prev"></div>
+    <div class="acts"><button class="btn">キャンセル</button><button class="btn pri" id="mk" disabled>作成</button></div>
+   </div>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <p><b>直す点</b></p>
+ <ul>
+  <li>「アイコン」「色」のラベルを、並べる列の<b style="min-width:0">上</b>に置く。アイコン 8 個が、ちょうど 1 行 (幅いっぱいを 8 等分) に収まる。</li>
+  <li>アイコンのボタンは、中央寄せ (<code>display:grid; place-items:center</code>) にして、アイコンは <code>display:block</code>・<code>line-height:1</code> の 1 つの箱にする。x.com 側の CSS (<code>button</code> / <code>i</code> の余白や基準線) に引きずられないよう、<code>box-sizing</code>・<code>margin</code>・<code>padding</code>・<code>line-height</code> を明示する。</li>
+  <li>選択中は、枠線 + 薄い背景。色は、選択中に二重のリングを付ける。</li>
+  <li>名前・アイコン・色を決めると、プレビュー (作ったあとの見え方) が 1 行で出る。名前が空のときは「作成」が押せない (いまの動作のまま)。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict go">採用を推奨</span>。ご指摘の不具合そのものの修正で、効果が大きい。変更は <code>folderCreateMenu.ts</code> の CSS と DOM の組み立てだけで、保存の動作には触れない。リスクは小さい (プレビューの 1 行は、不要なら外せる)。実機で、X のダーク / ライト / ダーク青の 3 つで確認する。</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2>2. 保存ポップオーバーのフォルダ一覧と下部の操作</h2>
+<p class="lead">チェックボックスが、ブラウザ標準の灰色の四角のままで、X の画面から浮いています。下部の 2 つの操作 (フォルダを追加 / サイドパネルで開く) も、見分けにくい。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage x"><div class="pop">
+   <div class="hd"><span class="av"></span>保存先: @tabunugoku_dev</div>
+   <div class="row"><svg viewBox="0 0 24 24"><path d="M4 4h16v10l-3 3H7l-3-3zM4 14h4l1 2h6l1-2h4"/></svg><span>未分類</span><i class="chk-b"></i></div>
+   <div class="row"><svg viewBox="0 0 24 24" style="color:#378ADD"><path d="M7 8l-4 4l4 4M17 8l4 4l-4 4M14 4l-4 16"/></svg><span>開発ネタ</span><i class="chk-b"></i></div>
+   <div class="row"><svg viewBox="0 0 24 24" style="color:#BA7517"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6v13M12 6v13M21 6v13"/></svg><span>あとで読む</span><i class="chk-b"></i></div>
+   <div style="border-top:.5px solid var(--bd);margin-top:6px;padding:8px 8px 4px;display:flex;gap:8px;align-items:center"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2M12 10v6M9 13h6"/></svg>フォルダを追加</div>
+   <div style="padding:8px 8px 4px">サイドパネルで開く</div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after</span>
+  <div class="stage x"><div class="pop" id="p2">
+   <div class="hd"><span class="av"></span>保存先: @tabunugoku_dev</div>
+   <div id="lst"></div>
+   <div class="ln"></div>
+   <button class="flat"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2M12 10v6M9 13h6"/></svg>フォルダを追加</button>
+   <button class="flat sub"><svg viewBox="0 0 24 24"><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1M15 4v16"/></svg>サイドパネルで開く</button>
+   <div class="ln"></div>
+   <button class="flat dng"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>PostShelf から外す</button>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <p><b>直す点</b></p>
+ <ul>
+  <li>チェックボックスを、角の丸い自前のチェックにする (選択中は、アクセントの色で塗り、白いチェックを出す)。選択中の行には、薄い背景を付ける。実際の入力は、<code>input type="checkbox"</code> を残し (キーボードとスクリーンリーダーの操作はそのまま)、見た目だけを <code>appearance:none</code> で変える。</li>
+  <li>下部の操作を、同じ形のボタンの行 (アイコン + 文) にそろえる。「PostShelf から外す」は、保存済みのときだけ、区切り線の下に、赤い文字で置く (いまは一覧の下に枠線つきのボタンで出る)。</li>
+  <li>この一覧は、管理画面の「フォルダを変更」と、サイドパネルの保存でも共通 (<code>folderPicker.ts</code>) なので、3 か所とも同時に変わる。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict go">採用を推奨</span>。共通部品の 1 か所を直すだけで、3 か所の見た目がそろう。保存の動作は変えない。リスクは、管理画面側 (CSS 変数のテーマ) で、色が合っているかの確認。</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2>3. サイドパネルの上部 (4 段 → 2 段)</h2>
+<p class="lead">幅 340px のサイドパネルで、上部の 4 段が縦の高さの約 4 分の 1 を使っています。しかも、フォルダのチップ列と絞り込みのチップ列が、右端で切れて、全部は見えません。「フォルダの選択」は、ドロップダウンとチップ列の両方にあって、重複しています。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage"><div class="app sp">
+   <div class="rw"><span class="sel"><span>すべて 6</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6l6-6"/></svg></span><span class="ic"><svg viewBox="0 0 24 24"><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0M21 21l-6-6"/></svg></span><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg></span></div>
+   <div class="scr"><span class="bx on">すべて</span><span class="bx">未分類 <span class="badge">1</span></span><span class="bx">最近の 7 日</span><span class="bx cut">開発ネタ</span></div>
+   <div class="rw"><span class="bx" style="border-radius:8px">保存が新しい順 ⌄</span><span style="flex:1"></span><span class="bx" style="border-radius:8px">▤ ☰ ▦</span></div>
+   <div class="scr"><span class="bx">画像あり</span><span class="bx">動画あり</span><span class="bx">リンクあり</span><span class="bx cut">投稿者</span></div>
+   <div class="post"><i></i><div><b>Dev Tips</b> <span style="color:var(--mu)">@devtips</span><p>Chrome拡張の manifest v3 で…</p></div></div>
+   <div class="post"><i></i><div><b>Maho</b> <span style="color:var(--mu)">@maho</span><p>長文スレッド: 個人開発で…</p></div></div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after</span>
+  <div class="stage"><div class="app sp ping">
+   <div class="rw"><span class="sel"><span>すべて 6</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6l6-6"/></svg></span><span class="ic"><svg viewBox="0 0 24 24"><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0M21 21l-6-6"/></svg></span><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg></span></div>
+   <div class="rw"><span class="bx" style="border-radius:8px">保存が新しい順 ⌄</span><span class="bx" id="fb" style="border-radius:8px;cursor:pointer"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>絞り込み <span class="badge" id="fbd" style="display:none">1</span></span><span style="flex:1"></span><span class="bx" style="border-radius:8px">▤ ☰ ▦</span></div>
+   <div class="menu" id="fm" style="display:none"><b>絞り込み</b>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="bx" data-f>画像あり</span><span class="bx" data-f>動画あり</span><span class="bx" data-f>リンクあり</span><span class="bx" data-f>投稿者で絞り込み</span></div></div>
+   <div class="post"><i></i><div><b>Dev Tips</b> <span style="color:var(--mu)">@devtips</span><p>Chrome拡張の manifest v3 で…</p></div></div>
+   <div class="post"><i></i><div><b>Maho</b> <span style="color:var(--mu)">@maho</span><p>長文スレッド: 個人開発で…</p></div></div>
+   <div class="post"><i></i><div><b>UI Daily</b> <span style="color:var(--mu)">@uidaily</span><p>余白とタイポグラフィだけで…</p></div></div>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <p><b>直す点</b> (「絞り込み」を押すと、4 つの条件が開きます。右の after で試せます)</p>
+ <ul>
+  <li>フォルダのチップ列をなくし、ドロップダウンに一本化する (「すべて」「未分類」「最近の 7 日」も、ドロップダウンの先頭の区画に入っている)。</li>
+  <li>絞り込みの 4 つのチップ (画像あり / 動画あり / リンクあり / 投稿者) は、「絞り込み」のボタンの中に畳む。条件を選んだときは、ボタンに件数のバッジを付けて、選択中だと分かるようにする。</li>
+  <li>上部が 4 段から 2 段になり、ポストの一覧が、約 90px 広くなる。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict hold">判断が分かれる</span>。縦の狭さは確実に解消するが、フォルダの切り替えが、ワンタップから 2 タップになる。サイドパネルは「いま開いているポストを保存する」用途が主で、一覧を見る頻度は管理画面より低いはず。<b style="min-width:0">私の推奨は、絞り込みだけ畳み、フォルダのチップ列は残す</b> (縦が 2 段減るのではなく 1 段減る) か、フォルダのチップ列も畳むかの二択で、ご判断ください。</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2>4. 設定画面 (オン / オフ、見出し、画像のキャッシュ)</h2>
+<p class="lead">オン / オフの設定が、ブラウザ標準の四角いチェックと、丸いラジオボタンで、見た目がばらばらです。見出し「設定」の歯車の絵と文字がくっついています。「画像のキャッシュ」は、オフでも説明が 6 段落ぶん並んで、とても長い。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage"><div class="app st">
+   <div style="padding:10px 12px"><b style="font-size:15px">⚙設定</b></div>
+   <div class="sec"><div class="line" style="justify-content:flex-start"><i class="nat"></i><div><b>X のブックマークと連動する</b><p class="help">フォルダに保存したとき X 標準のブックマークも付け、すべてのフォルダから外したとき X 側のブックマークも外します。初期値はオフです。</p></div></div></div>
+   <div class="sec"><h3>画像のキャッシュ</h3>
+    <div class="line" style="justify-content:flex-start"><i class="nat"></i><div><b>画像をキャッシュする</b><p class="help">ポストを保存するときに、画像を端末に残します。</p></div></div>
+    <div style="opacity:.45"><b style="font-size:12px">保存先</b><div class="line" style="padding:3px 0;justify-content:flex-start;gap:8px"><i class="rad on"></i>ブラウザの中 (おすすめ)</div><div class="line" style="padding:3px 0;justify-content:flex-start;gap:8px"><i class="rad"></i>自分で選んだフォルダ</div><b style="font-size:12px">最大容量</b> 1 GB ⌄<br><b style="font-size:12px">画質</b> 標準 / 元のサイズ<br><b style="font-size:12px">容量がいっぱいになったら</b> …</div>
+    <p class="help">初めてオンにするとき、Chrome が「pbs.twimg.com へのアクセス」の許可を求めます。…(以下 3 段落)</p>
+   </div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after</span>
+  <div class="stage"><div class="app st">
+   <div style="padding:10px 12px;display:flex;gap:8px;align-items:center"><svg viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37c1 .608 2.296.07 2.572-1.065M9 12a3 3 0 1 0 6 0a3 3 0 0 0-6 0"/></svg><b style="font-size:15px">設定</b></div>
+   <div class="sec"><div class="line"><div><b>X のブックマークと連動する</b><p class="help">フォルダに保存したとき X 標準のブックマークも付け、すべてのフォルダから外したとき X 側のブックマークも外します。初期値はオフです。</p></div><i class="sw2" data-sw></i></div></div>
+   <div class="sec"><h3>画像のキャッシュ</h3>
+    <div class="line"><div><b>画像をキャッシュする</b><p class="help">ポストを保存するときに、画像を端末に残します。</p></div><i class="sw2" id="cs"></i></div>
+    <div id="cd" style="display:none"><b style="font-size:12px">保存先</b><div class="line" style="padding:3px 0;justify-content:flex-start;gap:8px"><i class="rad on"></i>ブラウザの中 (おすすめ)</div><div class="line" style="padding:3px 0;justify-content:flex-start;gap:8px"><i class="rad"></i>自分で選んだフォルダ</div><p class="help">…最大容量、画質、容量がいっぱいになったとき</p></div>
+    <div class="fold" id="cf"><span>オンにすると、保存先・容量・画質を選べます</span></div>
+   </div>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <p><b>直す点</b> (右の after のスイッチを押すと、キャッシュの詳細が開きます)</p>
+ <ul>
+  <li>オン / オフの設定 (連動・キャッシュ・自動取り込みなど) を、右端のスイッチにそろえる。ラジオボタン (どれか 1 つを選ぶ設定) は残す。実際の入力は <code>input type="checkbox" role="switch"</code> にして、キーボードとスクリーンリーダーの操作を保つ。</li>
+  <li>見出し「設定」の歯車は、文字との間に余白を空ける (いまは、くっついている)。</li>
+  <li>「画像のキャッシュ」は、オフのとき、詳細 (保存先・容量・画質・いっぱいになったとき・長い注意書き) を畳み、1 行の案内だけにする。オンにしたときに開く。</li>
+  <li>「初めてオンにするとき、Chrome が許可を求めます」の説明は、スイッチをオンにする前に読めるよう、スイッチの下の短い補足にする。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict go">採用を推奨</span> (スイッチと余白)。<span class="verdict hold">キャッシュを畳むのは、判断が分かれる</span>。画面は短くなるが、オフのままでは、どんな設定があるかが見えなくなる。畳むなら、案内の 1 行に、設定の概要を書いておく。</p>
+</div>
+
+<h2>採用の判断 (そのまま返信できる形)</h2>
+<div class="ev">
+ <p>1. 作成メニュー → <b style="min-width:0">採用</b> / 保留 / 見送り</p>
+ <p>2. ポップオーバーの一覧と下部 → <b style="min-width:0">採用</b> / 保留 / 見送り</p>
+ <p>3. サイドパネルの上部 → 絞り込みだけ畳む / フォルダも畳む / 見送り</p>
+ <p>4. 設定画面 → スイッチと余白だけ採用 / キャッシュの畳みも採用 / 見送り</p>
+ <p style="color:var(--pg2)">実装は、<code>docs/TASK_V19.md</code> (v18 のあと) にまとめます。実機の見え方 (x.com のテーマ 3 種、幅 340px のサイドパネル) は、実装後に、ご確認をお願いします。</p>
+</div>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const tg=$('#tg');
+let th=null;
+tg.onclick=()=>{
+  th=(th||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))==='dark'?'light':'dark';
+  document.documentElement.dataset.page=th;
+  document.body.classList.toggle('light',th==='light');
+  document.querySelectorAll('.stage.x').forEach(s=>s.classList.toggle('xl',th==='light'));
+};
+const ICONS=[
+ ['folder','M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2'],
+ ['star','M12 17.75l-6.172 3.245l1.179-6.873l-5-4.867l6.9-1l3.086-6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z'],
+ ['code','M7 8l-4 4l4 4M17 8l4 4l-4 4M14 4l-4 16'],
+ ['book','M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6v13M12 6v13M21 6v13'],
+ ['bulb','M3 12h1m8-9v1m8 8h1M5.6 5.6l.7.7m12.1-.7l-.7.7M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0-1 3a2 2 0 0 1-4 0a3.5 3.5 0 0 0-1-3M9.7 17h4.6'],
+ ['heart','M19.5 12.572l-7.5 7.428l-7.5-7.428a5 5 0 1 1 7.5-6.566a5 5 0 1 1 7.5 6.572'],
+ ['photo','M15 8h.01M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM3 16l5-5c.928-.893 2.072-.893 3 0l5 5M14 14l1-1c.928-.893 2.072-.893 3 0l3 3'],
+ ['briefcase','M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1M3 13a20 20 0 0 0 18 0']];
+const COLORS=['','#E24B4A','#BA7517','#639922','#1D9E75','#378ADD','#7F77DD','#D4537E','#888780'];
+const svg=(d,st='')=>`<svg viewBox="0 0 24 24" style="${st}"><path d="${d}"/></svg>`;
+// 1. 作成メニュー (after)
+let ic=0,co=0;
+const ig=$('#ig'),sg=$('#sg'),nm=$('#nm'),mk=$('#mk'),prev=$('#prev');
+function paint1(){
+  ig.innerHTML='';ICONS.forEach((x,i)=>{const b=document.createElement('button');b.className='ib'+(i===ic?' on':'');b.setAttribute('aria-label',x[0]);b.innerHTML=svg(x[1]);b.onclick=()=>{ic=i;paint1()};ig.append(b)});
+  sg.innerHTML='';COLORS.forEach((c,i)=>{const b=document.createElement('button');b.className='sw'+(i===co?' on':'');b.style.background=c||'linear-gradient(135deg,transparent 45%,currentColor 46%,currentColor 54%,transparent 55%)';b.setAttribute('aria-label',c||'色なし');b.onclick=()=>{co=i;paint1()};sg.append(b)});
+  const n=nm.value.trim();mk.disabled=!n;
+  prev.innerHTML=svg(ICONS[ic][1],COLORS[co]?`color:${COLORS[co]}`:'')+`<span>${n?n.replace(/[<>&]/g,''):'フォルダ名'}</span>`;
+  prev.style.opacity=n?1:.6;
+}
+nm.oninput=paint1;paint1();
+// 2. 一覧 (after)
+const rows=[['未分類','M4 4h16v10l-3 3H7l-3-3zM4 14h4l1 2h6l1-2h4','',true],['開発ネタ',ICONS[2][1],'#378ADD',false],['あとで読む',ICONS[3][1],'#BA7517',false]];
+const lst=$('#lst');
+function paint2(){lst.innerHTML='';rows.forEach((r,i)=>{const d=document.createElement('div');d.className='row'+(r[3]?' sel':'');d.style.cursor='pointer';
+  d.innerHTML=svg(r[1],r[2]?`color:${r[2]}`:'')+`<span>${r[0]}</span><i class="chk-a${r[3]?' on':''}">${r[3]?'<svg viewBox="0 0 24 24"><path d="M5 12l5 5l10-10"/></svg>':''}</i>`;
+  d.onclick=()=>{if(i===0){rows.forEach((x,j)=>x[3]=j===0)}else{rows[i][3]=!rows[i][3];rows[0][3]=false;if(!rows.some(x=>x[3]))rows[0][3]=true}paint2()};lst.append(d)})}
+paint2();
+// 3. 絞り込み
+const fb=$('#fb'),fm=$('#fm'),fbd=$('#fbd');
+fb.onclick=()=>{fm.style.display=fm.style.display==='none'?'block':'none'};
+fm.querySelectorAll('[data-f]').forEach(c=>c.onclick=()=>{c.classList.toggle('on');const n=fm.querySelectorAll('[data-f].on').length;fbd.textContent=n;fbd.style.display=n?'inline':'none'});
+// 4. 設定
+document.querySelectorAll('[data-sw]').forEach(s=>s.onclick=()=>s.classList.toggle('on'));
+const cs=$('#cs'),cd=$('#cd'),cf=$('#cf');
+cs.onclick=()=>{cs.classList.toggle('on');const on=cs.classList.contains('on');cd.style.display=on?'block':'none';cf.style.display=on?'none':'flex'};
+</script>
+</body>
+</html>
