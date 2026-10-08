@@ -197,6 +197,32 @@ describe('settings: 自動取り込みを使う', () => {
   });
 });
 
+describe('page panel: dates (v27)', () => {
+  const stub = () => ({ pause: vi.fn(), resume: vi.fn(), resumeLater: vi.fn(), stop: vi.fn(), dismiss: vi.fn() }) as unknown as AutoCollector;
+  const st = (over: Partial<CollectState> = {}): CollectState => ({ status: 'running', accountId: 'me', startedAt: 1, imported: 1, skipped: 0, failed: 0, speed: 'slow', cap: 300, updatedAt: 1, ...over });
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    history.pushState(null, '', '/i/history');
+  });
+
+  it('running shows recentPostDate; paused shows the oldest', () => {
+    const p = new AutoCollectPanel(stub(), () => {});
+    const dates = { oldestSeenPostDate: '2020-01-05T00:00:00Z', recentPostDate: '2026-09-28T00:00:00Z' };
+    p.update(st(dates));
+    const text = $('.postshelf-autocollect-panel').textContent ?? '';
+    expect(text).toContain('2026');
+    expect(text).not.toContain('2020');
+    p.update(st({ ...dates, status: 'paused', reason: 'user' }));
+    expect($('.postshelf-autocollect-panel').textContent).toContain('2020');
+  });
+
+  it('running without recentPostDate falls back to the plain sub text', () => {
+    const p = new AutoCollectPanel(stub(), () => {});
+    p.update(st({ oldestSeenPostDate: '2020-01-05T00:00:00Z' }));
+    expect($('.postshelf-autocollect-panel').textContent).not.toContain('2020');
+  });
+});
+
 describe('page panel', () => {
   const stub = () => ({ pause: vi.fn(), resume: vi.fn(), resumeLater: vi.fn(), stop: vi.fn(), dismiss: vi.fn() }) as unknown as AutoCollector & Record<string, ReturnType<typeof vi.fn>>;
   const st = (over: Partial<CollectState> = {}): CollectState => ({ status: 'running', accountId: 'me', startedAt: 1, imported: 128, skipped: 12, failed: 0, speed: 'slow', cap: 300, updatedAt: 1, ...over });
