@@ -73,6 +73,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
 
   // 保存に失敗したときは、ポップオーバーの中に理由を出す (console だけで終わらせない)
   const errorEl = document.createElement('div');
+  errorEl.className = 'postshelf-save-error';
   errorEl.setAttribute('role', 'alert');
   errorEl.style.cssText = 'display:none;padding:6px 8px;margin-top:6px;color:#f4212e;font-size:13px;overflow-wrap:anywhere';
   const save = async () => {

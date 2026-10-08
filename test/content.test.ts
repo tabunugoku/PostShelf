@@ -61,9 +61,10 @@ describe('popover', () => {
     expect((await getBookmark('1234567890'))?.folderIds).toEqual(['inbox']); // 最後のフォルダを外すと「未分類」になる
   });
 
-  it('creates a new folder from the popover and selects it', async () => {
+  it('creates a new folder from the popover (フォルダを追加 → 作成) and selects it', async () => {
     injectButtons();
     const pop = (await openPopover(document.querySelector('article')!, document.querySelector('[data-postshelf-btn]')!))!;
+    [...pop.querySelectorAll('button')].find((b) => b.textContent === 'フォルダを追加')!.click();
     pop.querySelector<HTMLInputElement>('form input')!.value = '新規';
     pop.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
     await new Promise((r) => setTimeout(r, 10));

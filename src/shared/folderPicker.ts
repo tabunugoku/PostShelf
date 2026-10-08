@@ -1,12 +1,12 @@
 /**
- * チェックボックス式のフォルダ選択 (フォルダ行 = アイコン(色つき) + 名前 + チェックボックス、末尾に「新しいフォルダ」行)。
+ * チェックボックス式のフォルダ選択 (フォルダ行 = アイコン(色つき) + 名前 + チェックボックス、一覧の下に「フォルダを追加」ボタン)。
+ * ボタンを押すと、同じ場所に「フォルダを作成」のメニューが開く (一覧は隠れる。名前・アイコン・色を決めて「作成」)。
  * x.com のポップオーバーと manager の「フォルダを変更」で共通に使う。
  * 配色は theme で受け取る (x.com では X のテーマ、manager では CSS 変数の文字列を渡す)。
  */
 import { INBOX_ID, displayName, type Folder } from './models';
-import { createFolder, StorageError } from './storage';
 import { t } from './strings';
-import { ACCENT_FILL } from './tokens';
+import { createFolderMenu } from './folderCreateMenu';
 
 export interface PickerTheme {
   fg: string;
@@ -48,10 +48,61 @@ export function createFolderPicker(opts: {
     return { id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color };
   };
 
-  const render = (all: Folder[]) => {
-    el.replaceChildren();
+  const folders = [...opts.folders];
+  const listEl = document.createElement('div');
+  el.append(listEl);
+
+  const menu = createFolderMenu({
+    theme: th,
+    existing: () => folders,
+    onCreated: async (f) => {
+      // 作ったフォルダを、このポストの保存先として選んで一覧に戻る (「未分類」との排他は normalize)
+      folders.push(f);
+      normalize(f.id, true);
+      await onChange(selected);
+      closeMenu();
+    },
+    onClose: () => closeMenu(),
+  });
+  menu.el.hidden = true;
+  menu.el.style.display = 'none';
+  // Escape: メニューが開いているときは、メニューだけを閉じる (ポップオーバーや呼び出し元のダイアログは閉じない)
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !menu.el.hidden) {
+      e.stopPropagation();
+      closeMenu();
+    }
+  });
+  const openMenu = () => {
+    menu.reset();
+    listEl.style.display = 'none';
+    menu.el.hidden = false;
+    menu.el.style.display = 'grid';
+    menu.focus();
+  };
+  const closeMenu = () => {
+    menu.el.hidden = true;
+    menu.el.style.display = 'none';
+    listEl.style.display = '';
+    render();
+    addBtn.focus();
+  };
+
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.style.cssText = `display:flex;gap:8px;align-items:center;width:100%;min-height:32px;margin-top:6px;padding:4px 8px;background:transparent;color:${th.fg};border:0;border-top:.5px solid ${th.border};border-radius:0 0 8px 8px;cursor:pointer;font:inherit;text-align:left`;
+  const addIcon = document.createElement('i');
+  addIcon.className = 'ti ti-folder-plus';
+  addIcon.style.cssText = 'font-size:18px';
+  addBtn.append(addIcon, document.createTextNode(t('addFolder')));
+  addBtn.addEventListener('mouseenter', () => (addBtn.style.background = th.hover));
+  addBtn.addEventListener('mouseleave', () => (addBtn.style.background = ''));
+  addBtn.addEventListener('click', openMenu);
+
+  const render = () => {
+    listEl.replaceChildren();
     boxes.clear();
-    const list = [inboxOf(all), ...all.filter((f) => f.id !== INBOX_ID)];
+    const list = [inboxOf(folders), ...folders.filter((f) => f.id !== INBOX_ID)];
     for (const f of list) {
       const label = document.createElement('label');
       label.style.cssText = 'display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
@@ -73,34 +124,11 @@ export function createFolderPicker(opts: {
       name.textContent = displayName(f);
       name.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
       label.append(ico, name, cb);
-      el.append(label);
+      listEl.append(label);
     }
-    const row = document.createElement('form');
-    row.style.cssText = `display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:.5px solid ${th.border}`;
-    const input = document.createElement('input');
-    input.placeholder = t('newFolderPlaceholder');
-    input.setAttribute('aria-label', t('newFolder'));
-    input.style.cssText = `flex:1;min-width:0;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;padding:4px 8px;min-height:32px`;
-    const add = document.createElement('button');
-    add.type = 'submit';
-    add.textContent = t('add');
-    add.style.cssText = `background:${ACCENT_FILL};color:#fff;border:0;border-radius:8px;padding:4px 12px;min-height:32px;cursor:pointer`;
-    row.append(input, add);
-    row.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        const f = await createFolder({ name: input.value });
-        normalize(f.id, true);
-        await onChange(selected);
-        render([...all, f]);
-      } catch (err) {
-        if (!(err instanceof StorageError)) throw err;
-        input.setCustomValidity(err.message);
-        input.reportValidity();
-      }
-    });
-    el.append(row);
+    listEl.append(addBtn);
   };
-  render(opts.folders);
+  el.append(menu.el);
+  render();
   return { el, sync };
 }

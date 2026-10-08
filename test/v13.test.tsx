@@ -101,12 +101,12 @@ describe('v13-C-4: empty state and errors on screen', () => {
     await createFolder({ name: '開発' });
     injectButtons();
     const pop = (await openPopover(document.querySelector('article')!, document.querySelector('[data-postshelf-btn]')!))!;
-    const alertEl = pop.querySelector<HTMLElement>('[role=alert]:not(.postshelf-account)')!;
+    const alertEl = pop.querySelector<HTMLElement>('.postshelf-save-error')!;
     expect(alertEl.style.display).toBe('none');
     (globalThis as any).chrome.storage.local.set = async () => {
       throw new Error('QUOTA_BYTES quota exceeded');
     };
-    const cb = pop.querySelector<HTMLInputElement>('input[type=checkbox]')!;
+    const cb = pop.querySelectorAll<HTMLInputElement>('input[type=checkbox]')[1]!; // [0] は「未分類」
     cb.checked = true;
     cb.dispatchEvent(new Event('change'));
     await new Promise((r) => setTimeout(r, 20));

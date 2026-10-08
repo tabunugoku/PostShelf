@@ -118,12 +118,14 @@ describe('v15-A: save as 未分類', () => {
     void f;
   });
 
-  it('the new-folder form does not decide whether the post is saved (an empty name only shows the error)', async () => {
+  it('opening and cancelling the 「フォルダを追加」 menu does not decide whether the post is saved', async () => {
     injectButtons();
     const pop = (await openPopover(document.querySelector('article')!, document.querySelector('[data-postshelf-btn]')!))!;
-    pop.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    [...pop.querySelectorAll('button')].find((b) => b.textContent === 'フォルダを追加')!.click();
+    pop.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true })); // 名前が空のまま
     await tick();
     expect(await getBookmark('1234567890')).toBeUndefined();
+    [...pop.querySelectorAll('button')].find((b) => b.textContent === 'キャンセル')!.click();
     await flip(boxes(pop)[0], true);
     expect((await getBookmark('1234567890'))?.folderIds).toEqual([INBOX_ID]);
   });
