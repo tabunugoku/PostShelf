@@ -1,0 +1,8 @@
+<!-- 本文にリンク (外部 URL / メンション / ハッシュタグ) を含むポストの簡略 fixture。外部 URL は X の短縮 URL (t.co)、表示文字は途中で「…」に省略される (推測) -->
+<article data-testid="tweet">
+  <div data-testid="User-Name"><span>リンク 太郎</span><span>@linkman</span>
+    <a href="/linkman/status/888"><time datetime="2026-10-07T12:00:00.000Z">10月7日</time></a>
+  </div>
+  <div data-testid="tweetText"><span>見てください </span><a href="https://t.co/abc123"><span>https://</span><span>example.com/very/long/pa</span><span>…</span></a><span> </span><a href="/someone">@someone</a><span> </span><a href="/hashtag/test?src=hashtag_click">#test</a><span> </span><a href="javascript:alert(1)">bad</a></div>
+  <div role="group"><div><button data-testid="bookmark"></button></div></div>
+</article>

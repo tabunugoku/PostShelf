@@ -108,6 +108,7 @@ export class FullTextQueue {
     if (fresh.length === 0) return this.finished;
     this.pending.push(...fresh);
     if (!this.looping) {
+      this.looping = true; // 続けて呼ばれても、動かすのは 1 つだけ (同時に開く裏のタブは 1 つ)
       this.aborted = false;
       this.failures = 0;
       await this.publish({ running: true, kind, total: fresh.length, done: 0, failed: 0, stopReason: undefined });
