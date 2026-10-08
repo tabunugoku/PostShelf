@@ -167,6 +167,42 @@
   "syncNativeNote": {
     "message": "初期値はオフです。"
   },
+  "groupSave": {
+    "message": "保存"
+  },
+  "groupCollect": {
+    "message": "取り込み"
+  },
+  "groupBehavior": {
+    "message": "表示と動作"
+  },
+  "groupData": {
+    "message": "データ"
+  },
+  "groupInfo": {
+    "message": "情報"
+  },
+  "groupReset": {
+    "message": "初期化と削除"
+  },
+  "settingsJump": {
+    "message": "設定のグループへ移動"
+  },
+  "syncNativeSection": {
+    "message": "X のブックマークとの連動"
+  },
+  "dataMoveSection": {
+    "message": "データの保存と移行"
+  },
+  "dataMoveDesc": {
+    "message": "保存したポストとフォルダを、ファイルに書き出したり、読み込んだりします。"
+  },
+  "acSection": {
+    "message": "ブックマークの自動取り込み"
+  },
+  "aboutSection": {
+    "message": "PostShelf について"
+  },
   "savedBadgeTitle": {
     "message": "$COUNT$ 個のフォルダに保存済み",
     "placeholders": {
@@ -427,9 +463,6 @@
   },
   "viewLabel": {
     "message": "表示形式"
-  },
-  "dataSection": {
-    "message": "データ"
   },
   "saveCurrentPost": {
     "message": "いま開いているポストを保存…"

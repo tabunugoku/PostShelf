@@ -405,3 +405,10 @@ input[type=number]{width:110px}
 .more-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .more-btn{min-height:28px;padding:0;border:0;background:transparent;color:var(--text-accent);font:inherit;text-decoration:none;cursor:pointer}
 .more-btn:hover{background:transparent;text-decoration:underline}
+
+/* 設定: グループの見出しと目次 (v25)。目次は URL のハッシュを使わない <button> */
+.settings-nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;padding:6px 0;background:var(--surface-2)}
+.layout-wide .settings-nav{position:sticky;top:0;z-index:5}
+.nav-chip{min-height:32px;padding:2px 12px;border-radius:16px;font-size:14px;background:var(--surface-2)}
+.set-h{margin:20px 0 0;font-size:14px;font-weight:700;color:var(--text-secondary);scroll-margin-top:56px}
+.set-h:focus-visible{outline:2px solid var(--fill-accent);outline-offset:2px}

@@ -167,6 +167,42 @@
   "syncNativeNote": {
     "message": "기본값은 꺼짐입니다."
   },
+  "groupSave": {
+    "message": "저장"
+  },
+  "groupCollect": {
+    "message": "가져오기"
+  },
+  "groupBehavior": {
+    "message": "표시와 동작"
+  },
+  "groupData": {
+    "message": "데이터"
+  },
+  "groupInfo": {
+    "message": "정보"
+  },
+  "groupReset": {
+    "message": "초기화와 삭제"
+  },
+  "settingsJump": {
+    "message": "설정 그룹으로 이동"
+  },
+  "syncNativeSection": {
+    "message": "X 북마크와 연동"
+  },
+  "dataMoveSection": {
+    "message": "데이터 백업과 이전"
+  },
+  "dataMoveDesc": {
+    "message": "저장한 게시물과 폴더를 파일로 내보내거나 파일에서 가져옵니다."
+  },
+  "acSection": {
+    "message": "북마크 자동 가져오기"
+  },
+  "aboutSection": {
+    "message": "PostShelf 정보"
+  },
   "savedBadgeTitle": {
     "message": "폴더 $COUNT$개에 저장됨",
     "placeholders": {
@@ -427,9 +463,6 @@
   },
   "viewLabel": {
     "message": "보기 방식"
-  },
-  "dataSection": {
-    "message": "데이터"
   },
   "saveCurrentPost": {
     "message": "지금 열려 있는 게시물 저장…"

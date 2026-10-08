@@ -167,6 +167,42 @@
   "syncNativeNote": {
     "message": "默认关闭。"
   },
+  "groupSave": {
+    "message": "保存"
+  },
+  "groupCollect": {
+    "message": "导入"
+  },
+  "groupBehavior": {
+    "message": "显示与操作"
+  },
+  "groupData": {
+    "message": "数据"
+  },
+  "groupInfo": {
+    "message": "信息"
+  },
+  "groupReset": {
+    "message": "重置与删除"
+  },
+  "settingsJump": {
+    "message": "跳转到设置分组"
+  },
+  "syncNativeSection": {
+    "message": "与 X 书签联动"
+  },
+  "dataMoveSection": {
+    "message": "数据的保存与迁移"
+  },
+  "dataMoveDesc": {
+    "message": "将保存的帖子和文件夹导出为文件，或从文件导入。"
+  },
+  "acSection": {
+    "message": "书签自动导入"
+  },
+  "aboutSection": {
+    "message": "关于 PostShelf"
+  },
   "savedBadgeTitle": {
     "message": "已保存到 $COUNT$ 个文件夹",
     "placeholders": {
@@ -427,9 +463,6 @@
   },
   "viewLabel": {
     "message": "视图"
-  },
-  "dataSection": {
-    "message": "数据"
   },
   "saveCurrentPost": {
     "message": "保存当前打开的帖子…"

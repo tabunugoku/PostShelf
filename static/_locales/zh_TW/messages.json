@@ -167,6 +167,42 @@
   "syncNativeNote": {
     "message": "預設為關閉。"
   },
+  "groupSave": {
+    "message": "儲存"
+  },
+  "groupCollect": {
+    "message": "匯入"
+  },
+  "groupBehavior": {
+    "message": "顯示與操作"
+  },
+  "groupData": {
+    "message": "資料"
+  },
+  "groupInfo": {
+    "message": "資訊"
+  },
+  "groupReset": {
+    "message": "重設與刪除"
+  },
+  "settingsJump": {
+    "message": "跳到設定群組"
+  },
+  "syncNativeSection": {
+    "message": "與 X 書籤連動"
+  },
+  "dataMoveSection": {
+    "message": "資料的儲存與遷移"
+  },
+  "dataMoveDesc": {
+    "message": "將儲存的貼文和資料夾匯出為檔案，或從檔案匯入。"
+  },
+  "acSection": {
+    "message": "書籤自動匯入"
+  },
+  "aboutSection": {
+    "message": "關於 PostShelf"
+  },
   "savedBadgeTitle": {
     "message": "已儲存到 $COUNT$ 個資料夾",
     "placeholders": {
@@ -427,9 +463,6 @@
   },
   "viewLabel": {
     "message": "檢視"
-  },
-  "dataSection": {
-    "message": "資料"
   },
   "saveCurrentPost": {
     "message": "儲存目前開啟的貼文…"

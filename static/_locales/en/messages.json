@@ -167,6 +167,42 @@
   "syncNativeNote": {
     "message": "Off by default."
   },
+  "groupSave": {
+    "message": "Saving"
+  },
+  "groupCollect": {
+    "message": "Importing"
+  },
+  "groupBehavior": {
+    "message": "Display and behavior"
+  },
+  "groupData": {
+    "message": "Data"
+  },
+  "groupInfo": {
+    "message": "About"
+  },
+  "groupReset": {
+    "message": "Reset and delete"
+  },
+  "settingsJump": {
+    "message": "Jump to a settings group"
+  },
+  "syncNativeSection": {
+    "message": "Sync with X bookmarks"
+  },
+  "dataMoveSection": {
+    "message": "Backup and transfer"
+  },
+  "dataMoveDesc": {
+    "message": "Export your saved posts and folders to a file, or import them from one."
+  },
+  "acSection": {
+    "message": "Automatic bookmark import"
+  },
+  "aboutSection": {
+    "message": "About PostShelf"
+  },
   "savedBadgeTitle": {
     "message": "Saved in $COUNT$ folder(s)",
     "placeholders": {
@@ -427,9 +463,6 @@
   },
   "viewLabel": {
     "message": "View"
-  },
-  "dataSection": {
-    "message": "Data"
   },
   "saveCurrentPost": {
     "message": "Save the open post…"
