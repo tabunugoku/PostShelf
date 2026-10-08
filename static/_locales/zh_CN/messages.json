@@ -1208,5 +1208,20 @@
   },
   "acNoAccount": {
     "message": "无法判断账号，因此无法开始。请打开 x.com 登录后再试一次。"
+  },
+  "addFolder": {
+    "message": "添加文件夹"
+  },
+  "createFolder": {
+    "message": "创建文件夹"
+  },
+  "create": {
+    "message": "创建"
+  },
+  "back": {
+    "message": "返回"
+  },
+  "errDuplicateFolder": {
+    "message": "已有同名的文件夹"
   }
 }

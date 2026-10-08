@@ -1208,5 +1208,20 @@
   },
   "acNoAccount": {
     "message": "アカウントを判定できないため、始められません。x.com を開いてログインしてから、もう一度試してください。"
+  },
+  "addFolder": {
+    "message": "フォルダを追加"
+  },
+  "createFolder": {
+    "message": "フォルダを作成"
+  },
+  "create": {
+    "message": "作成"
+  },
+  "back": {
+    "message": "戻る"
+  },
+  "errDuplicateFolder": {
+    "message": "同名のフォルダがあります"
   }
 }

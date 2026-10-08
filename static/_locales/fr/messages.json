@@ -1208,5 +1208,20 @@
   },
   "acNoAccount": {
     "message": "Impossible de démarrer car le compte n'a pas pu être déterminé. Ouvrez x.com, connectez-vous et réessayez."
+  },
+  "addFolder": {
+    "message": "Ajouter un dossier"
+  },
+  "createFolder": {
+    "message": "Créer un dossier"
+  },
+  "create": {
+    "message": "Créer"
+  },
+  "back": {
+    "message": "Retour"
+  },
+  "errDuplicateFolder": {
+    "message": "Un dossier portant ce nom existe déjà"
   }
 }

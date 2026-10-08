@@ -1208,5 +1208,20 @@
   },
   "acNoAccount": {
     "message": "無法判斷帳號，因此無法開始。請開啟 x.com 登入後再試一次。"
+  },
+  "addFolder": {
+    "message": "新增資料夾"
+  },
+  "createFolder": {
+    "message": "建立資料夾"
+  },
+  "create": {
+    "message": "建立"
+  },
+  "back": {
+    "message": "返回"
+  },
+  "errDuplicateFolder": {
+    "message": "已有同名的資料夾"
   }
 }

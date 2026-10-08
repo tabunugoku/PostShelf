@@ -1208,5 +1208,20 @@
   },
   "acNoAccount": {
     "message": "Não é possível iniciar porque a conta não pôde ser identificada. Abra o x.com, entre e tente de novo."
+  },
+  "addFolder": {
+    "message": "Adicionar pasta"
+  },
+  "createFolder": {
+    "message": "Criar pasta"
+  },
+  "create": {
+    "message": "Criar"
+  },
+  "back": {
+    "message": "Voltar"
+  },
+  "errDuplicateFolder": {
+    "message": "Já existe uma pasta com este nome"
   }
 }

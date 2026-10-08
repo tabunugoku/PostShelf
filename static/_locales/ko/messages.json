@@ -1208,5 +1208,20 @@
   },
   "acNoAccount": {
     "message": "계정을 판단할 수 없어서 시작할 수 없습니다. x.com을 열고 로그인한 뒤 다시 시도하세요."
+  },
+  "addFolder": {
+    "message": "폴더 추가"
+  },
+  "createFolder": {
+    "message": "폴더 만들기"
+  },
+  "create": {
+    "message": "만들기"
+  },
+  "back": {
+    "message": "뒤로"
+  },
+  "errDuplicateFolder": {
+    "message": "같은 이름의 폴더가 있습니다"
   }
 }

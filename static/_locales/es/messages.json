@@ -1208,5 +1208,20 @@
   },
   "acNoAccount": {
     "message": "No se puede empezar porque no se pudo determinar la cuenta. Abre x.com, inicia sesión e inténtalo de nuevo."
+  },
+  "addFolder": {
+    "message": "Añadir carpeta"
+  },
+  "createFolder": {
+    "message": "Crear carpeta"
+  },
+  "create": {
+    "message": "Crear"
+  },
+  "back": {
+    "message": "Atrás"
+  },
+  "errDuplicateFolder": {
+    "message": "Ya existe una carpeta con este nombre"
   }
 }

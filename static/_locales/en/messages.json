@@ -1208,5 +1208,20 @@
   },
   "acNoAccount": {
     "message": "Cannot start because the account could not be determined. Open x.com, sign in, and try again."
+  },
+  "addFolder": {
+    "message": "Add folder"
+  },
+  "createFolder": {
+    "message": "Create folder"
+  },
+  "create": {
+    "message": "Create"
+  },
+  "back": {
+    "message": "Back"
+  },
+  "errDuplicateFolder": {
+    "message": "A folder with this name already exists"
   }
 }
