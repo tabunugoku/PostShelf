@@ -58,7 +58,7 @@
 方針 (ユーザーの要望): 「保存したアカウントが分かる」「拡張機能の中でアカウントを切り替えて見られる」。
 
 1. アカウントの判定 (content script)
-   - ユーザーが見ている x.com の画面から、現在ログイン中のアカウントの `@ハンドル` と表示名を DOM で読む。X の非公開 API は呼ばない。識別には左メニュー下部のアカウント切替ボタン (`data-testid="SideNav_AccountSwitcher_Button"` の想定。実機では下部に表示名と `@tabunugoku_dev` が出ている) を使う
+   - ユーザーが見ている x.com の画面から、現在ログイン中のアカウントの `@ハンドル` と表示名を DOM で読む。X の非公開 API は呼ばない。識別には左メニュー下部のアカウント切替ボタン (`data-testid="SideNav_AccountSwitcher_Button"` の想定。実機では下部に表示名と `@sample_dev` が出ている) を使う
    - セレクタは `src/shared/selectors.ts` に候補リストで集約する (v7-D の `queryFirst` を使う)。読めない場合は null を返し、例外にしない
    - ハンドルは小文字に正規化して ID とする。ハンドルは変更できるため、変更すると別アカウント扱いになる。この限界を FAQ に書き、データを別アカウントへ付け替える手段 (下記 E-2 の「割り当て」) を案内する
    - 現在のアカウントは、content script が読み取るたびに `chrome.storage.local` の別キー (例: `lastSeenAccount`) に保存する。manager、サイドパネル、popup はそれを読んで既定の表示アカウントにする

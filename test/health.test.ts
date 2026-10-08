@@ -225,7 +225,7 @@ describe('v9-C: the diagnostics path never contains user names or ids', () => {
     expect(safePath('/')).toBe('/');
     expect(safePath('/someone/status/123456')).toBe('/?/status/?');
     expect(safePath('/search')).toBe('/search');
-    expect(safePath('/tabunugoku_dev')).toBe('/?');
+    expect(safePath('/sample_dev')).toBe('/?');
   });
   it('the report includes the path line', () => {
     const r = buildReport({ version: '1', userAgent: 'ua', uiLanguage: 'ja', health: null, path: '/i/history', skeleton: null });

@@ -44,8 +44,8 @@ describe('E-1: detecting the logged-in account from the screen', () => {
   const switcher = (inner: string) => `<nav><div data-testid="SideNav_AccountSwitcher_Button">${inner}</div></nav>`;
 
   it('reads handle, display name and avatar from the account switcher button', () => {
-    document.body.innerHTML = switcher('<img src="https://pbs.example/a.jpg"><div><span>たぶ 開発</span><span>@Tabunugoku_Dev</span></div>');
-    expect(detectAccount()).toEqual({ handle: 'Tabunugoku_Dev', displayName: 'たぶ 開発', avatar: 'https://pbs.example/a.jpg' });
+    document.body.innerHTML = switcher('<img src="https://pbs.example/a.jpg"><div><span>たぶ 開発</span><span>@Sample_Dev</span></div>');
+    expect(detectAccount()).toEqual({ handle: 'Sample_Dev', displayName: 'たぶ 開発', avatar: 'https://pbs.example/a.jpg' });
   });
 
   it('falls back to later candidates: profile link href, then the avatar test id', () => {
@@ -69,14 +69,14 @@ describe('E-1: detecting the logged-in account from the screen', () => {
   });
 
   it('noteAccount normalizes the handle (lowercase id, original case kept) and stores lastSeenAccount', async () => {
-    const a = await noteAccount({ handle: '@Tabunugoku_Dev', displayName: 'Dev' }, 1000);
-    expect(a).toMatchObject({ id: 'tabunugoku_dev', handle: 'Tabunugoku_Dev', displayName: 'Dev', lastSeenAt: 1000 });
+    const a = await noteAccount({ handle: '@Sample_Dev', displayName: 'Dev' }, 1000);
+    expect(a).toMatchObject({ id: 'sample_dev', handle: 'Sample_Dev', displayName: 'Dev', lastSeenAt: 1000 });
     expect(await getLastSeenAccount()).toEqual(a);
     // 変化がなければ 1 分以内は書き込まない
     const set = vi.spyOn(chrome.storage.local, 'set');
-    await noteAccount({ handle: 'Tabunugoku_Dev', displayName: 'Dev' }, 2000);
+    await noteAccount({ handle: 'Sample_Dev', displayName: 'Dev' }, 2000);
     expect(set).not.toHaveBeenCalled();
-    await noteAccount({ handle: 'Tabunugoku_Dev', displayName: 'Dev' }, 1000 + 61_000);
+    await noteAccount({ handle: 'Sample_Dev', displayName: 'Dev' }, 1000 + 61_000);
     expect(set).toHaveBeenCalledTimes(1);
   });
 });
