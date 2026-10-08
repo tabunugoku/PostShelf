@@ -621,5 +621,61 @@
   },
   "deleteAllDone": {
     "message": "All data was deleted"
+  },
+  "viewImage": {
+    "message": "View image $N$ of $M$ larger",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "Zoom"
+  },
+  "viewerLabel": {
+    "message": "Image viewer"
+  },
+  "viewerClose": {
+    "message": "Close (Esc)"
+  },
+  "viewerPrev": {
+    "message": "Previous image"
+  },
+  "viewerNext": {
+    "message": "Next image"
+  },
+  "viewerOpenOriginal": {
+    "message": "Open original size ↗"
+  },
+  "viewerOpenPost": {
+    "message": "Open the post on X ↗"
+  },
+  "viewerFailTitle": {
+    "message": "The image could not be loaded"
+  },
+  "viewerFailReason": {
+    "message": "The original post may have been deleted, or X may have moved the image."
+  },
+  "viewerShowSmall": {
+    "message": "Show the saved small image"
+  },
+  "videoBadge": {
+    "message": "Video"
+  },
+  "videoOpenLabel": {
+    "message": "Show how to play this video"
+  },
+  "videoDialogTitle": {
+    "message": "Videos play on X"
+  },
+  "videoDialogBody": {
+    "message": "PostShelf cannot play videos because the video file itself cannot be saved."
+  },
+  "videoPlayOnX": {
+    "message": "Play the video on X ↗"
   }
 }

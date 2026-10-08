@@ -621,5 +621,61 @@
   },
   "deleteAllDone": {
     "message": "すべてのデータを削除しました"
+  },
+  "viewImage": {
+    "message": "画像 $N$ / $M$ を大きく表示",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "拡大"
+  },
+  "viewerLabel": {
+    "message": "画像ビューア"
+  },
+  "viewerClose": {
+    "message": "閉じる（Esc）"
+  },
+  "viewerPrev": {
+    "message": "前の画像"
+  },
+  "viewerNext": {
+    "message": "次の画像"
+  },
+  "viewerOpenOriginal": {
+    "message": "元のサイズで開く ↗"
+  },
+  "viewerOpenPost": {
+    "message": "X でポストを開く ↗"
+  },
+  "viewerFailTitle": {
+    "message": "画像を読み込めませんでした"
+  },
+  "viewerFailReason": {
+    "message": "元のポストが削除されたか、X 側で画像の場所が変わった可能性があります。"
+  },
+  "viewerShowSmall": {
+    "message": "保存してある小さい画像を表示"
+  },
+  "videoBadge": {
+    "message": "動画"
+  },
+  "videoOpenLabel": {
+    "message": "動画の案内を表示"
+  },
+  "videoDialogTitle": {
+    "message": "動画は X で再生します"
+  },
+  "videoDialogBody": {
+    "message": "動画の再生用のファイルは保存できないため、PostShelf では再生できません。"
+  },
+  "videoPlayOnX": {
+    "message": "X で動画を再生 ↗"
   }
 }

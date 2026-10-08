@@ -621,5 +621,61 @@
   },
   "deleteAllDone": {
     "message": "Se eliminaron todos los datos"
+  },
+  "viewImage": {
+    "message": "Ver la imagen $N$ de $M$ en grande",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "Ampliar"
+  },
+  "viewerLabel": {
+    "message": "Visor de imágenes"
+  },
+  "viewerClose": {
+    "message": "Cerrar (Esc)"
+  },
+  "viewerPrev": {
+    "message": "Imagen anterior"
+  },
+  "viewerNext": {
+    "message": "Imagen siguiente"
+  },
+  "viewerOpenOriginal": {
+    "message": "Abrir en tamaño original ↗"
+  },
+  "viewerOpenPost": {
+    "message": "Abrir la publicación en X ↗"
+  },
+  "viewerFailTitle": {
+    "message": "No se pudo cargar la imagen"
+  },
+  "viewerFailReason": {
+    "message": "Puede que la publicación original se haya eliminado o que X haya cambiado la ubicación de la imagen."
+  },
+  "viewerShowSmall": {
+    "message": "Mostrar la imagen pequeña guardada"
+  },
+  "videoBadge": {
+    "message": "Vídeo"
+  },
+  "videoOpenLabel": {
+    "message": "Mostrar cómo reproducir este vídeo"
+  },
+  "videoDialogTitle": {
+    "message": "Los vídeos se reproducen en X"
+  },
+  "videoDialogBody": {
+    "message": "PostShelf no puede reproducir vídeos porque no se puede guardar el archivo de vídeo."
+  },
+  "videoPlayOnX": {
+    "message": "Reproducir el vídeo en X ↗"
   }
 }

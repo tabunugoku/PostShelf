@@ -34,6 +34,8 @@ export const CANDIDATES = {
   media: ['[data-testid="tweetPhoto"] img', 'a[href*="/photo/"] img'],
   // 以下は実機未確認の推測。動画は videoPlayer か video 要素
   video: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
+  // 動画のサムネイル (poster 属性)。実機未確認の推測
+  videoPoster: ['[data-testid="videoPlayer"] video[poster]', 'video[poster]'],
   // 候補が 1 つだけ: リンクカードは data-testid 以外に目印が無い
   linkCard: ['[data-testid="card.wrapper"]'],
   // 現在ログイン中のアカウント (v9)。いずれも実機未確認 (2026-10 時点):

@@ -621,5 +621,61 @@
   },
   "deleteAllDone": {
     "message": "已删除所有数据"
+  },
+  "viewImage": {
+    "message": "放大显示第 $N$ / $M$ 张图片",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "放大"
+  },
+  "viewerLabel": {
+    "message": "图片查看器"
+  },
+  "viewerClose": {
+    "message": "关闭（Esc）"
+  },
+  "viewerPrev": {
+    "message": "上一张图片"
+  },
+  "viewerNext": {
+    "message": "下一张图片"
+  },
+  "viewerOpenOriginal": {
+    "message": "以原始尺寸打开 ↗"
+  },
+  "viewerOpenPost": {
+    "message": "在 X 上打开帖子 ↗"
+  },
+  "viewerFailTitle": {
+    "message": "无法加载图片"
+  },
+  "viewerFailReason": {
+    "message": "原帖可能已被删除，或 X 更改了图片的位置。"
+  },
+  "viewerShowSmall": {
+    "message": "显示已保存的小图"
+  },
+  "videoBadge": {
+    "message": "视频"
+  },
+  "videoOpenLabel": {
+    "message": "显示视频播放说明"
+  },
+  "videoDialogTitle": {
+    "message": "视频请在 X 上播放"
+  },
+  "videoDialogBody": {
+    "message": "无法保存视频的播放文件，因此 PostShelf 无法播放视频。"
+  },
+  "videoPlayOnX": {
+    "message": "在 X 上播放视频 ↗"
   }
 }

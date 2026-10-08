@@ -621,5 +621,61 @@
   },
   "deleteAllDone": {
     "message": "Toutes les données ont été supprimées"
+  },
+  "viewImage": {
+    "message": "Agrandir l'image $N$ sur $M$",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "Agrandir"
+  },
+  "viewerLabel": {
+    "message": "Visionneuse d'images"
+  },
+  "viewerClose": {
+    "message": "Fermer (Échap)"
+  },
+  "viewerPrev": {
+    "message": "Image précédente"
+  },
+  "viewerNext": {
+    "message": "Image suivante"
+  },
+  "viewerOpenOriginal": {
+    "message": "Ouvrir en taille d'origine ↗"
+  },
+  "viewerOpenPost": {
+    "message": "Ouvrir le post sur X ↗"
+  },
+  "viewerFailTitle": {
+    "message": "Impossible de charger l'image"
+  },
+  "viewerFailReason": {
+    "message": "Le post d'origine a peut-être été supprimé, ou X a déplacé l'image."
+  },
+  "viewerShowSmall": {
+    "message": "Afficher la petite image enregistrée"
+  },
+  "videoBadge": {
+    "message": "Vidéo"
+  },
+  "videoOpenLabel": {
+    "message": "Afficher comment lire cette vidéo"
+  },
+  "videoDialogTitle": {
+    "message": "Les vidéos se lisent sur X"
+  },
+  "videoDialogBody": {
+    "message": "PostShelf ne peut pas lire les vidéos, car le fichier vidéo lui-même ne peut pas être enregistré."
+  },
+  "videoPlayOnX": {
+    "message": "Lire la vidéo sur X ↗"
   }
 }

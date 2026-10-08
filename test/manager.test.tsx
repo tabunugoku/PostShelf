@@ -314,7 +314,7 @@ describe('v7 manager layout', () => {
     await rerender();
     await click($('.seg button[aria-label="グリッド表示"]'));
     expect($$('.gc').length).toBe(4);
-    expect($<HTMLImageElement>('[data-row="4"] .cover').src).toContain('cover.jpg');
+    expect($<HTMLImageElement>('[data-row="4"] .cover-wrap img').src).toContain('cover.jpg');
     const css = (await import('node:fs')).readFileSync('static/manager.css', 'utf8');
     expect(css).toMatch(/\.view-grid\{display:grid;grid-template-columns:repeat\(auto-fill,minmax\(\d+px,1fr\)\);grid-auto-rows:1fr/);
   });

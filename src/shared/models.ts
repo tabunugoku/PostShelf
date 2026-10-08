@@ -47,6 +47,8 @@ export interface Snapshot {
   hasVideo?: boolean;
   /** 外部リンク / リンクカードを含むか。同上 (v7) */
   hasLink?: boolean;
+  /** 動画の `<video poster>` (サムネイルの URL)。保存時に content script が取る (v11)。取れなければ未定義。古い保存分も未定義 */
+  videoPoster?: string;
 }
 
 export interface Bookmark {

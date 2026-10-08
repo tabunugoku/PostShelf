@@ -621,5 +621,61 @@
   },
   "deleteAllDone": {
     "message": "已刪除所有資料"
+  },
+  "viewImage": {
+    "message": "放大顯示第 $N$ / $M$ 張圖片",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "放大"
+  },
+  "viewerLabel": {
+    "message": "圖片檢視器"
+  },
+  "viewerClose": {
+    "message": "關閉（Esc）"
+  },
+  "viewerPrev": {
+    "message": "上一張圖片"
+  },
+  "viewerNext": {
+    "message": "下一張圖片"
+  },
+  "viewerOpenOriginal": {
+    "message": "以原始尺寸開啟 ↗"
+  },
+  "viewerOpenPost": {
+    "message": "在 X 上開啟貼文 ↗"
+  },
+  "viewerFailTitle": {
+    "message": "無法載入圖片"
+  },
+  "viewerFailReason": {
+    "message": "原貼文可能已被刪除，或 X 變更了圖片的位置。"
+  },
+  "viewerShowSmall": {
+    "message": "顯示已儲存的小圖"
+  },
+  "videoBadge": {
+    "message": "影片"
+  },
+  "videoOpenLabel": {
+    "message": "顯示影片播放說明"
+  },
+  "videoDialogTitle": {
+    "message": "影片請在 X 上播放"
+  },
+  "videoDialogBody": {
+    "message": "無法儲存影片的播放檔案，因此 PostShelf 無法播放影片。"
+  },
+  "videoPlayOnX": {
+    "message": "在 X 上播放影片 ↗"
   }
 }

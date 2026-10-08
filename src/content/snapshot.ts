@@ -25,6 +25,7 @@ export function extractTweet(article: Element): Extracted | null {
   const bodyLinks = [...(queryFirst(article, 'tweetText')?.el.querySelectorAll('a[href]') ?? [])].some((a) => /^https?:\/\//i.test(a.getAttribute('href') ?? ''));
   const hasLink = !!queryFirst(article, 'linkCard') || bodyLinks;
   const hasVideo = !!queryFirst(article, 'video');
+  const videoPoster = hasVideo ? queryFirst(article, 'videoPoster')?.el.getAttribute('poster') || undefined : undefined;
 
   return {
     tweetId,
@@ -38,6 +39,7 @@ export function extractTweet(article: Element): Extracted | null {
       url: `https://x.com/${handle}/status/${tweetId}`,
       hasVideo,
       hasLink,
+      ...(videoPoster ? { videoPoster } : {}),
     },
   };
 }

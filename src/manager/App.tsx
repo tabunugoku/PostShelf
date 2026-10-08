@@ -47,6 +47,7 @@ import {
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card } from './Cards';
+import { ImageViewer, VideoGuide } from './Viewer';
 import { AccountSwitcher, AssignDialog, resolveViewAccount } from './Accounts';
 import { FolderEdit } from './FolderEdit';
 import { SaveCurrent } from './SaveCurrent';
@@ -97,6 +98,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [viewId, setViewId] = useState(UNKNOWN_ACCOUNT_ID);
   const [lastSeen, setLastSeen] = useState<Account | null>(null);
   const [assignFrom, setAssignFrom] = useState<string | null>(null);
+  /** 画像ビューア / 動画の案内 (どのポストの何枚目か)。閉じたときのフォーカスは Viewer が元のボタンへ戻す */
+  const [viewer, setViewer] = useState<{ kind: 'image'; tweetId: string; index: number } | { kind: 'video'; tweetId: string } | null>(null);
   const viewRef = useRef(UNKNOWN_ACCOUNT_ID);
   const lastRef = useRef<Account | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -232,6 +235,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   const count = (id: string) => countFolder(bookmarks, id, now);
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
+  const viewerBookmark = viewer ? bookmarks.find((b) => b.tweetId === viewer.tweetId) : undefined;
   const assignSource = accounts.find((a) => a.account.id === assignFrom);
   const unknownCount = accounts.find((a) => a.account.id === UNKNOWN_ACCOUNT_ID)?.count ?? 0;
   const confirmMessage = (c: NonNullable<ConfirmState>) => {
@@ -619,6 +623,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           folderOf={folderOf}
           pickerOpen={picker === b.tweetId}
           onSelect={(shift) => toggleSelect(b.tweetId, shift)}
+          onOpenImage={(index) => setViewer({ kind: 'image', tweetId: b.tweetId, index })}
+          onOpenVideo={() => setViewer({ kind: 'video', tweetId: b.tweetId })}
           onFocus={() => setFocusId(b.tweetId)}
           onRemoveFromFolder={(fid) => void run(removeFromFolders([b.tweetId], [fid]), 'toastRemoved')}
           onTogglePicker={() => setPicker(picker === b.tweetId ? null : b.tweetId)}
@@ -700,6 +706,19 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             await afterAccountChange(from, to);
           }}
         />
+      )}
+      {viewerBookmark && viewer?.kind === 'image' && (
+        <ImageViewer
+          tweetId={viewerBookmark.tweetId}
+          urls={viewerBookmark.snapshot.media}
+          index={Math.min(viewer.index, viewerBookmark.snapshot.media.length - 1)}
+          postUrl={viewerBookmark.snapshot.url}
+          onIndex={(index) => setViewer({ kind: 'image', tweetId: viewerBookmark.tweetId, index })}
+          onClose={() => setViewer(null)}
+        />
+      )}
+      {viewerBookmark && viewer?.kind === 'video' && (
+        <VideoGuide tweetId={viewerBookmark.tweetId} poster={viewerBookmark.snapshot.videoPoster} postUrl={viewerBookmark.snapshot.url} onClose={() => setViewer(null)} />
       )}
       {showHow && <InfoDialog title={t('importHowTitle')} body={t('importHowSteps')} onClose={() => setShowHow(false)} />}
       {toast && <Toast message={toast.message} onUndo={toast.undo || toast.action ? () => void doUndo() : undefined} />}

@@ -621,5 +621,61 @@
   },
   "deleteAllDone": {
     "message": "모든 데이터를 삭제했습니다"
+  },
+  "viewImage": {
+    "message": "이미지 $N$ / $M$ 크게 보기",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "확대"
+  },
+  "viewerLabel": {
+    "message": "이미지 뷰어"
+  },
+  "viewerClose": {
+    "message": "닫기(Esc)"
+  },
+  "viewerPrev": {
+    "message": "이전 이미지"
+  },
+  "viewerNext": {
+    "message": "다음 이미지"
+  },
+  "viewerOpenOriginal": {
+    "message": "원본 크기로 열기 ↗"
+  },
+  "viewerOpenPost": {
+    "message": "X에서 게시물 열기 ↗"
+  },
+  "viewerFailTitle": {
+    "message": "이미지를 불러오지 못했습니다"
+  },
+  "viewerFailReason": {
+    "message": "원래 게시물이 삭제되었거나 X에서 이미지 위치가 바뀌었을 수 있습니다."
+  },
+  "viewerShowSmall": {
+    "message": "저장해 둔 작은 이미지 표시"
+  },
+  "videoBadge": {
+    "message": "동영상"
+  },
+  "videoOpenLabel": {
+    "message": "동영상 안내 표시"
+  },
+  "videoDialogTitle": {
+    "message": "동영상은 X에서 재생합니다"
+  },
+  "videoDialogBody": {
+    "message": "동영상 재생용 파일은 저장할 수 없어 PostShelf에서는 재생할 수 없습니다."
+  },
+  "videoPlayOnX": {
+    "message": "X에서 동영상 재생 ↗"
   }
 }

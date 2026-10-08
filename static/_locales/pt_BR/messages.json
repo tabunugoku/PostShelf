@@ -621,5 +621,61 @@
   },
   "deleteAllDone": {
     "message": "Todos os dados foram excluídos"
+  },
+  "viewImage": {
+    "message": "Ver a imagem $N$ de $M$ ampliada",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "m": {
+        "content": "$2"
+      }
+    }
+  },
+  "zoomHint": {
+    "message": "Ampliar"
+  },
+  "viewerLabel": {
+    "message": "Visualizador de imagens"
+  },
+  "viewerClose": {
+    "message": "Fechar (Esc)"
+  },
+  "viewerPrev": {
+    "message": "Imagem anterior"
+  },
+  "viewerNext": {
+    "message": "Próxima imagem"
+  },
+  "viewerOpenOriginal": {
+    "message": "Abrir no tamanho original ↗"
+  },
+  "viewerOpenPost": {
+    "message": "Abrir o post no X ↗"
+  },
+  "viewerFailTitle": {
+    "message": "Não foi possível carregar a imagem"
+  },
+  "viewerFailReason": {
+    "message": "O post original pode ter sido excluído ou o X pode ter mudado o local da imagem."
+  },
+  "viewerShowSmall": {
+    "message": "Mostrar a imagem pequena salva"
+  },
+  "videoBadge": {
+    "message": "Vídeo"
+  },
+  "videoOpenLabel": {
+    "message": "Mostrar como reproduzir este vídeo"
+  },
+  "videoDialogTitle": {
+    "message": "Os vídeos são reproduzidos no X"
+  },
+  "videoDialogBody": {
+    "message": "O PostShelf não pode reproduzir vídeos porque o arquivo de vídeo não pode ser salvo."
+  },
+  "videoPlayOnX": {
+    "message": "Reproduzir o vídeo no X ↗"
   }
 }

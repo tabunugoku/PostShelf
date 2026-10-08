@@ -5,6 +5,7 @@ import { INBOX_ID, displayName, type Bookmark, type Folder } from '../shared/mod
 import { formatDate, t } from '../shared/strings';
 import type { ViewMode } from '../shared/settings';
 import { Dropdown } from './ui';
+import { MediaImg } from './MediaImg';
 
 export interface CardProps {
   b: Bookmark;
@@ -24,6 +25,10 @@ export interface CardProps {
   onTogglePicker: () => void;
   onDelete: () => void;
   onDragStart: (e: DragEvent) => void;
+  /** 画像をクリック (index は 0 始まり)。ビューアを開く */
+  onOpenImage: (index: number) => void;
+  /** 動画のサムネイルをクリック。X で再生する案内を開く */
+  onOpenVideo: () => void;
 }
 
 const initials = (name: string) => [...name.trim()].slice(0, 2).join('').toUpperCase();
@@ -106,6 +111,39 @@ function Actions(props: CardProps) {
   );
 }
 
+/**
+ * 画像 / 動画サムネイルのボタン。選択モード (いずれかのポストが選択されている) 中は、クリックで選択を切り替える (ビューアは開かない)。
+ * hover / フォーカスで「拡大」のヒント。フォーカスリングは CSS (.ph:focus-visible)。
+ */
+function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: number; total?: number; extra?: number }) {
+  const { card } = props;
+  const s = card.b.snapshot;
+  const i = props.index ?? 0;
+  const label = props.kind === 'image' ? t('viewImage', i + 1, props.total ?? 1) : t('videoOpenLabel');
+  const click = (e: MouseEvent) => {
+    if (card.selectionActive) {
+      e.preventDefault();
+      card.onSelect(e.shiftKey);
+    } else if (props.kind === 'image') card.onOpenImage(i);
+    else card.onOpenVideo();
+  };
+  return (
+    <button class={`ph${props.kind === 'video' ? ' v' : ''}`} aria-label={label} title={label} onClick={click}>
+      {props.kind === 'image' ? (
+        <MediaImg tweetId={card.b.tweetId} name={String(i + 1)} src={s.media[i]} alt="" loading="lazy" />
+      ) : (
+        <>
+          {s.videoPoster && <MediaImg tweetId={card.b.tweetId} name="video-thumb" src={s.videoPoster} alt="" loading="lazy" />}
+          <span class="play" aria-hidden="true" />
+          <span class="badge">{t('videoBadge')}</span>
+        </>
+      )}
+      {props.kind === 'image' && !card.selectionActive && <span class="hint">{t('zoomHint')}</span>}
+      {props.extra ? <span class="more">+{props.extra}</span> : null}
+    </button>
+  );
+}
+
 function FolderChips(props: { b: Bookmark; folderOf: CardProps['folderOf']; removable: boolean; onRemove: (id: string) => void }) {
   const { b, folderOf } = props;
   return (
@@ -172,7 +210,15 @@ export function Card(props: CardProps) {
     return (
       <article {...common}>
         {check}
-        {s.media[0] && <img class="cover" src={s.media[0]} alt="" loading="lazy" />}
+        {s.media[0] ? (
+          <div class="cover-wrap">
+            <MediaTile card={props} kind="image" index={0} total={s.media.length} />
+          </div>
+        ) : s.hasVideo ? (
+          <div class="cover-wrap">
+            <MediaTile card={props} kind="video" />
+          </div>
+        ) : null}
         <div class="gc-head">
           <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
         </div>
@@ -192,13 +238,17 @@ export function Card(props: CardProps) {
           {s.createdAt && <span class="muted"> · {formatDate(s.createdAt)}</span>}
         </div>
         <div class="text">{s.text}</div>
-        {s.media.length > 0 && (
+        {s.media.length > 0 ? (
           <div class={`media m${Math.min(s.media.length, 4)}`}>
-            {s.media.slice(0, 4).map((m) => (
-              <img src={m} alt="" loading="lazy" />
+            {s.media.slice(0, 4).map((_, i) => (
+              <MediaTile card={props} kind="image" index={i} total={s.media.length} extra={i === 3 && s.media.length > 4 ? s.media.length - 4 : 0} />
             ))}
           </div>
-        )}
+        ) : s.hasVideo ? (
+          <div class="media m1">
+            <MediaTile card={props} kind="video" />
+          </div>
+        ) : null}
         <FolderChips b={b} folderOf={props.folderOf} removable onRemove={props.onRemoveFromFolder} />
       </div>
       <Actions {...props} />
