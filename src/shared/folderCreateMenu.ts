@@ -4,7 +4,7 @@
  * アイコンと色の選択肢は models.ts のもの (manager の編集パネルと同じ: アイコンは先頭の 8 種、色は色なし + COLORS)。
  * manager の FolderEdit は Preact なので、DOM 版をここに別に持つ (選択肢は共有)。
  */
-import { COLORS, FOLDER_ICON, ICONS, displayName, type Folder } from './models';
+import { COLORS, FOLDER_ICON, ICONS, colorLabel, displayName, iconLabel, type Folder } from './models';
 import { createFolder, StorageError } from './storage';
 import { t } from './strings';
 import { ACCENT_FILL } from './tokens';
@@ -88,7 +88,8 @@ export function createFolderMenu(opts: {
   for (const i of ICONS.slice(0, 8)) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.setAttribute('aria-label', i);
+    b.setAttribute('aria-label', iconLabel(i));
+    b.dataset.icon = i;
     b.style.cssText = `${RESET};display:grid;place-items:center;aspect-ratio:1;width:100%;min-width:0;min-height:0;padding:0;border-radius:8px;cursor:pointer;border:.5px solid transparent;background:transparent;color:${th.fg}`;
     const ic = document.createElement('i');
     ic.className = `ti ${i}`;
@@ -111,7 +112,8 @@ export function createFolderMenu(opts: {
   for (const c of [undefined, ...COLORS]) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.setAttribute('aria-label', c ?? t('colorNone'));
+    b.setAttribute('aria-label', c ? colorLabel(c) : t('colorNone'));
+    b.dataset.color = c ?? '';
     if (c === undefined) b.title = t('colorNone');
     // 色なし: 斜線の入った枠 (manager の編集パネルの「色なし」と同じ見た目)
     b.style.cssText = `${RESET};display:block;width:clamp(20px,100%,24px);aspect-ratio:1;min-height:0;padding:0;border-radius:50%;cursor:pointer;border:.5px solid ${th.border};background:${c ?? `linear-gradient(135deg,transparent 45%,${th.fg} 46%,${th.fg} 54%,transparent 55%)`}`;

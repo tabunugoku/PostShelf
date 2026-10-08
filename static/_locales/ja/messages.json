@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "色なし（既定）"
   },
+  "iconFolder": {
+    "message": "フォルダ"
+  },
+  "iconStar": {
+    "message": "星"
+  },
+  "iconCode": {
+    "message": "コード"
+  },
+  "iconBook": {
+    "message": "本"
+  },
+  "iconBulb": {
+    "message": "電球"
+  },
+  "iconHeart": {
+    "message": "ハート"
+  },
+  "iconPhoto": {
+    "message": "写真"
+  },
+  "iconBriefcase": {
+    "message": "かばん"
+  },
+  "iconMusic": {
+    "message": "音楽"
+  },
+  "iconMovie": {
+    "message": "映画"
+  },
+  "colorRed": {
+    "message": "赤"
+  },
+  "colorOrange": {
+    "message": "オレンジ"
+  },
+  "colorGreen": {
+    "message": "緑"
+  },
+  "colorTeal": {
+    "message": "青緑"
+  },
+  "colorBlue": {
+    "message": "青"
+  },
+  "colorPurple": {
+    "message": "紫"
+  },
+  "colorPink": {
+    "message": "ピンク"
+  },
+  "colorGray": {
+    "message": "グレー"
+  },
   "openSidePanel": {
     "message": "サイドパネルで開く"
   },

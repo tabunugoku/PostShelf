@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "Sin color (predeterminado)"
   },
+  "iconFolder": {
+    "message": "Carpeta"
+  },
+  "iconStar": {
+    "message": "Estrella"
+  },
+  "iconCode": {
+    "message": "Código"
+  },
+  "iconBook": {
+    "message": "Libro"
+  },
+  "iconBulb": {
+    "message": "Bombilla"
+  },
+  "iconHeart": {
+    "message": "Corazón"
+  },
+  "iconPhoto": {
+    "message": "Foto"
+  },
+  "iconBriefcase": {
+    "message": "Maletín"
+  },
+  "iconMusic": {
+    "message": "Música"
+  },
+  "iconMovie": {
+    "message": "Película"
+  },
+  "colorRed": {
+    "message": "Rojo"
+  },
+  "colorOrange": {
+    "message": "Naranja"
+  },
+  "colorGreen": {
+    "message": "Verde"
+  },
+  "colorTeal": {
+    "message": "Turquesa"
+  },
+  "colorBlue": {
+    "message": "Azul"
+  },
+  "colorPurple": {
+    "message": "Morado"
+  },
+  "colorPink": {
+    "message": "Rosa"
+  },
+  "colorGray": {
+    "message": "Gris"
+  },
   "openSidePanel": {
     "message": "Abrir en el panel lateral"
   },

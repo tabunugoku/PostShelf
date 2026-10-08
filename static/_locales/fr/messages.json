@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "Sans couleur (par défaut)"
   },
+  "iconFolder": {
+    "message": "Dossier"
+  },
+  "iconStar": {
+    "message": "Étoile"
+  },
+  "iconCode": {
+    "message": "Code"
+  },
+  "iconBook": {
+    "message": "Livre"
+  },
+  "iconBulb": {
+    "message": "Ampoule"
+  },
+  "iconHeart": {
+    "message": "Cœur"
+  },
+  "iconPhoto": {
+    "message": "Photo"
+  },
+  "iconBriefcase": {
+    "message": "Mallette"
+  },
+  "iconMusic": {
+    "message": "Musique"
+  },
+  "iconMovie": {
+    "message": "Film"
+  },
+  "colorRed": {
+    "message": "Rouge"
+  },
+  "colorOrange": {
+    "message": "Orange"
+  },
+  "colorGreen": {
+    "message": "Vert"
+  },
+  "colorTeal": {
+    "message": "Turquoise"
+  },
+  "colorBlue": {
+    "message": "Bleu"
+  },
+  "colorPurple": {
+    "message": "Violet"
+  },
+  "colorPink": {
+    "message": "Rose"
+  },
+  "colorGray": {
+    "message": "Gris"
+  },
   "openSidePanel": {
     "message": "Ouvrir dans le panneau latéral"
   },

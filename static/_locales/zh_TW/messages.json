@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "無顏色（預設）"
   },
+  "iconFolder": {
+    "message": "資料夾"
+  },
+  "iconStar": {
+    "message": "星號"
+  },
+  "iconCode": {
+    "message": "程式碼"
+  },
+  "iconBook": {
+    "message": "書"
+  },
+  "iconBulb": {
+    "message": "燈泡"
+  },
+  "iconHeart": {
+    "message": "愛心"
+  },
+  "iconPhoto": {
+    "message": "照片"
+  },
+  "iconBriefcase": {
+    "message": "公事包"
+  },
+  "iconMusic": {
+    "message": "音樂"
+  },
+  "iconMovie": {
+    "message": "電影"
+  },
+  "colorRed": {
+    "message": "紅色"
+  },
+  "colorOrange": {
+    "message": "橘色"
+  },
+  "colorGreen": {
+    "message": "綠色"
+  },
+  "colorTeal": {
+    "message": "青綠色"
+  },
+  "colorBlue": {
+    "message": "藍色"
+  },
+  "colorPurple": {
+    "message": "紫色"
+  },
+  "colorPink": {
+    "message": "粉紅色"
+  },
+  "colorGray": {
+    "message": "灰色"
+  },
   "openSidePanel": {
     "message": "在側邊欄中開啟"
   },

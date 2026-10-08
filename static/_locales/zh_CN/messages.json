@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "无颜色（默认）"
   },
+  "iconFolder": {
+    "message": "文件夹"
+  },
+  "iconStar": {
+    "message": "星标"
+  },
+  "iconCode": {
+    "message": "代码"
+  },
+  "iconBook": {
+    "message": "书"
+  },
+  "iconBulb": {
+    "message": "灯泡"
+  },
+  "iconHeart": {
+    "message": "爱心"
+  },
+  "iconPhoto": {
+    "message": "照片"
+  },
+  "iconBriefcase": {
+    "message": "公文包"
+  },
+  "iconMusic": {
+    "message": "音乐"
+  },
+  "iconMovie": {
+    "message": "电影"
+  },
+  "colorRed": {
+    "message": "红色"
+  },
+  "colorOrange": {
+    "message": "橙色"
+  },
+  "colorGreen": {
+    "message": "绿色"
+  },
+  "colorTeal": {
+    "message": "青绿色"
+  },
+  "colorBlue": {
+    "message": "蓝色"
+  },
+  "colorPurple": {
+    "message": "紫色"
+  },
+  "colorPink": {
+    "message": "粉色"
+  },
+  "colorGray": {
+    "message": "灰色"
+  },
   "openSidePanel": {
     "message": "在侧边栏中打开"
   },

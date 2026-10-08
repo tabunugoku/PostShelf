@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "색 없음 (기본)"
   },
+  "iconFolder": {
+    "message": "폴더"
+  },
+  "iconStar": {
+    "message": "별"
+  },
+  "iconCode": {
+    "message": "코드"
+  },
+  "iconBook": {
+    "message": "책"
+  },
+  "iconBulb": {
+    "message": "전구"
+  },
+  "iconHeart": {
+    "message": "하트"
+  },
+  "iconPhoto": {
+    "message": "사진"
+  },
+  "iconBriefcase": {
+    "message": "서류가방"
+  },
+  "iconMusic": {
+    "message": "음악"
+  },
+  "iconMovie": {
+    "message": "영화"
+  },
+  "colorRed": {
+    "message": "빨강"
+  },
+  "colorOrange": {
+    "message": "주황"
+  },
+  "colorGreen": {
+    "message": "초록"
+  },
+  "colorTeal": {
+    "message": "청록"
+  },
+  "colorBlue": {
+    "message": "파랑"
+  },
+  "colorPurple": {
+    "message": "보라"
+  },
+  "colorPink": {
+    "message": "분홍"
+  },
+  "colorGray": {
+    "message": "회색"
+  },
   "openSidePanel": {
     "message": "사이드 패널에서 열기"
   },
