@@ -272,3 +272,17 @@ export async function getCacheCleanupNeeded(): Promise<boolean> {
 export async function setCacheCleanupNeeded(v: boolean): Promise<void> {
   await chrome.storage.local.set({ [CLEANUP_KEY]: v });
 }
+
+// ---- 更新の検出 (v13) ----
+// 前回起動したときのバージョンを保存しておき、変わっていたら「更新しました」を 1 回だけ出す。
+// 新しい版が出ているかを外部に問い合わせることはしない (外部通信なし)。設定の初期化 / 全削除の対象にはしない。
+const VERSION_KEY = 'lastRunVersion';
+
+/** 現在のバージョンを記録し、前回から変わっていれば前回のバージョンを返す。初回インストール (記録なし) と同じバージョンは null */
+export async function noteRunVersion(current: string): Promise<string | null> {
+  if (!current) return null;
+  const res = await chrome.storage.local.get(VERSION_KEY);
+  const prev = typeof res[VERSION_KEY] === 'string' ? (res[VERSION_KEY] as string) : null;
+  if (prev !== current) await chrome.storage.local.set({ [VERSION_KEY]: current });
+  return prev && prev !== current ? prev : null;
+}

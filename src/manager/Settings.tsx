@@ -9,6 +9,8 @@ import { deleteAllDataAndCache } from '../shared/cacheops';
 import { refreshCacheView } from './cacheView';
 import { DiagnosticsDialog } from './Diagnostics';
 import { HealthNotice } from './HealthNotice';
+import { INSTALL_URL } from '../shared/links';
+import { currentVersion } from '../shared/version';
 
 export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }: {
   /** 画像キャッシュのフォルダを選べるのはタブ版だけ */
@@ -137,6 +139,15 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
             />
           </label>
         </div>
+        <p class="muted setting-desc version-info">
+          <strong>{t('versionLabel', currentVersion())}</strong>
+        </p>
+        <p class="muted setting-desc">
+          {t('updateGuide')}{' '}
+          <a href={INSTALL_URL} target="_blank" rel="noopener noreferrer">
+            {t('installGuideLink')}
+          </a>
+        </p>
       </fieldset>
       <fieldset class="setting-group">
         <legend>{t('healthTitle')}</legend>

@@ -309,3 +309,6 @@ button:disabled{cursor:not-allowed}
 .meter i{display:block;height:100%;background:var(--accent-strong)}
 select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--radius);min-height:32px;padding:2px 8px}
 input[type=number]{width:110px}
+.banner-error{background:transparent;border-color:var(--danger)}
+.banner-error>i{color:var(--danger)}
+.version-info{margin-top:12px}

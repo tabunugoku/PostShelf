@@ -378,7 +378,7 @@
     "message": "No saved posts yet"
   },
   "noPostsHint": {
-    "message": "Press the folder button on a post on x.com to save it. Bookmarks made on your phone can be imported by opening your x.com Bookmarks in desktop Chrome."
+    "message": "Press the folder button on a post on x.com to save it. Posts you have already bookmarked can be imported from Bookmarks in your x.com history."
   },
   "folderMore": {
     "message": "Change name, icon, color"
@@ -897,5 +897,32 @@
   },
   "cacheRules": {
     "message": "Saved images stay on this PC and are never sent anywhere. If you remove the extension, the cache inside the browser is deleted too (a folder you chose is not). Keep images you really want in \"a folder I choose\". For backing up your saved data itself, use the JSON export (it contains image URLs only, not the images)."
+  },
+  "updateNotice": {
+    "message": "PostShelf was updated ($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Version $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "To update: first save your data with \"Export\", then overwrite the same folder with the new version and press \"Reload\" for the extension. Do not remove the extension (your saved data would be deleted too)."
+  },
+  "installGuideLink": {
+    "message": "Steps for updating and manual installation"
+  },
+  "errorStorage": {
+    "message": "Saving or loading failed. Please try again. If it keeps happening, save your data with \"Export\" in Settings, then reload the extension."
   }
 }

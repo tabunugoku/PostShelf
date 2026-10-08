@@ -378,7 +378,7 @@
     "message": "Aún no hay publicaciones guardadas"
   },
   "noPostsHint": {
-    "message": "Pulsa el botón de carpeta de una publicación en x.com para guardarla. Los marcadores hechos en el móvil se importan abriendo tus Marcadores de x.com en Chrome de escritorio."
+    "message": "Pulsa el botón de carpeta de una publicación en x.com para guardarla. Las publicaciones que ya marcaste se pueden importar desde Marcadores en el historial de x.com."
   },
   "folderMore": {
     "message": "Cambiar nombre, icono, color"
@@ -897,5 +897,32 @@
   },
   "cacheRules": {
     "message": "Las imágenes guardadas se quedan en este equipo y nunca se envían a ningún sitio. Si eliminas la extensión, la caché dentro del navegador también se elimina (una carpeta que hayas elegido no). Guarda las imágenes que quieras conservar de verdad en «Una carpeta que elijo». Para respaldar los datos guardados, usa la exportación JSON (solo contiene las URL de las imágenes, no las imágenes)."
+  },
+  "updateNotice": {
+    "message": "PostShelf se ha actualizado ($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Versión $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "Para actualizar: primero guarda tus datos con «Exportar», luego sobrescribe la misma carpeta con la nueva versión y pulsa «Volver a cargar» en la extensión. No elimines la extensión (se borrarían también tus datos guardados)."
+  },
+  "installGuideLink": {
+    "message": "Pasos de actualización e instalación manual"
+  },
+  "errorStorage": {
+    "message": "Error al guardar o cargar. Inténtalo de nuevo. Si sigue ocurriendo, guarda tus datos con «Exportar» en Ajustes y vuelve a cargar la extensión."
   }
 }

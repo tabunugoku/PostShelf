@@ -69,7 +69,20 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   }
   pop.append(head);
 
+  // 保存に失敗したときは、ポップオーバーの中に理由を出す (console だけで終わらせない)
+  const errorEl = document.createElement('div');
+  errorEl.setAttribute('role', 'alert');
+  errorEl.style.cssText = 'display:none;padding:6px 8px;margin-top:6px;color:#f4212e;font-size:13px;overflow-wrap:anywhere';
   const save = async () => {
+    try {
+      await saveNow();
+      errorEl.style.display = 'none';
+    } catch {
+      errorEl.textContent = t('errorStorage');
+      errorEl.style.display = 'block';
+    }
+  };
+  const saveNow = async () => {
     if (getCurrentAccount()?.id !== account?.id) return closePopovers(); // 開いている間にアカウントが切り替わった
     const saved = await setBookmarkFolders(tweetId, [...selected], snapshot);
     if (saved && account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
@@ -85,6 +98,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     onChange: () => save(),
   });
   if (account) pop.append(picker.el);
+  pop.append(errorEl);
   // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
   if (account && mode === 'replace' && queryFirst(article, 'removeBookmark')) {
     const rel = document.createElement('button');

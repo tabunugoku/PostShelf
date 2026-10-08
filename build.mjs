@@ -22,6 +22,7 @@ await build({
 });
 
 await cp('static', 'dist', { recursive: true });
+await cp('THIRD_PARTY_NOTICES.md', 'dist/THIRD_PARTY_NOTICES.md');
 
 // Tabler Icons (outline) をローカル同梱 (CDN 禁止)
 const tabler = 'node_modules/@tabler/icons-webfont/dist';

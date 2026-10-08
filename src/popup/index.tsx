@@ -13,15 +13,21 @@ function Popup() {
   const [counts, setCounts] = useState({ posts: 0, folders: 0 });
   const [recent, setRecent] = useState<Bookmark[]>([]);
   const [account, setAccount] = useState<Account | null>(null);
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
     // 件数は現在のアカウント (x.com で最後に読み取ったアカウント。分からなければ「アカウント未設定」) のもの
     const load = async () => {
+      try {
       const last = await getLastSeenAccount();
       setAccount(last);
       setAccountScope(last?.id ?? UNKNOWN_ACCOUNT_ID);
       const [b, f] = await Promise.all([listBookmarks(), listFolders()]);
       setCounts({ posts: b.length, folders: f.length - 1 }); // 「すべて」を除く
       setRecent([...b].sort((x, y) => y.savedAt - x.savedAt).slice(0, 3));
+      setFailed(false);
+      } catch {
+        setFailed(true); // 読み込めなかったことを画面に出す
+      }
     };
     void load();
     const offs = [onDataChanged(() => void load()), onLastSeenAccountChanged(() => void load())];
@@ -37,6 +43,11 @@ function Popup() {
       <div class="sub">
         {counts.posts} {t('popupPosts')} · {counts.folders} {t('popupFolders')}
       </div>
+      {failed && (
+        <div class="sub error" role="alert">
+          {t('errorStorage')}
+        </div>
+      )}
       <HealthNotice onDiagnose={() => openManager('#diagnostics')} />
       <div class="rec">
         <div>{t('recent')}</div>

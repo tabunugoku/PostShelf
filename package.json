@@ -6,7 +6,9 @@
   "scripts": {
     "build": "node build.mjs",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "package": "node scripts/package.mjs",
+    "release:check": "node scripts/release-check.mjs"
   },
   "devDependencies": {
     "@tabler/icons-webfont": "^3.49.0",

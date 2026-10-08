@@ -378,7 +378,7 @@
     "message": "還沒有儲存的貼文"
   },
   "noPostsHint": {
-    "message": "在 x.com 上點擊貼文的資料夾按鈕即可儲存。在手機上加入的書籤，可在桌面版 Chrome 中開啟 x.com「書籤」來匯入。"
+    "message": "在 x.com 上點擊貼文的資料夾按鈕即可儲存。已經加入書籤的貼文，可以從 x.com 歷史記錄中的「書籤」匯入。"
   },
   "folderMore": {
     "message": "變更名稱、圖示、顏色"
@@ -897,5 +897,32 @@
   },
   "cacheRules": {
     "message": "儲存的圖片只放在這台電腦裡，不會傳送到外部。移除擴充功能後，瀏覽器內部的快取也會被刪除（自己選擇的資料夾不會被刪除）。真正想保留的圖片請儲存到「自己選擇的資料夾」。儲存資料本身的備份請使用 JSON 匯出（不含圖片，僅含 URL）。"
+  },
+  "updateNotice": {
+    "message": "PostShelf 已更新（$VERSION$）",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "版本 $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "更新時：請先用「匯出」儲存資料，然後用新版本覆蓋同一個資料夾，再點擊擴充功能的「重新載入」。請不要移除擴充功能（已儲存的資料也會一併刪除）。"
+  },
+  "installGuideLink": {
+    "message": "更新和手動安裝的步驟"
+  },
+  "errorStorage": {
+    "message": "儲存或讀取失敗。請再試一次。若持續發生，請先在設定的「資料」中用「匯出」儲存資料，然後重新載入擴充功能。"
   }
 }

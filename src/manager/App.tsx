@@ -16,6 +16,7 @@ import {
   dismissImportHint,
   getImportHint,
   getSettings,
+  noteRunVersion,
   onImportHintChanged,
   shouldShowImportHint,
   updateSettings,
@@ -54,6 +55,8 @@ import { AccountSwitcher, AssignDialog, resolveViewAccount } from './Accounts';
 import { FolderEdit } from './FolderEdit';
 import { SaveCurrent } from './SaveCurrent';
 import { SettingsPage } from './Settings';
+import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
+import { currentVersion } from '../shared/version';
 import { useCompact } from './useCompact';
 
 const sorts = (): [SortKey, string][] => [
@@ -95,6 +98,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [dragOver, setDragOver] = useState<string | null>(null);
   const [showHow, setShowHow] = useState(false);
   const [bannerOn, setBannerOn] = useState(false);
+  /** 更新した直後の最初の起動だけ出すお知らせ (更新後のバージョン) */
+  const [updated, setUpdated] = useState<string | null>(null);
+  const storageError = useStorageError();
   const [pending, setPending] = useState(0);
   const [accounts, setAccounts] = useState<AccountSummary[]>([]);
   const [viewId, setViewId] = useState(UNKNOWN_ACCOUNT_ID);
@@ -132,11 +138,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       setLastSeen(last);
       applyView(resolveViewAccount(s.viewAccount, last, accs));
       await Promise.all([reload(), loadHint()]);
+      const ver = currentVersion();
+      if (await noteRunVersion(ver)) setUpdated(ver);
       setCurrent(s.lastFolderId);
       setView(s.viewMode);
       setSort(s.sortKey);
       setReady(true);
-    })();
+    })().catch(() => {
+      reportStorageError(); // 読み込めなかったことを画面に出す (空の画面のままにしない)
+      setReady(true);
+    });
     const offs = [onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
     return () => offs.forEach((o) => o());
   }, []);
@@ -659,8 +670,32 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     </div>
   );
 
+  const notices = (
+    <>
+      {storageError && (
+        <div class="banner banner-error" role="alert">
+          <Icon name="ti-alert-triangle" />
+          <span>{t('errorStorage')}</span>
+          <button class="icon-btn" aria-label={t('dismiss')} title={t('dismiss')} onClick={clearStorageError}>
+            <Icon name="ti-x" />
+          </button>
+        </div>
+      )}
+      {updated && (
+        <div class="banner" role="status">
+          <Icon name="ti-circle-check" />
+          <span>{t('updateNotice', updated)}</span>
+          <button class="icon-btn" aria-label={t('dismiss')} title={t('dismiss')} onClick={() => setUpdated(null)}>
+            <Icon name="ti-x" />
+          </button>
+        </div>
+      )}
+    </>
+  );
+
   const body = (
     <>
+      {notices}
       {unknownBanner}
       {banner}
       {chips}
@@ -731,12 +766,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   if (!ready) return <div class={`app surface-${surface}`} />;
 
   const settingsPage = (
-    <SettingsPage
-      surface={surface}
-      onChanged={() => void reload()}
-      onApplied={() => void reapplySettings()}
-      onNotice={(message, action) => setToast({ key: Date.now(), message, action })}
-    />
+    <>
+      {notices}
+      <SettingsPage
+        surface={surface}
+        onChanged={() => void reload()}
+        onApplied={() => void reapplySettings()}
+        onNotice={(message, action) => setToast({ key: Date.now(), message, action })}
+      />
+    </>
   );
 
   // ===== 狭いレイアウト (サイドパネル向け): 1 つのフォルダボタン + 検索 + 横スクロールのチップ =====

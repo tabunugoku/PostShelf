@@ -378,7 +378,7 @@
     "message": "Ainda não há posts salvos"
   },
   "noPostsHint": {
-    "message": "Clique no botão de pasta de um post no x.com para salvá-lo. Favoritos feitos no celular podem ser importados abrindo seus Favoritos do x.com no Chrome para computador."
+    "message": "Pressione o botão de pasta de um post no x.com para salvá-lo. Os posts que você já salvou nos favoritos podem ser importados de Favoritos no histórico do x.com."
   },
   "folderMore": {
     "message": "Alterar nome, ícone, cor"
@@ -897,5 +897,32 @@
   },
   "cacheRules": {
     "message": "As imagens salvas ficam somente neste PC e nunca são enviadas para fora. Se você remover a extensão, o cache dentro do navegador também é excluído (uma pasta escolhida por você não é). Guarde as imagens que realmente quer manter em \"Uma pasta que eu escolher\". Para fazer backup dos dados salvos, use a exportação JSON (contém apenas as URLs das imagens, não as imagens)."
+  },
+  "updateNotice": {
+    "message": "O PostShelf foi atualizado ($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Versão $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "Para atualizar: primeiro salve seus dados com \"Exportar\", depois sobrescreva a mesma pasta com a nova versão e pressione \"Recarregar\" na extensão. Não remova a extensão (os dados salvos também seriam apagados)."
+  },
+  "installGuideLink": {
+    "message": "Passos de atualização e instalação manual"
+  },
+  "errorStorage": {
+    "message": "Falha ao salvar ou carregar. Tente novamente. Se continuar, salve seus dados com \"Exportar\" em Configurações e recarregue a extensão."
   }
 }

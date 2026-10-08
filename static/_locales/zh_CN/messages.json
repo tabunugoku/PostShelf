@@ -378,7 +378,7 @@
     "message": "还没有保存的帖子"
   },
   "noPostsHint": {
-    "message": "在 x.com 上点击帖子的文件夹按钮即可保存。在手机上添加的书签，可在桌面版 Chrome 中打开 x.com“书签”来导入。"
+    "message": "在 x.com 上点击帖子的文件夹按钮即可保存。已经加入书签的帖子，可以从 x.com 历史记录中的“书签”导入。"
   },
   "folderMore": {
     "message": "更改名称、图标、颜色"
@@ -897,5 +897,32 @@
   },
   "cacheRules": {
     "message": "保存的图片只放在这台电脑里，不会发送到外部。卸载扩展程序后，浏览器内部的缓存也会被删除（自己选择的文件夹不会被删除）。真正想保留的图片请保存到“自己选择的文件夹”。保存数据本身的备份请使用 JSON 导出（不含图片，仅含 URL）。"
+  },
+  "updateNotice": {
+    "message": "PostShelf 已更新（$VERSION$）",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "版本 $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "更新时：请先用“导出”保存数据，然后用新版本覆盖同一个文件夹，再点击扩展程序的“重新加载”。请不要删除扩展程序（已保存的数据也会一并删除）。"
+  },
+  "installGuideLink": {
+    "message": "更新和手动安装的步骤"
+  },
+  "errorStorage": {
+    "message": "保存或读取失败。请重试。如果问题持续出现，请先在设置的“数据”中用“导出”保存数据，然后重新加载扩展程序。"
   }
 }

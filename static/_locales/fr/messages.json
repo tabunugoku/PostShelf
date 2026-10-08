@@ -378,7 +378,7 @@
     "message": "Aucun post enregistré pour l'instant"
   },
   "noPostsHint": {
-    "message": "Cliquez sur le bouton dossier d'un post sur x.com pour l'enregistrer. Les favoris faits sur mobile s'importent en ouvrant vos Favoris x.com dans Chrome sur ordinateur."
+    "message": "Cliquez sur le bouton de dossier d'un post sur x.com pour l'enregistrer. Les posts déjà mis en favoris peuvent être importés depuis Favoris dans l'historique de x.com."
   },
   "folderMore": {
     "message": "Modifier nom, icône, couleur"
@@ -897,5 +897,32 @@
   },
   "cacheRules": {
     "message": "Les images enregistrées restent sur ce PC et ne sont jamais envoyées ailleurs. Si vous supprimez l'extension, le cache dans le navigateur est aussi supprimé (un dossier que vous avez choisi ne l'est pas). Conservez les images qui comptent vraiment dans « Un dossier de mon choix ». Pour sauvegarder vos données enregistrées, utilisez l'export JSON (il ne contient que les URL des images, pas les images)."
+  },
+  "updateNotice": {
+    "message": "PostShelf a été mis à jour ($VERSION$)",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Version $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "updateGuide": {
+    "message": "Pour mettre à jour : enregistrez d'abord vos données avec « Exporter », puis écrasez le même dossier avec la nouvelle version et cliquez sur « Recharger » pour l'extension. Ne supprimez pas l'extension (vos données enregistrées seraient aussi supprimées)."
+  },
+  "installGuideLink": {
+    "message": "Étapes de mise à jour et d'installation manuelle"
+  },
+  "errorStorage": {
+    "message": "Échec de l'enregistrement ou du chargement. Réessayez. Si cela continue, enregistrez vos données avec « Exporter » dans les Réglages, puis rechargez l'extension."
   }
 }
