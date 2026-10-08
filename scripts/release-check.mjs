@@ -23,7 +23,13 @@ const notesErrors = [];
 if (!notes) notesErrors.push(`${notesPath} がありません`);
 else for (const h of ['## 追加', '## 修正']) if (!notes.includes(h)) notesErrors.push(`${notesPath} に「${h}」の節がありません`);
 
+const site = readFileSync('site/index.html', 'utf8');
+const siteErrors = [];
+if (!site.includes(`v${pkg.version} ·`)) siteErrors.push(`site/index.html の版の表示が v${pkg.version} ではありません`);
+if (!site.includes(`postshelf-${pkg.version}.zip`)) siteErrors.push(`site/index.html の zip の名前が postshelf-${pkg.version}.zip ではありません`);
+
 const results = [
+  ['紹介サイト (site/index.html) の版と zip の名前が現在の version と同じ', siteErrors],
   ['リリースノート (docs/releases/v<version>.md) に「追加」と「修正」の節がある', notesErrors],
   ['version が package.json と一致', checkVersion(manifest, pkg)],
   ['必須の permissions / host_permissions が現在の一覧と同じ', [...checkPermissions(manifest), ...checkPermissions(distManifest)]],

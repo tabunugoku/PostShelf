@@ -14,6 +14,7 @@
    - 実機確認 (`docs/MANUAL_TEST.md`) を済ませてから `1.0.0` にします。それまでは `0.1.0` のままです。
 2. `npm run release:check` を実行する。typecheck / テスト / ビルド / パッケージに加えて、次を確かめます。
    - manifest の version が `package.json` と一致している
+   - 紹介サイト `site/index.html` の版の表示 (`v1.1.1 ·`) と zip の名前が、現在の version と同じ (リリースのたびに更新する。ほかに変わった機能や注意点があれば、サイトの本文も更新する)
    - 必須の `permissions` / `host_permissions` が現在の一覧と完全に同じ (増えていたら失敗)
    - 全 8 言語の `messages.json` のキーとプレースホルダーが一致している
    - `dist` の JavaScript に、外部のスクリプトの URL・`eval`・`new Function`・リモートコードの読み込みが無い
