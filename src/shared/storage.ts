@@ -434,18 +434,29 @@ const isStr = (v: unknown): v is string => typeof v === 'string';
 function validFolder(f: any): f is Folder {
   return f && isStr(f.id) && isStr(f.name) && isStr(f.icon) && typeof f.order === 'number' && !isBuiltinFolder(f.id);
 }
+/** ポストの URL は x.com / twitter.com のものだけ (取り込んだ JSON が <a href> にそのまま使われるため) */
+const X_URL = /^https:\/\/(x|twitter)\.com\//i;
+const HTTPS_URL = /^https:\/\//i;
 function validBookmark(b: any): b is Bookmark {
   return (
     b && isStr(b.tweetId) && Array.isArray(b.folderIds) && b.folderIds.every(isStr) &&
-    typeof b.savedAt === 'number' && b.snapshot && isStr(b.snapshot.text) && isStr(b.snapshot.url) &&
-    Array.isArray(b.snapshot.media)
+    typeof b.savedAt === 'number' && b.snapshot && isStr(b.snapshot.text) && isStr(b.snapshot.url) && X_URL.test(b.snapshot.url) &&
+    isStr(b.snapshot.handle) && isStr(b.snapshot.author) && Array.isArray(b.snapshot.media)
   );
 }
 /** 取り込んだ JSON の snapshot の、省略できる項目 (v24) を検証する。不正なら、その項目だけ捨てる (text で表示する) */
 function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
-  const { segments, truncated, ...rest } = s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown };
+  const { segments, truncated, avatar, media, ...rest } = s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown };
   const seg = segments === undefined ? undefined : sanitizeSegments(segments);
-  return { ...rest, ...(seg ? { segments: seg } : {}), ...(typeof truncated === 'boolean' ? { truncated } : {}) };
+  // 画像・アバターは https の URL だけ (x.com 以外への勝手な要求や javascript: を通さない)。満たさない要素だけ捨てる
+  const httpsOnly = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
+  return {
+    ...rest,
+    media: (media as unknown[]).filter(httpsOnly),
+    ...(httpsOnly(avatar) ? { avatar } : {}),
+    ...(seg ? { segments: seg } : {}),
+    ...(typeof truncated === 'boolean' ? { truncated } : {}),
+  };
 }
 function validAccount(a: any): a is Account {
   return a && isStr(a.id) && a.id !== '' && isStr(a.handle) && typeof a.lastSeenAt === 'number';
@@ -464,9 +475,18 @@ export function importData(json: unknown): Promise<number> {
     const legacy = d.version === undefined || d.version < 2;
     const acc = (v: unknown) => (!legacy && isStr(v) && v ? (v === UNKNOWN_ACCOUNT_ID ? v : accountIdOf(v)) : UNKNOWN_ACCOUNT_ID);
     const folders = d.folders.filter(validFolder).map((f) => ({ ...f, accountId: acc(f.accountId) }));
-    const bookmarks = d.bookmarks.filter(validBookmark).map((b) => ({ ...b, snapshot: cleanSnapshot(b.snapshot), accountId: acc(b.accountId) }));
+    // 保存時と同じ規則で所属を整える ([] / 'all' は「未分類」に)。件数と中身は変えない
+    const bookmarks = d.bookmarks
+      .filter(validBookmark)
+      .map((b) => ({ ...b, folderIds: normalizeFolderIds(b.folderIds), snapshot: cleanSnapshot(b.snapshot), accountId: acc(b.accountId) }));
     const curFolders = new Map((await readAllFolders()).map((f) => [bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f]));
     for (const f of folders) curFolders.set(bookmarkKey(f.accountId, f.id), f);
+    // 「未分類」に入るポストがあるアカウントには、受け皿のフォルダを用意する
+    for (const b of bookmarks) {
+      if (!b.folderIds.includes(INBOX_ID) || curFolders.has(bookmarkKey(b.accountId, INBOX_ID))) continue;
+      const mineF = [...curFolders.values()].filter((f) => (f.accountId ?? UNKNOWN_ACCOUNT_ID) === b.accountId);
+      curFolders.set(bookmarkKey(b.accountId, INBOX_ID), { id: INBOX_ID, name: '', icon: 'ti-star', order: mineF.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: b.accountId });
+    }
     const map = await readMap();
     for (const b of bookmarks) map[bookmarkKey(b.accountId, b.tweetId)] = b;
     const accounts = await read<Record<string, Account>>(KEY_ACCOUNTS, {});

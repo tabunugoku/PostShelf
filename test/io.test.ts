@@ -6,7 +6,7 @@ import { collectVisible, isBookmarksPage } from '../src/content/collect';
 import { displayName } from '../src/shared/models';
 import { addCollected, createFolder, exportData, importData, listBookmarks, listFolders, setBookmarkFolders } from '../src/shared/storage';
 
-const snap = { text: 't', author: 'a', handle: '@a', media: [], url: 'u' };
+const snap = { text: 't', author: 'a', handle: '@a', media: [], url: 'https://x.com/a/status/1' };
 beforeEach(() => installChromeMock());
 
 describe('export/import', () => {
