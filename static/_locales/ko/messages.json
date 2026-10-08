@@ -1011,6 +1011,23 @@
       }
     }
   },
+  "fullTextProgressSkipped": {
+    "message": "가져오는 중: $DONE$ / $TOTAL$ (건너뜀: $SKIPPED$)",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      },
+      "skipped": {
+        "content": "$3",
+        "example": "3"
+      }
+    }
+  },
   "fullTextStop": {
     "message": "중지"
   },

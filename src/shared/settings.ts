@@ -456,6 +456,8 @@ export interface FullTextRun {
   total: number;
   done: number;
   failed: number;
+  /** 飛ばした件数 (取得済み / 削除済み / 1 時間以内に試した)。done には数えない */
+  skipped?: number;
   /** 止めた理由 (limit: X が制限や警告を出した / failures: 連続で 3 件失敗 / user: 止めるボタン) */
   stopReason?: FullTextStop;
   updatedAt: number;
@@ -473,6 +475,7 @@ export async function getFullTextRun(): Promise<FullTextRun | null> {
     total: Number(r.total) || 0,
     done: Number(r.done) || 0,
     failed: Number(r.failed) || 0,
+    skipped: Number(r.skipped) || 0,
     stopReason: r.stopReason === 'limit' || r.stopReason === 'failures' || r.stopReason === 'user' ? r.stopReason : undefined,
     updatedAt: Number(r.updatedAt) || 0,
   };

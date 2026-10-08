@@ -43,7 +43,7 @@ describe('v26-C: counting the results of full-text fetches', () => {
     const run = (await getFullTextRun())!;
     expect(run.failed).toBe(0);
     expect(run.stopReason).toBeUndefined();
-    expect(run.done).toBe(MAX_FAILURES + 2);
+    expect(run.done + (run.skipped ?? 0)).toBe(MAX_FAILURES + 2);
     expect((await getBookmark('1'))!.snapshot.text).toBe('タブ側 1');
   });
 

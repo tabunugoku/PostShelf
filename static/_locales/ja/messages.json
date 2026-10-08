@@ -1011,6 +1011,23 @@
       }
     }
   },
+  "fullTextProgressSkipped": {
+    "message": "取得しています: $DONE$ / $TOTAL$ 件（飛ばした: $SKIPPED$ 件）",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      },
+      "skipped": {
+        "content": "$3",
+        "example": "3"
+      }
+    }
+  },
   "fullTextStop": {
     "message": "止める"
   },

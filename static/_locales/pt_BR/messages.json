@@ -1011,6 +1011,23 @@
       }
     }
   },
+  "fullTextProgressSkipped": {
+    "message": "Obtendo: $DONE$ / $TOTAL$ (ignorados: $SKIPPED$)",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      },
+      "skipped": {
+        "content": "$3",
+        "example": "3"
+      }
+    }
+  },
   "fullTextStop": {
     "message": "Parar"
   },

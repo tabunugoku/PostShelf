@@ -6,7 +6,7 @@
  *  - 同時に開く裏のタブは 1 つ。次を開くまで 4〜8 秒のランダムな間隔をあける。1 件の待ちは 15 秒まで
  *  - 自動取り込みの実行中は動かさない (終わるまで待つ)
  *  - X が制限や警告 (selectors の xError) を出したら止める。連続で 3 件失敗しても止める。止めた理由は、設定の画面に出す
- *  - 同じポストの再試行は 1 時間に 1 回まで
+ *  - 同じポストの再試行は 1 時間に 1 回まで (自動のとき。設定の「いま取得する」は、ユーザーが押したので間隔を無視する)。飛ばした分は done に数えず skipped に数える
  * キューはメモリだけ (service worker が止まれば消える)。続きは、保存してある truncated のポストから作り直せる (設定の「いま取得する」)。
  * tabs の権限は使わない (chrome.tabs.create / remove / sendMessage は、権限なしで使える)。
  */
@@ -84,7 +84,9 @@ export class FullTextQueue {
   private looping = false;
   private aborted = false;
   private userStopped = false;
-  private run: FullTextRun = { running: false, kind: 'save', total: 0, done: 0, failed: 0, updatedAt: 0 };
+  /** 「いま取得する」で入れたもの。1 時間の再試行の間隔を無視して取得する */
+  private manual = new Set<string>();
+  private run: FullTextRun = { running: false, kind: 'save', total: 0, done: 0, failed: 0, skipped: 0, updatedAt: 0 };
   private failures = 0;
 
   constructor(private d: FullTextDeps = defaultDeps()) {}
@@ -106,6 +108,7 @@ export class FullTextQueue {
     if (items.length === 0 || !(await this.d.enabled())) return;
     // 止める操作の直後の依頼は、止め終わってから受け付ける (後始末で黙って捨てられないように)
     while (this.userStopped) await this.finished.catch(() => {});
+    if (kind === 'manual') for (const it of items) this.manual.add(keyOf(it));
     const known = new Set(this.pending.map(keyOf));
     const fresh = items.filter((it) => !known.has(keyOf(it)));
     if (fresh.length === 0) return this.finished;
@@ -114,7 +117,7 @@ export class FullTextQueue {
       this.looping = true; // 続けて呼ばれても、動かすのは 1 つだけ (同時に開く裏のタブは 1 つ)
       this.aborted = false;
       this.failures = 0;
-      await this.publish({ running: true, kind, total: fresh.length, done: 0, failed: 0, stopReason: undefined });
+      await this.publish({ running: true, kind, total: fresh.length, done: 0, failed: 0, skipped: 0, stopReason: undefined });
       this.finished = this.loop();
     } else await this.publish({ total: this.run.total + fresh.length });
     return this.finished;
@@ -145,8 +148,11 @@ export class FullTextQueue {
         const item = this.pending.shift()!;
         const b = await this.d.lookup(item);
         const recent = (await this.d.tries())[keyOf(item)];
-        if (!b || (recent !== undefined && this.d.now() - recent < RETRY_MS)) {
-          await this.publish({ done: this.run.done + 1 }); // 取得済み / 1 時間以内に試した: 飛ばす
+        // 飛ばす: 取得済み (全文が入っている / 削除済み)、または 1 時間以内に試した (自動のときだけ。「いま取得する」は間隔を無視する)
+        const tooSoon = !this.manual.has(keyOf(item)) && recent !== undefined && this.d.now() - recent < RETRY_MS;
+        if (!b || tooSoon) {
+          await this.publish({ skipped: (this.run.skipped ?? 0) + 1 });
+          first = true; // タブを開いていないので、次との間隔は要らない
           continue;
         }
         await this.d.recordTry(keyOf(item), this.d.now());
@@ -159,7 +165,7 @@ export class FullTextQueue {
           await this.stopWith('limit');
         } else if (r === 'skip' || r === 'abort') {
           // skip: 読めたが、すでに全文が入っている / ポストが無い (成功でも失敗でもない)。abort: 止める操作による中断 (失敗に数えない)
-          if (r === 'skip') await this.publish({ done: this.run.done + 1 });
+          if (r === 'skip') await this.publish({ skipped: (this.run.skipped ?? 0) + 1 });
         } else {
           this.failures++;
           await this.publish({ failed: this.run.failed + 1 });
@@ -169,6 +175,7 @@ export class FullTextQueue {
     } finally {
       this.looping = false;
       this.userStopped = false;
+      this.manual.clear();
       this.pending = [];
       await this.publish({ running: false });
     }
