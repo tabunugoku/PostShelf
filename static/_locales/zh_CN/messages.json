@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "文件夹"
   },
+  "popupInbox": {
+    "message": "整理未分类"
+  },
+  "popupSearch": {
+    "message": "搜索已保存的帖子"
+  },
   "recent": {
     "message": "最近保存的 3 条"
   },

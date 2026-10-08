@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "資料夾"
   },
+  "popupInbox": {
+    "message": "整理未分類"
+  },
+  "popupSearch": {
+    "message": "搜尋已儲存的貼文"
+  },
   "recent": {
     "message": "最近儲存的 3 則"
   },

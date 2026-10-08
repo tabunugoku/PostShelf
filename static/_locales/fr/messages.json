@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "dossiers"
   },
+  "popupInbox": {
+    "message": "Trier les non classés"
+  },
+  "popupSearch": {
+    "message": "Rechercher les posts enregistrés"
+  },
   "recent": {
     "message": "Enregistrés récemment (3)"
   },

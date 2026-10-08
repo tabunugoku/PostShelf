@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "pastas"
   },
+  "popupInbox": {
+    "message": "Organizar sem categoria"
+  },
+  "popupSearch": {
+    "message": "Buscar posts salvos"
+  },
   "recent": {
     "message": "Salvos recentemente (3)"
   },

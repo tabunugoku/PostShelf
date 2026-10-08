@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "folders"
   },
+  "popupInbox": {
+    "message": "Sort Unsorted"
+  },
+  "popupSearch": {
+    "message": "Search saved posts"
+  },
   "recent": {
     "message": "Recently saved (3)"
   },

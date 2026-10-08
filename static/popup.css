@@ -18,3 +18,12 @@ body{margin:0;padding:12px;width:320px}
 .pr{display:flex;gap:6px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer;border:0;text-align:left}
 .pr.small{flex:1;justify-content:center;font-size:12px;color:var(--text-secondary);min-width:0}
 .pr:hover{background:var(--fill-ghost-hover)}
+
+.tile-inbox{font:inherit;color:inherit;background:transparent;cursor:pointer;border-color:var(--accent-strong)}
+.tile-inbox:hover{background:var(--fill-ghost-hover)}
+.tile-inbox span{color:var(--text-primary);white-space:nowrap}
+.tile-quiet{opacity:.6}
+.popup-search{box-sizing:border-box;width:100%;margin-top:10px;min-height:36px;padding:4px 10px}
+.rec-dots{display:inline-flex;gap:2px;margin-right:4px;vertical-align:middle}
+.rec-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text-secondary)}
+.rec-dot.hollow{background:transparent;border:1.5px solid var(--text-secondary);box-sizing:border-box}

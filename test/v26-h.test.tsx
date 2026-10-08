@@ -131,8 +131,8 @@ describe('v26-H: the image viewer', () => {
   });
 });
 
-describe('v26-H: the popup folder count matches the manager menu', () => {
-  it('does not count 「未分類」 (a stored inbox) as a folder', async () => {
+describe('v26-H / v28-C: the popup 未分類 count matches the manager menu', () => {
+  it('counts 「未分類」 with the same function as the left menu', async () => {
     installChromeMock();
     document.body.innerHTML = '<div id="app"></div>';
     await noteAccount({ handle: 'me' }, 1);
@@ -143,12 +143,13 @@ describe('v26-H: the popup folder count matches the manager menu', () => {
     await act(async () => void (await import('../src/popup/index')));
     await flush(40);
     const tiles = $$('.tiles .tile').map((t) => [t.querySelector('b')!.textContent, t.querySelector('span')!.textContent]);
-    expect(tiles).toEqual([['1', 'ポスト'], ['1', 'フォルダ']]);
+    expect(tiles).toEqual([['1', 'ポスト'], ['1', '未分類を仕分ける']]);
     // 管理画面の左のメニューの、ユーザーのフォルダの数
     document.body.innerHTML = '<div id="app"></div>';
     installPanelMock();
     await act(() => void render(<App />, $('#app')));
     await flush(40);
     expect($$('.fr').filter((r) => r.textContent?.includes('F')).length).toBe(1);
+    expect($$('.fr').find((r) => r.textContent?.includes('未分類'))!.querySelector('.badge')!.textContent).toBe('1');
   });
 });

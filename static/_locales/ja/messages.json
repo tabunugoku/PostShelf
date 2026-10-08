@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "フォルダ"
   },
+  "popupInbox": {
+    "message": "未分類を仕分ける"
+  },
+  "popupSearch": {
+    "message": "保存したポストを検索"
+  },
   "recent": {
     "message": "最近保存した 3 件"
   },

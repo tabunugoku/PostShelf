@@ -81,6 +81,22 @@ type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: str
 type ToastState = { key: number; message: string; undo?: BookmarkUndo; /** 設定の初期化の取り消しなど、ポスト以外の「元に戻す」 */ action?: () => Promise<void> } | null;
 
 /** 「未分類」は保存データにまだ無くても常にスマートビューに出す。アイコンは受け皿らしく inbox に統一する */
+/** ポップアップからの入口: #inbox (未分類で開く) と #q=<検索語> (検索語を入れて開く)。読み取ったらハッシュを消す。ほかのハッシュは触らない */
+export function takeEntryHash(): { inbox?: boolean; q?: string } | null {
+  const h = location.hash;
+  let out: { inbox?: boolean; q?: string } | null = null;
+  if (h === '#inbox') out = { inbox: true };
+  else if (h.startsWith('#q=')) {
+    try {
+      out = { q: decodeURIComponent(h.slice(3)) };
+    } catch {
+      out = { q: '' };
+    }
+  }
+  if (out) history.replaceState(null, '', location.pathname + location.search);
+  return out;
+}
+
 const inboxView = (stored?: Folder): Folder => ({ id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color });
 const recentView = (): Folder => ({ id: RECENT_ID, name: t('recent7'), icon: 'ti-clock', order: -1 });
 
@@ -154,6 +170,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setBannerOn(shouldShowImportHint(h));
   };
   useEffect(() => {
+    const entry = takeEntryHash(); // ポップアップからの入口 (#inbox / #q=…)。読んだらハッシュを消す。lastFolderId より優先する
     void (async () => {
       const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts(), refreshCacheView()]).then((r) => [r[0], r[1], r[2]] as const);
       lastRef.current = last;
@@ -163,7 +180,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       await Promise.all([reload(), loadHint()]);
       const ver = currentVersion();
       if (await noteRunVersion(ver)) setUpdated(ver);
-      setCurrent(s.lastFolderId);
+      setCurrent(entry?.inbox ? INBOX_ID : entry?.q !== undefined ? ALL_FOLDER_ID : s.lastFolderId);
+      if (entry?.q !== undefined) {
+        setSearch(entry.q);
+        setSearchOpen(true);
+      }
       setView(s.viewMode);
       setSort(s.sortKey);
       setReady(true);
@@ -172,6 +193,13 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       setReady(true);
     });
     const onHash = () => {
+      const e = takeEntryHash();
+      if (e?.inbox) chooseView(INBOX_ID);
+      else if (e?.q !== undefined) {
+        chooseView(ALL_FOLDER_ID);
+        setSearch(e.q);
+        setSearchOpen(true);
+      }
       if (location.hash === '#autocollect') setAutoOpen(true); // x.com の「自動で取り込む…」から開かれた
     };
     window.addEventListener('hashchange', onHash);

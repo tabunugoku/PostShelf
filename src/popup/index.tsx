@@ -1,18 +1,22 @@
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { inboxOf } from '../shared/folderPicker';
 import { Icon } from '../shared/Icon';
 import { HealthNotice } from '../manager/HealthNotice';
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
-import { UNKNOWN_ACCOUNT_ID, accountLabel, userFoldersOf, type Account, type Bookmark } from '../shared/models';
+import { INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, type Account, type Bookmark, type Folder } from '../shared/models';
 import { t } from '../shared/strings';
+import { countFolder } from '../shared/query';
 import { getLastSeenAccount, listBookmarks, listFolders, onDataChanged, onLastSeenAccountChanged, setAccountScope } from '../shared/storage';
 
 const openManager = (hash = '') => void openManagerTab(hash);
 
 function Popup() {
-  const [counts, setCounts] = useState({ posts: 0, folders: 0 });
+  const [counts, setCounts] = useState({ posts: 0, inbox: 0 });
   const [recent, setRecent] = useState<Bookmark[]>([]);
   const [account, setAccount] = useState<Account | null>(null);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [query, setQuery] = useState('');
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     // 件数は現在のアカウント (x.com で最後に読み取ったアカウント。分からなければ「アカウント未設定」) のもの
@@ -22,7 +26,8 @@ function Popup() {
       setAccount(last);
       setAccountScope(last?.id ?? UNKNOWN_ACCOUNT_ID);
       const [b, f] = await Promise.all([listBookmarks(), listFolders()]);
-      setCounts({ posts: b.length, folders: userFoldersOf(f).length }); // 管理画面の左のメニューと同じ数え方 (「すべて」と「未分類」を除く)
+      setCounts({ posts: b.length, inbox: countFolder(b, INBOX_ID, Date.now()) }); // 管理画面の左のメニューの「未分類」と同じ関数で数える
+      setFolders(f);
       setRecent([...b].sort((x, y) => y.savedAt - x.savedAt).slice(0, 3));
       setFailed(false);
       } catch {
@@ -48,11 +53,29 @@ function Popup() {
           <b>{counts.posts}</b>
           <span>{t('popupPosts')}</span>
         </div>
-        <div class="tile">
-          <b>{counts.folders}</b>
-          <span>{t('popupFolders')}</span>
-        </div>
+        {counts.inbox > 0 ? (
+          <button class="tile tile-inbox" onClick={() => openManager('#inbox')}>
+            <b>{counts.inbox}</b>
+            <span>{t('popupInbox')}</span>
+          </button>
+        ) : (
+          <div class="tile tile-quiet">
+            <b>0</b>
+            <span>{displayName(inboxOf(folders))}</span>
+          </div>
+        )}
       </div>
+      <input
+        class="popup-search"
+        type="search"
+        placeholder={t('popupSearch')}
+        aria-label={t('popupSearch')}
+        value={query}
+        onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && query.trim()) openManager(`#q=${encodeURIComponent(query.trim())}`);
+        }}
+      />
       {failed && (
         <div class="sub error" role="alert">
           {t('errorStorage')}
@@ -63,6 +86,12 @@ function Popup() {
         <div class="rec-head">{t('recent')}</div>
         {recent.map((b) => (
           <div class="rec-row" title={b.snapshot.text}>
+            <span class="rec-dots" aria-hidden="true">
+              {b.folderIds.slice(0, 3).map((id) => {
+                const f = folders.find((x) => x.id === id);
+                return id === INBOX_ID || !f?.color ? <i class="rec-dot hollow" /> : <i class="rec-dot" style={{ background: f.color }} />;
+              })}
+            </span>
             <span class="rec-handle">{b.snapshot.handle}</span> {b.snapshot.text}
           </div>
         ))}
@@ -86,10 +115,6 @@ function Popup() {
         <button class="pr small" onClick={() => openManager('#settings')}>
           <Icon name="ti-settings" />
           {t('settings')}
-        </button>
-        <button class="pr small" onClick={() => openManager('#diagnostics')}>
-          <Icon name="ti-stethoscope" />
-          {t('copyDiag')}
         </button>
       </div>
     </div>

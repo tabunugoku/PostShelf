@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "폴더"
   },
+  "popupInbox": {
+    "message": "미분류 정리"
+  },
+  "popupSearch": {
+    "message": "저장한 게시물 검색"
+  },
   "recent": {
     "message": "최근 저장한 3개"
   },

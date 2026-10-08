@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "carpetas"
   },
+  "popupInbox": {
+    "message": "Ordenar sin clasificar"
+  },
+  "popupSearch": {
+    "message": "Buscar publicaciones guardadas"
+  },
   "recent": {
     "message": "Guardadas recientemente (3)"
   },
