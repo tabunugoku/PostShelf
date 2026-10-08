@@ -69,6 +69,10 @@ describe('design tokens follow the X palette', () => {
         expect(ratio([255, 255, 255], rgb(t['accent-strong']))).toBeGreaterThanOrEqual(4.5);
         expect(ratio([255, 255, 255], rgb(t['danger-solid']))).toBeGreaterThanOrEqual(4.5);
       });
+      it('v30: search highlight (mark) keeps body text readable', () => {
+        expect(ratio(rgb(t['text-primary']), rgb(t['mark-bg']))).toBeGreaterThanOrEqual(4.5);
+        expect(css).toMatch(/\.post-text mark\{[^}]*color:var\(--text-primary\)/); // リンクの中でも、強調の文字は本文の色
+      });
       it('danger text on surfaces', () => {
         for (const bg of ['surface-1', 'surface-2']) expect(ratio(rgb(t.danger), rgb(t[bg]))).toBeGreaterThanOrEqual(4.5);
       });

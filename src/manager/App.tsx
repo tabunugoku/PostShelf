@@ -63,6 +63,7 @@ import { FolderEdit } from './FolderEdit';
 import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
 import { Triage } from './Triage';
+import { SearchContext } from './PostText';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
 import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
@@ -732,6 +733,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     ));
 
   const rows = (
+    <SearchContext.Provider value={search}>
     <div class={`rows view-${view}${compact ? ' compact' : ''}`} ref={listRef} onKeyDown={onListKeyDown} role="list">
       {shown.map((b) => (
         <Card
@@ -777,6 +779,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         />
       ))}
     </div>
+    </SearchContext.Provider>
   );
 
   // 案内を出す条件: 自動取り込みを使う設定、判定できたアカウントを表示していて、そのアカウントのデータが 0 件、案内を閉じていない。

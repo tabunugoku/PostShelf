@@ -6,7 +6,7 @@
   --border:#eff3f4;--border-strong:#cfd9de;--border-stronger:#8b98a5;
   --fill-ghost-hover:rgba(15,20,25,.06);--fill-ghost-selected:rgba(15,20,25,.12);--fill-control:#cfd9de;
   /* アクセント: アイコン・リンク・選択の強調は --fill-accent、文字の載る塗りは白文字で 4.5:1 以上の --accent-strong */
-  --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0f6fb3;
+  --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0f6fb3;--mark-bg:#fff0a0;
   --accent-strong:#0f6fb3;--danger:#c0302f;--danger-solid:#c0302f;
   --warn-fg:#8a5a00;--warn-bg:#fff4d6;--ok:#00805a;
   --shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);--radius:8px;
@@ -18,7 +18,7 @@
   --surface-1:#16181c;--surface-2:#000000;--surface-3:#16181c;
   --border:#2f3336;--border-strong:#536471;--border-stronger:#71767b;
   --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
-  --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;
+  --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;--mark-bg:#5c4b00;
   --warn-fg:#ffd277;--warn-bg:#3a2d0a;--ok:#4cd8a6;
   --shadow-popover:0 8px 24px rgba(0,0,0,.5);
 }}
@@ -454,3 +454,6 @@ input[type=number]{width:110px}
 .onboard-n{flex:none;display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent-strong);color:#fff;font-size:13px;font-weight:700}
 .onboard-text{flex:1;min-width:0;color:var(--text-primary)}
 .onboard-btn{flex:none;white-space:nowrap;min-height:32px}
+
+/* 検索語の強調 (v30): 本文の色のまま、背景だけで示す (下線や太字には頼らない) */
+.post-text mark{background:var(--mark-bg);color:var(--text-primary);border-radius:2px;padding:0 1px}
