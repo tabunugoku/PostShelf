@@ -689,7 +689,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           }}
           pickerNode={
             picker === b.tweetId ? (
-              <Dropdown onClose={() => setPicker(null)} label={t('changeFolder')} class="menu-wide">
+              <Dropdown fixed onClose={() => setPicker(null)} label={t('changeFolder')} class="menu-wide">
                 <FolderPickerHost
                   folders={pickerFolders}
                   selected={b.folderIds}

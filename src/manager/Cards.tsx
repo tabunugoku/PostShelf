@@ -101,7 +101,7 @@ function Actions(props: CardProps) {
             <Icon name="ti-dots-vertical" />
           </button>
           {more && (
-            <Dropdown onClose={() => setMore(false)} label={t('cardMenu')} class="menu-card">
+            <Dropdown fixed onClose={() => setMore(false)} label={t('cardMenu')} class="menu-card">
               <button class="menu-item" onClick={() => { setMore(false); props.onTogglePicker(); }}>
                 <Icon name="ti-folder-plus" /> {t('changeFolder')}
               </button>

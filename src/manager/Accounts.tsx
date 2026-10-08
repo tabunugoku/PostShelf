@@ -48,12 +48,12 @@ export function AccountSwitcher(props: {
   useEffect(() => {
     if (!open) return;
     // 開いたら現在のアカウントの行へフォーカス (キーボード操作)
-    menuHost.current?.querySelector<HTMLElement>('.acct-main[aria-checked=true]')?.focus();
+    document.querySelector<HTMLElement>('.menu-acct .acct-main[aria-checked=true]')?.focus();
   }, [open]);
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-    const items = [...(menuHost.current?.querySelectorAll<HTMLElement>('.acct-main') ?? [])];
+    const items = [...document.querySelectorAll<HTMLElement>('.menu-acct .acct-main')];
     const i = items.indexOf(document.activeElement as HTMLElement);
     if (!items.length) return;
     e.preventDefault();

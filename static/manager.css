@@ -210,7 +210,9 @@ button:disabled{cursor:not-allowed}
 /* ---- 確認ダイアログ / トースト ---- */
 .overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
 .dialog{width:min(460px,calc(100vw - 32px));padding:16px;background:var(--surface-3);border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-popover)}
-.dialog p{margin:0 0 16px}
+.dialog p{margin:0 0 16px;text-wrap:balance}
+/* 確認の画面 (削除の確認など): 本文が 2 行に収まる幅にし、1 文字だけ次の行に折り返さないよう、行の長さを均す */
+.dialog[role=alertdialog]{width:min(520px,calc(100vw - 32px))}
 .dialog-title{font-size:16px;margin:0 0 8px}
 .dialog-actions{display:flex;gap:8px;justify-content:flex-end}
 .primary{background:var(--accent-strong);color:#fff;border-color:transparent}.primary:hover{background:var(--accent-strong);opacity:.9}
