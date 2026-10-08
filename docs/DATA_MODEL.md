@@ -24,7 +24,8 @@
 - 保存し直す (フォルダを変更する) と、その時点のスナップショットで `hasVideo` / `hasLink` が入る
 
 ## `settings`
-`{ syncNative, buttonMode, actionMode, lastFolderId, viewMode, sortKey, viewAccount, imageCache }`
+`{ syncNative, buttonMode, actionMode, lastFolderId, viewMode, sortKey, viewAccount, imageCache, autoCollect }`
+- `autoCollect` (**v15**): `{ enabled: true, speed: 'slow' | 'normal', cap: 300 | 100 | 0, offers: Record<accountId, 'dismissed' | 'done'> }`。初期化の対象 (`offers` も戻る)。`cap` の 0 は「止めない」。`offers` は案内の記録 (dismissed = 「このアカウントでは表示しない」/ done = 取り込みが終わった)
 - `imageCache` (**v11**): `{ enabled: false, backend: 'idb' | 'dir', maxBytes: 1 GB, quality: 'large' | 'orig', onFull: 'evict' | 'stop' }`。初期化の対象
 - `viewAccount` (**v9**): 手動で選んだ表示アカウントの ID。`''` = 選んでいない (x.com で最後に読み取ったアカウントに追従)
 - `lastFolderId` / `viewMode` (`post|list|grid`) / `sortKey` は manager の最後の表示状態 (**v7**。`localStorage` は使わない)
@@ -34,6 +35,11 @@
 - `pending`: ブックマーク一覧 (`/i/history`) を開いたときに content script が記録した「画面に出ている未取り込み件数」(最後の観測値)
 - `dismissed`: manager の取り込み案内バナーを閉じた時点の `pending`。`pending > dismissed` のときだけバナーを出す
 - 件数が減ったとき (取り込んだ等) は `dismissed` も下げ、次の増加で再び案内する
+
+## 自動取り込みの状態 (v15)
+- `collectRun`: `{ status: countdown|running|paused|limit|stopped|done, accountId, startedAt, imported, skipped, failed, oldestSeenPostDate?, speed, cap, reason?, updatedAt }`。x.com のタブが書き、管理画面が読む (進行表示と、ページを閉じたあとの前回の状態)。**設定の初期化の対象外**
+- `collectCommand`: `{ id, type: start|pause|resume|stop, consent?, speed?, cap?, accountId?, at }`。管理画面が書き、x.com のブックマークのタブが読んで消す (1 回限り)。`start` は `consent: true` が無ければ動かない。2 分より古いものは捨てる
+- **`savedAt` の決め方 (取り込み)**: 取り込んだ時刻ではなく、一覧での位置から決める (`src/shared/ordering.ts` の `assignOrder`)。新しいポストが連続する区間ごとに、すぐ上の取り込み済み (U) とすぐ下の取り込み済み (L) の `savedAt` を使う: U と L の両方がある (U > L) ときは 2 つのあいだを等間隔 (`L + (U − L) × (n − i) / (n + 1)`、小数でもよい)、U だけなら `U − (i + 1) × 1000`、L だけ (いちばん上) なら開始時刻 T から `T − i × 1000` (L より大きくならなければ L の上に積む)、どちらも無ければ `T − i × 1000`、U ≤ L のときは `U − (i + 1)` ミリ秒。取り込み済みのポストの `savedAt` は変えない。既存のデータは移行しない
 
 ## アカウント (v9)
 - `accounts`: Record<accountId, `{ id, handle, displayName?, avatar?, lastSeenAt }`>。`id` は正規化したハンドル (小文字、`@` なし)。`handle` は X での大文字小文字のまま
