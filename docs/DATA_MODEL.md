@@ -37,7 +37,7 @@
 - 件数が減ったとき (取り込んだ等) は `dismissed` も下げ、次の増加で再び案内する
 
 ## 自動取り込みの状態 (v15)
-- `collectRun`: `{ status: countdown|running|paused|limit|stopped|done, accountId, startedAt, imported, skipped, failed, oldestSeenPostDate?, speed, cap, reason?, updatedAt }`。x.com のタブが書き、管理画面が読む (進行表示と、ページを閉じたあとの前回の状態)。**設定の初期化の対象外**
+- `collectRun`: `{ status: countdown|running|paused|limit|stopped|done, accountId, startedAt, imported, skipped, failed, oldestSeenPostDate?, recentPostDate?, speed, cap, reason?, updatedAt }`。x.com のタブが書き、管理画面が読む (進行表示と、ページを閉じたあとの前回の状態)。**設定の初期化の対象外**
 - `collectCommand`: `{ id, type: start|pause|resume|stop, consent?, speed?, cap?, accountId?, at }`。管理画面が書き、x.com のブックマークのタブが読んで消す (1 回限り)。`start` は `consent: true` が無ければ動かない。2 分より古いものは捨てる
 - **`savedAt` の決め方 (取り込み)**: 取り込んだ時刻ではなく、一覧での位置から決める (`src/shared/ordering.ts` の `assignOrder`)。新しいポストが連続する区間ごとに、すぐ上の取り込み済み (U) とすぐ下の取り込み済み (L) の `savedAt` を使う: U と L の両方がある (U > L) ときは 2 つのあいだを等間隔 (`L + (U − L) × (n − i) / (n + 1)`、小数でもよい)、U だけなら `U − (i + 1) × 1000`、L だけ (いちばん上) なら開始時刻 T から `T − i × 1000` (L より大きくならなければ L の上に積む)、どちらも無ければ `T − i × 1000`、U ≤ L のときは `U − (i + 1)` ミリ秒。取り込み済みのポストの `savedAt` は変えない。既存のデータは移行しない
 

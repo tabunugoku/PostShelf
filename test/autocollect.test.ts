@@ -453,3 +453,48 @@ describe('communication: only the page DOM is read', () => {
   });
 });
 
+
+describe('recentPostDate (v27)', () => {
+  const at = (n: number, iso: string): Extracted => ({ tweetId: `r${n}`, snapshot: { ...post(n).snapshot, createdAt: iso } });
+  const day = (d: number) => new Date(Date.UTC(2026, 9, d)).toISOString();
+  /** 指定の日時を、並べた順に読ませる (1 画面に全部出す) */
+  async function run(dates: string[]) {
+    const { deps } = world(0);
+    const list = dates.map((d, i) => at(i + 1, d));
+    deps.visible = () => list;
+    const c = new AutoCollector(deps);
+    await c.start(consent);
+    await until(c, (s) => s.status === 'done');
+    return c;
+  }
+
+  it('an old post in the mix does not stick: the median comes back, oldest stays', async () => {
+    const c = await run([day(20), day(2), day(19), day(18), day(17), day(16), day(15)]);
+    expect(c.state!.oldestSeenPostDate).toBe(day(2));
+    expect(c.state!.recentPostDate).toBe(day(17)); // 7 件の真ん中
+  });
+
+  it('drops the oldest-entered after 10 (window of 10)', async () => {
+    const d = [day(1), ...Array.from({ length: 10 }, (_, i) => day(20 + i))]; // 先頭の 1 件は 11 件目で捨てられる
+    const c = await run(d);
+    expect(c.state!.recentPostDate).toBe(day(24)); // 20..29 の 10 件: 古い方の真ん中 (5 番目)
+    expect(c.state!.oldestSeenPostDate).toBe(day(1));
+  });
+
+  it('even counts use the older of the middle two', async () => {
+    expect((await run([day(10), day(12)])).state!.recentPostDate).toBe(day(10));
+    expect((await run([day(1), day(2), day(3), day(4), day(5), day(6), day(7), day(8), day(9), day(10)])).state!.recentPostDate).toBe(day(5));
+  });
+
+  it('a fresh start resets it; adopt keeps the saved value until something new is read', async () => {
+    const c = await run([day(5), day(6), day(7)]);
+    expect(c.state!.recentPostDate).toBe(day(6));
+    const { deps } = world(0);
+    deps.visible = () => [];
+    const c2 = new AutoCollector(deps);
+    c2.adopt({ status: 'running', accountId: 'me', startedAt: 1, imported: 1, skipped: 0, failed: 0, speed: 'slow', cap: 0, updatedAt: 1, recentPostDate: day(9) });
+    expect(c2.state!.recentPostDate).toBe(day(9));
+    await c2.start(consent); // fresh
+    expect(c2.state!.recentPostDate).toBeUndefined();
+  });
+});

@@ -106,6 +106,9 @@ export function defaultDeps(): CollectDeps {
   };
 }
 
+/** 実行中の「いま ○○ ごろ」に使う、直近の投稿日時の件数 */
+const RECENT_POSTS = 10;
+
 export class AutoCollector {
   state: CollectState | null = null;
   private token = 0;
@@ -123,6 +126,8 @@ export class AutoCollector {
   private truncatedIds: string[] = [];
   /** ページの再読み込みなどで、保存してある取り込みを引き継いだ。それまでの分のたたまれたポストの ID は、このタブには残っていない */
   private adopted = false;
+  /** 直近に読んだ投稿日時 (最大 RECENT_POSTS 件。保存しない) */
+  private recent: string[] = [];
   private flushing: Promise<void> = Promise.resolve();
   private listeners = new Set<(s: CollectState | null) => void>();
   /** このタブの ID。保存データの取り込みの記録 (collectRun) に owner として残し、複数のタブで同じ取り込みを動かさない (v18) */
@@ -222,6 +227,8 @@ export class AutoCollector {
       s.skipped = 0;
       s.failed = 0;
       s.oldestSeenPostDate = undefined;
+      s.recentPostDate = undefined;
+      this.recent = [];
     }
     s.status = 'running';
     s.reason = undefined;
@@ -306,6 +313,12 @@ export class AutoCollector {
       fresh++;
       const posted = it.snapshot.createdAt;
       if (posted && (!s.oldestSeenPostDate || posted < s.oldestSeenPostDate)) s.oldestSeenPostDate = posted;
+      if (posted) {
+        this.recent.push(posted);
+        if (this.recent.length > RECENT_POSTS) this.recent.shift();
+        const sorted = [...this.recent].sort(); // 偶数件のときは、真ん中の 2 件のうち古い方
+        s.recentPostDate = sorted[Math.ceil(sorted.length / 2) - 1];
+      }
       if (saved.has(it.tweetId)) s.skipped++;
       else {
         this.pending.push(it);
