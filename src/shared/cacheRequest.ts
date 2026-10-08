@@ -17,7 +17,10 @@ export const requestPrune = (): void => send({ type: 'pruneCache' });
 /** たたまれた状態で保存したとき (v24)。background が、設定がオンなら、裏のタブで全文を取る */
 export const requestFullText = (tweetId: string, accountId: string): void => send({ type: 'fetchFullText', tweetId, accountId });
 
-/** 自動取り込みが終わったとき (v24)。取り込んだ truncated のポスト (最大 30 件は background が数える) の全文を、終わってから取る */
-export const requestFullTextBatch = (accountId: string, ids: string[]): void => {
-  if (ids.length) send({ type: 'fetchFullText', accountId, ids: ids.slice(0, 30), kind: 'auto' } as never);
+/**
+ * 自動取り込みが終わったとき (v24)。取り込んだ truncated のポスト (最大 30 件は background が数える) の全文を、終わってから取る。
+ * scan: ページを開き直して引き継いだ取り込み。それまでの分の ID が無いので、background が保存データの truncated から作り足す (v26)
+ */
+export const requestFullTextBatch = (accountId: string, ids: string[], scan = false): void => {
+  if (ids.length || scan) send({ type: 'fetchFullText', accountId, ids: ids.slice(0, 30), kind: 'auto', ...(scan ? { scan: true } : {}) } as never);
 };

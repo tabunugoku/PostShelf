@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "色なし（既定）"
   },
+  "iconFolder": {
+    "message": "フォルダ"
+  },
+  "iconStar": {
+    "message": "星"
+  },
+  "iconCode": {
+    "message": "コード"
+  },
+  "iconBook": {
+    "message": "本"
+  },
+  "iconBulb": {
+    "message": "電球"
+  },
+  "iconHeart": {
+    "message": "ハート"
+  },
+  "iconPhoto": {
+    "message": "写真"
+  },
+  "iconBriefcase": {
+    "message": "かばん"
+  },
+  "iconMusic": {
+    "message": "音楽"
+  },
+  "iconMovie": {
+    "message": "映画"
+  },
+  "colorRed": {
+    "message": "赤"
+  },
+  "colorOrange": {
+    "message": "オレンジ"
+  },
+  "colorGreen": {
+    "message": "緑"
+  },
+  "colorTeal": {
+    "message": "青緑"
+  },
+  "colorBlue": {
+    "message": "青"
+  },
+  "colorPurple": {
+    "message": "紫"
+  },
+  "colorPink": {
+    "message": "ピンク"
+  },
+  "colorGray": {
+    "message": "グレー"
+  },
   "openSidePanel": {
     "message": "サイドパネルで開く"
   },
@@ -1011,6 +1065,23 @@
       }
     }
   },
+  "fullTextProgressSkipped": {
+    "message": "取得しています: $DONE$ / $TOTAL$ 件（飛ばした: $SKIPPED$ 件）",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      },
+      "skipped": {
+        "content": "$3",
+        "example": "3"
+      }
+    }
+  },
   "fullTextStop": {
     "message": "止める"
   },
@@ -1149,6 +1220,9 @@
   },
   "acReasonRefusedUnknown": {
     "message": "x.com のアカウントを判定できないため、始められません"
+  },
+  "acStartMissed": {
+    "message": "x.com のブックマークの一覧で、取り込みが始まりませんでした。x.com でブックマークの一覧（/i/history）を開いてから、もう一度始めてください。"
   },
   "acSubDone": {
     "message": "いちばん古いブックマークまで読み込みました"

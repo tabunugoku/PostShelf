@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Icon } from '../shared/Icon';
-import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, type Account, type Bookmark, type Folder } from '../shared/models';
+import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
 import {
   RECENT_ID,
   authorHandles,
@@ -64,7 +64,7 @@ import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
-import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun } from './AutoCollect';
+import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
 import { currentVersion } from '../shared/version';
 import { REPO_URL } from '../shared/links';
 import { useCompact } from './useCompact';
@@ -106,6 +106,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [filterOpen, setFilterOpen] = useState(false);
   /** お知らせの帯が複数あるとき、いま出している帯の番号 (「他に N 件」で切り替える) */
   const [noticeIdx, setNoticeIdx] = useState(0);
+  /** 自動取り込みの開始の指示が、x.com のブックマークの一覧で受け取られなかった */
+  const [startMissed, setStartMissed] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
@@ -257,7 +259,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   }, [toast?.key]);
 
   const storedInbox = folders.find((f) => f.id === INBOX_ID);
-  const userFolders = folders.filter((f) => !isBuiltinFolder(f.id) && f.id !== INBOX_ID);
+  const userFolders = userFoldersOf(folders);
   const smartViews: Folder[] = [folders[0] ?? { id: ALL_FOLDER_ID, name: '', icon: 'ti-bookmarks', order: -1 }, inboxView(storedInbox), recentView()];
   const allViews = [...smartViews, ...userFolders];
   const curFolder = allViews.find((f) => f.id === current) ?? smartViews[0];
@@ -302,10 +304,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   /** 一括操作を実行し、件数が変わったら取り消し付きトーストを出す */
   const run = async (op: Promise<BookmarkUndo>, msgKey: string) => {
-    const undo = await op;
-    await reload();
-    const n = Object.keys(undo).length;
-    if (n > 0) setToast({ key: Date.now(), message: t(msgKey, n), undo });
+    try {
+      const undo = await op;
+      await reload();
+      const n = Object.keys(undo).length;
+      if (n > 0) setToast({ key: Date.now(), message: t(msgKey, n), undo });
+    } catch {
+      // 保存の失敗 (容量・保存のエラー): 通知を出し、画面は読み直して実際の状態に合わせる
+      setToast({ key: Date.now(), message: t('errorStorage') });
+      await reload().catch(() => {});
+    }
   };
   const doUndo = async () => {
     if (toast?.action) {
@@ -679,7 +687,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           folderOf={folderOf}
           pickerOpen={picker === b.tweetId}
           onSelect={(shift) => toggleSelect(b.tweetId, shift)}
-          onOpenImage={(index) => setViewer({ kind: 'image', tweetId: b.tweetId, index })}
+          onOpenImage={(index) => b.snapshot.media.length > 0 && setViewer({ kind: 'image', tweetId: b.tweetId, index })}
           onOpenVideo={() => setViewer({ kind: 'video', tweetId: b.tweetId })}
           onFocus={() => setFocusId(b.tweetId)}
           onRemoveFromFolder={(fid) => void run(removeFromFolders([b.tweetId], [fid]), 'toastRemoved')}
@@ -738,6 +746,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             if (collectRun.status === 'done' || collectRun.status === 'stopped') void clearCollectRun().catch(() => {});
           }}
         />
+      )}
+      {startMissed && (
+        <div class="banner" role="status">
+          <Icon name="ti-info-circle" />
+          <span class="banner-text">{t('acStartMissed')}</span>
+          <button class="icon-btn" aria-label={t('dismiss')} title={t('dismiss')} onClick={() => setStartMissed(false)}>
+            <Icon name="ti-x" />
+          </button>
+        </div>
       )}
       {offerShown && lastSeen && (
         <OfferBanner
@@ -809,7 +826,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           }}
         />
       )}
-      {viewerBookmark && viewer?.kind === 'image' && (
+      {viewerBookmark && viewer?.kind === 'image' && viewerBookmark.snapshot.media.length > 0 && (
         <ImageViewer
           tweetId={viewerBookmark.tweetId}
           urls={viewerBookmark.snapshot.media}
@@ -834,7 +851,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           onStart={(speed, cap) => {
             setAutoOpen(false);
             if (location.hash === '#autocollect') history.replaceState(null, '', location.pathname + location.search);
-            if (lastSeen) void startAutoCollect({ accountId: lastSeen.id, speed, cap });
+            if (lastSeen) void startAutoCollect({ accountId: lastSeen.id, speed, cap }).then((id) => void watchStart(id, () => setStartMissed(true))).catch(() => {});
           }}
         />
       )}

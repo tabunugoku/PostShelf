@@ -78,10 +78,10 @@ describe('v16-A: 「フォルダを追加」 menu in the popover', () => {
   it('offers the same icons and colors as the manager (ICONS first 8 / COLORS + none), starting with ti-folder and no color', async () => {
     const pop = await open();
     btn(pop, 'フォルダを追加').click();
-    const icons = [...menu(pop).querySelectorAll('button[aria-label^="ti-"]')];
-    expect(icons.map((b) => b.getAttribute('aria-label'))).toEqual(ICONS.slice(0, 8));
-    expect(icons.find((b) => b.getAttribute('aria-pressed') === 'true')!.getAttribute('aria-label')).toBe(FOLDER_ICON);
-    const sw = [...menu(pop).querySelectorAll('button[aria-label^="#"], button[title]')];
+    const icons = [...menu(pop).querySelectorAll('button[data-icon]')];
+    expect(icons.map((b) => (b as HTMLElement).dataset.icon)).toEqual(ICONS.slice(0, 8));
+    expect((icons.find((b) => b.getAttribute('aria-pressed') === 'true') as HTMLElement).dataset.icon).toBe(FOLDER_ICON);
+    const sw = [...menu(pop).querySelectorAll('button[data-color]')];
     expect(sw.length).toBe(COLORS.length + 1);
     expect(menu(pop).querySelector('button[title="色なし（既定）"]')!.getAttribute('aria-pressed')).toBe('true');
   });
@@ -90,8 +90,8 @@ describe('v16-A: 「フォルダを追加」 menu in the popover', () => {
     const pop = await open();
     btn(pop, 'フォルダを追加').click();
     type(pop, '  読書  ');
-    (menu(pop).querySelector(`button[aria-label="${ICONS[3]}"]`) as HTMLElement).click();
-    (menu(pop).querySelector(`button[aria-label="${COLORS[2]}"]`) as HTMLElement).click();
+    (menu(pop).querySelector(`button[data-icon="${ICONS[3]}"]`) as HTMLElement).click();
+    (menu(pop).querySelector(`button[data-color="${COLORS[2]}"]`) as HTMLElement).click();
     await submit(pop);
     const f = (await listFolders()).find((x) => x.name === '読書')!;
     expect(f).toMatchObject({ icon: ICONS[3], color: COLORS[2] });
@@ -138,14 +138,14 @@ describe('v16-A: 「フォルダを追加」 menu in the popover', () => {
     for (const label of ['キャンセル', '← 戻る']) {
       btn(pop, 'フォルダを追加').click();
       type(pop, '捨てる');
-      (menu(pop).querySelector(`button[aria-label="${ICONS[1]}"]`) as HTMLElement).click();
+      (menu(pop).querySelector(`button[data-icon="${ICONS[1]}"]`) as HTMLElement).click();
       btn(pop, label).click();
       expect(menu(pop).hidden).toBe(true);
       expect(await names()).toEqual([]);
       expect(await getBookmark('1234567890')).toBeUndefined();
       btn(pop, 'フォルダを追加').click(); // 開き直すと、空で、初期のアイコン
       expect(nameInput(pop).value).toBe('');
-      expect(menu(pop).querySelector(`button[aria-label="${FOLDER_ICON}"]`)!.getAttribute('aria-pressed')).toBe('true');
+      expect(menu(pop).querySelector(`button[data-icon="${FOLDER_ICON}"]`)!.getAttribute('aria-pressed')).toBe('true');
       btn(pop, 'キャンセル').click();
     }
   });

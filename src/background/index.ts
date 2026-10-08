@@ -23,8 +23,11 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   if (msg?.type === 'fetchFullText' && typeof msg.accountId === 'string') {
     if (typeof msg.tweetId === 'string') void fullText.enqueue([{ accountId: msg.accountId, tweetId: msg.tweetId }], 'save').catch(() => {});
     else if (msg.kind === 'auto' && Array.isArray(msg.ids)) {
-      const items = (msg.ids as unknown[]).filter((x): x is string => typeof x === 'string').slice(0, AUTO_CAP).map((tweetId) => ({ accountId: msg.accountId as string, tweetId }));
-      void fullText.enqueue(items, 'auto').catch(() => {});
+      const accountId = msg.accountId as string;
+      const ids = (msg.ids as unknown[]).filter((x): x is string => typeof x === 'string');
+      // scan: 引き継いだ取り込み。ID が足りないので、保存してある truncated のポスト (手動と同じ関数) から作り足す
+      const build = msg.scan === true ? manualItems(accountId, AUTO_CAP).then((stored) => [...new Set([...ids, ...stored.map((i) => i.tweetId)])]) : Promise.resolve(ids);
+      void build.then((all) => fullText.enqueue(all.slice(0, AUTO_CAP).map((tweetId) => ({ accountId, tweetId })), 'auto')).catch(() => {});
     } else if (msg.kind === 'manual') void manualItems(msg.accountId, MANUAL_CAP).then((items) => fullText.enqueue(items, 'manual')).catch(() => {});
   }
   if (msg?.type === 'stopFullText') void fullText.stop('user').catch(() => {});

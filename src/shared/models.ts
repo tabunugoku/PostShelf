@@ -106,8 +106,24 @@ export const COLORS = [
   '#888780',
 ] as const;
 
+const ICON_KEYS: Record<string, string> = {
+  'ti-folder': 'iconFolder', 'ti-star': 'iconStar', 'ti-code': 'iconCode', 'ti-book': 'iconBook', 'ti-bulb': 'iconBulb',
+  'ti-heart': 'iconHeart', 'ti-photo': 'iconPhoto', 'ti-briefcase': 'iconBriefcase', 'ti-music': 'iconMusic', 'ti-movie': 'iconMovie',
+};
+const COLOR_KEYS: Record<string, string> = {
+  '#E24B4A': 'colorRed', '#BA7517': 'colorOrange', '#639922': 'colorGreen', '#1D9E75': 'colorTeal',
+  '#378ADD': 'colorBlue', '#7F77DD': 'colorPurple', '#D4537E': 'colorPink', '#888780': 'colorGray',
+};
+/** アイコンボタンの読み上げ名 (クラス名の ti-star ではなく「星」)。知らないアイコンは ID のまま */
+export const iconLabel = (icon: string): string => (ICON_KEYS[icon] ? t(ICON_KEYS[icon]) : icon);
+/** 色のスウォッチの読み上げ名 (16 進数ではなく「赤」)。知らない色は値のまま */
+export const colorLabel = (color: string): string => (COLOR_KEYS[color.toUpperCase()] ? t(COLOR_KEYS[color.toUpperCase()]) : color);
+
 /** 表示名。組み込み「すべて」と、名前を保存していない「未分類」は t() で解決する */
 export const displayName = (f: Folder): string =>
   f.id === ALL_FOLDER_ID ? t('allFolderName') : f.id === INBOX_ID && f.name === '' ? t('inboxName') : f.name;
 
 export const isBuiltinFolder = (id: string): boolean => id === ALL_FOLDER_ID;
+
+/** ユーザーが作ったフォルダだけ (「すべて」と「未分類」は含めない)。管理画面の左のメニューとポップアップの「フォルダ」の数は、これで数える */
+export const userFoldersOf = (folders: Folder[]): Folder[] => folders.filter((f) => !isBuiltinFolder(f.id) && f.id !== INBOX_ID);

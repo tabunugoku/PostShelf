@@ -40,10 +40,10 @@ describe('v18-A-1: 「未分類」と他のフォルダは同時に付かない'
     expect((await getBookmark('2'))!.folderIds).toEqual([INBOX_ID]);
   });
 
-  it('importData restores a backup as it is (no rewriting)', async () => {
+  it('importData normalizes folderIds like a normal save (v26)', async () => {
     const bk = { accountId: 'me', tweetId: '5', folderIds: [INBOX_ID, 'f_x'], savedAt: 1, snapshot: snap('5') };
     await importData({ app: 'PostShelf', version: 2, accounts: [], folders: [], bookmarks: [bk] });
-    expect(data.bookmarks['me:5'].folderIds).toEqual([INBOX_ID, 'f_x']);
+    expect(data.bookmarks['me:5'].folderIds).toEqual(['f_x']);
   });
 });
 

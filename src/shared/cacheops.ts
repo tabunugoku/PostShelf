@@ -26,7 +26,7 @@ import {
   setCacheCleanupNeeded,
   type ImageCacheSettings,
 } from './settings';
-import { deleteAccountData, deleteAllData, getAccountScope, getBookmark, listAllBookmarks, setAccountScope } from './storage';
+import { deleteAccountData, deleteAllData, getBookmarkOf, listAllBookmarks } from './storage';
 import { hasImagePermission } from './permissions';
 
 export interface CacheDeps {
@@ -307,16 +307,11 @@ export async function deleteAccountDataAndCache(accountId: string): Promise<bool
 export async function cachePostById(tweetId: string, accountId: string, deps: CacheDeps = defaultDeps): Promise<CacheResult | null> {
   const s = await getSettings();
   if (!s.imageCache.enabled || !(await hasImagePermission())) return null;
-  const prev = getAccountScope();
-  setAccountScope(accountId);
-  try {
-    const b = await getBookmark(tweetId);
-    if (!b) return null;
-    const { store } = await openStore(s.imageCache.backend);
-    return store ? await cachePost(store, s.imageCache, b, deps) : null;
-  } finally {
-    setAccountScope(prev);
-  }
+  // 画面のアカウントの範囲 (scope) は入れ替えない (await をまたぐので、別のアカウントの依頼と重なると戻らなくなる)。アカウントは引数で渡す
+  const b = await getBookmarkOf(accountId, tweetId);
+  if (!b) return null;
+  const { store } = await openStore(s.imageCache.backend);
+  return store ? await cachePost(store, s.imageCache, b, deps) : null;
 }
 
 // ---- 保存先の切り替え ----

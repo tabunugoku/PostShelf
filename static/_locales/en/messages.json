@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "No color (default)"
   },
+  "iconFolder": {
+    "message": "Folder"
+  },
+  "iconStar": {
+    "message": "Star"
+  },
+  "iconCode": {
+    "message": "Code"
+  },
+  "iconBook": {
+    "message": "Book"
+  },
+  "iconBulb": {
+    "message": "Light bulb"
+  },
+  "iconHeart": {
+    "message": "Heart"
+  },
+  "iconPhoto": {
+    "message": "Photo"
+  },
+  "iconBriefcase": {
+    "message": "Briefcase"
+  },
+  "iconMusic": {
+    "message": "Music"
+  },
+  "iconMovie": {
+    "message": "Movie"
+  },
+  "colorRed": {
+    "message": "Red"
+  },
+  "colorOrange": {
+    "message": "Orange"
+  },
+  "colorGreen": {
+    "message": "Green"
+  },
+  "colorTeal": {
+    "message": "Teal"
+  },
+  "colorBlue": {
+    "message": "Blue"
+  },
+  "colorPurple": {
+    "message": "Purple"
+  },
+  "colorPink": {
+    "message": "Pink"
+  },
+  "colorGray": {
+    "message": "Gray"
+  },
   "openSidePanel": {
     "message": "Open in side panel"
   },
@@ -1011,6 +1065,23 @@
       }
     }
   },
+  "fullTextProgressSkipped": {
+    "message": "Fetching: $DONE$ / $TOTAL$ (skipped: $SKIPPED$)",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      },
+      "skipped": {
+        "content": "$3",
+        "example": "3"
+      }
+    }
+  },
   "fullTextStop": {
     "message": "Stop"
   },
@@ -1149,6 +1220,9 @@
   },
   "acReasonRefusedUnknown": {
     "message": "Cannot start: the account on x.com could not be determined"
+  },
+  "acStartMissed": {
+    "message": "The import did not start on x.com. Open your bookmarks list (/i/history) on x.com, then start again."
   },
   "acSubDone": {
     "message": "Reached the oldest bookmark"

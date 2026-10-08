@@ -170,9 +170,10 @@ describe('v24-B: 全文の取得のキュー', () => {
     const origSleep = d.sleep;
     d.sleep = async (ms) => {
       await origSleep(ms);
-      if (w.opened.length === 2) await q.stop('user');
+      if (w.opened.length === 2) void q.stop('user'); // 実際は別のメッセージから来る (ループの中で待つと自分を待つことになる)
     };
     await q.enqueue(items(5), 'manual');
+    await q.stop('user');
     expect(w.opened.length).toBeLessThanOrEqual(2);
     expect(w.open).toBe(0);
     expect((await getFullTextRun())).toMatchObject({ running: false, stopReason: 'user' });

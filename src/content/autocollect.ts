@@ -51,6 +51,9 @@ export interface CollectState extends CollectRun {
   resumeAt?: number;
 }
 
+/** 保存へ渡す、画面に出た順の 1 件。snapshot が無いものは、保存済みの基準 (並び順を決めるためだけに使う) */
+export type SeqEntry = Pick<Extracted, 'tweetId'> & { snapshot?: Extracted['snapshot'] };
+
 export interface CollectDeps {
   now(): number;
   sleep(ms: number): Promise<void>;
@@ -67,13 +70,14 @@ export interface CollectDeps {
   pageOk(): boolean;
   isHidden(): boolean;
   accountId(): string | null;
-  savedIds(): Promise<Set<string>>;
+  /** 保存先は取り込みを始めたアカウント (state.accountId)。画面の現在のアカウントではない */
+  savedIds(accountId: string): Promise<Set<string>>;
   /** 保存データが (他の場所で) 変わったら呼ばれる。解除関数を返す */
   onDataChanged?(cb: () => void): () => void;
   /** 保存してある取り込みの記録 (owner / commandId の確認用) */
   loadRun?(): Promise<CollectRun | null>;
-  /** seq = 画面に出た順の全ポスト。保存の savedAt は一覧での位置から決める (ordering.ts) */
-  addCollected(seq: Extracted[], startedAt: number): Promise<number>;
+  /** seq = 前回の保存以降に画面に出た順のポスト (先頭は、保存済みの印のことがある)。保存の savedAt は一覧での位置から決める (ordering.ts) */
+  addCollected(seq: SeqEntry[], startedAt: number, accountId: string): Promise<number>;
   saveRun(run: CollectRun): Promise<void>;
   clearRun(): Promise<void>;
 }
@@ -93,10 +97,10 @@ export function defaultDeps(): CollectDeps {
     pageOk: () => isBookmarksPath(location.pathname),
     isHidden: () => document.visibilityState === 'hidden',
     accountId: () => getCurrentAccount()?.id ?? null,
-    savedIds: () => getSavedIds(),
+    savedIds: (accountId) => getSavedIds(accountId),
     onDataChanged: (cb) => onDataChanged(cb),
     loadRun: () => getCollectRun(),
-    addCollected: (seq, startedAt) => addCollected(seq, startedAt),
+    addCollected: (seq, startedAt, accountId) => addCollected(seq, startedAt, accountId),
     saveRun: (run) => saveCollectRun(run),
     clearRun: () => clearCollectRun(),
   };
@@ -107,7 +111,8 @@ export class AutoCollector {
   private token = 0;
   private resumeToken = 0;
   private seen = new Set<string>();
-  private seq: Extracted[] = [];
+  /** 前回の保存以降に画面に出た順のポスト。先頭は、保存済みの印 (ID だけ。並び順の基準) のことがある */
+  private seq: SeqEntry[] = [];
   private pending: Extracted[] = [];
   private streak = 0;
   /** 上限の数え始め (再開のたびに、その時点の imported から数え直す) */
@@ -116,6 +121,8 @@ export class AutoCollector {
   private rewind = false;
   /** この取り込みで取り込んだ、たたまれた (truncated) ポストの ID。終わってから、全文の取得を依頼する (v24) */
   private truncatedIds: string[] = [];
+  /** ページの再読み込みなどで、保存してある取り込みを引き継いだ。それまでの分のたたまれたポストの ID は、このタブには残っていない */
+  private adopted = false;
   private flushing: Promise<void> = Promise.resolve();
   private listeners = new Set<(s: CollectState | null) => void>();
   /** このタブの ID。保存データの取り込みの記録 (collectRun) に owner として残し、複数のタブで同じ取り込みを動かさない (v18) */
@@ -209,6 +216,7 @@ export class AutoCollector {
     const s = this.state!;
     if (fresh) {
       this.truncatedIds = [];
+      this.adopted = false;
       s.startedAt = this.d.now();
       s.imported = 0;
       s.skipped = 0;
@@ -287,7 +295,7 @@ export class AutoCollector {
   /** 画面に出ているポストを読む。X は画面外のポストを DOM から外す (仮想化) ので、スクロールのたびに読む。新しく見つけた件数を返す */
   private async readVisible(token: number): Promise<number> {
     const items = this.d.visible();
-    const saved = (this.saved ??= await this.d.savedIds());
+    const saved = (this.saved ??= await this.d.savedIds(this.state!.accountId));
     if (token !== this.token) return 0;
     const s = this.state!;
     let fresh = 0;
@@ -302,7 +310,6 @@ export class AutoCollector {
       else {
         this.pending.push(it);
         s.imported++;
-        if (it.snapshot.truncated) this.truncatedIds.push(it.tweetId);
       }
     }
     return fresh;
@@ -320,8 +327,15 @@ export class AutoCollector {
       if (batch.length === 0 || !this.state) return;
       this.writing = true;
       try {
-        await this.d.addCollected(this.seq, this.state.startedAt);
-        for (const it of batch) this.saved?.add(it.tweetId);
+        const sent = this.seq;
+        await this.d.addCollected(sent, this.state.startedAt, this.state.accountId);
+        for (const it of batch) {
+          this.saved?.add(it.tweetId);
+          if (it.snapshot.truncated) this.truncatedIds.push(it.tweetId); // 全文の要求は、保存できたものだけ
+        }
+        // 保存できた分は、いちばん下の 1 件の ID だけ残して捨てる (次の保存の並び順の基準。メモリを増やさず、保存も差分だけにする)
+        const last = sent[sent.length - 1];
+        if (last) this.seq = [{ tweetId: last.tweetId }, ...this.seq.slice(sent.length)];
       } catch {
         if (final) {
           this.state.failed += batch.length;
@@ -429,6 +443,7 @@ export class AutoCollector {
     if (!['countdown', 'running', 'paused', 'limit'].includes(run.status)) return;
     this.state = { ...run, status: run.status === 'limit' ? 'limit' : 'paused', reason: run.status === 'limit' ? 'limit' : 'reload' };
     this.rewind = true;
+    this.adopted = true;
     this.emit(); // owner を自分の ID に書き換えて保存する
   }
 
@@ -464,11 +479,16 @@ export class AutoCollector {
     return false;
   }
 
-  /** 取り込みで取り込んだ、たたまれたポストの ID を渡して、空にする (終わった / 止めたあとに 1 回) */
-  takeTruncated(): string[] {
+  /**
+   * 取り込みで保存できた、たたまれたポストの ID を渡して、空にする (終わった / 止めたあとに 1 回)。
+   * 引き継いだあと (adopted) は、それまでの分の ID が無いので、scan: true を返す: 全文取得のキューを、保存データの truncated から作り足す。
+   */
+  takeTruncated(): { ids: string[]; scan: boolean } {
     const ids = this.truncatedIds;
     this.truncatedIds = [];
-    return ids;
+    const scan = this.adopted;
+    this.adopted = false;
+    return { ids, scan };
   }
 
   get needsRewind(): boolean {
@@ -514,7 +534,10 @@ export function installAutoCollect(onState: (s: CollectState | null, c: AutoColl
   c.subscribe((s) => {
     if (s?.status === 'done' && lastStatus !== 'done') void markOfferDone(s.accountId);
     // 終わった / 止めたあとに、取り込んだ分のうち、たたまれていたものの全文を取る (動いている間は取らない。件数の上限は background が 30 件にする)
-    if ((s?.status === 'done' || s?.status === 'stopped') && lastStatus !== s.status) requestFullTextBatch(s.accountId, c.takeTruncated());
+    if ((s?.status === 'done' || s?.status === 'stopped') && lastStatus !== s.status) {
+      const { ids, scan } = c.takeTruncated();
+      requestFullTextBatch(s.accountId, ids, scan);
+    }
     lastStatus = s?.status;
     onState(s, c);
   });

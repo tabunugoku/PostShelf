@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "Sans couleur (par défaut)"
   },
+  "iconFolder": {
+    "message": "Dossier"
+  },
+  "iconStar": {
+    "message": "Étoile"
+  },
+  "iconCode": {
+    "message": "Code"
+  },
+  "iconBook": {
+    "message": "Livre"
+  },
+  "iconBulb": {
+    "message": "Ampoule"
+  },
+  "iconHeart": {
+    "message": "Cœur"
+  },
+  "iconPhoto": {
+    "message": "Photo"
+  },
+  "iconBriefcase": {
+    "message": "Mallette"
+  },
+  "iconMusic": {
+    "message": "Musique"
+  },
+  "iconMovie": {
+    "message": "Film"
+  },
+  "colorRed": {
+    "message": "Rouge"
+  },
+  "colorOrange": {
+    "message": "Orange"
+  },
+  "colorGreen": {
+    "message": "Vert"
+  },
+  "colorTeal": {
+    "message": "Turquoise"
+  },
+  "colorBlue": {
+    "message": "Bleu"
+  },
+  "colorPurple": {
+    "message": "Violet"
+  },
+  "colorPink": {
+    "message": "Rose"
+  },
+  "colorGray": {
+    "message": "Gris"
+  },
   "openSidePanel": {
     "message": "Ouvrir dans le panneau latéral"
   },
@@ -1011,6 +1065,23 @@
       }
     }
   },
+  "fullTextProgressSkipped": {
+    "message": "Récupération : $DONE$ / $TOTAL$ (ignorés : $SKIPPED$)",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      },
+      "skipped": {
+        "content": "$3",
+        "example": "3"
+      }
+    }
+  },
   "fullTextStop": {
     "message": "Arrêter"
   },
@@ -1149,6 +1220,9 @@
   },
   "acReasonRefusedUnknown": {
     "message": "Impossible de démarrer : le compte x.com n'a pas pu être déterminé"
+  },
+  "acStartMissed": {
+    "message": "L'importation n'a pas démarré sur x.com. Ouvrez votre liste de favoris (/i/history) sur x.com, puis recommencez."
   },
   "acSubDone": {
     "message": "Le plus ancien favori a été atteint"

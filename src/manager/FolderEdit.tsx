@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
-import { COLORS, ICONS, displayName, type Folder } from '../shared/models';
+import { COLORS, ICONS, colorLabel, displayName, iconLabel, type Folder } from '../shared/models';
 import { t } from '../shared/strings';
 import { updateFolder } from '../shared/storage';
 import { hasSameName } from '../shared/folderCreateMenu';
@@ -57,7 +57,7 @@ export function FolderEdit(props: { folder: Folder; existing?: Folder[]; onSaved
       <div class="erow wrap">
         <span class="elabel">{t('icon')}</span>
         {ICONS.slice(0, 8).map((i) => (
-          <button class={`ic${i === folder.icon ? ' on' : ''}`} aria-label={i} aria-pressed={i === folder.icon} onClick={() => void apply({ icon: i })}>
+          <button class={`ic${i === folder.icon ? ' on' : ''}`} aria-label={iconLabel(i)} data-icon={i} aria-pressed={i === folder.icon} onClick={() => void apply({ icon: i })}>
             <Icon name={i} />
           </button>
         ))}
@@ -75,7 +75,8 @@ export function FolderEdit(props: { folder: Folder; existing?: Folder[]; onSaved
           <button
             class={`sw${c === folder.color ? ' on' : ''}`}
             style={{ background: c }}
-            aria-label={c}
+            aria-label={colorLabel(c)}
+            data-color={c}
             aria-pressed={c === folder.color}
             onClick={() => void apply({ color: c })}
           />

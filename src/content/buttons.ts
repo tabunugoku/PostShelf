@@ -1,7 +1,7 @@
 import { closestFirst, queryAllFirst, queryFirst } from '../shared/selectors';
 import { isBroken, subscribeHealth } from './health';
 import { t } from '../shared/strings';
-import { getBookmark, onDataChanged, listFolders } from '../shared/storage';
+import { listBookmarks, onDataChanged, listFolders } from '../shared/storage';
 import { getSettings, onSettingsChanged, type ButtonMode } from '../shared/settings';
 import { extractTweet } from './snapshot';
 import { ensureIconCss, openPopover, setPopoverMode } from './popover';
@@ -80,19 +80,35 @@ function setSaved(host: HTMLElement, folders: Folder[]): void {
   }
 }
 
-async function refreshArticle(article: Element): Promise<void> {
+/** ボタンの表示に使う保存データ。まとめて 1 回だけ読み、記事ごとには読まない (記事ごとに全ポストを読み直さないため) */
+interface Shared {
+  bookmarks: Map<string, { folderIds: string[] }>;
+  folders: Folder[];
+}
+async function loadShared(): Promise<Shared> {
+  const [list, folders] = await Promise.all([listBookmarks(), listFolders()]);
+  return { bookmarks: new Map(list.map((b) => [b.tweetId, b])), folders };
+}
+
+function refreshArticle(article: Element, data: Shared): void {
   const marker = article.querySelector<HTMLElement>(`[${BTN_ATTR}], [${BADGE_ATTR}]`);
   const host = marker?.closest<HTMLElement>(`[${BTN_ATTR}]`) ?? (marker ? closestFirst<HTMLElement>(marker, 'bookmarkButton')?.el : undefined);
   const ex = extractTweet(article);
   if (!host || !ex) return;
   if (!getCurrentAccount()) return void setSaved(host, []); // アカウント不明: どのアカウントの保存か分からないので「未保存」表示
-  const bm = await getBookmark(ex.tweetId);
-  const all = await listFolders();
-  setSaved(host, (bm?.folderIds ?? []).map((id) => all.find((f) => f.id === id)).filter((f): f is Folder => !!f));
+  const bm = data.bookmarks.get(ex.tweetId);
+  setSaved(host, (bm?.folderIds ?? []).map((id) => data.folders.find((f) => f.id === id)).filter((f): f is Folder => !!f));
+}
+
+/** 指定の記事の表示を更新する。保存データの読み込みは、全体で 1 回 */
+async function refreshArticles(articles: Element[]): Promise<void> {
+  if (articles.length === 0) return;
+  const data = getCurrentAccount() ? await loadShared() : { bookmarks: new Map(), folders: [] };
+  for (const a of articles) refreshArticle(a, data);
 }
 
 export async function refreshAll(): Promise<void> {
-  await Promise.all(queryAllFirst(document, 'tweet').els.map(refreshArticle));
+  await refreshArticles(queryAllFirst(document, 'tweet').els);
 }
 
 /** 画面上のポストに、現在のモードに応じたボタン/バッジを付ける (何度呼んでも二重にならない) */
@@ -100,6 +116,7 @@ export function injectButtons(root: ParentNode = document): void {
   ensureIconCss();
   ensureStyle();
   if (isBroken()) return; // X の画面構造が変わっているときはボタンを挿入しない
+  const fresh: Element[] = [];
   for (const article of queryAllFirst(root, 'tweet').els) {
     const bm = queryFirst<HTMLElement>(article, 'bookmarkButton')?.el;
     if (!bm) continue;
@@ -108,7 +125,7 @@ export function injectButtons(root: ParentNode = document): void {
       if (!bm.parentElement) continue;
       const btn = createSeparateButton(article);
       bm.insertAdjacentElement('afterend', btn);
-      void refreshArticle(article);
+      fresh.push(article);
     } else {
       if (bm.querySelector(`[${BADGE_ATTR}]`)) continue;
       // バッジは標準ボタンの上に重ねるだけ (アイコンの形は変えず、クリックは透過)
@@ -117,9 +134,10 @@ export function injectButtons(root: ParentNode = document): void {
         bm.setAttribute('data-postshelf-pos', '');
       }
       bm.append(makeBadge());
-      void refreshArticle(article);
+      fresh.push(article);
     }
   }
+  void refreshArticles(fresh); // 新しく付けた分は、まとめて 1 回の読み込みで表示する
 }
 
 /** 置き換えモード: 標準ブックマークボタンのクリックを capture で横取りして PostShelf のフォルダ選択を開く */

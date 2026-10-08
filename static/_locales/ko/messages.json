@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "색 없음 (기본)"
   },
+  "iconFolder": {
+    "message": "폴더"
+  },
+  "iconStar": {
+    "message": "별"
+  },
+  "iconCode": {
+    "message": "코드"
+  },
+  "iconBook": {
+    "message": "책"
+  },
+  "iconBulb": {
+    "message": "전구"
+  },
+  "iconHeart": {
+    "message": "하트"
+  },
+  "iconPhoto": {
+    "message": "사진"
+  },
+  "iconBriefcase": {
+    "message": "서류가방"
+  },
+  "iconMusic": {
+    "message": "음악"
+  },
+  "iconMovie": {
+    "message": "영화"
+  },
+  "colorRed": {
+    "message": "빨강"
+  },
+  "colorOrange": {
+    "message": "주황"
+  },
+  "colorGreen": {
+    "message": "초록"
+  },
+  "colorTeal": {
+    "message": "청록"
+  },
+  "colorBlue": {
+    "message": "파랑"
+  },
+  "colorPurple": {
+    "message": "보라"
+  },
+  "colorPink": {
+    "message": "분홍"
+  },
+  "colorGray": {
+    "message": "회색"
+  },
   "openSidePanel": {
     "message": "사이드 패널에서 열기"
   },
@@ -1011,6 +1065,23 @@
       }
     }
   },
+  "fullTextProgressSkipped": {
+    "message": "가져오는 중: $DONE$ / $TOTAL$ (건너뜀: $SKIPPED$)",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      },
+      "skipped": {
+        "content": "$3",
+        "example": "3"
+      }
+    }
+  },
   "fullTextStop": {
     "message": "중지"
   },
@@ -1149,6 +1220,9 @@
   },
   "acReasonRefusedUnknown": {
     "message": "시작할 수 없습니다. x.com의 계정을 판단할 수 없습니다"
+  },
+  "acStartMissed": {
+    "message": "x.com에서 가져오기가 시작되지 않았습니다. x.com에서 북마크 목록(/i/history)을 연 다음 다시 시작해 주세요."
   },
   "acSubDone": {
     "message": "가장 오래된 북마크까지 불러왔습니다"

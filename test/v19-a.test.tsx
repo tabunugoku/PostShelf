@@ -26,8 +26,8 @@ const menu = () => {
   document.body.append(m.el);
   return m;
 };
-const iconBtns = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>('button[aria-label^="ti-"]')];
-const swatches = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>('button[aria-label^="#"], button[title]')].filter((b) => b.type === 'button' && !b.textContent);
+const iconBtns = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>('button[data-icon]')];
+const swatches = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>('button[data-color]')].filter((b) => b.type === 'button' && !b.textContent);
 
 describe('v19-1: 「フォルダを作成」メニュー', () => {
   it('icons: 8 buttons in one 8-column grid; each is a square grid-centered box holding one block-level icon; the label sits above the row', () => {
@@ -81,12 +81,12 @@ describe('v19-1: 「フォルダを作成」メニュー', () => {
     const prev = () => el.querySelector<HTMLElement>('[aria-hidden=true]')!;
     expect(prev().textContent).toBe('フォルダ名'); // 空のときは、薄くして「フォルダ名」
     expect((prev().lastElementChild as HTMLElement).style.opacity).toBe('0.5');
-    const book = el.querySelector<HTMLButtonElement>('button[aria-label=ti-book]')!;
+    const book = el.querySelector<HTMLButtonElement>('button[data-icon="ti-book"]')!;
     book.click();
     expect(book.getAttribute('aria-pressed')).toBe('true');
     expect(book.style.borderColor).toBe('rgb(0, 102, 204)');
     expect(prev().firstElementChild!.className).toContain('ti-book');
-    const blue = el.querySelector<HTMLButtonElement>('button[aria-label="#378ADD"]')!;
+    const blue = el.querySelector<HTMLButtonElement>('button[data-color="#378ADD"]')!;
     blue.click();
     expect(blue.style.outline).toContain('2px solid');
     expect((prev().firstElementChild as HTMLElement).style.color).toBe('rgb(55, 138, 221)');

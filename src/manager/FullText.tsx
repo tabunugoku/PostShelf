@@ -54,7 +54,7 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
             )}
             {running && (
               <>
-                <span role="status" class="ft-progress">{t('fullTextProgress', run!.done, run!.total)}</span>
+                <span role="status" class="ft-progress">{run!.skipped ? t('fullTextProgressSkipped', run!.done, run!.total, run!.skipped) : t('fullTextProgress', run!.done, run!.total)}</span>
                 <button onClick={() => send({ type: 'stopFullText' })}>{t('fullTextStop')}</button>
               </>
             )}

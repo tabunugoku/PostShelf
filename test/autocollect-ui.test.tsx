@@ -79,7 +79,7 @@ describe('manager: the offer banner (it never starts anything by itself)', () =>
   });
 
   it('with an x.com history tab already open, that tab is used (no new tab)', async () => {
-    tabs.query.mockResolvedValue([{ id: 9, windowId: 3 }]);
+    tabs.query.mockResolvedValue([{ id: 9, windowId: 3, url: 'https://x.com/i/history' }]);
     await mount();
     await click(byText('.ac-offer button', '取り込みを始める…'));
     await click($('.ac-dialog input[type=checkbox]'));

@@ -31,7 +31,20 @@ function closePopovers(): void {
   document.querySelectorAll(`.${POP_CLASS}`).forEach((p) => p.remove());
 }
 
+let opening = false;
+
+/** ポップオーバーを開く。保存データを読む間 (await) に、続けて呼ばれても、開くのは同時に 1 つだけ */
 export async function openPopover(article: Element, anchor: HTMLElement): Promise<HTMLElement | null> {
+  if (opening) return null;
+  opening = true;
+  try {
+    return await buildPopover(article, anchor);
+  } finally {
+    opening = false;
+  }
+}
+
+async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTMLElement | null> {
   closePopovers();
   ensureIconCss();
   const ex = extractTweet(article);
@@ -104,6 +117,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   };
   showUnsave(isSaved);
   unsave.addEventListener('click', async () => {
+    if (getCurrentAccount()?.id !== account?.id) return closePopovers(); // 開いたあとにアカウントが切り替わった: 新しいアカウントの保存を消さない
     try {
       await removeBookmark(tweetId);
       isSaved = false;

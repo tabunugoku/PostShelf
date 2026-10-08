@@ -326,6 +326,60 @@
   "colorNone": {
     "message": "無顏色（預設）"
   },
+  "iconFolder": {
+    "message": "資料夾"
+  },
+  "iconStar": {
+    "message": "星號"
+  },
+  "iconCode": {
+    "message": "程式碼"
+  },
+  "iconBook": {
+    "message": "書"
+  },
+  "iconBulb": {
+    "message": "燈泡"
+  },
+  "iconHeart": {
+    "message": "愛心"
+  },
+  "iconPhoto": {
+    "message": "照片"
+  },
+  "iconBriefcase": {
+    "message": "公事包"
+  },
+  "iconMusic": {
+    "message": "音樂"
+  },
+  "iconMovie": {
+    "message": "電影"
+  },
+  "colorRed": {
+    "message": "紅色"
+  },
+  "colorOrange": {
+    "message": "橘色"
+  },
+  "colorGreen": {
+    "message": "綠色"
+  },
+  "colorTeal": {
+    "message": "青綠色"
+  },
+  "colorBlue": {
+    "message": "藍色"
+  },
+  "colorPurple": {
+    "message": "紫色"
+  },
+  "colorPink": {
+    "message": "粉紅色"
+  },
+  "colorGray": {
+    "message": "灰色"
+  },
   "openSidePanel": {
     "message": "在側邊欄中開啟"
   },
@@ -1011,6 +1065,23 @@
       }
     }
   },
+  "fullTextProgressSkipped": {
+    "message": "正在取得:$DONE$ / $TOTAL$(已略過:$SKIPPED$)",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      },
+      "skipped": {
+        "content": "$3",
+        "example": "3"
+      }
+    }
+  },
   "fullTextStop": {
     "message": "停止"
   },
@@ -1149,6 +1220,9 @@
   },
   "acReasonRefusedUnknown": {
     "message": "無法開始：無法判斷 x.com 上的帳號"
+  },
+  "acStartMissed": {
+    "message": "匯入沒有在 x.com 上開始。請在 x.com 開啟書籤清單(/i/history),然後再次開始。"
   },
   "acSubDone": {
     "message": "已讀取到最早的書籤"

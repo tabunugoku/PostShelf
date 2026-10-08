@@ -317,19 +317,27 @@ export async function listAllBookmarks(): Promise<Bookmark[]> {
 }
 
 /** 保存済みポストの tweetId 一覧 (取り込み件数の計算用) */
-export async function getSavedIds(): Promise<Set<string>> {
-  return new Set((await listBookmarks()).map((b) => b.tweetId));
+export async function getSavedIds(accountId: string = scope): Promise<Set<string>> {
+  const map = await readMap();
+  return new Set(Object.values(map).filter((b) => b.accountId === accountId).map((b) => b.tweetId));
 }
 
 export async function getBookmark(tweetId: string): Promise<Bookmark | undefined> {
   return (await readMap())[key(tweetId)];
 }
 
+/** アカウントを引数で指定して読む。裏方 (service worker) が、画面のアカウントの範囲 (scope) を入れ替えずに読むための関数 */
+export async function getBookmarkOf(accountId: string, tweetId: string): Promise<Bookmark | undefined> {
+  return (await readMap())[bookmarkKey(accountId, tweetId)];
+}
+
 /** 「未分類」の受け皿のフォルダ (名前なし = 表示時に解決) が無ければ作る */
-async function ensureInboxFolder(): Promise<void> {
-  const folders = await readFolders();
+async function ensureInboxFolder(accountId: string = scope): Promise<void> {
+  const all = await readAllFolders();
+  const folders = all.filter((f) => f.accountId === accountId);
   if (folders.some((f) => f.id === INBOX_ID)) return;
-  await writeFolders([...folders, { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: scope }]);
+  const others = all.filter((f) => f.accountId !== accountId);
+  await write(KEY_FOLDERS, [...others, ...folders, { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId }]);
 }
 
 /**
@@ -431,18 +439,29 @@ const isStr = (v: unknown): v is string => typeof v === 'string';
 function validFolder(f: any): f is Folder {
   return f && isStr(f.id) && isStr(f.name) && isStr(f.icon) && typeof f.order === 'number' && !isBuiltinFolder(f.id);
 }
+/** ポストの URL は x.com / twitter.com のものだけ (取り込んだ JSON が <a href> にそのまま使われるため) */
+const X_URL = /^https:\/\/(x|twitter)\.com\//i;
+const HTTPS_URL = /^https:\/\//i;
 function validBookmark(b: any): b is Bookmark {
   return (
     b && isStr(b.tweetId) && Array.isArray(b.folderIds) && b.folderIds.every(isStr) &&
-    typeof b.savedAt === 'number' && b.snapshot && isStr(b.snapshot.text) && isStr(b.snapshot.url) &&
-    Array.isArray(b.snapshot.media)
+    typeof b.savedAt === 'number' && b.snapshot && isStr(b.snapshot.text) && isStr(b.snapshot.url) && X_URL.test(b.snapshot.url) &&
+    isStr(b.snapshot.handle) && isStr(b.snapshot.author) && Array.isArray(b.snapshot.media)
   );
 }
 /** 取り込んだ JSON の snapshot の、省略できる項目 (v24) を検証する。不正なら、その項目だけ捨てる (text で表示する) */
 function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
-  const { segments, truncated, ...rest } = s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown };
+  const { segments, truncated, avatar, media, ...rest } = s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown };
   const seg = segments === undefined ? undefined : sanitizeSegments(segments);
-  return { ...rest, ...(seg ? { segments: seg } : {}), ...(typeof truncated === 'boolean' ? { truncated } : {}) };
+  // 画像・アバターは https の URL だけ (x.com 以外への勝手な要求や javascript: を通さない)。満たさない要素だけ捨てる
+  const httpsOnly = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
+  return {
+    ...rest,
+    media: (media as unknown[]).filter(httpsOnly),
+    ...(httpsOnly(avatar) ? { avatar } : {}),
+    ...(seg ? { segments: seg } : {}),
+    ...(typeof truncated === 'boolean' ? { truncated } : {}),
+  };
 }
 function validAccount(a: any): a is Account {
   return a && isStr(a.id) && a.id !== '' && isStr(a.handle) && typeof a.lastSeenAt === 'number';
@@ -461,9 +480,18 @@ export function importData(json: unknown): Promise<number> {
     const legacy = d.version === undefined || d.version < 2;
     const acc = (v: unknown) => (!legacy && isStr(v) && v ? (v === UNKNOWN_ACCOUNT_ID ? v : accountIdOf(v)) : UNKNOWN_ACCOUNT_ID);
     const folders = d.folders.filter(validFolder).map((f) => ({ ...f, accountId: acc(f.accountId) }));
-    const bookmarks = d.bookmarks.filter(validBookmark).map((b) => ({ ...b, snapshot: cleanSnapshot(b.snapshot), accountId: acc(b.accountId) }));
+    // 保存時と同じ規則で所属を整える ([] / 'all' は「未分類」に)。件数と中身は変えない
+    const bookmarks = d.bookmarks
+      .filter(validBookmark)
+      .map((b) => ({ ...b, folderIds: normalizeFolderIds(b.folderIds), snapshot: cleanSnapshot(b.snapshot), accountId: acc(b.accountId) }));
     const curFolders = new Map((await readAllFolders()).map((f) => [bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f]));
     for (const f of folders) curFolders.set(bookmarkKey(f.accountId, f.id), f);
+    // 「未分類」に入るポストがあるアカウントには、受け皿のフォルダを用意する
+    for (const b of bookmarks) {
+      if (!b.folderIds.includes(INBOX_ID) || curFolders.has(bookmarkKey(b.accountId, INBOX_ID))) continue;
+      const mineF = [...curFolders.values()].filter((f) => (f.accountId ?? UNKNOWN_ACCOUNT_ID) === b.accountId);
+      curFolders.set(bookmarkKey(b.accountId, INBOX_ID), { id: INBOX_ID, name: '', icon: 'ti-star', order: mineF.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: b.accountId });
+    }
     const map = await readMap();
     for (const b of bookmarks) map[bookmarkKey(b.accountId, b.tweetId)] = b;
     const accounts = await read<Record<string, Account>>(KEY_ACCOUNTS, {});
@@ -490,24 +518,28 @@ export function importData(json: unknown): Promise<number> {
  * 取り込み済みのポストは、並びの基準 (すぐ上・すぐ下) として使うだけで、変更しない。
  * @param startedAt 取り込みの開始時刻 (いちばん上の区間の基準)
  */
-export function addCollected(items: { tweetId: string; snapshot: Bookmark['snapshot'] }[], startedAt: number = Date.now()): Promise<number> {
+export function addCollected(items: { tweetId: string; snapshot?: Bookmark['snapshot'] }[], startedAt: number = Date.now(), accountId: string = scope): Promise<number> {
+  // 取り込み中にアカウントが切り替わっても、保存先は開始時のアカウントのまま (v26)。モジュールの scope には頼らない
+  const keyOf = (tweetId: string) => bookmarkKey(accountId, tweetId);
   return serial(async () => {
+    // snapshot の無い項目は並び順の基準 (保存済みのもの) としてだけ使う。保存データに無ければ、基準にもしない
     const plan = (m: BookmarkMap) => {
+      const usable = items.filter((it) => it.snapshot || m[keyOf(it.tweetId)]);
       const order = assignOrder(
-        items.map((it) => ({ id: it.tweetId, savedAt: m[key(it.tweetId)]?.savedAt })),
+        usable.map((it) => ({ id: it.tweetId, savedAt: m[keyOf(it.tweetId)]?.savedAt })),
         startedAt,
       );
-      return { order, fresh: items.filter((it) => !m[key(it.tweetId)] && order.has(it.tweetId)) };
+      return { order, fresh: usable.filter((it) => !m[keyOf(it.tweetId)] && order.has(it.tweetId)) };
     };
     if (plan(await readMap()).fresh.length === 0) return 0;
-    await ensureInboxFolder(); // 読んだあと書くまでの間に await を挟まないよう、先に用意して読み直す
+    await ensureInboxFolder(accountId); // 読んだあと書くまでの間に await を挟まないよう、先に用意して読み直す
     const map = await readMap();
     const { order, fresh } = plan(map);
     if (fresh.length === 0) return 0;
     let added = 0;
     for (const it of fresh) {
-      if (map[key(it.tweetId)]) continue;
-      map[key(it.tweetId)] = { accountId: scope, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot };
+      if (map[keyOf(it.tweetId)]) continue;
+      map[keyOf(it.tweetId)] = { accountId, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot! };
       added++;
     }
     await write(KEY_BOOKMARKS, map);

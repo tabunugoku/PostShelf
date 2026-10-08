@@ -426,8 +426,12 @@ export interface CollectCommand {
   at: number;
 }
 
-export const sendCollectCommand = (c: Omit<CollectCommand, 'id' | 'at'>): Promise<void> =>
-  chrome.storage.local.set({ [CMD_KEY]: { ...c, id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, at: Date.now() } satisfies CollectCommand });
+/** コマンドを書く。書いたコマンドの ID を返す (始まったかどうかの確認に使う) */
+export async function sendCollectCommand(c: Omit<CollectCommand, 'id' | 'at'>): Promise<string> {
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  await chrome.storage.local.set({ [CMD_KEY]: { ...c, id, at: Date.now() } satisfies CollectCommand });
+  return id;
+}
 
 /** 待っているコマンドを読む (消さない) */
 export async function peekCollectCommand(): Promise<CollectCommand | null> {
@@ -456,6 +460,8 @@ export interface FullTextRun {
   total: number;
   done: number;
   failed: number;
+  /** 飛ばした件数 (取得済み / 削除済み / 1 時間以内に試した)。done には数えない */
+  skipped?: number;
   /** 止めた理由 (limit: X が制限や警告を出した / failures: 連続で 3 件失敗 / user: 止めるボタン) */
   stopReason?: FullTextStop;
   updatedAt: number;
@@ -473,6 +479,7 @@ export async function getFullTextRun(): Promise<FullTextRun | null> {
     total: Number(r.total) || 0,
     done: Number(r.done) || 0,
     failed: Number(r.failed) || 0,
+    skipped: Number(r.skipped) || 0,
     stopReason: r.stopReason === 'limit' || r.stopReason === 'failures' || r.stopReason === 'user' ? r.stopReason : undefined,
     updatedAt: Number(r.updatedAt) || 0,
   };

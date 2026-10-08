@@ -3,7 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { HealthNotice } from '../manager/HealthNotice';
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
-import { UNKNOWN_ACCOUNT_ID, accountLabel, type Account, type Bookmark } from '../shared/models';
+import { UNKNOWN_ACCOUNT_ID, accountLabel, userFoldersOf, type Account, type Bookmark } from '../shared/models';
 import { t } from '../shared/strings';
 import { getLastSeenAccount, listBookmarks, listFolders, onDataChanged, onLastSeenAccountChanged, setAccountScope } from '../shared/storage';
 
@@ -22,7 +22,7 @@ function Popup() {
       setAccount(last);
       setAccountScope(last?.id ?? UNKNOWN_ACCOUNT_ID);
       const [b, f] = await Promise.all([listBookmarks(), listFolders()]);
-      setCounts({ posts: b.length, folders: f.length - 1 }); // 「すべて」を除く
+      setCounts({ posts: b.length, folders: userFoldersOf(f).length }); // 管理画面の左のメニューと同じ数え方 (「すべて」と「未分類」を除く)
       setRecent([...b].sort((x, y) => y.savedAt - x.savedAt).slice(0, 3));
       setFailed(false);
       } catch {
