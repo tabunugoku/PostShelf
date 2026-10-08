@@ -22,7 +22,7 @@ new MutationObserver(() => scheduleCollectRefresh()).observe(document.body, { ch
 
 // ブックマークの自動取り込み (v15)。管理画面の確認ダイアログで同意して始めたときだけ動く (src/content/autocollect.ts)
 const autoCollector = installAutoCollect((s) => panel.update(s));
-const panel = new AutoCollectPanel(autoCollector, () => void chrome.runtime?.sendMessage?.({ type: 'openManager' }));
+const panel = new AutoCollectPanel(autoCollector, (hash) => void chrome.runtime?.sendMessage?.({ type: 'openManager', ...(hash ? { hash } : {}) }));
 pathListeners.add(() => {
   panel.update(autoCollector.state);
   void handleCollectCommand(autoCollector).catch(() => {});

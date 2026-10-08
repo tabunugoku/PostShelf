@@ -54,7 +54,7 @@ describe('v22-2: 結果の帯', () => {
     await saveCollectRun(run());
     await mount();
     expect($$('.ac-progress')).toHaveLength(1);
-    await click($('.ac-progress .ac-row button'));
+    await click($$('.ac-progress .ac-row button').at(-1)!);
     expect($$('.ac-progress')).toHaveLength(0);
     expect(await getCollectRun()).toBeNull();
     await act(() => void render(null, $('#app')));
@@ -65,7 +65,7 @@ describe('v22-2: 結果の帯', () => {
   it('closing a stopped band deletes the record too', async () => {
     await saveCollectRun(run({ status: 'stopped', reason: 'user' }));
     await mount();
-    await click($('.ac-progress .ac-row button'));
+    await click($$('.ac-progress .ac-row button').at(-1)!);
     expect(await getCollectRun()).toBeNull();
   });
 

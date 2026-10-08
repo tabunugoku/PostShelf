@@ -174,7 +174,7 @@ const TITLE: Record<CollectRun['status'], string> = {
   done: 'acPanelDone',
 };
 
-export function ProgressBanner(props: { run: CollectRun; onClose: () => void }) {
+export function ProgressBanner(props: { run: CollectRun; onClose: () => void; /** 取り込めた分があるときの「仕分ける」。タブ版は仕分けモードを始め、サイドパネル版は「未分類」を開く */ onTriage?: () => void }) {
   const { run } = props;
   const active = run.status === 'running' || run.status === 'countdown';
   const waiting = run.status === 'paused' || run.status === 'limit';
@@ -196,6 +196,11 @@ export function ProgressBanner(props: { run: CollectRun; onClose: () => void }) 
             {(active || waiting) && (
               <button onClick={() => void openXTab()}>
                 <Icon name="ti-external-link" /> {t('acOpenX')}
+              </button>
+            )}
+            {!active && !waiting && run.imported >= 1 && props.onTriage && (
+              <button class="primary" onClick={props.onTriage}>
+                <Icon name="ti-bolt" /> {t('acBtnTriage')}
               </button>
             )}
             {!active && !waiting && <button onClick={props.onClose}>{t('acBtnClose')}</button>}

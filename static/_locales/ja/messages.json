@@ -1435,6 +1435,9 @@
   "acBtnOpenManager": {
     "message": "管理画面を開く"
   },
+  "acBtnTriage": {
+    "message": "仕分ける"
+  },
   "acBtnClose": {
     "message": "閉じる"
   },

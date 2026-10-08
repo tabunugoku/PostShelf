@@ -1435,6 +1435,9 @@
   "acBtnOpenManager": {
     "message": "관리 화면 열기"
   },
+  "acBtnTriage": {
+    "message": "분류하기"
+  },
   "acBtnClose": {
     "message": "닫기"
   },

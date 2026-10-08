@@ -1435,6 +1435,9 @@
   "acBtnOpenManager": {
     "message": "Abrir o gerenciador"
   },
+  "acBtnTriage": {
+    "message": "Organizar"
+  },
   "acBtnClose": {
     "message": "Fechar"
   },

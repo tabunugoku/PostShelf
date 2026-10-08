@@ -786,6 +786,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       {collectRun && collectRun.updatedAt !== runClosed && autoCfg.enabled && !staleResult(collectRun) && (
         <ProgressBanner
           run={collectRun}
+          onTriage={() => {
+            chooseView(INBOX_ID);
+            if (!compact) setTriageWanted(true);
+          }}
           onClose={() => {
             setRunClosed(collectRun.updatedAt);
             // 終わった状態 (done / stopped) は、保存してある記録も消す。進行中の状態は消さない

@@ -1435,6 +1435,9 @@
   "acBtnOpenManager": {
     "message": "打开管理页面"
   },
+  "acBtnTriage": {
+    "message": "去整理"
+  },
   "acBtnClose": {
     "message": "关闭"
   },

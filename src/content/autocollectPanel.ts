@@ -106,7 +106,7 @@ export function viewOf(s: CollectState): PanelView {
           : [{ label: t('acBtnResumeLater'), action: 'resumeLater' }, { label: t('acBtnEnd'), action: 'stop' }],
       };
     case 'done':
-      return { title: t('acPanelDone'), sub: t('acSubDone'), dot: 'done', bar: 'full', note: t('acNoteDone'), alert: '', buttons: [{ label: t('acBtnOpenManager'), action: 'openManager', primary: true }, { label: t('acBtnClose'), action: 'close' }] };
+      return { title: t('acPanelDone'), sub: t('acSubDone'), dot: 'done', bar: 'full', note: t('acNoteDone'), alert: '', buttons: [s.imported >= 1 ? { label: t('acBtnTriage'), action: 'triage', primary: true } : { label: t('acBtnOpenManager'), action: 'openManager', primary: true }, { label: t('acBtnClose'), action: 'close' }] }; // 取り込めた分があれば、仕分けへつなぐ (管理画面を #triage で開く)
     case 'stopped': {
       const refused = s.reason === 'refused-account' ? t('acReasonRefusedAccount') : s.reason === 'refused-unknown' ? t('acReasonRefusedUnknown') : '';
       return { title: t('acPanelStopped'), sub: refused || t('acSubStopped'), dot: refused ? 'ng' : 'pause', bar: 'none', note: '', alert: '', buttons: [{ label: t('acBtnClose'), action: 'close' }] };
@@ -125,7 +125,7 @@ export class AutoCollectPanel {
   private root: HTMLElement | null = null;
   private last: CollectState | null = null;
 
-  constructor(private c: AutoCollector, private openManager: () => void) {}
+  constructor(private c: AutoCollector, private openManager: (hash?: string) => void) {}
 
   update(s: CollectState | null): void {
     this.last = s;
@@ -214,6 +214,7 @@ export class AutoCollectPanel {
     else if (action === 'stop') void this.c.stop();
     else if (action === 'close') this.c.dismiss();
     else if (action === 'openManager') this.openManager();
+    else if (action === 'triage') this.openManager('#triage');
   }
 
   hide(): void {

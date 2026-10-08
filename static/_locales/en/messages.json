@@ -1435,6 +1435,9 @@
   "acBtnOpenManager": {
     "message": "Open the manager"
   },
+  "acBtnTriage": {
+    "message": "Sort now"
+  },
   "acBtnClose": {
     "message": "Close"
   },
