@@ -958,6 +958,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               {bulkMenu ?? viewSeg}
             </div>
           )}
+          {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         </header>
         <main class="pbody">
           {page === 'settings' ? (
@@ -966,7 +967,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             body
           )}
         </main>
-        {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         {dialogs}
       </div>
     );
@@ -1004,6 +1004,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         </a>
       </aside>
       <main class="main">
+        {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         {page === 'settings' ? (
           settingsPage
         ) : (
@@ -1021,7 +1022,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </>
         )}
       </main>
-      {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
       {dialogs}
     </div>
   );

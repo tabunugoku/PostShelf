@@ -1,83 +1,170 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { requestNativeSync, requestSnapshot, watchActivePost, type ActivePost } from '../shared/activeTab';
-import type { Folder, Snapshot } from '../shared/models';
-import { getAccountScope, getBookmark, setBookmarkFolders } from '../shared/storage';
-import { requestCache, requestFullText } from '../shared/cacheRequest';
+import { INBOX_ID, displayName, type Folder, type Snapshot } from '../shared/models';
+import { getAccountScope, getBookmark, removeBookmark, setBookmarkFolders } from '../shared/storage';
+import { getSettings, onSettingsChanged } from '../shared/settings';
+import { requestCache, requestFullText, requestPrune } from '../shared/cacheRequest';
 import { t } from '../shared/strings';
 import { Dropdown, FolderPickerHost } from './ui';
 
+/** チップに出すフォルダの数 (残りは「他の N つ」から選ぶ) */
+export const CHIP_COUNT = 4;
+
+/** チップに出すフォルダ: 「最近使った」を先頭に、足りなければ並び順で補う。「未分類」は出さない */
+export function chipFolders(folders: Folder[], recentIds: string[]): Folder[] {
+  const users = folders.filter((f) => f.id !== INBOX_ID);
+  const recent = recentIds.map((id) => users.find((f) => f.id === id)).filter((f): f is Folder => !!f);
+  const rest = users.filter((f) => !recent.includes(f));
+  return [...recent, ...rest].slice(0, CHIP_COUNT);
+}
+
+interface Current {
+  tweetId: string;
+  snapshot: Snapshot;
+  tabId: number;
+  selected: string[];
+  /** すでに PostShelf に保存してある (画像のキャッシュと全文の取得は、保存したときに要求済み) */
+  saved: boolean;
+}
+
 /**
- * サイドパネル下部の固定ボタン「いま開いているポストを保存…」。
- * アクティブタブが x.com/*\/status/* のときだけ表示。押すとそのタブの content script からスナップショットを取り、
- * 共通のフォルダ選択を開く。取れなければ短いエラーを出して何も保存しない。
+ * サイドパネル上部に固定する「いま開いているポスト」の枠 (v29)。
+ * アクティブタブが x.com/*\/status/* のときだけ表示。ポストの抜粋と、フォルダのチップ (1 タップで保存) を出す。
+ * スナップショットは、タブが変わったとき・ポストが変わったときに、そのタブの content script から取る。取れなければ短いエラーを出して何も保存しない。
  */
-export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /** 保存できない理由 (アカウントを判定できない / 表示中のアカウントが違う)。あるときは保存ボタンの代わりにこれを出す */ blockedReason?: string }) {
+export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /** 保存できない理由 (アカウントを判定できない / 表示中のアカウントが違う)。あるときはチップの代わりにこれを出す */ blockedReason?: string }) {
   const [post, setPost] = useState<ActivePost | null>(null);
+  const [cur, setCur] = useState<Current | null>(null);
   const [error, setError] = useState('');
-  const [open, setOpen] = useState<{ tweetId: string; snapshot: Snapshot; selected: string[]; tabId: number; /** このポストは、すでに PostShelf に保存してある (画像のキャッシュと全文の取得は、保存したときに要求済み) */ saved: boolean } | null>(null);
-  useEffect(() => watchActivePost((p) => {
-    setPost(p);
+  const [done, setDone] = useState('');
+  const [more, setMore] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
+  const tweetRef = useRef('');
+  useEffect(() => watchActivePost((p) => setPost((old) => (old?.tabId === p?.tabId && old?.tweetId === p?.tweetId ? old : p))), []);
+  useEffect(() => {
+    const load = () => void getSettings().then((s) => setRecent(s.recentFolderIds ?? []));
+    load();
+    return onSettingsChanged(load);
+  }, []);
+  const key = post ? `${post.tabId}:${post.tweetId}` : '';
+  useEffect(() => {
+    tweetRef.current = key;
+    setCur(null);
     setError('');
-    setOpen(null);
-  }), []);
+    setDone('');
+    setMore(false);
+    if (!post || props.blockedReason) return;
+    void (async () => {
+      const r = await requestSnapshot(post);
+      if (tweetRef.current !== key) return; // 取っている間に別のポストへ移った
+      if (!r) return void setError(t('saveCurrentFail'));
+      const prev = await getBookmark(r.tweetId);
+      if (tweetRef.current !== key) return;
+      setCur({ tweetId: r.tweetId, snapshot: r.snapshot, tabId: post.tabId, selected: prev?.folderIds ?? [], saved: !!prev });
+    })();
+  }, [key, !!props.blockedReason]);
   if (!post) return null; // x.com 以外のタブ / ポスト以外のページでは出さない
+
+  const frame = (children: preact.ComponentChildren) => (
+    <section class="active-post" aria-label={t('activePostTitle')}>
+      {children}
+    </section>
+  );
   if (props.blockedReason)
-    return (
-      <div class="pfoot">
-        <div class="pfoot-note error" role="alert">
-          {props.blockedReason}
-        </div>
-      </div>
+    return frame(
+      <div class="pfoot-note error" role="alert">
+        {props.blockedReason}
+      </div>,
     );
 
-  const start = async () => {
-    setError('');
-    const r = await requestSnapshot(post);
-    if (!r) {
-      setOpen(null);
-      setError(t('saveCurrentFail'));
-      return;
+  /** 保存する (チェックの切り替えの結果)。全フォルダを外しても、保存は残る (「未分類」になる)。保存の解除は、ごみ箱だけ */
+  const commit = async (c: Current, sel: string[]) => {
+    await setBookmarkFolders(c.tweetId, sel, c.snapshot);
+    // 画像のキャッシュと全文の取得は、保存の状態が変わったとき (新しく保存したとき) だけ要求する
+    if (!c.saved) {
+      requestCache(c.tweetId, getAccountScope());
+      if (c.snapshot.truncated) requestFullText(c.tweetId, getAccountScope()); // たたまれた状態で保存した (v24)
     }
-    const prev = await getBookmark(r.tweetId);
-    setOpen({ tweetId: r.tweetId, snapshot: r.snapshot, selected: prev?.folderIds ?? [], tabId: post.tabId, saved: !!prev });
+    await requestNativeSync(c.tabId, c.tweetId, true);
+    const names = sel.length ? sel.map((id) => props.folders.find((f) => f.id === id)).filter((f): f is Folder => !!f).map(displayName) : [displayName(props.folders.find((f) => f.id === INBOX_ID) ?? { id: INBOX_ID, name: '', icon: '', order: 0 })];
+    setCur({ ...c, selected: sel, saved: true });
+    setDone(t('activeSaved', names.join('、')));
+    setError('');
+    props.onSaved();
+  };
+  const run = (c: Current, sel: string[]) => void commit(c, sel).catch(() => setError(t('errorStorage')));
+  const toggle = (c: Current, id: string) => run(c, c.selected.includes(id) ? c.selected.filter((x) => x !== id && x !== INBOX_ID) : [...c.selected.filter((x) => x !== INBOX_ID), id]);
+  const remove = async (c: Current) => {
+    try {
+      await removeBookmark(c.tweetId);
+      requestPrune();
+      await requestNativeSync(c.tabId, c.tweetId, false);
+      setCur({ ...c, selected: [], saved: false });
+      setDone('');
+      props.onSaved();
+    } catch {
+      setError(t('errorStorage'));
+    }
   };
 
-  return (
-    <div class="pfoot">
-      <span class="menu-anchor block">
-        <button class="cta" aria-haspopup="dialog" aria-expanded={!!open} onClick={() => (open ? setOpen(null) : void start())}>
-          <Icon name="ti-folder-plus" />
-          {t('saveCurrentPost')}
-        </button>
-        {open && (
-          <Dropdown onClose={() => setOpen(null)} label={t('saveCurrentPost')} class="menu-wide">
-            <FolderPickerHost
-              folders={props.folders}
-              selected={open.selected}
-              onChange={async (sel) => {
-                // 全フォルダを外しても、保存は残る (「未分類」になる)。保存の解除は、ここではしない
-                await setBookmarkFolders(open.tweetId, [...sel], open.snapshot);
-                // 画像のキャッシュと全文の取得は、保存の状態が変わったとき (新しく保存したとき) だけ要求する
-                if (!open.saved) {
-                  open.saved = true;
-                  requestCache(open.tweetId, getAccountScope());
-                  if (open.snapshot.truncated) requestFullText(open.tweetId, getAccountScope()); // たたまれた状態で保存した (v24)
-                }
-                await requestNativeSync(open.tabId, open.tweetId, true);
-                props.onSaved();
-              }}
-            />
-          </Dropdown>
+  const chips = chipFolders(props.folders, recent);
+  const users = props.folders.filter((f) => f.id !== INBOX_ID);
+  const rest = users.length - chips.length;
+  const delLabel = t('removeFromPostShelf');
+  return frame(
+    <>
+      <div class="ap-head">
+        <b>{t('activePostTitle')}</b>
+        {cur?.saved && (
+          <button class="icon-btn ap-del" aria-label={delLabel} title={delLabel} onClick={() => void remove(cur)}>
+            <Icon name="ti-trash" />
+          </button>
         )}
-      </span>
+      </div>
+      {cur && (
+        <div class="ap-excerpt">
+          <span class="muted">{cur.snapshot.author} </span>
+          {cur.snapshot.text}
+        </div>
+      )}
+      {cur && (
+        <div class="ap-chips">
+          {chips.map((f) => {
+            const on = cur.selected.includes(f.id);
+            return (
+              <button key={f.id} class={`ap-chip${on ? ' on' : ''}`} aria-pressed={on} onClick={() => toggle(cur, f.id)}>
+                {on ? <Icon name="ti-check" /> : <Icon name={f.icon} color={f.color} />}
+                <span class="ap-chip-name">{displayName(f)}</span>
+              </button>
+            );
+          })}
+          {rest > 0 && (
+            <span class="menu-anchor">
+              <button class="ap-chip" aria-haspopup="dialog" aria-expanded={more} onClick={() => setMore(!more)}>
+                <span class="ap-chip-name">{t('activeMoreFolders', rest)}</span>
+                <Icon name="ti-chevron-down" />
+              </button>
+              {more && (
+                <Dropdown onClose={() => setMore(false)} label={t('activeMoreFolders', rest)} class="menu-wide">
+                  <FolderPickerHost folders={props.folders} selected={cur.selected} onChange={(sel) => run(cur, [...sel])} />
+                </Dropdown>
+              )}
+            </span>
+          )}
+        </div>
+      )}
       {error ? (
         <div class="pfoot-note error" role="alert">
           {error}
         </div>
       ) : (
-        <div class="pfoot-note muted">{t('saveCurrentHint')}</div>
+        done && (
+          <div class="pfoot-note muted" role="status">
+            ✓ {done}
+          </div>
+        )
       )}
-    </div>
+    </>,
   );
 }

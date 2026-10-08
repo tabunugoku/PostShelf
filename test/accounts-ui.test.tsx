@@ -248,11 +248,11 @@ describe('E-5/E-6: side panel save button and popup follow the account', () => {
     c.tabs = { query: async () => [{ id: 5, url: 'https://x.com/a/status/12345' }], sendMessage: async () => ({ ok: false }), onActivated: { addListener() {}, removeListener() {} }, onUpdated: { addListener() {}, removeListener() {} }, create: async () => ({}) };
     await seed();
     await mount('sidepanel');
-    expect($$('.cta').length).toBe(1);
+    expect($$('.active-post').length).toBe(1);
     await openSwitcher();
     await click($$('.acct-main').find((x) => x.textContent?.includes('@you'))!);
-    expect($$('.cta').length).toBe(0);
-    expect($('.pfoot [role=alert]').textContent).toContain('@me');
+    expect($$('.ap-chip').length).toBe(0);
+    expect($('.active-post [role=alert]').textContent).toContain('@me');
   });
 
   it('with no detected account, the side panel cannot save', async () => {
@@ -263,8 +263,8 @@ describe('E-5/E-6: side panel save button and popup follow the account', () => {
     await seed({ lastSeen: null });
     await (chrome.storage.local as any).remove('lastSeenAccount');
     await mount('sidepanel');
-    expect($$('.cta').length).toBe(0);
-    expect($('.pfoot [role=alert]').textContent).toContain('判定できない');
+    expect($$('.ap-chip').length).toBe(0);
+    expect($('.active-post [role=alert]').textContent).toContain('判定できない');
   });
 
   it('popup shows the current account and its counts only', async () => {

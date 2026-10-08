@@ -41,14 +41,11 @@ describe('v26-G: SaveCurrent', () => {
     await act(() => void render(<App surface="sidepanel" />, $('#app')));
     await flush();
     await flush();
-    await act(() => void $('.cta').dispatchEvent(new MouseEvent('click', { bubbles: true })));
     await flush();
-    const box = () => $$<HTMLLabelElement>('.pfoot label').find((l) => l.textContent?.includes('Dev'))!.querySelector('input')!;
+    const chip = () => $$<HTMLElement>('.ap-chip').find((l) => l.textContent?.includes('Dev'))!;
     const toggle = async (on: boolean) => {
-      await act(() => {
-        box().checked = on;
-        box().dispatchEvent(new Event('change'));
-      });
+      expect(chip().getAttribute('aria-pressed')).toBe(String(!on));
+      await act(() => void chip().click());
       await flush();
     };
     await toggle(true);

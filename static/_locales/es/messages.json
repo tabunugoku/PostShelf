@@ -557,6 +557,27 @@
   "saveCurrentHint": {
     "message": "Se muestra mientras hay una publicación abierta en x.com"
   },
+  "activePostTitle": {
+    "message": "Publicación abierta"
+  },
+  "activeSaved": {
+    "message": "Guardado ($FOLDER$)",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "$COUNT$ más",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "saveCurrentFail": {
     "message": "No se pudo leer esta publicación. Recarga la página e inténtalo de nuevo."
   },

@@ -39,6 +39,7 @@ const mount = async () => {
   await act(() => void render(<App surface="sidepanel" />, $('#app')));
   await flush();
   await flush(); // アクティブタブの問い合わせ (非同期) が終わるまで
+  await flush();
 };
 
 describe('parsePostUrl', () => {
@@ -64,32 +65,62 @@ describe('side panel "save the open post" button', () => {
   it('is hidden on non-x.com tabs and on x.com pages that are not a post', async () => {
     installTabs('https://example.com/', { ok: false });
     await mount();
-    expect($$('.cta').length).toBe(0);
+    expect($$('.active-post').length).toBe(0);
     await act(() => void render(null, $('#app')));
     installTabs('https://x.com/home', { ok: false });
     await mount();
-    expect($$('.cta').length).toBe(0);
+    expect($$('.active-post').length).toBe(0);
   });
 
-  it('is shown on x.com/*/status/*; pressing it asks the tab for a snapshot and opens the folder picker; checking saves it', async () => {
+  it('is shown on x.com/*/status/* as a frame at the top (no footer); a chip saves in one tap, shows ✓ and 「保存しました」; all off → 未分類', async () => {
     const f = await createFolder({ name: 'Dev' });
     const { sent } = installTabs('https://x.com/yamada/status/1234567890', { ok: true, tweetId: '1234567890', snapshot });
     await mount();
-    expect($('.cta').textContent).toContain('いま開いているポストを保存');
-    await act(() => void $('.cta').dispatchEvent(new MouseEvent('click', { bubbles: true })));
-    await flush();
+    expect($('.active-post').textContent).toContain('いま開いているポスト');
+    expect($('.active-post').textContent).toContain('こんにちは 世界'); // 抜粋
+    expect($$('.pfoot')).toHaveLength(0);
+    expect($$('.active-post .ap-del')).toHaveLength(0); // 未保存: 削除は出ない
     expect(sent[0]).toEqual({ type: 'getPostSnapshot', tweetId: '1234567890' });
-    const cb = $$<HTMLLabelElement>('.pfoot label').find((l) => l.textContent?.includes('Dev'))!.querySelector('input')!;
-    expect($$('.pfoot label').map((l) => l.textContent)).toContain('未分類'); // 受け皿も選べる
-    expect(cb).toBeTruthy();
-    await act(() => {
-      cb.checked = true;
-      cb.dispatchEvent(new Event('change'));
-    });
+    expect($$('.ap-chip').map((c) => c.textContent)).toEqual(['Dev']);
+    await act(() => void ($('.ap-chip') as HTMLElement).click());
     await flush();
     expect((await getBookmark('1234567890'))!.folderIds).toEqual([f.id]);
     expect((await getBookmark('1234567890'))!.snapshot.handle).toBe('@yamada');
     expect(sent).toContainEqual({ type: 'syncNative', tweetId: '1234567890', want: true });
+    expect($('.ap-chip').getAttribute('aria-pressed')).toBe('true');
+    expect($('.active-post [role=status]').textContent).toContain('保存しました（Dev）');
+    await act(() => void ($('.ap-chip') as HTMLElement).click());
+    await flush();
+    expect((await getBookmark('1234567890'))!.folderIds).toEqual(['inbox']);
+    expect($('.active-post [role=status]').textContent).toContain('保存しました（未分類）');
+  });
+
+  it('chips: recentFolderIds first, at most 4, and 「他の N つ」 opens the shared picker when there are more', async () => {
+    const fs = [];
+    for (let i = 1; i <= 6; i++) fs.push(await createFolder({ name: `F${i}` }));
+    await updateSettings({ recentFolderIds: [fs[4].id, 'gone', fs[2].id] });
+    installTabs('https://x.com/yamada/status/1234567890', { ok: true, tweetId: '1234567890', snapshot });
+    await mount();
+    expect($$('.ap-chip').map((c) => c.textContent)).toEqual(['F5', 'F3', 'F1', 'F2', '他の 2 つ']);
+    await act(() => void $$<HTMLElement>('.ap-chip').at(-1)!.click());
+    await flush();
+    expect($$('.active-post label').map((l) => l.textContent)).toContain('F6');
+  });
+
+  it('the trash icon (only when saved) deletes without asking; aria-label and title are set', async () => {
+    await createFolder({ name: 'Dev' });
+    installTabs('https://x.com/yamada/status/1234567890', { ok: true, tweetId: '1234567890', snapshot });
+    await mount();
+    await act(() => void ($('.ap-chip') as HTMLElement).click());
+    await flush();
+    const del = $<HTMLButtonElement>('.ap-del');
+    expect(del.getAttribute('aria-label')).toBe('PostShelf の保存を削除');
+    expect(del.title).toBe('PostShelf の保存を削除');
+    await act(() => void del.click());
+    await flush();
+    expect(await getBookmark('1234567890')).toBeUndefined();
+    expect($$('.ap-del')).toHaveLength(0);
+    expect(document.querySelector('[role=dialog]')).toBeNull(); // 確認は出ない
   });
 
   it('shows a short error and saves nothing when the snapshot cannot be read', async () => {
@@ -98,12 +129,11 @@ describe('side panel "save the open post" button', () => {
       installPanelMock();
       await noteAccount({ handle: 'me' });
       setAccountScope('me');
+      await createFolder({ name: 'Dev' });
       installTabs('https://x.com/yamada/status/1234567890', reply);
       await mount();
-      await act(() => void $('.cta').dispatchEvent(new MouseEvent('click', { bubbles: true })));
-      await flush();
-      expect($('.pfoot [role=alert]').textContent).toContain('読み取れませんでした');
-      expect($$('.pfoot input[type=checkbox]').length).toBe(0);
+      expect($('.active-post [role=alert]').textContent).toContain('読み取れませんでした');
+      expect($$('.ap-chip').length).toBe(0);
       expect(await getBookmark('1234567890')).toBeUndefined();
       await act(() => void render(null, $('#app')));
     }
@@ -114,7 +144,7 @@ describe('side panel "save the open post" button', () => {
     document.body.innerHTML = '<div id="app"></div>';
     await act(() => void render(<App surface="tab" />, $('#app')));
     await flush();
-    expect($$('.cta').length).toBe(0);
+    expect($$('.active-post').length).toBe(0);
   });
 });
 

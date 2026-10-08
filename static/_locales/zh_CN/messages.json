@@ -557,6 +557,27 @@
   "saveCurrentHint": {
     "message": "在 x.com 打开帖子时显示"
   },
+  "activePostTitle": {
+    "message": "当前打开的帖子"
+  },
+  "activeSaved": {
+    "message": "已保存（$FOLDER$）",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "其他 $COUNT$ 个",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "saveCurrentFail": {
     "message": "无法读取此帖子。请刷新页面后重试。"
   },

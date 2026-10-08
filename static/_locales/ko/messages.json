@@ -557,6 +557,27 @@
   "saveCurrentHint": {
     "message": "x.com에서 게시물을 열었을 때 표시됩니다"
   },
+  "activePostTitle": {
+    "message": "지금 열린 게시물"
+  },
+  "activeSaved": {
+    "message": "저장됨 ($FOLDER$)",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "외 $COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "saveCurrentFail": {
     "message": "이 게시물을 읽을 수 없습니다. 페이지를 새로고침한 뒤 다시 시도하세요."
   },

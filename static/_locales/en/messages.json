@@ -557,6 +557,27 @@
   "saveCurrentHint": {
     "message": "Shown while a post is open on x.com"
   },
+  "activePostTitle": {
+    "message": "Open post"
+  },
+  "activeSaved": {
+    "message": "Saved ($FOLDER$)",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "$COUNT$ more",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "saveCurrentFail": {
     "message": "Could not read this post. Reload the page and try again."
   },

@@ -557,6 +557,27 @@
   "saveCurrentHint": {
     "message": "在 x.com 開啟貼文時顯示"
   },
+  "activePostTitle": {
+    "message": "目前開啟的貼文"
+  },
+  "activeSaved": {
+    "message": "已儲存（$FOLDER$）",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "其他 $COUNT$ 個",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "saveCurrentFail": {
     "message": "無法讀取此貼文。請重新整理頁面後再試一次。"
   },

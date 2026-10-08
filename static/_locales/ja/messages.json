@@ -557,6 +557,27 @@
   "saveCurrentHint": {
     "message": "x.com のポストを開いているときに表示"
   },
+  "activePostTitle": {
+    "message": "いま開いているポスト"
+  },
+  "activeSaved": {
+    "message": "保存しました（$FOLDER$）",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "他の $COUNT$ つ",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "saveCurrentFail": {
     "message": "このポストを読み取れませんでした。ページを再読み込みしてから、もう一度お試しください。"
   },
