@@ -565,6 +565,18 @@
   "noPostsHint": {
     "message": "Pulsa el botón de carpeta de una publicación en x.com para guardarla. Las publicaciones que ya marcaste se pueden importar desde Marcadores en el historial de x.com."
   },
+  "onboardTitle": {
+    "message": "Empecemos"
+  },
+  "onboardStep1": {
+    "message": "En x.com, pulsa el botón de carpeta de una publicación"
+  },
+  "onboardStep2": {
+    "message": "Importa tus marcadores actuales"
+  },
+  "onboardImport": {
+    "message": "Importar"
+  },
   "folderMore": {
     "message": "Cambiar nombre, icono, color"
   },

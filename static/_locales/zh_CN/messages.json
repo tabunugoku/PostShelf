@@ -565,6 +565,18 @@
   "noPostsHint": {
     "message": "在 x.com 上点击帖子的文件夹按钮即可保存。已经加入书签的帖子，可以从 x.com 历史记录中的“书签”导入。"
   },
+  "onboardTitle": {
+    "message": "开始吧"
+  },
+  "onboardStep1": {
+    "message": "在 x.com 的帖子上点按文件夹按钮"
+  },
+  "onboardStep2": {
+    "message": "导入现有的书签"
+  },
+  "onboardImport": {
+    "message": "导入"
+  },
   "folderMore": {
     "message": "更改名称、图标、颜色"
   },

@@ -64,8 +64,9 @@ describe('v13-C-2: version display and the update notice', () => {
 describe('v13-C-4: empty state and errors on screen', () => {
   it('first install (no data): a natural empty state that points to the x.com history Bookmarks', async () => {
     await mount(<App />);
-    expect($('.empty-title').textContent).toBe('まだ保存したポストがありません');
-    expect($('.empty-state').textContent).toContain('x.com の履歴の「ブックマーク」から取り込めます');
+    expect($('.empty-title').textContent).toBe('はじめましょう'); // v30: 2 つの手順と「取り込む」
+    expect($$('.empty-state .onboard li')).toHaveLength(2);
+    expect($('.empty-state .onboard-btn').textContent).toBe('取り込む');
     expect($$('.banner-error').length).toBe(0);
   });
   it('an unhandled failure (e.g. a storage write) shows an alert in the manager that can be closed', async () => {

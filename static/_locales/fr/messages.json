@@ -565,6 +565,18 @@
   "noPostsHint": {
     "message": "Cliquez sur le bouton de dossier d'un post sur x.com pour l'enregistrer. Les posts déjà mis en favoris peuvent être importés depuis Favoris dans l'historique de x.com."
   },
+  "onboardTitle": {
+    "message": "Commençons"
+  },
+  "onboardStep1": {
+    "message": "Sur x.com, appuyez sur le bouton dossier d’un post"
+  },
+  "onboardStep2": {
+    "message": "Importez vos signets actuels"
+  },
+  "onboardImport": {
+    "message": "Importer"
+  },
   "folderMore": {
     "message": "Modifier nom, icône, couleur"
   },

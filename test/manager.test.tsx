@@ -290,8 +290,8 @@ describe('v7 manager layout', () => {
   it('with no saved posts at all, explains how to save', async () => {
     await chrome.storage.local.set({ bookmarks: {} });
     await rerender();
-    expect($('.empty-state').textContent).toContain('まだ保存したポストがありません');
-    expect($('.empty-state').textContent).toContain('フォルダボタン');
+    expect($('.empty-state').textContent).toContain('はじめましょう'); // v30: 2 つの手順
+    expect($('.empty-state').textContent).toContain('フォルダのボタン');
   });
 
   it('import banner: shows the pending count, how-to dialog, dismiss survives until it grows', async () => {

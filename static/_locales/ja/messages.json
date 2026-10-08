@@ -565,6 +565,18 @@
   "noPostsHint": {
     "message": "x.com でポストのフォルダボタンを押して保存します。すでにブックマークしてあるポストは、x.com の履歴の「ブックマーク」から取り込めます。"
   },
+  "onboardTitle": {
+    "message": "はじめましょう"
+  },
+  "onboardStep1": {
+    "message": "x.com のポストで、フォルダのボタンを押す"
+  },
+  "onboardStep2": {
+    "message": "いまのブックマークを取り込む"
+  },
+  "onboardImport": {
+    "message": "取り込む"
+  },
   "folderMore": {
     "message": "名前・アイコン・色を変更"
   },

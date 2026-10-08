@@ -565,6 +565,18 @@
   "noPostsHint": {
     "message": "在 x.com 上點擊貼文的資料夾按鈕即可儲存。已經加入書籤的貼文，可以從 x.com 歷史記錄中的「書籤」匯入。"
   },
+  "onboardTitle": {
+    "message": "開始吧"
+  },
+  "onboardStep1": {
+    "message": "在 x.com 的貼文上按下資料夾按鈕"
+  },
+  "onboardStep2": {
+    "message": "匯入目前的書籤"
+  },
+  "onboardImport": {
+    "message": "匯入"
+  },
   "folderMore": {
     "message": "變更名稱、圖示、顏色"
   },

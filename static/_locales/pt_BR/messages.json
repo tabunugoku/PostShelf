@@ -565,6 +565,18 @@
   "noPostsHint": {
     "message": "Pressione o botão de pasta de um post no x.com para salvá-lo. Os posts que você já salvou nos favoritos podem ser importados de Favoritos no histórico do x.com."
   },
+  "onboardTitle": {
+    "message": "Vamos começar"
+  },
+  "onboardStep1": {
+    "message": "No x.com, toque o botão de pasta em um post"
+  },
+  "onboardStep2": {
+    "message": "Importe seus favoritos atuais"
+  },
+  "onboardImport": {
+    "message": "Importar"
+  },
   "folderMore": {
     "message": "Alterar nome, ícone, cor"
   },

@@ -447,3 +447,10 @@ input[type=number]{width:110px}
 .settings-saved{margin-left:auto;min-width:11em;min-height:1.4em;text-align:right;font-size:13px;white-space:nowrap}
 .settings-search{display:flex;margin:0 0 6px}
 .settings-match{min-height:1.4em;margin:0 0 6px;font-size:13px}
+
+/* ---- 初めて開いたときの案内 (v30) ---- */
+.empty-state .onboard{list-style:none;display:flex;flex-direction:column;gap:10px;margin:6px 0 0;padding:0;max-width:460px;width:100%;text-align:left;word-break:auto-phrase;line-break:strict}
+.onboard li{display:flex;align-items:center;gap:10px}
+.onboard-n{flex:none;display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent-strong);color:#fff;font-size:13px;font-weight:700}
+.onboard-text{flex:1;min-width:0;color:var(--text-primary)}
+.onboard-btn{flex:none;white-space:nowrap;min-height:32px}

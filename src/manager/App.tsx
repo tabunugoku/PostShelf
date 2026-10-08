@@ -703,8 +703,20 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     (bookmarks.length === 0 ? (
       <div class="empty-state">
         <Icon name="ti-bookmarks" />
-        <div class="empty-title">{t('noPostsTitle')}</div>
-        <div>{t('noPostsHint')}</div>
+        <div class="empty-title">{t('onboardTitle')}</div>
+        <ol class="onboard">
+          <li>
+            <span class="onboard-n" aria-hidden="true">1</span>
+            <span class="onboard-text">{t('onboardStep1')}</span>
+          </li>
+          <li>
+            <span class="onboard-n" aria-hidden="true">2</span>
+            <span class="onboard-text">{t('onboardStep2')}</span>
+            <button class="onboard-btn" onClick={() => (autoCfg.enabled && lastSeen ? setAutoOpen(true) : setShowHow(true))}>
+              {t('onboardImport')}
+            </button>
+          </li>
+        </ol>
       </div>
     ) : searching ? (
       <div class="empty-state">

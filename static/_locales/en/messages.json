@@ -565,6 +565,18 @@
   "noPostsHint": {
     "message": "Press the folder button on a post on x.com to save it. Posts you have already bookmarked can be imported from Bookmarks in your x.com history."
   },
+  "onboardTitle": {
+    "message": "Let's get started"
+  },
+  "onboardStep1": {
+    "message": "On x.com, press the folder button on a post"
+  },
+  "onboardStep2": {
+    "message": "Import your current bookmarks"
+  },
+  "onboardImport": {
+    "message": "Import"
+  },
   "folderMore": {
     "message": "Change name, icon, color"
   },
