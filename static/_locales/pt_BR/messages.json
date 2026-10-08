@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$. Carregando posts de por volta de $DATE$",
+    "message": "Carregando na velocidade \"$SPEED$\". Agora em posts de por volta de $DATE$",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1020,7 +1020,7 @@
     "message": "Chegou ao favorito mais antigo"
   },
   "acSubStopped": {
-    "message": "Tudo até aqui já está salvo"
+    "message": "Tudo até aqui já foi importado"
   },
   "acNoteRunning": {
     "message": "Mantenha esta aba aberta. Ao mudar de aba, a importação pausa automaticamente."
@@ -1089,7 +1089,7 @@
     "message": "Importar automaticamente…"
   },
   "acBtnAutoTitle": {
-    "message": "Rola automaticamente a aba de favoritos e importa tudo (confirmação no gerenciador)"
+    "message": "Rola automaticamente a aba de favoritos e importa a partir dela. O limite por execução pode ser alterado nas configurações"
   },
   "acManualTitle": {
     "message": "Importar só o que está visível agora"

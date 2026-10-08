@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$。正在读取 $DATE$ 前后的帖子",
+    "message": "以“$SPEED$”速度读取中。现在在 $DATE$ 前后的帖子",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1020,7 +1020,7 @@
     "message": "已读取到最早的书签"
   },
   "acSubStopped": {
-    "message": "此前的内容已保存"
+    "message": "到这里为止的内容已经导入"
   },
   "acNoteRunning": {
     "message": "请保持此标签页打开。切换到其他标签页会自动暂停。"
@@ -1089,7 +1089,7 @@
     "message": "自动导入…"
   },
   "acBtnAutoTitle": {
-    "message": "自动滚动书签标签并全部导入（在管理页面中确认）"
+    "message": "自动滚动书签标签并导入。单次上限可在设置中修改"
   },
   "acManualTitle": {
     "message": "只导入当前可见的部分"

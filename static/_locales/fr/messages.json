@@ -938,13 +938,13 @@
     "message": "En pause"
   },
   "acPanelLimit": {
-    "message": "Arrêt automatique"
+    "message": "Arrêté automatiquement"
   },
   "acPanelDone": {
     "message": "Importation terminée"
   },
   "acPanelStopped": {
-    "message": "Importation terminée par vous"
+    "message": "Importation terminée"
   },
   "acPanelCountdown": {
     "message": "Démarrage dans $SEC$ s",
@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$. Chargement des posts autour du $DATE$",
+    "message": "Chargement à la vitesse « $SPEED$ ». Actuellement sur des posts autour du $DATE$",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1020,7 +1020,7 @@
     "message": "Le plus ancien favori a été atteint"
   },
   "acSubStopped": {
-    "message": "Tout ce qui précède est enregistré"
+    "message": "Tout ce qui précède a déjà été importé"
   },
   "acNoteRunning": {
     "message": "Gardez cet onglet ouvert. Changer d'onglet met l'importation en pause automatiquement."
@@ -1089,7 +1089,7 @@
     "message": "Importer automatiquement…"
   },
   "acBtnAutoTitle": {
-    "message": "Fait défiler automatiquement l'onglet des favoris et importe tout (confirmation dans le gestionnaire)"
+    "message": "Fait défiler automatiquement l'onglet des favoris et importe à partir de celui-ci. La limite par exécution peut être modifiée dans les réglages"
   },
   "acManualTitle": {
     "message": "Importer seulement ce qui est visible"

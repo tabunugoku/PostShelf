@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$. Cargando publicaciones de alrededor del $DATE$",
+    "message": "Cargando a velocidad «$SPEED$». Ahora en publicaciones de alrededor del $DATE$",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1005,7 +1005,7 @@
     "message": "Detenido porque se recargó la página"
   },
   "acReasonLimit": {
-    "message": "X puede haber mostrado un límite"
+    "message": "Puede que X haya mostrado un límite"
   },
   "acReasonPage": {
     "message": "Se detuvo porque saliste de la página de marcadores"
@@ -1020,7 +1020,7 @@
     "message": "Se llegó al marcador más antiguo"
   },
   "acSubStopped": {
-    "message": "Todo lo anterior ya está guardado"
+    "message": "Todo lo anterior ya se ha importado"
   },
   "acNoteRunning": {
     "message": "Mantén esta pestaña abierta. Si cambias a otra pestaña, la importación se pausa automáticamente."
@@ -1089,7 +1089,7 @@
     "message": "Importar automáticamente…"
   },
   "acBtnAutoTitle": {
-    "message": "Desplaza automáticamente la pestaña de marcadores e importa todo (se confirma en el gestor)"
+    "message": "Desplaza automáticamente la pestaña de marcadores e importa desde ella. El límite por ejecución se puede cambiar en los ajustes"
   },
   "acManualTitle": {
     "message": "Importar solo lo que se ve ahora"

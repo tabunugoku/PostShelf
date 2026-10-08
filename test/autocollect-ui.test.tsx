@@ -230,7 +230,7 @@ describe('page panel', () => {
     expect(viewOf(st({ status: 'paused', reason: 'cap' })).sub).toBe('上限の 300 件に達したため、止めました');
     expect(viewOf(st({ status: 'paused', reason: 'reload' })).note).toContain('一覧の先頭から読み直します');
     const limit = viewOf(st({ status: 'limit', reason: 'limit' }));
-    expect(limit.title).toBe('自動で停止しました');
+    expect(limit.title).toBe('自動で止めました');
     expect(limit.alert).toContain('15 分以上あけてから再開してください');
     expect(limit.buttons.map((b) => b.label)).toEqual(['15 分後に再開する', 'ここで終了']);
     expect(viewOf(st({ status: 'limit', resumeAt: Date.now() + 1000 })).buttons.map((b) => b.label)).toEqual(['ここで終了']);

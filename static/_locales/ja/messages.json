@@ -938,13 +938,13 @@
     "message": "一時停止中"
   },
   "acPanelLimit": {
-    "message": "自動で停止しました"
+    "message": "自動で止めました"
   },
   "acPanelDone": {
     "message": "取り込みが終わりました"
   },
   "acPanelStopped": {
-    "message": "取り込みを終了しました"
+    "message": "取り込みを終えました"
   },
   "acPanelCountdown": {
     "message": "$SEC$ 秒後に始まります",
@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$。$DATE$ ごろの投稿を読み込み中",
+    "message": "$SPEED$で読み込み中。いま $DATE$ ごろの投稿です",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1005,7 +1005,7 @@
     "message": "ページが読み込み直されたため、止まっています"
   },
   "acReasonLimit": {
-    "message": "X が制限を表示した可能性があります"
+    "message": "X が制限を表示したかもしれません"
   },
   "acReasonPage": {
     "message": "ブックマークの画面から移動したため、止めました"
@@ -1020,7 +1020,7 @@
     "message": "いちばん古いブックマークまで読み込みました"
   },
   "acSubStopped": {
-    "message": "そこまでの分は保存済みです"
+    "message": "ここまでの分は、すでに取り込んであります"
   },
   "acNoteRunning": {
     "message": "このタブを開いたままにしてください。別のタブへ切り替えると、自動で一時停止します。"
@@ -1089,7 +1089,7 @@
     "message": "自動で取り込む…"
   },
   "acBtnAutoTitle": {
-    "message": "ブックマークのタブを自動でスクロールして、すべて取り込みます。確認は管理画面で行います"
+    "message": "ブックマークのタブを自動でスクロールして取り込みます。1 回の上限は設定で変えられます"
   },
   "acManualTitle": {
     "message": "いま見えている分だけ取り込む"

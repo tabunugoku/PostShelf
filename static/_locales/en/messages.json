@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$ speed. Loading posts from around $DATE$",
+    "message": "Loading at $SPEED$ speed. Now at posts from around $DATE$",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1020,7 +1020,7 @@
     "message": "Reached the oldest bookmark"
   },
   "acSubStopped": {
-    "message": "Everything up to that point is saved"
+    "message": "Everything up to here has already been imported"
   },
   "acNoteRunning": {
     "message": "Keep this tab open. Switching to another tab pauses the import automatically."
@@ -1089,7 +1089,7 @@
     "message": "Import automatically…"
   },
   "acBtnAutoTitle": {
-    "message": "Scrolls the bookmarks tab automatically and imports everything (you confirm in the manager)"
+    "message": "Scrolls the bookmarks tab automatically and imports from it. The limit per run can be changed in the settings"
   },
   "acManualTitle": {
     "message": "Import only what is visible now"

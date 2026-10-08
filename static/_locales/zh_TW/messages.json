@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$。正在讀取 $DATE$ 前後的貼文",
+    "message": "以「$SPEED$」速度讀取中。現在在 $DATE$ 前後的貼文",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1020,7 +1020,7 @@
     "message": "已讀取到最早的書籤"
   },
   "acSubStopped": {
-    "message": "此前的內容已儲存"
+    "message": "到這裡為止的內容已經匯入"
   },
   "acNoteRunning": {
     "message": "請保持此分頁開啟。切換到其他分頁會自動暫停。"
@@ -1089,7 +1089,7 @@
     "message": "自動匯入…"
   },
   "acBtnAutoTitle": {
-    "message": "自動捲動書籤分頁並全部匯入（在管理頁面中確認）"
+    "message": "自動捲動書籤分頁並匯入。單次上限可在設定中變更"
   },
   "acManualTitle": {
     "message": "只匯入目前可見的部分"

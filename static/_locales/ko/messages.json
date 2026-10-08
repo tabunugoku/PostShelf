@@ -938,13 +938,13 @@
     "message": "일시 중지됨"
   },
   "acPanelLimit": {
-    "message": "자동으로 중지했습니다"
+    "message": "자동으로 멈췄습니다"
   },
   "acPanelDone": {
     "message": "가져오기가 끝났습니다"
   },
   "acPanelStopped": {
-    "message": "가져오기를 종료했습니다"
+    "message": "가져오기를 마쳤습니다"
   },
   "acPanelCountdown": {
     "message": "$SEC$초 후에 시작합니다",
@@ -965,7 +965,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "$SPEED$. $DATE$ 무렵의 게시물을 불러오는 중",
+    "message": "$SPEED$ 속도로 불러오는 중. 지금은 $DATE$ 무렵의 게시물입니다",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1005,7 +1005,7 @@
     "message": "페이지를 다시 불러와서 멈춰 있습니다"
   },
   "acReasonLimit": {
-    "message": "X가 제한을 표시했을 수 있습니다"
+    "message": "X가 제한을 표시했을지도 모릅니다"
   },
   "acReasonPage": {
     "message": "북마크 화면에서 이동해서 멈췄습니다"
@@ -1020,7 +1020,7 @@
     "message": "가장 오래된 북마크까지 불러왔습니다"
   },
   "acSubStopped": {
-    "message": "그때까지의 분량은 저장되었습니다"
+    "message": "여기까지의 분량은 이미 가져왔습니다"
   },
   "acNoteRunning": {
     "message": "이 탭을 열어 두세요. 다른 탭으로 전환하면 자동으로 일시 중지됩니다."
@@ -1089,7 +1089,7 @@
     "message": "자동으로 가져오기…"
   },
   "acBtnAutoTitle": {
-    "message": "북마크 탭을 자동으로 스크롤해서 모두 가져옵니다(관리 화면에서 확인)"
+    "message": "북마크 탭을 자동으로 스크롤해서 가져옵니다. 1회 상한은 설정에서 바꿀 수 있습니다"
   },
   "acManualTitle": {
     "message": "지금 보이는 것만 가져오기"
