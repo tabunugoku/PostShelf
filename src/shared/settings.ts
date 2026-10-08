@@ -369,6 +369,8 @@ export interface CollectRun {
   failed: number;
   /** 読み込んだ中でいちばん古い投稿の日時 (ISO) */
   oldestSeenPostDate?: string;
+  /** 直近に読んだ 10 件の投稿日時の中央値 (ISO)。実行中の「いま ○○ ごろ」に使う (v27) */
+  recentPostDate?: string;
   speed: CollectSpeed;
   cap: CollectCap;
   reason?: CollectReason;
@@ -393,6 +395,7 @@ export async function getCollectRun(): Promise<CollectRun | null> {
     skipped: Number(r.skipped) || 0,
     failed: Number(r.failed) || 0,
     oldestSeenPostDate: typeof r.oldestSeenPostDate === 'string' ? r.oldestSeenPostDate : undefined,
+    recentPostDate: typeof r.recentPostDate === 'string' ? r.recentPostDate : undefined,
     speed: r.speed === 'normal' ? 'normal' : 'slow',
     cap: r.cap === 100 || r.cap === 0 ? r.cap : 300,
     reason: r.reason,
