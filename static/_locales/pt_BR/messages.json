@@ -48,7 +48,7 @@
     "message": "Adicionar"
   },
   "noFolders": {
-    "message": "Nenhuma pasta ainda"
+    "message": "As pastas que você criar aparecerão aqui"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -924,5 +924,8 @@
   },
   "errorStorage": {
     "message": "Falha ao salvar ou carregar. Tente novamente. Se continuar, salve seus dados com \"Exportar\" em Configurações e recarregue a extensão."
+  },
+  "removeFromPostShelf": {
+    "message": "Remover do PostShelf"
   }
 }

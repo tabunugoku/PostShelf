@@ -48,7 +48,7 @@
     "message": "添加"
   },
   "noFolders": {
-    "message": "还没有文件夹"
+    "message": "创建的文件夹会显示在这里"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -924,5 +924,8 @@
   },
   "errorStorage": {
     "message": "保存或读取失败。请重试。如果问题持续出现，请先在设置的“数据”中用“导出”保存数据，然后重新加载扩展程序。"
+  },
+  "removeFromPostShelf": {
+    "message": "从 PostShelf 中移除"
   }
 }

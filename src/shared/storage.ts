@@ -239,27 +239,41 @@ export async function getBookmark(tweetId: string): Promise<Bookmark | undefined
   return (await readMap())[key(tweetId)];
 }
 
+/** 「未分類」の受け皿のフォルダ (名前なし = 表示時に解決) が無ければ作る */
+async function ensureInboxFolder(): Promise<void> {
+  const folders = await readFolders();
+  if (folders.some((f) => f.id === INBOX_ID)) return;
+  await writeFolders([...folders, { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: scope }]);
+}
+
 /**
- * ポストの所属フォルダを設定する。空配列ならブックマークごと削除する。
+ * ポストの所属フォルダを設定する (保存)。INBOX_ID だけなら「未分類」として保存する。
+ * 空配列も「未分類」として保存する (保存の解除は、明示的な removeBookmark だけ)。
  * 既存の savedAt / snapshot は、新規保存でなければ維持する。
  */
 export async function setBookmarkFolders(
   tweetId: string,
   folderIds: string[],
   snapshot: Bookmark['snapshot'],
-): Promise<Bookmark | undefined> {
+): Promise<Bookmark> {
   const map = await readMap();
-  const ids = [...new Set(folderIds.filter((id) => !isBuiltinFolder(id)))];
-  if (ids.length === 0) {
-    delete map[key(tweetId)];
-    await write(KEY_BOOKMARKS, map);
-    return undefined;
-  }
+  const real = [...new Set(folderIds.filter((id) => !isBuiltinFolder(id)))];
+  // 「未分類」は他のフォルダと同時には持たない
+  const ids = real.length === 0 ? [INBOX_ID] : real.filter((id) => id !== INBOX_ID).length ? real.filter((id) => id !== INBOX_ID) : [INBOX_ID];
+  if (ids.includes(INBOX_ID)) await ensureInboxFolder();
   const prev = map[key(tweetId)];
   const b: Bookmark = { accountId: scope, tweetId, folderIds: ids, savedAt: prev?.savedAt ?? Date.now(), snapshot };
   map[key(tweetId)] = b;
   await write(KEY_BOOKMARKS, map);
   return b;
+}
+
+/** PostShelf から外す (明示的な操作。X 側のブックマークには触らない) */
+export async function removeBookmark(tweetId: string): Promise<void> {
+  const map = await readMap();
+  if (!(key(tweetId) in map)) return;
+  delete map[key(tweetId)];
+  await write(KEY_BOOKMARKS, map);
 }
 
 // ---- Export / Import ----

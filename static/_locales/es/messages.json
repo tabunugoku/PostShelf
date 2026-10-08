@@ -48,7 +48,7 @@
     "message": "Añadir"
   },
   "noFolders": {
-    "message": "Aún no hay carpetas"
+    "message": "Las carpetas que crees aparecerán aquí"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -924,5 +924,8 @@
   },
   "errorStorage": {
     "message": "Error al guardar o cargar. Inténtalo de nuevo. Si sigue ocurriendo, guarda tus datos con «Exportar» en Ajustes y vuelve a cargar la extensión."
+  },
+  "removeFromPostShelf": {
+    "message": "Quitar de PostShelf"
   }
 }

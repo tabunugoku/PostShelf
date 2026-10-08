@@ -3,7 +3,7 @@
  * x.com のポップオーバーと manager の「フォルダを変更」で共通に使う。
  * 配色は theme で受け取る (x.com では X のテーマ、manager では CSS 変数の文字列を渡す)。
  */
-import { displayName, type Folder } from './models';
+import { INBOX_ID, displayName, type Folder } from './models';
 import { createFolder, StorageError } from './storage';
 import { t } from './strings';
 import { ACCENT_FILL } from './tokens';
@@ -17,6 +17,8 @@ export interface PickerTheme {
 
 export interface FolderPicker {
   el: HTMLElement;
+  /** selected を外から書き換えたあと、チェックの表示を合わせる */
+  sync: () => void;
 }
 
 export function createFolderPicker(opts: {
@@ -29,13 +31,27 @@ export function createFolderPicker(opts: {
   const { selected, theme: th, onChange } = opts;
   const el = document.createElement('div');
 
-  const render = (list: Folder[]) => {
+  // 先頭に常に「未分類」の行を出す (フォルダが 1 つもなくても、チェックを入れるだけで保存できる)。
+  // 「未分類」は他のフォルダと同時には選べない。最後のチェックを外したときは「未分類」に戻る (保存の解除ではない)。
+  const boxes = new Map<string, HTMLInputElement>();
+  const sync = () => boxes.forEach((cb, id) => (cb.checked = selected.has(id)));
+  const normalize = (changed: string, on: boolean) => {
+    if (on && changed === INBOX_ID) selected.clear();
+    if (on) selected.add(changed);
+    else selected.delete(changed);
+    if (on && changed !== INBOX_ID) selected.delete(INBOX_ID);
+    if (selected.size === 0) selected.add(INBOX_ID);
+    sync();
+  };
+  const inboxOf = (list: Folder[]): Folder => {
+    const stored = list.find((f) => f.id === INBOX_ID);
+    return { id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color };
+  };
+
+  const render = (all: Folder[]) => {
     el.replaceChildren();
-    if (list.length === 0) {
-      const empty = document.createElement('div');
-      empty.textContent = t('noFolders');
-      el.append(empty);
-    }
+    boxes.clear();
+    const list = [inboxOf(all), ...all.filter((f) => f.id !== INBOX_ID)];
     for (const f of list) {
       const label = document.createElement('label');
       label.style.cssText = 'display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
@@ -48,9 +64,9 @@ export function createFolderPicker(opts: {
       cb.type = 'checkbox';
       cb.checked = selected.has(f.id);
       cb.style.cssText = `accent-color:${th.accent};width:16px;height:16px;margin:0`;
+      boxes.set(f.id, cb);
       cb.addEventListener('change', () => {
-        if (cb.checked) selected.add(f.id);
-        else selected.delete(f.id);
+        normalize(f.id, cb.checked);
         void onChange(selected);
       });
       const name = document.createElement('span');
@@ -74,9 +90,9 @@ export function createFolderPicker(opts: {
       e.preventDefault();
       try {
         const f = await createFolder({ name: input.value });
-        selected.add(f.id);
+        normalize(f.id, true);
         await onChange(selected);
-        render([...list, f]);
+        render([...all, f]);
       } catch (err) {
         if (!(err instanceof StorageError)) throw err;
         input.setCustomValidity(err.message);
@@ -86,5 +102,5 @@ export function createFolderPicker(opts: {
     el.append(row);
   };
   render(opts.folders);
-  return { el };
+  return { el, sync };
 }

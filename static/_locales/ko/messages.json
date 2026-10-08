@@ -48,7 +48,7 @@
     "message": "추가"
   },
   "noFolders": {
-    "message": "폴더가 없습니다"
+    "message": "폴더를 만들면 여기에 표시됩니다"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -924,5 +924,8 @@
   },
   "errorStorage": {
     "message": "저장 또는 불러오기에 실패했습니다. 다시 시도해 주세요. 계속되면 설정의 \"데이터\"에서 \"내보내기\"로 저장한 뒤 확장 프로그램을 새로고침하세요."
+  },
+  "removeFromPostShelf": {
+    "message": "PostShelf에서 제거"
   }
 }

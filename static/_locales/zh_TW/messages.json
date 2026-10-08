@@ -48,7 +48,7 @@
     "message": "新增"
   },
   "noFolders": {
-    "message": "尚無資料夾"
+    "message": "建立的資料夾會顯示在這裡"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -924,5 +924,8 @@
   },
   "errorStorage": {
     "message": "儲存或讀取失敗。請再試一次。若持續發生，請先在設定的「資料」中用「匯出」儲存資料，然後重新載入擴充功能。"
+  },
+  "removeFromPostShelf": {
+    "message": "從 PostShelf 中移除"
   }
 }

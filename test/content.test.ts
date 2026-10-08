@@ -46,11 +46,11 @@ describe('popover', () => {
     expect(btns[0].previousElementSibling?.getAttribute('data-testid')).toBe('bookmark');
   });
 
-  it('saves a bookmark when a folder is checked and removes it when unchecked', async () => {
+  it('saves a bookmark when a folder is checked and moves it to 未分類 when unchecked', async () => {
     const f = await createFolder({ name: '開発' });
     injectButtons();
     const pop = (await openPopover(document.querySelector('article')!, document.querySelector('[data-postshelf-btn]')!))!;
-    const cb = pop.querySelector<HTMLInputElement>('input[type=checkbox]')!;
+    const cb = pop.querySelectorAll<HTMLInputElement>('input[type=checkbox]')[1]!; // [0] は「未分類」
     cb.checked = true;
     cb.dispatchEvent(new Event('change'));
     await new Promise((r) => setTimeout(r, 0));
@@ -58,7 +58,7 @@ describe('popover', () => {
     cb.checked = false;
     cb.dispatchEvent(new Event('change'));
     await new Promise((r) => setTimeout(r, 0));
-    expect(await getBookmark('1234567890')).toBeUndefined();
+    expect((await getBookmark('1234567890'))?.folderIds).toEqual(['inbox']); // 最後のフォルダを外すと「未分類」になる
   });
 
   it('creates a new folder from the popover and selects it', async () => {

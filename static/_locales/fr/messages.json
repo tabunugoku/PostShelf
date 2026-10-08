@@ -48,7 +48,7 @@
     "message": "Ajouter"
   },
   "noFolders": {
-    "message": "Aucun dossier pour l'instant"
+    "message": "Les dossiers que vous créerez apparaîtront ici"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -924,5 +924,8 @@
   },
   "errorStorage": {
     "message": "Échec de l'enregistrement ou du chargement. Réessayez. Si cela continue, enregistrez vos données avec « Exporter » dans les Réglages, puis rechargez l'extension."
+  },
+  "removeFromPostShelf": {
+    "message": "Retirer de PostShelf"
   }
 }

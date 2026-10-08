@@ -1,7 +1,7 @@
 import { queryFirst } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { extractTweet } from './snapshot';
-import { getBookmark, listFolders, setBookmarkFolders } from '../shared/storage';
+import { getBookmark, listFolders, removeBookmark, setBookmarkFolders } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
 import { createFolderPicker } from '../shared/folderPicker';
@@ -39,7 +39,9 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   const { tweetId, snapshot } = ex;
   const account = getCurrentAccount(); // 保存先は、判定できた現在のアカウントだけ
   const folders = (await listFolders()).filter((f) => !isBuiltinFolder(f.id));
-  const selected = new Set((await getBookmark(tweetId))?.folderIds ?? []);
+  const existing = await getBookmark(tweetId);
+  const selected = new Set(existing?.folderIds ?? []);
+  let isSaved = !!existing; // 「PostShelf から外す」を出すかどうか
 
   const pop = document.createElement('div');
   pop.className = POP_CLASS;
@@ -84,12 +86,33 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   };
   const saveNow = async () => {
     if (getCurrentAccount()?.id !== account?.id) return closePopovers(); // 開いている間にアカウントが切り替わった
-    const saved = await setBookmarkFolders(tweetId, [...selected], snapshot);
-    if (saved && account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
-    else requestPrune();
+    await setBookmarkFolders(tweetId, [...selected], snapshot); // 「未分類」だけでも保存する (保存の解除は「PostShelf から外す」だけ)
+    isSaved = true;
+    unsave.style.display = 'block';
+    if (account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
     // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
-    if ((await getSettings()).syncNative) setNativeBookmark(article, saved !== undefined);
+    if ((await getSettings()).syncNative) setNativeBookmark(article, true);
   };
+  // 保存の解除は、明示的な操作だけ (保存済みのときだけ表示)
+  const unsave = document.createElement('button');
+  unsave.type = 'button';
+  unsave.textContent = t('removeFromPostShelf');
+  unsave.style.cssText = `display:${isSaved ? 'block' : 'none'};width:100%;text-align:left;margin-top:6px;padding:6px 8px;min-height:32px;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;cursor:pointer`;
+  unsave.addEventListener('click', async () => {
+    try {
+      await removeBookmark(tweetId);
+      isSaved = false;
+      selected.clear();
+      picker.sync();
+      unsave.style.display = 'none';
+      requestPrune();
+      if ((await getSettings()).syncNative) setNativeBookmark(article, false);
+      errorEl.style.display = 'none';
+    } catch {
+      errorEl.textContent = t('errorStorage');
+      errorEl.style.display = 'block';
+    }
+  });
 
   const picker = createFolderPicker({
     folders,
@@ -99,6 +122,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   });
   if (account) pop.append(picker.el);
   pop.append(errorEl);
+  if (account) pop.append(unsave);
   // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
   if (account && mode === 'replace' && queryFirst(article, 'removeBookmark')) {
     const rel = document.createElement('button');
