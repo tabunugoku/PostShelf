@@ -317,8 +317,9 @@ export async function listAllBookmarks(): Promise<Bookmark[]> {
 }
 
 /** 保存済みポストの tweetId 一覧 (取り込み件数の計算用) */
-export async function getSavedIds(): Promise<Set<string>> {
-  return new Set((await listBookmarks()).map((b) => b.tweetId));
+export async function getSavedIds(accountId: string = scope): Promise<Set<string>> {
+  const map = await readMap();
+  return new Set(Object.values(map).filter((b) => b.accountId === accountId).map((b) => b.tweetId));
 }
 
 export async function getBookmark(tweetId: string): Promise<Bookmark | undefined> {
@@ -326,10 +327,12 @@ export async function getBookmark(tweetId: string): Promise<Bookmark | undefined
 }
 
 /** 「未分類」の受け皿のフォルダ (名前なし = 表示時に解決) が無ければ作る */
-async function ensureInboxFolder(): Promise<void> {
-  const folders = await readFolders();
+async function ensureInboxFolder(accountId: string = scope): Promise<void> {
+  const all = await readAllFolders();
+  const folders = all.filter((f) => f.accountId === accountId);
   if (folders.some((f) => f.id === INBOX_ID)) return;
-  await writeFolders([...folders, { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: scope }]);
+  const others = all.filter((f) => f.accountId !== accountId);
+  await write(KEY_FOLDERS, [...others, ...folders, { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId }]);
 }
 
 /**
@@ -490,24 +493,26 @@ export function importData(json: unknown): Promise<number> {
  * 取り込み済みのポストは、並びの基準 (すぐ上・すぐ下) として使うだけで、変更しない。
  * @param startedAt 取り込みの開始時刻 (いちばん上の区間の基準)
  */
-export function addCollected(items: { tweetId: string; snapshot: Bookmark['snapshot'] }[], startedAt: number = Date.now()): Promise<number> {
+export function addCollected(items: { tweetId: string; snapshot: Bookmark['snapshot'] }[], startedAt: number = Date.now(), accountId: string = scope): Promise<number> {
+  // 取り込み中にアカウントが切り替わっても、保存先は開始時のアカウントのまま (v26)。モジュールの scope には頼らない
+  const keyOf = (tweetId: string) => bookmarkKey(accountId, tweetId);
   return serial(async () => {
     const plan = (m: BookmarkMap) => {
       const order = assignOrder(
-        items.map((it) => ({ id: it.tweetId, savedAt: m[key(it.tweetId)]?.savedAt })),
+        items.map((it) => ({ id: it.tweetId, savedAt: m[keyOf(it.tweetId)]?.savedAt })),
         startedAt,
       );
-      return { order, fresh: items.filter((it) => !m[key(it.tweetId)] && order.has(it.tweetId)) };
+      return { order, fresh: items.filter((it) => !m[keyOf(it.tweetId)] && order.has(it.tweetId)) };
     };
     if (plan(await readMap()).fresh.length === 0) return 0;
-    await ensureInboxFolder(); // 読んだあと書くまでの間に await を挟まないよう、先に用意して読み直す
+    await ensureInboxFolder(accountId); // 読んだあと書くまでの間に await を挟まないよう、先に用意して読み直す
     const map = await readMap();
     const { order, fresh } = plan(map);
     if (fresh.length === 0) return 0;
     let added = 0;
     for (const it of fresh) {
-      if (map[key(it.tweetId)]) continue;
-      map[key(it.tweetId)] = { accountId: scope, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot };
+      if (map[keyOf(it.tweetId)]) continue;
+      map[keyOf(it.tweetId)] = { accountId, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot };
       added++;
     }
     await write(KEY_BOOKMARKS, map);

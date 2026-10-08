@@ -67,13 +67,14 @@ export interface CollectDeps {
   pageOk(): boolean;
   isHidden(): boolean;
   accountId(): string | null;
-  savedIds(): Promise<Set<string>>;
+  /** 保存先は取り込みを始めたアカウント (state.accountId)。画面の現在のアカウントではない */
+  savedIds(accountId: string): Promise<Set<string>>;
   /** 保存データが (他の場所で) 変わったら呼ばれる。解除関数を返す */
   onDataChanged?(cb: () => void): () => void;
   /** 保存してある取り込みの記録 (owner / commandId の確認用) */
   loadRun?(): Promise<CollectRun | null>;
   /** seq = 画面に出た順の全ポスト。保存の savedAt は一覧での位置から決める (ordering.ts) */
-  addCollected(seq: Extracted[], startedAt: number): Promise<number>;
+  addCollected(seq: Extracted[], startedAt: number, accountId: string): Promise<number>;
   saveRun(run: CollectRun): Promise<void>;
   clearRun(): Promise<void>;
 }
@@ -93,10 +94,10 @@ export function defaultDeps(): CollectDeps {
     pageOk: () => isBookmarksPath(location.pathname),
     isHidden: () => document.visibilityState === 'hidden',
     accountId: () => getCurrentAccount()?.id ?? null,
-    savedIds: () => getSavedIds(),
+    savedIds: (accountId) => getSavedIds(accountId),
     onDataChanged: (cb) => onDataChanged(cb),
     loadRun: () => getCollectRun(),
-    addCollected: (seq, startedAt) => addCollected(seq, startedAt),
+    addCollected: (seq, startedAt, accountId) => addCollected(seq, startedAt, accountId),
     saveRun: (run) => saveCollectRun(run),
     clearRun: () => clearCollectRun(),
   };
@@ -287,7 +288,7 @@ export class AutoCollector {
   /** 画面に出ているポストを読む。X は画面外のポストを DOM から外す (仮想化) ので、スクロールのたびに読む。新しく見つけた件数を返す */
   private async readVisible(token: number): Promise<number> {
     const items = this.d.visible();
-    const saved = (this.saved ??= await this.d.savedIds());
+    const saved = (this.saved ??= await this.d.savedIds(this.state!.accountId));
     if (token !== this.token) return 0;
     const s = this.state!;
     let fresh = 0;
@@ -320,7 +321,7 @@ export class AutoCollector {
       if (batch.length === 0 || !this.state) return;
       this.writing = true;
       try {
-        await this.d.addCollected(this.seq, this.state.startedAt);
+        await this.d.addCollected(this.seq, this.state.startedAt, this.state.accountId);
         for (const it of batch) this.saved?.add(it.tweetId);
       } catch {
         if (final) {
