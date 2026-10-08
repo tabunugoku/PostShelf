@@ -304,10 +304,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   /** 一括操作を実行し、件数が変わったら取り消し付きトーストを出す */
   const run = async (op: Promise<BookmarkUndo>, msgKey: string) => {
-    const undo = await op;
-    await reload();
-    const n = Object.keys(undo).length;
-    if (n > 0) setToast({ key: Date.now(), message: t(msgKey, n), undo });
+    try {
+      const undo = await op;
+      await reload();
+      const n = Object.keys(undo).length;
+      if (n > 0) setToast({ key: Date.now(), message: t(msgKey, n), undo });
+    } catch {
+      // 保存の失敗 (容量・保存のエラー): 通知を出し、画面は読み直して実際の状態に合わせる
+      setToast({ key: Date.now(), message: t('errorStorage') });
+      await reload().catch(() => {});
+    }
   };
   const doUndo = async () => {
     if (toast?.action) {

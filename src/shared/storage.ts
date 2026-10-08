@@ -326,6 +326,11 @@ export async function getBookmark(tweetId: string): Promise<Bookmark | undefined
   return (await readMap())[key(tweetId)];
 }
 
+/** アカウントを引数で指定して読む。裏方 (service worker) が、画面のアカウントの範囲 (scope) を入れ替えずに読むための関数 */
+export async function getBookmarkOf(accountId: string, tweetId: string): Promise<Bookmark | undefined> {
+  return (await readMap())[bookmarkKey(accountId, tweetId)];
+}
+
 /** 「未分類」の受け皿のフォルダ (名前なし = 表示時に解決) が無ければ作る */
 async function ensureInboxFolder(accountId: string = scope): Promise<void> {
   const all = await readAllFolders();
