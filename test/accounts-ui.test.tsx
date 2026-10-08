@@ -26,6 +26,12 @@ const mount = async (surface: 'tab' | 'sidepanel' = 'tab') => {
 const rowIds = () => $$('[data-row]').map((r) => r.getAttribute('data-row')).sort();
 const switcherBtn = () => $<HTMLButtonElement>('.acct-btn');
 const openSwitcher = async () => click(switcherBtn());
+/** 行の「…」のメニューを開いて、「このアカウントのデータを削除」を押す (v19: ごみ箱は「…」の中) */
+const deleteVia = async (name: string) => {
+  const row = $$('.acct-row').find((r) => r.querySelector('.fr-name')!.textContent === name)!;
+  await click(row.querySelector('[aria-haspopup=menu]')!);
+  await click($('.acct-more [role=menuitem]'));
+};
 const acctRows = () => $$('.acct-row').map((r) => r.querySelector('.fr-name')!.textContent);
 
 /** me: 2 件 / you: 1 件 (同じ tweetId 1 を両方で保存) / 旧データ (unknown): 1 件 */
@@ -174,7 +180,7 @@ describe('E-4: deleting an account\'s data / assigning data', () => {
     await seed();
     await mount();
     await openSwitcher();
-    await click($('.acct-row:nth-child(2) [aria-label^="このアカウントのデータを削除"]'));
+    await deleteVia('@you');
     const msg = $('[role=alertdialog] p').textContent!;
     expect(msg).toContain('@you');
     expect(msg).toContain('1 件');
@@ -191,7 +197,7 @@ describe('E-4: deleting an account\'s data / assigning data', () => {
     await seed();
     await mount();
     await openSwitcher();
-    await click($('.acct-row:nth-child(2) [aria-label^="このアカウントのデータを削除"]'));
+    await deleteVia('@you');
     await click($$('[role=alertdialog] button').find((b) => b.textContent === 'キャンセル')!);
     expect((await listAccounts()).map((a) => a.count)).toEqual([2, 1]);
   });
@@ -216,16 +222,21 @@ describe('E-4: deleting an account\'s data / assigning data', () => {
     expect($('.toast').textContent).toContain('2 件を割り当てました');
   });
 
-  it('the switcher row can also re-attach after a handle change (old account → another account)', async () => {
-    await seed();
+  it('v19: rows switch on click (no arrow button); only the アカウント未設定 row has a 割り当て… button; the trash is inside each row\'s 「…」 menu', async () => {
+    await seed({ withUnknown: true });
     await mount();
     await openSwitcher();
-    await click($('.acct-row:nth-child(2) [aria-label^="割り当て…"]'));
-    expect($('[role=dialog] input[type=radio]:checked')).toBeTruthy();
-    await click($$('[role=dialog] button').find((b) => b.textContent === '割り当て…')!);
-    setAccountScope('me');
-    expect((await listBookmarks()).length).toBe(2); // you の tweet 1 は me の 1 に統合
-    expect((await listAccounts()).map((a) => a.account.id)).toEqual(['me']);
+    expect($$('.acct-row [aria-label*="割り当て"]').length).toBe(1);
+    expect(acctRows()).toEqual(['@me', '@you', 'アカウント未設定']);
+    expect($$('.acct-row').find((r) => r.querySelector('.fr-name')!.textContent === 'アカウント未設定')!.querySelector('.acct-assign')!.textContent).toBe('割り当て…');
+    expect($$('.acct-row .ti-arrows-exchange').length).toBe(0);
+    expect($$('.acct-row .ti-trash').length).toBe(0); // ごみ箱は、「…」を開くまで出ない
+    expect($$('.acct-more').length).toBe(0);
+    await click($$('.acct-row')[1].querySelector('[aria-haspopup=menu]')!);
+    expect($('.acct-more .menu-item').textContent).toContain('このアカウントのデータを削除');
+    expect($('.acct-more .ti-trash')).toBeTruthy();
+    await click($$('.acct-row .acct-assign')[0]); // 「割り当て…」から、データの割り当ての画面へ
+    expect($('[role=dialog] h2').textContent).toBe('データの割り当て');
   });
 });
 
@@ -262,7 +273,7 @@ describe('E-5/E-6: side panel save button and popup follow the account', () => {
     vi.resetModules();
     await act(async () => void (await import('../src/popup/index')));
     await flush();
-    expect($('.popup-account').textContent).toBe('アカウント: @me');
-    expect($('.sub:not(.popup-account)').textContent).toContain('2 ');
+    expect($('.popup-account').textContent?.trim()).toBe('@me');
+    expect($$('.tile b')[0].textContent).toBe('2');
   });
 });

@@ -16,6 +16,42 @@ export interface Settings {
   viewAccount: string;
   /** 画像のキャッシュ (v11)。初期値はオフ */
   imageCache: ImageCacheSettings;
+  /** ブックマークの自動取り込み (v15)。ユーザーが確認ダイアログで同意して始めたときだけ動く */
+  autoCollect: AutoCollectSettings;
+  /**
+   * 長いポストの全文を取得する (v24)。既定はオン。保存した時点で、たたまれたポストのページを裏のタブで開いて読む
+   * (間隔・上限あり。CLAUDE.md の「守ること」の例外)。オフのときは、たたまれた分だけを保存する。保存データに無くても、オンとして扱う
+   */
+  fullText: boolean;
+}
+
+export type CollectSpeed = 'slow' | 'normal';
+/** 1 回の上限 (件)。0 = 止めない */
+export type CollectCap = 300 | 100 | 0;
+
+export interface AutoCollectSettings {
+  /** 「自動取り込みを使う」。オフなら、案内も開始ボタンも出さない (既定はオン。ただし自動では始まらない) */
+  enabled: boolean;
+  speed: CollectSpeed;
+  cap: CollectCap;
+  /** アカウントごとの案内の記録。dismissed = 「このアカウントでは表示しない」/ done = 取り込みが終わった */
+  offers: Record<string, 'dismissed' | 'done'>;
+}
+
+export const DEFAULT_AUTO_COLLECT: AutoCollectSettings = { enabled: true, speed: 'slow', cap: 300, offers: {} };
+
+function normalizeAutoCollect(raw: unknown): AutoCollectSettings {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Partial<AutoCollectSettings>;
+  const offers: AutoCollectSettings['offers'] = {};
+  if (r.offers && typeof r.offers === 'object') {
+    for (const [id, v] of Object.entries(r.offers)) if (v === 'dismissed' || v === 'done') offers[id] = v;
+  }
+  return {
+    enabled: r.enabled !== false,
+    speed: r.speed === 'normal' ? 'normal' : 'slow',
+    cap: r.cap === 100 || r.cap === 0 ? r.cap : 300,
+    offers,
+  };
 }
 
 export type CacheBackend = 'idb' | 'dir';
@@ -58,7 +94,7 @@ export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true };
 
 const KEY = 'settings';
 
@@ -73,6 +109,8 @@ export async function getSettings(): Promise<Settings> {
   if (typeof merged.lastFolderId !== 'string') merged.lastFolderId = 'all';
   if (typeof merged.viewAccount !== 'string') merged.viewAccount = '';
   merged.imageCache = normalizeImageCache(stored.imageCache);
+  merged.autoCollect = normalizeAutoCollect(stored.autoCollect);
+  merged.fullText = stored.fullText !== false; // 省略できる項目: 無ければオン
   return merged;
 }
 
@@ -103,6 +141,33 @@ export function updateImageCache(patch: Partial<ImageCacheSettings>): Promise<Se
   const run = queue.then(async () => {
     const cur = await getSettings();
     const next = { ...cur, imageCache: normalizeImageCache({ ...cur.imageCache, ...patch }) };
+    await chrome.storage.local.set({ [KEY]: next });
+    return next;
+  });
+  queue = run.catch(() => undefined);
+  return run;
+}
+
+/** 自動取り込みの設定だけを更新する (他の設定は変えない。更新は 1 つずつ順に行う) */
+export function updateAutoCollect(patch: Partial<AutoCollectSettings>): Promise<Settings> {
+  const run = queue.then(async () => {
+    const cur = await getSettings();
+    const next = { ...cur, autoCollect: normalizeAutoCollect({ ...cur.autoCollect, ...patch }) };
+    await chrome.storage.local.set({ [KEY]: next });
+    return next;
+  });
+  queue = run.catch(() => undefined);
+  return run;
+}
+
+/** アカウントごとの案内の記録を 1 つ書き換える (null で消す) */
+export function setCollectOffer(accountId: string, value: 'dismissed' | 'done' | null): Promise<Settings> {
+  const run = queue.then(async () => {
+    const cur = await getSettings();
+    const offers = { ...cur.autoCollect.offers };
+    if (value) offers[accountId] = value;
+    else delete offers[accountId];
+    const next = { ...cur, autoCollect: normalizeAutoCollect({ ...cur.autoCollect, offers }) };
     await chrome.storage.local.set({ [KEY]: next });
     return next;
   });
@@ -285,4 +350,157 @@ export async function noteRunVersion(current: string): Promise<string | null> {
   const prev = typeof res[VERSION_KEY] === 'string' ? (res[VERSION_KEY] as string) : null;
   if (prev !== current) await chrome.storage.local.set({ [VERSION_KEY]: current });
   return prev && prev !== current ? prev : null;
+}
+
+
+// ---- ブックマークの自動取り込みの状態とコマンド (v15) ----
+// manager と x.com のタブ (content script) は chrome.storage.local を介して連絡する (新しい権限は使わない)。
+// collectRun: 取り込みの状態 (設定の初期化の対象外)。collectCommand: manager → x.com のタブへの 1 回限りの指示。
+
+export type CollectStatus = 'countdown' | 'running' | 'paused' | 'limit' | 'stopped' | 'done';
+export type CollectReason = 'user' | 'hidden' | 'account' | 'cap' | 'time' | 'reload' | 'limit' | 'page' | 'refused-account' | 'refused-unknown';
+
+export interface CollectRun {
+  status: CollectStatus;
+  accountId: string;
+  startedAt: number;
+  imported: number;
+  skipped: number;
+  failed: number;
+  /** 読み込んだ中でいちばん古い投稿の日時 (ISO) */
+  oldestSeenPostDate?: string;
+  speed: CollectSpeed;
+  cap: CollectCap;
+  reason?: CollectReason;
+  updatedAt: number;
+  /** 取り込みを動かしているタブの ID (タブごとに作る乱数)。複数のタブで同じ取り込みを動かさないための印 (v18) */
+  owner?: string;
+  /** この取り込みを始めた開始コマンドの ID。同じコマンドで二重に始めないための印 (v18) */
+  commandId?: string;
+}
+
+const RUN_KEY = 'collectRun';
+const CMD_KEY = 'collectCommand';
+
+export async function getCollectRun(): Promise<CollectRun | null> {
+  const r = (await chrome.storage.local.get(RUN_KEY))[RUN_KEY] as Partial<CollectRun> | undefined;
+  if (!r || typeof r.status !== 'string' || !['countdown', 'running', 'paused', 'limit', 'stopped', 'done'].includes(r.status)) return null;
+  return {
+    status: r.status as CollectStatus,
+    accountId: String(r.accountId ?? ''),
+    startedAt: Number(r.startedAt) || 0,
+    imported: Number(r.imported) || 0,
+    skipped: Number(r.skipped) || 0,
+    failed: Number(r.failed) || 0,
+    oldestSeenPostDate: typeof r.oldestSeenPostDate === 'string' ? r.oldestSeenPostDate : undefined,
+    speed: r.speed === 'normal' ? 'normal' : 'slow',
+    cap: r.cap === 100 || r.cap === 0 ? r.cap : 300,
+    reason: r.reason,
+    updatedAt: Number(r.updatedAt) || 0,
+    owner: typeof r.owner === 'string' ? r.owner : undefined,
+    commandId: typeof r.commandId === 'string' ? r.commandId : undefined,
+  };
+}
+export const saveCollectRun = (r: CollectRun): Promise<void> => chrome.storage.local.set({ [RUN_KEY]: r });
+/** 結果の記録 (done / stopped) を表示する期間。これを過ぎた結果は、管理画面を開いても出さない (記録は次の取り込みで上書きされる) */
+export const RESULT_TTL_MS = 24 * 60 * 60 * 1000;
+export const staleResult = (r: CollectRun, now = Date.now()): boolean => (r.status === 'done' || r.status === 'stopped') && now - r.updatedAt > RESULT_TTL_MS;
+export const clearCollectRun = (): Promise<void> => chrome.storage.local.remove(RUN_KEY);
+
+export function onCollectRunChanged(cb: () => void): () => void {
+  const listener = (changes: Record<string, unknown>, area: string) => {
+    if (area === 'local' && RUN_KEY in changes) cb();
+  };
+  chrome.storage.onChanged?.addListener(listener as never);
+  return () => chrome.storage.onChanged?.removeListener(listener as never);
+}
+
+export interface CollectCommand {
+  id: string;
+  type: 'start' | 'pause' | 'resume' | 'stop';
+  /** start のとき必須: 確認ダイアログで同意して「始める」を押した印。true でなければ、content script は始めない */
+  consent?: boolean;
+  speed?: CollectSpeed;
+  cap?: CollectCap;
+  accountId?: string;
+  at: number;
+}
+
+export const sendCollectCommand = (c: Omit<CollectCommand, 'id' | 'at'>): Promise<void> =>
+  chrome.storage.local.set({ [CMD_KEY]: { ...c, id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, at: Date.now() } satisfies CollectCommand });
+
+/** 待っているコマンドを読む (消さない) */
+export async function peekCollectCommand(): Promise<CollectCommand | null> {
+  const c = (await chrome.storage.local.get(CMD_KEY))[CMD_KEY] as Partial<CollectCommand> | undefined;
+  if (!c || typeof c.id !== 'string' || !['start', 'pause', 'resume', 'stop'].includes(c.type as string)) return null;
+  return { id: c.id, type: c.type as CollectCommand['type'], consent: c.consent === true, speed: c.speed === 'normal' ? 'normal' : 'slow', cap: c.cap === 100 || c.cap === 0 ? c.cap : 300, accountId: typeof c.accountId === 'string' ? c.accountId : undefined, at: Number(c.at) || 0 };
+}
+export const clearCollectCommand = (): Promise<void> => chrome.storage.local.remove(CMD_KEY);
+
+export function onCollectCommand(cb: () => void): () => void {
+  const listener = (changes: Record<string, { newValue?: unknown }>, area: string) => {
+    if (area === 'local' && CMD_KEY in changes && changes[CMD_KEY].newValue) cb();
+  };
+  chrome.storage.onChanged?.addListener(listener as never);
+  return () => chrome.storage.onChanged?.removeListener(listener as never);
+}
+
+// ---- 長いポストの全文の取得 (v24) の状態 ----
+// 裏方 (service worker) が書き、管理画面の設定が読む。キューそのものは保存せず (保存してある truncated のポストから作り直せる)、進み具合と止めた理由だけを残す。
+
+export type FullTextKind = 'save' | 'auto' | 'manual';
+export type FullTextStop = 'limit' | 'failures' | 'user';
+export interface FullTextRun {
+  running: boolean;
+  kind: FullTextKind;
+  total: number;
+  done: number;
+  failed: number;
+  /** 止めた理由 (limit: X が制限や警告を出した / failures: 連続で 3 件失敗 / user: 止めるボタン) */
+  stopReason?: FullTextStop;
+  updatedAt: number;
+}
+const FT_RUN_KEY = 'fullTextRun';
+const FT_TAB_KEY = 'fullTextTab';
+const FT_TRY_KEY = 'fullTextTries';
+
+export async function getFullTextRun(): Promise<FullTextRun | null> {
+  const r = (await chrome.storage.local.get(FT_RUN_KEY))[FT_RUN_KEY] as Partial<FullTextRun> | undefined;
+  if (!r || typeof r.running !== 'boolean') return null;
+  return {
+    running: r.running,
+    kind: r.kind === 'auto' || r.kind === 'manual' ? r.kind : 'save',
+    total: Number(r.total) || 0,
+    done: Number(r.done) || 0,
+    failed: Number(r.failed) || 0,
+    stopReason: r.stopReason === 'limit' || r.stopReason === 'failures' || r.stopReason === 'user' ? r.stopReason : undefined,
+    updatedAt: Number(r.updatedAt) || 0,
+  };
+}
+export const saveFullTextRun = (r: FullTextRun): Promise<void> => chrome.storage.local.set({ [FT_RUN_KEY]: r });
+export function onFullTextRunChanged(cb: () => void): () => void {
+  const listener = (changes: Record<string, unknown>, area: string) => {
+    if (area === 'local' && FT_RUN_KEY in changes) cb();
+  };
+  chrome.storage.onChanged?.addListener(listener as never);
+  return () => chrome.storage.onChanged?.removeListener(listener as never);
+}
+
+/** 取得のために開いた裏のタブの記録 (閉じ忘れを、起動時に閉じるため) */
+export async function getFullTextTab(): Promise<number | null> {
+  const v = (await chrome.storage.local.get(FT_TAB_KEY))[FT_TAB_KEY];
+  return typeof v === 'number' ? v : null;
+}
+export const setFullTextTab = (id: number | null): Promise<void> =>
+  id === null ? (chrome.storage.local.remove(FT_TAB_KEY) as Promise<void>) : chrome.storage.local.set({ [FT_TAB_KEY]: id });
+
+/** ポストごとの、最後に取りに行った時刻 (同じポストの再試行は 1 時間に 1 回まで)。古い記録は書くときに捨てる */
+export async function getFullTextTries(): Promise<Record<string, number>> {
+  return ((await chrome.storage.local.get(FT_TRY_KEY))[FT_TRY_KEY] ?? {}) as Record<string, number>;
+}
+export async function recordFullTextTry(key: string, now: number, keepMs: number): Promise<void> {
+  const cur = await getFullTextTries();
+  const next = Object.fromEntries(Object.entries(cur).filter(([, t]) => now - t < keepMs));
+  next[key] = now;
+  await chrome.storage.local.set({ [FT_TRY_KEY]: next });
 }

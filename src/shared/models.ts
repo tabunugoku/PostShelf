@@ -1,4 +1,5 @@
 import { t } from './strings';
+import type { Segment } from './segments';
 
 export interface Folder {
   id: string;
@@ -49,6 +50,13 @@ export interface Snapshot {
   hasLink?: boolean;
   /** 動画の `<video poster>` (サムネイルの URL)。保存時に content script が取る (v11)。取れなければ未定義。古い保存分も未定義 */
   videoPoster?: string;
+  /**
+   * X がたたんでいた (「さらに表示」があった) 状態で保存したか (v24。省略可)。真のあいだは、本文が途中までの可能性がある。
+   * 全文を取れたら偽にする。無い保存分は、たたまれていたか不明 = 全文として扱う
+   */
+  truncated?: boolean;
+  /** 本文を、リンクを含む順序つきの部品で持つ (v24。省略可)。text は、検索と書き出しのために残す。無い保存分は text だけで表示する */
+  segments?: Segment[];
 }
 
 export interface Bookmark {

@@ -260,6 +260,8 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
           <span class="muted setting-desc">{t('cacheEnableDesc')}</span>
         </span>
       </label>
+      {/* 初めてオンにするとき Chrome が許可を求める、という補足は、オンにする前に読める位置に置く (畳んでいても残す) */}
+      <p class="muted setting-desc cache-perm-note">{t('cachePermNote')}</p>
       {message && (
         <p class={message.error ? 'error' : 'muted'} role={message.error ? 'alert' : 'status'}>
           {message.text}
@@ -273,7 +275,19 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
           </button>
         </div>
       )}
-      <div class={cfg.enabled ? '' : 'dim'} aria-disabled={!cfg.enabled}>
+      {!cfg.enabled && (
+        <div class="fold" id="cache-collapsed">
+          <span>{t('cacheCollapsedHint')}</span>
+        </div>
+      )}
+      {!cfg.enabled && usage.files > 0 && (
+        <div class="io">
+          <button class="danger" disabled={busy} onClick={() => void askClear()}>
+            {t('cacheClear')}
+          </button>
+        </div>
+      )}
+      {cfg.enabled && (<div>
         <div class="field">
           <div class="lab">{t('cacheDest')}</div>
           <label class="setting">
@@ -374,15 +388,14 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
           </button>
         </div>
         <p class="muted setting-desc">{t('cacheBulkHelp')}</p>
-      </div>
+        <p class="muted setting-desc">{t('cacheRules')}</p>
+      </div>)}
       {cleanup && (
         <div class="warn" role="alert">
           <span>{t('cacheCleanupNeeded')}</span>
           <button onClick={() => void cleanNow()}>{t('cacheCleanupNow')}</button>
         </div>
       )}
-      <p class="muted setting-desc">{t('cachePermNote')}</p>
-      <p class="muted setting-desc">{t('cacheRules')}</p>
 
       {dlg?.kind === 'switch' && (
         <div class="overlay" onClick={() => setDlg(null)}>

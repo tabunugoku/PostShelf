@@ -6,6 +6,35 @@ import { formatDate, t } from '../shared/strings';
 import type { ViewMode } from '../shared/settings';
 import { Dropdown } from './ui';
 import { MediaImg } from './MediaImg';
+import { PostText } from './PostText';
+import type { Snapshot } from '../shared/models';
+
+/**
+ * 動画と画像の札 (v20-A)。判定は、保存してある snapshot.hasVideo と snapshot.media.length だけ (新しい取得はしない)。
+ * 動画のポストには、画像の枚数の札を付けない (media に動画のサムネイルが入っていても、枚数に数えない)。
+ * hasVideo が無い (v7 より前に保存した) ポストは、動画かどうか分からないので、動画の札は付かない。X の GIF は動画として扱われ、「動画」になる。
+ */
+export function mediaKindOf(s: Snapshot): { kind: 'video' } | { kind: 'images'; count: number } | null {
+  if (s.hasVideo === true) return { kind: 'video' };
+  return s.media.length >= 2 ? { kind: 'images', count: s.media.length } : null;
+}
+
+/** リスト表示の、行の右端の札 (動画は青い塗り、画像は枠だけの控えめな見た目) */
+function MediaMark({ s }: { s: Snapshot }) {
+  const k = mediaKindOf(s);
+  if (!k) return null;
+  if (k.kind === 'video')
+    return (
+      <span class="mk v" role="img" aria-label={t('videoBadge')}>
+        <Icon name="ti-video" /> {t('videoBadge')}
+      </span>
+    );
+  return (
+    <span class="mk" role="img" aria-label={t('mediaImages', k.count)}>
+      <Icon name="ti-photo" /> {k.count}
+    </span>
+  );
+}
 
 export interface CardProps {
   b: Bookmark;
@@ -73,7 +102,7 @@ function Actions(props: CardProps) {
             <Icon name="ti-dots-vertical" />
           </button>
           {more && (
-            <Dropdown onClose={() => setMore(false)} label={t('cardMenu')} class="menu-card">
+            <Dropdown fixed onClose={() => setMore(false)} label={t('cardMenu')} class="menu-card">
               <button class="menu-item" onClick={() => { setMore(false); props.onTogglePicker(); }}>
                 <Icon name="ti-folder-plus" /> {t('changeFolder')}
               </button>
@@ -115,7 +144,7 @@ function Actions(props: CardProps) {
  * 画像 / 動画サムネイルのボタン。選択モード (いずれかのポストが選択されている) 中は、クリックで選択を切り替える (ビューアは開かない)。
  * hover / フォーカスで「拡大」のヒント。フォーカスリングは CSS (.ph:focus-visible)。
  */
-function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: number; total?: number; extra?: number }) {
+function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: number; total?: number; extra?: number; /** 画像が 2 枚以上のとき、右下に「重なり + 枚数」の札を出す (グリッドの表紙) */ countBadge?: boolean }) {
   const { card } = props;
   const s = card.b.snapshot;
   const i = props.index ?? 0;
@@ -135,10 +164,17 @@ function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: nu
         <>
           {s.videoPoster && <MediaImg tweetId={card.b.tweetId} name="video-thumb" src={s.videoPoster} alt="" loading="lazy" />}
           <span class="play" aria-hidden="true" />
-          <span class="badge">{t('videoBadge')}</span>
+          <span class="badge" role="img" aria-label={t('videoBadge')}>
+            <Icon name="ti-video" /> {t('videoBadge')}
+          </span>
         </>
       )}
       {props.kind === 'image' && !card.selectionActive && <span class="hint">{t('zoomHint')}</span>}
+      {props.countBadge && (props.total ?? 0) >= 2 && !card.b.snapshot.hasVideo && (
+        <span class="cnt" role="img" aria-label={t('mediaImages', props.total ?? 0)}>
+          <Icon name="ti-stack-2" /> {props.total}
+        </span>
+      )}
       {props.extra ? <span class="more">+{props.extra}</span> : null}
     </button>
   );
@@ -202,6 +238,7 @@ export function Card(props: CardProps) {
         {first ? <Icon name={first.icon} color={first.color} /> : <Icon name="ti-bookmark" />}
         <span class="handle">{s.handle}</span>
         <span class="t">{s.text}</span>
+        <MediaMark s={s} />
         <Actions {...props} />
       </div>
     );
@@ -210,21 +247,23 @@ export function Card(props: CardProps) {
     return (
       <article {...common}>
         {check}
-        {s.media[0] ? (
-          <div class="cover-wrap">
-            <MediaTile card={props} kind="image" index={0} total={s.media.length} />
-          </div>
-        ) : s.hasVideo ? (
+        {s.hasVideo === true ? (
           <div class="cover-wrap">
             <MediaTile card={props} kind="video" />
+          </div>
+        ) : s.media[0] ? (
+          <div class="cover-wrap">
+            <MediaTile card={props} kind="image" index={0} total={s.media.length} countBadge />
           </div>
         ) : null}
         <div class="gc-head">
           <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
         </div>
         <div class="gc-text">{s.text}</div>
-        <FolderChips b={b} folderOf={props.folderOf} removable={false} onRemove={props.onRemoveFromFolder} />
-        <Actions {...props} />
+        <div class="gc-foot">
+          <FolderChips b={b} folderOf={props.folderOf} removable={false} onRemove={props.onRemoveFromFolder} />
+          <Actions {...props} />
+        </div>
       </article>
     );
   }
@@ -237,16 +276,16 @@ export function Card(props: CardProps) {
           <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
           {s.createdAt && <span class="muted"> · {formatDate(s.createdAt)}</span>}
         </div>
-        <div class="text">{s.text}</div>
-        {s.media.length > 0 ? (
+        <PostText s={s} />
+        {s.hasVideo === true ? (
+          <div class="media m1">
+            <MediaTile card={props} kind="video" />
+          </div>
+        ) : s.media.length > 0 ? (
           <div class={`media m${Math.min(s.media.length, 4)}`}>
             {s.media.slice(0, 4).map((_, i) => (
               <MediaTile card={props} kind="image" index={i} total={s.media.length} extra={i === 3 && s.media.length > 4 ? s.media.length - 4 : 0} />
             ))}
-          </div>
-        ) : s.hasVideo ? (
-          <div class="media m1">
-            <MediaTile card={props} kind="video" />
           </div>
         ) : null}
         <FolderChips b={b} folderOf={props.folderOf} removable onRemove={props.onRemoveFromFolder} />

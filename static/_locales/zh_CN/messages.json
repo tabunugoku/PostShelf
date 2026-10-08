@@ -48,7 +48,7 @@
     "message": "添加"
   },
   "noFolders": {
-    "message": "还没有文件夹"
+    "message": "创建的文件夹会显示在这里"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -108,10 +108,10 @@
     "message": "在 X 上打开"
   },
   "popupPosts": {
-    "message": "条帖子"
+    "message": "帖子"
   },
   "popupFolders": {
-    "message": "个文件夹"
+    "message": "文件夹"
   },
   "recent": {
     "message": "最近保存的 3 条"
@@ -155,8 +155,53 @@
   "syncNativeLabel": {
     "message": "与 X 书签同步"
   },
-  "syncNativeDesc": {
-    "message": "将帖子保存到文件夹时，PostShelf 也会将其添加到 X 标准书签；从所有文件夹中移除时，也会取消 X 上的书签。PostShelf 对你操作的每条帖子，只会点击一次屏幕上的书签按钮。默认关闭。"
+  "syncNativeDesc1": {
+    "message": "将帖子保存到文件夹时，PostShelf 也会将其添加到 X 标准书签。"
+  },
+  "syncNativeDesc2": {
+    "message": "从所有文件夹中移除时，也会取消 X 上的书签。"
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf 对你操作的每条帖子，只会点击一次屏幕上的书签按钮。"
+  },
+  "syncNativeNote": {
+    "message": "默认关闭。"
+  },
+  "groupSave": {
+    "message": "保存"
+  },
+  "groupCollect": {
+    "message": "导入"
+  },
+  "groupBehavior": {
+    "message": "显示与操作"
+  },
+  "groupData": {
+    "message": "数据"
+  },
+  "groupInfo": {
+    "message": "信息"
+  },
+  "groupReset": {
+    "message": "重置与删除"
+  },
+  "settingsJump": {
+    "message": "跳转到设置分组"
+  },
+  "syncNativeSection": {
+    "message": "与 X 书签联动"
+  },
+  "dataMoveSection": {
+    "message": "数据的保存与迁移"
+  },
+  "dataMoveDesc": {
+    "message": "将保存的帖子和文件夹导出为文件，或从文件导入。"
+  },
+  "acSection": {
+    "message": "书签自动导入"
+  },
+  "aboutSection": {
+    "message": "关于 PostShelf"
   },
   "savedBadgeTitle": {
     "message": "已保存到 $COUNT$ 个文件夹",
@@ -190,6 +235,9 @@
         "example": "3"
       }
     }
+  },
+  "bulkMenuLabel": {
+    "message": "对所选帖子的操作"
   },
   "bulkAdd": {
     "message": "添加到文件夹"
@@ -353,6 +401,21 @@
   "dismiss": {
     "message": "关闭"
   },
+  "showMore": {
+    "message": "显示更多"
+  },
+  "viewFullOnX": {
+    "message": "在 X 上查看全文"
+  },
+  "noticeMore": {
+    "message": "另有 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "含图片"
   },
@@ -364,6 +427,9 @@
   },
   "filterAuthor": {
     "message": "按作者筛选"
+  },
+  "filterButton": {
+    "message": "筛选"
   },
   "clearFilters": {
     "message": "清除筛选"
@@ -397,9 +463,6 @@
   },
   "viewLabel": {
     "message": "视图"
-  },
-  "dataSection": {
-    "message": "数据"
   },
   "saveCurrentPost": {
     "message": "保存当前打开的帖子…"
@@ -542,14 +605,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "账号：$NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "无法判断 x.com 上登录的账号，因此无法保存。请重新载入 x.com 页面。"
   },
@@ -666,6 +721,15 @@
   "videoBadge": {
     "message": "视频"
   },
+  "mediaImages": {
+    "message": "$COUNT$ 张图片",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "显示视频播放说明"
   },
@@ -686,6 +750,9 @@
   },
   "cacheEnableDesc": {
     "message": "保存帖子时，会把图片也保留在本机。即使 X 上删除了也能查看。视频只保留缩略图。"
+  },
+  "cacheCollapsedHint": {
+    "message": "开启后，可以选择保存位置、容量和画质"
   },
   "cachePermNote": {
     "message": "首次开启时，Chrome 会请求访问 pbs.twimg.com（X 的图片服务器）的权限。只有在开启此功能时才会请求。"
@@ -898,6 +965,64 @@
   "cacheRules": {
     "message": "保存的图片只放在这台电脑里，不会发送到外部。卸载扩展程序后，浏览器内部的缓存也会被删除（自己选择的文件夹不会被删除）。真正想保留的图片请保存到“自己选择的文件夹”。保存数据本身的备份请使用 JSON 导出（不含图片，仅含 URL）。"
   },
+  "fullTextTitle": {
+    "message": "长帖子的全文"
+  },
+  "fullTextSwitch": {
+    "message": "获取长帖子的全文"
+  },
+  "fullTextSwitchDesc": {
+    "message": "保存被 X 折叠为“显示更多”的帖子时，会在后台标签页中打开该帖子的页面，读取全文后关闭。每条之间间隔 4～8 秒，不会操作您正在查看的标签页。按 X 的条款，这可能被视为自动化访问（不构成法律建议）。关闭后，只保存折叠的部分。"
+  },
+  "fullTextPending": {
+    "message": "尚未获取全文的帖子：$COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "立即获取"
+  },
+  "fullTextConfirm": {
+    "message": "将获取 $COUNT$ 条帖子的全文。每条需要 4～8 秒，X 的帖子页面会在后台标签页中打开后关闭。按 X 的条款，这可能被视为自动化访问。要开始吗？",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "开始获取"
+  },
+  "fullTextProgress": {
+    "message": "正在获取：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "停止"
+  },
+  "fullTextStopLimit": {
+    "message": "X 似乎显示了限制或警告，已停止。请隔一段时间后再试。"
+  },
+  "fullTextStopFailures": {
+    "message": "连续 3 条获取失败，已停止。"
+  },
+  "fullTextStopUser": {
+    "message": "已停止获取。"
+  },
   "updateNotice": {
     "message": "PostShelf 已更新（$VERSION$）",
     "placeholders": {
@@ -922,7 +1047,315 @@
   "installGuideLink": {
     "message": "更新和手动安装的步骤"
   },
+  "githubLink": {
+    "message": "在 GitHub 上查看"
+  },
+  "githubLinkAria": {
+    "message": "在 GitHub 上查看（在新标签页中打开）"
+  },
   "errorStorage": {
     "message": "保存或读取失败。请重试。如果问题持续出现，请先在设置的“数据”中用“导出”保存数据，然后重新加载扩展程序。"
+  },
+  "removeFromPostShelf": {
+    "message": "从 PostShelf 中移除"
+  },
+  "acPanelLabel": {
+    "message": "书签自动导入"
+  },
+  "acPanelRunning": {
+    "message": "正在导入书签"
+  },
+  "acPanelPaused": {
+    "message": "已暂停"
+  },
+  "acPanelLimit": {
+    "message": "已自动停止"
+  },
+  "acPanelDone": {
+    "message": "导入已完成"
+  },
+  "acPanelStopped": {
+    "message": "导入已停止"
+  },
+  "acPanelCountdown": {
+    "message": "$SEC$ 秒后开始",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "以“$SPEED$”速度读取中",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "以“$SPEED$”速度读取中。现在在 $DATE$ 前后的帖子",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "慢速"
+  },
+  "acSpeedNormal": {
+    "message": "标准"
+  },
+  "acReasonUser": {
+    "message": "已暂停"
+  },
+  "acReasonHidden": {
+    "message": "因为切换到了其他标签页，已自动暂停"
+  },
+  "acReasonAccount": {
+    "message": "因为账号已切换，已暂停"
+  },
+  "acReasonCap": {
+    "message": "已达到 $COUNT$ 条的上限，已暂停",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonTime": {
+    "message": "已达到单次导入 2 小时的上限，已暂停"
+  },
+  "acReasonReload": {
+    "message": "因为页面已重新加载，已暂停"
+  },
+  "acReasonLimit": {
+    "message": "X 可能显示了限制"
+  },
+  "acReasonPage": {
+    "message": "因为离开了书签页面，已暂停"
+  },
+  "acReasonRefusedAccount": {
+    "message": "无法开始：管理页面中选择的账号与 x.com 上的账号不一致"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "无法开始：无法判断 x.com 上的账号"
+  },
+  "acSubDone": {
+    "message": "已读取到最早的书签"
+  },
+  "acSubStopped": {
+    "message": "到这里为止的内容已经导入"
+  },
+  "acNoteRunning": {
+    "message": "请保持此标签页打开。切换到其他标签页会自动暂停。"
+  },
+  "acNotePaused": {
+    "message": "继续后会从中断处接着导入。已导入的帖子会被跳过，并按 X 书签的顺序排列。"
+  },
+  "acNoteReload": {
+    "message": "继续后会从列表开头重新读取。已导入的帖子会被跳过。"
+  },
+  "acNoteDone": {
+    "message": "已按 X 的顺序整理。可以在“未分类”中分到各个文件夹。"
+  },
+  "acLimitAlert": {
+    "message": "X 的页面出现了错误或限制提示，已停止。请至少等待 15 分钟后再继续。连续尝试可能会让限制持续更久。"
+  },
+  "acResumeAt": {
+    "message": "将于 $TIME$ 继续（请保持此标签页打开）",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "已导入"
+  },
+  "acStatSkipped": {
+    "message": "已跳过"
+  },
+  "acStatFailed": {
+    "message": "失败"
+  },
+  "acOldest": {
+    "message": "最早的帖子：$DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "暂停"
+  },
+  "acBtnStop": {
+    "message": "停止"
+  },
+  "acBtnResume": {
+    "message": "继续"
+  },
+  "acBtnEnd": {
+    "message": "到此结束"
+  },
+  "acBtnResumeLater": {
+    "message": "15 分钟后继续"
+  },
+  "acBtnOpenManager": {
+    "message": "打开管理页面"
+  },
+  "acBtnClose": {
+    "message": "关闭"
+  },
+  "acBtnAuto": {
+    "message": "自动导入…"
+  },
+  "acBtnAutoTitle": {
+    "message": "自动滚动书签标签并导入。单次上限可在设置中修改"
+  },
+  "acManualTitle": {
+    "message": "只导入当前可见的部分"
+  },
+  "acOfferTitle": {
+    "message": "要导入你的 X 书签吗？"
+  },
+  "acOfferBody": {
+    "message": "你是第一次用 $ACCOUNT$ 使用 PostShelf。它会打开 x.com 的“历史记录”→“书签”，自动滚动页面并导入。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "开始导入…"
+  },
+  "acOfferLater": {
+    "message": "稍后"
+  },
+  "acOfferNever": {
+    "message": "此账号不再显示"
+  },
+  "acDlgTitle": {
+    "message": "自动导入"
+  },
+  "acDlgIntro": {
+    "message": "账号：$ACCOUNT$。将自动滚动 x.com 的书签标签并读取。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "速度"
+  },
+  "acSpeedSlowOpt": {
+    "message": "慢速（推荐）"
+  },
+  "acSpeedSlowHint": {
+    "message": "约每分钟 20–40 条"
+  },
+  "acSpeedNormalHint": {
+    "message": "约每分钟 40–80 条"
+  },
+  "acCapLabel": {
+    "message": "单次上限"
+  },
+  "acCap300": {
+    "message": "每 300 条暂停一次（推荐）"
+  },
+  "acCap100": {
+    "message": "每 100 条暂停一次"
+  },
+  "acCap0": {
+    "message": "不暂停"
+  },
+  "acOrderX": {
+    "message": "x.com 的书签"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf（导入后）"
+  },
+  "acOrderNewest": {
+    "message": "最新的帖子"
+  },
+  "acOrderPrev": {
+    "message": "之前的帖子"
+  },
+  "acOrderOld": {
+    "message": "……更早的帖子"
+  },
+  "acOrderSame": {
+    "message": "顺序相同"
+  },
+  "acRisk": {
+    "message": "自动滚动可能被视为 X 条款所禁止的“自动化访问”。即使账号受到限制等情况，PostShelf 的作者也无法承担责任。请仅依据你自己的判断，仅对你自己的账号进行导入。"
+  },
+  "acConsent": {
+    "message": "我已理解以上内容，并依据自己的判断执行"
+  },
+  "acDlgStart": {
+    "message": "开始导入"
+  },
+  "acProgressLine": {
+    "message": "已导入 $IMPORTED$ 条，已跳过 $SKIPPED$ 条",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "打开 x.com 标签页"
+  },
+  "acSettingsSwitch": {
+    "message": "使用自动导入"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "关闭后，将不再显示导入提示和开始按钮。即使开启，也不会自动开始。"
+  },
+  "acSettingsRun": {
+    "message": "自动导入书签…"
+  },
+  "acSettingsNote": {
+    "message": "自动滚动可能被视为 X 条款中的“自动化访问”。开始前请阅读确认页面中的内容。"
+  },
+  "acNoAccount": {
+    "message": "无法判断账号，因此无法开始。请打开 x.com 登录后再试一次。"
+  },
+  "addFolder": {
+    "message": "添加文件夹"
+  },
+  "createFolder": {
+    "message": "创建文件夹"
+  },
+  "create": {
+    "message": "创建"
+  },
+  "back": {
+    "message": "返回"
+  },
+  "errDuplicateFolder": {
+    "message": "已有同名的文件夹"
   }
 }

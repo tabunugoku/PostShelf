@@ -68,7 +68,7 @@ describe('popover + syncNative', () => {
     const spy = vi.fn(() => native.setAttribute('data-testid', 'removeBookmark')); // X がトグルした状態を模擬
     native.addEventListener('click', spy);
     const pop = (await openPopover(document.querySelector('article')!, document.querySelector('[data-postshelf-btn]')!))!;
-    return { pop, spy, native, cb: pop.querySelector<HTMLInputElement>('input[type=checkbox]')! };
+    return { pop, spy, native, cb: pop.querySelectorAll<HTMLInputElement>('input[type=checkbox]')[1]! }; // [0] は「未分類」
   }
   const toggle = async (cb: HTMLInputElement, v: boolean) => {
     cb.checked = v;
@@ -82,19 +82,28 @@ describe('popover + syncNative', () => {
     await toggle(cb, false);
     expect(spy).not.toHaveBeenCalled();
   });
-  it('on: checking a folder bookmarks natively once; unchecking all removes it once', async () => {
-    const { cb, spy, native } = await setup(true);
+  it('on: checking a folder bookmarks natively once; "PostShelf から外す" removes it once', async () => {
+    const { pop, cb, spy, native } = await setup(true);
     await toggle(cb, true);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(native.getAttribute('data-testid')).toBe('removeBookmark');
-    await toggle(cb, false);
+    await toggle(cb, false); // 最後のフォルダを外すと「未分類」になる (保存は残る)
+    expect(spy).toHaveBeenCalledTimes(1);
+    const unsave = [...pop.querySelectorAll('button')].find((b) => b.textContent === 'PostShelf から外す')!;
+    unsave.click();
+    await tick();
     expect(spy).toHaveBeenCalledTimes(2); // removeBookmark を 1 回 click
+  });
+  it('on: saving as 未分類 also bookmarks natively', async () => {
+    const { pop, spy } = await setup(true);
+    await toggle(pop.querySelectorAll<HTMLInputElement>('input[type=checkbox]')[0], true);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
   it('on: second folder while already bookmarked does not click again', async () => {
     await updateSettings({ syncNative: true });
     await createFolder({ name: 'b' });
     const { pop, spy } = await setup(true);
-    const [a, b] = [...pop.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
+    const [, a, b] = [...pop.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
     await toggle(a, true);
     await toggle(b, true);
     expect(spy).toHaveBeenCalledTimes(1);

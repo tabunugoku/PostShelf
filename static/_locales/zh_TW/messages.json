@@ -48,7 +48,7 @@
     "message": "新增"
   },
   "noFolders": {
-    "message": "尚無資料夾"
+    "message": "建立的資料夾會顯示在這裡"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -108,10 +108,10 @@
     "message": "在 X 上開啟"
   },
   "popupPosts": {
-    "message": "則貼文"
+    "message": "貼文"
   },
   "popupFolders": {
-    "message": "個資料夾"
+    "message": "資料夾"
   },
   "recent": {
     "message": "最近儲存的 3 則"
@@ -155,8 +155,53 @@
   "syncNativeLabel": {
     "message": "與 X 書籤同步"
   },
-  "syncNativeDesc": {
-    "message": "將貼文儲存到資料夾時，PostShelf 也會將其加入 X 標準書籤；從所有資料夾中移除時，也會取消 X 上的書籤。PostShelf 對你操作的每則貼文，只會點擊一次畫面上的書籤按鈕。預設為關閉。"
+  "syncNativeDesc1": {
+    "message": "將貼文儲存到資料夾時，PostShelf 也會將其加入 X 標準書籤。"
+  },
+  "syncNativeDesc2": {
+    "message": "從所有資料夾中移除時，也會取消 X 上的書籤。"
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf 對你操作的每則貼文，只會點擊一次畫面上的書籤按鈕。"
+  },
+  "syncNativeNote": {
+    "message": "預設為關閉。"
+  },
+  "groupSave": {
+    "message": "儲存"
+  },
+  "groupCollect": {
+    "message": "匯入"
+  },
+  "groupBehavior": {
+    "message": "顯示與操作"
+  },
+  "groupData": {
+    "message": "資料"
+  },
+  "groupInfo": {
+    "message": "資訊"
+  },
+  "groupReset": {
+    "message": "重設與刪除"
+  },
+  "settingsJump": {
+    "message": "跳到設定群組"
+  },
+  "syncNativeSection": {
+    "message": "與 X 書籤連動"
+  },
+  "dataMoveSection": {
+    "message": "資料的儲存與遷移"
+  },
+  "dataMoveDesc": {
+    "message": "將儲存的貼文和資料夾匯出為檔案，或從檔案匯入。"
+  },
+  "acSection": {
+    "message": "書籤自動匯入"
+  },
+  "aboutSection": {
+    "message": "關於 PostShelf"
   },
   "savedBadgeTitle": {
     "message": "已儲存到 $COUNT$ 個資料夾",
@@ -190,6 +235,9 @@
         "example": "3"
       }
     }
+  },
+  "bulkMenuLabel": {
+    "message": "對所選貼文的操作"
   },
   "bulkAdd": {
     "message": "加入資料夾"
@@ -353,6 +401,21 @@
   "dismiss": {
     "message": "關閉"
   },
+  "showMore": {
+    "message": "顯示更多"
+  },
+  "viewFullOnX": {
+    "message": "在 X 上查看全文"
+  },
+  "noticeMore": {
+    "message": "另有 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "含圖片"
   },
@@ -364,6 +427,9 @@
   },
   "filterAuthor": {
     "message": "依作者篩選"
+  },
+  "filterButton": {
+    "message": "篩選"
   },
   "clearFilters": {
     "message": "清除篩選"
@@ -397,9 +463,6 @@
   },
   "viewLabel": {
     "message": "檢視"
-  },
-  "dataSection": {
-    "message": "資料"
   },
   "saveCurrentPost": {
     "message": "儲存目前開啟的貼文…"
@@ -542,14 +605,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "帳號：$NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "無法判斷 x.com 上登入的帳號，因此無法儲存。請重新載入 x.com 頁面。"
   },
@@ -666,6 +721,15 @@
   "videoBadge": {
     "message": "影片"
   },
+  "mediaImages": {
+    "message": "$COUNT$ 張圖片",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "顯示影片播放說明"
   },
@@ -686,6 +750,9 @@
   },
   "cacheEnableDesc": {
     "message": "儲存貼文時，會把圖片也保留在本機。即使 X 上刪除了也能檢視。影片只保留縮圖。"
+  },
+  "cacheCollapsedHint": {
+    "message": "開啟後，可以選擇儲存位置、容量和畫質"
   },
   "cachePermNote": {
     "message": "首次開啟時，Chrome 會要求存取 pbs.twimg.com（X 的圖片伺服器）的權限。只有在開啟此功能時才會要求。"
@@ -898,6 +965,64 @@
   "cacheRules": {
     "message": "儲存的圖片只放在這台電腦裡，不會傳送到外部。移除擴充功能後，瀏覽器內部的快取也會被刪除（自己選擇的資料夾不會被刪除）。真正想保留的圖片請儲存到「自己選擇的資料夾」。儲存資料本身的備份請使用 JSON 匯出（不含圖片，僅含 URL）。"
   },
+  "fullTextTitle": {
+    "message": "長貼文的全文"
+  },
+  "fullTextSwitch": {
+    "message": "取得長貼文的全文"
+  },
+  "fullTextSwitchDesc": {
+    "message": "儲存被 X 摺疊為「顯示更多」的貼文時，會在背景分頁中開啟該貼文的頁面，讀取全文後關閉。每則之間間隔 4～8 秒，不會操作您正在檢視的分頁。依 X 的條款，這可能被視為自動化存取（不構成法律建議）。關閉後，只儲存摺疊的部分。"
+  },
+  "fullTextPending": {
+    "message": "尚未取得全文的貼文：$COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "立即取得"
+  },
+  "fullTextConfirm": {
+    "message": "將取得 $COUNT$ 則貼文的全文。每則需要 4～8 秒，X 的貼文頁面會在背景分頁中開啟後關閉。依 X 的條款，這可能被視為自動化存取。要開始嗎？",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "開始取得"
+  },
+  "fullTextProgress": {
+    "message": "正在取得：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "停止"
+  },
+  "fullTextStopLimit": {
+    "message": "X 似乎顯示了限制或警告，已停止。請隔一段時間後再試。"
+  },
+  "fullTextStopFailures": {
+    "message": "連續 3 則取得失敗，已停止。"
+  },
+  "fullTextStopUser": {
+    "message": "已停止取得。"
+  },
   "updateNotice": {
     "message": "PostShelf 已更新（$VERSION$）",
     "placeholders": {
@@ -922,7 +1047,315 @@
   "installGuideLink": {
     "message": "更新和手動安裝的步驟"
   },
+  "githubLink": {
+    "message": "在 GitHub 上查看"
+  },
+  "githubLinkAria": {
+    "message": "在 GitHub 上查看（在新分頁中開啟）"
+  },
   "errorStorage": {
     "message": "儲存或讀取失敗。請再試一次。若持續發生，請先在設定的「資料」中用「匯出」儲存資料，然後重新載入擴充功能。"
+  },
+  "removeFromPostShelf": {
+    "message": "從 PostShelf 中移除"
+  },
+  "acPanelLabel": {
+    "message": "書籤自動匯入"
+  },
+  "acPanelRunning": {
+    "message": "正在匯入書籤"
+  },
+  "acPanelPaused": {
+    "message": "已暫停"
+  },
+  "acPanelLimit": {
+    "message": "已自動停止"
+  },
+  "acPanelDone": {
+    "message": "匯入已完成"
+  },
+  "acPanelStopped": {
+    "message": "匯入已停止"
+  },
+  "acPanelCountdown": {
+    "message": "$SEC$ 秒後開始",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "以「$SPEED$」速度讀取中",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "以「$SPEED$」速度讀取中。現在在 $DATE$ 前後的貼文",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "慢速"
+  },
+  "acSpeedNormal": {
+    "message": "標準"
+  },
+  "acReasonUser": {
+    "message": "已暫停"
+  },
+  "acReasonHidden": {
+    "message": "因為切換到其他分頁，已自動暫停"
+  },
+  "acReasonAccount": {
+    "message": "因為帳號已切換，已暫停"
+  },
+  "acReasonCap": {
+    "message": "已達到 $COUNT$ 則的上限，已暫停",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonTime": {
+    "message": "已達到單次匯入 2 小時的上限，已暫停"
+  },
+  "acReasonReload": {
+    "message": "因為頁面已重新載入，已暫停"
+  },
+  "acReasonLimit": {
+    "message": "X 可能顯示了限制"
+  },
+  "acReasonPage": {
+    "message": "因為離開了書籤頁面，已暫停"
+  },
+  "acReasonRefusedAccount": {
+    "message": "無法開始：管理頁面中選擇的帳號與 x.com 上的帳號不一致"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "無法開始：無法判斷 x.com 上的帳號"
+  },
+  "acSubDone": {
+    "message": "已讀取到最早的書籤"
+  },
+  "acSubStopped": {
+    "message": "到這裡為止的內容已經匯入"
+  },
+  "acNoteRunning": {
+    "message": "請保持此分頁開啟。切換到其他分頁會自動暫停。"
+  },
+  "acNotePaused": {
+    "message": "繼續後會從中斷處接著匯入。已匯入的貼文會被略過，並依 X 書籤的順序排列。"
+  },
+  "acNoteReload": {
+    "message": "繼續後會從清單開頭重新讀取。已匯入的貼文會被略過。"
+  },
+  "acNoteDone": {
+    "message": "已依 X 的順序整理。可以在「未分類」中分到各個資料夾。"
+  },
+  "acLimitAlert": {
+    "message": "X 的頁面出現了錯誤或限制提示，已停止。請至少等待 15 分鐘後再繼續。連續嘗試可能會讓限制持續更久。"
+  },
+  "acResumeAt": {
+    "message": "將於 $TIME$ 繼續（請保持此分頁開啟）",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "已匯入"
+  },
+  "acStatSkipped": {
+    "message": "已略過"
+  },
+  "acStatFailed": {
+    "message": "失敗"
+  },
+  "acOldest": {
+    "message": "最早的貼文：$DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "暫停"
+  },
+  "acBtnStop": {
+    "message": "停止"
+  },
+  "acBtnResume": {
+    "message": "繼續"
+  },
+  "acBtnEnd": {
+    "message": "到此結束"
+  },
+  "acBtnResumeLater": {
+    "message": "15 分鐘後繼續"
+  },
+  "acBtnOpenManager": {
+    "message": "開啟管理頁面"
+  },
+  "acBtnClose": {
+    "message": "關閉"
+  },
+  "acBtnAuto": {
+    "message": "自動匯入…"
+  },
+  "acBtnAutoTitle": {
+    "message": "自動捲動書籤分頁並匯入。單次上限可在設定中變更"
+  },
+  "acManualTitle": {
+    "message": "只匯入目前可見的部分"
+  },
+  "acOfferTitle": {
+    "message": "要匯入你的 X 書籤嗎？"
+  },
+  "acOfferBody": {
+    "message": "你是第一次用 $ACCOUNT$ 使用 PostShelf。它會開啟 x.com 的「歷史記錄」→「書籤」，自動捲動頁面並匯入。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "開始匯入…"
+  },
+  "acOfferLater": {
+    "message": "稍後"
+  },
+  "acOfferNever": {
+    "message": "此帳號不再顯示"
+  },
+  "acDlgTitle": {
+    "message": "自動匯入"
+  },
+  "acDlgIntro": {
+    "message": "帳號：$ACCOUNT$。將自動捲動 x.com 的書籤分頁並讀取。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "速度"
+  },
+  "acSpeedSlowOpt": {
+    "message": "慢速（建議）"
+  },
+  "acSpeedSlowHint": {
+    "message": "約每分鐘 20–40 則"
+  },
+  "acSpeedNormalHint": {
+    "message": "約每分鐘 40–80 則"
+  },
+  "acCapLabel": {
+    "message": "單次上限"
+  },
+  "acCap300": {
+    "message": "每 300 則暫停一次（建議）"
+  },
+  "acCap100": {
+    "message": "每 100 則暫停一次"
+  },
+  "acCap0": {
+    "message": "不暫停"
+  },
+  "acOrderX": {
+    "message": "x.com 的書籤"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf（匯入後）"
+  },
+  "acOrderNewest": {
+    "message": "最新的貼文"
+  },
+  "acOrderPrev": {
+    "message": "之前的貼文"
+  },
+  "acOrderOld": {
+    "message": "……更早的貼文"
+  },
+  "acOrderSame": {
+    "message": "順序相同"
+  },
+  "acRisk": {
+    "message": "自動捲動可能被視為 X 條款所禁止的「自動化存取」。即使帳號受到限制等情況，PostShelf 的作者也無法承擔責任。請僅依據你自己的判斷，僅對你自己的帳號進行匯入。"
+  },
+  "acConsent": {
+    "message": "我已理解以上內容，並依據自己的判斷執行"
+  },
+  "acDlgStart": {
+    "message": "開始匯入"
+  },
+  "acProgressLine": {
+    "message": "已匯入 $IMPORTED$ 則，已略過 $SKIPPED$ 則",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "開啟 x.com 分頁"
+  },
+  "acSettingsSwitch": {
+    "message": "使用自動匯入"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "關閉後，將不再顯示匯入提示和開始按鈕。即使開啟，也不會自動開始。"
+  },
+  "acSettingsRun": {
+    "message": "自動匯入書籤…"
+  },
+  "acSettingsNote": {
+    "message": "自動捲動可能被視為 X 條款中的「自動化存取」。開始前請閱讀確認頁面中的內容。"
+  },
+  "acNoAccount": {
+    "message": "無法判斷帳號，因此無法開始。請開啟 x.com 登入後再試一次。"
+  },
+  "addFolder": {
+    "message": "新增資料夾"
+  },
+  "createFolder": {
+    "message": "建立資料夾"
+  },
+  "create": {
+    "message": "建立"
+  },
+  "back": {
+    "message": "返回"
+  },
+  "errDuplicateFolder": {
+    "message": "已有同名的資料夾"
   }
 }

@@ -142,12 +142,12 @@ describe('narrow layout', () => {
     await flush();
   };
 
-  it('width <= 520px: folder button + horizontally scrolling chips, no sidebar (shared components)', async () => {
+  it('width <= 520px: folder dropdown only (no folder chip row), no sidebar (shared components)', async () => {
     await mountAt(400);
     expect($('.app').classList.contains('layout-narrow')).toBe(true);
     expect($$('.side').length).toBe(0);
     expect($('.folder-btn').getAttribute('aria-haspopup')).toBe('menu');
-    expect($$('.scroll .chip').length).toBeGreaterThanOrEqual(3); // すべて / 未分類 / 最近の 7 日
+    expect($$('.scroll').length).toBe(0); // フォルダのチップ列はない (ドロップダウンに一本化)
     expect($$('[aria-label="タブで開く"]').length).toBe(1);
     await act(() => void render(null, $('#app')));
   });
@@ -170,9 +170,9 @@ describe('narrow layout', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
   });
 
-  it('css: chips scroll horizontally, bulk bar stacks, list rows stay single-line', () => {
+  it('css: list rows stay single-line, the tools row does not wrap (the bulk bar is a menu button now)', () => {
     expect(css).toMatch(/\.scroll\{[^}]*overflow-x:auto/);
-    expect(css).toMatch(/\.layout-narrow \.bulk\{flex-direction:column/);
+    expect(css).toMatch(/\.layout-narrow \.tools\{[^}]*flex-wrap:nowrap/);
     expect(css).toMatch(/\.mini \.t\{[^}]*white-space:nowrap/);
   });
 });

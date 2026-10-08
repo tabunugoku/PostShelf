@@ -48,7 +48,7 @@
     "message": "추가"
   },
   "noFolders": {
-    "message": "폴더가 없습니다"
+    "message": "폴더를 만들면 여기에 표시됩니다"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -108,10 +108,10 @@
     "message": "X에서 열기"
   },
   "popupPosts": {
-    "message": "개 게시물"
+    "message": "게시물"
   },
   "popupFolders": {
-    "message": "개 폴더"
+    "message": "폴더"
   },
   "recent": {
     "message": "최근 저장한 3개"
@@ -155,8 +155,53 @@
   "syncNativeLabel": {
     "message": "X 북마크와 연동"
   },
-  "syncNativeDesc": {
-    "message": "게시물을 폴더에 저장하면 PostShelf가 X 표준 북마크에도 추가하고, 모든 폴더에서 제외하면 X 북마크도 해제합니다. PostShelf가 화면의 북마크 버튼을 누르는 것은 조작한 게시물 1개당 한 번뿐입니다. 기본값은 꺼짐입니다."
+  "syncNativeDesc1": {
+    "message": "게시물을 폴더에 저장하면 PostShelf가 X 표준 북마크에도 추가합니다."
+  },
+  "syncNativeDesc2": {
+    "message": "모든 폴더에서 제외하면 X 북마크도 해제합니다."
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf가 화면의 북마크 버튼을 누르는 것은 조작한 게시물 1개당 한 번뿐입니다."
+  },
+  "syncNativeNote": {
+    "message": "기본값은 꺼짐입니다."
+  },
+  "groupSave": {
+    "message": "저장"
+  },
+  "groupCollect": {
+    "message": "가져오기"
+  },
+  "groupBehavior": {
+    "message": "표시와 동작"
+  },
+  "groupData": {
+    "message": "데이터"
+  },
+  "groupInfo": {
+    "message": "정보"
+  },
+  "groupReset": {
+    "message": "초기화와 삭제"
+  },
+  "settingsJump": {
+    "message": "설정 그룹으로 이동"
+  },
+  "syncNativeSection": {
+    "message": "X 북마크와 연동"
+  },
+  "dataMoveSection": {
+    "message": "데이터 백업과 이전"
+  },
+  "dataMoveDesc": {
+    "message": "저장한 게시물과 폴더를 파일로 내보내거나 파일에서 가져옵니다."
+  },
+  "acSection": {
+    "message": "북마크 자동 가져오기"
+  },
+  "aboutSection": {
+    "message": "PostShelf 정보"
   },
   "savedBadgeTitle": {
     "message": "폴더 $COUNT$개에 저장됨",
@@ -190,6 +235,9 @@
         "example": "3"
       }
     }
+  },
+  "bulkMenuLabel": {
+    "message": "선택한 게시물 작업"
   },
   "bulkAdd": {
     "message": "폴더에 추가"
@@ -353,6 +401,21 @@
   "dismiss": {
     "message": "닫기"
   },
+  "showMore": {
+    "message": "더 보기"
+  },
+  "viewFullOnX": {
+    "message": "X에서 전문 보기"
+  },
+  "noticeMore": {
+    "message": "외 $COUNT$건",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "이미지 있음"
   },
@@ -364,6 +427,9 @@
   },
   "filterAuthor": {
     "message": "작성자로 필터"
+  },
+  "filterButton": {
+    "message": "필터"
   },
   "clearFilters": {
     "message": "필터 해제"
@@ -397,9 +463,6 @@
   },
   "viewLabel": {
     "message": "보기 방식"
-  },
-  "dataSection": {
-    "message": "데이터"
   },
   "saveCurrentPost": {
     "message": "지금 열려 있는 게시물 저장…"
@@ -542,14 +605,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "계정: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "x.com에서 로그인한 계정을 확인할 수 없어 저장할 수 없습니다. x.com 페이지를 새로고침하세요."
   },
@@ -666,6 +721,15 @@
   "videoBadge": {
     "message": "동영상"
   },
+  "mediaImages": {
+    "message": "이미지 $COUNT$장",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "동영상 안내 표시"
   },
@@ -686,6 +750,9 @@
   },
   "cacheEnableDesc": {
     "message": "게시물을 저장할 때 이미지를 이 컴퓨터에도 남깁니다. X에서 삭제되어도 볼 수 있습니다. 동영상은 썸네일만 남깁니다."
+  },
+  "cacheCollapsedHint": {
+    "message": "켜면 저장 위치, 용량, 화질을 고를 수 있습니다"
   },
   "cachePermNote": {
     "message": "처음 켤 때 Chrome이 pbs.twimg.com(X의 이미지 서버) 접근 권한을 요청합니다. 이 기능을 켤 때만 요청합니다."
@@ -898,6 +965,64 @@
   "cacheRules": {
     "message": "저장한 이미지는 이 PC 안에만 두며 외부로 보내지 않습니다. 확장 프로그램을 삭제하면 브라우저 내부의 캐시도 삭제됩니다(직접 고른 폴더는 삭제되지 않습니다). 정말 남기고 싶은 이미지는 \"직접 고른 폴더\"에 저장하세요. 저장 데이터 자체의 백업에는 JSON 내보내기를 사용하세요(이미지는 포함되지 않고 URL만 들어갑니다)."
   },
+  "fullTextTitle": {
+    "message": "긴 게시물의 전문"
+  },
+  "fullTextSwitch": {
+    "message": "긴 게시물의 전문 가져오기"
+  },
+  "fullTextSwitchDesc": {
+    "message": "X에서 ‘더 보기’로 접힌 게시물을 저장하면, 그 게시물의 페이지를 백그라운드 탭에서 열어 전문을 읽고 닫습니다. 한 건마다 4~8초 간격을 두며, 지금 보고 있는 탭은 건드리지 않습니다. X의 약관상 자동화된 접근으로 간주될 수 있습니다(법률 자문이 아닙니다). 끄면 접힌 부분만 저장합니다."
+  },
+  "fullTextPending": {
+    "message": "전문을 가져오지 않은 게시물: $COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "지금 가져오기"
+  },
+  "fullTextConfirm": {
+    "message": "$COUNT$개 게시물의 전문을 가져옵니다. 한 건에 4~8초가 걸리며, X의 게시물 페이지가 백그라운드 탭에서 열렸다 닫힙니다. X의 약관상 자동화된 접근으로 간주될 수 있습니다. 시작할까요?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "가져오기 시작"
+  },
+  "fullTextProgress": {
+    "message": "가져오는 중: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "중지"
+  },
+  "fullTextStopLimit": {
+    "message": "X가 제한이나 경고를 표시한 것 같아 멈췄습니다. 잠시 후 다시 시도하세요."
+  },
+  "fullTextStopFailures": {
+    "message": "연속 3건을 가져오지 못해 멈췄습니다."
+  },
+  "fullTextStopUser": {
+    "message": "가져오기를 멈췄습니다."
+  },
   "updateNotice": {
     "message": "PostShelf를 업데이트했습니다($VERSION$)",
     "placeholders": {
@@ -922,7 +1047,315 @@
   "installGuideLink": {
     "message": "업데이트 및 수동 설치 방법"
   },
+  "githubLink": {
+    "message": "GitHub에서 보기"
+  },
+  "githubLinkAria": {
+    "message": "GitHub에서 보기(새 탭에서 열림)"
+  },
   "errorStorage": {
     "message": "저장 또는 불러오기에 실패했습니다. 다시 시도해 주세요. 계속되면 설정의 \"데이터\"에서 \"내보내기\"로 저장한 뒤 확장 프로그램을 새로고침하세요."
+  },
+  "removeFromPostShelf": {
+    "message": "PostShelf에서 제거"
+  },
+  "acPanelLabel": {
+    "message": "북마크 자동 가져오기"
+  },
+  "acPanelRunning": {
+    "message": "북마크를 가져오는 중"
+  },
+  "acPanelPaused": {
+    "message": "일시 중지됨"
+  },
+  "acPanelLimit": {
+    "message": "자동으로 멈췄습니다"
+  },
+  "acPanelDone": {
+    "message": "가져오기가 끝났습니다"
+  },
+  "acPanelStopped": {
+    "message": "가져오기를 멈췄습니다"
+  },
+  "acPanelCountdown": {
+    "message": "$SEC$초 후에 시작합니다",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "$SPEED$ 속도로 불러오는 중",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "$SPEED$ 속도로 불러오는 중. 지금은 $DATE$ 무렵의 게시물입니다",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "느리게"
+  },
+  "acSpeedNormal": {
+    "message": "보통"
+  },
+  "acReasonUser": {
+    "message": "일시 중지했습니다"
+  },
+  "acReasonHidden": {
+    "message": "다른 탭으로 전환해서 자동으로 멈췄습니다"
+  },
+  "acReasonAccount": {
+    "message": "계정이 바뀌어서 멈췄습니다"
+  },
+  "acReasonCap": {
+    "message": "상한인 $COUNT$개에 도달해서 멈췄습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonTime": {
+    "message": "1회 상한인 2시간에 도달해서 멈췄습니다"
+  },
+  "acReasonReload": {
+    "message": "페이지를 다시 불러와서 멈춰 있습니다"
+  },
+  "acReasonLimit": {
+    "message": "X가 제한을 표시했을지도 모릅니다"
+  },
+  "acReasonPage": {
+    "message": "북마크 화면에서 이동해서 멈췄습니다"
+  },
+  "acReasonRefusedAccount": {
+    "message": "시작할 수 없습니다. 관리 화면에서 선택한 계정과 x.com의 계정이 다릅니다"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "시작할 수 없습니다. x.com의 계정을 판단할 수 없습니다"
+  },
+  "acSubDone": {
+    "message": "가장 오래된 북마크까지 불러왔습니다"
+  },
+  "acSubStopped": {
+    "message": "여기까지의 분량은 이미 가져왔습니다"
+  },
+  "acNoteRunning": {
+    "message": "이 탭을 열어 두세요. 다른 탭으로 전환하면 자동으로 일시 중지됩니다."
+  },
+  "acNotePaused": {
+    "message": "다시 시작하면 이어서 가져옵니다. 이미 가져온 게시물은 건너뛰고, X 북마크의 순서에 맞춰 정리합니다."
+  },
+  "acNoteReload": {
+    "message": "다시 시작하면 목록의 맨 위부터 다시 읽습니다. 이미 가져온 게시물은 건너뜁니다."
+  },
+  "acNoteDone": {
+    "message": "X의 순서대로 정리했습니다. \"미분류\"에서 폴더로 나눌 수 있습니다."
+  },
+  "acLimitAlert": {
+    "message": "X 화면에 오류 또는 제한 표시가 나타나서 멈췄습니다. 15분 이상 기다린 뒤에 다시 시작하세요. 계속 시도하면 제한이 길어질 수 있습니다."
+  },
+  "acResumeAt": {
+    "message": "$TIME$에 다시 시작합니다(이 탭을 열어 두세요)",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "가져옴"
+  },
+  "acStatSkipped": {
+    "message": "건너뜀"
+  },
+  "acStatFailed": {
+    "message": "실패"
+  },
+  "acOldest": {
+    "message": "가장 오래된 게시물: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "일시 중지"
+  },
+  "acBtnStop": {
+    "message": "중지"
+  },
+  "acBtnResume": {
+    "message": "다시 시작"
+  },
+  "acBtnEnd": {
+    "message": "여기서 종료"
+  },
+  "acBtnResumeLater": {
+    "message": "15분 후에 다시 시작"
+  },
+  "acBtnOpenManager": {
+    "message": "관리 화면 열기"
+  },
+  "acBtnClose": {
+    "message": "닫기"
+  },
+  "acBtnAuto": {
+    "message": "자동으로 가져오기…"
+  },
+  "acBtnAutoTitle": {
+    "message": "북마크 탭을 자동으로 스크롤해서 가져옵니다. 1회 상한은 설정에서 바꿀 수 있습니다"
+  },
+  "acManualTitle": {
+    "message": "지금 보이는 것만 가져오기"
+  },
+  "acOfferTitle": {
+    "message": "X 북마크를 가져올까요?"
+  },
+  "acOfferBody": {
+    "message": "$ACCOUNT$ 계정으로 PostShelf를 처음 사용합니다. x.com의 \"기록\" → \"북마크\"를 열고 화면을 자동으로 스크롤하면서 가져옵니다.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "가져오기 시작…"
+  },
+  "acOfferLater": {
+    "message": "나중에"
+  },
+  "acOfferNever": {
+    "message": "이 계정에서는 표시하지 않음"
+  },
+  "acDlgTitle": {
+    "message": "자동으로 가져오기"
+  },
+  "acDlgIntro": {
+    "message": "계정: $ACCOUNT$. x.com의 북마크 탭을 자동으로 스크롤해서 읽어 들입니다.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "속도"
+  },
+  "acSpeedSlowOpt": {
+    "message": "느리게(권장)"
+  },
+  "acSpeedSlowHint": {
+    "message": "1분에 약 20~40개 정도"
+  },
+  "acSpeedNormalHint": {
+    "message": "1분에 약 40~80개 정도"
+  },
+  "acCapLabel": {
+    "message": "1회 상한"
+  },
+  "acCap300": {
+    "message": "300개마다 한 번 멈춤(권장)"
+  },
+  "acCap100": {
+    "message": "100개마다 한 번 멈춤"
+  },
+  "acCap0": {
+    "message": "멈추지 않음"
+  },
+  "acOrderX": {
+    "message": "x.com의 북마크"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf(가져온 뒤)"
+  },
+  "acOrderNewest": {
+    "message": "최신 게시물"
+  },
+  "acOrderPrev": {
+    "message": "그 전의 게시물"
+  },
+  "acOrderOld": {
+    "message": "…오래된 게시물"
+  },
+  "acOrderSame": {
+    "message": "같은 순서로 나열됩니다"
+  },
+  "acRisk": {
+    "message": "자동 스크롤은 X의 약관이 금지하는 \"자동화된 접근\"으로 간주될 수 있습니다. 계정 제한 등이 발생해도 PostShelf의 제작자는 책임을 질 수 없습니다. 가져오기는 본인의 판단으로, 본인의 계정에 대해서만 하세요."
+  },
+  "acConsent": {
+    "message": "위 내용을 이해했으며 내 판단으로 실행합니다"
+  },
+  "acDlgStart": {
+    "message": "가져오기 시작"
+  },
+  "acProgressLine": {
+    "message": "$IMPORTED$개 가져옴, $SKIPPED$개 건너뜀",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "x.com 탭 열기"
+  },
+  "acSettingsSwitch": {
+    "message": "자동 가져오기 사용"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "끄면 가져오기 안내와 시작 버튼이 표시되지 않습니다. 켜 두어도 자동으로 시작되지 않습니다."
+  },
+  "acSettingsRun": {
+    "message": "북마크 자동으로 가져오기…"
+  },
+  "acSettingsNote": {
+    "message": "자동 스크롤은 X 약관상 \"자동화된 접근\"으로 간주될 수 있습니다. 시작하기 전에 확인 화면의 내용을 읽어 주세요."
+  },
+  "acNoAccount": {
+    "message": "계정을 판단할 수 없어서 시작할 수 없습니다. x.com을 열고 로그인한 뒤 다시 시도하세요."
+  },
+  "addFolder": {
+    "message": "폴더 추가"
+  },
+  "createFolder": {
+    "message": "폴더 만들기"
+  },
+  "create": {
+    "message": "만들기"
+  },
+  "back": {
+    "message": "뒤로"
+  },
+  "errDuplicateFolder": {
+    "message": "같은 이름의 폴더가 있습니다"
   }
 }

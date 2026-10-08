@@ -1,14 +1,14 @@
 import { queryFirst } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { extractTweet } from './snapshot';
-import { getBookmark, listFolders, setBookmarkFolders } from '../shared/storage';
+import { getBookmark, listFolders, removeBookmark, setBookmarkFolders } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
-import { createFolderPicker } from '../shared/folderPicker';
+import { createFolderPicker, divider, flatButton } from '../shared/folderPicker';
 import { setNativeBookmark } from './native';
 import { getSettings, type ButtonMode } from '../shared/settings';
 import { getCurrentAccount, subscribeAccount } from './account';
-import { requestCache, requestPrune } from '../shared/cacheRequest';
+import { requestCache, requestFullText, requestPrune } from '../shared/cacheRequest';
 
 const POP_CLASS = 'postshelf-popover';
 
@@ -39,7 +39,9 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   const { tweetId, snapshot } = ex;
   const account = getCurrentAccount(); // 保存先は、判定できた現在のアカウントだけ
   const folders = (await listFolders()).filter((f) => !isBuiltinFolder(f.id));
-  const selected = new Set((await getBookmark(tweetId))?.folderIds ?? []);
+  const existing = await getBookmark(tweetId);
+  const selected = new Set(existing?.folderIds ?? []);
+  let isSaved = !!existing; // 「PostShelf から外す」を出すかどうか
 
   const pop = document.createElement('div');
   pop.className = POP_CLASS;
@@ -71,6 +73,7 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
 
   // 保存に失敗したときは、ポップオーバーの中に理由を出す (console だけで終わらせない)
   const errorEl = document.createElement('div');
+  errorEl.className = 'postshelf-save-error';
   errorEl.setAttribute('role', 'alert');
   errorEl.style.cssText = 'display:none;padding:6px 8px;margin-top:6px;color:#f4212e;font-size:13px;overflow-wrap:anywhere';
   const save = async () => {
@@ -84,12 +87,37 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   };
   const saveNow = async () => {
     if (getCurrentAccount()?.id !== account?.id) return closePopovers(); // 開いている間にアカウントが切り替わった
-    const saved = await setBookmarkFolders(tweetId, [...selected], snapshot);
-    if (saved && account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
-    else requestPrune();
+    await setBookmarkFolders(tweetId, [...selected], snapshot); // 「未分類」だけでも保存する (保存の解除は「PostShelf から外す」だけ)
+    isSaved = true;
+    showUnsave(true);
+    if (account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
+    if (account && snapshot.truncated) requestFullText(tweetId, account.id); // たたまれた状態で保存したとき: 設定がオンなら、background が全文を取る (v24)
     // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
-    if ((await getSettings()).syncNative) setNativeBookmark(article, saved !== undefined);
+    if ((await getSettings()).syncNative) setNativeBookmark(article, true);
   };
+  // 保存の解除は、明示的な操作だけ (保存済みのときだけ表示。区切り線の下に、赤い文字で置く)
+  const unsave = flatButton(th, t('removeFromPostShelf'), 'ti-trash', 'danger');
+  const unsaveLine = divider(th);
+  const showUnsave = (on: boolean) => {
+    unsave.style.display = on ? 'flex' : 'none';
+    unsaveLine.style.display = on ? 'block' : 'none';
+  };
+  showUnsave(isSaved);
+  unsave.addEventListener('click', async () => {
+    try {
+      await removeBookmark(tweetId);
+      isSaved = false;
+      selected.clear();
+      picker.sync();
+      showUnsave(false);
+      requestPrune();
+      if ((await getSettings()).syncNative) setNativeBookmark(article, false);
+      errorEl.style.display = 'none';
+    } catch {
+      errorEl.textContent = t('errorStorage');
+      errorEl.style.display = 'block';
+    }
+  });
 
   const picker = createFolderPicker({
     folders,
@@ -112,15 +140,13 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
     pop.append(rel);
   }
   // サイドパネルで開く (content script からは直接開けないので background へ依頼する。ユーザーのクリック直後に送る)
-  const side = document.createElement('button');
-  side.type = 'button';
-  side.textContent = t('openSidePanel');
-  side.style.cssText = `display:block;width:100%;text-align:left;margin-top:6px;padding:6px 8px;min-height:32px;background:transparent;color:${th.fg};border:0;border-radius:8px;cursor:pointer`;
+  const side = flatButton(th, t('openSidePanel'), 'ti-layout-sidebar-right', 'sub');
   side.addEventListener('click', () => {
     void chrome.runtime?.sendMessage?.({ type: 'openSidePanel' });
     closePopovers();
   });
   pop.append(side);
+  if (account) pop.append(unsaveLine, unsave);
   document.body.append(pop);
   position(pop, anchor);
   return pop;

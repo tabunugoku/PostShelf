@@ -17,7 +17,7 @@ const mk = (id: string, handle: string, over: Partial<Bookmark['snapshot']> = {}
 
 describe('filters (AND)', () => {
   const all = [
-    mk('1', '@a', { media: ['x.jpg'], hasVideo: true }),
+    mk('1', '@a', { media: ['x.jpg'], hasVideo: true }), // 動画のポスト: media に動画のサムネイルが入っているが、画像ではない (v22)
     mk('2', '@a', { media: ['y.jpg'], hasLink: true }),
     mk('3', '@b', { hasLink: true, hasVideo: false }),
     mk('4', '@b', { media: ['z.jpg'] }), // 旧データ: hasVideo / hasLink が未定義 (未判定)
@@ -25,7 +25,7 @@ describe('filters (AND)', () => {
   const ids = (f: Parameters<typeof matchesFilters>[1]) => queryBookmarks(all, { folderId: 'all', search: '', sort: 'savedAsc', filters: f, now: NOW }).map((b) => b.tweetId).sort();
 
   it('image / video / link each filter on their own', () => {
-    expect(ids({ image: true })).toEqual(['1', '2', '4']);
+    expect(ids({ image: true })).toEqual(['2', '4']);
     expect(ids({ video: true })).toEqual(['1']);
     expect(ids({ link: true })).toEqual(['2', '3']);
   });

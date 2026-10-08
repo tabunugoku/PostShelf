@@ -5,7 +5,7 @@ import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { installChromeMock } from './chrome-mock';
 import { applyButtonMode, injectButtons, refreshAll } from '../src/content/buttons';
 import { installGlobalHandlers } from '../src/content/popover';
-import { createFolder, setBookmarkFolders } from '../src/shared/storage';
+import { createFolder, removeBookmark, setBookmarkFolders } from '../src/shared/storage';
 import { getSettings, updateSettings } from '../src/shared/settings';
 
 const html = readFileSync(resolve(process.cwd(), 'test/fixtures/tweet.html'), 'utf8');
@@ -68,7 +68,7 @@ describe('separate mode button', () => {
     await setBookmarkFolders('1234567890', [f.id], snap);
     await refreshAll();
     expect(document.querySelector('[data-postshelf-btn]')!.hasAttribute('data-saved')).toBe(true);
-    await setBookmarkFolders('1234567890', [], snap);
+    await removeBookmark('1234567890'); // 保存の解除は明示的な操作だけ
     await refreshAll();
     expect(document.querySelector('[data-postshelf-btn]')!.hasAttribute('data-saved')).toBe(false);
   });

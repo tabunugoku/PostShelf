@@ -12,13 +12,23 @@ describe('settings page section order (v13-B)', () => {
     (globalThis as any).chrome.tabs = { query: async () => [] };
     document.body.innerHTML = '<div id="app"></div>';
   });
+  /** グループの見出し (h3) と、欄の見出し (legend) の出現順 (v25) */
   const expected = [
-    'X のブックマークと連動する',
+    '保存',
+    'X のブックマークとの連動',
     '標準ブックマークボタンの動作',
-    'ツールバーアイコンのクリック時の動作',
+    '長いポストの全文',
     '画像のキャッシュ',
+    '取り込み',
+    'ブックマークの自動取り込み',
+    '表示と動作',
+    'ツールバーアイコンのクリック時の動作',
     'データ',
+    'データの保存と移行',
+    '情報',
     'X の画面構造',
+    'PostShelf について',
+    '初期化と削除',
     '設定の初期化',
     '危険な操作',
   ];
@@ -27,8 +37,7 @@ describe('settings page section order (v13-B)', () => {
       await act(() => void render(<SettingsPage surface={surface} onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} />, document.getElementById('app')!));
       await flush();
       const root = document.querySelector('section')!;
-      // 先頭のスイッチ (連動モード) と、以降の fieldset の legend を出現順に並べる
-      const heads = [...root.querySelectorAll(':scope > label.setting strong, :scope > fieldset > legend')].map((e) => e.textContent!.trim());
+      const heads = [...root.querySelectorAll(':scope > h3.set-h, :scope > fieldset > legend')].map((e) => e.textContent!.trim());
       expect(heads).toEqual(expected);
       expect(root.querySelector(':scope > fieldset:last-of-type')!.classList.contains('danger-zone')).toBe(true);
     });

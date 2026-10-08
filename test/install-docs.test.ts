@@ -42,4 +42,17 @@ describe('v13-D: install docs', () => {
   it('README has an install section that points to INSTALL.md', () => {
     expect(read('README.md')).toMatch(/## インストール[\s\S]*docs\/INSTALL\.md/);
   });
+  it('v15: the auto-collect exception to the policy is written honestly everywhere', () => {
+    const claude = read('CLAUDE.md');
+    expect(claude).toContain('自動スクロールによる取り込みは、ユーザーが確認ダイアログで同意して開始した取り込みに限る');
+    expect(claude).not.toContain('自動スクロールで大量取得しない');
+    for (const f of ['README.md', 'docs/FAQ.md', 'docs/INSTALL.md', 'docs/PUBLISH.md']) {
+      const text = read(f);
+      expect(text, f).toContain('自動化されたアクセス');
+      expect(text, f).toContain('責任を負えません');
+    }
+    expect(read('docs/INSTALL.en.md')).toContain('automated access');
+    expect(read('README.md')).not.toContain('自動スクロールもしない');
+    expect(read('docs/MANUAL_TEST.md')).toContain('確認できなかった');
+  });
 });

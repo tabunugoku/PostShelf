@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
+import { render } from 'preact';
 import { createFolderPicker } from '../shared/folderPicker';
 import { displayName, type Folder } from '../shared/models';
 import { Icon } from '../shared/Icon';
@@ -117,41 +118,97 @@ export function Toast(props: { message: string; onUndo?: () => void }) {
   );
 }
 
-/** 外側クリック / Esc で閉じるドロップダウンの枠 */
+/**
+ * 子を body 直下の入れ物に描く (preact/compat は、入力イベントの扱いを変えてしまうので使わない)。
+ * 入れ物の中の描画は、この部品の描画のたびに、同じ入れ物へ描き直す。
+ */
+function Portal(props: { children: ComponentChildren }) {
+  const host = useRef<HTMLDivElement | null>(null);
+  if (!host.current) host.current = document.createElement('div');
+  useLayoutEffect(() => {
+    document.body.append(host.current!);
+    return () => {
+      render(null, host.current!);
+      host.current!.remove();
+    };
+  }, []);
+  useLayoutEffect(() => {
+    render(<>{props.children}</>, host.current!);
+  });
+  return null;
+}
+
+/**
+ * 外側クリック / Esc で閉じるドロップダウンの枠。
+ * fixed: カードや一覧の overflow に隠れないよう、body 直下 (portal) に出し、きっかけのボタンの近くを基準に、画面の端に収まる位置へ補正する
+ * (右にはみ出すときは左へ、下にはみ出すときは上へ)。スクロールやウィンドウの大きさの変更でも閉じる (位置がずれるため)。
+ */
 export function Dropdown(props: { onClose: () => void; children: ComponentChildren; label?: string; class?: string; fixed?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
-  // fixed: スクロール領域 (サイドバー) の中でも切れないよう、画面基準で開く位置を計算する (画面端ではみ出さない)
-  useLayoutEffect(() => {
-    if (!props.fixed || !ref.current) return;
+  const marker = useRef<HTMLSpanElement>(null);
+  /** きっかけのボタンを含む入れ物 (fixed のときは、目印の span の親。そうでなければ、このメニューの親) */
+  const anchor = () => (props.fixed ? marker.current?.parentElement : ref.current?.parentElement) ?? ref.current;
+  const place = () => {
     const el = ref.current;
-    const r = (el.parentElement ?? el).getBoundingClientRect();
+    if (!props.fixed || !el) return;
+    const r = (anchor() ?? el).getBoundingClientRect();
     const vw = document.documentElement.clientWidth || window.innerWidth;
     const vh = document.documentElement.clientHeight || window.innerHeight;
+    el.style.maxHeight = `${Math.max(120, vh - 16)}px`;
+    el.style.overflowY = 'auto';
     const w = el.offsetWidth;
     const h = el.offsetHeight;
     el.style.left = `${Math.max(8, Math.min(r.left, vw - w - 8))}px`;
-    el.style.top = `${r.bottom + 4 + h > vh - 8 && r.top - 4 - h >= 8 ? r.top - 4 - h : r.bottom + 4}px`;
+    const below = r.bottom + 4;
+    const above = r.top - 4 - h;
+    el.style.top = `${below + h > vh - 8 && above >= 8 ? above : Math.max(8, Math.min(below, vh - h - 8))}px`;
+  };
+  useLayoutEffect(() => {
+    place();
+    // 中身があとから増える (フォルダの一覧など) ときも、画面の端に収まる位置に補正し直す
+    const el = ref.current;
+    if (!props.fixed || !el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => place());
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
   useEffect(() => {
     const down = (e: MouseEvent) => {
       // 開くボタン (親の .menu-anchor 内) の mousedown では閉じない。ボタン側のトグルに任せる
-      const host = ref.current?.parentElement ?? ref.current;
-      if (!host?.contains(e.target as Node)) props.onClose();
+      const t = e.target as Node;
+      if (!anchor()?.contains(t) && !ref.current?.contains(t)) props.onClose();
     };
     const key = (e: KeyboardEvent) => {
       if (e.key === 'Escape') props.onClose();
     };
+    const away = (e: Event) => {
+      const t = e.target;
+      if (!(t instanceof Node && ref.current?.contains(t))) props.onClose(); // メニューの中のスクロールでは閉じない
+    };
     document.addEventListener('mousedown', down);
     document.addEventListener('keydown', key);
+    if (props.fixed) {
+      window.addEventListener('scroll', away, true);
+      window.addEventListener('resize', away);
+    }
     return () => {
       document.removeEventListener('mousedown', down);
       document.removeEventListener('keydown', key);
+      window.removeEventListener('scroll', away, true);
+      window.removeEventListener('resize', away);
     };
   }, []);
-  return (
+  const menu = (
     <div ref={ref} class={`menu${props.fixed ? ' fixed' : ''} ${props.class ?? ''}`} role="dialog" aria-label={props.label}>
       {props.children}
     </div>
+  );
+  if (!props.fixed) return menu;
+  return (
+    <>
+      <span ref={marker} hidden />
+      <Portal>{menu}</Portal>
+    </>
   );
 }
 

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
-import { getSettings, resetSettings, restoreSettings, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
+import { getSettings, resetSettings, restoreSettings, updateAutoCollect, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
 import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
 import { Confirm, TypeToConfirm } from './ui';
 import { ImageCacheSection } from './ImageCache';
+import { FullTextSection } from './FullText';
 import { deleteAllDataAndCache } from '../shared/cacheops';
 import { refreshCacheView } from './cacheView';
 import { DiagnosticsDialog } from './Diagnostics';
@@ -12,7 +13,9 @@ import { HealthNotice } from './HealthNotice';
 import { INSTALL_URL } from '../shared/links';
 import { currentVersion } from '../shared/version';
 
-export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }: {
+export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, surface = 'tab' }: {
+  /** 「ブックマークを自動で取り込む…」: 開始前の確認ダイアログを開く (ここでは始めない) */
+  onAutoCollect?: () => void;
   /** 画像キャッシュのフォルダを選べるのはタブ版だけ */
   surface?: 'tab' | 'sidepanel';
   /** データが変わった (インポートなど) */
@@ -25,6 +28,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
   const [sync, setSync] = useState(false);
   const [bmode, setBmode] = useState<ButtonMode>('separate');
   const [amode, setAmode] = useState<ActionMode>('popup');
+  const [autoOn, setAutoOn] = useState(true);
   const [diag, setDiag] = useState(location.hash === '#diagnostics');
   const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
   const [counts, setCounts] = useState<DataCounts | null>(null);
@@ -34,6 +38,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
       setSync(s.syncNative);
       setBmode(s.buttonMode);
       setAmode(s.actionMode);
+      setAutoOn(s.autoCollect.enabled);
     });
   useEffect(load, []);
 
@@ -65,13 +70,44 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
     onApplied();
     onNotice(cacheCleared ? t('deleteAllDone') : `${t('deleteAllDone')} ${t('cacheCleanupNeeded')}`);
   };
+  const groups = [
+    ['save', 'groupSave'],
+    ['collect', 'groupCollect'],
+    ['behavior', 'groupBehavior'],
+    ['data', 'groupData'],
+    ['info', 'groupInfo'],
+    ['reset', 'groupReset'],
+  ] as const;
+  /** 目次: URL のハッシュは使わない (管理画面は #settings などを画面の切り替えに使う)。見出しまでスクロールして、見出しにフォーカスを移す */
+  const jump = (id: string) => {
+    const h = document.getElementById(`set-group-${id}`);
+    if (!h) return;
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    h.scrollIntoView?.({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+    h.focus({ preventScroll: true });
+  };
+  const heading = (id: string, key: string) => (
+    <h3 class="set-h" id={`set-group-${id}`} tabIndex={-1}>
+      {t(key)}
+    </h3>
+  );
   return (
     <section>
       <div class="bar">
         <Icon name="ti-settings" />
         <span class="bar-name">{t('settings')}</span>
       </div>
-      <label class="setting">
+      <nav class="settings-nav" aria-label={t('settingsJump')}>
+        {groups.map(([id, key]) => (
+          <button type="button" class="nav-chip" onClick={() => jump(id)}>
+            {t(key)}
+          </button>
+        ))}
+      </nav>
+      {heading('save', 'groupSave')}
+      <fieldset class="setting-group">
+        <legend>{t('syncNativeSection')}</legend>
+        <label class="setting">
         <input
           type="checkbox"
           role="switch"
@@ -80,9 +116,15 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
         />
         <span>
           <strong>{t('syncNativeLabel')}</strong>
-          <span class="muted setting-desc">{t('syncNativeDesc')}</span>
+          <span class="muted setting-desc desc-list">
+            {(['syncNativeDesc1', 'syncNativeDesc2', 'syncNativeDesc3'] as const).map((k) => (
+              <span class="desc-item">{t(k)}</span>
+            ))}
+          </span>
+          <span class="muted setting-desc desc-note">{t('syncNativeNote')}</span>
         </span>
       </label>
+      </fieldset>
       <fieldset class="setting-group">
         <legend>{t('buttonModeHeading')}</legend>
         {(['separate', 'replace'] as const).map((m) => (
@@ -98,6 +140,33 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
         ))}
         <p class="muted setting-desc">{t('buttonModeNote')}</p>
       </fieldset>
+      <FullTextSection reloadKey={cacheKey} />
+      <ImageCacheSection surface={surface} reloadKey={cacheKey} />
+      {heading('collect', 'groupCollect')}
+      <fieldset class="setting-group">
+        <legend>{t('acSection')}</legend>
+        <label class="setting ac-setting">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={autoOn}
+            onChange={async (e) => setAutoOn((await updateAutoCollect({ enabled: (e.target as HTMLInputElement).checked })).autoCollect.enabled)}
+          />
+          <span>
+            <strong>{t('acSettingsSwitch')}</strong>
+            <span class="muted setting-desc">{t('acSettingsSwitchDesc')}</span>
+          </span>
+        </label>
+        {autoOn && onAutoCollect && (
+          <div class="io">
+            <button onClick={onAutoCollect}>
+              <Icon name="ti-player-track-next" /> {t('acSettingsRun')}
+            </button>
+          </div>
+        )}
+        {autoOn && <p class="muted setting-desc">{t('acSettingsNote')}</p>}
+      </fieldset>
+      {heading('behavior', 'groupBehavior')}
       <fieldset class="setting-group">
         <legend>{t('actionModeHeading')}</legend>
         {(['popup', 'sidepanel'] as const).map((m) => (
@@ -113,9 +182,10 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
         ))}
         <p class="muted setting-desc">{t('actionModeNote')}</p>
       </fieldset>
-      <ImageCacheSection surface={surface} reloadKey={cacheKey} />
+      {heading('data', 'groupData')}
       <fieldset class="setting-group">
-        <legend>{t('dataSection')}</legend>
+        <legend>{t('dataMoveSection')}</legend>
+        <p class="muted setting-desc">{t('dataMoveDesc')}</p>
         <div class="io">
           <button onClick={() => downloadJson(exportData)}>{t('exportBtn')}</button>
           <label class="file-btn">
@@ -139,6 +209,19 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
             />
           </label>
         </div>
+      </fieldset>
+      {heading('info', 'groupInfo')}
+      <fieldset class="setting-group">
+        <legend>{t('healthTitle')}</legend>
+        <HealthNotice showOk onDiagnose={() => setDiag(true)} />
+        <div class="io">
+          <button onClick={() => setDiag(true)}>
+            <Icon name="ti-stethoscope" /> {t('copyDiag')}
+          </button>
+        </div>
+      </fieldset>
+      <fieldset class="setting-group">
+        <legend>{t('aboutSection')}</legend>
         <p class="muted setting-desc version-info">
           <strong>{t('versionLabel', currentVersion())}</strong>
         </p>
@@ -149,15 +232,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
           </a>
         </p>
       </fieldset>
-      <fieldset class="setting-group">
-        <legend>{t('healthTitle')}</legend>
-        <HealthNotice showOk onDiagnose={() => setDiag(true)} />
-        <div class="io">
-          <button onClick={() => setDiag(true)}>
-            <Icon name="ti-stethoscope" /> {t('copyDiag')}
-          </button>
-        </div>
-      </fieldset>
+      {heading('reset', 'groupReset')}
       <fieldset class="setting-group">
         <legend>{t('settingsResetHeading')}</legend>
         <p class="muted setting-desc">{t('settingsResetDesc')}</p>

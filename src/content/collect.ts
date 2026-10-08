@@ -1,7 +1,7 @@
 import { isBookmarksPath, queryAllFirst } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
-import { recordPending } from '../shared/settings';
+import { getSettings, onSettingsChanged, recordPending } from '../shared/settings';
 import { xTheme } from './theme';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { extractTweet, type Extracted } from './snapshot';
@@ -53,7 +53,10 @@ export async function refreshCollectButton(): Promise<void> {
 /** ブックマーク一覧 (/i/history など。判定は selectors.ts) 上に収集ボタンを出す。ユーザーが押したときだけ取り込む。 */
 export function ensureCollectButton(): void {
   const existing = document.querySelector('.postshelf-collect');
-  if (!isBookmarksPage()) return existing?.remove();
+  if (!isBookmarksPage()) {
+    document.querySelector('.postshelf-autocollect')?.remove();
+    return existing?.remove();
+  }
   if (existing) return;
   const btn = document.createElement('button');
   btn.className = 'postshelf-collect';
@@ -73,7 +76,26 @@ export function ensureCollectButton(): void {
     }, 3000);
   });
   document.body.append(btn);
+  // 「いま見えている分だけ取り込む」(上のボタン) と「自動で取り込む…」の 2 つの選択。後者は、管理画面の確認ダイアログで同意したときだけ動く
+  document.querySelector('.postshelf-autocollect')?.remove();
+  const auto = document.createElement('button');
+  auto.className = 'postshelf-autocollect';
+  auto.type = 'button';
+  auto.textContent = t('acBtnAuto');
+  auto.title = t('acBtnAutoTitle');
+  auto.style.cssText = `position:fixed;right:16px;bottom:60px;z-index:2147483646;min-height:36px;padding:6px 14px;border-radius:18px;border:.5px solid ${th.border};background:${th.bg};color:${th.fg};color-scheme:${th.scheme};font:14px/1.4 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;display:none`;
+  auto.addEventListener('click', () => void chrome.runtime?.sendMessage?.({ type: 'openAutoCollect' }));
+  document.body.append(auto);
   void refreshCollectButton();
+  void refreshAutoButton();
+}
+
+/** 設定「自動取り込みを使う」がオフなら、開始のボタンを出さない */
+export async function refreshAutoButton(): Promise<void> {
+  const auto = document.querySelector<HTMLElement>('.postshelf-autocollect');
+  if (!auto) return;
+  const on = (await getSettings()).autoCollect.enabled && !!getCurrentAccount();
+  auto.style.display = on ? '' : 'none';
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -85,7 +107,14 @@ export function scheduleCollectRefresh(): void {
 }
 
 export const watchCollectData = (): (() => void) => {
-  const offs = [onDataChanged(() => void refreshCollectButton()), subscribeAccount(() => void refreshCollectButton())];
+  const offs = [
+    onDataChanged(() => void refreshCollectButton()),
+    subscribeAccount(() => {
+      void refreshCollectButton();
+      void refreshAutoButton();
+    }),
+    onSettingsChanged(() => void refreshAutoButton()),
+  ];
   return () => offs.forEach((o) => o());
 };
 
@@ -93,6 +122,9 @@ export const watchCollectData = (): (() => void) => {
  * SPA 遷移 (pushState) で URL だけが変わり DOM の変化が少ない場合でも、ボタンを出し入れできるようにパスの変化を見張る。
  * content script は isolated world なので history.pushState を差し替えられない。軽い比較 (500ms ごと) と popstate で拾う。
  */
+/** パスが変わったときに呼ばれる (自動取り込みが、ブックマークのタブに移ったあとで待っているコマンドを拾うのに使う) */
+export const pathListeners = new Set<() => void>();
+
 export function watchPath(intervalMs = 500): () => void {
   let last = location.pathname;
   const check = () => {
@@ -100,6 +132,7 @@ export function watchPath(intervalMs = 500): () => void {
     last = location.pathname;
     ensureCollectButton();
     scheduleCollectRefresh();
+    pathListeners.forEach((l) => l());
   };
   const id = setInterval(check, intervalMs);
   window.addEventListener('popstate', check);

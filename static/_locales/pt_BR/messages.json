@@ -48,7 +48,7 @@
     "message": "Adicionar"
   },
   "noFolders": {
-    "message": "Nenhuma pasta ainda"
+    "message": "As pastas que você criar aparecerão aqui"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -155,8 +155,53 @@
   "syncNativeLabel": {
     "message": "Sincronizar com os favoritos do X"
   },
-  "syncNativeDesc": {
-    "message": "Ao salvar um post em uma pasta, o PostShelf também o adiciona aos favoritos padrão do X; ao removê-lo de todas as pastas, o favorito do X também é removido. O PostShelf clica no botão de favorito da tela apenas uma vez por post em que você age. Desativado por padrão."
+  "syncNativeDesc1": {
+    "message": "Ao salvar um post em uma pasta, o PostShelf também o adiciona aos favoritos padrão do X."
+  },
+  "syncNativeDesc2": {
+    "message": "Ao removê-lo de todas as pastas, o favorito do X também é removido."
+  },
+  "syncNativeDesc3": {
+    "message": "O PostShelf clica no botão de favorito da tela apenas uma vez por post em que você age."
+  },
+  "syncNativeNote": {
+    "message": "Desativado por padrão."
+  },
+  "groupSave": {
+    "message": "Salvar"
+  },
+  "groupCollect": {
+    "message": "Importação"
+  },
+  "groupBehavior": {
+    "message": "Exibição e comportamento"
+  },
+  "groupData": {
+    "message": "Dados"
+  },
+  "groupInfo": {
+    "message": "Informações"
+  },
+  "groupReset": {
+    "message": "Redefinir e excluir"
+  },
+  "settingsJump": {
+    "message": "Ir para um grupo de configurações"
+  },
+  "syncNativeSection": {
+    "message": "Sincronização com os favoritos do X"
+  },
+  "dataMoveSection": {
+    "message": "Backup e transferência"
+  },
+  "dataMoveDesc": {
+    "message": "Exporte seus posts e pastas salvos para um arquivo, ou importe de um arquivo."
+  },
+  "acSection": {
+    "message": "Importação automática de favoritos"
+  },
+  "aboutSection": {
+    "message": "Sobre o PostShelf"
   },
   "savedBadgeTitle": {
     "message": "Salvo em $COUNT$ pasta(s)",
@@ -190,6 +235,9 @@
         "example": "3"
       }
     }
+  },
+  "bulkMenuLabel": {
+    "message": "Ações para os posts selecionados"
   },
   "bulkAdd": {
     "message": "Adicionar à pasta"
@@ -353,6 +401,21 @@
   "dismiss": {
     "message": "Fechar"
   },
+  "showMore": {
+    "message": "Mostrar mais"
+  },
+  "viewFullOnX": {
+    "message": "Ver o texto completo no X"
+  },
+  "noticeMore": {
+    "message": "mais $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "Com imagens"
   },
@@ -364,6 +427,9 @@
   },
   "filterAuthor": {
     "message": "Filtrar por autor"
+  },
+  "filterButton": {
+    "message": "Filtros"
   },
   "clearFilters": {
     "message": "Limpar filtros"
@@ -397,9 +463,6 @@
   },
   "viewLabel": {
     "message": "Visualização"
-  },
-  "dataSection": {
-    "message": "Dados"
   },
   "saveCurrentPost": {
     "message": "Salvar o post aberto…"
@@ -542,14 +605,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "Conta: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "Não foi possível identificar a conta conectada no x.com, então nada pode ser salvo. Recarregue a página do x.com."
   },
@@ -666,6 +721,15 @@
   "videoBadge": {
     "message": "Vídeo"
   },
+  "mediaImages": {
+    "message": "$COUNT$ imagens",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "Mostrar como reproduzir este vídeo"
   },
@@ -686,6 +750,9 @@
   },
   "cacheEnableDesc": {
     "message": "Ao salvar um post, as imagens também ficam neste computador, então você ainda as vê se sumirem do X. Dos vídeos, só a miniatura é mantida."
+  },
+  "cacheCollapsedHint": {
+    "message": "Ative para escolher onde salvar, a capacidade e a qualidade"
   },
   "cachePermNote": {
     "message": "Na primeira vez que ativar, o Chrome pedirá permissão para acessar pbs.twimg.com (o servidor de imagens do X). A permissão só é pedida ao ativar este recurso."
@@ -898,6 +965,64 @@
   "cacheRules": {
     "message": "As imagens salvas ficam somente neste PC e nunca são enviadas para fora. Se você remover a extensão, o cache dentro do navegador também é excluído (uma pasta escolhida por você não é). Guarde as imagens que realmente quer manter em \"Uma pasta que eu escolher\". Para fazer backup dos dados salvos, use a exportação JSON (contém apenas as URLs das imagens, não as imagens)."
   },
+  "fullTextTitle": {
+    "message": "Texto completo de posts longos"
+  },
+  "fullTextSwitch": {
+    "message": "Obter o texto completo de posts longos"
+  },
+  "fullTextSwitchDesc": {
+    "message": "Ao salvar um post que o X recolheu atrás de “Mostrar mais”, o PostShelf abre a página desse post em uma guia em segundo plano, lê o texto completo e fecha a guia. Espera de 4 a 8 segundos entre posts e nunca mexe na guia que você está vendo. Os termos do X podem tratar isso como acesso automatizado (não é aconselhamento jurídico). Desativado, só o texto recolhido é salvo."
+  },
+  "fullTextPending": {
+    "message": "Posts sem o texto completo: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "Obter agora"
+  },
+  "fullTextConfirm": {
+    "message": "Será obtido o texto completo de $COUNT$ posts. Cada um leva de 4 a 8 segundos e as páginas do X são abertas e fechadas em uma guia em segundo plano. Os termos do X podem tratar isso como acesso automatizado. Começar?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "Começar"
+  },
+  "fullTextProgress": {
+    "message": "Obtendo: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "Parar"
+  },
+  "fullTextStopLimit": {
+    "message": "Parou porque o X parece ter mostrado um limite ou aviso. Aguarde um pouco e tente de novo."
+  },
+  "fullTextStopFailures": {
+    "message": "Parou porque 3 posts seguidos não puderam ser obtidos."
+  },
+  "fullTextStopUser": {
+    "message": "A obtenção foi interrompida."
+  },
   "updateNotice": {
     "message": "O PostShelf foi atualizado ($VERSION$)",
     "placeholders": {
@@ -922,7 +1047,315 @@
   "installGuideLink": {
     "message": "Passos de atualização e instalação manual"
   },
+  "githubLink": {
+    "message": "Ver no GitHub"
+  },
+  "githubLinkAria": {
+    "message": "Ver no GitHub (abre em uma nova guia)"
+  },
   "errorStorage": {
     "message": "Falha ao salvar ou carregar. Tente novamente. Se continuar, salve seus dados com \"Exportar\" em Configurações e recarregue a extensão."
+  },
+  "removeFromPostShelf": {
+    "message": "Remover do PostShelf"
+  },
+  "acPanelLabel": {
+    "message": "Importação automática de favoritos"
+  },
+  "acPanelRunning": {
+    "message": "Importando favoritos"
+  },
+  "acPanelPaused": {
+    "message": "Pausado"
+  },
+  "acPanelLimit": {
+    "message": "Parou automaticamente"
+  },
+  "acPanelDone": {
+    "message": "Importação concluída"
+  },
+  "acPanelStopped": {
+    "message": "Importação interrompida"
+  },
+  "acPanelCountdown": {
+    "message": "Começa em $SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "Carregando na velocidade \"$SPEED$\"",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "Carregando na velocidade \"$SPEED$\". Agora em posts de por volta de $DATE$",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "Lenta"
+  },
+  "acSpeedNormal": {
+    "message": "Normal"
+  },
+  "acReasonUser": {
+    "message": "Você pausou a importação"
+  },
+  "acReasonHidden": {
+    "message": "Parou automaticamente porque você mudou de aba"
+  },
+  "acReasonAccount": {
+    "message": "Parou porque a conta mudou"
+  },
+  "acReasonCap": {
+    "message": "Parou ao atingir o limite de $COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonTime": {
+    "message": "Parou ao atingir o limite de 2 horas por importação"
+  },
+  "acReasonReload": {
+    "message": "Parado porque a página foi recarregada"
+  },
+  "acReasonLimit": {
+    "message": "O X pode ter exibido um limite"
+  },
+  "acReasonPage": {
+    "message": "Parou porque você saiu da página de favoritos"
+  },
+  "acReasonRefusedAccount": {
+    "message": "Não é possível iniciar: a conta escolhida no gerenciador é diferente da conta do x.com"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "Não é possível iniciar: não foi possível identificar a conta do x.com"
+  },
+  "acSubDone": {
+    "message": "Chegou ao favorito mais antigo"
+  },
+  "acSubStopped": {
+    "message": "Tudo até aqui já foi importado"
+  },
+  "acNoteRunning": {
+    "message": "Mantenha esta aba aberta. Ao mudar de aba, a importação pausa automaticamente."
+  },
+  "acNotePaused": {
+    "message": "Ao retomar, continua de onde parou. Posts já importados são ignorados e os novos são colocados na ordem dos seus favoritos do X."
+  },
+  "acNoteReload": {
+    "message": "Ao retomar, a lista é lida de novo desde o início. Posts já importados são ignorados."
+  },
+  "acNoteDone": {
+    "message": "Organizado na mesma ordem do X. Você pode separá-los em pastas a partir de \"Não classificados\"."
+  },
+  "acLimitAlert": {
+    "message": "Parou porque o X exibiu um erro ou um limite. Espere pelo menos 15 minutos antes de retomar. Tentar de novo logo pode prolongar o limite."
+  },
+  "acResumeAt": {
+    "message": "Será retomado às $TIME$ (mantenha esta aba aberta)",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "Importados"
+  },
+  "acStatSkipped": {
+    "message": "Ignorados"
+  },
+  "acStatFailed": {
+    "message": "Falhas"
+  },
+  "acOldest": {
+    "message": "Post mais antigo: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "Pausar"
+  },
+  "acBtnStop": {
+    "message": "Parar"
+  },
+  "acBtnResume": {
+    "message": "Retomar"
+  },
+  "acBtnEnd": {
+    "message": "Encerrar aqui"
+  },
+  "acBtnResumeLater": {
+    "message": "Retomar em 15 minutos"
+  },
+  "acBtnOpenManager": {
+    "message": "Abrir o gerenciador"
+  },
+  "acBtnClose": {
+    "message": "Fechar"
+  },
+  "acBtnAuto": {
+    "message": "Importar automaticamente…"
+  },
+  "acBtnAutoTitle": {
+    "message": "Rola automaticamente a aba de favoritos e importa a partir dela. O limite por execução pode ser alterado nas configurações"
+  },
+  "acManualTitle": {
+    "message": "Importar só o que está visível agora"
+  },
+  "acOfferTitle": {
+    "message": "Importar seus favoritos do X?"
+  },
+  "acOfferBody": {
+    "message": "É a primeira vez que você usa o PostShelf com $ACCOUNT$. Ele abre \"Histórico\" → \"Favoritos\" no x.com e importa rolando a página automaticamente.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "Começar a importar…"
+  },
+  "acOfferLater": {
+    "message": "Depois"
+  },
+  "acOfferNever": {
+    "message": "Não mostrar para esta conta"
+  },
+  "acDlgTitle": {
+    "message": "Importar automaticamente"
+  },
+  "acDlgIntro": {
+    "message": "Conta: $ACCOUNT$. A aba de favoritos do x.com é rolada e lida automaticamente.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "Velocidade"
+  },
+  "acSpeedSlowOpt": {
+    "message": "Lenta (recomendado)"
+  },
+  "acSpeedSlowHint": {
+    "message": "Cerca de 20–40 posts por minuto"
+  },
+  "acSpeedNormalHint": {
+    "message": "Cerca de 40–80 posts por minuto"
+  },
+  "acCapLabel": {
+    "message": "Limite por execução"
+  },
+  "acCap300": {
+    "message": "Pausar a cada 300 posts (recomendado)"
+  },
+  "acCap100": {
+    "message": "Pausar a cada 100 posts"
+  },
+  "acCap0": {
+    "message": "Não pausar"
+  },
+  "acOrderX": {
+    "message": "Favoritos no x.com"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf (após importar)"
+  },
+  "acOrderNewest": {
+    "message": "Post mais recente"
+  },
+  "acOrderPrev": {
+    "message": "O anterior"
+  },
+  "acOrderOld": {
+    "message": "… posts mais antigos"
+  },
+  "acOrderSame": {
+    "message": "Mesma ordem"
+  },
+  "acRisk": {
+    "message": "A rolagem automática pode ser considerada \"acesso automatizado\", proibido pelos termos do X. Se sua conta for restringida ou algo semelhante ocorrer, o autor do PostShelf não pode assumir responsabilidade. Importe apenas por sua própria decisão e apenas na sua própria conta."
+  },
+  "acConsent": {
+    "message": "Entendo o que está acima e executo por minha própria decisão"
+  },
+  "acDlgStart": {
+    "message": "Começar a importar"
+  },
+  "acProgressLine": {
+    "message": "$IMPORTED$ importados, $SKIPPED$ ignorados",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "Abrir a aba do x.com"
+  },
+  "acSettingsSwitch": {
+    "message": "Usar a importação automática"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "Desativada, o aviso de importação e os botões de início ficam ocultos. Mesmo ativada, nada começa sozinho."
+  },
+  "acSettingsRun": {
+    "message": "Importar favoritos automaticamente…"
+  },
+  "acSettingsNote": {
+    "message": "A rolagem automática pode ser considerada \"acesso automatizado\" pelos termos do X. Leia a tela de confirmação antes de começar."
+  },
+  "acNoAccount": {
+    "message": "Não é possível iniciar porque a conta não pôde ser identificada. Abra o x.com, entre e tente de novo."
+  },
+  "addFolder": {
+    "message": "Adicionar pasta"
+  },
+  "createFolder": {
+    "message": "Criar pasta"
+  },
+  "create": {
+    "message": "Criar"
+  },
+  "back": {
+    "message": "Voltar"
+  },
+  "errDuplicateFolder": {
+    "message": "Já existe uma pasta com este nome"
   }
 }

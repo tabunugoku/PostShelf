@@ -16,7 +16,12 @@ export interface Filters {
 
 const posted = (b: Bookmark) => (b.snapshot.createdAt ? Date.parse(b.snapshot.createdAt) : 0) || 0;
 
-export const hasImage = (b: Bookmark): boolean => b.snapshot.media.length > 0;
+/**
+ * 画像のポストか。動画のポストは、X が動画のサムネイルを画像として表示するので、保存時に media にそのサムネイルが入る。
+ * そのため、hasVideo が真のポストは (media があっても) 画像ではない。動画の本数には依存しない。
+ * hasVideo を持たない (v7 より前に保存した) ポストは、動画かどうか分からないので、media があれば画像として扱う。
+ */
+export const hasImage = (b: Bookmark): boolean => b.snapshot.hasVideo !== true && b.snapshot.media.length > 0;
 
 /** 保存データに hasVideo / hasLink が無い (v6 以前に保存した) ポストは未判定として false 扱い = 絞り込みに出ない */
 export function matchesFilters(b: Bookmark, f: Filters): boolean {

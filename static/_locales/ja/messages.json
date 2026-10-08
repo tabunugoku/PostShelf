@@ -48,7 +48,7 @@
     "message": "追加"
   },
   "noFolders": {
-    "message": "フォルダがありません"
+    "message": "フォルダを作ると、ここに並びます"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -108,7 +108,7 @@
     "message": "X で開く"
   },
   "popupPosts": {
-    "message": "件"
+    "message": "ポスト"
   },
   "popupFolders": {
     "message": "フォルダ"
@@ -155,8 +155,53 @@
   "syncNativeLabel": {
     "message": "X のブックマークと連動する"
   },
-  "syncNativeDesc": {
-    "message": "フォルダに保存したとき X 標準のブックマークも付け、すべてのフォルダから外したとき X 側のブックマークも外します。PostShelf が画面上のブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。初期値はオフです。"
+  "syncNativeDesc1": {
+    "message": "フォルダに保存したとき、X 標準のブックマークも付けます。"
+  },
+  "syncNativeDesc2": {
+    "message": "すべてのフォルダから外したとき、X 側のブックマークも外します。"
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf が画面上のブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。"
+  },
+  "syncNativeNote": {
+    "message": "初期値はオフです。"
+  },
+  "groupSave": {
+    "message": "保存"
+  },
+  "groupCollect": {
+    "message": "取り込み"
+  },
+  "groupBehavior": {
+    "message": "表示と動作"
+  },
+  "groupData": {
+    "message": "データ"
+  },
+  "groupInfo": {
+    "message": "情報"
+  },
+  "groupReset": {
+    "message": "初期化と削除"
+  },
+  "settingsJump": {
+    "message": "設定のグループへ移動"
+  },
+  "syncNativeSection": {
+    "message": "X のブックマークとの連動"
+  },
+  "dataMoveSection": {
+    "message": "データの保存と移行"
+  },
+  "dataMoveDesc": {
+    "message": "保存したポストとフォルダを、ファイルに書き出したり、読み込んだりします。"
+  },
+  "acSection": {
+    "message": "ブックマークの自動取り込み"
+  },
+  "aboutSection": {
+    "message": "PostShelf について"
   },
   "savedBadgeTitle": {
     "message": "$COUNT$ 個のフォルダに保存済み",
@@ -190,6 +235,9 @@
         "example": "3"
       }
     }
+  },
+  "bulkMenuLabel": {
+    "message": "選択したポストの操作"
   },
   "bulkAdd": {
     "message": "フォルダに追加"
@@ -353,6 +401,21 @@
   "dismiss": {
     "message": "閉じる"
   },
+  "showMore": {
+    "message": "さらに表示"
+  },
+  "viewFullOnX": {
+    "message": "全文は X で見る"
+  },
+  "noticeMore": {
+    "message": "他に $COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "画像あり"
   },
@@ -364,6 +427,9 @@
   },
   "filterAuthor": {
     "message": "投稿者で絞り込み"
+  },
+  "filterButton": {
+    "message": "絞り込み"
   },
   "clearFilters": {
     "message": "絞り込みを外す"
@@ -397,9 +463,6 @@
   },
   "viewLabel": {
     "message": "表示形式"
-  },
-  "dataSection": {
-    "message": "データ"
   },
   "saveCurrentPost": {
     "message": "いま開いているポストを保存…"
@@ -542,14 +605,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "アカウント: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "x.com でログイン中のアカウントを判定できないため、保存できません。x.com のページを開き直してください。"
   },
@@ -666,6 +721,15 @@
   "videoBadge": {
     "message": "動画"
   },
+  "mediaImages": {
+    "message": "画像 $COUNT$ 枚",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "動画の案内を表示"
   },
@@ -686,6 +750,9 @@
   },
   "cacheEnableDesc": {
     "message": "ポストを保存するときに、画像を端末に残します。X 側で消えても見られます。動画はサムネイルだけです。"
+  },
+  "cacheCollapsedHint": {
+    "message": "オンにすると、保存先・容量・画質を選べます"
   },
   "cachePermNote": {
     "message": "初めてオンにするとき、Chrome が「pbs.twimg.com（X の画像サーバー）へのアクセス」の許可を求めます。許可は、この機能をオンにしたときだけ求めます。"
@@ -898,6 +965,64 @@
   "cacheRules": {
     "message": "保存した画像は、この PC の中だけに置き、外部へは送りません。拡張機能を削除すると、ブラウザの中のキャッシュも消えます（選んだフォルダは消えません）。本当に残したい画像は「自分で選んだフォルダ」に保存してください。保存データ本体の備えには、JSON のエクスポートを使ってください（画像は含まれず、URL のみです）。"
   },
+  "fullTextTitle": {
+    "message": "長いポストの全文"
+  },
+  "fullTextSwitch": {
+    "message": "長いポストの全文を取得する"
+  },
+  "fullTextSwitchDesc": {
+    "message": "X で「さらに表示」とたたまれたポストを保存すると、そのポストのページを裏のタブで開いて全文を読み、閉じます。1 件ごとに 4〜8 秒の間隔をあけ、いま見ているタブには触れません。X の規約上、自動化されたアクセスとみなされる可能性があります（法的な助言ではありません）。オフにすると、たたまれた分だけを保存します。"
+  },
+  "fullTextPending": {
+    "message": "全文を取得していないポスト: $COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "いま取得する"
+  },
+  "fullTextConfirm": {
+    "message": "$COUNT$ 件の全文を取得します。1 件ごとに 4〜8 秒かかり、X のポストのページが、裏のタブで開いては閉じます。X の規約上、自動化されたアクセスとみなされる可能性があります。始めますか？",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "取得を始める"
+  },
+  "fullTextProgress": {
+    "message": "取得しています: $DONE$ / $TOTAL$ 件",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "止める"
+  },
+  "fullTextStopLimit": {
+    "message": "X が制限や警告を出したようなので、止めました。しばらくあけてから、もう一度試してください。"
+  },
+  "fullTextStopFailures": {
+    "message": "続けて 3 件取得できなかったので、止めました。"
+  },
+  "fullTextStopUser": {
+    "message": "取得を止めました。"
+  },
   "updateNotice": {
     "message": "PostShelf を更新しました（$VERSION$）",
     "placeholders": {
@@ -922,7 +1047,315 @@
   "installGuideLink": {
     "message": "更新と手動インストールの手順"
   },
+  "githubLink": {
+    "message": "GitHub で見る"
+  },
+  "githubLinkAria": {
+    "message": "GitHub で見る（新しいタブで開きます）"
+  },
   "errorStorage": {
     "message": "保存または読み込みに失敗しました。もう一度試してください。続くときは、設定の「データ」から「エクスポート」で保存してから、拡張機能を再読み込みしてください。"
+  },
+  "removeFromPostShelf": {
+    "message": "PostShelf から外す"
+  },
+  "acPanelLabel": {
+    "message": "ブックマークの自動取り込み"
+  },
+  "acPanelRunning": {
+    "message": "ブックマークを取り込み中"
+  },
+  "acPanelPaused": {
+    "message": "一時停止中"
+  },
+  "acPanelLimit": {
+    "message": "自動で止めました"
+  },
+  "acPanelDone": {
+    "message": "取り込みが終わりました"
+  },
+  "acPanelStopped": {
+    "message": "取り込みを止めました"
+  },
+  "acPanelCountdown": {
+    "message": "$SEC$ 秒後に始まります",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "$SPEED$で読み込み中",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "速度「$SPEED$」で読み込み中。いま $DATE$ ごろの投稿です",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "ゆっくり"
+  },
+  "acSpeedNormal": {
+    "message": "標準"
+  },
+  "acReasonUser": {
+    "message": "一時停止しました"
+  },
+  "acReasonHidden": {
+    "message": "別のタブに切り替えたため、自動で止めました"
+  },
+  "acReasonAccount": {
+    "message": "アカウントが変わったため、止めました"
+  },
+  "acReasonCap": {
+    "message": "上限の $COUNT$ 件に達したため、止めました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonTime": {
+    "message": "1 回の上限の 2 時間に達したため、止めました"
+  },
+  "acReasonReload": {
+    "message": "ページが読み込み直されたため、止まっています"
+  },
+  "acReasonLimit": {
+    "message": "X が制限を表示したかもしれません"
+  },
+  "acReasonPage": {
+    "message": "ブックマークの画面から移動したため、止めました"
+  },
+  "acReasonRefusedAccount": {
+    "message": "管理画面で選んだアカウントと、x.com のアカウントが違うため、始められません"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "x.com のアカウントを判定できないため、始められません"
+  },
+  "acSubDone": {
+    "message": "いちばん古いブックマークまで読み込みました"
+  },
+  "acSubStopped": {
+    "message": "ここまでの分は、すでに取り込んであります"
+  },
+  "acNoteRunning": {
+    "message": "このタブを開いたままにしてください。別のタブへ切り替えると、自動で一時停止します。"
+  },
+  "acNotePaused": {
+    "message": "再開すると、続きから取り込みます。すでに取り込んだ投稿はスキップし、X のブックマークの並びに合わせて整えます。"
+  },
+  "acNoteReload": {
+    "message": "再開すると、一覧の先頭から読み直します。すでに取り込んだ投稿はスキップします。"
+  },
+  "acNoteDone": {
+    "message": "X の並び順どおりに整理しました。「未分類」から、フォルダに振り分けられます。"
+  },
+  "acLimitAlert": {
+    "message": "X の画面にエラーまたは制限の表示が出たため、止めました。15 分以上あけてから再開してください。続けて試すと、制限が長引くことがあります。"
+  },
+  "acResumeAt": {
+    "message": "$TIME$ に再開します（このタブを開いたままにしてください）",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "取り込み"
+  },
+  "acStatSkipped": {
+    "message": "スキップ"
+  },
+  "acStatFailed": {
+    "message": "失敗"
+  },
+  "acOldest": {
+    "message": "いちばん古い投稿: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "一時停止"
+  },
+  "acBtnStop": {
+    "message": "停止"
+  },
+  "acBtnResume": {
+    "message": "再開"
+  },
+  "acBtnEnd": {
+    "message": "ここで終了"
+  },
+  "acBtnResumeLater": {
+    "message": "15 分後に再開する"
+  },
+  "acBtnOpenManager": {
+    "message": "管理画面を開く"
+  },
+  "acBtnClose": {
+    "message": "閉じる"
+  },
+  "acBtnAuto": {
+    "message": "自動で取り込む…"
+  },
+  "acBtnAutoTitle": {
+    "message": "ブックマークのタブを自動でスクロールして取り込みます。1 回の上限は設定で変えられます"
+  },
+  "acManualTitle": {
+    "message": "いま見えている分だけ取り込む"
+  },
+  "acOfferTitle": {
+    "message": "X のブックマークを取り込みますか？"
+  },
+  "acOfferBody": {
+    "message": "$ACCOUNT$ で、初めて PostShelf を使います。x.com の「履歴」→「ブックマーク」を開き、画面を自動でスクロールしながら取り込みます。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "取り込みを始める…"
+  },
+  "acOfferLater": {
+    "message": "あとで"
+  },
+  "acOfferNever": {
+    "message": "このアカウントでは表示しない"
+  },
+  "acDlgTitle": {
+    "message": "自動で取り込みます"
+  },
+  "acDlgIntro": {
+    "message": "アカウント: $ACCOUNT$。x.com のブックマークのタブを、自動でスクロールして読み込みます。",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "速度"
+  },
+  "acSpeedSlowOpt": {
+    "message": "ゆっくり（おすすめ）"
+  },
+  "acSpeedSlowHint": {
+    "message": "目安: 1 分に約 20〜40 件"
+  },
+  "acSpeedNormalHint": {
+    "message": "目安: 1 分に約 40〜80 件"
+  },
+  "acCapLabel": {
+    "message": "1 回の上限"
+  },
+  "acCap300": {
+    "message": "300 件ごとに一度止める（おすすめ）"
+  },
+  "acCap100": {
+    "message": "100 件ごとに一度止める"
+  },
+  "acCap0": {
+    "message": "止めない"
+  },
+  "acOrderX": {
+    "message": "x.com のブックマーク"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf（取り込み後）"
+  },
+  "acOrderNewest": {
+    "message": "最新のポスト"
+  },
+  "acOrderPrev": {
+    "message": "その前のポスト"
+  },
+  "acOrderOld": {
+    "message": "…古いポスト"
+  },
+  "acOrderSame": {
+    "message": "同じ順で並びます"
+  },
+  "acRisk": {
+    "message": "自動スクロールは、X の規約が禁じる「自動化されたアクセス」とみなされる可能性があります。アカウントの制限などが起きても、PostShelf の作者は責任を負えません。取り込みは、あなた自身の判断で、あなたのアカウントに対してだけ行ってください。"
+  },
+  "acConsent": {
+    "message": "上の内容を理解したうえで、自分の判断で実行します"
+  },
+  "acDlgStart": {
+    "message": "取り込みを始める"
+  },
+  "acProgressLine": {
+    "message": "$IMPORTED$ 件取り込み、$SKIPPED$ 件スキップ",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "x.com のタブを開く"
+  },
+  "acSettingsSwitch": {
+    "message": "自動取り込みを使う"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "オフにすると、取り込みの案内と、開始のボタンが出なくなります。オンでも、自動では始まりません。"
+  },
+  "acSettingsRun": {
+    "message": "ブックマークを自動で取り込む…"
+  },
+  "acSettingsNote": {
+    "message": "自動スクロールは、X の規約上の「自動化されたアクセス」とみなされる可能性があります。始める前に、確認の画面で内容を読んでください。"
+  },
+  "acNoAccount": {
+    "message": "アカウントを判定できないため、始められません。x.com を開いてログインしてから、もう一度試してください。"
+  },
+  "addFolder": {
+    "message": "フォルダを追加"
+  },
+  "createFolder": {
+    "message": "フォルダを作成"
+  },
+  "create": {
+    "message": "作成"
+  },
+  "back": {
+    "message": "戻る"
+  },
+  "errDuplicateFolder": {
+    "message": "同名のフォルダがあります"
   }
 }

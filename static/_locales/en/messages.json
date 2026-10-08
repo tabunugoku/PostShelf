@@ -48,7 +48,7 @@
     "message": "Add"
   },
   "noFolders": {
-    "message": "No folders yet"
+    "message": "Folders you create will be listed here"
   },
   "appTitle": {
     "message": "PostShelf"
@@ -155,8 +155,53 @@
   "syncNativeLabel": {
     "message": "Sync with X bookmarks"
   },
-  "syncNativeDesc": {
-    "message": "When you save a post to a folder, PostShelf also adds it to your standard X bookmarks; when you remove it from all folders, the X bookmark is removed too. PostShelf presses the on-screen bookmark button only once per post you act on. Off by default."
+  "syncNativeDesc1": {
+    "message": "When you save a post to a folder, PostShelf also adds it to your standard X bookmarks."
+  },
+  "syncNativeDesc2": {
+    "message": "When you remove it from all folders, the X bookmark is removed too."
+  },
+  "syncNativeDesc3": {
+    "message": "PostShelf presses the on-screen bookmark button only once per post you act on."
+  },
+  "syncNativeNote": {
+    "message": "Off by default."
+  },
+  "groupSave": {
+    "message": "Saving"
+  },
+  "groupCollect": {
+    "message": "Importing"
+  },
+  "groupBehavior": {
+    "message": "Display and behavior"
+  },
+  "groupData": {
+    "message": "Data"
+  },
+  "groupInfo": {
+    "message": "About"
+  },
+  "groupReset": {
+    "message": "Reset and delete"
+  },
+  "settingsJump": {
+    "message": "Jump to a settings group"
+  },
+  "syncNativeSection": {
+    "message": "Sync with X bookmarks"
+  },
+  "dataMoveSection": {
+    "message": "Backup and transfer"
+  },
+  "dataMoveDesc": {
+    "message": "Export your saved posts and folders to a file, or import them from one."
+  },
+  "acSection": {
+    "message": "Automatic bookmark import"
+  },
+  "aboutSection": {
+    "message": "About PostShelf"
   },
   "savedBadgeTitle": {
     "message": "Saved in $COUNT$ folder(s)",
@@ -190,6 +235,9 @@
         "example": "3"
       }
     }
+  },
+  "bulkMenuLabel": {
+    "message": "Actions for selected posts"
   },
   "bulkAdd": {
     "message": "Add to folder"
@@ -353,6 +401,21 @@
   "dismiss": {
     "message": "Dismiss"
   },
+  "showMore": {
+    "message": "Show more"
+  },
+  "viewFullOnX": {
+    "message": "See the full text on X"
+  },
+  "noticeMore": {
+    "message": "$COUNT$ more",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "With images"
   },
@@ -364,6 +427,9 @@
   },
   "filterAuthor": {
     "message": "Filter by author"
+  },
+  "filterButton": {
+    "message": "Filter"
   },
   "clearFilters": {
     "message": "Clear filters"
@@ -397,9 +463,6 @@
   },
   "viewLabel": {
     "message": "View"
-  },
-  "dataSection": {
-    "message": "Data"
   },
   "saveCurrentPost": {
     "message": "Save the open post…"
@@ -542,14 +605,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "Account: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "Can't tell which account is logged in on x.com, so nothing can be saved. Reload the x.com page."
   },
@@ -666,6 +721,15 @@
   "videoBadge": {
     "message": "Video"
   },
+  "mediaImages": {
+    "message": "$COUNT$ images",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "videoOpenLabel": {
     "message": "Show how to play this video"
   },
@@ -686,6 +750,9 @@
   },
   "cacheEnableDesc": {
     "message": "When you save a post, its images are also kept on this computer, so you can still see them if they disappear from X. For videos, only the thumbnail is kept."
+  },
+  "cacheCollapsedHint": {
+    "message": "Turn on to choose where to save, the size limit and the quality"
   },
   "cachePermNote": {
     "message": "The first time you turn this on, Chrome asks for permission to access pbs.twimg.com (X's image server). Permission is requested only when you turn this feature on."
@@ -898,6 +965,64 @@
   "cacheRules": {
     "message": "Saved images stay on this PC and are never sent anywhere. If you remove the extension, the cache inside the browser is deleted too (a folder you chose is not). Keep images you really want in \"a folder I choose\". For backing up your saved data itself, use the JSON export (it contains image URLs only, not the images)."
   },
+  "fullTextTitle": {
+    "message": "Full text of long posts"
+  },
+  "fullTextSwitch": {
+    "message": "Fetch the full text of long posts"
+  },
+  "fullTextSwitchDesc": {
+    "message": "When you save a post that X has collapsed behind “Show more”, PostShelf opens that post’s page in a background tab, reads the full text and closes the tab. It waits 4–8 seconds between posts and never touches the tab you are viewing. X’s terms may treat this as automated access (this is not legal advice). When off, only the collapsed text is saved."
+  },
+  "fullTextPending": {
+    "message": "Posts without full text: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextRunNow": {
+    "message": "Fetch now"
+  },
+  "fullTextConfirm": {
+    "message": "This fetches the full text of $COUNT$ posts. Each takes 4–8 seconds, and X post pages are opened and closed in a background tab. X’s terms may treat this as automated access. Start?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStart": {
+    "message": "Start"
+  },
+  "fullTextProgress": {
+    "message": "Fetching: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "fullTextStop": {
+    "message": "Stop"
+  },
+  "fullTextStopLimit": {
+    "message": "Stopped because X seems to have shown a limit or warning. Wait a while and try again."
+  },
+  "fullTextStopFailures": {
+    "message": "Stopped because 3 posts in a row could not be fetched."
+  },
+  "fullTextStopUser": {
+    "message": "Fetching was stopped."
+  },
   "updateNotice": {
     "message": "PostShelf was updated ($VERSION$)",
     "placeholders": {
@@ -922,7 +1047,315 @@
   "installGuideLink": {
     "message": "Steps for updating and manual installation"
   },
+  "githubLink": {
+    "message": "View on GitHub"
+  },
+  "githubLinkAria": {
+    "message": "View on GitHub (opens in a new tab)"
+  },
   "errorStorage": {
     "message": "Saving or loading failed. Please try again. If it keeps happening, save your data with \"Export\" in Settings, then reload the extension."
+  },
+  "removeFromPostShelf": {
+    "message": "Remove from PostShelf"
+  },
+  "acPanelLabel": {
+    "message": "Automatic bookmark import"
+  },
+  "acPanelRunning": {
+    "message": "Importing bookmarks"
+  },
+  "acPanelPaused": {
+    "message": "Paused"
+  },
+  "acPanelLimit": {
+    "message": "Stopped automatically"
+  },
+  "acPanelDone": {
+    "message": "Import finished"
+  },
+  "acPanelStopped": {
+    "message": "Import stopped"
+  },
+  "acPanelCountdown": {
+    "message": "Starting in $SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunning": {
+    "message": "Loading at $SPEED$ speed",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSubRunningDate": {
+    "message": "Loading at $SPEED$ speed. Now at posts from around $DATE$",
+    "placeholders": {
+      "speed": {
+        "content": "$1",
+        "example": "x"
+      },
+      "date": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedSlow": {
+    "message": "Slow"
+  },
+  "acSpeedNormal": {
+    "message": "Normal"
+  },
+  "acReasonUser": {
+    "message": "You paused the import"
+  },
+  "acReasonHidden": {
+    "message": "Stopped automatically because you switched to another tab"
+  },
+  "acReasonAccount": {
+    "message": "Stopped because the account changed"
+  },
+  "acReasonCap": {
+    "message": "Stopped because it reached the limit of $COUNT$ posts",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acReasonTime": {
+    "message": "Stopped because it reached the 2-hour limit for one import"
+  },
+  "acReasonReload": {
+    "message": "Stopped because the page was reloaded"
+  },
+  "acReasonLimit": {
+    "message": "X may have shown a limit"
+  },
+  "acReasonPage": {
+    "message": "Stopped because you left the bookmarks page"
+  },
+  "acReasonRefusedAccount": {
+    "message": "Cannot start: the account chosen in the manager is different from the account on x.com"
+  },
+  "acReasonRefusedUnknown": {
+    "message": "Cannot start: the account on x.com could not be determined"
+  },
+  "acSubDone": {
+    "message": "Reached the oldest bookmark"
+  },
+  "acSubStopped": {
+    "message": "Everything up to here has already been imported"
+  },
+  "acNoteRunning": {
+    "message": "Keep this tab open. Switching to another tab pauses the import automatically."
+  },
+  "acNotePaused": {
+    "message": "Resuming continues from where it stopped. Posts already imported are skipped, and new ones are placed to match the order of your X bookmarks."
+  },
+  "acNoteReload": {
+    "message": "Resuming reads the list again from the top. Posts already imported are skipped."
+  },
+  "acNoteDone": {
+    "message": "Organized in the same order as on X. You can sort them into folders from \"Unsorted\"."
+  },
+  "acLimitAlert": {
+    "message": "Stopped because X showed an error or a limit. Wait at least 15 minutes before resuming. Trying again right away may make the limit last longer."
+  },
+  "acResumeAt": {
+    "message": "Will resume at $TIME$ (keep this tab open)",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acStatImported": {
+    "message": "Imported"
+  },
+  "acStatSkipped": {
+    "message": "Skipped"
+  },
+  "acStatFailed": {
+    "message": "Failed"
+  },
+  "acOldest": {
+    "message": "Oldest post: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acBtnPause": {
+    "message": "Pause"
+  },
+  "acBtnStop": {
+    "message": "Stop"
+  },
+  "acBtnResume": {
+    "message": "Resume"
+  },
+  "acBtnEnd": {
+    "message": "End here"
+  },
+  "acBtnResumeLater": {
+    "message": "Resume in 15 minutes"
+  },
+  "acBtnOpenManager": {
+    "message": "Open the manager"
+  },
+  "acBtnClose": {
+    "message": "Close"
+  },
+  "acBtnAuto": {
+    "message": "Import automatically…"
+  },
+  "acBtnAutoTitle": {
+    "message": "Scrolls the bookmarks tab automatically and imports from it. The limit per run can be changed in the settings"
+  },
+  "acManualTitle": {
+    "message": "Import only what is visible now"
+  },
+  "acOfferTitle": {
+    "message": "Import your X bookmarks?"
+  },
+  "acOfferBody": {
+    "message": "You are using PostShelf for the first time with $ACCOUNT$. It opens \"History\" → \"Bookmarks\" on x.com and imports while scrolling the page automatically.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acOfferStart": {
+    "message": "Start importing…"
+  },
+  "acOfferLater": {
+    "message": "Later"
+  },
+  "acOfferNever": {
+    "message": "Do not show for this account"
+  },
+  "acDlgTitle": {
+    "message": "Import automatically"
+  },
+  "acDlgIntro": {
+    "message": "Account: $ACCOUNT$. The bookmarks tab on x.com is scrolled automatically and read.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "x"
+      }
+    }
+  },
+  "acSpeedLabel": {
+    "message": "Speed"
+  },
+  "acSpeedSlowOpt": {
+    "message": "Slow (recommended)"
+  },
+  "acSpeedSlowHint": {
+    "message": "About 20–40 posts per minute"
+  },
+  "acSpeedNormalHint": {
+    "message": "About 40–80 posts per minute"
+  },
+  "acCapLabel": {
+    "message": "Limit per run"
+  },
+  "acCap300": {
+    "message": "Pause every 300 posts (recommended)"
+  },
+  "acCap100": {
+    "message": "Pause every 100 posts"
+  },
+  "acCap0": {
+    "message": "Do not pause"
+  },
+  "acOrderX": {
+    "message": "Bookmarks on x.com"
+  },
+  "acOrderShelf": {
+    "message": "PostShelf (after importing)"
+  },
+  "acOrderNewest": {
+    "message": "Newest post"
+  },
+  "acOrderPrev": {
+    "message": "The one before it"
+  },
+  "acOrderOld": {
+    "message": "… older posts"
+  },
+  "acOrderSame": {
+    "message": "Same order"
+  },
+  "acRisk": {
+    "message": "Automatic scrolling may be treated as \"automated access\", which X's terms prohibit. If your account is restricted or anything similar happens, PostShelf's author cannot take responsibility. Import only on your own judgment and only for your own account."
+  },
+  "acConsent": {
+    "message": "I understand the above and will run this on my own judgment"
+  },
+  "acDlgStart": {
+    "message": "Start importing"
+  },
+  "acProgressLine": {
+    "message": "$IMPORTED$ imported, $SKIPPED$ skipped",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "x"
+      },
+      "skipped": {
+        "content": "$2",
+        "example": "x"
+      }
+    }
+  },
+  "acOpenX": {
+    "message": "Open the x.com tab"
+  },
+  "acSettingsSwitch": {
+    "message": "Use automatic import"
+  },
+  "acSettingsSwitchDesc": {
+    "message": "When off, the import prompt and the start buttons are hidden. Even when on, nothing starts by itself."
+  },
+  "acSettingsRun": {
+    "message": "Import bookmarks automatically…"
+  },
+  "acSettingsNote": {
+    "message": "Automatic scrolling may be treated as \"automated access\" under X's terms. Please read the confirmation screen before you start."
+  },
+  "acNoAccount": {
+    "message": "Cannot start because the account could not be determined. Open x.com, sign in, and try again."
+  },
+  "addFolder": {
+    "message": "Add folder"
+  },
+  "createFolder": {
+    "message": "Create folder"
+  },
+  "create": {
+    "message": "Create"
+  },
+  "back": {
+    "message": "Back"
+  },
+  "errDuplicateFolder": {
+    "message": "A folder with this name already exists"
   }
 }

@@ -13,8 +13,18 @@ export async function openSidePanel(): Promise<void> {
   if (win.id !== undefined) await chrome.sidePanel.open({ windowId: win.id });
 }
 
-export async function openManagerTab(hash = ''): Promise<void> {
-  await chrome.tabs.create({ url: chrome.runtime.getURL('manager.html') + hash });
+export async function openManagerTab(hash = '', reuse = false): Promise<void> {
+  const url = chrome.runtime.getURL('manager.html') + hash;
+  if (reuse) {
+    // すでに開いている管理画面があれば、それを前面に出す (x.com のタブから呼ぶとき、タブが増えないように)
+    const open = (await chrome.tabs.query({ url: chrome.runtime.getURL('manager.html*') }))[0];
+    if (open?.id !== undefined) {
+      await chrome.tabs.update(open.id, { active: true, url });
+      if (open.windowId !== undefined) await chrome.windows?.update?.(open.windowId, { focused: true });
+      return;
+    }
+  }
+  await chrome.tabs.create({ url });
 }
 
 /**

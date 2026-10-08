@@ -58,3 +58,6 @@ When Chrome starts with an extension loaded in developer mode, it may show a con
   - Same ID → check the account shown at the top left of the manager (you may be viewing another account's data).
 - **Updated but nothing changed**: make sure you pressed "Reload" (↻) on PostShelf. Reload open x.com tabs (F5).
 - If the display looks wrong because X changed its layout: copy the diagnostic information from Settings → "X page structure" and report it.
+
+## 6. About the automatic bookmark import
+PostShelf can import your x.com bookmarks by scrolling the page automatically. It runs only after you agree in the confirmation screen and press "Start". Automatic scrolling may be treated as "automated access", which X's terms prohibit, and the author cannot take responsibility if your account is restricted or anything similar happens. If you do not want it, turn off "Use automatic import" in Settings (the prompt and the start buttons will no longer appear). See the [FAQ](FAQ.md) for details.

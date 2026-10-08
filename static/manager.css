@@ -8,6 +8,7 @@
   /* アクセント: アイコン・リンク・選択の強調は --fill-accent、文字の載る塗りは白文字で 4.5:1 以上の --accent-strong */
   --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0f6fb3;
   --accent-strong:#0f6fb3;--danger:#c0302f;--danger-solid:#c0302f;
+  --warn-fg:#8a5a00;--warn-bg:#fff4d6;--ok:#00805a;
   --shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);--radius:8px;
   /* ポスト表示 (X 風カード) の列の上限幅。広い画面で横に伸びすぎて読みづらくならないよう、ここ 1 か所で調整する */
   --post-col-max:720px;
@@ -18,6 +19,7 @@
   --border:#2f3336;--border-strong:#536471;--border-stronger:#71767b;
   --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
   --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;
+  --warn-fg:#ffd277;--warn-bg:#3a2d0a;--ok:#4cd8a6;
   --shadow-popover:0 8px 24px rgba(0,0,0,.5);
 }}
 /* OS のダーク/ライトにフォーム部品 (input, button, スクロールバー等) を追従させる */
@@ -90,15 +92,19 @@ button:disabled{cursor:not-allowed}
 /* ---- バナー / チップ / 一括操作 ---- */
 .banner{display:flex;align-items:center;gap:10px;background:var(--bg-accent);border:1px solid var(--border);border-radius:10px;padding:6px 8px 6px 12px;margin-bottom:12px}
 .banner>i{color:var(--text-accent);font-size:18px}
-.banner-btn{margin-left:auto}
+.banner-btn{margin-left:auto;flex:none;white-space:nowrap}
+.banner-text{flex:1 1 auto;min-width:0}
+.banner-more{display:inline-flex;flex:none;gap:4px;align-items:center;color:var(--text-secondary);white-space:nowrap}
 .chips,.scroll{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .scroll{flex-wrap:nowrap;overflow-x:auto;margin-bottom:0;padding-bottom:2px}
 .chip.filter,.scroll .chip{display:inline-flex;gap:6px;align-items:center;min-height:32px;padding:2px 12px;border:1px solid var(--border-strong);border-radius:16px;background:var(--surface-2);cursor:pointer;white-space:nowrap}
 .chip.filter.on,.scroll .chip.on{background:var(--fill-ghost-selected);font-weight:700;border-color:var(--text-primary)}
 .chip .x{display:inline-flex;margin-left:2px}
-.bulk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px;padding:8px 10px;border:1px solid var(--border-strong);border-radius:12px;background:var(--bg-accent)}
-.bulk-clear{margin-left:auto}
-.bulk .danger{margin-left:0}
+.bulk-anchor{margin-left:auto}
+.bulk-btn{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:2px 12px;border-radius:16px;background:var(--accent-strong);color:#fff;border-color:transparent}
+.bulk-btn:hover{background:var(--accent-strong);opacity:.92}
+.menu-bulk{min-width:220px}
+.menu-bulk .menu-item{width:100%}
 
 /* ---- ポスト / リスト / グリッド ---- */
 .rows{position:relative}
@@ -120,11 +126,16 @@ button:disabled{cursor:not-allowed}
 .ph.v{cursor:pointer;background:linear-gradient(135deg,#14171a,#3b4a57)}
 .ph:hover::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.08);pointer-events:none}
 .ph:focus-visible{outline:3px solid var(--fill-accent);outline-offset:-3px}
-.ph .hint{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.7);color:#fff;border-radius:999px;font-size:14px;padding:0 10px;line-height:24px;opacity:0;transition:opacity .12s;pointer-events:none}
+.ph .hint{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.7);color:#fff;border-radius:999px;font-size:14px;padding:0 10px;line-height:24px;opacity:0;transition:opacity .12s;pointer-events:none}
 .ph:hover .hint,.ph:focus-visible .hint{opacity:1}
 .play{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(0,0,0,.65);border:2px solid #fff;display:grid;place-items:center;pointer-events:none}
 .play::before{content:'';border-left:18px solid #fff;border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px}
-.ph .badge{position:absolute;left:8px;bottom:8px;margin:0;background:rgba(0,0,0,.7);color:#fff;border-radius:4px;font-size:14px;padding:0 6px;line-height:22px}
+.ph .badge,.ph .cnt{position:absolute;bottom:8px;margin:0;display:inline-flex;gap:4px;align-items:center;background:rgba(0,0,0,.7);color:#fff;border-radius:6px;font-size:14px;font-weight:700;padding:0 6px;line-height:22px;pointer-events:none}
+.ph .badge{left:8px}
+.ph .cnt{right:8px}
+/* リスト表示の、行の右端の札 (動画は青い塗り。画像は枠だけ) */
+.mk{display:inline-flex;flex:none;gap:4px;align-items:center;border:1px solid var(--border-strong);border-radius:6px;padding:0 6px;font-size:14px;line-height:22px;color:var(--text-secondary);white-space:nowrap}
+.mk.v{color:#fff;background:var(--accent-strong);border-color:var(--accent-strong)}
 .ph .more{position:absolute;inset:0;background:rgba(0,0,0,.55);color:#fff;font-size:24px;font-weight:700;display:grid;place-items:center;pointer-events:none}
 .act{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
 .tag{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0 8px;border:1px solid var(--border-strong);border-radius:12px;font-size:14px;color:var(--text-secondary)}
@@ -146,17 +157,23 @@ button:disabled{cursor:not-allowed}
 .mini:hover{background:var(--fill-ghost-hover)}
 .mini .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .handle{color:var(--text-secondary);width:110px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.view-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));grid-auto-rows:1fr;gap:10px}
+.view-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));grid-auto-rows:1fr;gap:10px;padding:10px 10px 0}
 /* ポスト表示は列に上限幅をつけて左に寄せる (中央寄せにしない)。リスト・グリッド・ツールバーはメインの幅いっぱい */
 .layout-wide .view-post{max-width:var(--post-col-max)}
-.gc{position:relative;display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--border);border-radius:12px;min-height:180px;overflow:hidden}
+.gc{position:relative;display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--border);border-radius:12px;min-height:180px}
 .gc:hover{background:var(--fill-ghost-hover)}
-.gc .sel{position:absolute;top:6px;left:6px;z-index:1}
-.gc .row-actions{position:absolute;top:6px;right:6px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;z-index:1}
+/* チェックは、カードの左上の角に、丸いバッジとして出す (投稿者名・本文に重ならない)。選択中は塗りつぶし */
+.gc .sel{position:absolute;top:-12px;left:-12px;z-index:2}
+.gc .sel::before{inset:4px;border-radius:50%}
+.gc .sel:checked::after{font-size:13px}
+/* 操作ボタンは、カードの下の行の右端 (フォルダのチップと同じ行)。hover / フォーカスで出る (.row-actions の共通ルール) */
+.gc-foot{display:flex;gap:6px;align-items:flex-end;margin-top:auto}
+.gc-foot .act{flex:1;min-width:0;margin-top:4px}
+.gc .tag{min-width:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gc .row-actions{margin-left:auto;padding:1px 3px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px}
 .gc .cover-wrap{border-radius:8px;overflow:hidden;margin:-2px 0 2px}
 .gc .cover-wrap .ph{aspect-ratio:auto;height:110px}
 .gc-text{flex:1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.gc .act{margin-top:auto}
 .empty{color:var(--text-secondary)}
 .empty-state{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:48px 16px;color:var(--text-secondary)}
 .empty-state>i{font-size:32px}
@@ -167,9 +184,8 @@ button:disabled{cursor:not-allowed}
 .menu-anchor{position:relative;display:inline-block}
 .menu{position:absolute;z-index:20;top:100%;right:0;min-width:200px;max-width:min(300px,calc(100vw - 20px));margin-top:4px;padding:6px;background:var(--surface-3);border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-popover);font-weight:400;cursor:default}
 .menu-left{left:0;right:auto}
-.bulk .menu{left:0;right:auto}
 .menu.fixed{position:fixed;right:auto;margin:0;z-index:40}
-.menu-wide{min-width:260px}
+.menu-wide{min-width:min(300px,calc(100vw - 16px));max-width:min(340px,calc(100vw - 16px))}
 .menu-edit{width:min(440px,calc(100vw - 16px));max-width:none}
 .menu-scroll{max-height:320px;overflow-y:auto}
 .menu-item{display:flex;gap:8px;align-items:center;width:100%;min-height:36px;border:0;text-align:left;padding:4px 8px;border-radius:8px;color:var(--text-primary);text-decoration:none}
@@ -195,7 +211,9 @@ button:disabled{cursor:not-allowed}
 /* ---- 確認ダイアログ / トースト ---- */
 .overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
 .dialog{width:min(460px,calc(100vw - 32px));padding:16px;background:var(--surface-3);border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-popover)}
-.dialog p{margin:0 0 16px}
+.dialog p{margin:0 0 16px;text-wrap:balance}
+/* 確認の画面 (削除の確認など): 本文が 2 行に収まる幅にし、1 文字だけ次の行に折り返さないよう、行の長さを均す */
+.dialog[role=alertdialog]{width:min(520px,calc(100vw - 32px))}
 .dialog-title{font-size:16px;margin:0 0 8px}
 .dialog-actions{display:flex;gap:8px;justify-content:flex-end}
 .primary{background:var(--accent-strong);color:#fff;border-color:transparent}.primary:hover{background:var(--accent-strong);opacity:.9}
@@ -206,7 +224,25 @@ button:disabled{cursor:not-allowed}
 /* ---- 設定 ---- */
 .setting{display:flex;gap:10px;align-items:flex-start;padding:10px 0;cursor:pointer}
 .setting input{min-height:0;width:20px;height:20px;margin-top:4px;accent-color:var(--accent-strong);flex:none}
-.setting-desc{display:block;font-size:14px;margin-top:2px}
+.setting-desc{display:block;font-size:14px;margin-top:2px;max-width:40em}
+/* 説明は、短い文の箇条書きにする (v25) */
+.desc-list{display:grid;gap:2px}
+.desc-item{display:block;padding-left:1em;text-indent:-1em}
+.desc-item::before{content:'・'}
+.desc-note{margin-top:4px}
+/* 見出し (歯車のアイコンと文字の間に余白を空ける) */
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.bar>i{font-size:22px}
+/* オン / オフの設定は、右端のスイッチ。実際の入力は input type=checkbox role=switch のまま (キーボード: Space)。ラジオはそのまま */
+.setting:has(>input[role=switch]){justify-content:space-between}
+.setting>input[role=switch]{order:2;margin-left:auto;margin-top:2px;width:38px;height:22px;min-height:22px;padding:0;border:0;border-radius:999px;background:var(--border-stronger);position:relative;-webkit-appearance:none;appearance:none;cursor:pointer;transition:background .15s}
+.setting>input[role=switch]::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.setting>input[role=switch]:checked{background:var(--accent-strong)}
+.setting>input[role=switch]:checked::after{left:18px}
+.setting>input[role=switch]:disabled{opacity:.5;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){.setting>input[role=switch],.setting>input[role=switch]::after{transition:none}}
+.fold{display:flex;justify-content:space-between;align-items:center;color:var(--text-secondary);border-top:1px dashed var(--border-strong);margin-top:6px;padding-top:8px}
+.cache-perm-note{margin:-4px 0 4px}
 .setting-group{border:1px solid var(--border);border-radius:12px;margin:12px 0;padding:4px 12px 8px}
 .setting-group legend{padding:0 6px;font-weight:700}
 .io{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
@@ -221,15 +257,23 @@ button:disabled{cursor:not-allowed}
 .fb-main{display:flex;gap:8px;align-items:center;min-width:0}
 .fb-main .muted{font-weight:400}
 .pbody{flex:1;padding:8px 12px 80px;min-width:0}
-.layout-narrow .tools{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
-.layout-narrow .chips{flex-wrap:nowrap;overflow-x:auto}
+.layout-narrow .tools{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}
+.layout-narrow .tools .sortbox{min-width:0;flex:0 1 auto}
+.layout-narrow .tools .sort-btn{max-width:100%;gap:4px;padding:4px 8px;white-space:nowrap}
+.layout-narrow .tools .sort-btn>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.layout-narrow .tools .fbtn{flex:none;padding:2px 10px;gap:4px}
+.layout-narrow .tools .seg{flex:none}
+.layout-narrow .tools .seg button{min-width:32px;padding:4px 6px}
+/* 幅 380px 以下 (サイドパネルの最小幅) では、並べ替えの文言を欠けさせないよう、「絞り込み」はアイコン (と件数のバッジ) だけにする */
+@media (max-width:380px){.layout-narrow .tools .fbtn-label{display:none}.layout-narrow .tools .fbtn{padding:2px 8px}}
+.fbtn{position:relative}
+.count-badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent-strong);color:#fff;font-size:12px;font-weight:700;line-height:1}
+.menu-filter{width:min(300px,calc(100vw - 16px))}
+.menu-filter .chips{flex-wrap:wrap;overflow:visible;margin:0}
 .layout-narrow .post{gap:8px;padding:10px 0}
 .layout-narrow .av{width:32px;height:32px;font-size:14px}
 .layout-narrow .media{max-width:none}
 .layout-narrow .view-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-.layout-narrow .bulk{flex-direction:column;align-items:stretch}
-.layout-narrow .bulk .menu-anchor>button,.layout-narrow .bulk-clear,.layout-narrow .bulk .danger{width:100%;margin-left:0}
-.layout-narrow .bulk .menu{left:0;right:auto}
 .layout-narrow .handle{width:64px}
 .pfoot{position:sticky;bottom:0;z-index:10;padding:10px 12px;background:var(--surface-1);border-top:1px solid var(--border)}
 .cta{width:100%;display:flex;gap:8px;align-items:center;justify-content:center;background:var(--accent-strong);color:#fff;border-color:transparent}
@@ -261,6 +305,8 @@ button:disabled{cursor:not-allowed}
 .menu-acct{width:min(360px,calc(100vw - 16px));max-width:none}
 .acct-row{display:flex;align-items:center;gap:2px}
 .acct-main{flex:1;min-width:0}
+.acct-assign{flex:none;min-height:28px;padding:0 10px;border-radius:6px;font-size:13px;color:var(--text-secondary);white-space:nowrap}
+.acct-more{margin:2px 0 4px 32px;padding:4px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2)}
 .acct-text{display:flex;flex-direction:column;min-width:0}
 .acct-sub{font-size:14px;line-height:1.3}
 .acct-main[aria-checked=true]{font-weight:700;background:var(--fill-ghost-selected)}
@@ -312,3 +358,58 @@ input[type=number]{width:110px}
 .banner-error{background:transparent;border-color:var(--danger)}
 .banner-error>i{color:var(--danger)}
 .version-info{margin-top:12px}
+
+/* ブックマークの自動取り込み (v15) */
+.ac-offer,.ac-progress{align-items:flex-start}
+.ac-offer-main{display:grid;gap:8px;flex:1;min-width:0}
+.ac-row{display:flex;gap:8px;flex-wrap:wrap}
+.ac-title{display:flex;align-items:center;gap:8px}
+.ac-head{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.ac-head .ac-title{flex:1 1 240px;min-width:0}
+.ac-head .ac-actions{margin-left:auto;flex:none}
+.ac-head.single{flex-wrap:nowrap}
+.ac-head.single .ac-title{flex:1 1 0;align-items:flex-start;padding-top:4px}
+.ac-head.single .ac-dot{margin-top:6px}
+.ac-dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--fill-accent)}
+.ac-dot.run{animation:ac-pulse 1.2s infinite}.ac-dot.pause{background:var(--warn-fg)}.ac-dot.done{background:var(--ok)}.ac-dot.ng{background:var(--danger)}
+@keyframes ac-pulse{50%{opacity:.35}}
+.ac-bar{height:8px;border-radius:999px;background:var(--border);overflow:hidden;border:1px solid var(--border-strong)}
+.ac-bar i{display:block;height:100%;width:35%;background:var(--accent-strong)}
+.ac-bar.ind i{animation:ac-slide 1.6s infinite linear}
+@keyframes ac-slide{0%{margin-left:-35%}100%{margin-left:100%}}
+.ac-alert{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:8px 10px;font-size:14px}
+.ac-dialog{display:grid;gap:10px;max-height:calc(100vh - 32px);overflow:auto}
+.ac-dialog p,.ac-dialog .dialog-title{margin:0}
+.ac-field{border:0;margin:0;padding:0;display:grid;gap:2px}
+.ac-field legend{font-weight:700;padding:0 0 2px}
+.ac-cap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ac-cap select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;min-height:32px;padding:2px 8px}
+.ac-order{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px}
+.ac-order>div{border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--surface-1)}
+.ac-order ol{margin:4px 0 0;padding-left:20px}
+.ac-ok{color:var(--ok);font-weight:700}
+@media (max-width:480px){.ac-order{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.ac-dot.run,.ac-bar.ind i{animation:none}}
+
+/* 左のメニューの「設定」の下の GitHub のボタン (v25) */
+.gh-link{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;min-height:32px;margin:4px 10px 0;padding:0 12px;border:1px solid var(--border-strong);border-radius:999px;color:var(--text-secondary);text-decoration:none;font-size:14px}
+.gh-link:hover{background:var(--fill-ghost-hover);color:var(--text-primary)}
+.gh-link i{font-size:16px}
+.gh-link i:last-child{font-size:12px}
+/* 左のメニューが狭いとき (幅が足りないとき) は、ロゴだけにする。名前は aria-label に残す */
+@media (max-width:760px){.gh-text,.gh-link i:last-child{display:none}}
+
+/* ポストの本文: 6 行でたたむ / リンク / 「さらに表示」 (v24) */
+.text.clamp{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.tl{color:var(--text-accent);text-decoration:none;overflow-wrap:anywhere}
+.tl:hover{text-decoration:underline}
+.more-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.more-btn{min-height:28px;padding:0;border:0;background:transparent;color:var(--text-accent);font:inherit;text-decoration:none;cursor:pointer}
+.more-btn:hover{background:transparent;text-decoration:underline}
+
+/* 設定: グループの見出しと目次 (v25)。目次は URL のハッシュを使わない <button> */
+.settings-nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;padding:6px 0;background:var(--surface-2)}
+.layout-wide .settings-nav{position:sticky;top:0;z-index:5}
+.nav-chip{min-height:32px;padding:2px 12px;border-radius:16px;font-size:14px;background:var(--surface-2)}
+.set-h{margin:20px 0 0;font-size:14px;font-weight:700;color:var(--text-secondary);scroll-margin-top:56px}
+.set-h:focus-visible{outline:2px solid var(--fill-accent);outline-offset:2px}

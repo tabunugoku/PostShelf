@@ -56,9 +56,10 @@ describe('manager organizing', () => {
     await click(boxes()[0]);
     await click(boxes()[2], { shiftKey: true });
     expect($$('.selected').length).toBe(3);
-    expect($('.bulk strong').textContent).toBe('3 件選択中');
-    await click($('.bulk-clear'));
-    expect($$('.bulk').length).toBe(0);
+    expect($('.bulk-btn strong').textContent).toBe('3 件選択中');
+    await click($('.bulk-btn'));
+    await click($$('.menu-bulk .menu-item').find((x) => x.textContent?.includes('選択解除'))!);
+    expect($$('.bulk-btn').length).toBe(0);
   });
 
   it('Ctrl+A selects everything shown (within search results)', async () => {
@@ -79,11 +80,15 @@ describe('manager organizing', () => {
     const before = await listBookmarks();
     await click($$('.sel')[0]);
     await click($$('.sel')[1]);
-    await click($$('.bulk button').find((x) => x.textContent?.includes('削除'))!);
+    const del = async () => {
+      await click($('.bulk-btn'));
+      await click($$('.menu-bulk .menu-item').find((x) => x.textContent?.includes('削除'))!);
+    };
+    await del();
     expect($('[role=alertdialog]').textContent).toContain('2 件');
     await click($$('.dialog-actions button')[0]); // キャンセル
     expect((await listBookmarks()).length).toBe(4);
-    await click($$('.bulk button').find((x) => x.textContent?.includes('削除'))!);
+    await del();
     await click($$('.dialog-actions button')[1]);
     expect((await listBookmarks()).length).toBe(2);
     expect(rowIds()).toEqual(['2', '1']);
@@ -168,7 +173,7 @@ describe('manager organizing', () => {
     await click($('.folder-edit .danger'));
     expect($('[role=alertdialog]')).toBeTruthy();
     await click($$('.dialog-actions button')[1]);
-    expect((await listFolders()).map((f) => f.id)).toEqual(['all', b]);
+    expect((await listFolders()).map((f) => f.id)).toEqual(['all', 'inbox', b]); // 所属が空になったポストの受け皿 (v18)
   });
 
   it('folder edit popover: any icon can have a color, "no color" clears it, the name commits on Enter', async () => {

@@ -36,12 +36,22 @@ export const CANDIDATES = {
   video: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
   // 動画のサムネイル (poster 属性)。実機未確認の推測
   videoPoster: ['[data-testid="videoPlayer"] video[poster]', 'video[poster]'],
+  // 長いポストのたたみ (「さらに表示」)。ポストのページへのリンクで、たたまれたポストにだけある。実機未確認の推測 (docs/MANUAL_TEST.md)。
+  // 候補が 1 つだけ: data-testid 以外に目印が無い (文言は表示言語で変わる)
+  showMore: ['[data-testid="tweet-text-show-more-link"]'],
   // 候補が 1 つだけ: リンクカードは data-testid 以外に目印が無い
   linkCard: ['[data-testid="card.wrapper"]'],
   // 現在ログイン中のアカウント (v9)。いずれも実機未確認 (2026-10 時点):
   // 1 番目: 左メニュー下部のアカウント切替ボタン。実機では表示名と @ハンドルが出ている
   // 2 番目: 左メニューの「プロフィール」リンク (href が /ハンドル)
   // 3 番目: 左メニュー内のアバター (data-testid が UserAvatar-Container-ハンドル)
+  // 自動取り込み (v15) で使う。いずれも実機未確認の推測 (docs/MANUAL_TEST.md に未確認として書く):
+  // 読み込み中の表示 (スクロールの下端に出るスピナー)。role="progressbar" を持つ (推測)。
+  // ポストの中の読み込み表示 (動画など) は終わりの判定に関係ないので、メインの列の中に絞り、timelineLoading で article の内側を除く
+  loadingIndicator: ['[data-testid="primaryColumn"] [role="progressbar"]'],
+  // X が出すエラーや制限の表示 (「問題が発生しました」「Rate limit exceeded」と再試行ボタン)。data-testid は推測。
+  // 誤検知で止めすぎないよう、文言 (表示言語で変わる) には頼らず、エラー専用らしい data-testid だけを候補にする
+  xError: ['[data-testid="error-detail"]', '[data-testid="retry"]'],
   accountSwitcher: [
     '[data-testid="SideNav_AccountSwitcher_Button"]',
     '[data-testid="AppTabBar_Profile_Link"]',
@@ -89,6 +99,11 @@ export function queryAllFirst<T extends Element = Element>(root: ParentNode, key
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
+}
+
+/** タイムラインの読み込み表示が出ているか (ポスト = article の内側のものは数えない) */
+export function timelineLoading(root: ParentNode): boolean {
+  return queryAllFirst(root, 'loadingIndicator').els.some((el) => !el.closest('article'));
 }
 
 /** el から見て最も近い祖先 (自身を含む) で、いずれかの候補に一致するもの */

@@ -17,6 +17,12 @@ import {
   getImportHint,
   getSettings,
   noteRunVersion,
+  onSettingsChanged,
+  setCollectOffer,
+  clearCollectRun,
+  staleResult,
+  DEFAULT_AUTO_COLLECT,
+  type AutoCollectSettings,
   onImportHintChanged,
   shouldShowImportHint,
   updateSettings,
@@ -48,15 +54,19 @@ import {
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card } from './Cards';
+import { BulkMenu } from './BulkMenu';
 import { refreshCacheView } from './cacheView';
 import { afterPostsRemoved, deleteAccountDataAndCache } from '../shared/cacheops';
 import { ImageViewer, VideoGuide } from './Viewer';
 import { AccountSwitcher, AssignDialog, resolveViewAccount } from './Accounts';
 import { FolderEdit } from './FolderEdit';
+import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
+import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun } from './AutoCollect';
 import { currentVersion } from '../shared/version';
+import { REPO_URL } from '../shared/links';
 import { useCompact } from './useCompact';
 
 const sorts = (): [SortKey, string][] => [
@@ -92,6 +102,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [focusId, setFocusId] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
   const [menu, setMenu] = useState<'add' | 'remove' | 'author' | 'folders' | null>(null);
+  /** サイドパネルの「絞り込み」(4 つの条件を畳んだもの) を開いているか */
+  const [filterOpen, setFilterOpen] = useState(false);
+  /** お知らせの帯が複数あるとき、いま出している帯の番号 (「他に N 件」で切り替える) */
+  const [noticeIdx, setNoticeIdx] = useState(0);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
@@ -101,6 +115,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   /** 更新した直後の最初の起動だけ出すお知らせ (更新後のバージョン) */
   const [updated, setUpdated] = useState<string | null>(null);
   const storageError = useStorageError();
+  /** ブックマークの自動取り込み (v15): 設定、確認ダイアログ、「あとで」(この画面を開いている間だけ案内を隠す)、取り込みの状態 */
+  const [autoCfg, setAutoCfg] = useState<AutoCollectSettings>(DEFAULT_AUTO_COLLECT);
+  const [autoOpen, setAutoOpen] = useState(location.hash === '#autocollect');
+  const [offerLater, setOfferLater] = useState(false);
+  const collectRun = useCollectRun();
+  const [runClosed, setRunClosed] = useState(0);
   const [pending, setPending] = useState(0);
   const [accounts, setAccounts] = useState<AccountSummary[]>([]);
   const [viewId, setViewId] = useState(UNKNOWN_ACCOUNT_ID);
@@ -136,6 +156,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts(), refreshCacheView()]).then((r) => [r[0], r[1], r[2]] as const);
       lastRef.current = last;
       setLastSeen(last);
+      setAutoCfg(s.autoCollect);
       applyView(resolveViewAccount(s.viewAccount, last, accs));
       await Promise.all([reload(), loadHint()]);
       const ver = currentVersion();
@@ -148,7 +169,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       reportStorageError(); // 読み込めなかったことを画面に出す (空の画面のままにしない)
       setReady(true);
     });
-    const offs = [onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
+    const onHash = () => {
+      if (location.hash === '#autocollect') setAutoOpen(true); // x.com の「自動で取り込む…」から開かれた
+    };
+    window.addEventListener('hashchange', onHash);
+    const offs = [() => window.removeEventListener('hashchange', onHash), onSettingsChanged((c) => setAutoCfg(c.autoCollect)), onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
     return () => offs.forEach((o) => o());
   }, []);
 
@@ -160,6 +185,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setFilters({});
     setEditing(null);
     setMenu(null);
+    setFilterOpen(false);
     void updateSettings({ lastFolderId: id });
   };
   const chooseMode = (m: ViewMode) => {
@@ -260,15 +286,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     return t('confirmDelete');
   };
   /** ログイン中のアカウントを判定できていて、「アカウント未設定」にデータが残っているとき、割り当てを案内する */
-  const unknownBanner = unknownCount > 0 && viewId !== UNKNOWN_ACCOUNT_ID && lastSeen && page === 'bookmarks' && (
-    <div class="banner" role="region" aria-label={t('accountUnknownName')}>
-      <Icon name="ti-user-question" />
-      <span>{t('accountUnknownBanner', unknownCount)}</span>
-      <button class="banner-btn" onClick={() => setAssignFrom(UNKNOWN_ACCOUNT_ID)}>
-        {t('accountAssign')}
-      </button>
-    </div>
-  );
+  const unknownOn = unknownCount > 0 && viewId !== UNKNOWN_ACCOUNT_ID && !!lastSeen && page === 'bookmarks';
   const switcher = (
     <AccountSwitcher
       accounts={accounts}
@@ -376,7 +394,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const editNode = (f: Folder) =>
     editing === f.id && (
       <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-edit">
-        <FolderEdit folder={f} onSaved={() => void reload()} onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }} />
+        <FolderEdit folder={f} existing={[inboxOf(folders), ...folders]} onSaved={() => void reload()} onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }} />
       </Dropdown>
     );
 
@@ -482,21 +500,46 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       </button>
     ) : null;
 
-  const banner = bannerOn && page === 'bookmarks' && !compact && (
-    <div class="banner" role="region" aria-label={t('importHow')}>
-      <Icon name="ti-download" />
-      <span>{t('importBanner', pending)}</span>
-      <button class="banner-btn" onClick={() => setShowHow(true)}>
-        {t('importHow')}
+  const importOn = bannerOn && page === 'bookmarks' && !compact;
+  /**
+   * お知らせの帯は、いちばん大事な 1 本だけを出し、残りは「他に N 件」で次の帯に切り替える (v19-B)。
+   * 優先順: アカウント未設定の割り当て → ブックマークの取り込みの案内。自動取り込みの進捗は状態の表示なので、この対象ではない。
+   */
+  const noticeKinds = [...(unknownOn ? (['unknown'] as const) : []), ...(importOn ? (['import'] as const) : [])];
+  const noticeKind = noticeKinds.length ? noticeKinds[noticeIdx % noticeKinds.length] : null;
+  const moreBtn =
+    noticeKinds.length > 1 ? (
+      <button class="banner-more" aria-label={t('noticeMore', noticeKinds.length - 1)} onClick={() => setNoticeIdx((i) => i + 1)}>
+        {t('noticeMore', noticeKinds.length - 1)} <Icon name="ti-chevron-down" />
       </button>
-      <button class="icon-btn" aria-label={t('dismiss')} title={t('dismiss')} onClick={dismissBanner}>
-        <Icon name="ti-x" />
-      </button>
-    </div>
-  );
+    ) : null;
+  const noticeBand =
+    noticeKind === 'unknown' ? (
+      <div class="banner" role="region" aria-label={t('accountUnknownName')}>
+        <Icon name="ti-user-question" />
+        <span class="banner-text">{t('accountUnknownBanner', unknownCount)}</span>
+        <button class="banner-btn" onClick={() => setAssignFrom(UNKNOWN_ACCOUNT_ID)}>
+          {t('accountAssign')}
+        </button>
+        {moreBtn}
+      </div>
+    ) : noticeKind === 'import' ? (
+      <div class="banner" role="region" aria-label={t('importHow')}>
+        <Icon name="ti-download" />
+        <span class="banner-text">{t('importBanner', pending)}</span>
+        <button class="banner-btn" onClick={() => setShowHow(true)}>
+          {t('importHow')}
+        </button>
+        {moreBtn}
+        <button class="icon-btn" aria-label={t('dismiss')} title={t('dismiss')} onClick={dismissBanner}>
+          <Icon name="ti-x" />
+        </button>
+      </div>
+    ) : null;
 
-  const chips = (
-    <div class="chips" role="group" aria-label={t('filterAuthor')}>
+  /** 絞り込みの 4 つの条件 (画像あり / 動画あり / リンクあり / 投稿者)。管理画面では常に見えて、サイドパネルでは「絞り込み」に畳む */
+  const filterItems = (
+    <>
       {(
         [
           ['image', 'ti-photo', t('filterImage')],
@@ -548,51 +591,51 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </Dropdown>
         )}
       </span>
-    </div>
+    </>
   );
 
-  const bulk = selected.size > 0 && (
-    <div class="bulk" role="toolbar">
-      <strong>{t('selectedCount', selected.size)}</strong>
-      <span class="menu-anchor">
-        <button onClick={() => setMenu(menu === 'add' ? null : 'add')}>
-          <Icon name="ti-folder-plus" /> {t('bulkAdd')}
-        </button>
-        {menu === 'add' && (
-          <FolderMenu
-            label={t('bulkAdd')}
-            folders={pickerFolders}
-            onClose={() => setMenu(null)}
-            onPick={(id) => {
-              setMenu(null);
-              void run(addToFolders(bulkIds, [id]), 'toastAdded');
-            }}
-          />
-        )}
-      </span>
-      <span class="menu-anchor">
-        <button onClick={() => setMenu(menu === 'remove' ? null : 'remove')}>
-          <Icon name="ti-folder-minus" /> {t('bulkRemove')}
-        </button>
-        {menu === 'remove' && (
-          <FolderMenu
-            label={t('bulkRemove')}
-            folders={removableFolders}
-            onClose={() => setMenu(null)}
-            onPick={(id) => {
-              setMenu(null);
-              void run(removeFromFolders(bulkIds, [id]), 'toastRemoved');
-            }}
-          />
-        )}
-      </span>
-      <button class="danger" onClick={() => setConfirmState({ kind: 'posts', ids: bulkIds })}>
-        <Icon name="ti-trash" /> {t('delete')}
-      </button>
-      <button class="bulk-clear" onClick={clearSelection}>
-        {t('clearSelection')}
-      </button>
+  const bulkMenu =
+    selected.size > 0 ? (
+      <BulkMenu
+        count={selected.size}
+        addFolders={pickerFolders}
+        removeFolders={removableFolders}
+        onAdd={(id) => void run(addToFolders(bulkIds, [id]), 'toastAdded')}
+        onRemove={(id) => void run(removeFromFolders(bulkIds, [id]), 'toastRemoved')}
+        onDelete={() => setConfirmState({ kind: 'posts', ids: bulkIds })}
+        onClear={clearSelection}
+      />
+    ) : null;
+  /** 管理画面: 絞り込みの行。複数選択のボタンは右端に置く (行はいつもあるので、選択のたびに一覧はずれない) */
+  const chips = (
+    <div class="chips" role="group" aria-label={t('filterAuthor')}>
+      {filterItems}
+      {bulkMenu}
     </div>
+  );
+  const filterCount = (['image', 'video', 'link', 'handle'] as const).filter((k) => !!filters[k]).length;
+  /** サイドパネル: 「絞り込み」ボタン。押すと 4 つの条件が開く。選んでいるあいだは件数のバッジを出す */
+  const filterButton = (
+    <span class="menu-anchor">
+      <button
+        class={`chip filter fbtn${filterCount ? ' on' : ''}`}
+        aria-haspopup="true"
+        aria-expanded={filterOpen}
+        aria-label={t('filterButton')}
+        title={t('filterButton')}
+        onClick={() => setFilterOpen(!filterOpen)}
+      >
+        <Icon name="ti-adjustments-horizontal" /> <span class="fbtn-label">{t('filterButton')}</span>
+        {filterCount > 0 && <span class="count-badge">{filterCount}</span>}
+      </button>
+      {filterOpen && (
+        <Dropdown fixed onClose={() => setFilterOpen(false)} label={t('filterButton')} class="menu-filter">
+          <div class="chips" role="group" aria-label={t('filterButton')}>
+            {filterItems}
+          </div>
+        </Dropdown>
+      )}
+    </span>
   );
 
   const searching = search.trim() !== '' || hasActiveFilters(filters);
@@ -649,7 +692,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           }}
           pickerNode={
             picker === b.tweetId ? (
-              <Dropdown onClose={() => setPicker(null)} label={t('changeFolder')} class="menu-wide">
+              <Dropdown fixed onClose={() => setPicker(null)} label={t('changeFolder')} class="menu-wide">
                 <FolderPickerHost
                   folders={pickerFolders}
                   selected={b.folderIds}
@@ -670,6 +713,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     </div>
   );
 
+  // 案内を出す条件: 自動取り込みを使う設定、判定できたアカウントを表示していて、そのアカウントのデータが 0 件、案内を閉じていない。
+  // 出すだけで、自動では始まらない (「始める」を押して確認ダイアログで同意したときだけ動く)
+  const runActive = !!collectRun && ['countdown', 'running', 'paused', 'limit'].includes(collectRun.status);
+  const offerShown =
+    page === 'bookmarks' && autoCfg.enabled && !!lastSeen && viewId === lastSeen.id && bookmarks.length === 0 && !autoCfg.offers[lastSeen.id] && !offerLater && !runActive;
   const notices = (
     <>
       {storageError && (
@@ -680,6 +728,24 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             <Icon name="ti-x" />
           </button>
         </div>
+      )}
+      {collectRun && collectRun.updatedAt !== runClosed && autoCfg.enabled && !staleResult(collectRun) && (
+        <ProgressBanner
+          run={collectRun}
+          onClose={() => {
+            setRunClosed(collectRun.updatedAt);
+            // 終わった状態 (done / stopped) は、保存してある記録も消す。進行中の状態は消さない
+            if (collectRun.status === 'done' || collectRun.status === 'stopped') void clearCollectRun().catch(() => {});
+          }}
+        />
+      )}
+      {offerShown && lastSeen && (
+        <OfferBanner
+          accountName={accountLabel(lastSeen)}
+          onStart={() => setAutoOpen(true)}
+          onLater={() => setOfferLater(true)}
+          onNever={() => void setCollectOffer(lastSeen.id, 'dismissed')}
+        />
       )}
       {updated && (
         <div class="banner" role="status">
@@ -696,10 +762,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const body = (
     <>
       {notices}
-      {unknownBanner}
-      {banner}
-      {chips}
-      {bulk}
+      {noticeBand}
+      {compact ? null : chips}
       {empty}
       {rows}
     </>
@@ -758,6 +822,22 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       {viewerBookmark && viewer?.kind === 'video' && (
         <VideoGuide tweetId={viewerBookmark.tweetId} poster={viewerBookmark.snapshot.videoPoster} postUrl={viewerBookmark.snapshot.url} onClose={() => setViewer(null)} />
       )}
+      {autoOpen && autoCfg.enabled && (
+        <AutoCollectDialog
+          accountName={lastSeen ? accountLabel(lastSeen) : null}
+          speed={autoCfg.speed}
+          cap={autoCfg.cap}
+          onCancel={() => {
+            setAutoOpen(false);
+            if (location.hash === '#autocollect') history.replaceState(null, '', location.pathname + location.search);
+          }}
+          onStart={(speed, cap) => {
+            setAutoOpen(false);
+            if (location.hash === '#autocollect') history.replaceState(null, '', location.pathname + location.search);
+            if (lastSeen) void startAutoCollect({ accountId: lastSeen.id, speed, cap });
+          }}
+        />
+      )}
       {showHow && <InfoDialog title={t('importHowTitle')} body={t('importHowSteps')} onClose={() => setShowHow(false)} />}
       {toast && <Toast message={toast.message} onUndo={toast.undo || toast.action ? () => void doUndo() : undefined} />}
     </>
@@ -772,6 +852,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         surface={surface}
         onChanged={() => void reload()}
         onApplied={() => void reapplySettings()}
+        onAutoCollect={() => setAutoOpen(true)}
         onNotice={(message, action) => setToast({ key: Date.now(), message, action })}
       />
     </>
@@ -823,27 +904,21 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             {switchIcons}
           </div>
           {searchOpen && searchBox}
-          <div class="scroll" role="group" aria-label={t('foldersHeading')}>
-            {allViews.map((f) => (
-              <button class={`chip${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}`} aria-pressed={f.id === curFolder.id && page === 'bookmarks'} onClick={() => chooseView(f.id)}>
-                <Icon name={f.icon} color={f.color} />
-                {f.id === RECENT_ID ? f.name : displayName(f)}
-                {f.id === INBOX_ID && count(f.id) > 0 && <span class="badge">{count(f.id)}</span>}
-              </button>
-            ))}
-          </div>
+          {page === 'bookmarks' && (
+            <div class="tools">
+              {sortMenu}
+              {filterButton}
+              <span class="grow" />
+              {/* 選んでいるあいだは、表示切り替えの場所に「N 件選択中 ⌄」を出す (幅 340px に収めるため。一覧は下にずれない) */}
+              {bulkMenu ?? viewSeg}
+            </div>
+          )}
         </header>
         <main class="pbody">
           {page === 'settings' ? (
             settingsPage
           ) : (
-            <>
-              <div class="tools">
-                {sortMenu}
-                {viewSeg}
-              </div>
-              {body}
-            </>
+            body
           )}
         </main>
         {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
@@ -876,6 +951,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           <Icon name="ti-settings" />
           {t('settings')}
         </div>
+        {/* GitHub のリポジトリ (v25: 設定の中から、ここへ移した。どの画面にいても見える)。狭いときは、ロゴだけにして、名前は aria-label に残す */}
+        <a class="gh-link" href={REPO_URL} target="_blank" rel="noopener noreferrer" aria-label={t('githubLinkAria')} title={t('githubLinkAria')}>
+          <Icon name="ti-brand-github" />
+          <span class="gh-text">GitHub</span>
+          <Icon name="ti-external-link" />
+        </a>
       </aside>
       <main class="main">
         {page === 'settings' ? (
