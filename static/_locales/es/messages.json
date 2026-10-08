@@ -677,5 +677,225 @@
   },
   "videoPlayOnX": {
     "message": "Reproducir el vídeo en X ↗"
+  },
+  "cacheTitle": {
+    "message": "Caché de imágenes"
+  },
+  "cacheEnable": {
+    "message": "Guardar imágenes en caché"
+  },
+  "cacheEnableDesc": {
+    "message": "Al guardar una publicación, sus imágenes también se conservan en este equipo, así que podrás verlas aunque desaparezcan de X. De los vídeos solo se conserva la miniatura."
+  },
+  "cachePermNote": {
+    "message": "La primera vez que lo actives, Chrome pedirá permiso para acceder a pbs.twimg.com (el servidor de imágenes de X). El permiso solo se pide al activar esta función."
+  },
+  "cachePermDenied": {
+    "message": "No se pudo activar porque no se permitió el acceso al servidor de imágenes. Actívalo de nuevo y permite el acceso."
+  },
+  "cachePermMissing": {
+    "message": "No hay permiso para acceder al servidor de imágenes (pbs.twimg.com)."
+  },
+  "cacheGrant": {
+    "message": "Permitir"
+  },
+  "cacheDest": {
+    "message": "Dónde guardar"
+  },
+  "cacheDestIdb": {
+    "message": "Dentro del navegador (área de datos de la extensión; recomendado)"
+  },
+  "cacheDestDir": {
+    "message": "Una carpeta que elijo (en cualquier lugar del equipo)"
+  },
+  "cacheDirNone": {
+    "message": "No se ha elegido ninguna carpeta"
+  },
+  "cacheDirPick": {
+    "message": "Elegir una carpeta…"
+  },
+  "cacheDirRepick": {
+    "message": "Elegir otra carpeta…"
+  },
+  "cacheDirRescan": {
+    "message": "Volver a analizar"
+  },
+  "cacheDirRescanDone": {
+    "message": "Se volvieron a contar $COUNT$ imágenes",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "Se necesita permiso"
+  },
+  "cacheDirPermNote": {
+    "message": "Al reiniciar Chrome, el acceso a la carpeta puede revocarse. Hasta que lo permitas de nuevo, las imágenes no se escriben en la carpeta y se cargan desde el servidor de imágenes de X."
+  },
+  "cacheDirTabOnly": {
+    "message": "La carpeta se elige en la versión en pestaña de la página de gestión (no se puede elegir en el panel lateral). Elígela allí."
+  },
+  "cacheDirUnsupported": {
+    "message": "No se pudo elegir una carpeta en esta página de la extensión. Usa «Dentro del navegador»."
+  },
+  "cacheDirReadme": {
+    "message": "Esta es la caché de imágenes de PostShelf. Borrarla no borra los datos de PostShelf.\nLa carpeta «images» contiene una carpeta por cada ID de publicación."
+  },
+  "cacheDirNonEmpty": {
+    "message": "Esta carpeta no la creó PostShelf y ya contiene otros archivos. ¿Puede PostShelf crear aquí «.postshelf», «README.txt» y una carpeta «images»? Los demás archivos de la carpeta no se tocan."
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "Crear"
+  },
+  "cacheMax": {
+    "message": "Tamaño máximo"
+  },
+  "cacheMaxCustom": {
+    "message": "Personalizado…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "Tamaño máximo (MB, 100 o más)"
+  },
+  "cacheMaxMin": {
+    "message": "El tamaño máximo debe ser de al menos 100 MB."
+  },
+  "cacheUsage": {
+    "message": "En uso: $USED$ de $MAX$ ($COUNT$ imágenes)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "Calidad de imagen"
+  },
+  "cacheQualityLarge": {
+    "message": "Estándar (unos 0,2–0,5 MB cada una; suficiente para ver)"
+  },
+  "cacheQualityOrig": {
+    "message": "Tamaño original (unos 1–5 MB cada una; ocupa espacio más rápido)"
+  },
+  "cacheFull": {
+    "message": "Cuando se llene"
+  },
+  "cacheFullEvict": {
+    "message": "Borrar primero lo más antiguo (imágenes de las publicaciones guardadas hace más tiempo)"
+  },
+  "cacheFullStop": {
+    "message": "No guardar imágenes nuevas"
+  },
+  "cacheBulk": {
+    "message": "Guardar en caché las imágenes de las publicaciones guardadas"
+  },
+  "cacheBulkProgress": {
+    "message": "Obteniendo imágenes: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "Detener"
+  },
+  "cacheBulkDone": {
+    "message": "Se guardaron $COUNT$ imágenes en caché ($FAILED$ fallidas)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "No hay imágenes que guardar en caché"
+  },
+  "cacheBulkBlocked": {
+    "message": "Se detuvo porque no se pudo escribir en el destino. Comprueba el permiso y la carpeta."
+  },
+  "cacheBulkFull": {
+    "message": "Se detuvo porque se alcanzó el tamaño máximo."
+  },
+  "cacheBulkHelp": {
+    "message": "Guardar todo en caché carga las imágenes una a una (se muestra el progreso y puedes detenerlo en cualquier momento). Si lo detienes, la próxima vez continúa donde se quedó. Al eliminar una publicación también se eliminan sus imágenes."
+  },
+  "cacheClear": {
+    "message": "Eliminar la caché"
+  },
+  "cacheClearConfirm": {
+    "message": "¿Eliminar las imágenes en caché ($COUNT$ imágenes)? Las publicaciones guardadas se conservan. Las imágenes se cargarán desde el servidor de imágenes de X.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "Se eliminó la caché"
+  },
+  "cacheLowerConfirm": {
+    "message": "Al reducir el tamaño máximo se eliminarán de inmediato las imágenes de las $COUNT$ publicaciones guardadas más antiguas. ¿Continuar?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "Reducir y limpiar"
+  },
+  "cacheSwitchTitle": {
+    "message": "Cambiar dónde se guardan"
+  },
+  "cacheSwitchBody": {
+    "message": "Hay $COUNT$ imágenes en la ubicación actual. ¿Moverlas a la nueva?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "Mover"
+  },
+  "cacheSwitchKeep": {
+    "message": "No mover"
+  },
+  "cacheSwitchProgress": {
+    "message": "Moviendo imágenes: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "No se pudieron mover las imágenes. Comprueba el permiso del destino."
+  },
+  "cacheCleanupNeeded": {
+    "message": "Algunas imágenes no se eliminaron al eliminar publicaciones. Comprueba el permiso del destino y pulsa «Limpiar ahora»."
+  },
+  "cacheCleanupNow": {
+    "message": "Limpiar ahora"
+  },
+  "cacheRules": {
+    "message": "Las imágenes guardadas se quedan en este equipo y nunca se envían a ningún sitio. Si eliminas la extensión, la caché dentro del navegador también se elimina (una carpeta que hayas elegido no). Guarda las imágenes que quieras conservar de verdad en «Una carpeta que elijo». Para respaldar los datos guardados, usa la exportación JSON (solo contiene las URL de las imágenes, no las imágenes)."
   }
 }

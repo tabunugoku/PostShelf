@@ -677,5 +677,225 @@
   },
   "videoPlayOnX": {
     "message": "X で動画を再生 ↗"
+  },
+  "cacheTitle": {
+    "message": "画像のキャッシュ"
+  },
+  "cacheEnable": {
+    "message": "画像をキャッシュする"
+  },
+  "cacheEnableDesc": {
+    "message": "ポストを保存するときに、画像を端末に残します。X 側で消えても見られます。動画はサムネイルだけです。"
+  },
+  "cachePermNote": {
+    "message": "初めてオンにするとき、Chrome が「pbs.twimg.com（X の画像サーバー）へのアクセス」の許可を求めます。許可は、この機能をオンにしたときだけ求めます。"
+  },
+  "cachePermDenied": {
+    "message": "画像サーバーへのアクセスが許可されなかったため、オンにできませんでした。もう一度オンにして、許可してください。"
+  },
+  "cachePermMissing": {
+    "message": "画像サーバー（pbs.twimg.com）へのアクセス許可がありません。"
+  },
+  "cacheGrant": {
+    "message": "許可する"
+  },
+  "cacheDest": {
+    "message": "保存先"
+  },
+  "cacheDestIdb": {
+    "message": "ブラウザの中（拡張機能のデータ領域。おすすめ）"
+  },
+  "cacheDestDir": {
+    "message": "自分で選んだフォルダ（PC の好きな場所）"
+  },
+  "cacheDirNone": {
+    "message": "フォルダが選ばれていません"
+  },
+  "cacheDirPick": {
+    "message": "フォルダを選ぶ…"
+  },
+  "cacheDirRepick": {
+    "message": "フォルダを選び直す…"
+  },
+  "cacheDirRescan": {
+    "message": "再スキャン"
+  },
+  "cacheDirRescanDone": {
+    "message": "$COUNT$ 枚を数え直しました",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "許可が必要です"
+  },
+  "cacheDirPermNote": {
+    "message": "Chrome を再起動すると、フォルダへのアクセス許可が外れることがあります。許可するまで、画像はフォルダに書き込まず、X の画像サーバーから読みます。"
+  },
+  "cacheDirTabOnly": {
+    "message": "フォルダの選択はタブ版の管理画面で行います（サイドパネルでは選べません）。タブ版で選んでください。"
+  },
+  "cacheDirUnsupported": {
+    "message": "このブラウザの拡張機能のページでは、フォルダを選べませんでした。保存先は「ブラウザの中」を使ってください。"
+  },
+  "cacheDirReadme": {
+    "message": "PostShelf の画像キャッシュです。消しても、PostShelf 本体のデータは消えません。\n「images」フォルダの中に、ポスト ID ごとのフォルダがあります。"
+  },
+  "cacheDirNonEmpty": {
+    "message": "このフォルダは PostShelf が作ったものではなく、すでに別のファイルが入っています。ここに「.postshelf」「README.txt」「images」フォルダを作ってよいですか？ 選んだフォルダにある他のファイルには触りません。"
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "作成する"
+  },
+  "cacheMax": {
+    "message": "最大容量"
+  },
+  "cacheMaxCustom": {
+    "message": "指定…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "最大容量（MB、100 以上）"
+  },
+  "cacheMaxMin": {
+    "message": "最大容量は 100 MB 以上にしてください。"
+  },
+  "cacheUsage": {
+    "message": "使用中 $USED$ / $MAX$（画像 $COUNT$ 枚）",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "画質"
+  },
+  "cacheQualityLarge": {
+    "message": "標準（1 枚あたり約 0.2〜0.5 MB。表示には十分）"
+  },
+  "cacheQualityOrig": {
+    "message": "元のサイズ（1 枚あたり約 1〜5 MB。容量が早く減ります）"
+  },
+  "cacheFull": {
+    "message": "容量がいっぱいになったら"
+  },
+  "cacheFullEvict": {
+    "message": "古いものから消す（保存日が古いポストの画像から）"
+  },
+  "cacheFullStop": {
+    "message": "新しい画像を保存しない"
+  },
+  "cacheBulk": {
+    "message": "保存済みのポストの画像をまとめてキャッシュ"
+  },
+  "cacheBulkProgress": {
+    "message": "$DONE$ / $TOTAL$ 枚を取得しています",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "中止"
+  },
+  "cacheBulkDone": {
+    "message": "$COUNT$ 枚をキャッシュしました（失敗 $FAILED$ 枚）",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "キャッシュする画像はありません"
+  },
+  "cacheBulkBlocked": {
+    "message": "保存先に書き込めないため、途中で止めました。許可やフォルダを確認してください。"
+  },
+  "cacheBulkFull": {
+    "message": "容量がいっぱいのため、途中で止めました。"
+  },
+  "cacheBulkHelp": {
+    "message": "まとめてキャッシュは、1 枚ずつ順に読み込みます（進捗を表示。いつでも止められます）。止めても、次に押すと続きから始まります。ポストを削除すると、そのポストの画像も消えます。"
+  },
+  "cacheClear": {
+    "message": "キャッシュを削除"
+  },
+  "cacheClearConfirm": {
+    "message": "キャッシュした画像（$COUNT$ 枚）を削除しますか？ ポストのデータは消えません。画像は X の画像サーバーから読み込まれます。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "キャッシュを削除しました"
+  },
+  "cacheLowerConfirm": {
+    "message": "最大容量を下げると、保存日が古い $COUNT$ 件のポストの画像がすぐに消えます。続けますか？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "下げて整理する"
+  },
+  "cacheSwitchTitle": {
+    "message": "保存先を切り替えます"
+  },
+  "cacheSwitchBody": {
+    "message": "いまの保存先に画像が $COUNT$ 枚あります。新しい保存先へ移しますか？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "移す"
+  },
+  "cacheSwitchKeep": {
+    "message": "移さない"
+  },
+  "cacheSwitchProgress": {
+    "message": "$DONE$ / $TOTAL$ 枚を移しています",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "画像を移せませんでした。保存先の許可を確認してください。"
+  },
+  "cacheCleanupNeeded": {
+    "message": "ポストを削除したときに、画像の削除が済んでいないものがあります。保存先の許可を確認してから、「今すぐ整理」を押してください。"
+  },
+  "cacheCleanupNow": {
+    "message": "今すぐ整理"
+  },
+  "cacheRules": {
+    "message": "保存した画像は、この PC の中だけに置き、外部へは送りません。拡張機能を削除すると、ブラウザの中のキャッシュも消えます（選んだフォルダは消えません）。本当に残したい画像は「自分で選んだフォルダ」に保存してください。保存データ本体の備えには、JSON のエクスポートを使ってください（画像は含まれず、URL のみです）。"
   }
 }

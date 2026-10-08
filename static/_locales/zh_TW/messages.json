@@ -677,5 +677,225 @@
   },
   "videoPlayOnX": {
     "message": "在 X 上播放影片 ↗"
+  },
+  "cacheTitle": {
+    "message": "圖片快取"
+  },
+  "cacheEnable": {
+    "message": "快取圖片"
+  },
+  "cacheEnableDesc": {
+    "message": "儲存貼文時，會把圖片也保留在本機。即使 X 上刪除了也能檢視。影片只保留縮圖。"
+  },
+  "cachePermNote": {
+    "message": "首次開啟時，Chrome 會要求存取 pbs.twimg.com（X 的圖片伺服器）的權限。只有在開啟此功能時才會要求。"
+  },
+  "cachePermDenied": {
+    "message": "由於未允許存取圖片伺服器，無法開啟。請再次開啟並允許存取。"
+  },
+  "cachePermMissing": {
+    "message": "沒有存取圖片伺服器（pbs.twimg.com）的權限。"
+  },
+  "cacheGrant": {
+    "message": "允許"
+  },
+  "cacheDest": {
+    "message": "儲存位置"
+  },
+  "cacheDestIdb": {
+    "message": "瀏覽器內部（擴充功能的資料區域，建議）"
+  },
+  "cacheDestDir": {
+    "message": "自己選擇的資料夾（電腦上的任意位置）"
+  },
+  "cacheDirNone": {
+    "message": "尚未選擇資料夾"
+  },
+  "cacheDirPick": {
+    "message": "選擇資料夾…"
+  },
+  "cacheDirRepick": {
+    "message": "重新選擇資料夾…"
+  },
+  "cacheDirRescan": {
+    "message": "重新掃描"
+  },
+  "cacheDirRescanDone": {
+    "message": "已重新統計 $COUNT$ 張圖片",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "需要授權"
+  },
+  "cacheDirPermNote": {
+    "message": "重新啟動 Chrome 後，對資料夾的存取權限可能會失效。在重新允許之前，圖片不會寫入資料夾，而是從 X 的圖片伺服器載入。"
+  },
+  "cacheDirTabOnly": {
+    "message": "資料夾需要在分頁版的管理頁面中選擇（側邊面板中無法選擇）。請在分頁版中選擇。"
+  },
+  "cacheDirUnsupported": {
+    "message": "在此擴充功能頁面中無法選擇資料夾。請使用「瀏覽器內部」。"
+  },
+  "cacheDirReadme": {
+    "message": "這是 PostShelf 的圖片快取。刪除它不會刪除 PostShelf 本身的資料。\n「images」資料夾中有依貼文 ID 劃分的資料夾。"
+  },
+  "cacheDirNonEmpty": {
+    "message": "此資料夾不是 PostShelf 建立的，裡面已有其他檔案。是否允許在此建立「.postshelf」「README.txt」和「images」資料夾？資料夾中的其他檔案不會被更動。"
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "建立"
+  },
+  "cacheMax": {
+    "message": "最大容量"
+  },
+  "cacheMaxCustom": {
+    "message": "自訂…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "最大容量（MB，至少 100）"
+  },
+  "cacheMaxMin": {
+    "message": "最大容量不能小於 100 MB。"
+  },
+  "cacheUsage": {
+    "message": "已使用 $USED$ / $MAX$（$COUNT$ 張圖片）",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "畫質"
+  },
+  "cacheQualityLarge": {
+    "message": "標準（每張約 0.2–0.5 MB，足夠檢視）"
+  },
+  "cacheQualityOrig": {
+    "message": "原始尺寸（每張約 1–5 MB，容量消耗更快）"
+  },
+  "cacheFull": {
+    "message": "容量滿了之後"
+  },
+  "cacheFullEvict": {
+    "message": "從舊的開始刪除（先刪除儲存日期較早的貼文的圖片）"
+  },
+  "cacheFullStop": {
+    "message": "不再儲存新圖片"
+  },
+  "cacheBulk": {
+    "message": "批次快取已儲存貼文的圖片"
+  },
+  "cacheBulkProgress": {
+    "message": "正在取得圖片：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "停止"
+  },
+  "cacheBulkDone": {
+    "message": "已快取 $COUNT$ 張圖片（失敗 $FAILED$ 張）",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "沒有需要快取的圖片"
+  },
+  "cacheBulkBlocked": {
+    "message": "由於無法寫入儲存位置，已中途停止。請檢查權限和資料夾。"
+  },
+  "cacheBulkFull": {
+    "message": "由於容量已滿，已中途停止。"
+  },
+  "cacheBulkHelp": {
+    "message": "批次快取會逐張載入圖片（顯示進度，可隨時停止）。停止後再次點擊會從中斷處繼續。刪除貼文時，其圖片也會一併刪除。"
+  },
+  "cacheClear": {
+    "message": "刪除快取"
+  },
+  "cacheClearConfirm": {
+    "message": "要刪除已快取的圖片（$COUNT$ 張）嗎？已儲存的貼文不會被刪除。圖片將改為從 X 的圖片伺服器載入。",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "已刪除快取"
+  },
+  "cacheLowerConfirm": {
+    "message": "降低最大容量會立即刪除儲存日期最早的 $COUNT$ 則貼文的圖片。要繼續嗎？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "降低並清理"
+  },
+  "cacheSwitchTitle": {
+    "message": "切換儲存位置"
+  },
+  "cacheSwitchBody": {
+    "message": "目前位置有 $COUNT$ 張圖片。要移到新位置嗎？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "移動"
+  },
+  "cacheSwitchKeep": {
+    "message": "不移動"
+  },
+  "cacheSwitchProgress": {
+    "message": "正在移動圖片：$DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "無法移動圖片。請檢查儲存位置的權限。"
+  },
+  "cacheCleanupNeeded": {
+    "message": "刪除貼文時，有些圖片尚未刪除。請檢查儲存位置的權限，然後點擊「立即清理」。"
+  },
+  "cacheCleanupNow": {
+    "message": "立即清理"
+  },
+  "cacheRules": {
+    "message": "儲存的圖片只放在這台電腦裡，不會傳送到外部。移除擴充功能後，瀏覽器內部的快取也會被刪除（自己選擇的資料夾不會被刪除）。真正想保留的圖片請儲存到「自己選擇的資料夾」。儲存資料本身的備份請使用 JSON 匯出（不含圖片，僅含 URL）。"
   }
 }

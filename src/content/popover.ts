@@ -8,6 +8,7 @@ import { createFolderPicker } from '../shared/folderPicker';
 import { setNativeBookmark } from './native';
 import { getSettings, type ButtonMode } from '../shared/settings';
 import { getCurrentAccount, subscribeAccount } from './account';
+import { requestCache, requestPrune } from '../shared/cacheRequest';
 
 const POP_CLASS = 'postshelf-popover';
 
@@ -71,6 +72,8 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   const save = async () => {
     if (getCurrentAccount()?.id !== account?.id) return closePopovers(); // 開いている間にアカウントが切り替わった
     const saved = await setBookmarkFolders(tweetId, [...selected], snapshot);
+    if (saved && account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
+    else requestPrune();
     // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
     if ((await getSettings()).syncNative) setNativeBookmark(article, saved !== undefined);
   };

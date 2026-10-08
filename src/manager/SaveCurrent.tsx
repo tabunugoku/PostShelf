@@ -2,7 +2,8 @@ import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { requestNativeSync, requestSnapshot, watchActivePost, type ActivePost } from '../shared/activeTab';
 import type { Folder, Snapshot } from '../shared/models';
-import { getBookmark, setBookmarkFolders } from '../shared/storage';
+import { getAccountScope, getBookmark, setBookmarkFolders } from '../shared/storage';
+import { requestCache, requestPrune } from '../shared/cacheRequest';
 import { t } from '../shared/strings';
 import { Dropdown, FolderPickerHost } from './ui';
 
@@ -56,6 +57,8 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
               selected={open.selected}
               onChange={async (sel) => {
                 const saved = await setBookmarkFolders(open.tweetId, [...sel], open.snapshot);
+                if (saved) requestCache(open.tweetId, getAccountScope());
+                else requestPrune();
                 await requestNativeSync(open.tabId, open.tweetId, saved !== undefined);
                 props.onSaved();
               }}

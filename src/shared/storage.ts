@@ -220,6 +220,16 @@ export async function listBookmarks(): Promise<Bookmark[]> {
   return Object.values(await readMap()).filter(inScope);
 }
 
+/** 全アカウントの保存済みポストの tweetId (画像キャッシュの掃除用: どのアカウントにも無いポストの画像は消してよい) */
+export async function listAllTweetIds(): Promise<Set<string>> {
+  return new Set(Object.values(await readMap()).map((b) => b.tweetId));
+}
+
+/** 全アカウントのブックマーク (画像キャッシュの post.json 用)。書き込み用ではない */
+export async function listAllBookmarks(): Promise<Bookmark[]> {
+  return Object.values(await readMap());
+}
+
 /** 保存済みポストの tweetId 一覧 (取り込み件数の計算用) */
 export async function getSavedIds(): Promise<Set<string>> {
   return new Set((await listBookmarks()).map((b) => b.tweetId));

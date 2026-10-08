@@ -677,5 +677,225 @@
   },
   "videoPlayOnX": {
     "message": "Lire la vidéo sur X ↗"
+  },
+  "cacheTitle": {
+    "message": "Cache d'images"
+  },
+  "cacheEnable": {
+    "message": "Mettre les images en cache"
+  },
+  "cacheEnableDesc": {
+    "message": "Quand vous enregistrez un post, ses images sont aussi conservées sur cet ordinateur : vous les voyez même si elles disparaissent de X. Pour les vidéos, seule la miniature est conservée."
+  },
+  "cachePermNote": {
+    "message": "La première fois, Chrome demande l'autorisation d'accéder à pbs.twimg.com (le serveur d'images de X). L'autorisation n'est demandée que lorsque vous activez cette fonction."
+  },
+  "cachePermDenied": {
+    "message": "Impossible d'activer la fonction : l'accès au serveur d'images n'a pas été autorisé. Réactivez-la et autorisez l'accès."
+  },
+  "cachePermMissing": {
+    "message": "L'accès au serveur d'images (pbs.twimg.com) n'est pas autorisé."
+  },
+  "cacheGrant": {
+    "message": "Autoriser"
+  },
+  "cacheDest": {
+    "message": "Emplacement"
+  },
+  "cacheDestIdb": {
+    "message": "Dans le navigateur (zone de données de l'extension ; recommandé)"
+  },
+  "cacheDestDir": {
+    "message": "Un dossier de mon choix (n'importe où sur ce PC)"
+  },
+  "cacheDirNone": {
+    "message": "Aucun dossier choisi"
+  },
+  "cacheDirPick": {
+    "message": "Choisir un dossier…"
+  },
+  "cacheDirRepick": {
+    "message": "Choisir un autre dossier…"
+  },
+  "cacheDirRescan": {
+    "message": "Réanalyser"
+  },
+  "cacheDirRescanDone": {
+    "message": "$COUNT$ images recomptées",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "Autorisation requise"
+  },
+  "cacheDirPermNote": {
+    "message": "Après un redémarrage de Chrome, l'accès au dossier peut être révoqué. Tant que vous ne l'autorisez pas à nouveau, les images ne sont pas écrites dans le dossier et sont chargées depuis le serveur d'images de X."
+  },
+  "cacheDirTabOnly": {
+    "message": "Le dossier se choisit dans la version en onglet de la page de gestion (impossible dans le panneau latéral). Choisissez-le là-bas."
+  },
+  "cacheDirUnsupported": {
+    "message": "Impossible de choisir un dossier sur cette page de l'extension. Utilisez « Dans le navigateur »."
+  },
+  "cacheDirReadme": {
+    "message": "Ceci est le cache d'images de PostShelf. Le supprimer n'efface pas les données de PostShelf.\nLe dossier « images » contient un dossier par ID de post."
+  },
+  "cacheDirNonEmpty": {
+    "message": "Ce dossier n'a pas été créé par PostShelf et contient déjà d'autres fichiers. PostShelf peut-il y créer « .postshelf », « README.txt » et un dossier « images » ? Les autres fichiers du dossier ne sont pas touchés."
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "Créer"
+  },
+  "cacheMax": {
+    "message": "Taille maximale"
+  },
+  "cacheMaxCustom": {
+    "message": "Personnalisé…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "Taille maximale (Mo, 100 ou plus)"
+  },
+  "cacheMaxMin": {
+    "message": "La taille maximale doit être d'au moins 100 Mo."
+  },
+  "cacheUsage": {
+    "message": "Utilisé : $USED$ sur $MAX$ ($COUNT$ images)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "Qualité des images"
+  },
+  "cacheQualityLarge": {
+    "message": "Standard (environ 0,2 à 0,5 Mo chacune ; suffisant pour l'affichage)"
+  },
+  "cacheQualityOrig": {
+    "message": "Taille d'origine (environ 1 à 5 Mo chacune ; occupe l'espace plus vite)"
+  },
+  "cacheFull": {
+    "message": "Quand la limite est atteinte"
+  },
+  "cacheFullEvict": {
+    "message": "Supprimer les plus anciennes d'abord (images des posts enregistrés le plus tôt)"
+  },
+  "cacheFullStop": {
+    "message": "Ne plus enregistrer de nouvelles images"
+  },
+  "cacheBulk": {
+    "message": "Mettre en cache les images des posts enregistrés"
+  },
+  "cacheBulkProgress": {
+    "message": "Récupération des images : $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "Arrêter"
+  },
+  "cacheBulkDone": {
+    "message": "$COUNT$ images mises en cache ($FAILED$ échecs)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "Aucune image à mettre en cache"
+  },
+  "cacheBulkBlocked": {
+    "message": "Arrêté car l'écriture à l'emplacement a échoué. Vérifiez l'autorisation et le dossier."
+  },
+  "cacheBulkFull": {
+    "message": "Arrêté car la limite de taille a été atteinte."
+  },
+  "cacheBulkHelp": {
+    "message": "La mise en cache groupée charge les images une par une (la progression est affichée et vous pouvez arrêter à tout moment). Si vous arrêtez, la fois suivante reprend là où elle s'était arrêtée. Supprimer un post supprime aussi ses images."
+  },
+  "cacheClear": {
+    "message": "Supprimer le cache"
+  },
+  "cacheClearConfirm": {
+    "message": "Supprimer les images en cache ($COUNT$ images) ? Les posts enregistrés sont conservés. Les images seront chargées depuis le serveur d'images de X.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "Le cache a été supprimé"
+  },
+  "cacheLowerConfirm": {
+    "message": "Réduire la taille maximale supprimera immédiatement les images des $COUNT$ posts enregistrés les plus anciens. Continuer ?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "Réduire et nettoyer"
+  },
+  "cacheSwitchTitle": {
+    "message": "Changer l'emplacement"
+  },
+  "cacheSwitchBody": {
+    "message": "Il y a $COUNT$ images à l'emplacement actuel. Les déplacer vers le nouvel emplacement ?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "Déplacer"
+  },
+  "cacheSwitchKeep": {
+    "message": "Ne pas déplacer"
+  },
+  "cacheSwitchProgress": {
+    "message": "Déplacement des images : $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "Impossible de déplacer les images. Vérifiez l'autorisation de l'emplacement."
+  },
+  "cacheCleanupNeeded": {
+    "message": "Certaines images n'ont pas été supprimées lors de la suppression de posts. Vérifiez l'autorisation de l'emplacement, puis cliquez sur « Nettoyer maintenant »."
+  },
+  "cacheCleanupNow": {
+    "message": "Nettoyer maintenant"
+  },
+  "cacheRules": {
+    "message": "Les images enregistrées restent sur ce PC et ne sont jamais envoyées ailleurs. Si vous supprimez l'extension, le cache dans le navigateur est aussi supprimé (un dossier que vous avez choisi ne l'est pas). Conservez les images qui comptent vraiment dans « Un dossier de mon choix ». Pour sauvegarder vos données enregistrées, utilisez l'export JSON (il ne contient que les URL des images, pas les images)."
   }
 }

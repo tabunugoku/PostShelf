@@ -2,12 +2,17 @@ import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
 import { getSettings, resetSettings, restoreSettings, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
-import { countAllData, deleteAllData, exportData, importData, type DataCounts } from '../shared/storage';
+import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
 import { Confirm, TypeToConfirm } from './ui';
+import { ImageCacheSection } from './ImageCache';
+import { deleteAllDataAndCache } from '../shared/cacheops';
+import { refreshCacheView } from './cacheView';
 import { DiagnosticsDialog } from './Diagnostics';
 import { HealthNotice } from './HealthNotice';
 
-export function SettingsPage({ onChanged, onApplied, onNotice }: {
+export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }: {
+  /** 画像キャッシュのフォルダを選べるのはタブ版だけ */
+  surface?: 'tab' | 'sidepanel';
   /** データが変わった (インポートなど) */
   onChanged: () => void;
   /** 設定やデータが変わって、開いている画面の表示を作り直す必要がある (初期化 / 取り消し / 全削除) */
@@ -21,6 +26,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice }: {
   const [diag, setDiag] = useState(location.hash === '#diagnostics');
   const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
   const [counts, setCounts] = useState<DataCounts | null>(null);
+  const [cacheKey, setCacheKey] = useState(0);
   const load = () =>
     void getSettings().then((s) => {
       setSync(s.syncNative);
@@ -33,11 +39,15 @@ export function SettingsPage({ onChanged, onApplied, onNotice }: {
     setDialog(null);
     const backup = await resetSettings();
     load();
+    setCacheKey((n) => n + 1);
+    void refreshCacheView();
     onApplied();
     // 直後の 5 秒間は、初期化前の設定に戻せる
     onNotice(t('settingsResetDone'), async () => {
       await restoreSettings(backup);
       load();
+      setCacheKey((n) => n + 1);
+      void refreshCacheView();
       onApplied();
     });
   };
@@ -47,9 +57,11 @@ export function SettingsPage({ onChanged, onApplied, onNotice }: {
   };
   const doDeleteAll = async () => {
     setDialog(null);
-    await deleteAllData();
+    const cacheCleared = await deleteAllDataAndCache(); // キャッシュした画像も消す。消せなくてもデータの削除は成功
+    void refreshCacheView();
+    setCacheKey((n) => n + 1);
     onApplied();
-    onNotice(t('deleteAllDone'));
+    onNotice(cacheCleared ? t('deleteAllDone') : `${t('deleteAllDone')} ${t('cacheCleanupNeeded')}`);
   };
   return (
     <section>
@@ -134,6 +146,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice }: {
           </label>
         </div>
       </fieldset>
+      <ImageCacheSection surface={surface} reloadKey={cacheKey} />
       <fieldset class="setting-group">
         <legend>{t('settingsResetHeading')}</legend>
         <p class="muted setting-desc">{t('settingsResetDesc')}</p>

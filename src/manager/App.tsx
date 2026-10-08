@@ -47,6 +47,8 @@ import {
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card } from './Cards';
+import { refreshCacheView } from './cacheView';
+import { afterPostsRemoved, deleteAccountDataAndCache } from '../shared/cacheops';
 import { ImageViewer, VideoGuide } from './Viewer';
 import { AccountSwitcher, AssignDialog, resolveViewAccount } from './Accounts';
 import { FolderEdit } from './FolderEdit';
@@ -125,7 +127,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   };
   useEffect(() => {
     void (async () => {
-      const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts()]);
+      const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts(), refreshCacheView()]).then((r) => [r[0], r[1], r[2]] as const);
       lastRef.current = last;
       setLastSeen(last);
       applyView(resolveViewAccount(s.viewAccount, last, accs));
@@ -680,9 +682,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             setConfirmState(null);
             if (c.kind === 'posts') {
               await run(deleteBookmarks(c.ids), 'toastDeleted');
+              void afterPostsRemoved(); // 対応する画像も消す (失敗してもポストの削除は成功。設定画面に整理が必要と出る)
               setSelected((s) => new Set([...s].filter((id) => !c.ids.includes(id))));
             } else if (c.kind === 'account') {
-              await deleteAccountData(c.id);
+              await deleteAccountDataAndCache(c.id);
               await afterAccountChange(c.id);
             } else {
               await deleteFolder(c.id);
@@ -729,6 +732,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   const settingsPage = (
     <SettingsPage
+      surface={surface}
       onChanged={() => void reload()}
       onApplied={() => void reapplySettings()}
       onNotice={(message, action) => setToast({ key: Date.now(), message, action })}

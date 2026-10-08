@@ -14,6 +14,42 @@ export interface Settings {
   sortKey: SortKey;
   /** 手動で選んだ表示アカウントの ID。'' = 選んでいない (最後に x.com で読み取ったアカウントを使う) */
   viewAccount: string;
+  /** 画像のキャッシュ (v11)。初期値はオフ */
+  imageCache: ImageCacheSettings;
+}
+
+export type CacheBackend = 'idb' | 'dir';
+
+export interface ImageCacheSettings {
+  enabled: boolean;
+  /** idb: ブラウザの中 (IndexedDB) / dir: 自分で選んだフォルダ */
+  backend: CacheBackend;
+  /** 最大容量 (バイト) */
+  maxBytes: number;
+  /** 保存する画質: large = 標準 / orig = 元のサイズ */
+  quality: 'large' | 'orig';
+  /** 容量がいっぱいのとき: evict = 古いポストの画像から消す / stop = 新しい画像を保存しない */
+  onFull: 'evict' | 'stop';
+}
+
+export const MB = 1024 * 1024;
+export const GB = 1024 * MB;
+/** 選べる最大容量 (指定 = 任意の MB。最小 100 MB) */
+export const CACHE_SIZE_CHOICES = [500 * MB, 1 * GB, 2 * GB, 5 * GB, 10 * GB] as const;
+export const CACHE_MIN_BYTES = 100 * MB;
+
+export const DEFAULT_IMAGE_CACHE: ImageCacheSettings = { enabled: false, backend: 'idb', maxBytes: 1 * GB, quality: 'large', onFull: 'evict' };
+
+function normalizeImageCache(raw: unknown): ImageCacheSettings {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Partial<ImageCacheSettings>;
+  const d = DEFAULT_IMAGE_CACHE;
+  return {
+    enabled: r.enabled === true,
+    backend: r.backend === 'dir' ? 'dir' : d.backend,
+    maxBytes: typeof r.maxBytes === 'number' && Number.isFinite(r.maxBytes) && r.maxBytes >= CACHE_MIN_BYTES ? Math.floor(r.maxBytes) : d.maxBytes,
+    quality: r.quality === 'orig' ? 'orig' : d.quality,
+    onFull: r.onFull === 'stop' ? 'stop' : d.onFull,
+  };
 }
 
 export type ViewMode = 'post' | 'list' | 'grid';
@@ -22,7 +58,7 @@ export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '' };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE };
 
 const KEY = 'settings';
 
@@ -36,6 +72,7 @@ export async function getSettings(): Promise<Settings> {
   if (!['savedDesc', 'savedAsc', 'postedDesc', 'postedAsc'].includes(merged.sortKey)) merged.sortKey = 'savedDesc';
   if (typeof merged.lastFolderId !== 'string') merged.lastFolderId = 'all';
   if (typeof merged.viewAccount !== 'string') merged.viewAccount = '';
+  merged.imageCache = normalizeImageCache(stored.imageCache);
   return merged;
 }
 
@@ -54,6 +91,18 @@ let queue: Promise<unknown> = Promise.resolve();
 export function updateSettings(patch: Partial<Settings>): Promise<Settings> {
   const run = queue.then(async () => {
     const next = { ...(await getSettings()), ...patch };
+    await chrome.storage.local.set({ [KEY]: next });
+    return next;
+  });
+  queue = run.catch(() => undefined);
+  return run;
+}
+
+/** 画像キャッシュの設定だけを更新する (他の設定は変えない。更新は 1 つずつ順に行う) */
+export function updateImageCache(patch: Partial<ImageCacheSettings>): Promise<Settings> {
+  const run = queue.then(async () => {
+    const cur = await getSettings();
+    const next = { ...cur, imageCache: normalizeImageCache({ ...cur.imageCache, ...patch }) };
     await chrome.storage.local.set({ [KEY]: next });
     return next;
   });
@@ -187,4 +236,39 @@ export async function restoreSettings(b: SettingsBackup): Promise<void> {
   });
   queue = run.catch(() => undefined);
   await run;
+}
+
+// ---- 画像キャッシュの状態 (v11-B) ----
+
+const FAIL_KEY = 'imageCacheFailures';
+/** 失敗が続く画像は、この回数で諦める */
+export const MAX_FETCH_FAILURES = 3;
+
+/** 画像ごとの取得の失敗回数 (キー: `tweetId/名前`)。失敗は記録して、次の機会に再試行する */
+export async function getCacheFailures(): Promise<Record<string, number>> {
+  return ((await chrome.storage.local.get(FAIL_KEY))[FAIL_KEY] ?? {}) as Record<string, number>;
+}
+export async function recordCacheFailure(key: string): Promise<number> {
+  const f = await getCacheFailures();
+  f[key] = (f[key] ?? 0) + 1;
+  await chrome.storage.local.set({ [FAIL_KEY]: f });
+  return f[key];
+}
+export async function clearCacheFailure(key: string): Promise<void> {
+  const f = await getCacheFailures();
+  if (!(key in f)) return;
+  delete f[key];
+  await chrome.storage.local.set({ [FAIL_KEY]: f });
+}
+export async function resetCacheFailures(): Promise<void> {
+  await chrome.storage.local.set({ [FAIL_KEY]: {} });
+}
+
+const CLEANUP_KEY = 'imageCacheCleanup';
+/** ポストを消したときにキャッシュ側の削除に失敗した (フォルダの許可が無い、など)。後で整理が必要 */
+export async function getCacheCleanupNeeded(): Promise<boolean> {
+  return (await chrome.storage.local.get(CLEANUP_KEY))[CLEANUP_KEY] === true;
+}
+export async function setCacheCleanupNeeded(v: boolean): Promise<void> {
+  await chrome.storage.local.set({ [CLEANUP_KEY]: v });
 }

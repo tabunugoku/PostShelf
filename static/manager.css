@@ -296,3 +296,16 @@ button:disabled{cursor:not-allowed}
 .viewer-guide{align-content:end;padding-bottom:96px}
 .viewer-foot{position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px 12px;background:linear-gradient(#0000,#000b);z-index:2}
 @media (max-width:520px){.viewer-img{inset:56px 8px 120px}.nav.l{left:4px}.nav.r{right:4px}}
+
+/* ---- 画像のキャッシュ (v11-B。docs/mockups/media-viewer.html) ---- */
+.image-cache .field{margin:12px 0}
+.image-cache .lab{font-weight:700;margin-bottom:2px}
+.rowflex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.dim{opacity:.5}
+.dirbox{margin:6px 0 0 30px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-1);display:grid;gap:8px}
+.dirbox code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--fill-ghost-hover);padding:1px 6px;border-radius:4px;overflow-wrap:anywhere}
+.warn{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px}
+.meter{height:10px;margin-top:8px;border-radius:999px;background:var(--border);overflow:hidden;border:1px solid var(--border-strong)}
+.meter i{display:block;height:100%;background:var(--accent-strong)}
+select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--radius);min-height:32px;padding:2px 8px}
+input[type=number]{width:110px}

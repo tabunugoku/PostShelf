@@ -677,5 +677,225 @@
   },
   "videoPlayOnX": {
     "message": "Play the video on X ↗"
+  },
+  "cacheTitle": {
+    "message": "Image cache"
+  },
+  "cacheEnable": {
+    "message": "Cache images"
+  },
+  "cacheEnableDesc": {
+    "message": "When you save a post, its images are also kept on this computer, so you can still see them if they disappear from X. For videos, only the thumbnail is kept."
+  },
+  "cachePermNote": {
+    "message": "The first time you turn this on, Chrome asks for permission to access pbs.twimg.com (X's image server). Permission is requested only when you turn this feature on."
+  },
+  "cachePermDenied": {
+    "message": "Image caching could not be turned on because access to the image server was not allowed. Turn it on again and allow access."
+  },
+  "cachePermMissing": {
+    "message": "Access to the image server (pbs.twimg.com) is not allowed."
+  },
+  "cacheGrant": {
+    "message": "Allow"
+  },
+  "cacheDest": {
+    "message": "Where to keep images"
+  },
+  "cacheDestIdb": {
+    "message": "Inside the browser (the extension's data area; recommended)"
+  },
+  "cacheDestDir": {
+    "message": "A folder I choose (anywhere on this PC)"
+  },
+  "cacheDirNone": {
+    "message": "No folder selected"
+  },
+  "cacheDirPick": {
+    "message": "Choose a folder…"
+  },
+  "cacheDirRepick": {
+    "message": "Choose another folder…"
+  },
+  "cacheDirRescan": {
+    "message": "Rescan"
+  },
+  "cacheDirRescanDone": {
+    "message": "Recounted $COUNT$ images",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheDirPermNeeded": {
+    "message": "Permission needed"
+  },
+  "cacheDirPermNote": {
+    "message": "After Chrome restarts, access to the folder may be revoked. Until you allow it again, images are not written to the folder and are loaded from X's image server instead."
+  },
+  "cacheDirTabOnly": {
+    "message": "The folder is chosen on the tab version of the manager page (it cannot be chosen in the side panel). Please choose it there."
+  },
+  "cacheDirUnsupported": {
+    "message": "A folder could not be chosen on this extension page. Please use \"Inside the browser\" instead."
+  },
+  "cacheDirReadme": {
+    "message": "This is the PostShelf image cache. Deleting it does not delete PostShelf's own data.\nThe \"images\" folder contains one folder per post ID."
+  },
+  "cacheDirNonEmpty": {
+    "message": "This folder was not created by PostShelf and already contains other files. May PostShelf create \".postshelf\", \"README.txt\" and an \"images\" folder here? Other files in the folder are left untouched."
+  },
+  "cacheDirNonEmptyOk": {
+    "message": "Create"
+  },
+  "cacheMax": {
+    "message": "Maximum size"
+  },
+  "cacheMaxCustom": {
+    "message": "Custom…"
+  },
+  "cacheMaxCustomLabel": {
+    "message": "Maximum size (MB, 100 or more)"
+  },
+  "cacheMaxMin": {
+    "message": "The maximum size must be at least 100 MB."
+  },
+  "cacheUsage": {
+    "message": "Using $USED$ of $MAX$ ($COUNT$ images)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      },
+      "count": {
+        "content": "$3"
+      }
+    }
+  },
+  "cacheQuality": {
+    "message": "Image quality"
+  },
+  "cacheQualityLarge": {
+    "message": "Standard (about 0.2–0.5 MB each; enough for viewing)"
+  },
+  "cacheQualityOrig": {
+    "message": "Original size (about 1–5 MB each; uses up space faster)"
+  },
+  "cacheFull": {
+    "message": "When the size limit is reached"
+  },
+  "cacheFullEvict": {
+    "message": "Delete the oldest first (images of the earliest saved posts)"
+  },
+  "cacheFullStop": {
+    "message": "Stop saving new images"
+  },
+  "cacheBulk": {
+    "message": "Cache images of all saved posts"
+  },
+  "cacheBulkProgress": {
+    "message": "Fetching images: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkStop": {
+    "message": "Stop"
+  },
+  "cacheBulkDone": {
+    "message": "Cached $COUNT$ images ($FAILED$ failed)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheBulkNothing": {
+    "message": "There are no images to cache"
+  },
+  "cacheBulkBlocked": {
+    "message": "Stopped because the destination could not be written to. Please check the permission and the folder."
+  },
+  "cacheBulkFull": {
+    "message": "Stopped because the size limit was reached."
+  },
+  "cacheBulkHelp": {
+    "message": "Caching all posts loads images one by one (progress is shown and you can stop at any time). If you stop, the next run continues where it left off. Deleting a post also deletes its images."
+  },
+  "cacheClear": {
+    "message": "Delete the cache"
+  },
+  "cacheClearConfirm": {
+    "message": "Delete the cached images ($COUNT$ images)? Your saved posts are kept. Images will be loaded from X's image server instead.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheClearDone": {
+    "message": "The cache was deleted"
+  },
+  "cacheLowerConfirm": {
+    "message": "Lowering the maximum size will immediately delete the images of the $COUNT$ oldest saved posts. Continue?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheLowerBtn": {
+    "message": "Lower and clean up"
+  },
+  "cacheSwitchTitle": {
+    "message": "Switch where images are kept"
+  },
+  "cacheSwitchBody": {
+    "message": "There are $COUNT$ images in the current location. Move them to the new location?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "cacheSwitchMove": {
+    "message": "Move"
+  },
+  "cacheSwitchKeep": {
+    "message": "Don't move"
+  },
+  "cacheSwitchProgress": {
+    "message": "Moving images: $DONE$ / $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "cacheMoveFail": {
+    "message": "The images could not be moved. Please check the permission for the destination."
+  },
+  "cacheCleanupNeeded": {
+    "message": "Some images were not deleted when posts were deleted. Check the permission for the destination, then press \"Clean up now\"."
+  },
+  "cacheCleanupNow": {
+    "message": "Clean up now"
+  },
+  "cacheRules": {
+    "message": "Saved images stay on this PC and are never sent anywhere. If you remove the extension, the cache inside the browser is deleted too (a folder you chose is not). Keep images you really want in \"a folder I choose\". For backing up your saved data itself, use the JSON export (it contains image URLs only, not the images)."
   }
 }
