@@ -66,6 +66,7 @@ import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
 import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun } from './AutoCollect';
 import { currentVersion } from '../shared/version';
+import { REPO_URL } from '../shared/links';
 import { useCompact } from './useCompact';
 
 const sorts = (): [SortKey, string][] => [
@@ -950,6 +951,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           <Icon name="ti-settings" />
           {t('settings')}
         </div>
+        {/* GitHub のリポジトリ (v25: 設定の中から、ここへ移した。どの画面にいても見える)。狭いときは、ロゴだけにして、名前は aria-label に残す */}
+        <a class="gh-link" href={REPO_URL} target="_blank" rel="noopener noreferrer" aria-label={t('githubLinkAria')} title={t('githubLinkAria')}>
+          <Icon name="ti-brand-github" />
+          <span class="gh-text">GitHub</span>
+          <Icon name="ti-external-link" />
+        </a>
       </aside>
       <main class="main">
         {page === 'settings' ? (

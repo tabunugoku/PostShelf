@@ -391,12 +391,13 @@ input[type=number]{width:110px}
 @media (max-width:480px){.ac-order{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.ac-dot.run,.ac-bar.ind i{animation:none}}
 
-/* 設定の一番下の「GitHub で見る」 (枠のある丸いボタンの形のリンク) */
-.repo-link{margin:8px 0 4px}
-.link-btn{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border:1px solid var(--border-strong);border-radius:999px;color:var(--text-primary);text-decoration:none;font-weight:700}
-.link-btn:hover{background:var(--fill-ghost-hover)}
-.link-btn i{font-size:18px}
-.link-btn i:last-child{font-size:14px;color:var(--text-secondary)}
+/* 左のメニューの「設定」の下の GitHub のボタン (v25) */
+.gh-link{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;min-height:32px;margin:4px 10px 0;padding:0 12px;border:1px solid var(--border-strong);border-radius:999px;color:var(--text-secondary);text-decoration:none;font-size:14px}
+.gh-link:hover{background:var(--fill-ghost-hover);color:var(--text-primary)}
+.gh-link i{font-size:16px}
+.gh-link i:last-child{font-size:12px}
+/* 左のメニューが狭いとき (幅が足りないとき) は、ロゴだけにする。名前は aria-label に残す */
+@media (max-width:760px){.gh-text,.gh-link i:last-child{display:none}}
 
 /* ポストの本文: 6 行でたたむ / リンク / 「さらに表示」 (v24) */
 .text.clamp{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}

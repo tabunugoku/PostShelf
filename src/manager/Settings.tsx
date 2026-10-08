@@ -10,7 +10,7 @@ import { deleteAllDataAndCache } from '../shared/cacheops';
 import { refreshCacheView } from './cacheView';
 import { DiagnosticsDialog } from './Diagnostics';
 import { HealthNotice } from './HealthNotice';
-import { INSTALL_URL, REPO_URL } from '../shared/links';
+import { INSTALL_URL } from '../shared/links';
 import { currentVersion } from '../shared/version';
 
 export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, surface = 'tab' }: {
@@ -229,13 +229,6 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           {t('updateGuide')}{' '}
           <a href={INSTALL_URL} target="_blank" rel="noopener noreferrer">
             {t('installGuideLink')}
-          </a>
-        </p>
-        <p class="repo-link">
-          <a class="link-btn" href={REPO_URL} target="_blank" rel="noopener noreferrer" aria-label={t('githubLinkAria')}>
-            <Icon name="ti-brand-github" />
-            {t('githubLink')}
-            <Icon name="ti-external-link" />
           </a>
         </p>
       </fieldset>
