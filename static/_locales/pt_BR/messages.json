@@ -1167,6 +1167,9 @@
   "acReasonRefusedUnknown": {
     "message": "Não é possível iniciar: não foi possível identificar a conta do x.com"
   },
+  "acStartMissed": {
+    "message": "A importação não começou no x.com. Abra sua lista de itens salvos (/i/history) no x.com e comece de novo."
+  },
   "acSubDone": {
     "message": "Chegou ao favorito mais antigo"
   },

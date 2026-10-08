@@ -1167,6 +1167,9 @@
   "acReasonRefusedUnknown": {
     "message": "Cannot start: the account on x.com could not be determined"
   },
+  "acStartMissed": {
+    "message": "The import did not start on x.com. Open your bookmarks list (/i/history) on x.com, then start again."
+  },
   "acSubDone": {
     "message": "Reached the oldest bookmark"
   },

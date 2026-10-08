@@ -1167,6 +1167,9 @@
   "acReasonRefusedUnknown": {
     "message": "無法開始：無法判斷 x.com 上的帳號"
   },
+  "acStartMissed": {
+    "message": "匯入沒有在 x.com 上開始。請在 x.com 開啟書籤清單(/i/history),然後再次開始。"
+  },
   "acSubDone": {
     "message": "已讀取到最早的書籤"
   },

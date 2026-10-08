@@ -426,8 +426,12 @@ export interface CollectCommand {
   at: number;
 }
 
-export const sendCollectCommand = (c: Omit<CollectCommand, 'id' | 'at'>): Promise<void> =>
-  chrome.storage.local.set({ [CMD_KEY]: { ...c, id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, at: Date.now() } satisfies CollectCommand });
+/** コマンドを書く。書いたコマンドの ID を返す (始まったかどうかの確認に使う) */
+export async function sendCollectCommand(c: Omit<CollectCommand, 'id' | 'at'>): Promise<string> {
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  await chrome.storage.local.set({ [CMD_KEY]: { ...c, id, at: Date.now() } satisfies CollectCommand });
+  return id;
+}
 
 /** 待っているコマンドを読む (消さない) */
 export async function peekCollectCommand(): Promise<CollectCommand | null> {

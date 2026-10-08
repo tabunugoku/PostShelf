@@ -1167,6 +1167,9 @@
   "acReasonRefusedUnknown": {
     "message": "无法开始：无法判断 x.com 上的账号"
   },
+  "acStartMissed": {
+    "message": "导入没有在 x.com 上开始。请在 x.com 打开书签列表(/i/history),然后再次开始。"
+  },
   "acSubDone": {
     "message": "已读取到最早的书签"
   },

@@ -1167,6 +1167,9 @@
   "acReasonRefusedUnknown": {
     "message": "No se puede empezar: no se pudo determinar la cuenta de x.com"
   },
+  "acStartMissed": {
+    "message": "La importación no se inició en x.com. Abre tu lista de marcadores (/i/history) en x.com y vuelve a empezar."
+  },
   "acSubDone": {
     "message": "Se llegó al marcador más antiguo"
   },

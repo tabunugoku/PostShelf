@@ -8,9 +8,10 @@
  */
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
+import { isBookmarksPath } from '../shared/selectors';
 import { t } from '../shared/strings';
 import {
-  getCollectRun, onCollectRunChanged, sendCollectCommand, updateAutoCollect,
+  clearCollectCommand, getCollectRun, onCollectRunChanged, peekCollectCommand, sendCollectCommand, updateAutoCollect,
   type CollectCap, type CollectRun, type CollectSpeed,
 } from '../shared/settings';
 
@@ -26,9 +27,17 @@ export function useCollectRun(): CollectRun | null {
 
 const X_HISTORY_URLS = ['https://x.com/i/history*', 'https://x.com/i/bookmarks*', 'https://twitter.com/i/history*', 'https://twitter.com/i/bookmarks*'];
 
-/** x.com の /i/history のタブを前面に出す (無ければ開く)。tabs の権限は使わない (host 権限で URL が読める) */
+/** x.com のブックマークの一覧のタブを前面に出す (無ければ開く)。tabs の権限は使わない (host 権限で URL が読める)。
+ *  再利用するのは、x.com 側が取り込みを受け付けるページ (isBookmarksPath と同じ定義) のタブだけ。/i/history/likes などは使わない */
 export async function openXTab(): Promise<void> {
-  const tab = (await chrome.tabs.query({ url: X_HISTORY_URLS }))[0];
+  const tabs = await chrome.tabs.query({ url: X_HISTORY_URLS });
+  const tab = tabs.find((x) => {
+    try {
+      return !!x.url && isBookmarksPath(new URL(x.url).pathname);
+    } catch {
+      return false;
+    }
+  });
   if (tab?.id !== undefined) {
     await chrome.tabs.update(tab.id, { active: true });
     if (tab.windowId !== undefined) await chrome.windows?.update?.(tab.windowId, { focused: true });
@@ -37,11 +46,28 @@ export async function openXTab(): Promise<void> {
   await chrome.tabs.create({ url: 'https://x.com/i/history' });
 }
 
+/** 開始の指示が、この時間のうちに x.com 側で受け取られなかったら、始まらなかったとみなす (読み込みが遅いタブを待つ余裕を含む) */
+export const START_CHECK_MS = 30_000;
+
+/** 開始の指示 (id) が、まだ残っていたら (x.com 側が受け取っていない) 指示を取り下げて onMissed を呼ぶ */
+export function watchStart(id: string, onMissed: () => void, ms = START_CHECK_MS): ReturnType<typeof setTimeout> {
+  return setTimeout(() => {
+    void peekCollectCommand()
+      .then(async (cmd) => {
+        if (cmd?.type !== 'start' || cmd.id !== id) return;
+        await clearCollectCommand();
+        onMissed();
+      })
+      .catch(() => {});
+  }, ms);
+}
+
 /** 確認ダイアログで同意して「始める」を押したときだけ呼ぶ。consent: true のコマンドを書き、x.com のタブを開く */
-export async function startAutoCollect(opts: { accountId: string; speed: CollectSpeed; cap: CollectCap }): Promise<void> {
+export async function startAutoCollect(opts: { accountId: string; speed: CollectSpeed; cap: CollectCap }): Promise<string> {
   await updateAutoCollect({ speed: opts.speed, cap: opts.cap });
-  await sendCollectCommand({ type: 'start', consent: true, speed: opts.speed, cap: opts.cap, accountId: opts.accountId });
+  const id = await sendCollectCommand({ type: 'start', consent: true, speed: opts.speed, cap: opts.cap, accountId: opts.accountId });
   await openXTab();
+  return id;
 }
 
 export function OfferBanner(props: { accountName: string; onStart: () => void; onLater: () => void; onNever: () => void }) {

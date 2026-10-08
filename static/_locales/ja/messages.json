@@ -1167,6 +1167,9 @@
   "acReasonRefusedUnknown": {
     "message": "x.com のアカウントを判定できないため、始められません"
   },
+  "acStartMissed": {
+    "message": "x.com のブックマークの一覧で、取り込みが始まりませんでした。x.com でブックマークの一覧（/i/history）を開いてから、もう一度始めてください。"
+  },
   "acSubDone": {
     "message": "いちばん古いブックマークまで読み込みました"
   },

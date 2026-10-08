@@ -64,7 +64,7 @@ import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
-import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun } from './AutoCollect';
+import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
 import { currentVersion } from '../shared/version';
 import { REPO_URL } from '../shared/links';
 import { useCompact } from './useCompact';
@@ -106,6 +106,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [filterOpen, setFilterOpen] = useState(false);
   /** お知らせの帯が複数あるとき、いま出している帯の番号 (「他に N 件」で切り替える) */
   const [noticeIdx, setNoticeIdx] = useState(0);
+  /** 自動取り込みの開始の指示が、x.com のブックマークの一覧で受け取られなかった */
+  const [startMissed, setStartMissed] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
@@ -739,6 +741,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           }}
         />
       )}
+      {startMissed && (
+        <div class="banner" role="status">
+          <Icon name="ti-info-circle" />
+          <span class="banner-text">{t('acStartMissed')}</span>
+          <button class="icon-btn" aria-label={t('dismiss')} title={t('dismiss')} onClick={() => setStartMissed(false)}>
+            <Icon name="ti-x" />
+          </button>
+        </div>
+      )}
       {offerShown && lastSeen && (
         <OfferBanner
           accountName={accountLabel(lastSeen)}
@@ -834,7 +845,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           onStart={(speed, cap) => {
             setAutoOpen(false);
             if (location.hash === '#autocollect') history.replaceState(null, '', location.pathname + location.search);
-            if (lastSeen) void startAutoCollect({ accountId: lastSeen.id, speed, cap });
+            if (lastSeen) void startAutoCollect({ accountId: lastSeen.id, speed, cap }).then((id) => void watchStart(id, () => setStartMissed(true))).catch(() => {});
           }}
         />
       )}

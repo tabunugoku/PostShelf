@@ -1167,6 +1167,9 @@
   "acReasonRefusedUnknown": {
     "message": "Impossible de démarrer : le compte x.com n'a pas pu être déterminé"
   },
+  "acStartMissed": {
+    "message": "L'importation n'a pas démarré sur x.com. Ouvrez votre liste de favoris (/i/history) sur x.com, puis recommencez."
+  },
   "acSubDone": {
     "message": "Le plus ancien favori a été atteint"
   },

@@ -1167,6 +1167,9 @@
   "acReasonRefusedUnknown": {
     "message": "시작할 수 없습니다. x.com의 계정을 판단할 수 없습니다"
   },
+  "acStartMissed": {
+    "message": "x.com에서 가져오기가 시작되지 않았습니다. x.com에서 북마크 목록(/i/history)을 연 다음 다시 시작해 주세요."
+  },
   "acSubDone": {
     "message": "가장 오래된 북마크까지 불러왔습니다"
   },
