@@ -160,7 +160,7 @@ async function cacheOne(store: ImageStore, cfg: ImageCacheSettings, b: Bookmark,
   try {
     blob = await fetchImageBlob(t.url, deps.fetch);
   } catch {
-    await recordCacheFailure(key); // 失敗は記録して次の機会に再試行 (3 回で諦める)
+    await recordCacheFailure(key); // 失敗は記録して次の機会に再試行 (3 回失敗したら再試行を止める)
     r.failed++;
     return 'next';
   }

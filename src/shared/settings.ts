@@ -241,7 +241,7 @@ export async function restoreSettings(b: SettingsBackup): Promise<void> {
 // ---- 画像キャッシュの状態 (v11-B) ----
 
 const FAIL_KEY = 'imageCacheFailures';
-/** 失敗が続く画像は、この回数で諦める */
+/** 失敗が続く画像は、この回数失敗したら再試行を止める */
 export const MAX_FETCH_FAILURES = 3;
 
 /** 画像ごとの取得の失敗回数 (キー: `tweetId/名前`)。失敗は記録して、次の機会に再試行する */

@@ -779,10 +779,10 @@
     "message": "Calidad de imagen"
   },
   "cacheQualityLarge": {
-    "message": "Estándar (unos 0,2–0,5 MB cada una; suficiente para ver)"
+    "message": "Estándar (estimado de 0,2–0,5 MB cada una; suficiente para ver)"
   },
   "cacheQualityOrig": {
-    "message": "Tamaño original (unos 1–5 MB cada una; ocupa espacio más rápido)"
+    "message": "Tamaño original (estimado de 1–5 MB cada una; ocupa espacio más rápido)"
   },
   "cacheFull": {
     "message": "Cuando se llene"
@@ -831,7 +831,7 @@
     "message": "Se detuvo porque se alcanzó el tamaño máximo."
   },
   "cacheBulkHelp": {
-    "message": "Guardar todo en caché carga las imágenes una a una (se muestra el progreso y puedes detenerlo en cualquier momento). Si lo detienes, la próxima vez continúa donde se quedó. Al eliminar una publicación también se eliminan sus imágenes."
+    "message": "Guardar todo en caché carga las imágenes una a una. Se muestra el progreso y puedes detenerlo en cualquier momento. Si lo detienes, la próxima vez continúa donde se quedó. Al eliminar una publicación también se eliminan sus imágenes."
   },
   "cacheClear": {
     "message": "Eliminar la caché"
@@ -890,7 +890,7 @@
     "message": "No se pudieron mover las imágenes. Comprueba el permiso del destino."
   },
   "cacheCleanupNeeded": {
-    "message": "Algunas imágenes no se eliminaron al eliminar publicaciones. Comprueba el permiso del destino y pulsa «Limpiar ahora»."
+    "message": "Algunas imágenes de las publicaciones eliminadas aún no se han eliminado. Comprueba el permiso del destino y pulsa «Limpiar ahora»."
   },
   "cacheCleanupNow": {
     "message": "Limpiar ahora"

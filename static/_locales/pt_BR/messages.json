@@ -779,10 +779,10 @@
     "message": "Qualidade da imagem"
   },
   "cacheQualityLarge": {
-    "message": "Padrão (cerca de 0,2–0,5 MB cada; suficiente para visualizar)"
+    "message": "Padrão (estimativa de 0,2–0,5 MB cada; suficiente para visualizar)"
   },
   "cacheQualityOrig": {
-    "message": "Tamanho original (cerca de 1–5 MB cada; ocupa espaço mais rápido)"
+    "message": "Tamanho original (estimativa de 1–5 MB cada; ocupa espaço mais rápido)"
   },
   "cacheFull": {
     "message": "Quando o limite for atingido"
@@ -831,7 +831,7 @@
     "message": "Interrompido porque o limite de tamanho foi atingido."
   },
   "cacheBulkHelp": {
-    "message": "Guardar tudo em cache carrega as imagens uma a uma (o progresso é exibido e você pode parar a qualquer momento). Se parar, da próxima vez continua de onde parou. Ao excluir um post, suas imagens também são excluídas."
+    "message": "Guardar tudo em cache carrega as imagens uma a uma. O progresso é exibido e você pode parar a qualquer momento. Se parar, da próxima vez continua de onde parou. Ao excluir um post, suas imagens também são excluídas."
   },
   "cacheClear": {
     "message": "Excluir o cache"
@@ -890,7 +890,7 @@
     "message": "Não foi possível mover as imagens. Verifique a permissão do destino."
   },
   "cacheCleanupNeeded": {
-    "message": "Algumas imagens não foram excluídas quando posts foram excluídos. Verifique a permissão do destino e pressione \"Limpar agora\"."
+    "message": "Algumas imagens dos posts excluídos ainda não foram excluídas. Verifique a permissão do destino e pressione \"Limpar agora\"."
   },
   "cacheCleanupNow": {
     "message": "Limpar agora"

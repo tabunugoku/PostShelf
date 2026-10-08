@@ -779,10 +779,10 @@
     "message": "Qualité des images"
   },
   "cacheQualityLarge": {
-    "message": "Standard (environ 0,2 à 0,5 Mo chacune ; suffisant pour l'affichage)"
+    "message": "Standard (estimation de 0,2 à 0,5 Mo chacune ; suffisant pour l'affichage)"
   },
   "cacheQualityOrig": {
-    "message": "Taille d'origine (environ 1 à 5 Mo chacune ; occupe l'espace plus vite)"
+    "message": "Taille d'origine (estimation de 1 à 5 Mo chacune ; occupe l'espace plus vite)"
   },
   "cacheFull": {
     "message": "Quand la limite est atteinte"
@@ -831,7 +831,7 @@
     "message": "Arrêté car la limite de taille a été atteinte."
   },
   "cacheBulkHelp": {
-    "message": "La mise en cache groupée charge les images une par une (la progression est affichée et vous pouvez arrêter à tout moment). Si vous arrêtez, la fois suivante reprend là où elle s'était arrêtée. Supprimer un post supprime aussi ses images."
+    "message": "La mise en cache groupée charge les images une par une. La progression est affichée et vous pouvez arrêter à tout moment. Si vous arrêtez, la fois suivante reprend là où elle s'était arrêtée. Supprimer un post supprime aussi ses images."
   },
   "cacheClear": {
     "message": "Supprimer le cache"
@@ -890,7 +890,7 @@
     "message": "Impossible de déplacer les images. Vérifiez l'autorisation de l'emplacement."
   },
   "cacheCleanupNeeded": {
-    "message": "Certaines images n'ont pas été supprimées lors de la suppression de posts. Vérifiez l'autorisation de l'emplacement, puis cliquez sur « Nettoyer maintenant »."
+    "message": "Certaines images des posts supprimés n'ont pas encore été supprimées. Vérifiez l'autorisation de l'emplacement, puis cliquez sur « Nettoyer maintenant »."
   },
   "cacheCleanupNow": {
     "message": "Nettoyer maintenant"

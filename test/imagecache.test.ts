@@ -342,7 +342,7 @@ describe('failures: retried later, given up after 3', () => {
     expect((await getCacheFailures())['20/1']).toBe(MAX_FETCH_FAILURES);
     const before = deps.calls.length;
     await cachePost(store, cfg(), b, deps);
-    expect(deps.calls.length).toBe(before); // 3 回で諦める: もう取得しない
+    expect(deps.calls.length).toBe(before); // 3 回失敗したら再試行を止める: もう取得しない
     // 別の画像は影響を受けず、成功した画像の記録は消える
     const ok = fakeDeps();
     await cachePost(store, cfg(), bm('21', [img('Z')]), ok);

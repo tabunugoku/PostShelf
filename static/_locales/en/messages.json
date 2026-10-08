@@ -779,10 +779,10 @@
     "message": "Image quality"
   },
   "cacheQualityLarge": {
-    "message": "Standard (about 0.2–0.5 MB each; enough for viewing)"
+    "message": "Standard (estimated 0.2–0.5 MB each; enough for viewing)"
   },
   "cacheQualityOrig": {
-    "message": "Original size (about 1–5 MB each; uses up space faster)"
+    "message": "Original size (estimated 1–5 MB each; uses up space faster)"
   },
   "cacheFull": {
     "message": "When the size limit is reached"
@@ -831,7 +831,7 @@
     "message": "Stopped because the size limit was reached."
   },
   "cacheBulkHelp": {
-    "message": "Caching all posts loads images one by one (progress is shown and you can stop at any time). If you stop, the next run continues where it left off. Deleting a post also deletes its images."
+    "message": "Caching all posts loads images one by one. Progress is shown, and you can stop at any time. If you stop, the next run continues where it left off. Deleting a post also deletes its images."
   },
   "cacheClear": {
     "message": "Delete the cache"
@@ -890,7 +890,7 @@
     "message": "The images could not be moved. Please check the permission for the destination."
   },
   "cacheCleanupNeeded": {
-    "message": "Some images were not deleted when posts were deleted. Check the permission for the destination, then press \"Clean up now\"."
+    "message": "Some images of deleted posts have not been deleted yet. Check the permission for the destination, then press \"Clean up now\"."
   },
   "cacheCleanupNow": {
     "message": "Clean up now"
