@@ -25,6 +25,18 @@ export function unsavedItems(visible: Extracted[], savedIds: Set<string>): Extra
 
 let flashing = false; // 取り込み完了メッセージの表示中は件数表示で上書きしない
 
+/** 保存済みの ID は、短い時間 (SAVED_TTL_MS) だけ使い回す。スクロールのたびに全ポストを読み直さない。データの変更・アカウントの切り替えで捨てる */
+export const SAVED_TTL_MS = 300;
+let savedCache: { account: string; at: number; ids: Set<string> } | null = null;
+export const dropSavedCache = (): void => void (savedCache = null);
+async function cachedSavedIds(account: string): Promise<Set<string>> {
+  const now = Date.now();
+  if (savedCache && savedCache.account === account && now - savedCache.at < SAVED_TTL_MS) return savedCache.ids;
+  const ids = await getSavedIds();
+  savedCache = { account, at: Date.now(), ids };
+  return ids;
+}
+
 /** ボタンの表示を「未取り込み N 件」/「すべて取り込み済み」に更新する */
 export async function refreshCollectButton(): Promise<void> {
   const btn = document.querySelector<HTMLButtonElement>('.postshelf-collect');
@@ -40,7 +52,7 @@ export async function refreshCollectButton(): Promise<void> {
     btn.title = t('accountUnknown');
     return;
   }
-  const n = unsavedItems(collectVisible(), await getSavedIds()).length;
+  const n = unsavedItems(collectVisible(), await cachedSavedIds(account.id)).length;
   void recordPending(account.id, n); // manager の取り込み案内バナー用に最後に観測した件数を残す (アカウントごと)
   btn.textContent = n > 0 ? t('collectPending', n) : t('collectAllDone');
   btn.dataset.pending = String(n);
@@ -68,6 +80,7 @@ export function ensureCollectButton(): void {
   btn.addEventListener('click', async () => {
     if (!getCurrentAccount()) return; // アカウント不明のときは何もしない (ボタンも無効)
     const n = await addCollected(collectVisible()); // 取り込み済みは重複させない
+    dropSavedCache();
     flashing = true;
     btn.textContent = t('collectDone', n);
     setTimeout(() => {
@@ -108,8 +121,12 @@ export function scheduleCollectRefresh(): void {
 
 export const watchCollectData = (): (() => void) => {
   const offs = [
-    onDataChanged(() => void refreshCollectButton()),
+    onDataChanged(() => {
+      dropSavedCache();
+      void refreshCollectButton();
+    }),
     subscribeAccount(() => {
+      dropSavedCache();
       void refreshCollectButton();
       void refreshAutoButton();
     }),

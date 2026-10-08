@@ -513,16 +513,18 @@ export function importData(json: unknown): Promise<number> {
  * 取り込み済みのポストは、並びの基準 (すぐ上・すぐ下) として使うだけで、変更しない。
  * @param startedAt 取り込みの開始時刻 (いちばん上の区間の基準)
  */
-export function addCollected(items: { tweetId: string; snapshot: Bookmark['snapshot'] }[], startedAt: number = Date.now(), accountId: string = scope): Promise<number> {
+export function addCollected(items: { tweetId: string; snapshot?: Bookmark['snapshot'] }[], startedAt: number = Date.now(), accountId: string = scope): Promise<number> {
   // 取り込み中にアカウントが切り替わっても、保存先は開始時のアカウントのまま (v26)。モジュールの scope には頼らない
   const keyOf = (tweetId: string) => bookmarkKey(accountId, tweetId);
   return serial(async () => {
+    // snapshot の無い項目は並び順の基準 (保存済みのもの) としてだけ使う。保存データに無ければ、基準にもしない
     const plan = (m: BookmarkMap) => {
+      const usable = items.filter((it) => it.snapshot || m[keyOf(it.tweetId)]);
       const order = assignOrder(
-        items.map((it) => ({ id: it.tweetId, savedAt: m[keyOf(it.tweetId)]?.savedAt })),
+        usable.map((it) => ({ id: it.tweetId, savedAt: m[keyOf(it.tweetId)]?.savedAt })),
         startedAt,
       );
-      return { order, fresh: items.filter((it) => !m[keyOf(it.tweetId)] && order.has(it.tweetId)) };
+      return { order, fresh: usable.filter((it) => !m[keyOf(it.tweetId)] && order.has(it.tweetId)) };
     };
     if (plan(await readMap()).fresh.length === 0) return 0;
     await ensureInboxFolder(accountId); // 読んだあと書くまでの間に await を挟まないよう、先に用意して読み直す
@@ -532,7 +534,7 @@ export function addCollected(items: { tweetId: string; snapshot: Bookmark['snaps
     let added = 0;
     for (const it of fresh) {
       if (map[keyOf(it.tweetId)]) continue;
-      map[keyOf(it.tweetId)] = { accountId, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot };
+      map[keyOf(it.tweetId)] = { accountId, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot! };
       added++;
     }
     await write(KEY_BOOKMARKS, map);

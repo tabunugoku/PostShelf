@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { installChromeMock } from './chrome-mock';
-import { collectVisible, ensureCollectButton, refreshCollectButton, unsavedItems, watchPath } from '../src/content/collect';
+import { collectVisible, dropSavedCache, ensureCollectButton, refreshCollectButton, unsavedItems, watchPath } from '../src/content/collect';
 import { createFolder, getSavedIds, setBookmarkFolders } from '../src/shared/storage';
 
 const fixture = readFileSync(resolve(process.cwd(), 'test/fixtures/tweet.html'), 'utf8');
@@ -15,6 +15,7 @@ const btn = () => document.querySelector<HTMLButtonElement>('.postshelf-collect'
 
 beforeEach(() => {
   installChromeMock();
+  dropSavedCache();
   resetAccount();
   setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   history.pushState({}, '', '/i/history');

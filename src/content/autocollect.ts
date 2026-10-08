@@ -51,6 +51,9 @@ export interface CollectState extends CollectRun {
   resumeAt?: number;
 }
 
+/** 保存へ渡す、画面に出た順の 1 件。snapshot が無いものは、保存済みの基準 (並び順を決めるためだけに使う) */
+export type SeqEntry = Pick<Extracted, 'tweetId'> & { snapshot?: Extracted['snapshot'] };
+
 export interface CollectDeps {
   now(): number;
   sleep(ms: number): Promise<void>;
@@ -73,8 +76,8 @@ export interface CollectDeps {
   onDataChanged?(cb: () => void): () => void;
   /** 保存してある取り込みの記録 (owner / commandId の確認用) */
   loadRun?(): Promise<CollectRun | null>;
-  /** seq = 画面に出た順の全ポスト。保存の savedAt は一覧での位置から決める (ordering.ts) */
-  addCollected(seq: Extracted[], startedAt: number, accountId: string): Promise<number>;
+  /** seq = 前回の保存以降に画面に出た順のポスト (先頭は、保存済みの印のことがある)。保存の savedAt は一覧での位置から決める (ordering.ts) */
+  addCollected(seq: SeqEntry[], startedAt: number, accountId: string): Promise<number>;
   saveRun(run: CollectRun): Promise<void>;
   clearRun(): Promise<void>;
 }
@@ -108,7 +111,8 @@ export class AutoCollector {
   private token = 0;
   private resumeToken = 0;
   private seen = new Set<string>();
-  private seq: Extracted[] = [];
+  /** 前回の保存以降に画面に出た順のポスト。先頭は、保存済みの印 (ID だけ。並び順の基準) のことがある */
+  private seq: SeqEntry[] = [];
   private pending: Extracted[] = [];
   private streak = 0;
   /** 上限の数え始め (再開のたびに、その時点の imported から数え直す) */
@@ -321,8 +325,12 @@ export class AutoCollector {
       if (batch.length === 0 || !this.state) return;
       this.writing = true;
       try {
-        await this.d.addCollected(this.seq, this.state.startedAt, this.state.accountId);
+        const sent = this.seq;
+        await this.d.addCollected(sent, this.state.startedAt, this.state.accountId);
         for (const it of batch) this.saved?.add(it.tweetId);
+        // 保存できた分は、いちばん下の 1 件の ID だけ残して捨てる (次の保存の並び順の基準。メモリを増やさず、保存も差分だけにする)
+        const last = sent[sent.length - 1];
+        if (last) this.seq = [{ tweetId: last.tweetId }, ...this.seq.slice(sent.length)];
       } catch {
         if (final) {
           this.state.failed += batch.length;
