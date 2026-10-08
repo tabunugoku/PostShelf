@@ -133,7 +133,7 @@ describe('v19-6: 管理画面の上部', () => {
   });
 
   it('the result band: 「閉じる」 sits in the same row as the sentence, at its right end', async () => {
-    await chrome.storage.local.set({ collectRun: { status: 'done', accountId: 'me', startedAt: 1, imported: 5, skipped: 2, failed: 0, speed: 'slow', cap: 300, updatedAt: 9 } });
+    await chrome.storage.local.set({ collectRun: { status: 'done', accountId: 'me', startedAt: 1, imported: 5, skipped: 2, failed: 0, speed: 'slow', cap: 300, updatedAt: Date.now() } });
     await mount('tab', 1000);
     const head = $('.ac-progress .ac-head');
     expect(head.classList.contains('single')).toBe(true);
@@ -142,8 +142,8 @@ describe('v19-6: 管理画面の上部', () => {
     expect(css).toMatch(/\.ac-head\.single\{flex-wrap:nowrap\}/);
     expect(css).toMatch(/\.ac-head \.ac-actions\{margin-left:auto/);
     await click(head.querySelector('.ac-row button')!);
-    expect($$('.ac-progress')).toHaveLength(0); // 押すと画面から消える (結果の記録は残る)
-    expect((await chrome.storage.local.get('collectRun')).collectRun.status).toBe('done');
+    expect($$('.ac-progress')).toHaveLength(0); // 押すと画面から消える
+    expect((await chrome.storage.local.get('collectRun')).collectRun).toBeUndefined(); // v22: 閉じると、結果の記録も消える
   });
 
   it('while running, the buttons are in the same flex row as the sentence (they wrap below only when they do not fit)', async () => {

@@ -19,6 +19,8 @@ import {
   noteRunVersion,
   onSettingsChanged,
   setCollectOffer,
+  clearCollectRun,
+  staleResult,
   DEFAULT_AUTO_COLLECT,
   type AutoCollectSettings,
   onImportHintChanged,
@@ -726,8 +728,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </button>
         </div>
       )}
-      {collectRun && collectRun.updatedAt !== runClosed && autoCfg.enabled && (
-        <ProgressBanner run={collectRun} onClose={() => setRunClosed(collectRun.updatedAt)} />
+      {collectRun && collectRun.updatedAt !== runClosed && autoCfg.enabled && !staleResult(collectRun) && (
+        <ProgressBanner
+          run={collectRun}
+          onClose={() => {
+            setRunClosed(collectRun.updatedAt);
+            // 終わった状態 (done / stopped) は、保存してある記録も消す。進行中の状態は消さない
+            if (collectRun.status === 'done' || collectRun.status === 'stopped') void clearCollectRun().catch(() => {});
+          }}
+        />
       )}
       {offerShown && lastSeen && (
         <OfferBanner

@@ -396,6 +396,9 @@ export async function getCollectRun(): Promise<CollectRun | null> {
   };
 }
 export const saveCollectRun = (r: CollectRun): Promise<void> => chrome.storage.local.set({ [RUN_KEY]: r });
+/** 結果の記録 (done / stopped) を表示する期間。これを過ぎた結果は、管理画面を開いても出さない (記録は次の取り込みで上書きされる) */
+export const RESULT_TTL_MS = 24 * 60 * 60 * 1000;
+export const staleResult = (r: CollectRun, now = Date.now()): boolean => (r.status === 'done' || r.status === 'stopped') && now - r.updatedAt > RESULT_TTL_MS;
 export const clearCollectRun = (): Promise<void> => chrome.storage.local.remove(RUN_KEY);
 
 export function onCollectRunChanged(cb: () => void): () => void {

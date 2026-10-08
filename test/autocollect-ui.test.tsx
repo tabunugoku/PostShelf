@@ -166,7 +166,7 @@ describe('manager: progress banner', () => {
     await saveCollectRun(run({ status: 'limit', updatedAt: 6 }) as any);
     await flush();
     expect($('.ac-progress').textContent).toContain('15 分以上あけてから再開してください');
-    await saveCollectRun(run({ status: 'done', updatedAt: 7 }) as any);
+    await saveCollectRun(run({ status: 'done', updatedAt: Date.now() }) as any);
     await flush();
     expect($('.ac-progress').textContent).toContain('取り込みが終わりました');
     await click(byText('.ac-progress button', '閉じる'));

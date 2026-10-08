@@ -403,6 +403,7 @@ export class AutoCollector {
     if (this.state && ['stopped', 'done'].includes(this.state.status)) {
       this.state = null;
       this.emit(false);
+      void this.d.clearRun().catch(() => {}); // 終わった状態は、保存してある記録も消す (管理画面で開き直しても出ない)
     }
   }
 
@@ -437,6 +438,11 @@ export class AutoCollector {
    * 自分の取り込みを止めて状態を消し、パネルを閉じる。
    */
   onRunChanged(run: CollectRun | null): void {
+    // 終わった状態の記録が (管理画面などで閉じられて) 消えたら、このタブのパネルも閉じる
+    if (!run && this.state && ['stopped', 'done'].includes(this.state.status)) {
+      this.state = null;
+      return this.emit(false);
+    }
     if (!this.state || !run?.owner || run.owner === this.owner) return;
     this.token++;
     this.resumeToken++;
