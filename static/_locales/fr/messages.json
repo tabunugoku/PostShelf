@@ -702,6 +702,9 @@
   "cacheEnableDesc": {
     "message": "Quand vous enregistrez un post, ses images sont aussi conservées sur cet ordinateur : vous les voyez même si elles disparaissent de X. Pour les vidéos, seule la miniature est conservée."
   },
+  "cacheCollapsedHint": {
+    "message": "Activez pour choisir l’emplacement, la capacité et la qualité"
+  },
   "cachePermNote": {
     "message": "La première fois, Chrome demande l'autorisation d'accéder à pbs.twimg.com (le serveur d'images de X). L'autorisation n'est demandée que lorsque vous activez cette fonction."
   },

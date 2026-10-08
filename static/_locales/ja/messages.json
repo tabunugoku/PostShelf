@@ -702,6 +702,9 @@
   "cacheEnableDesc": {
     "message": "ポストを保存するときに、画像を端末に残します。X 側で消えても見られます。動画はサムネイルだけです。"
   },
+  "cacheCollapsedHint": {
+    "message": "オンにすると、保存先・容量・画質を選べます"
+  },
   "cachePermNote": {
     "message": "初めてオンにするとき、Chrome が「pbs.twimg.com（X の画像サーバー）へのアクセス」の許可を求めます。許可は、この機能をオンにしたときだけ求めます。"
   },

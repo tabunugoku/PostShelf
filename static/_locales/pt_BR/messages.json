@@ -702,6 +702,9 @@
   "cacheEnableDesc": {
     "message": "Ao salvar um post, as imagens também ficam neste computador, então você ainda as vê se sumirem do X. Dos vídeos, só a miniatura é mantida."
   },
+  "cacheCollapsedHint": {
+    "message": "Ative para escolher onde salvar, a capacidade e a qualidade"
+  },
   "cachePermNote": {
     "message": "Na primeira vez que ativar, o Chrome pedirá permissão para acessar pbs.twimg.com (o servidor de imagens do X). A permissão só é pedida ao ativar este recurso."
   },

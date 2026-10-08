@@ -702,6 +702,9 @@
   "cacheEnableDesc": {
     "message": "儲存貼文時，會把圖片也保留在本機。即使 X 上刪除了也能檢視。影片只保留縮圖。"
   },
+  "cacheCollapsedHint": {
+    "message": "開啟後，可以選擇儲存位置、容量和畫質"
+  },
   "cachePermNote": {
     "message": "首次開啟時，Chrome 會要求存取 pbs.twimg.com（X 的圖片伺服器）的權限。只有在開啟此功能時才會要求。"
   },

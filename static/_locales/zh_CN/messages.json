@@ -702,6 +702,9 @@
   "cacheEnableDesc": {
     "message": "保存帖子时，会把图片也保留在本机。即使 X 上删除了也能查看。视频只保留缩略图。"
   },
+  "cacheCollapsedHint": {
+    "message": "开启后，可以选择保存位置、容量和画质"
+  },
   "cachePermNote": {
     "message": "首次开启时，Chrome 会请求访问 pbs.twimg.com（X 的图片服务器）的权限。只有在开启此功能时才会请求。"
   },

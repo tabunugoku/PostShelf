@@ -702,6 +702,9 @@
   "cacheEnableDesc": {
     "message": "Al guardar una publicación, sus imágenes también se conservan en este equipo, así que podrás verlas aunque desaparezcan de X. De los vídeos solo se conserva la miniatura."
   },
+  "cacheCollapsedHint": {
+    "message": "Actívalo para elegir dónde guardar, la capacidad y la calidad"
+  },
   "cachePermNote": {
     "message": "La primera vez que lo actives, Chrome pedirá permiso para acceder a pbs.twimg.com (el servidor de imágenes de X). El permiso solo se pide al activar esta función."
   },

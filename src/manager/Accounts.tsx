@@ -26,7 +26,8 @@ export function AccountAvatar({ account, size = 24 }: { account: Account; size?:
 
 /**
  * サイドバー最上部の「アカウント切替」。現在表示中のアカウント (アバター + @ハンドル + ▾)。
- * 押すと保存履歴のあるアカウントの一覧 (件数つき)。各行に「割り当て」と「このアカウントのデータを削除」。
+ * 押すと保存履歴のあるアカウントの一覧 (件数つき)。行をクリックするとそのアカウントの表示に切り替わる。
+ * 「アカウント未設定」の行にだけ文字のボタン「割り当て…」。「このアカウントのデータを削除」は、各行の「…」のメニューの中 (v19-C)。
  * ここで切り替えても X のログイン状態は変わらない (一言を添える)。
  */
 export function AccountSwitcher(props: {
@@ -38,6 +39,8 @@ export function AccountSwitcher(props: {
   onDelete: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  /** 「…」のメニューを開いている行のアカウント ID */
+  const [moreId, setMoreId] = useState<string | null>(null);
   const menuHost = useRef<HTMLSpanElement>(null);
   const cur = props.accounts.find((a) => a.account.id === props.viewId)?.account ?? { id: props.viewId, handle: props.viewId, lastSeenAt: 0 };
   const label = accountLabel(cur);
@@ -77,30 +80,48 @@ export function AccountSwitcher(props: {
             {props.accounts.map(({ account, count }) => {
               const name = accountLabel(account);
               return (
-                <div class="acct-row" key={account.id}>
-                  <button
-                    class="menu-item acct-main"
-                    role="menuitemradio"
-                    aria-checked={account.id === props.viewId}
-                    onClick={() => {
-                      setOpen(false);
-                      props.onPick(account.id);
-                    }}
-                  >
-                    <AccountAvatar account={account} size={24} />
-                    <span class="acct-text">
-                      <span class="fr-name">{name}</span>
-                      {account.displayName && account.id !== UNKNOWN_ACCOUNT_ID && <span class="muted acct-sub">{account.displayName}</span>}
-                      {account.id === props.loggedInId && <span class="muted acct-sub">{t('accountLoggedIn')}</span>}
-                    </span>
-                    <span class="n">{count}</span>
-                  </button>
-                  <button class="icon-btn" aria-label={`${t('accountAssign')} ${name}`} title={t('accountAssign')} onClick={() => { setOpen(false); props.onAssign(account.id); }}>
-                    <Icon name="ti-arrows-exchange" />
-                  </button>
-                  <button class="icon-btn danger" aria-label={`${t('accountDelete')}: ${name}`} title={t('accountDelete')} onClick={() => { setOpen(false); props.onDelete(account.id); }}>
-                    <Icon name="ti-trash" />
-                  </button>
+                <div key={account.id}>
+                  <div class="acct-row">
+                    <button
+                      class="menu-item acct-main"
+                      role="menuitemradio"
+                      aria-checked={account.id === props.viewId}
+                      onClick={() => {
+                        setOpen(false);
+                        props.onPick(account.id);
+                      }}
+                    >
+                      <AccountAvatar account={account} size={24} />
+                      <span class="acct-text">
+                        <span class="fr-name">{name}</span>
+                        {account.displayName && account.id !== UNKNOWN_ACCOUNT_ID && <span class="muted acct-sub">{account.displayName}</span>}
+                        {account.id === props.loggedInId && <span class="muted acct-sub">{t('accountLoggedIn')}</span>}
+                      </span>
+                      <span class="n">{count}</span>
+                    </button>
+                    {account.id === UNKNOWN_ACCOUNT_ID && (
+                      <button class="acct-assign" aria-label={`${t('accountAssign')} ${name}`} onClick={() => { setOpen(false); props.onAssign(account.id); }}>
+                        {t('accountAssign')}
+                      </button>
+                    )}
+                    <button
+                      class="icon-btn"
+                      aria-label={`${t('cardMenu')}: ${name}`}
+                      title={t('cardMenu')}
+                      aria-haspopup="menu"
+                      aria-expanded={moreId === account.id}
+                      onClick={() => setMoreId(moreId === account.id ? null : account.id)}
+                    >
+                      <Icon name="ti-dots" />
+                    </button>
+                  </div>
+                  {moreId === account.id && (
+                    <div class="acct-more" role="menu">
+                      <button class="menu-item danger-text" role="menuitem" onClick={() => { setOpen(false); props.onDelete(account.id); }}>
+                        <Icon name="ti-trash" /> {t('accountDelete')}
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -702,6 +702,9 @@
   "cacheEnableDesc": {
     "message": "When you save a post, its images are also kept on this computer, so you can still see them if they disappear from X. For videos, only the thumbnail is kept."
   },
+  "cacheCollapsedHint": {
+    "message": "Turn on to choose where to save, the size limit and the quality"
+  },
   "cachePermNote": {
     "message": "The first time you turn this on, Chrome asks for permission to access pbs.twimg.com (X's image server). Permission is requested only when you turn this feature on."
   },
