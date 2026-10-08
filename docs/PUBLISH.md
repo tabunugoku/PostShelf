@@ -6,6 +6,9 @@
 - [ ] ストア掲載用のアイコン画像: 128px = `static/brand/icon-128.png`、512px = `docs/brand/icon-512.png` (ソース SVG は `docs/brand/icon.svg`、確認用 `docs/brand/preview.png`)。黒地に白い吹き出しと青 (#1D9BF0) の栞。X のロゴは使っていない
 - [ ] ストア掲載文・スクリーンショット・プライバシーポリシー (外部送信なし、保存は端末内のみ)
 - [ ] 権限の説明: `storage`/`unlimitedStorage` (ブックマーク保存), `sidePanel` (サイドパネル), host `x.com`/`twitter.com` (ボタン挿入と DOM 読み取り。取り込みは、ユーザーが開いた「履歴」→「ブックマーク」タブ `/i/history` の表示中のポストだけを、ボタンを押したときに読む)
+  - **画像のキャッシュ (任意の権限)**: `pbs.twimg.com` (X の画像サーバー) へのアクセスは、manifest の `optional_host_permissions` に宣言している。必須の `permissions` / `host_permissions` は増やしていない (テストで manifest を確認)。そのため、拡張機能の更新だけで Chrome が権限の再承認を求めることはない。設定「画像のキャッシュ」をオンにするクリックの中で `chrome.permissions.request` を呼び、拒否されたらオフに戻す。通信は画像の取得 (GET) だけで、X の非公開 API は呼ばない。取得した画像はこの PC の中にだけ置き、外部へ送らない
+  - プライバシーポリシーには、キャッシュをオンにした場合の通信先 (`pbs.twimg.com`) と、画像が端末内にだけ保存されることを書く (初期値はオフ)
+  - 「自分で選んだフォルダ」は File System Access API。選んだフォルダのハンドルは IndexedDB に保存し、書き込みは `images/` の下の自分が作ったファイルだけ
   - サイドパネルの「いま開いているポストを保存」はアクティブタブの URL (x.com / twitter.com のみ) を読むが、**`tabs` / `activeTab` 権限は追加していない**。x.com / twitter.com は host 権限に入っているので `chrome.tabs.query` の `url` が読める。他のサイトの URL は読めない
 - [ ] リモートコード不使用 (CDN なし、アイコンフォントは同梱) を申告
 - [ ] 類似拡張との差別化 (アイコン/色/X 風ポスト表示/完全ローカル) をストア説明に反映

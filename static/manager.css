@@ -276,7 +276,7 @@ button:disabled{cursor:not-allowed}
 .danger-solid:disabled,.primary:disabled,.danger-solid:disabled:hover,.primary:disabled:hover{opacity:.45}
 
 /* ---- 画像ビューア / 動画の案内 (v11) ---- */
-.viewer{position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.92);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.viewer{position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.96);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .viewer-bar{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:linear-gradient(#000a,#0000);z-index:2;pointer-events:none}
 .viewer-bar>*{pointer-events:auto}
 .viewer-count{font-size:14px}

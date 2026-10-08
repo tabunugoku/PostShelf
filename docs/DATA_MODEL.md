@@ -16,14 +16,16 @@
 - x.com のポップオーバーで全部のチェックを外した場合のみ、ブックマークごと削除する (従来どおり)
 
 ### `snapshot`
-`{ text, author, handle, avatar?, media: string[], createdAt?, url, hasVideo?, hasLink? }`
+`{ text, author, handle, avatar?, media: string[], createdAt?, url, hasVideo?, hasLink?, videoPoster? }`
+- **v11 で追加**: `videoPoster?: string` (動画の `<video poster>` の URL。保存時に取れたときだけ。古い保存分は未定義 = 動画アイコンの枠だけ。特別な移行はしない)
 - **v7 で追加**: `hasVideo?: boolean` / `hasLink?: boolean` (真偽値のみ。内容は保存しない)。保存時に content script が判定する
 - 読み込み時に欠けていても動く。**v6 以前に保存したポストは未定義 = 未判定**で、「動画あり」「リンクあり」の絞り込みには出ない。URL や拡張子からの推定はしない
 - 「画像あり」は `media.length > 0` で判定できるので既存データでも使える
 - 保存し直す (フォルダを変更する) と、その時点のスナップショットで `hasVideo` / `hasLink` が入る
 
 ## `settings`
-`{ syncNative, buttonMode, actionMode, lastFolderId, viewMode, sortKey, viewAccount }`
+`{ syncNative, buttonMode, actionMode, lastFolderId, viewMode, sortKey, viewAccount, imageCache }`
+- `imageCache` (**v11**): `{ enabled: false, backend: 'idb' | 'dir', maxBytes: 1 GB, quality: 'large' | 'orig', onFull: 'evict' | 'stop' }`。初期化の対象
 - `viewAccount` (**v9**): 手動で選んだ表示アカウントの ID。`''` = 選んでいない (x.com で最後に読み取ったアカウントに追従)
 - `lastFolderId` / `viewMode` (`post|list|grid`) / `sortKey` は manager の最後の表示状態 (**v7**。`localStorage` は使わない)
 - 不正値は読み込み時に既定値へ戻す
@@ -49,3 +51,12 @@
 ### エクスポート JSON
 - `version: 2`: `{ app, version, exportedAt, accounts, folders, bookmarks }` (全アカウント分。フォルダとブックマークに `accountId`)
 - `version: 1` (v9 より前) または `version` なし: インポートすると `unknown` に入る
+
+## 画像のキャッシュ (v11)
+画像の実体は `chrome.storage.local` には入れない。`src/shared/imagecache.ts` が扱う。
+- `idb`: IndexedDB `postshelf-images`。ストア `blobs` (キー `tweetId/名前`、値 `{ buf, type }`)、`meta` (サイズ・保存日・ポストの保存日)、`dirmeta` (フォルダ保存のメタ)、`handles` (選んだフォルダのハンドル)
+- `dir`: 選んだフォルダ (`.postshelf`、`README.txt`、`images/<ポストID>/N.ext`・`video-thumb.ext`・`post.json`)。`post.json` は `{ tweetId, handle, displayName, url, savedAt (ISO 8601) }` で、本文は入れない
+- 名前は `N` (画像の番号。1 から) と `video-thumb`。拡張子はサーバーが返した形式
+- `chrome.storage.local` のキー: `imageCacheFailures` (画像ごとの取得の失敗回数。3 回で諦める)、`imageCacheCleanup` (キャッシュ側の削除が済んでいないときの印)
+- キャッシュはポスト ID (tweetId) 単位で、同じポストを複数のアカウントで保存していても 1 組。どのアカウントにも無くなったポストの画像だけ消す
+- JSON のエクスポートに画像は含めない (URL のみ)
