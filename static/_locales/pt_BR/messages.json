@@ -467,6 +467,19 @@
       }
     }
   },
+  "itemCountOf": {
+    "message": "$SHOWN$ de $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "importBanner": {
     "message": "Há $COUNT$ posts dos seus Favoritos do x.com que podem ser importados",
     "placeholders": {

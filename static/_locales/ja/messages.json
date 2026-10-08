@@ -467,6 +467,19 @@
       }
     }
   },
+  "itemCountOf": {
+    "message": "$TOTAL$ 件中 $SHOWN$ 件",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "importBanner": {
     "message": "x.com の「ブックマーク」から取り込めるポストが $COUNT$ 件あります",
     "placeholders": {

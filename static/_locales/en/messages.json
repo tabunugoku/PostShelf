@@ -467,6 +467,19 @@
       }
     }
   },
+  "itemCountOf": {
+    "message": "$SHOWN$ of $TOTAL$ posts",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "importBanner": {
     "message": "$COUNT$ posts on your x.com Bookmarks can be imported",
     "placeholders": {

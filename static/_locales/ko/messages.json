@@ -467,6 +467,19 @@
       }
     }
   },
+  "itemCountOf": {
+    "message": "총 $TOTAL$개 중 $SHOWN$개",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "importBanner": {
     "message": "x.com 북마크에서 가져올 수 있는 게시물이 $COUNT$개 있습니다",
     "placeholders": {

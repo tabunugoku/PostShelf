@@ -467,6 +467,19 @@
       }
     }
   },
+  "itemCountOf": {
+    "message": "共 $TOTAL$ 条，显示 $SHOWN$ 条",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "importBanner": {
     "message": "x.com“书签”中有 $COUNT$ 条帖子可以导入",
     "placeholders": {

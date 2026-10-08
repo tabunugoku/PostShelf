@@ -675,6 +675,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   );
 
   const searching = search.trim() !== '' || hasActiveFilters(filters);
+  const clearAll = () => {
+    setSearch('');
+    setFilters({});
+  };
   const empty =
     shown.length === 0 &&
     (bookmarks.length === 0 ? (
@@ -688,12 +692,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         <Icon name="ti-search" />
         <div class="empty-title">{t('notFoundTitle')}</div>
         <div>{t('notFoundHint')}</div>
-        <button
-          onClick={() => {
-            setSearch('');
-            setFilters({});
-          }}
-        >
+        <button onClick={clearAll}>
           {t('clearFilters')}
         </button>
       </div>
@@ -1012,7 +1011,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             <div class="top">
               <Icon name={curFolder.icon} color={curFolder.color} />
               <span class="bar-name">{viewName}</span>
-              <span class="muted bar-count">{t('itemCount', count(curFolder.id))}</span>
+              <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
+              {searching && (
+                <button class="bar-clear" onClick={clearAll}>
+                  {t('clearFilters')}
+                </button>
+              )}
               {searchBox}
               {sortMenu}
               {viewSeg}
