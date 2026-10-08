@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>設定画面の GitHub リンク (モック)</title>
+<style>
+:root{--pg:#fff;--pgt:#0f1419;--mu:#536471;--bd:#cfd9de;--card:#f7f9f9;--ac:#1d9bf0}
+@media (prefers-color-scheme:dark){:root{--pg:#0b0d10;--pgt:#e7e9ea;--mu:#8b98a5;--bd:#2f3336;--card:#16181c}}
+body{margin:0;padding:24px 16px;background:var(--pg);color:var(--pgt);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic UI",sans-serif}
+.wrap{max-width:860px;margin:0 auto}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:32px 0 6px}
+.lead{color:var(--mu);margin:0 0 12px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:720px){.pair{grid-template-columns:1fr}}
+.tag{display:inline-block;font-size:12px;font-weight:700;border:1px solid var(--bd);border-radius:999px;padding:0 10px;margin-bottom:6px}
+.stage{border:1px solid var(--bd);border-radius:14px;padding:16px;background:var(--pg)}
+.sec{border-top:1px solid var(--bd);padding-top:10px;margin-top:10px}
+.muted{color:var(--mu);font-size:13px}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
+a.gh{display:inline-flex;align-items:center;gap:6px;color:var(--ac);text-decoration:none;font-size:13px}
+a.gh:hover{text-decoration:underline}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:999px;padding:6px 14px;color:inherit;text-decoration:none;font-size:13px;background:transparent}
+.ev{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-top:16px;font-size:13px}
+</style></head><body><div class="wrap">
+<h1>設定画面の GitHub リンク (モック)</h1>
+<p class="lead">設定画面の一番下に置く案を 2 つ並べます。どちらも、バージョン表示の下です。</p>
+<svg width="0" height="0" style="position:absolute"><symbol id="gh" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></symbol></svg>
+<div class="pair">
+ <div><span class="tag">案 A: 文字のリンク (控えめ)</span>
+  <div class="stage"><div class="muted">… 設定の項目 …</div>
+   <div class="sec"><strong>バージョン 1.1.0</strong>
+    <p class="muted" style="margin:2px 0 8px">PostShelf は、X の公式のものではありません。</p>
+    <a class="gh" href="#"><svg class="i"><use href="#gh"/></svg>GitHub のリポジトリ</a></div></div></div>
+ <div><span class="tag">案 B: ボタン (目に留まる)</span>
+  <div class="stage"><div class="muted">… 設定の項目 …</div>
+   <div class="sec"><strong>バージョン 1.1.0</strong>
+    <p class="muted" style="margin:2px 0 8px">PostShelf は、X の公式のものではありません。</p>
+    <a class="btn" href="#"><svg class="i"><use href="#gh"/></svg>GitHub で見る<svg class="i" style="width:14px;height:14px;color:var(--mu)" viewBox="0 0 24 24"><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg></a></div></div></div>
+</div>
+<div class="ev"><b>提案</b>: 案 A (目立たせすぎない)。新しいタブで開き、外部のリンクであることがわかるよう、アイコンは GitHub のロゴにします (Tabler の brand-github を、ほかのアイコンと同じく拡張に同梱するので、外部通信は増えません)。<br>
+<b>要確認</b>: いまのリポジトリは<b>非公開</b>です。公開するまで、他の人がリンクを開くと「404」になります。公開してから載せるか、いま載せるか決めてください。</div>
+</div></body></html>
