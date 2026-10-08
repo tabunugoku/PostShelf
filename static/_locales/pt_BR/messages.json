@@ -557,14 +557,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "Conta: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "Não foi possível identificar a conta conectada no x.com, então nada pode ser salvo. Recarregue a página do x.com."
   },

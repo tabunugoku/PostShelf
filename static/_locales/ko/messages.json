@@ -108,10 +108,10 @@
     "message": "X에서 열기"
   },
   "popupPosts": {
-    "message": "개 게시물"
+    "message": "게시물"
   },
   "popupFolders": {
-    "message": "개 폴더"
+    "message": "폴더"
   },
   "recent": {
     "message": "최근 저장한 3개"
@@ -553,14 +553,6 @@
     "message": "\"계정 미설정\"에 게시물 $COUNT$개가 있습니다. 어느 계정의 것인지 선택하고 \"다른 계정으로 이동…\"을 누르세요.",
     "placeholders": {
       "count": {
-        "content": "$1"
-      }
-    }
-  },
-  "popupAccount": {
-    "message": "계정: $NAME$",
-    "placeholders": {
-      "name": {
         "content": "$1"
       }
     }

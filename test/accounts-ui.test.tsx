@@ -273,7 +273,7 @@ describe('E-5/E-6: side panel save button and popup follow the account', () => {
     vi.resetModules();
     await act(async () => void (await import('../src/popup/index')));
     await flush();
-    expect($('.popup-account').textContent).toBe('アカウント: @me');
-    expect($('.sub:not(.popup-account)').textContent).toContain('2 ');
+    expect($('.popup-account').textContent?.trim()).toBe('@me');
+    expect($$('.tile b')[0].textContent).toBe('2');
   });
 });

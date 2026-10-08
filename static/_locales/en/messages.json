@@ -557,14 +557,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "Account: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "Can't tell which account is logged in on x.com, so nothing can be saved. Reload the x.com page."
   },

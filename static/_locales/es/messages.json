@@ -557,14 +557,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "Cuenta: $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "No se puede saber qué cuenta tiene la sesión en x.com, así que no se puede guardar. Recarga la página de x.com."
   },

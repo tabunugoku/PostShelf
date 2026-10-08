@@ -108,10 +108,10 @@
     "message": "在 X 上開啟"
   },
   "popupPosts": {
-    "message": "則貼文"
+    "message": "貼文"
   },
   "popupFolders": {
-    "message": "個資料夾"
+    "message": "資料夾"
   },
   "recent": {
     "message": "最近儲存的 3 則"
@@ -553,14 +553,6 @@
     "message": "「未設定帳號」下有 $COUNT$ 則貼文。請選擇它們屬於哪個帳號，並點擊「重新指定…」。",
     "placeholders": {
       "count": {
-        "content": "$1"
-      }
-    }
-  },
-  "popupAccount": {
-    "message": "帳號：$NAME$",
-    "placeholders": {
-      "name": {
         "content": "$1"
       }
     }

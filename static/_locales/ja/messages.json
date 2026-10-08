@@ -108,7 +108,7 @@
     "message": "X で開く"
   },
   "popupPosts": {
-    "message": "件"
+    "message": "ポスト"
   },
   "popupFolders": {
     "message": "フォルダ"
@@ -553,14 +553,6 @@
     "message": "「アカウント未設定」に $COUNT$ 件のポストがあります。どのアカウントのものかを選んで、割り当ててください。",
     "placeholders": {
       "count": {
-        "content": "$1"
-      }
-    }
-  },
-  "popupAccount": {
-    "message": "アカウント: $NAME$",
-    "placeholders": {
-      "name": {
         "content": "$1"
       }
     }

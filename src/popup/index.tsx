@@ -37,11 +37,21 @@ function Popup() {
     <div>
       <div class="hd">
         <img class="brand" src="brand/icon-32.png" width="24" height="24" alt="" />
-        <span>{t('appTitle')}</span>
+        <span class="hd-title">{t('appTitle')}</span>
+        {/* 現在のアカウント。判定できていないときだけ「アカウント未設定」 */}
+        <span class="acct-chip popup-account" title={accountLabel(account ?? { id: UNKNOWN_ACCOUNT_ID, handle: '' })}>
+          {accountLabel(account ?? { id: UNKNOWN_ACCOUNT_ID, handle: '' })}
+        </span>
       </div>
-      <div class="sub popup-account">{t('popupAccount', accountLabel(account ?? { id: UNKNOWN_ACCOUNT_ID, handle: '' }))}</div>
-      <div class="sub">
-        {counts.posts} {t('popupPosts')} · {counts.folders} {t('popupFolders')}
+      <div class="tiles">
+        <div class="tile">
+          <b>{counts.posts}</b>
+          <span>{t('popupPosts')}</span>
+        </div>
+        <div class="tile">
+          <b>{counts.folders}</b>
+          <span>{t('popupFolders')}</span>
+        </div>
       </div>
       {failed && (
         <div class="sub error" role="alert">
@@ -50,20 +60,20 @@ function Popup() {
       )}
       <HealthNotice onDiagnose={() => openManager('#diagnostics')} />
       <div class="rec">
-        <div>{t('recent')}</div>
+        <div class="rec-head">{t('recent')}</div>
         {recent.map((b) => (
-          <div title={b.snapshot.text}>
-            {b.snapshot.handle} {b.snapshot.text}
+          <div class="rec-row" title={b.snapshot.text}>
+            <span class="rec-handle">{b.snapshot.handle}</span> {b.snapshot.text}
           </div>
         ))}
       </div>
-      <button class="pr link" onClick={() => openManager()}>
+      <button class="main-btn" onClick={() => openManager()}>
         <Icon name="ti-external-link" />
         {t('openManager')}
       </button>
       {hasSidePanel() && (
         <button
-          class="pr link"
+          class="sub-btn"
           onClick={() => {
             void openSidePanel().then(() => window.close());
           }}
@@ -72,14 +82,16 @@ function Popup() {
           {t('openSidePanel')}
         </button>
       )}
-      <button class="pr" onClick={() => openManager('#diagnostics')}>
-        <Icon name="ti-stethoscope" />
-        {t('copyDiag')}
-      </button>
-      <button class="pr" onClick={() => openManager('#settings')}>
-        <Icon name="ti-settings" />
-        {t('settings')}
-      </button>
+      <div class="foot-row">
+        <button class="pr small" onClick={() => openManager('#settings')}>
+          <Icon name="ti-settings" />
+          {t('settings')}
+        </button>
+        <button class="pr small" onClick={() => openManager('#diagnostics')}>
+          <Icon name="ti-stethoscope" />
+          {t('copyDiag')}
+        </button>
+      </div>
     </div>
   );
 }

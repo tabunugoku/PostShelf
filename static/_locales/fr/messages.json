@@ -557,14 +557,6 @@
       }
     }
   },
-  "popupAccount": {
-    "message": "Compte : $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1"
-      }
-    }
-  },
   "saveCurrentNoAccount": {
     "message": "Impossible de savoir quel compte est connecté sur x.com : rien ne peut être enregistré. Rechargez la page x.com."
   },

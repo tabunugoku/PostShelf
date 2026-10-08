@@ -108,10 +108,10 @@
     "message": "在 X 上打开"
   },
   "popupPosts": {
-    "message": "条帖子"
+    "message": "帖子"
   },
   "popupFolders": {
-    "message": "个文件夹"
+    "message": "文件夹"
   },
   "recent": {
     "message": "最近保存的 3 条"
@@ -553,14 +553,6 @@
     "message": "“未设置账号”下有 $COUNT$ 条帖子。请选择它们属于哪个账号，并点击“分配…”。",
     "placeholders": {
       "count": {
-        "content": "$1"
-      }
-    }
-  },
-  "popupAccount": {
-    "message": "账号：$NAME$",
-    "placeholders": {
-      "name": {
         "content": "$1"
       }
     }
