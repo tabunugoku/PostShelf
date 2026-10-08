@@ -170,9 +170,9 @@ describe('narrow layout', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
   });
 
-  it('css: chips scroll horizontally, bulk bar stacks, list rows stay single-line', () => {
+  it('css: list rows stay single-line, the tools row does not wrap (the bulk bar is a menu button now)', () => {
     expect(css).toMatch(/\.scroll\{[^}]*overflow-x:auto/);
-    expect(css).toMatch(/\.layout-narrow \.bulk\{flex-direction:column/);
+    expect(css).toMatch(/\.layout-narrow \.tools\{[^}]*flex-wrap:nowrap/);
     expect(css).toMatch(/\.mini \.t\{[^}]*white-space:nowrap/);
   });
 });

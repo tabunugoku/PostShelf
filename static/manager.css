@@ -100,14 +100,11 @@ button:disabled{cursor:not-allowed}
 .chip.filter,.scroll .chip{display:inline-flex;gap:6px;align-items:center;min-height:32px;padding:2px 12px;border:1px solid var(--border-strong);border-radius:16px;background:var(--surface-2);cursor:pointer;white-space:nowrap}
 .chip.filter.on,.scroll .chip.on{background:var(--fill-ghost-selected);font-weight:700;border-color:var(--text-primary)}
 .chip .x{display:inline-flex;margin-left:2px}
-.bulk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px;padding:8px 10px;border:1px solid var(--border-strong);border-radius:12px;background:var(--bg-accent)}
-.bulk-clear{margin-left:auto}
 .bulk-anchor{margin-left:auto}
 .bulk-btn{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:2px 12px;border-radius:16px;background:var(--accent-strong);color:#fff;border-color:transparent}
 .bulk-btn:hover{background:var(--accent-strong);opacity:.92}
 .menu-bulk{min-width:220px}
 .menu-bulk .menu-item{width:100%}
-.bulk .danger{margin-left:0}
 
 /* ---- ポスト / リスト / グリッド ---- */
 .rows{position:relative}
@@ -186,7 +183,6 @@ button:disabled{cursor:not-allowed}
 .menu-anchor{position:relative;display:inline-block}
 .menu{position:absolute;z-index:20;top:100%;right:0;min-width:200px;max-width:min(300px,calc(100vw - 20px));margin-top:4px;padding:6px;background:var(--surface-3);border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-popover);font-weight:400;cursor:default}
 .menu-left{left:0;right:auto}
-.bulk .menu{left:0;right:auto}
 .menu.fixed{position:fixed;right:auto;margin:0;z-index:40}
 .menu-wide{min-width:min(300px,calc(100vw - 16px));max-width:min(340px,calc(100vw - 16px))}
 .menu-edit{width:min(440px,calc(100vw - 16px));max-width:none}
@@ -270,9 +266,6 @@ button:disabled{cursor:not-allowed}
 .layout-narrow .av{width:32px;height:32px;font-size:14px}
 .layout-narrow .media{max-width:none}
 .layout-narrow .view-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-.layout-narrow .bulk{flex-direction:column;align-items:stretch}
-.layout-narrow .bulk .menu-anchor>button,.layout-narrow .bulk-clear,.layout-narrow .bulk .danger{width:100%;margin-left:0}
-.layout-narrow .bulk .menu{left:0;right:auto}
 .layout-narrow .handle{width:64px}
 .pfoot{position:sticky;bottom:0;z-index:10;padding:10px 12px;background:var(--surface-1);border-top:1px solid var(--border)}
 .cta{width:100%;display:flex;gap:8px;align-items:center;justify-content:center;background:var(--accent-strong);color:#fff;border-color:transparent}

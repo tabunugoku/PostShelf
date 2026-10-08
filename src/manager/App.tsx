@@ -635,50 +635,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     </span>
   );
 
-  const bulk = selected.size > 0 && (
-    <div class="bulk" role="toolbar">
-      <strong>{t('selectedCount', selected.size)}</strong>
-      <span class="menu-anchor">
-        <button onClick={() => setMenu(menu === 'add' ? null : 'add')}>
-          <Icon name="ti-folder-plus" /> {t('bulkAdd')}
-        </button>
-        {menu === 'add' && (
-          <FolderMenu
-            label={t('bulkAdd')}
-            folders={pickerFolders}
-            onClose={() => setMenu(null)}
-            onPick={(id) => {
-              setMenu(null);
-              void run(addToFolders(bulkIds, [id]), 'toastAdded');
-            }}
-          />
-        )}
-      </span>
-      <span class="menu-anchor">
-        <button onClick={() => setMenu(menu === 'remove' ? null : 'remove')}>
-          <Icon name="ti-folder-minus" /> {t('bulkRemove')}
-        </button>
-        {menu === 'remove' && (
-          <FolderMenu
-            label={t('bulkRemove')}
-            folders={removableFolders}
-            onClose={() => setMenu(null)}
-            onPick={(id) => {
-              setMenu(null);
-              void run(removeFromFolders(bulkIds, [id]), 'toastRemoved');
-            }}
-          />
-        )}
-      </span>
-      <button class="danger" onClick={() => setConfirmState({ kind: 'posts', ids: bulkIds })}>
-        <Icon name="ti-trash" /> {t('delete')}
-      </button>
-      <button class="bulk-clear" onClick={clearSelection}>
-        {t('clearSelection')}
-      </button>
-    </div>
-  );
-
   const searching = search.trim() !== '' || hasActiveFilters(filters);
   const empty =
     shown.length === 0 &&
@@ -797,7 +753,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     <>
       {notices}
       {noticeBand}
-      {compact ? bulk : chips}
+      {compact ? null : chips}
       {empty}
       {rows}
     </>
@@ -943,7 +899,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               {sortMenu}
               {filterButton}
               <span class="grow" />
-              {viewSeg}
+              {/* 選んでいるあいだは、表示切り替えの場所に「N 件選択中 ⌄」を出す (幅 340px に収めるため。一覧は下にずれない) */}
+              {bulkMenu ?? viewSeg}
             </div>
           )}
         </header>
