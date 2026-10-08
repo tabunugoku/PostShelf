@@ -44,6 +44,9 @@ Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: num
 - 不確かな X の DOM 構造は推測で断定せず、fixture とコメントで前提を明記する
 - 対応言語は日本語と英語 (`chrome.i18n`, `_locales/{ja,en}`)。UI 文字列は直書きせず `t()` 経由
 
+## 紹介サイト (GitHub Pages)
+`site/index.html` (静的な 1 ページ。ビルド不要、外部の JS・CSS・フォントは使わない)。`.github/workflows/pages.yml` が、`main` への push で `site/` を公開する (リポジトリの Settings → Pages → Source を「GitHub Actions」にしてから動く)。スクリーンショットは載せず、画面のイメージはマークアップで描く。サンプルは架空のアカウントだけ。比較表は日付つきで、公開ページの記載に基づく (変わったら更新する)。
+
 ## 実装順 (マイルストーン)
 1. M1 骨組み: manifest.json, ビルド, `models.ts`, `storage.ts`, フォルダ CRUD (名前/アイコン/色) と単体テスト
 2. M2 content script: ブックマークボタン横のポップオーバー、スナップショット保存 (fixture でテスト)
