@@ -3,12 +3,14 @@ import { Icon } from '../shared/Icon';
 import { COLORS, ICONS, displayName, type Folder } from '../shared/models';
 import { t } from '../shared/strings';
 import { updateFolder } from '../shared/storage';
+import { hasSameName } from '../shared/folderCreateMenu';
 
 /**
  * フォルダの編集ポップオーバーの中身 (名前 / アイコン / 色 (色なし含む))。
  * アイコンと色は選んだ時点で保存し、名前は Enter / フォーカスを外したときに保存する。
  */
-export function FolderEdit(props: { folder: Folder; onSaved: () => void; onRequestDelete: () => void }) {
+/** existing: 同名の判定に使う、ほかのフォルダ (「未分類」を含む。このフォルダ自身は含めない) */
+export function FolderEdit(props: { folder: Folder; existing?: Folder[]; onSaved: () => void; onRequestDelete: () => void }) {
   const { folder } = props;
   const [name, setName] = useState(displayName(folder));
   const [error, setError] = useState('');
@@ -28,7 +30,9 @@ export function FolderEdit(props: { folder: Folder; onSaved: () => void; onReque
     }
   };
   const commitName = () => {
-    if (name !== displayName(folder)) void apply({ name });
+    if (name === displayName(folder)) return;
+    if (hasSameName((props.existing ?? []).filter((f) => f.id !== folder.id), name)) return setError(t('errDuplicateFolder'));
+    void apply({ name });
   };
 
   return (

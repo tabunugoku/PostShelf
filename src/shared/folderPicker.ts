@@ -21,6 +21,12 @@ export interface FolderPicker {
   sync: () => void;
 }
 
+/** 「未分類」の行 (保存されていなくても、一覧の先頭に出す仮想の行) */
+export const inboxOf = (list: Folder[]): Folder => {
+  const stored = list.find((f) => f.id === INBOX_ID);
+  return { id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color };
+};
+
 export function createFolderPicker(opts: {
   folders: Folder[];
   selected: Set<string>;
@@ -43,10 +49,6 @@ export function createFolderPicker(opts: {
     if (selected.size === 0) selected.add(INBOX_ID);
     sync();
   };
-  const inboxOf = (list: Folder[]): Folder => {
-    const stored = list.find((f) => f.id === INBOX_ID);
-    return { id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color };
-  };
 
   const folders = [...opts.folders];
   const listEl = document.createElement('div');
@@ -54,7 +56,7 @@ export function createFolderPicker(opts: {
 
   const menu = createFolderMenu({
     theme: th,
-    existing: () => folders,
+    existing: () => [inboxOf(folders), ...folders], // 「未分類」(まだ保存されていないときの仮想の行) も同名の判定に含める
     onCreated: async (f) => {
       // 作ったフォルダを、このポストの保存先として選んで一覧に戻る (「未分類」との排他は normalize)
       folders.push(f);

@@ -57,6 +57,7 @@ import { afterPostsRemoved, deleteAccountDataAndCache } from '../shared/cacheops
 import { ImageViewer, VideoGuide } from './Viewer';
 import { AccountSwitcher, AssignDialog, resolveViewAccount } from './Accounts';
 import { FolderEdit } from './FolderEdit';
+import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
@@ -392,7 +393,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const editNode = (f: Folder) =>
     editing === f.id && (
       <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-edit">
-        <FolderEdit folder={f} onSaved={() => void reload()} onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }} />
+        <FolderEdit folder={f} existing={[inboxOf(folders), ...folders]} onSaved={() => void reload()} onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }} />
       </Dropdown>
     );
 
