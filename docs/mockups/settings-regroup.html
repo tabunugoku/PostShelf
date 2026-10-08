@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>設定画面の整理 (モック)</title>
+<style>
+:root{--pg:#fff;--pgt:#0f1419;--mu:#536471;--bd:#cfd9de;--card:#f7f9f9;--ac:#1d9bf0;--nav:#eff3f4;--dg:#c4161c}
+@media (prefers-color-scheme:dark){:root{--pg:#0b0d10;--pgt:#e7e9ea;--mu:#8b98a5;--bd:#2f3336;--card:#16181c;--nav:#202327;--dg:#ff7b80}}
+*{box-sizing:border-box}body{margin:0;padding:24px 16px;background:var(--pg);color:var(--pgt);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic UI",sans-serif}
+.wrap{max-width:1100px;margin:0 auto}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:32px 0 6px;border-top:1px solid var(--bd);padding-top:14px}
+.lead,.muted{color:var(--mu)}.muted{font-size:13px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:860px){.pair{grid-template-columns:1fr}}
+.tag{display:inline-block;font-size:12px;font-weight:700;border:1px solid var(--bd);border-radius:999px;padding:0 10px;margin-bottom:6px}
+.stage{border:1px solid var(--bd);border-radius:14px;overflow:hidden;background:var(--pg);display:flex;min-height:200px}
+.side{width:150px;flex:none;border-right:1px solid var(--bd);padding:10px;display:flex;flex-direction:column;gap:2px;font-size:13px}
+.side .it{padding:5px 8px;border-radius:8px}.side .on{background:var(--nav);font-weight:700}
+.side .sp{flex:1;min-height:30px}
+.main{flex:1;padding:12px 14px;min-width:0}
+fieldset{border:1px solid var(--bd);border-radius:12px;margin:10px 0;padding:8px 12px}legend{font-weight:700;font-size:13px;padding:0 6px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.sw{flex:none;width:34px;height:20px;border-radius:999px;background:var(--bd);position:relative}.sw.on{background:var(--ac)}
+.sw:after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff}.sw.on:after{left:16px}
+.btn{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--bd);border-radius:999px;padding:3px 12px;font-size:13px;margin:2px 4px 2px 0}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+.gh{margin-top:6px;padding:5px 8px;border:1px solid var(--bd);border-radius:999px;display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600}
+.ul{text-decoration:underline;color:var(--ac)}
+.dg{border-color:var(--dg)}.dg legend{color:var(--dg)}
+.ev{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px}
+ul{margin:4px 0;padding-left:20px}
+</style></head><body><div class="wrap">
+<h1>設定画面の整理 (モック)</h1>
+<p class="lead">3 つの指摘 (説明が横に長い / 「データ」欄の寄せ集め / GitHub ボタンの位置) への案です。</p>
+<svg width="0" height="0" style="position:absolute"><symbol id="gh" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></symbol><symbol id="ex" viewBox="0 0 24 24"><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></symbol></svg>
+
+<h2>1. 「X のブックマークと連動する」の説明を、短い行に分ける</h2>
+<div class="pair">
+ <div><span class="tag">before</span><div class="stage"><div class="main">
+  <div class="row"><div><b>X のブックマークと連動する</b><div class="muted">フォルダに保存したとき X 標準のブックマークも付け、すべてのフォルダから外したとき X 側のブックマークも外します。PostShelf が画面上のブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。初期値はオフです。</div></div><span class="sw"></span></div></div></div></div>
+ <div><span class="tag">after</span><div class="stage"><div class="main">
+  <div class="row"><div><b>X のブックマークと連動する</b>
+   <ul class="muted" style="margin:4px 0 0">
+    <li>フォルダに保存したとき、X 標準のブックマークも付けます。</li>
+    <li>すべてのフォルダから外したとき、X 側のブックマークも外します。</li>
+    <li>ブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。</li></ul>
+   <div class="muted" style="margin-top:4px">初期値はオフです。</div></div><span class="sw"></span></div></div></div></div>
+</div>
+<div class="ev">説明の文は、意味を変えずに 3 つの短い文に分け、箇条書きにします。<b>ほかの設定の説明も、同じ長さの目安 (1 行 40 字前後、横幅は最大 40 文字分) にそろえ</b>、画面を広げても行が間延びしないようにします。</div>
+
+<h2>2. 「データ」欄を、役割ごとの 4 つの欄に分ける</h2>
+<div class="pair">
+ <div><span class="tag">before</span><div class="stage"><div class="main">
+  <fieldset><legend>データ</legend>
+   <span class="btn">エクスポート</span><span class="btn">インポート</span>
+   <div class="row" style="margin-top:6px"><div><b>自動取り込みを使う</b><div class="muted">オフにすると、取り込みの案内と、開始のボタンが出なくなります。</div></div><span class="sw on"></span></div>
+   <span class="btn">ブックマークを自動で取り込む…</span><div class="muted">自動スクロールは、X の規約上の「自動化されたアクセス」とみなされる可能性があります。</div>
+   <div style="margin-top:6px"><b>バージョン 1.0.0</b></div>
+   <div class="muted">更新するとき: 先にエクスポートで保存してから… <span class="ul">更新と手動インストールの手順</span></div>
+   <span class="btn"><svg class="i"><use href="#gh"/></svg>GitHub で見る</span></fieldset></div></div></div>
+ <div><span class="tag">after</span><div class="stage"><div class="side"><div class="it">すべて</div><div class="it">未分類</div><div class="it on">設定</div><div class="sp"></div></div><div class="main">
+  <fieldset><legend>データの保存と移行</legend><span class="btn">エクスポート</span><span class="btn">インポート</span><div class="muted">保存したポストとフォルダを、ファイルに書き出す / 読み込みます。</div></fieldset>
+  <fieldset><legend>ブックマークの自動取り込み</legend>
+   <div class="row"><div><b>自動取り込みを使う</b><div class="muted">オフにすると、案内と開始のボタンが出なくなります。オンでも、自動では始まりません。</div></div><span class="sw on"></span></div>
+   <span class="btn">ブックマークを自動で取り込む…</span><div class="muted">自動スクロールは、X の規約上の「自動化されたアクセス」とみなされる可能性があります。</div></fieldset>
+  <fieldset><legend>PostShelf について</legend><div><b>バージョン 1.0.0</b></div>
+   <div class="muted">更新するとき: 先にエクスポートで保存してから、同じフォルダに新しい版を上書きし、「再読み込み」を押します。<br><span class="ul">更新と手動インストールの手順</span></div></fieldset>
+ </div></div></div>
+</div>
+<div class="ev">「データ」は、エクスポート / インポートだけにします。<b>自動取り込み</b>は独立した欄、<b>バージョンと更新の手順</b>は「PostShelf について」の欄に分けます。ほかの欄 (X の画面構造、設定の初期化、危険な操作) は、いまのままです。欄の並びは、「連動 → ボタンの動作 → 画像のキャッシュ → データの保存と移行 → 自動取り込み → X の画面構造 → PostShelf について → 設定の初期化 → 危険な操作」にします。</div>
+
+<h2>3. GitHub ボタンを、左のメニューの「設定」の下に置く</h2>
+<div class="pair">
+ <div><span class="tag">before (いま)</span><div class="stage"><div class="side"><div class="it">すべて</div><div class="it">未分類</div><div class="sp"></div><div class="it">サイドパネルで開く</div><div class="it on">設定</div></div><div class="main"><div class="muted">… 設定の中の「データ」欄の一番下に、GitHub のボタン …</div></div></div></div>
+ <div><span class="tag">after (矢印の先)</span><div class="stage"><div class="side"><div class="it">すべて</div><div class="it">未分類</div><div class="sp"></div><div class="it">サイドパネルで開く</div><div class="it on">設定</div>
+   <a class="gh"><svg class="i"><use href="#gh"/></svg>GitHub<svg class="i" style="width:12px;height:12px;color:var(--mu)"><use href="#ex"/></svg></a></div><div class="main"><div class="muted">… 設定の中からは外す …</div></div></div></div>
+</div>
+<div class="ev"><b>提案</b>: 左のメニューの一番下、「設定」の下に、小さな丸いボタン「GitHub」(ロゴ + 外部リンクの印) を置きます。どの画面にいても見えます。左のメニューが狭いとき (幅が足りないとき) は、ロゴだけにして、文字は読み上げ用の名前 (`aria-label`) に残します。サイドパネルには置きません。設定の中の GitHub ボタンは外します。<br>
+<b>確認</b>: 矢印の先を、「左のメニューの『設定』の下」と読みました。違っていれば教えてください。</div>
+</div></body></html>
