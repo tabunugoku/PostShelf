@@ -399,34 +399,37 @@ h1{font-size:21px;margin:0 0 4px}h2{font-size:17px;margin:40px 0 4px;padding-top
 </div>
 
 <!-- ============ 8 ============ -->
-<h2>8. ツールバーのポップアップ</h2>
-<p class="lead">スクリーンショット (<code>popup-light.png</code>) で、「アカウント: アカウント未設定」と、「アカウント」が重なります。件数が 1 行の文字で、主な操作の「管理画面を開く」が、ほかのリンクと同じ見た目です。</p>
+<h2>8. ツールバーのポップアップ (実際の画面に合わせて作り直しました)</h2>
+<p class="lead">最初の案は、古いスクリーンショット (サイドパネルの項目がなく、アカウントが「未設定」の状態) を元にしていて、実際の画面と違っていました。今回は、ご提示の実際の画面 (アカウント表示あり、最近保存した 3 件、サイドパネルの項目あり) を再現しています。なお、「アカウント: アカウント未設定」は、アカウントを判定できていないときだけ出る表示で、通常は出ません。</p>
 <div class="pair">
- <div class="cell"><span class="tag">before</span>
-  <div class="stage"><div class="app pu">
-   <div class="hd2">PostShelf</div>
-   <div class="rec">アカウント: アカウント未設定</div><div class="rec">1 件 · 1 フォルダ</div>
-   <div class="rec">最近保存した 3 件<br>@devtips Chrome拡張の manifes…</div>
-   <div class="lk" style="color:#1d9bf0"><svg viewBox="0 0 24 24" style=""><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg>管理画面を開く</div><div class="lk" style="color:var(--tx)"><svg viewBox="0 0 24 24" style=""><path d="M6 4h-1a2 2 0 0 0-2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0-2-2h-1M8 15a6 6 0 1 0 12 0v-3M11 3v2M6 3v2M18 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></svg>診断情報をコピー</div><div class="lk" style="color:var(--tx)"><svg viewBox="0 0 24 24" style=""><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M10.3 4.3c.4-1.8 2.9-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.5-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.6c1.8.4 1.8 2.9 0 3.4a1.7 1.7 0 0 0-1.1 2.6c.9 1.5-.8 3.3-2.4 2.4a1.7 1.7 0 0 0-2.6 1.1c-.4 1.8-2.9 1.8-3.4 0a1.7 1.7 0 0 0-2.6-1.1c-1.5.9-3.3-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.6c-1.8-.4-1.8-2.9 0-3.4a1.7 1.7 0 0 0 1.1-2.6c-.9-1.5.8-3.3 2.4-2.4c1 .6 2.3.1 2.6-1.1"/></svg>設定</div>
+ <div class="cell"><span class="tag">before (実際の画面)</span>
+  <div class="stage x"><div class="app pu" style="width:320px">
+   <div class="hd2"><svg viewBox="0 0 24 24" style="color:#1d9bf0"><path d="M5 5h14v10H11l-4 4v-4H5z"/></svg>PostShelf</div>
+   <div class="rec">アカウント: @tabunugoku_dev</div><div class="rec">17 件 · 1 フォルダ</div>
+   <div class="rec">最近保存した 3 件<br>@showheyohtaki AIへの指示用に、"…<br>@ftcarpe 誰かがプロフェッショナルな音…<br>@CollectUI Micro UI Interaction by…</div>
+   <div class="lk" style="color:#1d9bf0"><svg viewBox="0 0 24 24"><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg>管理画面を開く</div><div class="lk" style="color:#1d9bf0"><svg viewBox="0 0 24 24"><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1M15 4v16"/></svg>サイドパネルで開く</div><div class="lk" style="color:var(--tx)"><svg viewBox="0 0 24 24"><path d="M6 4h-1a2 2 0 0 0-2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0-2-2h-1M8 15a6 6 0 1 0 12 0v-3M11 3v2M6 3v2M18 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></svg>診断情報をコピー</div><div class="lk" style="color:var(--tx)"><svg viewBox="0 0 24 24"><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M10.3 4.3c.4-1.8 2.9-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.5-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.6c1.8.4 1.8 2.9 0 3.4a1.7 1.7 0 0 0-1.1 2.6c.9 1.5-.8 3.3-2.4 2.4a1.7 1.7 0 0 0-2.6 1.1c-.4 1.8-2.9 1.8-3.4 0a1.7 1.7 0 0 0-2.6-1.1c-1.5.9-3.3-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.6c-1.8-.4-1.8-2.9 0-3.4a1.7 1.7 0 0 0 1.1-2.6c-.9-1.5.8-3.3 2.4-2.4c1 .6 2.3.1 2.6-1.1"/></svg>設定</div>
   </div></div>
  </div>
  <div class="cell"><span class="tag after">after</span>
-  <div class="stage"><div class="app pu">
-   <div class="hd2">PostShelf<span style="flex:1"></span><span style="font-weight:400;font-size:12px;border:1px solid var(--bd);border-radius:999px;padding:0 8px;color:var(--mu)">アカウント未設定</span></div>
-   <div class="tiles"><div class="tile"><b>1</b><span>ポスト</span></div><div class="tile"><b>1</b><span>フォルダ</span></div></div>
-   <div class="rec" style="margin:0 0 8px">最近保存: @devtips Chrome拡張の manifes…</div>
-   <div class="bigb"><svg viewBox="0 0 24 24" style=""><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg>管理画面を開く</div>
-   <div style="display:flex;gap:4px;margin-top:6px"><span class="lk" style="flex:1"><svg viewBox="0 0 24 24" style=""><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M10.3 4.3c.4-1.8 2.9-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.5-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.6c1.8.4 1.8 2.9 0 3.4a1.7 1.7 0 0 0-1.1 2.6c.9 1.5-.8 3.3-2.4 2.4a1.7 1.7 0 0 0-2.6 1.1c-.4 1.8-2.9 1.8-3.4 0a1.7 1.7 0 0 0-2.6-1.1c-1.5.9-3.3-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.6c-1.8-.4-1.8-2.9 0-3.4a1.7 1.7 0 0 0 1.1-2.6c-.9-1.5.8-3.3 2.4-2.4c1 .6 2.3.1 2.6-1.1"/></svg>設定</span><span class="lk" style="flex:1"><svg viewBox="0 0 24 24" style=""><path d="M6 4h-1a2 2 0 0 0-2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0-2-2h-1M8 15a6 6 0 1 0 12 0v-3M11 3v2M6 3v2M18 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></svg>診断情報をコピー</span></div>
+  <div class="stage x"><div class="app pu" style="width:320px">
+   <div class="hd2"><svg viewBox="0 0 24 24" style="color:#1d9bf0"><path d="M5 5h14v10H11l-4 4v-4H5z"/></svg>PostShelf<span style="flex:1"></span><span style="font-weight:400;font-size:12px;border:1px solid var(--bd);border-radius:999px;padding:0 8px;color:var(--mu)">@tabunugoku_dev</span></div>
+   <div class="tiles"><div class="tile"><b>17</b><span>ポスト</span></div><div class="tile"><b>1</b><span>フォルダ</span></div></div>
+   <div class="rec" style="margin:8px 0 2px;font-size:12px">最近保存した 3 件</div>
+   <div style="font-size:13px;line-height:1.7"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="color:var(--mu)">@showheyohtaki</span> AIへの指示用に、"…</div><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="color:var(--mu)">@ftcarpe</span> 誰かがプロフェッショナルな音…</div><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="color:var(--mu)">@CollectUI</span> Micro UI Interaction by…</div></div>
+   <div class="bigb" style="margin-top:10px"><svg viewBox="0 0 24 24"><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg>管理画面を開く</div>
+   <div class="btn2" style="display:flex;gap:6px;align-items:center;justify-content:center;margin-top:6px;padding:7px"><svg viewBox="0 0 24 24"><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1M15 4v16"/></svg>サイドパネルで開く</div>
+   <div style="display:flex;gap:4px;margin-top:6px"><span class="lk" style="flex:1;font-size:12px"><svg viewBox="0 0 24 24"><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M10.3 4.3c.4-1.8 2.9-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.5-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.6c1.8.4 1.8 2.9 0 3.4a1.7 1.7 0 0 0-1.1 2.6c.9 1.5-.8 3.3-2.4 2.4a1.7 1.7 0 0 0-2.6 1.1c-.4 1.8-2.9 1.8-3.4 0a1.7 1.7 0 0 0-2.6-1.1c-1.5.9-3.3-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.6c-1.8-.4-1.8-2.9 0-3.4a1.7 1.7 0 0 0 1.1-2.6c-.9-1.5.8-3.3 2.4-2.4c1 .6 2.3.1 2.6-1.1"/></svg>設定</span><span class="lk" style="flex:1;font-size:12px"><svg viewBox="0 0 24 24"><path d="M6 4h-1a2 2 0 0 0-2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0-2-2h-1M8 15a6 6 0 1 0 12 0v-3M11 3v2M6 3v2M18 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></svg>診断情報をコピー</span></div>
   </div></div>
  </div>
 </div>
 <div class="ev">
+ <p><b>実際の画面で、直したほうが良い所</b> (小さな点です)</p>
  <ul>
-  <li>アカウントは、右上の小さな札 1 つにまとめる (「アカウント: アカウント未設定」の重なりが消える)。</li>
-  <li>件数は、2 つのタイルにする。最近保存した 1 件は、1 行に残す。</li>
-  <li>「管理画面を開く」を、塗りつぶしのボタンにする。設定と診断情報は、下の 1 行にまとめる。</li>
+  <li>「管理画面を開く」「サイドパネルで開く」だけが青で、「診断情報をコピー」「設定」が黒です。4 つが同じ形のリンクで並ぶので、どれが主な操作か分かりにくい。</li>
+  <li>件数が「17 件 · 1 フォルダ」の 1 行で、数字が読み取りにくい。</li>
+  <li>最近保存した 3 件は、投稿者名と本文の区別がなく、長い 1 行です。投稿者名を薄い色にすると読みやすい。</li>
  </ul>
- <p><b>評価</b> <span class="verdict go">採用を推奨</span> (軽い変更)。ツールバーの動作を「サイドパネルを開く」にしていると、このポップアップは見られないので、使う人は限られる。</p>
+ <p><b>評価</b> <span class="verdict hold">保留のままで良い</span>。ツールバーのポップアップは、見る時間が短く、困っている点も小さい。ご指摘のとおり、最初の案は元の画面が違っていたので、効果を大きく見積もっていました。直すなら、上の 3 点だけの小さな変更にします (上の after)。</p>
 </div>
 
 <h2>小さな改善案 (モックなし)</h2>
@@ -444,7 +447,7 @@ h1{font-size:21px;margin:0 0 4px}h2{font-size:17px;margin:40px 0 4px;padding-top
  <p>5. グリッドのホバー → 採用 / 保留 / 見送り</p>
  <p>6. 管理画面上部の帯 → 帯の統合だけ / 選択バーも / 見送り</p>
  <p>7. アカウントメニュー → 採用 / 保留 / 見送り</p>
- <p>8. ポップアップ → 採用 / 保留 / 見送り</p>
+ <p>8. ポップアップ (作り直した案) → 採用 / 保留 / 見送り</p>
  <p>小さな改善案 (停止ボタンの色、ダイアログの順) → 採用 / 見送り</p>
  <p style="color:var(--pg2)">実装は、<code>docs/TASK_V19.md</code> (v18 のあと) にまとめます。実機の見え方 (x.com のテーマ 3 種、幅 340px のサイドパネル) は、実装後に、ご確認をお願いします。</p>
 </div>
