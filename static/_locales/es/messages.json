@@ -467,7 +467,7 @@
     "message": "No se puede saber qué cuenta ha iniciado sesión, así que no se puede guardar. Recarga la página de x.com."
   },
   "collectNoAccount": {
-    "message": "No se puede importar: cuenta desconocida"
+    "message": "No se puede saber qué cuenta ha iniciado sesión, así que no se puede importar"
   },
   "accountUnknownName": {
     "message": "Sin cuenta asignada"
@@ -496,7 +496,7 @@
     "message": "Reasignar datos"
   },
   "accountAssignDesc": {
-    "message": "Mueve los datos guardados de $NAME$ ($COUNT$ publicaciones) a la cuenta que elijas. Si la misma publicación ya existe, se fusionan las carpetas.",
+    "message": "Mueve los datos guardados de $NAME$ ($COUNT$ publicaciones) a la cuenta que elijas. Si la misma publicación ya existe allí, se combinan las carpetas en las que está esa publicación.",
     "placeholders": {
       "name": {
         "content": "$1"
@@ -510,7 +510,7 @@
     "message": "Mover a"
   },
   "accountAssignNone": {
-    "message": "No hay ninguna cuenta de destino. Abre x.com con la sesión iniciada y la cuenta aparecerá aquí."
+    "message": "No hay ninguna cuenta de destino. Abre x.com con la sesión iniciada y podrás elegir la cuenta aquí."
   },
   "accountAssignDone": {
     "message": "Se reasignaron $COUNT$ publicaciones",
@@ -535,7 +535,7 @@
     }
   },
   "accountUnknownBanner": {
-    "message": "Hay $COUNT$ publicaciones en «Sin cuenta asignada». Indica a qué cuenta pertenecen.",
+    "message": "Hay $COUNT$ publicaciones en «Sin cuenta asignada». Elige a qué cuenta pertenecen y usa «Reasignar…».",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -554,7 +554,7 @@
     "message": "No se puede saber qué cuenta tiene la sesión en x.com, así que no se puede guardar. Recarga la página de x.com."
   },
   "saveCurrentWrongAccount": {
-    "message": "La cuenta que se muestra no coincide con $NAME$, que tiene la sesión en x.com, así que no se puede guardar. Cambia de cuenta arriba.",
+    "message": "La cuenta que se muestra en PostShelf es distinta de $NAME$, que tiene la sesión en x.com, así que no se puede guardar. Cambia la cuenta que se muestra aquí a $NAME$.",
     "placeholders": {
       "name": {
         "content": "$1"

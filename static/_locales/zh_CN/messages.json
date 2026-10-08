@@ -467,7 +467,7 @@
     "message": "无法判断当前登录的账号，因此无法保存。请重新载入 x.com 页面。"
   },
   "collectNoAccount": {
-    "message": "账号未知，无法导入"
+    "message": "无法判断当前登录的账号，因此无法导入"
   },
   "accountUnknownName": {
     "message": "未设置账号"
@@ -496,7 +496,7 @@
     "message": "分配数据"
   },
   "accountAssignDesc": {
-    "message": "将 $NAME$ 的已保存数据（$COUNT$ 条）移动到所选账号。如果目标账号中已有相同的帖子，会合并文件夹。",
+    "message": "将 $NAME$ 的已保存数据（$COUNT$ 条）移动到所选账号。如果目标账号中已有相同的帖子，会把该帖子所在的文件夹合并起来。",
     "placeholders": {
       "name": {
         "content": "$1"
@@ -510,7 +510,7 @@
     "message": "移动到"
   },
   "accountAssignNone": {
-    "message": "没有可分配的账号。登录后打开 x.com，账号就会出现在这里。"
+    "message": "没有可分配的账号。登录后打开 x.com，该账号就可以在这里选为目标账号。"
   },
   "accountAssignDone": {
     "message": "已分配 $COUNT$ 条",
@@ -535,7 +535,7 @@
     }
   },
   "accountUnknownBanner": {
-    "message": "“未设置账号”下有 $COUNT$ 条帖子。请指定它们属于哪个账号。",
+    "message": "“未设置账号”下有 $COUNT$ 条帖子。请选择它们属于哪个账号，并点击“分配…”。",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -554,7 +554,7 @@
     "message": "无法判断 x.com 上登录的账号，因此无法保存。请重新载入 x.com 页面。"
   },
   "saveCurrentWrongAccount": {
-    "message": "当前显示的账号与 x.com 上登录的 $NAME$ 不同，因此无法保存。请切换账号。",
+    "message": "PostShelf 中显示的账号与 x.com 上登录的 $NAME$ 不同，因此无法保存。请将此处显示的账号切换为 $NAME$。",
     "placeholders": {
       "name": {
         "content": "$1"

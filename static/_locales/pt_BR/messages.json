@@ -467,7 +467,7 @@
     "message": "Não foi possível identificar a conta conectada, então nada pode ser salvo. Recarregue a página do x.com."
   },
   "collectNoAccount": {
-    "message": "Não é possível importar: conta desconhecida"
+    "message": "Não foi possível identificar a conta conectada, então nada pode ser importado"
   },
   "accountUnknownName": {
     "message": "Sem conta definida"
@@ -496,7 +496,7 @@
     "message": "Reatribuir dados"
   },
   "accountAssignDesc": {
-    "message": "Move os dados salvos de $NAME$ ($COUNT$ posts) para a conta escolhida. Se o mesmo post já existir, as pastas serão mescladas.",
+    "message": "Move os dados salvos de $NAME$ ($COUNT$ posts) para a conta escolhida. Se o mesmo post já existir lá, as pastas em que esse post está são combinadas.",
     "placeholders": {
       "name": {
         "content": "$1"
@@ -510,7 +510,7 @@
     "message": "Mover para"
   },
   "accountAssignNone": {
-    "message": "Não há conta de destino. Abra o x.com conectado e a conta aparecerá aqui."
+    "message": "Não há conta de destino. Abra o x.com conectado e você poderá escolher a conta aqui."
   },
   "accountAssignDone": {
     "message": "$COUNT$ posts reatribuídos",
@@ -535,7 +535,7 @@
     }
   },
   "accountUnknownBanner": {
-    "message": "Há $COUNT$ posts em \"Sem conta definida\". Indique a qual conta pertencem.",
+    "message": "Há $COUNT$ posts em \"Sem conta definida\". Escolha a qual conta pertencem e use \"Reatribuir…\".",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -554,7 +554,7 @@
     "message": "Não foi possível identificar a conta conectada no x.com, então nada pode ser salvo. Recarregue a página do x.com."
   },
   "saveCurrentWrongAccount": {
-    "message": "A conta exibida é diferente de $NAME$, conectada no x.com, então nada pode ser salvo. Troque a conta acima.",
+    "message": "A conta exibida no PostShelf é diferente de $NAME$, conectada no x.com, então nada pode ser salvo. Troque a conta exibida aqui para $NAME$.",
     "placeholders": {
       "name": {
         "content": "$1"

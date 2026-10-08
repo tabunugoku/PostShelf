@@ -390,7 +390,7 @@ describe('E-3: x.com side — saving and importing need a detected account', () 
     await tick();
     const btn = document.querySelector<HTMLButtonElement>('.postshelf-collect')!;
     expect(btn.disabled).toBe(true);
-    expect(btn.textContent).toContain('アカウント不明');
+    expect(btn.textContent).toContain('判定できないため、取り込めません');
     expect(btn.title).toContain('判定できない');
     btn.click();
     await tick();

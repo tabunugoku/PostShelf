@@ -467,7 +467,7 @@
     "message": "Can't tell which account is logged in, so nothing can be saved. Please reload the x.com page."
   },
   "collectNoAccount": {
-    "message": "Can't import: account unknown"
+    "message": "Can't tell which account is logged in, so nothing can be imported"
   },
   "accountUnknownName": {
     "message": "No account set"
@@ -496,7 +496,7 @@
     "message": "Reassign data"
   },
   "accountAssignDesc": {
-    "message": "Moves the saved data of $NAME$ ($COUNT$ posts) to the account you choose. If the same post already exists there, the folders are merged.",
+    "message": "Moves the saved data of $NAME$ ($COUNT$ posts) to the account you choose. If the same post already exists there, the folders that post is in are combined.",
     "placeholders": {
       "name": {
         "content": "$1"
@@ -510,7 +510,7 @@
     "message": "Move to"
   },
   "accountAssignNone": {
-    "message": "There is no account to move to. Open x.com while logged in and the account will appear here."
+    "message": "There is no account to move to. Open x.com while logged in, and the account becomes available to choose here."
   },
   "accountAssignDone": {
     "message": "Reassigned $COUNT$ posts",
@@ -535,7 +535,7 @@
     }
   },
   "accountUnknownBanner": {
-    "message": "$COUNT$ posts are saved under \"No account set\". Choose which account they belong to.",
+    "message": "$COUNT$ posts are saved under \"No account set\". Choose which account they belong to and use \"Reassign…\".",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -554,7 +554,7 @@
     "message": "Can't tell which account is logged in on x.com, so nothing can be saved. Reload the x.com page."
   },
   "saveCurrentWrongAccount": {
-    "message": "The account shown here differs from $NAME$, who is logged in on x.com, so nothing can be saved. Switch the account above.",
+    "message": "The account shown in PostShelf differs from $NAME$, who is logged in on x.com, so nothing can be saved. Switch the account shown here to $NAME$.",
     "placeholders": {
       "name": {
         "content": "$1"

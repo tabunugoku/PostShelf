@@ -467,7 +467,7 @@
     "message": "ログイン中のアカウントを判定できないため、保存できません。x.com のページを開き直してください。"
   },
   "collectNoAccount": {
-    "message": "アカウント不明のため取り込めません"
+    "message": "ログイン中のアカウントを判定できないため、取り込めません"
   },
   "accountUnknownName": {
     "message": "アカウント未設定"
@@ -496,7 +496,7 @@
     "message": "データの割り当て"
   },
   "accountAssignDesc": {
-    "message": "$NAME$ の保存データ（$COUNT$ 件）を、選んだアカウントへ移します。同じポストがすでにある場合は、フォルダを統合します。",
+    "message": "$NAME$ の保存データ（$COUNT$ 件）を、選んだアカウントへ移します。同じポストがすでにある場合は、そのポストが入っているフォルダを合わせます。",
     "placeholders": {
       "name": {
         "content": "$1"
@@ -510,7 +510,7 @@
     "message": "移動先"
   },
   "accountAssignNone": {
-    "message": "割り当て先のアカウントがありません。x.com を開いてログインすると、アカウントが現れます。"
+    "message": "割り当て先のアカウントがありません。x.com を開いてログインすると、割り当て先として選べるようになります。"
   },
   "accountAssignDone": {
     "message": "$COUNT$ 件を割り当てました",
@@ -535,7 +535,7 @@
     }
   },
   "accountUnknownBanner": {
-    "message": "「アカウント未設定」に $COUNT$ 件のポストがあります。どのアカウントのものかを指定してください。",
+    "message": "「アカウント未設定」に $COUNT$ 件のポストがあります。どのアカウントのものかを選んで、割り当ててください。",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -554,7 +554,7 @@
     "message": "x.com でログイン中のアカウントを判定できないため、保存できません。x.com のページを開き直してください。"
   },
   "saveCurrentWrongAccount": {
-    "message": "表示中のアカウントと、x.com でログイン中の $NAME$ が違うため保存できません。アカウントを切り替えてください。",
+    "message": "表示中のアカウントと、x.com でログイン中の $NAME$ が異なるため保存できません。表示するアカウントを $NAME$ に切り替えてください。",
     "placeholders": {
       "name": {
         "content": "$1"
