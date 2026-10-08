@@ -111,15 +111,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
         ))}
         <p class="muted setting-desc">{t('actionModeNote')}</p>
       </fieldset>
-      <fieldset class="setting-group">
-        <legend>{t('healthTitle')}</legend>
-        <HealthNotice showOk onDiagnose={() => setDiag(true)} />
-        <div class="io">
-          <button onClick={() => setDiag(true)}>
-            <Icon name="ti-stethoscope" /> {t('copyDiag')}
-          </button>
-        </div>
-      </fieldset>
+      <ImageCacheSection surface={surface} reloadKey={cacheKey} />
       <fieldset class="setting-group">
         <legend>{t('dataSection')}</legend>
         <div class="io">
@@ -146,7 +138,15 @@ export function SettingsPage({ onChanged, onApplied, onNotice, surface = 'tab' }
           </label>
         </div>
       </fieldset>
-      <ImageCacheSection surface={surface} reloadKey={cacheKey} />
+      <fieldset class="setting-group">
+        <legend>{t('healthTitle')}</legend>
+        <HealthNotice showOk onDiagnose={() => setDiag(true)} />
+        <div class="io">
+          <button onClick={() => setDiag(true)}>
+            <Icon name="ti-stethoscope" /> {t('copyDiag')}
+          </button>
+        </div>
+      </fieldset>
       <fieldset class="setting-group">
         <legend>{t('settingsResetHeading')}</legend>
         <p class="muted setting-desc">{t('settingsResetDesc')}</p>
