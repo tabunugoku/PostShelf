@@ -19,7 +19,7 @@
    - `dist` の JavaScript に、外部のスクリプトの URL・`eval`・`new Function`・リモートコードの読み込みが無い
    - manifest が指すファイル (アイコンなど) がすべて zip に入っている
    - `key` から求めた拡張機能 ID が `docs/INSTALL.md` の ID と同じ
-3. **タグを打つ**: `git tag v0.1.0 && git push origin v0.1.0` (タグは `v` + manifest の version)。
+3. **タグを打つ**: `git tag v1.0.0 && git push origin v1.0.0` (タグは `v` + manifest の version)。
 4. **ワークフローが zip を作る**: `.github/workflows/release.yml` が、タグと manifest の version の一致を確かめ、`release:check` を通してから、`postshelf-<version>.zip` を GitHub Release に添付します。
 5. **zip を取得して、固定のフォルダに上書き**: Release から zip を保存し、`docs/INSTALL.md` の「2. 更新するとき」の手順で、同じフォルダに上書きして「再読み込み」を押す。更新の前に、設定の「データ」から必ずエクスポートします。
 
