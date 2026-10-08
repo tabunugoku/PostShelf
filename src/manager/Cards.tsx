@@ -223,8 +223,10 @@ export function Card(props: CardProps) {
           <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
         </div>
         <div class="gc-text">{s.text}</div>
-        <FolderChips b={b} folderOf={props.folderOf} removable={false} onRemove={props.onRemoveFromFolder} />
-        <Actions {...props} />
+        <div class="gc-foot">
+          <FolderChips b={b} folderOf={props.folderOf} removable={false} onRemove={props.onRemoveFromFolder} />
+          <Actions {...props} />
+        </div>
       </article>
     );
   }

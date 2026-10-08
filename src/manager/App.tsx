@@ -52,6 +52,7 @@ import {
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card } from './Cards';
+import { BulkMenu } from './BulkMenu';
 import { refreshCacheView } from './cacheView';
 import { afterPostsRemoved, deleteAccountDataAndCache } from '../shared/cacheops';
 import { ImageViewer, VideoGuide } from './Viewer';
@@ -98,6 +99,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [focusId, setFocusId] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
   const [menu, setMenu] = useState<'add' | 'remove' | 'author' | 'folders' | null>(null);
+  /** サイドパネルの「絞り込み」(4 つの条件を畳んだもの) を開いているか */
+  const [filterOpen, setFilterOpen] = useState(false);
+  /** お知らせの帯が複数あるとき、いま出している帯の番号 (「他に N 件」で切り替える) */
+  const [noticeIdx, setNoticeIdx] = useState(0);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
@@ -177,6 +182,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setFilters({});
     setEditing(null);
     setMenu(null);
+    setFilterOpen(false);
     void updateSettings({ lastFolderId: id });
   };
   const chooseMode = (m: ViewMode) => {
@@ -277,15 +283,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     return t('confirmDelete');
   };
   /** ログイン中のアカウントを判定できていて、「アカウント未設定」にデータが残っているとき、割り当てを案内する */
-  const unknownBanner = unknownCount > 0 && viewId !== UNKNOWN_ACCOUNT_ID && lastSeen && page === 'bookmarks' && (
-    <div class="banner" role="region" aria-label={t('accountUnknownName')}>
-      <Icon name="ti-user-question" />
-      <span>{t('accountUnknownBanner', unknownCount)}</span>
-      <button class="banner-btn" onClick={() => setAssignFrom(UNKNOWN_ACCOUNT_ID)}>
-        {t('accountAssign')}
-      </button>
-    </div>
-  );
+  const unknownOn = unknownCount > 0 && viewId !== UNKNOWN_ACCOUNT_ID && !!lastSeen && page === 'bookmarks';
   const switcher = (
     <AccountSwitcher
       accounts={accounts}
@@ -499,21 +497,46 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       </button>
     ) : null;
 
-  const banner = bannerOn && page === 'bookmarks' && !compact && (
-    <div class="banner" role="region" aria-label={t('importHow')}>
-      <Icon name="ti-download" />
-      <span>{t('importBanner', pending)}</span>
-      <button class="banner-btn" onClick={() => setShowHow(true)}>
-        {t('importHow')}
+  const importOn = bannerOn && page === 'bookmarks' && !compact;
+  /**
+   * お知らせの帯は、いちばん大事な 1 本だけを出し、残りは「他に N 件」で次の帯に切り替える (v19-B)。
+   * 優先順: アカウント未設定の割り当て → ブックマークの取り込みの案内。自動取り込みの進捗は状態の表示なので、この対象ではない。
+   */
+  const noticeKinds = [...(unknownOn ? (['unknown'] as const) : []), ...(importOn ? (['import'] as const) : [])];
+  const noticeKind = noticeKinds.length ? noticeKinds[noticeIdx % noticeKinds.length] : null;
+  const moreBtn =
+    noticeKinds.length > 1 ? (
+      <button class="banner-more" aria-label={t('noticeMore', noticeKinds.length - 1)} onClick={() => setNoticeIdx((i) => i + 1)}>
+        {t('noticeMore', noticeKinds.length - 1)} <Icon name="ti-chevron-down" />
       </button>
-      <button class="icon-btn" aria-label={t('dismiss')} title={t('dismiss')} onClick={dismissBanner}>
-        <Icon name="ti-x" />
-      </button>
-    </div>
-  );
+    ) : null;
+  const noticeBand =
+    noticeKind === 'unknown' ? (
+      <div class="banner" role="region" aria-label={t('accountUnknownName')}>
+        <Icon name="ti-user-question" />
+        <span class="banner-text">{t('accountUnknownBanner', unknownCount)}</span>
+        <button class="banner-btn" onClick={() => setAssignFrom(UNKNOWN_ACCOUNT_ID)}>
+          {t('accountAssign')}
+        </button>
+        {moreBtn}
+      </div>
+    ) : noticeKind === 'import' ? (
+      <div class="banner" role="region" aria-label={t('importHow')}>
+        <Icon name="ti-download" />
+        <span class="banner-text">{t('importBanner', pending)}</span>
+        <button class="banner-btn" onClick={() => setShowHow(true)}>
+          {t('importHow')}
+        </button>
+        {moreBtn}
+        <button class="icon-btn" aria-label={t('dismiss')} title={t('dismiss')} onClick={dismissBanner}>
+          <Icon name="ti-x" />
+        </button>
+      </div>
+    ) : null;
 
-  const chips = (
-    <div class="chips" role="group" aria-label={t('filterAuthor')}>
+  /** 絞り込みの 4 つの条件 (画像あり / 動画あり / リンクあり / 投稿者)。管理画面では常に見えて、サイドパネルでは「絞り込み」に畳む */
+  const filterItems = (
+    <>
       {(
         [
           ['image', 'ti-photo', t('filterImage')],
@@ -565,7 +588,49 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </Dropdown>
         )}
       </span>
+    </>
+  );
+
+  const bulkMenu =
+    selected.size > 0 ? (
+      <BulkMenu
+        count={selected.size}
+        addFolders={pickerFolders}
+        removeFolders={removableFolders}
+        onAdd={(id) => void run(addToFolders(bulkIds, [id]), 'toastAdded')}
+        onRemove={(id) => void run(removeFromFolders(bulkIds, [id]), 'toastRemoved')}
+        onDelete={() => setConfirmState({ kind: 'posts', ids: bulkIds })}
+        onClear={clearSelection}
+      />
+    ) : null;
+  /** 管理画面: 絞り込みの行。複数選択のボタンは右端に置く (行はいつもあるので、選択のたびに一覧はずれない) */
+  const chips = (
+    <div class="chips" role="group" aria-label={t('filterAuthor')}>
+      {filterItems}
+      {bulkMenu}
     </div>
+  );
+  const filterCount = (['image', 'video', 'link', 'handle'] as const).filter((k) => !!filters[k]).length;
+  /** サイドパネル: 「絞り込み」ボタン。押すと 4 つの条件が開く。選んでいるあいだは件数のバッジを出す */
+  const filterButton = (
+    <span class="menu-anchor">
+      <button
+        class={`chip filter fbtn${filterCount ? ' on' : ''}`}
+        aria-haspopup="true"
+        aria-expanded={filterOpen}
+        onClick={() => setFilterOpen(!filterOpen)}
+      >
+        <Icon name="ti-adjustments-horizontal" /> {t('filterButton')}
+        {filterCount > 0 && <span class="count-badge">{filterCount}</span>}
+      </button>
+      {filterOpen && (
+        <Dropdown onClose={() => setFilterOpen(false)} label={t('filterButton')} class="menu-filter menu-left">
+          <div class="chips" role="group" aria-label={t('filterButton')}>
+            {filterItems}
+          </div>
+        </Dropdown>
+      )}
+    </span>
   );
 
   const bulk = selected.size > 0 && (
@@ -729,10 +794,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const body = (
     <>
       {notices}
-      {unknownBanner}
-      {banner}
-      {chips}
-      {bulk}
+      {noticeBand}
+      {compact ? bulk : chips}
       {empty}
       {rows}
     </>
@@ -873,27 +936,20 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             {switchIcons}
           </div>
           {searchOpen && searchBox}
-          <div class="scroll" role="group" aria-label={t('foldersHeading')}>
-            {allViews.map((f) => (
-              <button class={`chip${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}`} aria-pressed={f.id === curFolder.id && page === 'bookmarks'} onClick={() => chooseView(f.id)}>
-                <Icon name={f.icon} color={f.color} />
-                {f.id === RECENT_ID ? f.name : displayName(f)}
-                {f.id === INBOX_ID && count(f.id) > 0 && <span class="badge">{count(f.id)}</span>}
-              </button>
-            ))}
-          </div>
+          {page === 'bookmarks' && (
+            <div class="tools">
+              {sortMenu}
+              {filterButton}
+              <span class="grow" />
+              {viewSeg}
+            </div>
+          )}
         </header>
         <main class="pbody">
           {page === 'settings' ? (
             settingsPage
           ) : (
-            <>
-              <div class="tools">
-                {sortMenu}
-                {viewSeg}
-              </div>
-              {body}
-            </>
+            body
           )}
         </main>
         {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}

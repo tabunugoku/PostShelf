@@ -191,6 +191,9 @@
       }
     }
   },
+  "bulkMenuLabel": {
+    "message": "選択したポストの操作"
+  },
   "bulkAdd": {
     "message": "フォルダに追加"
   },
@@ -353,6 +356,15 @@
   "dismiss": {
     "message": "閉じる"
   },
+  "noticeMore": {
+    "message": "他に $COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "画像あり"
   },
@@ -364,6 +376,9 @@
   },
   "filterAuthor": {
     "message": "投稿者で絞り込み"
+  },
+  "filterButton": {
+    "message": "絞り込み"
   },
   "clearFilters": {
     "message": "絞り込みを外す"

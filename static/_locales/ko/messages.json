@@ -191,6 +191,9 @@
       }
     }
   },
+  "bulkMenuLabel": {
+    "message": "선택한 게시물 작업"
+  },
   "bulkAdd": {
     "message": "폴더에 추가"
   },
@@ -353,6 +356,15 @@
   "dismiss": {
     "message": "닫기"
   },
+  "noticeMore": {
+    "message": "외 $COUNT$건",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "이미지 있음"
   },
@@ -364,6 +376,9 @@
   },
   "filterAuthor": {
     "message": "작성자로 필터"
+  },
+  "filterButton": {
+    "message": "필터"
   },
   "clearFilters": {
     "message": "필터 해제"

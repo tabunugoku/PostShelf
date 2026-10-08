@@ -155,23 +155,27 @@ export function ProgressBanner(props: { run: CollectRun; onClose: () => void }) 
   return (
     <div class="banner ac-progress" role="status" aria-live="polite">
       <div class="ac-offer-main">
-        <strong class="ac-title">
-          <span class={`ac-dot ${dot}`} aria-hidden="true" />
-          {t(TITLE[run.status])}: {t('acProgressLine', run.imported, run.skipped)}
-        </strong>
+        {/* 文と操作のボタンは同じ行の右端にまとめる。収まらないときは、ボタンが文の下の段に折り返す。
+            終わった状態 (閉じるだけ) は、狭くても文が折り返し、「閉じる」は行の上端・右端のまま */}
+        <div class={`ac-head${active || waiting ? '' : ' single'}`}>
+          <strong class="ac-title">
+            <span class={`ac-dot ${dot}`} aria-hidden="true" />
+            {t(TITLE[run.status])}: {t('acProgressLine', run.imported, run.skipped)}
+          </strong>
+          <div class="ac-row ac-actions">
+            {active && <button onClick={() => void sendCollectCommand({ type: 'pause' })}>{t('acBtnPause')}</button>}
+            {waiting && <button class="primary" onClick={() => void sendCollectCommand({ type: 'resume' })}>{t('acBtnResume')}</button>}
+            {(active || waiting) && <button onClick={() => void sendCollectCommand({ type: 'stop' })}>{t(active ? 'acBtnStop' : 'acBtnEnd')}</button>}
+            {(active || waiting) && (
+              <button onClick={() => void openXTab()}>
+                <Icon name="ti-external-link" /> {t('acOpenX')}
+              </button>
+            )}
+            {!active && !waiting && <button onClick={props.onClose}>{t('acBtnClose')}</button>}
+          </div>
+        </div>
         {active && <div class="ac-bar ind" aria-hidden="true"><i /></div>}
         {run.status === 'limit' && <div class="ac-alert">{t('acLimitAlert')}</div>}
-        <div class="ac-row">
-          {active && <button onClick={() => void sendCollectCommand({ type: 'pause' })}>{t('acBtnPause')}</button>}
-          {waiting && <button class="primary" onClick={() => void sendCollectCommand({ type: 'resume' })}>{t('acBtnResume')}</button>}
-          {(active || waiting) && <button onClick={() => void sendCollectCommand({ type: 'stop' })}>{t(active ? 'acBtnStop' : 'acBtnEnd')}</button>}
-          {(active || waiting) && (
-            <button onClick={() => void openXTab()}>
-              <Icon name="ti-external-link" /> {t('acOpenX')}
-            </button>
-          )}
-          {!active && !waiting && <button onClick={props.onClose}>{t('acBtnClose')}</button>}
-        </div>
       </div>
     </div>
   );

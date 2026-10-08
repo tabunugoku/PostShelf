@@ -191,6 +191,9 @@
       }
     }
   },
+  "bulkMenuLabel": {
+    "message": "Acciones para las publicaciones seleccionadas"
+  },
   "bulkAdd": {
     "message": "Añadir a carpeta"
   },
@@ -353,6 +356,15 @@
   "dismiss": {
     "message": "Cerrar"
   },
+  "noticeMore": {
+    "message": "$COUNT$ más",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "Con imágenes"
   },
@@ -364,6 +376,9 @@
   },
   "filterAuthor": {
     "message": "Filtrar por autor"
+  },
+  "filterButton": {
+    "message": "Filtros"
   },
   "clearFilters": {
     "message": "Quitar filtros"

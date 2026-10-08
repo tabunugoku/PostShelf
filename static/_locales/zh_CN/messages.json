@@ -191,6 +191,9 @@
       }
     }
   },
+  "bulkMenuLabel": {
+    "message": "对所选帖子的操作"
+  },
   "bulkAdd": {
     "message": "添加到文件夹"
   },
@@ -353,6 +356,15 @@
   "dismiss": {
     "message": "关闭"
   },
+  "noticeMore": {
+    "message": "另有 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "含图片"
   },
@@ -364,6 +376,9 @@
   },
   "filterAuthor": {
     "message": "按作者筛选"
+  },
+  "filterButton": {
+    "message": "筛选"
   },
   "clearFilters": {
     "message": "清除筛选"

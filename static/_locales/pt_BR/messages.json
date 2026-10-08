@@ -191,6 +191,9 @@
       }
     }
   },
+  "bulkMenuLabel": {
+    "message": "Ações para os posts selecionados"
+  },
   "bulkAdd": {
     "message": "Adicionar à pasta"
   },
@@ -353,6 +356,15 @@
   "dismiss": {
     "message": "Fechar"
   },
+  "noticeMore": {
+    "message": "mais $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "filterImage": {
     "message": "Com imagens"
   },
@@ -364,6 +376,9 @@
   },
   "filterAuthor": {
     "message": "Filtrar por autor"
+  },
+  "filterButton": {
+    "message": "Filtros"
   },
   "clearFilters": {
     "message": "Limpar filtros"
