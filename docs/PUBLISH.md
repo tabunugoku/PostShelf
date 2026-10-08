@@ -45,6 +45,7 @@ MIT に決定済みです。`LICENSE` に全文があり、`README.md` の「ラ
 以下は、Chrome Web Store に公開する場合の準備メモです。配布は手動インストールなので、いまは行いません。
 
 - [ ] 実機確認 (`docs/MANUAL_TEST.md`) を全項目実施
+- [ ] GitHub のリポジトリを公開にしてから配る (設定画面の「GitHub で見る」のリンクは、リポジトリが非公開のあいだ、他の人には 404 になる。リンク先は `src/shared/links.ts` の `REPO_URL` の 1 か所)
 - [ ] Chrome Web Store で「PostShelf」の同名拡張がないか再確認
 - [x] 拡張機能アイコン: `manifest.json` の `icons` (16/32/48/128) と `action.default_icon` (16/32/48) に設定済み
 - [ ] ストア掲載用のアイコン画像: 128px = `static/brand/icon-128.png`、512px = `docs/brand/icon-512.png` (ソース SVG は `docs/brand/icon.svg`、確認用 `docs/brand/preview.png`)。青 (#1D9BF0) の吹き出しと白い栞だけ (背景なし。ライト・ダークのどちらでも見える)。X のロゴは使っていない
