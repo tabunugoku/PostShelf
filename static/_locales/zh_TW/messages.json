@@ -383,6 +383,33 @@
   "openSidePanel": {
     "message": "在側邊欄中開啟"
   },
+  "folderFilter": {
+    "message": "篩選資料夾"
+  },
+  "folderRecent": {
+    "message": "最近使用"
+  },
+  "folderAll": {
+    "message": "所有資料夾 ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "已儲存到 $COUNT$ 個",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "已儲存到未分類"
+  },
   "openInTab": {
     "message": "在分頁中開啟"
   },
@@ -1128,7 +1155,7 @@
     "message": "儲存或讀取失敗。請再試一次。若持續發生，請先在設定的「資料」中用「匯出」儲存資料，然後重新載入擴充功能。"
   },
   "removeFromPostShelf": {
-    "message": "從 PostShelf 中移除"
+    "message": "從 PostShelf 刪除儲存"
   },
   "acPanelLabel": {
     "message": "書籤自動匯入"

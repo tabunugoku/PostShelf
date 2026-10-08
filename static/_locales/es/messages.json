@@ -383,6 +383,33 @@
   "openSidePanel": {
     "message": "Abrir en el panel lateral"
   },
+  "folderFilter": {
+    "message": "Filtrar carpetas"
+  },
+  "folderRecent": {
+    "message": "Recientes"
+  },
+  "folderAll": {
+    "message": "Todas las carpetas ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "Guardado en $COUNT$ carpeta(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "Guardado en Sin clasificar"
+  },
   "openInTab": {
     "message": "Abrir en una pestaña"
   },
@@ -1128,7 +1155,7 @@
     "message": "Error al guardar o cargar. Inténtalo de nuevo. Si sigue ocurriendo, guarda tus datos con «Exportar» en Ajustes y vuelve a cargar la extensión."
   },
   "removeFromPostShelf": {
-    "message": "Quitar de PostShelf"
+    "message": "Eliminar de PostShelf"
   },
   "acPanelLabel": {
     "message": "Importación automática de marcadores"

@@ -93,10 +93,10 @@ describe('v26-G: the popover', () => {
   const article = () => document.querySelector('article')!;
   const anchor = () => document.querySelector<HTMLElement>('[data-testid=bookmark], [data-testid=removeBookmark]')!;
 
-  it('「PostShelf から外す」 after an account switch does nothing and closes the popover', async () => {
+  it('「PostShelf の保存を削除」 after an account switch does nothing and closes the popover', async () => {
     await setBookmarkFolders('1234567890', [], { ...snapshot });
     const pop = (await openPopover(article(), anchor()))!;
-    const unsave = [...pop.querySelectorAll<HTMLElement>('button, div')].find((e) => e.textContent?.includes('PostShelf から外す') && e.style.display !== 'none')!;
+    const unsave = pop.querySelector<HTMLElement>('button[aria-label="PostShelf の保存を削除"]')!;
     setAccountScope('me');
     // アカウントの切り替え (購読者によりポップオーバーも閉じるが、すでに押されたあとの経路も確かめる)
     setCurrentAccount({ id: 'other', handle: 'other', lastSeenAt: 1 });

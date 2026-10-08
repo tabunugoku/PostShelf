@@ -82,14 +82,14 @@ describe('popover + syncNative', () => {
     await toggle(cb, false);
     expect(spy).not.toHaveBeenCalled();
   });
-  it('on: checking a folder bookmarks natively once; "PostShelf から外す" removes it once', async () => {
+  it('on: checking a folder bookmarks natively once; "PostShelf の保存を削除" removes it once', async () => {
     const { pop, cb, spy, native } = await setup(true);
     await toggle(cb, true);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(native.getAttribute('data-testid')).toBe('removeBookmark');
     await toggle(cb, false); // 最後のフォルダを外すと「未分類」になる (保存は残る)
     expect(spy).toHaveBeenCalledTimes(1);
-    const unsave = [...pop.querySelectorAll('button')].find((b) => b.textContent === 'PostShelf から外す')!;
+    const unsave = pop.querySelector<HTMLElement>('button[aria-label="PostShelf の保存を削除"]')!;
     unsave.click();
     await tick();
     expect(spy).toHaveBeenCalledTimes(2); // removeBookmark を 1 回 click

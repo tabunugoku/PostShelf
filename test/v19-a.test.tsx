@@ -127,35 +127,39 @@ describe('v19-2: フォルダ一覧と下部の操作', () => {
     expect(rows[1].style.background).toBe('');
   });
 
-  it('bottom actions share one shape, in this order: フォルダを追加, サイドパネルで開く, a divider, PostShelf から外す (only when saved, red, with a trash icon)', async () => {
+  it('bottom: フォルダを追加 (icon + text), then a divider, then one row with two icon-only buttons: side panel (left) and delete (right, red, only when saved)', async () => {
     await createFolder({ name: 'A' });
     injectButtons();
     const article = document.querySelector('article')!;
     const btn = document.querySelector<HTMLElement>('[data-postshelf-btn]')!;
     const pop = (await openPopover(article, btn))!;
-    const names = ['フォルダを追加', 'サイドパネルで開く', 'PostShelf から外す'];
-    const bs = names.map((n) => [...pop.querySelectorAll('button')].find((b) => b.textContent === n)!);
-    expect(bs.every(Boolean)).toBe(true);
-    const order = [...pop.querySelectorAll('button')].filter((b) => names.includes(b.textContent!)).map((b) => b.textContent);
-    expect(order).toEqual(names);
-    for (const b of bs) {
-      expect(b.firstElementChild!.tagName).toBe('I'); // アイコン + 文
-      expect(b.style.display).not.toBe('block');
-      expect(b.style.minHeight).toBe('36px');
+    const add = [...pop.querySelectorAll('button')].find((b) => b.textContent === 'フォルダを追加')!;
+    expect(add.firstElementChild!.tagName).toBe('I');
+    const side = pop.querySelector<HTMLButtonElement>('button[aria-label="サイドパネルで開く"]')!;
+    const del = pop.querySelector<HTMLButtonElement>('button[aria-label="PostShelf の保存を削除"]')!;
+    for (const b of [side, del]) {
+      expect(b.title).toBe(b.getAttribute('aria-label'));
+      expect(b.textContent).toBe(''); // アイコンだけ
+      expect(b.style.width).toBe('44px');
+      expect(b.style.height).toBe('44px');
     }
-    expect(bs[2].style.display).toBe('none'); // 保存済みでないときは出ない
-    expect(bs[2].previousElementSibling!.tagName).toBe('DIV'); // 区切り線
-    expect((bs[2].previousElementSibling as HTMLElement).style.display).toBe('none');
-    expect(bs[2].style.color).toBe('rgb(244, 33, 46)');
-    expect(bs[2].firstElementChild!.className).toContain('ti-trash');
-    // 保存すると、区切り線と「PostShelf から外す」が出る
+    expect(side.firstElementChild!.className).toContain('ti-layout-sidebar-right');
+    expect(del.firstElementChild!.className).toContain('ti-trash');
+    expect(del.style.color).toBe('rgb(244, 33, 46)');
+    expect(side.parentElement).toBe(del.parentElement);
+    expect(side.parentElement!.style.justifyContent).toBe('space-between');
+    expect(side.parentElement!.firstElementChild).toBe(side);
+    expect(side.parentElement!.previousElementSibling!.tagName).toBe('DIV'); // 区切り線
+    expect(del.style.display).toBe('none'); // 保存済みでないときは出ない
+    const order = [...pop.querySelectorAll('button')];
+    expect(order.indexOf(add)).toBeLessThan(order.indexOf(side));
+    // 保存すると、削除のボタンが出る
     const cb = pop.querySelector<HTMLInputElement>('input[type=checkbox]')!;
     cb.checked = true;
     cb.dispatchEvent(new Event('change'));
     await tick();
     expect(await getBookmark('1234567890')).toBeTruthy();
-    expect(bs[2].style.display).toBe('flex');
-    expect((bs[2].previousElementSibling as HTMLElement).style.display).toBe('block');
+    expect(del.style.display).toBe('flex');
   });
 });
 

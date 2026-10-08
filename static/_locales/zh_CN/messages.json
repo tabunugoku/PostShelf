@@ -383,6 +383,33 @@
   "openSidePanel": {
     "message": "在侧边栏中打开"
   },
+  "folderFilter": {
+    "message": "筛选文件夹"
+  },
+  "folderRecent": {
+    "message": "最近使用"
+  },
+  "folderAll": {
+    "message": "所有文件夹 ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "已保存到 $COUNT$ 个",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "已保存到未分类"
+  },
   "openInTab": {
     "message": "在标签页中打开"
   },
@@ -1128,7 +1155,7 @@
     "message": "保存或读取失败。请重试。如果问题持续出现，请先在设置的“数据”中用“导出”保存数据，然后重新加载扩展程序。"
   },
   "removeFromPostShelf": {
-    "message": "从 PostShelf 中移除"
+    "message": "从 PostShelf 删除保存"
   },
   "acPanelLabel": {
     "message": "书签自动导入"

@@ -383,6 +383,33 @@
   "openSidePanel": {
     "message": "사이드 패널에서 열기"
   },
+  "folderFilter": {
+    "message": "폴더 필터"
+  },
+  "folderRecent": {
+    "message": "최근 사용"
+  },
+  "folderAll": {
+    "message": "모든 폴더 ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "$COUNT$개에 저장됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "미분류에 저장됨"
+  },
   "openInTab": {
     "message": "탭에서 열기"
   },
@@ -1128,7 +1155,7 @@
     "message": "저장 또는 불러오기에 실패했습니다. 다시 시도해 주세요. 계속되면 설정의 \"데이터\"에서 \"내보내기\"로 저장한 뒤 확장 프로그램을 새로고침하세요."
   },
   "removeFromPostShelf": {
-    "message": "PostShelf에서 제거"
+    "message": "PostShelf에서 저장 삭제"
   },
   "acPanelLabel": {
     "message": "북마크 자동 가져오기"

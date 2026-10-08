@@ -383,6 +383,33 @@
   "openSidePanel": {
     "message": "サイドパネルで開く"
   },
+  "folderFilter": {
+    "message": "フォルダを絞り込み"
+  },
+  "folderRecent": {
+    "message": "最近使った"
+  },
+  "folderAll": {
+    "message": "すべてのフォルダ（$COUNT$）",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "$COUNT$ つに保存済み",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "未分類に保存済み"
+  },
   "openInTab": {
     "message": "タブで開く"
   },
@@ -1128,7 +1155,7 @@
     "message": "保存または読み込みに失敗しました。もう一度試してください。続くときは、設定の「データ」から「エクスポート」で保存してから、拡張機能を再読み込みしてください。"
   },
   "removeFromPostShelf": {
-    "message": "PostShelf から外す"
+    "message": "PostShelf の保存を削除"
   },
   "acPanelLabel": {
     "message": "ブックマークの自動取り込み"

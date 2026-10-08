@@ -383,6 +383,33 @@
   "openSidePanel": {
     "message": "Ouvrir dans le panneau latéral"
   },
+  "folderFilter": {
+    "message": "Filtrer les dossiers"
+  },
+  "folderRecent": {
+    "message": "Récents"
+  },
+  "folderAll": {
+    "message": "Tous les dossiers ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "Enregistré dans $COUNT$ dossier(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "Enregistré dans Non classés"
+  },
   "openInTab": {
     "message": "Ouvrir dans un onglet"
   },
@@ -1128,7 +1155,7 @@
     "message": "Échec de l'enregistrement ou du chargement. Réessayez. Si cela continue, enregistrez vos données avec « Exporter » dans les Réglages, puis rechargez l'extension."
   },
   "removeFromPostShelf": {
-    "message": "Retirer de PostShelf"
+    "message": "Supprimer de PostShelf"
   },
   "acPanelLabel": {
     "message": "Importation automatique des favoris"

@@ -383,6 +383,33 @@
   "openSidePanel": {
     "message": "Abrir no painel lateral"
   },
+  "folderFilter": {
+    "message": "Filtrar pastas"
+  },
+  "folderRecent": {
+    "message": "Recentes"
+  },
+  "folderAll": {
+    "message": "Todas as pastas ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "Salvo em $COUNT$ pasta(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "Salvo em Sem categoria"
+  },
   "openInTab": {
     "message": "Abrir em uma guia"
   },
@@ -1128,7 +1155,7 @@
     "message": "Falha ao salvar ou carregar. Tente novamente. Se continuar, salve seus dados com \"Exportar\" em Configurações e recarregue a extensão."
   },
   "removeFromPostShelf": {
-    "message": "Remover do PostShelf"
+    "message": "Excluir do PostShelf"
   },
   "acPanelLabel": {
     "message": "Importação automática de favoritos"

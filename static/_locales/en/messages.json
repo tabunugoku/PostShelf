@@ -383,6 +383,33 @@
   "openSidePanel": {
     "message": "Open in side panel"
   },
+  "folderFilter": {
+    "message": "Filter folders"
+  },
+  "folderRecent": {
+    "message": "Recent"
+  },
+  "folderAll": {
+    "message": "All folders ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "Saved in $COUNT$ folder(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "Saved to Unsorted"
+  },
   "openInTab": {
     "message": "Open in a tab"
   },
@@ -1128,7 +1155,7 @@
     "message": "Saving or loading failed. Please try again. If it keeps happening, save your data with \"Export\" in Settings, then reload the extension."
   },
   "removeFromPostShelf": {
-    "message": "Remove from PostShelf"
+    "message": "Delete from PostShelf"
   },
   "acPanelLabel": {
     "message": "Automatic bookmark import"

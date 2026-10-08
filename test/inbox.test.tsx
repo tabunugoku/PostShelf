@@ -94,13 +94,13 @@ describe('v15-A: save as 未分類', () => {
     expect((await listBookmarks()).length).toBe(2);
   });
 
-  it('a saved post: unchecking the last folder makes it 未分類; "PostShelf から外す" (shown only when saved) deletes it', async () => {
+  it('a saved post: unchecking the last folder makes it 未分類; "PostShelf の保存を削除" (shown only when saved) deletes it', async () => {
     const f = await createFolder({ name: 'A' });
     injectButtons();
     const article = document.querySelector('article')!;
     const btn = document.querySelector<HTMLElement>('[data-postshelf-btn]')!;
     let pop = (await openPopover(article, btn))!;
-    const unsave = () => [...pop.querySelectorAll('button')].find((b) => b.textContent === 'PostShelf から外す')!;
+    const unsave = () => pop.querySelector<HTMLElement>('button[aria-label="PostShelf の保存を削除"]')!;
     expect(unsave().style.display).toBe('none'); // 未保存のときは出ない
     await flip(boxes(pop)[1], true);
     expect(unsave().style.display).toBe('flex');

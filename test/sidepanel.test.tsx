@@ -123,7 +123,7 @@ describe('x.com popover side panel link', () => {
     const calls = installPanelMock();
     document.body.innerHTML = readFileSync(resolve(process.cwd(), 'test/fixtures/tweet.html'), 'utf8');
     const pop = (await openPopover(document.querySelector('article')!, document.querySelector('article')!))!;
-    const link = [...pop.querySelectorAll('button')].find((b) => b.textContent === 'サイドパネルで開く')!;
+    const link = pop.querySelector<HTMLElement>('button[aria-label="サイドパネルで開く"]')!;
     link.click();
     expect(calls.messages).toEqual([{ type: 'openSidePanel' }]);
   });
