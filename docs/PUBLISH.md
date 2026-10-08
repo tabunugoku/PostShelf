@@ -3,7 +3,7 @@
 - [ ] 実機確認 (`docs/MANUAL_TEST.md`) を全項目実施
 - [ ] Chrome Web Store で「PostShelf」の同名拡張がないか再確認
 - [x] 拡張機能アイコン: `manifest.json` の `icons` (16/32/48/128) と `action.default_icon` (16/32/48) に設定済み
-- [ ] ストア掲載用のアイコン画像: 128px = `static/brand/icon-128.png`、512px = `docs/brand/icon-512.png` (ソース SVG は `docs/brand/icon.svg`、確認用 `docs/brand/preview.png`)。黒地に白い吹き出しと青 (#1D9BF0) の栞。X のロゴは使っていない
+- [ ] ストア掲載用のアイコン画像: 128px = `static/brand/icon-128.png`、512px = `docs/brand/icon-512.png` (ソース SVG は `docs/brand/icon.svg`、確認用 `docs/brand/preview.png`)。青 (#1D9BF0) の吹き出しと白い栞だけ (背景なし。ライト・ダークのどちらでも見える)。X のロゴは使っていない
 - [ ] ストア掲載文・スクリーンショット・プライバシーポリシー (外部送信なし、保存は端末内のみ)
 - [ ] 権限の説明: `storage`/`unlimitedStorage` (ブックマーク保存), `sidePanel` (サイドパネル), host `x.com`/`twitter.com` (ボタン挿入と DOM 読み取り。取り込みは、ユーザーが開いた「履歴」→「ブックマーク」タブ `/i/history` の表示中のポストだけを、ボタンを押したときに読む)
   - **画像のキャッシュ (任意の権限)**: `pbs.twimg.com` (X の画像サーバー) へのアクセスは、manifest の `optional_host_permissions` に宣言している。必須の `permissions` / `host_permissions` は増やしていない (テストで manifest を確認)。そのため、拡張機能の更新だけで Chrome が権限の再承認を求めることはない。設定「画像のキャッシュ」をオンにするクリックの中で `chrome.permissions.request` を呼び、拒否されたらオフに戻す。通信は画像の取得 (GET) だけで、X の非公開 API は呼ばない。取得した画像はこの PC の中にだけ置き、外部へ送らない
