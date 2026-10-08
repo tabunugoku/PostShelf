@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PostShelf 自動取り込みの画面案</title>
+<style>
+:root{--bg:#fff;--s1:#f7f9f9;--s2:#fff;--bd:#eff3f4;--bd2:#cfd9de;--tx:#0f1419;--tx2:#536471;--acc:#1d9bf0;--accd:#0f6fb3;--hv:rgba(15,20,25,.06);--sel:rgba(15,20,25,.12);--warn:#8a5a00;--warnbg:#fff4d6;--ok:#00805a;--ng:#c4161c}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#000;--s1:#16181c;--s2:#000;--bd:#2f3336;--bd2:#536471;--tx:#e7e9ea;--tx2:#8b98a5;--hv:rgba(231,233,234,.08);--sel:rgba(231,233,234,.16);--warn:#ffd277;--warnbg:#3a2d0a;--ok:#4cd8a6;--ng:#ff7b80}}
+:root[data-theme=dark]{--bg:#000;--s1:#16181c;--s2:#000;--bd:#2f3336;--bd2:#536471;--tx:#e7e9ea;--tx2:#8b98a5;--hv:rgba(231,233,234,.08);--sel:rgba(231,233,234,.16);--warn:#ffd277;--warnbg:#3a2d0a;--ok:#4cd8a6;--ng:#ff7b80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 system-ui,"Hiragino Sans","Yu Gothic UI",sans-serif}
+.page{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:34px 0 6px}
+.lead{color:var(--tx2);margin:0 0 12px}
+button{font:inherit;color:inherit;background:transparent;border:1px solid var(--bd2);border-radius:8px;min-height:32px;padding:4px 12px;cursor:pointer}
+button:hover{background:var(--hv)}
+button.primary{background:var(--accd);border-color:var(--accd);color:#fff}button.primary:hover{background:#0c5a94}
+button.danger{color:var(--ng);border-color:currentColor}
+.top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.switch{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.switch button.on{background:var(--sel);font-weight:700}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.note{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font-size:14px}
+.note b{display:block;margin-bottom:2px}.note ul{margin:6px 0 0;padding-left:20px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:0 8px;border-radius:999px;border:1px solid var(--bd2);margin-right:6px}
+/* X 画面の模擬 */
+.x{position:relative;height:640px;border:1px solid var(--bd);border-radius:14px;overflow:hidden;background:#000;color:#e7e9ea}
+.x .hd{padding:12px 16px;border-bottom:1px solid #2f3336;font-weight:700;display:flex;gap:16px;align-items:center}
+.x .tabs{display:flex;border-bottom:1px solid #2f3336}.x .tabs div{flex:1;text-align:center;padding:12px;color:#71767b}.x .tabs .a{color:#e7e9ea;font-weight:700;box-shadow:inset 0 -4px 0 #1d9bf0}
+.x .post{padding:12px 16px;border-bottom:1px solid #2f3336;display:flex;gap:12px}
+.x .av{width:40px;height:40px;border-radius:50%;flex:none;background:linear-gradient(135deg,#1d9bf0,#7856ff)}
+.x .nm{font-weight:700}.x .sub{color:#71767b}
+.x .ln{height:10px;border-radius:4px;background:#2f3336;margin-top:8px}
+/* 進捗パネル */
+.panel{position:absolute;right:14px;bottom:14px;width:340px;background:var(--s2);color:var(--tx);border:1px solid var(--bd2);border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:14px;font-size:14px}
+.panel h3{margin:0 0 2px;font-size:15px;display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--acc);flex:none}
+.dot.run{animation:p 1.2s infinite}@keyframes p{50%{opacity:.35}}
+.dot.pause{background:var(--warn)}.dot.done{background:var(--ok)}.dot.ng{background:var(--ng)}
+.bar{height:8px;border-radius:999px;background:var(--bd);overflow:hidden;margin:10px 0 6px;border:1px solid var(--bd2)}
+.bar i{display:block;height:100%;background:var(--accd);width:40%}
+.bar.ind i{width:35%;animation:s 1.6s infinite linear}@keyframes s{0%{margin-left:-35%}100%{margin-left:100%}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.stats div{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:6px 8px;text-align:center}
+.stats b{display:block;font-size:18px;line-height:1.2}.stats span{font-size:12px;color:var(--tx2)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.muted{color:var(--tx2);font-size:13px}
+.alert{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:8px 10px;font-size:13px;margin-top:8px}
+/* 管理画面側 */
+.mgr{border:1px solid var(--bd);border-radius:14px;background:var(--s2);padding:14px}
+.banner{border:1px solid var(--bd2);border-radius:12px;padding:12px 14px;background:var(--s1);display:grid;gap:8px}
+.banner h3{margin:0;font-size:15px}
+.dlg{border:1px solid var(--bd2);border-radius:16px;background:var(--s2);padding:16px;display:grid;gap:10px;box-shadow:0 8px 28px rgba(0,0,0,.3)}
+.dlg h3{margin:0;font-size:16px}
+.field label{display:flex;gap:8px;align-items:flex-start;min-height:32px;cursor:pointer}
+.field input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--accd)}
+select{font:inherit;color:inherit;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;min-height:32px;padding:2px 8px}
+.order{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px}
+.order ol{margin:4px 0 0;padding-left:20px}
+.order>div{border:1px solid var(--bd);border-radius:10px;padding:8px 10px;background:var(--s1)}
+.ok{color:var(--ok);font-weight:700}.ng{color:var(--ng);font-weight:700}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div>
+      <h1>ブックマークの自動取り込み (画面案)</h1>
+      <p class="lead">x.com の「履歴 → ブックマーク」を自動でスクロールして取り込む機能です。実行中の画面 (左) と、開始前の確認 (右) を並べています。</p>
+    </div>
+    <button id="theme">ライト / ダーク切替</button>
+  </div>
+
+  <h2>1. 実行中の画面 (x.com のページ上)</h2>
+  <div class="switch" id="sw">
+    <button class="on" data-s="run">実行中</button>
+    <button data-s="pause">一時停止中</button>
+    <button data-s="limit">X の制限を検知して自動停止</button>
+    <button data-s="done">完了</button>
+  </div>
+  <div class="cols">
+    <div class="x" aria-label="x.com の画面の模擬">
+      <div class="hd"><span>←</span><span>履歴</span></div>
+      <div class="tabs"><div class="a">ブックマーク</div><div>いいね</div></div>
+      <div class="post"><div class="av"></div><div style="flex:1"><div><span class="nm">サンプルさん</span> <span class="sub">@sample_a ・ 10月6日</span></div><div class="ln" style="width:92%"></div><div class="ln" style="width:70%"></div></div></div>
+      <div class="post"><div class="av" style="background:linear-gradient(135deg,#00ba7c,#1d9bf0)"></div><div style="flex:1"><div><span class="nm">例のユーザー</span> <span class="sub">@sample_b ・ 10月5日</span></div><div class="ln" style="width:88%"></div><div class="ln" style="width:60%"></div></div></div>
+      <div class="post"><div class="av" style="background:linear-gradient(135deg,#f91880,#7856ff)"></div><div style="flex:1"><div><span class="nm">もう一人</span> <span class="sub">@sample_c ・ 9月30日</span></div><div class="ln" style="width:80%"></div><div class="ln" style="width:55%"></div></div></div>
+      <div class="post"><div class="av" style="background:linear-gradient(135deg,#ffd400,#f91880)"></div><div style="flex:1"><div><span class="nm">サンプル D</span> <span class="sub">@sample_d ・ 9月28日</span></div><div class="ln" style="width:90%"></div></div></div>
+      <div class="panel" id="panel" role="status" aria-live="polite"></div>
+    </div>
+    <div>
+      <div class="note"><b>実行中に出す内容</b>
+        <ul>
+          <li>取り込んだ件数、すでにあったためスキップした件数、読み込み済みの範囲 (いちばん古い投稿の日付)</li>
+          <li>全体の件数は X が教えないので、割合は出さず「進行中」のバーにする</li>
+          <li><b style="display:inline">一時停止</b>と<b style="display:inline">停止</b>をいつでも押せる。停止しても、そこまでの分は保存済み</li>
+          <li>別のタブへ切り替えたとき、アカウントが変わったとき、X がエラーや制限を表示したときは、自動で一時停止</li>
+          <li>速度は「ゆっくり」(1 回のスクロールごとに 2〜4 秒待つ。既定) か「標準」(1〜2.5 秒)</li>
+        </ul>
+      </div>
+      <div class="note" style="margin-top:10px"><b>並び順を X と同じにする仕組み</b>
+        X のブックマークは「新しく追加した順」で、下へスクロールするほど古くなります。取り込むときは、画面に出てきた順番をそのまま記録し、PostShelf の「保存が新しい順」でも同じ順に並べます。一時停止から再開したとき、すでに取り込んだ投稿はスキップし、新しく見つかった投稿は、X の並びで直前にあった投稿のすぐ後ろに入れます。
+      </div>
+    </div>
+  </div>
+
+  <h2>2. 開始前の確認と案内 (管理画面)</h2>
+  <div class="cols">
+    <div class="mgr">
+      <div class="banner">
+        <h3>X のブックマークを取り込みますか？</h3>
+        <div class="muted">@tabunugoku_dev で、初めて PostShelf を使います。x.com の「履歴 → ブックマーク」を開き、画面を自動でスクロールしながら取り込みます。</div>
+        <div class="row" style="margin-top:0"><button class="primary">取り込みを始める…</button><button>あとで</button><button>このアカウントでは表示しない</button></div>
+      </div>
+      <p class="muted" style="margin:10px 0 0">表示するのは、初めて入れたとき、または、初めて見るアカウントに切り替えたときです。自動では始まりません。「始める」を押したときだけ動きます。設定の「データ」からいつでも手動で実行できます。</p>
+    </div>
+    <div class="dlg" role="dialog" aria-label="自動取り込みの確認">
+      <h3>自動で取り込みます</h3>
+      <div class="muted">アカウント: @tabunugoku_dev。x.com のブックマークのタブを、自動でスクロールして読み込みます。</div>
+      <div class="field">
+        <b>速度</b>
+        <label><input type="radio" name="sp" checked> ゆっくり (おすすめ)<span class="muted"> 1 分に約 20〜40 件</span></label>
+        <label><input type="radio" name="sp"> 標準<span class="muted"> 1 分に約 40〜80 件</span></label>
+      </div>
+      <div class="field"><b>1 回の上限</b> <select><option>300 件ごとに一度止める (おすすめ)</option><option>100 件ごとに一度止める</option><option>止めない</option></select></div>
+      <div class="order">
+        <div><b>x.com のブックマーク</b><ol><li>最新のポスト</li><li>その前のポスト</li><li>…古いポスト</li></ol></div>
+        <div><b>PostShelf (取り込み後)</b><ol><li>最新のポスト</li><li>その前のポスト</li><li>…古いポスト</li></ol><span class="ok">同じ順で並びます</span></div>
+      </div>
+      <div class="alert">自動スクロールは、X の規約が禁じる「自動化されたアクセス」とみなされる可能性があります。アカウントの制限などが起きても、PostShelf は責任を負えません。取り込みは、あなた自身の判断で、あなたのアカウントに対してだけ行ってください。</div>
+      <label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--accd)"> 上の内容を理解したうえで、自分の判断で実行します</label>
+      <div class="row" style="justify-content:flex-end"><button>キャンセル</button><button class="primary" disabled style="opacity:.55;cursor:not-allowed">取り込みを始める</button></div>
+    </div>
+  </div>
+
+  <h2>3. 管理画面側の進行表示</h2>
+  <div class="mgr">
+    <div class="banner">
+      <h3 style="display:flex;gap:8px;align-items:center"><span class="dot run"></span> 取り込み中: 128 件取り込み、12 件スキップ</h3>
+      <div class="bar ind" style="margin:0"><i></i></div>
+      <div class="row" style="margin-top:0"><button>一時停止</button><button>停止</button><button>x.com のタブを開く</button></div>
+    </div>
+    <p class="muted" style="margin:10px 0 0">x.com のタブで動いている取り込みの状況を、管理画面にも出します。取り込みはタブの中の拡張機能が行うので、管理画面を閉じても続きます。</p>
+  </div>
+
+  <h2>決めたいこと</h2>
+  <div class="note"><b>この画面と動作でよいですか？</b>
+    よければ開発計画 (`docs/TASK_V15.md`) にして、クラウドに渡します。
+  </div>
+</div>
+
+<script>
+var $=function(s){return document.querySelector(s)};
+var states={
+ run:{dot:'run',t:'ブックマークを取り込み中',sub:'ゆっくり。9 月 28 日ごろの投稿を読み込み中',bar:'ind',stats:[128,12,'—'],note:'このタブを開いたままにしてください。別のタブへ切り替えると、自動で一時停止します。',btn:'<button>一時停止</button><button class="danger">停止</button>'},
+ pause:{dot:'pause',t:'一時停止中',sub:'別のタブに切り替えたため、自動で止めました',bar:'fix',stats:[128,12,'—'],note:'再開すると、続きから取り込みます。すでに取り込んだ投稿はスキップし、X のブックマークの並びに合わせて整えます。',btn:'<button class="primary">再開</button><button>ここで終了</button>'},
+ limit:{dot:'ng',t:'自動で停止しました',sub:'X が制限を表示した可能性があります',bar:'fix',stats:[212,31,'—'],note:'',alert:'X の画面にエラーまたは制限の表示が出たため、止めました。15 分以上あけてから再開してください。続けて試すと、制限が長引くことがあります。',btn:'<button>15 分後に再開する</button><button>ここで終了</button>'},
+ done:{dot:'done',t:'取り込みが終わりました',sub:'いちばん古いブックマークまで読み込みました',bar:'full',stats:[342,47,0],note:'X の並び順どおりに整理しました。「未分類」から、フォルダに振り分けられます。',btn:'<button class="primary">管理画面を開く</button><button>閉じる</button>'}
+};
+function render(k){
+ var s=states[k],b=s.bar==='ind'?'<div class="bar ind"><i></i></div>':s.bar==='full'?'<div class="bar"><i style="width:100%"></i></div>':'<div class="bar"><i style="width:40%;opacity:.5"></i></div>';
+ $('#panel').innerHTML='<h3><span class="dot '+s.dot+'"></span>'+s.t+'</h3><div class="muted">'+s.sub+'</div>'+b
+ +'<div class="stats"><div><b>'+s.stats[0]+'</b><span>取り込み</span></div><div><b>'+s.stats[1]+'</b><span>スキップ</span></div><div><b>'+s.stats[2]+'</b><span>失敗</span></div></div>'
+ +(s.alert?'<div class="alert">'+s.alert+'</div>':'')+(s.note?'<div class="muted">'+s.note+'</div>':'')
+ +'<div class="row">'+s.btn+'</div>';
+ document.querySelectorAll('#sw button').forEach(function(x){x.classList.toggle('on',x.dataset.s===k)});
+}
+document.querySelectorAll('#sw button').forEach(function(x){x.onclick=function(){render(x.dataset.s)}});
+$('#theme').onclick=function(){var r=document.documentElement,d=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=d?'light':'dark'};
+render('run');
+</script>
+</body>
+</html>
