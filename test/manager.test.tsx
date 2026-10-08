@@ -168,7 +168,7 @@ describe('manager organizing', () => {
     await click($('.folder-edit .danger'));
     expect($('[role=alertdialog]')).toBeTruthy();
     await click($$('.dialog-actions button')[1]);
-    expect((await listFolders()).map((f) => f.id)).toEqual(['all', b]);
+    expect((await listFolders()).map((f) => f.id)).toEqual(['all', 'inbox', b]); // 所属が空になったポストの受け皿 (v18)
   });
 
   it('folder edit popover: any icon can have a color, "no color" clears it, the name commits on Enter', async () => {

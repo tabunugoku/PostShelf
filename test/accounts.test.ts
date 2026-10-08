@@ -109,7 +109,7 @@ describe('E-2: data is kept per account', () => {
     expect((await getBookmark('1'))!.folderIds).toEqual(['inbox']);
     setAccountScope('alice');
     await deleteFolder(fa.id);
-    expect((await getBookmark('1'))!.folderIds).toEqual([]);
+    expect((await getBookmark('1'))!.folderIds).toEqual(['inbox']); // 最後のフォルダを消したら「未分類」へ (v18)
     setAccountScope('bob');
     expect((await getBookmark('1'))!.folderIds).toEqual(['inbox']); // bob の「未分類」は残る
   });
@@ -168,7 +168,8 @@ describe('E-2: migration of existing data (schema 1 → 2)', () => {
     for (const id of ['11', '12']) {
       const { accountId, ...rest } = data.bookmarks[`unknown:${id}`];
       expect(accountId).toBe('unknown');
-      expect(rest).toEqual(before.bookmarks[id]); // 中身はそのまま (hasVideo なども)
+      // 中身はそのまま (hasVideo なども)。ただし「未分類」とフォルダの同時所属は、v18 の修復で「未分類」が外れる
+      expect(rest).toEqual(id === '12' ? { ...before.bookmarks[id], folderIds: ['f_a'] } : before.bookmarks[id]);
     }
     expect(data.folders.map((f: any) => [f.id, f.accountId, f.name, f.color])).toEqual([
       ['inbox', 'unknown', '', undefined],
