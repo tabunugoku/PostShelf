@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAutLADcpVbaQ/2wkv72XZ3ONK9KYNSHPaN8VMWukvYIjvAEsAcR5A0Q+1LigDcsZ4xt0t1rARtlY1Otwi54mrsXNOvet23R+Iqf0sOPegpuJkOTQO5G9ocCzcqeak+GEyVMF3be42dlapineK1cNl5KVuzcscgr28/9yW9t3FcgdpbgmDOPRgvjE74gb2qf2hPs3Zbf+T/xV4CZP7BrUSEoOBldYT9DsLCDyqDMRrbhN8bq8Vi5LWRu1WvNfj/tgXrAeESYIFqTdcfwbW2mBVZ2a5drey0M6oDZsBHpyDzSUTvvJO11kOwL4s4I5RSEm4H1UWH2ooX9asqPVrY5Z97wIDAQAB",
   "description": "__MSG_extDescription__",
   "permissions": [

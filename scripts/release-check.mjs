@@ -1,6 +1,6 @@
 // npm run release:check — typecheck / test / build / package と、リリース前の機械的な確認
 import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import {
   LOCALES, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions, checkVersion, listZip, readJson,
 } from './checks.mjs';
@@ -17,7 +17,14 @@ const distManifest = readJson('dist/manifest.json');
 const locales = Object.fromEntries(LOCALES.map((l) => [l, readJson(`static/_locales/${l}/messages.json`)]));
 const zipPath = `release/postshelf-${pkg.version}.zip`;
 
+const notesPath = `docs/releases/v${pkg.version}.md`;
+const notes = existsSync(notesPath) ? readFileSync(notesPath, 'utf8') : '';
+const notesErrors = [];
+if (!notes) notesErrors.push(`${notesPath} がありません`);
+else for (const h of ['## 追加', '## 修正']) if (!notes.includes(h)) notesErrors.push(`${notesPath} に「${h}」の節がありません`);
+
 const results = [
+  ['リリースノート (docs/releases/v<version>.md) に「追加」と「修正」の節がある', notesErrors],
   ['version が package.json と一致', checkVersion(manifest, pkg)],
   ['必須の permissions / host_permissions が現在の一覧と同じ', [...checkPermissions(manifest), ...checkPermissions(distManifest)]],
   ['8 言語の messages.json のキーとプレースホルダーが一致', checkLocales(locales)],

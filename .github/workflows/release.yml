@@ -1,7 +1,7 @@
 name: Release
 
 # タグ v* を push したときだけ動く。release:check を通し、タグと manifest の version が一致することを確かめてから、
-# zip を GitHub Release に添付する (zip の直下に manifest.json があり、展開したフォルダをそのまま「読み込む」ことができる)
+# docs/releases/<タグ>.md を本文にして、zip を GitHub Release に添付する (zip の直下に manifest.json があり、展開したフォルダをそのまま「読み込む」ことができる)
 on:
   push:
     tags:
@@ -28,6 +28,8 @@ jobs:
             exit 1
           fi
       - run: npm run release:check
+      - name: Check that the release notes exist
+        run: test -s "docs/releases/${GITHUB_REF_NAME}.md"
       - name: Create the GitHub Release with the zip
         env:
           GH_TOKEN: ${{ github.token }}
@@ -35,5 +37,5 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           gh release create "${GITHUB_REF_NAME}" "release/postshelf-${version}.zip" \
             --title "PostShelf ${version}" \
-            --notes "手動インストールと更新の手順は docs/INSTALL.md を参照してください。更新の前に、設定の「データ」から必ずエクスポートしてください。" \
+            --notes-file "docs/releases/${GITHUB_REF_NAME}.md" \
             --verify-tag
