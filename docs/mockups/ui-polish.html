@@ -140,6 +140,26 @@ h1{font-size:21px;margin:0 0 4px}h2{font-size:17px;margin:40px 0 4px;padding-top
 .pu .bigb{display:flex;gap:6px;align-items:center;justify-content:center;width:100%;border-radius:10px;padding:8px;background:#0f6fb3;color:#fff;font-weight:700}
 .pu .lk{display:flex;gap:6px;align-items:center;padding:6px 2px;color:var(--mu)}
 .pu .rec{color:var(--mu);margin:6px 0}
+
+/* ===== 追加 (9〜10) ===== */
+.th{position:relative;border-radius:10px;overflow:hidden;height:92px;background:linear-gradient(135deg,#9db8d9,#cfe0f2)}
+.th.v{background:linear-gradient(135deg,#34445c,#5c7aa5)}
+.th.p2{background:linear-gradient(135deg,#d9c79d,#f2e6cf)}
+.th .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;display:grid;place-items:center;border:1.5px solid rgba(255,255,255,.85)}
+.th .play svg{width:16px;height:16px;fill:#fff;stroke:#fff;stroke-width:1}
+.th .tg2{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.7);color:#fff;border-radius:6px;padding:0 6px;font-size:11px;font-weight:700;display:flex;gap:3px;align-items:center}
+.th .tg2 svg{width:12px;height:12px;stroke:#fff}
+.th .cnt{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.7);color:#fff;border-radius:6px;padding:0 6px;font-size:11px;font-weight:700;display:flex;gap:3px;align-items:center}
+.th .cnt svg{width:12px;height:12px;stroke:#fff}
+.gc2{border:1px solid var(--bd);border-radius:12px;padding:8px;background:var(--bg);display:flex;flex-direction:column;gap:6px;min-width:0}
+.lr{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid var(--bd);white-space:nowrap}
+.lr .h{color:var(--mu);width:84px;overflow:hidden;text-overflow:ellipsis}
+.lr .tx{flex:1;overflow:hidden;text-overflow:ellipsis}
+.mk{display:inline-flex;gap:3px;align-items:center;border:1px solid var(--bd);border-radius:6px;padding:0 6px;font-size:11px;color:var(--mu)}
+.mk.v{color:#fff;background:#1d6fb8;border-color:#1d6fb8}
+.mk svg{width:12px;height:12px}
+.sbar{margin:6px 10px;border:1px solid var(--bd);border-radius:10px;padding:8px;background:var(--s1)}
+.sbar .b{display:flex;gap:6px;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:8px;padding:6px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -441,15 +461,101 @@ h1{font-size:21px;margin:0 0 4px}h2{font-size:17px;margin:40px 0 4px;padding-top
  </ul>
 </div>
 
+
+<!-- ============ 9 ============ -->
+<h2>9. 動画と画像を見分けられるようにする</h2>
+<p class="lead">ご提示のスクリーンショットで、グリッド表示では、動画のポスト (サムネイルは動画の 1 コマ) と、画像のポストが、同じ見た目です。リスト表示とサイドパネルには、メディアの有無を示す表示がありません。ポスト表示 (X 風) でも、動画は止まった 1 枚の絵に見えるはずです。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before (グリッド)</span>
+  <div class="stage"><div class="app mg"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px">
+   <div class="gc2"><div class="th"></div><b>Manish Kumar</b><span style="color:var(--mu)">画像のポスト</span></div>
+   <div class="gc2"><div class="th v"></div><b>carpe</b><span style="color:var(--mu)">動画のポスト</span></div>
+   <div class="gc2"><div class="th p2"></div><b>silvan</b><span style="color:var(--mu)">画像 3 枚のポスト</span></div>
+  </div></div></div>
+ </div>
+ <div class="cell"><span class="tag after">after (グリッド)</span>
+  <div class="stage"><div class="app mg"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px">
+   <div class="gc2"><div class="th"></div><b>Manish Kumar</b><span style="color:var(--mu)">画像のポスト</span></div>
+   <div class="gc2"><div class="th v"><span class="play"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg></span><span class="tg2"><svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14zM3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>動画</span></div><b>carpe</b><span style="color:var(--mu)">動画のポスト</span></div>
+   <div class="gc2"><div class="th p2"><span class="cnt"><svg viewBox="0 0 24 24"><path d="M12 4l-8 4l8 4l8-4zM4 12l8 4l8-4M4 16l8 4l8-4"/></svg>3</span></div><b>silvan</b><span style="color:var(--mu)">画像 3 枚のポスト</span></div>
+  </div></div></div>
+ </div>
+</div>
+<div class="pair">
+ <div class="cell"><span class="tag">before (リスト)</span>
+  <div class="stage"><div class="app mg">
+   <div class="lr"><span class="h">@showheyohtaki</span><span class="tx">AIへの指示用に、"よく使うおしゃれな…</span></div>
+   <div class="lr"><span class="h">@ftcarpe</span><span class="tx">誰かがプロフェッショナルな音声スタジオを…</span></div>
+   <div class="lr"><span class="h">@CollectUI</span><span class="tx">Micro UI Interaction by @RaminNasibov…</span></div>
+   <div class="lr"><span class="h">@gigafreenet</span><span class="tx">アップデート - 静かに肥大化していく…</span></div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after (リスト)</span>
+  <div class="stage"><div class="app mg">
+   <div class="lr"><span class="h">@showheyohtaki</span><span class="tx">AIへの指示用に、"よく使うおしゃれな…</span><span class="mk"><svg viewBox="0 0 24 24"><path d="M15 8h.01M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM3 16l5-5c.928-.893 2.072-.893 3 0l5 5M14 14l1-1c.928-.893 2.072-.893 3 0l3 3"/></svg>4</span></div>
+   <div class="lr"><span class="h">@ftcarpe</span><span class="tx">誰かがプロフェッショナルな音声スタジオを…</span><span class="mk v"><svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14zM3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>動画</span></div>
+   <div class="lr"><span class="h">@CollectUI</span><span class="tx">Micro UI Interaction by @RaminNasibov…</span><span class="mk"><svg viewBox="0 0 24 24"><path d="M15 8h.01M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM3 16l5-5c.928-.893 2.072-.893 3 0l5 5M14 14l1-1c.928-.893 2.072-.893 3 0l3 3"/></svg>1</span></div>
+   <div class="lr"><span class="h">@gigafreenet</span><span class="tx">アップデート - 静かに肥大化していく…</span><span class="mk" style="opacity:0">-</span></div>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <p><b>案</b> (グリッド・リスト・ポスト表示・サイドパネルの 4 か所に、同じ印を使う)</p>
+ <ul>
+  <li><b style="min-width:0">動画</b>: サムネイルの中央に、X と同じ円形の再生ボタン (▶)、左下に「動画」の札を出す。リスト表示では、行の右端に、青い塗りの「動画」の札を出す。</li>
+  <li><b style="min-width:0">画像</b>: 1 枚のときは、何も付けない (これまでどおり)。2 枚以上のときは、右下に「重なり + 枚数」の札を出す。リスト表示では、行の右端に、画像のアイコンと枚数の札を出す。</li>
+  <li><b style="min-width:0">動画のサムネイルがないとき</b> (古い保存分は、サムネイルを持たない): 暗い単色の面に、再生ボタンと「動画」の札を出す。</li>
+  <li><b style="min-width:0">判定の根拠</b>: すでに保存してある「動画を含む」の印 (<code>hasVideo</code>、絞り込みの「動画あり」と同じもの) を使う。新しい取得はしない。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict go">採用を推奨</span>。ご要望そのものへの対応で、保存データの形は変わらない。限界が 2 つある。(1) 動画の長さは、保存していないので出せない。(2) X の GIF は、動画として扱われ、「動画」の札が付く可能性がある (実機で確認が必要)。</p>
+</div>
+
+<!-- ============ 10 ============ -->
+<h2>10. サイドパネルの複数選択バー</h2>
+<p class="lead">ご提示のスクリーンショットで、1 件を選ぶと、4 つの大きなボタン (フォルダに追加 / 外す / 削除 / 選択解除) が縦に並び、幅 340px のパネルの約 1 割強を使います。一覧が下へ押し下げられます。</p>
+<div class="pair">
+ <div class="cell"><span class="tag">before</span>
+  <div class="stage"><div class="app sp">
+   <div class="rw"><span class="bx" style="border-radius:8px">保存が新しい順 ⌄</span><span style="flex:1"></span><span class="bx" style="border-radius:8px">▤ ☰ ▦</span></div>
+   <div class="sbar"><b>1 件選択中</b>
+    <div class="b"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg>フォルダに追加</div><div class="b"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg>フォルダから外す</div><div class="b" style="color:#f4212e"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>削除</div><div class="b">選択解除</div></div>
+   <div class="post"><i></i><div><b>しょうへい</b> <span style="color:var(--mu)">@showheyohtaki</span><p>AIへの指示用に、…</p></div></div>
+  </div></div>
+ </div>
+ <div class="cell"><span class="tag after">after (押すと開きます)</span>
+  <div class="stage"><div class="app sp ping">
+   <div class="rw"><span class="bx" style="border-radius:8px">保存が新しい順 ⌄</span><span class="bx" id="sb" style="border-radius:8px;background:#0f6fb3;border-color:#0f6fb3;color:#fff;cursor:pointer">1 件選択中 ⌄</span><span style="flex:1"></span><span class="bx" style="border-radius:8px">▤ ☰ ▦</span></div>
+   <div class="menu" id="sbm" style="display:none"><div style="display:grid;gap:4px"><span class="bx" style="border-radius:8px"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg>フォルダに追加</span><span class="bx" style="border-radius:8px"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg>フォルダから外す</span><span class="bx" style="border-radius:8px;color:#f4212e"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>削除</span><span class="bx" style="border-radius:8px">選択解除</span></div></div>
+   <div class="post"><i></i><div><b>しょうへい</b> <span style="color:var(--mu)">@showheyohtaki</span><p>AIへの指示用に、…</p></div></div>
+   <div class="post"><i></i><div><b>carpe</b> <span style="color:var(--mu)">@ftcarpe</span><p>誰かがプロフェッショナルな…</p></div></div>
+  </div></div>
+ </div>
+</div>
+<div class="ev">
+ <ul>
+  <li>管理画面で決めた形 (6 の「N 件選択中 ⌄」のボタン) と、同じにする。サイドパネルでは、並べ替えの行に置く。</li>
+  <li>縦に 4 つ並ぶ大きなボタンがなくなり、一覧が、約 170px 上がる。</li>
+ </ul>
+ <p><b>評価</b> <span class="verdict go">採用を推奨</span> (管理画面の 6 で、すでに採用された方針と同じ)。</p>
+</div>
+
+<h2>モックなしの不具合 (スクリーンショットで確認したもの)</h2>
+<div class="ev">
+ <ul>
+  <li><b style="min-width:0">メニューが切れる</b>: サイドパネルのグリッド表示で、カードの「…」メニューが、パネルの左端で切れる (「ルダを変更」「で開く」「択」「stShelf から削除」と、文頭が欠ける)。管理画面のグリッド表示でも、「フォルダ変更」のメニューが、カードの枠に隠れて、一部しか見えない (「追加」とチェックの一部だけ)。メニューを、カードの外側 (画面全体の最前面) に出し、画面の端に収まる位置に補正する。</li>
+  <li><b style="min-width:0">削除の確認の折り返し</b>: 「…X のブックマークは変更されません。」が、「ませ / ん。」と、1 文字だけ次の行に折り返す。確認の幅を広げ、<code>text-wrap:balance</code> などで、不自然な折り返しを避ける。</li>
+  <li><b style="min-width:0">グリッドのチェック</b>: 選択中のとき、チェックが、投稿者名の頭の文字を隠す (「Hub AI Projects Community」「本的に無料ソフト」など)。5 で直す内容と同じ。</li>
+  <li><b style="min-width:0">サイドパネルの絞り込みの行</b>: 横スクロールのバー (矢印つき) が見えている。3 で畳むと、なくなる。</li>
+ </ul>
+</div>
+
 <h2>採用の判断 (そのまま返信できる形)</h2>
 <div class="ev">
- <p>決定済み: 1 採用 / 2 採用 / 3 フォルダも畳む / 4 キャッシュの畳みも採用</p>
- <p>5. グリッドのホバー → 採用 / 保留 / 見送り</p>
- <p>6. 管理画面上部の帯 → 帯の統合だけ / 選択バーも / 見送り</p>
- <p>7. アカウントメニュー → 採用 / 保留 / 見送り</p>
- <p>8. ポップアップ (作り直した案) → 採用 / 保留 / 見送り</p>
- <p>小さな改善案 (停止ボタンの色、ダイアログの順) → 採用 / 見送り</p>
- <p style="color:var(--pg2)">実装は、<code>docs/TASK_V19.md</code> (v18 のあと) にまとめます。実機の見え方 (x.com のテーマ 3 種、幅 340px のサイドパネル) は、実装後に、ご確認をお願いします。</p>
+ <p>決定済み: 1〜5 と 7、6 (選択バーも)、小さな案。8 は保留。</p>
+ <p>9. 動画と画像の見分け → 採用 / 保留 / 見送り (札の形や位置の希望があれば、書いてください)</p>
+ <p>10. サイドパネルの選択バー → 採用 / 保留 / 見送り</p>
+ <p>不具合 (メニューが切れる、折り返し) → 直す / 見送り</p>
+ <p style="color:var(--pg2)">9・10 と不具合は、<code>docs/TASK_V20.md</code> にまとめます (v18・v19 のあと)。</p>
 </div>
 </div>
 
@@ -505,6 +611,8 @@ cs.onclick=()=>{cs.classList.toggle('on');const on=cs.classList.contains('on');c
 const bn=$('#bnm');if(bn){let k=0;const L=[['「アカウント未設定」に 1 件のポストがあります。','割り当て…'],['x.com の「ブックマーク」から取り込めるポストが 12 件あります','取り込み方法']];bn.onclick=()=>{k=1-k;$('#bnt').textContent=L[k][0];$('#bnb').textContent=L[k][1]}}
 // 7
 document.querySelectorAll('.mo').forEach(b=>b.onclick=()=>{const m=document.getElementById(b.dataset.m);m.style.display=m.style.display==='block'?'none':'block'});
+
+const sb=$('#sb'),sbm=$('#sbm');if(sb){sb.onclick=()=>{sbm.style.display=sbm.style.display==='none'?'block':'none'}}
 </script>
 </body>
 </html>
