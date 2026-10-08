@@ -148,9 +148,9 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
   const marker = useRef<HTMLSpanElement>(null);
   /** きっかけのボタンを含む入れ物 (fixed のときは、目印の span の親。そうでなければ、このメニューの親) */
   const anchor = () => (props.fixed ? marker.current?.parentElement : ref.current?.parentElement) ?? ref.current;
-  useLayoutEffect(() => {
-    if (!props.fixed || !ref.current) return;
+  const place = () => {
     const el = ref.current;
+    if (!props.fixed || !el) return;
     const r = (anchor() ?? el).getBoundingClientRect();
     const vw = document.documentElement.clientWidth || window.innerWidth;
     const vh = document.documentElement.clientHeight || window.innerHeight;
@@ -162,6 +162,15 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
     const below = r.bottom + 4;
     const above = r.top - 4 - h;
     el.style.top = `${below + h > vh - 8 && above >= 8 ? above : Math.max(8, Math.min(below, vh - h - 8))}px`;
+  };
+  useLayoutEffect(() => {
+    place();
+    // 中身があとから増える (フォルダの一覧など) ときも、画面の端に収まる位置に補正し直す
+    const el = ref.current;
+    if (!props.fixed || !el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => place());
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
   useEffect(() => {
     const down = (e: MouseEvent) => {
@@ -173,7 +182,8 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
       if (e.key === 'Escape') props.onClose();
     };
     const away = (e: Event) => {
-      if (!ref.current?.contains(e.target as Node)) props.onClose();
+      const t = e.target;
+      if (!(t instanceof Node && ref.current?.contains(t))) props.onClose(); // メニューの中のスクロールでは閉じない
     };
     document.addEventListener('mousedown', down);
     document.addEventListener('keydown', key);
