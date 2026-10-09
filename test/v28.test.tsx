@@ -134,7 +134,7 @@ describe('v28-A: the x.com save popover', () => {
     expect((await getSettings()).recentFolderIds).toEqual(['a', 'b', 'c']);
   });
 
-  it('header: nothing when unsaved; 「未分類に保存済み」; 「N つに保存済み」 (未分類 not counted)', async () => {
+  it('header: nothing when unsaved; 「未分類に保存済み」; 「N 個のフォルダに保存済み」 (未分類 not counted)', async () => {
     const fs = await folders(2);
     const pop = await open();
     const header = () => pop.firstElementChild!.nextElementSibling!.firstElementChild as HTMLElement; // 保存先の行のあとの、ピッカーの見出し
@@ -149,7 +149,7 @@ describe('v28-A: the x.com save popover', () => {
       boxes()[i].dispatchEvent(new Event('change'));
       await tick();
     }
-    expect(pop.textContent).toContain('✓ 2 つに保存済み');
+    expect(pop.textContent).toContain('✓ 2 個のフォルダに保存済み');
     expect(pop.textContent).not.toContain('未分類に保存済み');
     void header;
     void fs;

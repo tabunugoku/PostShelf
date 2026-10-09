@@ -242,7 +242,7 @@ describe('page panel', () => {
     expect(el.textContent).toContain('128');
     expect(el.textContent).toContain('スキップ');
     expect(el.textContent).toContain('このタブを開いたままにしてください');
-    expect([...el.querySelectorAll('button')].map((b) => b.textContent)).toEqual(['一時停止', '停止', '畳む']);
+    expect([...el.querySelectorAll('button')].map((b) => b.textContent)).toEqual(['一時停止', '停止', 'たたむ']);
     expect(document.documentElement.hasAttribute('data-postshelf-panel')).toBe(true); // 右下の取り込みボタンは隠れる
     (el.querySelector('[data-action=pause]') as HTMLElement).click();
     (el.querySelector('[data-action=stop]') as HTMLElement).click();
