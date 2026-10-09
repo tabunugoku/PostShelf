@@ -16,6 +16,8 @@ const STYLE_ID = 'postshelf-style';
 /** X の操作アイコンに合わせたクリック判定 (34px 以上) と、標準ボタンとの余白 (4px 以上) */
 const HIT = 34;
 const GAP = 4;
+const MAX_HIT = 64;
+const ICON_MIN = 19;
 
 let mode: ButtonMode = 'separate';
 
@@ -40,6 +42,71 @@ function makeBadge(): HTMLElement {
   b.setAttribute(BADGE_ATTR, '');
   b.style.cssText = `position:absolute;right:-2px;top:-2px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:7px;background:${ACCENT_FILL};color:#fff;font:700 10px/14px system-ui,sans-serif;text-align:center;pointer-events:none;display:none`;
   return b;
+}
+
+/**
+ * 別ボタンの縦位置と間隔 (v33)。ポストの詳細ページ (x.com/<user>/status/<id>) の操作の行は、タイムラインと構造が違うことが
+ * 実機で報告された (ボタンが他のアイコンより上にあり、ブックマークの数字に詰まる)。実機の DOM は未確認の推測:
+ * 親が display:flex; align-items:flex-start で、ブックマークの右に数字の span が続く。
+ * align-self:center で親の align-items によらず中心をそろえ、右に要素が続くときは右にも同じ間隔を空ける。
+ * 親が flex でないときは align-self は効かないので、縦位置は変わらない。タイムラインと詳細ページで同じ規則。
+ */
+export function placeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
+  btn.style.alignSelf = 'center';
+  if (bm.nextElementSibling) btn.style.marginRight = `${GAP}px`;
+  bm.insertAdjacentElement('afterend', btn);
+}
+
+/** アイコンの周りに広がる hover の丸の、片側の余白 (X の操作アイコンの丸は、アイコンの周りに約 8px ずつ広がる) */
+const RING = 8;
+
+/**
+ * 隣のブックマークのボタンの大きさに合わせる (v35、v36 で高さ基準、v37 で丸の探し方を変更)。詳細ページでは、ブックマークのボタン (bm) の中に
+ * 数字 (「6,837」など) が入り、幅が桁数で変わる。幅は使わない。bm の高さも、余白を含んで丸より大きいので使わない (v36 の実機で約 2 割大きかった)。
+ * 丸の直径 = (1) bm の子孫 (svg の祖先だけでなく、svg の兄弟も) で、svg より大きく、幅と高さの差が 2px 以内で、border-radius が大きい
+ * (50% か 999px 以上) 要素の直径。複数あれば、svg と同じ親の中にあるもの、svg の祖先、その他の順に、最初のもの。
+ * (2) 無ければ svg の高さ + 16px。svg の高さが測れない (0) ときは HIT。下限 HIT = 34px、上限 64px。
+ * アイコンは bm の svg の高さに合わせる (下限 19px)。
+ * 実機未確認 (推測): X の hover の丸は、svg の祖先ではなく、svg の兄弟 (絶対配置で、負の余白で svg より大きく広がる、border-radius: 9999px の空の要素)
+ * であることが多い、という X の操作アイコンの一般的な構造からの想定。違っていたら、ここの探し方を直す。
+ * margin-left は GAP のまま (丸が大きくなっても、詳細ページの数字に重ならないよう、差の半分を減らさない)。
+ */
+export function sizeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
+  const svg = bm.querySelector('svg');
+  const sh = svg?.getBoundingClientRect().height ?? 0;
+  const clamp = (v: number) => Math.min(MAX_HIT, Math.max(HIT, Math.round(v)));
+  const round = (el: Element) => {
+    const cs = getComputedStyle(el);
+    const br = cs.borderTopLeftRadius || cs.borderRadius; // 値は "50%" か "9999px" の形。長い書き方が取れない環境では、まとめた書き方を見る
+    return br.endsWith('%') ? parseFloat(br) >= 50 : parseFloat(br) >= 999;
+  };
+  const circle = (el: Element) => {
+    const r = el.getBoundingClientRect();
+    return r.height > sh && Math.abs(r.width - r.height) <= 2 && round(el) ? r.height : 0;
+  };
+  let d = 0;
+  if (svg && sh > 0) {
+    const rank = (el: Element) => (el.parentElement === svg.parentElement ? 0 : el.contains(svg) ? 1 : 2);
+    const cands = [...bm.querySelectorAll('*')].filter((el) => el !== svg && !svg.contains(el));
+    // 同じ順位の中では、svg に近い祖先が先 (祖先は、内側から外側の順に並べ直す)
+    cands.sort((x, y) => rank(x) - rank(y) || (x.contains(y) ? 1 : y.contains(x) ? -1 : 0));
+    for (const el of cands) {
+      d = circle(el);
+      if (d > 0) break;
+    }
+    if (!(d > 0)) d = sh + RING * 2;
+  }
+  const size = d > 0 ? clamp(d) : HIT;
+  btn.style.width = `${size}px`;
+  btn.style.height = `${size}px`;
+  btn.style.fontSize = `${sh > 0 ? Math.max(ICON_MIN, Math.round(sh)) : ICON_MIN}px`;
+}
+
+/** 大きさを測るのは、挿入したときと、bm の大きさが変わったとき (ResizeObserver があれば) だけ。X の再描画のたびには測らない */
+function watchSize(bm: HTMLElement, btn: HTMLElement): void {
+  sizeSeparateButton(bm, btn);
+  if (typeof ResizeObserver === 'undefined') return;
+  new ResizeObserver(() => sizeSeparateButton(bm, btn)).observe(bm);
 }
 
 function createSeparateButton(article: Element): HTMLButtonElement {
@@ -124,7 +191,8 @@ export function injectButtons(root: ParentNode = document): void {
       if (article.querySelector(`[${BTN_ATTR}]`)) continue;
       if (!bm.parentElement) continue;
       const btn = createSeparateButton(article);
-      bm.insertAdjacentElement('afterend', btn);
+      placeSeparateButton(bm, btn);
+      watchSize(bm, btn);
       fresh.push(article);
     } else {
       if (bm.querySelector(`[${BADGE_ATTR}]`)) continue;

@@ -36,7 +36,7 @@ beforeEach(() => {
 });
 
 describe('v16-A: 「フォルダを追加」 menu in the popover', () => {
-  it('the name field and the 追加 button are not shown from the start; the 「フォルダを追加」 button is under the list (and above 「サイドパネルで開く」), even with no folders', async () => {
+  it('the name field and the 追加 button are not shown from the start; the 「フォルダを追加」 button is under the list (and above the side panel icon), even with no folders', async () => {
     const pop = await open();
     expect(menu(pop).hidden).toBe(true);
     expect(menu(pop).style.display).toBe('none');
@@ -47,7 +47,7 @@ describe('v16-A: 「フォルダを追加」 menu in the popover', () => {
     expect(add.querySelector('i')!.className).toContain('ti-folder-plus');
     const order = [...pop.querySelectorAll('label, button')];
     expect(order.indexOf(add)).toBeGreaterThan(order.indexOf(pop.querySelector('label')!));
-    expect(order.indexOf(add)).toBeLessThan(order.indexOf(btn(pop, 'サイドパネルで開く')));
+    expect(order.indexOf(add)).toBeLessThan(order.indexOf(pop.querySelector('button[aria-label="サイドパネルで開く"]')!));
   });
 
   it('pressing it opens the menu in place of the list (「← 戻る」), and the name field has the focus', async () => {

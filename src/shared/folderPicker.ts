@@ -7,6 +7,7 @@
 import { INBOX_ID, displayName, type Folder } from './models';
 import { t } from './strings';
 import { createFolderMenu } from './folderCreateMenu';
+import { foldText } from './fold';
 
 export interface PickerTheme {
   fg: string;
@@ -15,10 +16,17 @@ export interface PickerTheme {
   accent: string;
 }
 
+/** 絞り込み欄を出すフォルダ数 (「未分類」を除く) の下限 */
+export const FILTER_MIN_FOLDERS = 8;
+/** 「最近使った」を出すフォルダ数 (「未分類」を除く) の下限 */
+export const RECENT_MIN_FOLDERS = 6;
+
 export interface FolderPicker {
   el: HTMLElement;
   /** selected を外から書き換えたあと、チェックの表示を合わせる */
   sync: () => void;
+  /** 絞り込み欄があればフォーカスを当てる (あれば true) */
+  focusFilter: () => boolean;
 }
 
 /** 「未分類」の行 (保存されていなくても、一覧の先頭に出す仮想の行) */
@@ -45,6 +53,24 @@ export function flatButton(th: PickerTheme, text: string, icon: string, tone: 'n
   return b;
 }
 
+/** アイコンだけのボタン (44px 角)。名前は aria-label と title に入れる */
+export function iconButton(th: PickerTheme, label: string, icon: string, tone: 'normal' | 'danger' = 'normal'): HTMLButtonElement {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.setAttribute('aria-label', label);
+  b.title = label;
+  const color = tone === 'danger' ? '#f4212e' : th.fg;
+  b.style.cssText = `box-sizing:border-box;margin:0;display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;padding:0;background:transparent;color:${color};border:0;border-radius:8px;cursor:pointer;font:inherit`;
+  const ic = document.createElement('i');
+  ic.className = `ti ${icon}`;
+  ic.setAttribute('aria-hidden', 'true');
+  ic.style.cssText = 'display:block;position:static;margin:0;padding:0;width:20px;height:20px;font-size:20px;line-height:1;font-style:normal;flex:none';
+  b.append(ic);
+  b.addEventListener('mouseenter', () => (b.style.background = th.hover));
+  b.addEventListener('mouseleave', () => (b.style.background = 'transparent'));
+  return b;
+}
+
 /** 区切り線 */
 export function divider(th: PickerTheme): HTMLElement {
   const d = document.createElement('div');
@@ -58,6 +84,11 @@ export function createFolderPicker(opts: {
   theme: PickerTheme;
   /** チェックの変化 (新規作成フォルダの自動選択を含む) のたびに呼ばれる */
   onChange: (selected: Set<string>) => void | Promise<void>;
+  /**
+   * x.com のポップオーバー用の追加機能 (v28): 保存状態の見出し、絞り込み欄 (8 つ以上)、「最近使った」(6 つ以上)。
+   * 渡さなければ有効にしない (manager の「フォルダを変更」は見た目を変えない)。recentIds は新しい順。存在しないフォルダは飛ばす
+   */
+  extras?: { recentIds: string[] };
 }): FolderPicker {
   const { selected, theme: th, onChange } = opts;
   const el = document.createElement('div');
@@ -70,6 +101,7 @@ export function createFolderPicker(opts: {
   const sync = () => {
     boxes.forEach((cb, id) => (cb.checked = selected.has(id)));
     paints.forEach((p) => p());
+    paintStatus();
   };
   const normalize = (changed: string, on: boolean) => {
     if (on && changed === INBOX_ID) selected.clear();
@@ -81,8 +113,52 @@ export function createFolderPicker(opts: {
   };
 
   const folders = [...opts.folders];
+  const extras = opts.extras;
+  const userFolderCount = () => folders.filter((f) => f.id !== INBOX_ID).length;
+  let query = '';
+
+  // 見出し (保存状態) と絞り込み欄。一覧の再描画で消えないよう、一覧とは別の要素に置く
+  const headEl = document.createElement('div');
+  const statusEl = document.createElement('div');
+  statusEl.style.cssText = `box-sizing:border-box;padding:2px 8px 6px;font-size:13px;opacity:.8;white-space:nowrap;color:${th.fg}`;
+  const filterEl = document.createElement('input');
+  const paintStatus = () => {
+    if (!extras) return;
+    const ids = [...selected];
+    const n = ids.filter((id) => id !== INBOX_ID).length;
+    statusEl.textContent = ids.length === 0 ? '' : n === 0 ? `✓ ${t('savedInInbox')}` : `✓ ${t('savedInFolders', n)}`;
+    statusEl.style.display = ids.length === 0 ? 'none' : 'block';
+  };
+  if (extras) {
+    filterEl.type = 'text';
+    filterEl.placeholder = t('folderFilter');
+    filterEl.setAttribute('aria-label', t('folderFilter'));
+    filterEl.style.cssText = `box-sizing:border-box;display:block;width:100%;margin:0 0 4px;padding:6px 8px;font:inherit;color:${th.fg};background:transparent;border:.5px solid ${th.border};border-radius:8px;outline:none`;
+    filterEl.addEventListener('focus', () => (filterEl.style.outline = `2px solid ${th.accent}`));
+    filterEl.addEventListener('blur', () => (filterEl.style.outline = 'none'));
+    filterEl.addEventListener('input', () => {
+      query = foldText(filterEl.value.trim());
+      render();
+    });
+    headEl.append(statusEl, filterEl);
+  }
+  const showFilter = () => !!extras && userFolderCount() >= FILTER_MIN_FOLDERS;
   const listEl = document.createElement('div');
-  el.append(listEl);
+  el.append(headEl, listEl);
+
+  // ↑↓ で行を移動 (絞り込み欄から ↓ で最初の行へ)。Space の切り替えはチェックボックスの既存の動作
+  el.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const target = e.target as HTMLElement;
+    const rows = [...listEl.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
+    const i = rows.indexOf(target as HTMLInputElement);
+    if (target !== filterEl && i < 0) return;
+    e.preventDefault();
+    if (target === filterEl) return void (e.key === 'ArrowDown' && rows[0]?.focus());
+    if (e.key === 'ArrowDown') rows[Math.min(i + 1, rows.length - 1)].focus();
+    else if (i > 0) rows[i - 1].focus();
+    else if (showFilter()) filterEl.focus();
+  });
 
   const menu = createFolderMenu({
     theme: th,
@@ -107,6 +183,7 @@ export function createFolderPicker(opts: {
   });
   const openMenu = () => {
     menu.reset();
+    headEl.style.display = 'none';
     listEl.style.display = 'none';
     menu.el.hidden = false;
     menu.el.style.display = 'grid';
@@ -115,6 +192,7 @@ export function createFolderPicker(opts: {
   const closeMenu = () => {
     menu.el.hidden = true;
     menu.el.style.display = 'none';
+    headEl.style.display = '';
     listEl.style.display = '';
     render();
     addBtn.focus();
@@ -128,62 +206,90 @@ export function createFolderPicker(opts: {
     listEl.replaceChildren();
     boxes.clear();
     paints.clear();
-    const list = [inboxOf(folders), ...folders.filter((f) => f.id !== INBOX_ID)];
-    for (const f of list) {
-      const label = document.createElement('label');
-      label.style.cssText = 'box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
-      let hovered = false;
-      const ico = document.createElement('i');
-      ico.className = `ti ${f.icon}`;
-      ico.style.cssText = `display:block;position:static;margin:0;padding:0;font-size:18px;line-height:1;font-style:normal;color:${f.color ?? th.fg}`;
-      // 自前のチェック (角の丸い四角。選択中はアクセント色で塗り、白いチェック)。実際の入力は input type=checkbox のまま
-      // (キーボードとスクリーンリーダーの操作はそのまま)。appearance:none で見た目だけを変える
-      const box = document.createElement('span');
-      box.style.cssText = 'box-sizing:border-box;position:relative;display:block;width:18px;height:18px;flex:none;margin:0;padding:0';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = selected.has(f.id);
-      cb.style.cssText = `box-sizing:border-box;-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border-radius:5px;cursor:pointer;color:${th.fg}`;
-      const tick = document.createElement('i');
-      tick.className = 'ti ti-check';
-      tick.setAttribute('aria-hidden', 'true');
-      tick.style.cssText = 'position:absolute;inset:0;display:none;align-items:center;justify-content:center;margin:0;padding:0;font-size:13px;line-height:1;font-style:normal;color:#fff;pointer-events:none';
-      box.append(cb, tick);
-      const paintRow = () => {
-        const on = selected.has(f.id);
-        label.setAttribute('data-checked', String(on));
-        cb.style.border = `1.5px solid ${on ? th.accent : th.fg}`;
-        cb.style.opacity = on ? '1' : '.6';
-        cb.style.background = on ? th.accent : 'transparent';
-        tick.style.display = on ? 'flex' : 'none';
-        label.style.background = on || hovered ? th.hover : '';
-      };
-      label.addEventListener('mouseenter', () => {
-        hovered = true;
-        paintRow();
-      });
-      label.addEventListener('mouseleave', () => {
-        hovered = false;
-        paintRow();
-      });
-      boxes.set(f.id, cb);
-      paints.set(f.id, paintRow);
-      cb.addEventListener('change', () => {
-        normalize(f.id, cb.checked);
-        void onChange(selected);
-      });
-      cb.addEventListener('focus', () => (cb.style.outline = `2px solid ${th.accent}`));
-      cb.addEventListener('blur', () => (cb.style.outline = 'none'));
-      const name = document.createElement('span');
-      name.textContent = displayName(f);
-      name.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-      label.append(ico, name, box);
-      listEl.append(label);
-      paintRow();
+    filterEl.style.display = showFilter() ? 'block' : 'none';
+    const inbox = inboxOf(folders);
+    const users = folders.filter((f) => f.id !== INBOX_ID);
+    const heading = (text: string) => {
+      const h = document.createElement('div');
+      h.textContent = text;
+      h.style.cssText = `box-sizing:border-box;padding:6px 8px 2px;font-size:12px;opacity:.7;white-space:nowrap;color:${th.fg}`;
+      listEl.append(h);
+    };
+    if (query) {
+      // 絞り込み中は、「未分類」も対象にする (見出しは出さない)
+      for (const f of [inbox, ...users]) if (foldText(displayName(f)).includes(query)) addRow(f);
+    } else {
+      addRow(inbox); // 「未分類」は、見出しの上の先頭に固定する (見出しと件数の対象にしない)
+      const recent =
+        extras && userFolderCount() >= RECENT_MIN_FOLDERS
+          ? extras.recentIds
+              .map((id) => users.find((f) => f.id === id))
+              .filter((f): f is Folder => !!f)
+              .slice(0, 3)
+          : [];
+      if (recent.length) {
+        heading(t('folderRecent'));
+        for (const f of recent) addRow(f);
+        heading(t('folderAll', userFolderCount()));
+        for (const f of users) if (!recent.includes(f)) addRow(f);
+      } else for (const f of users) addRow(f);
     }
     listEl.append(divider(th), addBtn);
   };
+  const addRow = (f: Folder) => {
+    const label = document.createElement('label');
+    label.style.cssText = 'box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
+    let hovered = false;
+    const ico = document.createElement('i');
+    ico.className = `ti ${f.icon}`;
+    ico.style.cssText = `display:block;position:static;margin:0;padding:0;font-size:18px;line-height:1;font-style:normal;color:${f.color ?? th.fg}`;
+    // 自前のチェック (角の丸い四角。選択中はアクセント色で塗り、白いチェック)。実際の入力は input type=checkbox のまま
+    // (キーボードとスクリーンリーダーの操作はそのまま)。appearance:none で見た目だけを変える
+    const box = document.createElement('span');
+    box.style.cssText = 'box-sizing:border-box;position:relative;display:block;width:18px;height:18px;flex:none;margin:0;padding:0';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = selected.has(f.id);
+    cb.style.cssText = `box-sizing:border-box;-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border-radius:5px;cursor:pointer;color:${th.fg}`;
+    const tick = document.createElement('i');
+    tick.className = 'ti ti-check';
+    tick.setAttribute('aria-hidden', 'true');
+    tick.style.cssText = 'position:absolute;inset:0;display:none;align-items:center;justify-content:center;margin:0;padding:0;font-size:13px;line-height:1;font-style:normal;color:#fff;pointer-events:none';
+    box.append(cb, tick);
+    const paintRow = () => {
+      const on = selected.has(f.id);
+      label.setAttribute('data-checked', String(on));
+      cb.style.border = `1.5px solid ${on ? th.accent : th.fg}`;
+      cb.style.opacity = on ? '1' : '.6';
+      cb.style.background = on ? th.accent : 'transparent';
+      tick.style.display = on ? 'flex' : 'none';
+      label.style.background = on || hovered ? th.hover : '';
+    };
+    label.addEventListener('mouseenter', () => {
+      hovered = true;
+      paintRow();
+    });
+    label.addEventListener('mouseleave', () => {
+      hovered = false;
+      paintRow();
+    });
+    boxes.set(f.id, cb);
+    paints.set(f.id, paintRow);
+    cb.addEventListener('change', () => {
+      normalize(f.id, cb.checked);
+      void onChange(selected);
+    });
+    cb.addEventListener('focus', () => (cb.style.outline = `2px solid ${th.accent}`));
+    cb.addEventListener('blur', () => (cb.style.outline = 'none'));
+    const name = document.createElement('span');
+    name.textContent = displayName(f);
+    name.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    label.append(ico, name, box);
+    listEl.append(label);
+    paintRow();
+  };
   el.append(menu.el);
   render();
-  return { el, sync };
+  paintStatus();
+  return { el, sync, focusFilter: () => (showFilter() ? (filterEl.focus(), true) : false) };
 }

@@ -56,7 +56,7 @@ MIT に決定済みです。`LICENSE` に全文があり、`README.md` の「ラ
   - **画像のキャッシュ (任意の権限)**: `pbs.twimg.com` (X の画像サーバー) へのアクセスは、manifest の `optional_host_permissions` に宣言している。必須の `permissions` / `host_permissions` は増やしていない (テストで manifest を確認)。そのため、拡張機能の更新だけで Chrome が権限の再承認を求めることはない。設定「画像のキャッシュ」をオンにするクリックの中で `chrome.permissions.request` を呼び、拒否されたらオフに戻す。通信は画像の取得 (GET) だけで、X の非公開 API は呼ばない。取得した画像はこの PC の中にだけ置き、外部へ送らない
   - プライバシーポリシーには、キャッシュをオンにした場合の通信先 (`pbs.twimg.com`) と、画像が端末内にだけ保存されることを書く (初期値はオフ)
   - 「自分で選んだフォルダ」は File System Access API。選んだフォルダのハンドルは IndexedDB に保存し、書き込みは `images/` の下の自分が作ったファイルだけ
-  - サイドパネルの「いま開いているポストを保存」はアクティブタブの URL (x.com / twitter.com のみ) を読むが、**`tabs` / `activeTab` 権限は追加していない**。x.com / twitter.com は host 権限に入っているので `chrome.tabs.query` の `url` が読める。他のサイトの URL は読めない
+  - サイドパネルの「いま開いているポスト」の枠はアクティブタブの URL (x.com / twitter.com のみ) を読むが、**`tabs` / `activeTab` 権限は追加していない**。x.com / twitter.com は host 権限に入っているので `chrome.tabs.query` の `url` が読める。他のサイトの URL は読めない
 - [ ] リモートコード不使用 (CDN なし、アイコンフォントは同梱) を申告
 - [ ] 類似拡張との差別化 (アイコン/色/X 風ポスト表示/完全ローカル) をストア説明に反映
 - [ ] バージョン更新手順: `package.json` と `static/manifest.json` の version を揃える

@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "資料夾"
   },
+  "popupInbox": {
+    "message": "整理未分類"
+  },
+  "popupSearch": {
+    "message": "搜尋已儲存的貼文"
+  },
   "recent": {
     "message": "最近儲存的 3 則"
   },
@@ -187,6 +193,25 @@
   },
   "settingsJump": {
     "message": "跳到設定群組"
+  },
+  "settingsSearch": {
+    "message": "搜尋設定"
+  },
+  "settingsMatchCount": {
+    "message": "與「$QUERY$」相符 $COUNT$ 項",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "已儲存變更"
   },
   "syncNativeSection": {
     "message": "與 X 書籤連動"
@@ -383,6 +408,33 @@
   "openSidePanel": {
     "message": "在側邊欄中開啟"
   },
+  "folderFilter": {
+    "message": "篩選資料夾"
+  },
+  "folderRecent": {
+    "message": "最近使用"
+  },
+  "folderAll": {
+    "message": "所有資料夾 ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "已儲存到 $COUNT$ 個",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "已儲存到未分類"
+  },
   "openInTab": {
     "message": "在分頁中開啟"
   },
@@ -430,6 +482,19 @@
     "placeholders": {
       "count": {
         "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "itemCountOf": {
+    "message": "共 $TOTAL$ 則，顯示 $SHOWN$ 則",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
         "example": "3"
       }
     }
@@ -500,6 +565,18 @@
   "noPostsHint": {
     "message": "在 x.com 上點擊貼文的資料夾按鈕即可儲存。已經加入書籤的貼文，可以從 x.com 歷史記錄中的「書籤」匯入。"
   },
+  "onboardTitle": {
+    "message": "開始吧"
+  },
+  "onboardStep1": {
+    "message": "在 x.com 的貼文上按下資料夾按鈕"
+  },
+  "onboardStep2": {
+    "message": "匯入目前的書籤"
+  },
+  "onboardImport": {
+    "message": "匯入"
+  },
   "folderMore": {
     "message": "變更名稱、圖示、顏色"
   },
@@ -523,6 +600,67 @@
   },
   "saveCurrentHint": {
     "message": "在 x.com 開啟貼文時顯示"
+  },
+  "activePostTitle": {
+    "message": "目前開啟的貼文"
+  },
+  "activeSaved": {
+    "message": "已儲存（$FOLDER$）",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "其他 $COUNT$ 個",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageStart": {
+    "message": "整理模式"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "稍後"
+  },
+  "triageBack": {
+    "message": "返回"
+  },
+  "triageHint": {
+    "message": "1–9 加入 · Esc 結束"
+  },
+  "triageDone": {
+    "message": "整理完成了"
+  },
+  "triageDoneSub": {
+    "message": "已整理 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "其他資料夾"
   },
   "saveCurrentFail": {
     "message": "無法讀取此貼文。請重新整理頁面後再試一次。"
@@ -1128,7 +1266,7 @@
     "message": "儲存或讀取失敗。請再試一次。若持續發生，請先在設定的「資料」中用「匯出」儲存資料，然後重新載入擴充功能。"
   },
   "removeFromPostShelf": {
-    "message": "從 PostShelf 中移除"
+    "message": "從 PostShelf 刪除儲存"
   },
   "acPanelLabel": {
     "message": "書籤自動匯入"
@@ -1275,6 +1413,25 @@
   "acBtnPause": {
     "message": "暫停"
   },
+  "acBtnCollapse": {
+    "message": "收合"
+  },
+  "acBtnExpand": {
+    "message": "展開"
+  },
+  "acCollapsedLine": {
+    "message": "匯入中 · 已匯入 $IMPORTED$ · 失敗 $FAILED$",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "停止"
   },
@@ -1289,6 +1446,9 @@
   },
   "acBtnOpenManager": {
     "message": "開啟管理頁面"
+  },
+  "acBtnTriage": {
+    "message": "去整理"
   },
   "acBtnClose": {
     "message": "關閉"
@@ -1431,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "已有同名的資料夾"
+  },
+  "listRemaining": {
+    "message": "還有 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "全部顯示"
   }
 }

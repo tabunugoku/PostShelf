@@ -1,4 +1,5 @@
 import type { SortKey } from './query';
+import { ALL_FOLDER_ID, INBOX_ID } from './models';
 
 /** 設定ストア。chrome.storage.local の別キー (`settings`)。storage.ts と同様、直接 chrome.storage を触るのはここだけ。 */
 export interface Settings {
@@ -23,6 +24,17 @@ export interface Settings {
    * (間隔・上限あり。CLAUDE.md の「守ること」の例外)。オフのときは、たたまれた分だけを保存する。保存データに無くても、オンとして扱う
    */
   fullText: boolean;
+  /** x.com の保存ポップオーバーの「最近使った」フォルダ (v28)。最大 RECENT_FOLDERS 件、新しい順。無い・不正な値は空として扱う */
+  recentFolderIds?: string[];
+}
+
+export const RECENT_FOLDERS = 3;
+
+/** 「最近使った」を更新する: used を先頭へ入れ直す (重複なし。「未分類」と「すべて」は入れない。最大 RECENT_FOLDERS 件) */
+export function pushRecentFolders(list: readonly string[], used: readonly string[]): string[] {
+  const skip = new Set([INBOX_ID, ALL_FOLDER_ID]);
+  const next = [...used.filter((id) => !skip.has(id)), ...list];
+  return [...new Set(next)].slice(0, RECENT_FOLDERS);
 }
 
 export type CollectSpeed = 'slow' | 'normal';
@@ -94,7 +106,7 @@ export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, recentFolderIds: [] };
 
 const KEY = 'settings';
 
@@ -111,6 +123,9 @@ export async function getSettings(): Promise<Settings> {
   merged.imageCache = normalizeImageCache(stored.imageCache);
   merged.autoCollect = normalizeAutoCollect(stored.autoCollect);
   merged.fullText = stored.fullText !== false; // 省略できる項目: 無ければオン
+  merged.recentFolderIds = Array.isArray(stored.recentFolderIds)
+    ? [...new Set(stored.recentFolderIds.filter((x): x is string => typeof x === 'string'))].slice(0, RECENT_FOLDERS)
+    : [];
   return merged;
 }
 
@@ -125,6 +140,19 @@ export function onSettingsChanged(cb: (s: Settings) => void): () => void {
 
 // 読み出し → 書き込みの途中で別の更新が入って、片方の変更が消えないよう、更新は 1 つずつ順に行う
 let queue: Promise<unknown> = Promise.resolve();
+
+/**
+ * 「最近使った」を更新する (v31)。読み・計算・書きを、updateSettings と同じ直列化の中の 1 回の操作にする
+ * (続けて呼んでも、後の書き込みが先の追加を消さない)。失敗は呑み込まず、返す。
+ */
+export function updateRecentFolders(used: string[]): Promise<void> {
+  const run = queue.then(async () => {
+    const cur = await getSettings();
+    await chrome.storage.local.set({ [KEY]: { ...cur, recentFolderIds: pushRecentFolders(cur.recentFolderIds ?? [], used) } });
+  });
+  queue = run.catch(() => undefined);
+  return run;
+}
 
 export function updateSettings(patch: Partial<Settings>): Promise<Settings> {
   const run = queue.then(async () => {

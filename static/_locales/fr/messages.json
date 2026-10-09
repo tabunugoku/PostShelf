@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "dossiers"
   },
+  "popupInbox": {
+    "message": "Trier les non classés"
+  },
+  "popupSearch": {
+    "message": "Rechercher les posts enregistrés"
+  },
   "recent": {
     "message": "Enregistrés récemment (3)"
   },
@@ -187,6 +193,25 @@
   },
   "settingsJump": {
     "message": "Aller à un groupe de réglages"
+  },
+  "settingsSearch": {
+    "message": "Rechercher un réglage"
+  },
+  "settingsMatchCount": {
+    "message": "$COUNT$ résultats pour « $QUERY$ »",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "Modifications enregistrées"
   },
   "syncNativeSection": {
     "message": "Synchronisation avec les favoris X"
@@ -383,6 +408,33 @@
   "openSidePanel": {
     "message": "Ouvrir dans le panneau latéral"
   },
+  "folderFilter": {
+    "message": "Filtrer les dossiers"
+  },
+  "folderRecent": {
+    "message": "Récents"
+  },
+  "folderAll": {
+    "message": "Tous les dossiers ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "Enregistré dans $COUNT$ dossier(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "Enregistré dans Non classés"
+  },
   "openInTab": {
     "message": "Ouvrir dans un onglet"
   },
@@ -430,6 +482,19 @@
     "placeholders": {
       "count": {
         "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "itemCountOf": {
+    "message": "$SHOWN$ sur $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
         "example": "3"
       }
     }
@@ -500,6 +565,18 @@
   "noPostsHint": {
     "message": "Cliquez sur le bouton de dossier d'un post sur x.com pour l'enregistrer. Les posts déjà mis en favoris peuvent être importés depuis Favoris dans l'historique de x.com."
   },
+  "onboardTitle": {
+    "message": "Commençons"
+  },
+  "onboardStep1": {
+    "message": "Sur x.com, appuyez sur le bouton dossier d’un post"
+  },
+  "onboardStep2": {
+    "message": "Importez vos signets actuels"
+  },
+  "onboardImport": {
+    "message": "Importer"
+  },
   "folderMore": {
     "message": "Modifier nom, icône, couleur"
   },
@@ -523,6 +600,67 @@
   },
   "saveCurrentHint": {
     "message": "Affiché quand un post est ouvert sur x.com"
+  },
+  "activePostTitle": {
+    "message": "Post ouvert"
+  },
+  "activeSaved": {
+    "message": "Enregistré ($FOLDER$)",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "$COUNT$ autres",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageStart": {
+    "message": "Mode tri"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "Passer"
+  },
+  "triageBack": {
+    "message": "Retour"
+  },
+  "triageHint": {
+    "message": "1–9 ajouter · Échap quitter"
+  },
+  "triageDone": {
+    "message": "Tri terminé"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ triés",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "Autres dossiers"
   },
   "saveCurrentFail": {
     "message": "Impossible de lire ce post. Rechargez la page puis réessayez."
@@ -1128,7 +1266,7 @@
     "message": "Échec de l'enregistrement ou du chargement. Réessayez. Si cela continue, enregistrez vos données avec « Exporter » dans les Réglages, puis rechargez l'extension."
   },
   "removeFromPostShelf": {
-    "message": "Retirer de PostShelf"
+    "message": "Supprimer de PostShelf"
   },
   "acPanelLabel": {
     "message": "Importation automatique des favoris"
@@ -1275,6 +1413,25 @@
   "acBtnPause": {
     "message": "Pause"
   },
+  "acBtnCollapse": {
+    "message": "Réduire"
+  },
+  "acBtnExpand": {
+    "message": "Ouvrir"
+  },
+  "acCollapsedLine": {
+    "message": "Import en cours · $IMPORTED$ importés · $FAILED$ échecs",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "Arrêter"
   },
@@ -1289,6 +1446,9 @@
   },
   "acBtnOpenManager": {
     "message": "Ouvrir le gestionnaire"
+  },
+  "acBtnTriage": {
+    "message": "Trier"
   },
   "acBtnClose": {
     "message": "Fermer"
@@ -1431,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "Un dossier portant ce nom existe déjà"
+  },
+  "listRemaining": {
+    "message": "$COUNT$ de plus",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "Tout voir"
   }
 }

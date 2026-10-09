@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Icon } from '../shared/Icon';
 import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
@@ -53,7 +53,7 @@ import {
 } from '../shared/storage';
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
-import { Card } from './Cards';
+import { Card, type RowHandlers } from './Cards';
 import { BulkMenu } from './BulkMenu';
 import { refreshCacheView } from './cacheView';
 import { afterPostsRemoved, deleteAccountDataAndCache } from '../shared/cacheops';
@@ -62,6 +62,8 @@ import { AccountSwitcher, AssignDialog, resolveViewAccount } from './Accounts';
 import { FolderEdit } from './FolderEdit';
 import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
+import { Triage } from './Triage';
+import { SearchContext } from './PostText';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
 import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
@@ -80,9 +82,34 @@ type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: str
 /** undo の無いトースト (アカウントの切替・割り当ての通知) もある */
 type ToastState = { key: number; message: string; undo?: BookmarkUndo; /** 設定の初期化の取り消しなど、ポスト以外の「元に戻す」 */ action?: () => Promise<void> } | null;
 
+/** ポップアップからの入口: #inbox (未分類で開く) と #q=<検索語> (検索語を入れて開く)。読み取ったらハッシュを消す。ほかのハッシュは触らない */
+export function takeEntryHash(): { inbox?: boolean; triage?: boolean; q?: string } | null {
+  const h = location.hash;
+  let out: { inbox?: boolean; triage?: boolean; q?: string } | null = null;
+  if (h === '#inbox') out = { inbox: true };
+  else if (h === '#triage') out = { inbox: true, triage: true };
+  else if (h.startsWith('#q=')) {
+    try {
+      out = { q: decodeURIComponent(h.slice(3)) };
+    } catch {
+      out = { q: '' };
+    }
+  }
+  if (out) history.replaceState(null, '', location.pathname + location.search);
+  return out;
+}
+
 /** 「未分類」は保存データにまだ無くても常にスマートビューに出す。アイコンは受け皿らしく inbox に統一する */
 const inboxView = (stored?: Folder): Folder => ({ id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color });
 const recentView = (): Folder => ({ id: RECENT_ID, name: t('recent7'), icon: 'ti-clock', order: -1 });
+
+/** 一覧に最初に描くポストの数と、末尾に近づいたときに増やす数 (ビューごと。サイドパネルは 30)。調整しやすいように定数にしてある */
+export const PAGE_SIZE: Record<ViewMode, number> = { post: 30, list: 60, grid: 60 };
+export const PAGE_SIZE_SIDEPANEL = 30;
+/** 末尾のこの件数手前まで来たら、↓ キーで先に増やす */
+const KEY_LOOKAHEAD = 5;
+/** 「すべて表示」で、描画 1 回ごとに増やす件数 */
+const SHOW_ALL_STEP = 100;
 
 export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const compact = useCompact();
@@ -108,6 +135,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [noticeIdx, setNoticeIdx] = useState(0);
   /** 自動取り込みの開始の指示が、x.com のブックマークの一覧で受け取られなかった */
   const [startMissed, setStartMissed] = useState(false);
+  /** 未分類の仕分けモード (v29): 始めた時点のキュー。#triage で開かれたときは、データが読めてから始める */
+  const [triage, setTriage] = useState<Bookmark[] | null>(null);
+  const [triageWanted, setTriageWanted] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
@@ -154,6 +184,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setBannerOn(shouldShowImportHint(h));
   };
   useEffect(() => {
+    const entry = takeEntryHash(); // ポップアップからの入口 (#inbox / #q=…)。読んだらハッシュを消す。lastFolderId より優先する
     void (async () => {
       const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts(), refreshCacheView()]).then((r) => [r[0], r[1], r[2]] as const);
       lastRef.current = last;
@@ -163,7 +194,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       await Promise.all([reload(), loadHint()]);
       const ver = currentVersion();
       if (await noteRunVersion(ver)) setUpdated(ver);
-      setCurrent(s.lastFolderId);
+      if (entry?.triage) setTriageWanted(true);
+      setCurrent(entry?.inbox ? INBOX_ID : entry?.q !== undefined ? ALL_FOLDER_ID : s.lastFolderId);
+      if (entry?.q !== undefined) {
+        setSearch(entry.q);
+        setSearchOpen(true);
+      }
       setView(s.viewMode);
       setSort(s.sortKey);
       setReady(true);
@@ -172,12 +208,48 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       setReady(true);
     });
     const onHash = () => {
+      const e = takeEntryHash();
+      if (e?.inbox) {
+        chooseView(INBOX_ID);
+        if (e.triage) setTriageWanted(true);
+      }
+      else if (e?.q !== undefined) {
+        chooseView(ALL_FOLDER_ID);
+        setSearch(e.q);
+        setSearchOpen(true);
+      }
       if (location.hash === '#autocollect') setAutoOpen(true); // x.com の「自動で取り込む…」から開かれた
     };
     window.addEventListener('hashchange', onHash);
     const offs = [() => window.removeEventListener('hashchange', onHash), onSettingsChanged((c) => setAutoCfg(c.autoCollect)), onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
     return () => offs.forEach((o) => o());
   }, []);
+
+  // スクロールしているのは画面全体 (window)。一覧と設定が同じスクロールを共有するので、画面・フォルダ・並べ替え・検索・絞り込みを替えたときに位置を決める。
+  // 保存データが変わっただけの再読み込み (自動取り込み中など) では、この依存が変わらないので、位置は動かさない。位置は保存データに入れない
+  const pageRef = useRef(page);
+  pageRef.current = page;
+  const listScroll = useRef<{ folder: string; y: number } | null>(null);
+  const scrollPrev = useRef({ page, mounted: false });
+  useEffect(() => {
+    const onScroll = () => {
+      if (pageRef.current === 'bookmarks') listScroll.current = { folder: currentRef.current, y: window.scrollY };
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  const currentRef = useRef(current);
+  currentRef.current = current;
+  const filtersKey = JSON.stringify(filters);
+  useLayoutEffect(() => {
+    const prev = scrollPrev.current;
+    scrollPrev.current = { page, mounted: true };
+    if (!prev.mounted) return;
+    const saved = listScroll.current;
+    // 設定から一覧へ戻ったとき: 同じフォルダなら、移る前の位置へ。フォルダが変わっていたら先頭
+    const y = page === 'bookmarks' && prev.page === 'settings' && saved && saved.folder === current ? saved.y : 0;
+    window.scrollTo({ top: y, left: 0, behavior: 'instant' as ScrollBehavior });
+  }, [page, current, sort, search, filtersKey]);
 
   // 最後に開いたフォルダ / 表示形式 / 並べ替えを chrome.storage.local に保存 (localStorage は使わない)
   const chooseView = (id: string) => {
@@ -188,15 +260,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setEditing(null);
     setMenu(null);
     setFilterOpen(false);
-    void updateSettings({ lastFolderId: id });
+    void updateSettings({ lastFolderId: id }).catch(() => {});
   };
   const chooseMode = (m: ViewMode) => {
     setView(m);
-    void updateSettings({ viewMode: m });
+    void updateSettings({ viewMode: m }).catch(() => {});
   };
   const chooseSort = (s: SortKey) => {
     setSort(s);
-    void updateSettings({ sortKey: s });
+    void updateSettings({ sortKey: s }).catch(() => {});
   };
 
   /** x.com で読み取ったアカウントが変わった。別のアカウントに切り替わったら、そのアカウントの表示に切り替えて知らせる */
@@ -208,7 +280,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     if (!next || next.id === prev?.id) return;
     const s = await getSettings();
     if (prev === null && s.viewAccount) return; // 初めて読み取れた: 手動で選んだ表示があればそのまま
-    if (prev !== null) void updateSettings({ viewAccount: '' }); // 別のアカウントに切り替えた: 手動の選択は解く
+    if (prev !== null) void updateSettings({ viewAccount: '' }).catch(() => {}); // 別のアカウントに切り替えた: 手動の選択は解く
     switchTo(next.id);
     if (prev !== null) setToast({ key: Date.now(), message: t('accountSwitched', accountLabel(next)) });
   };
@@ -233,14 +305,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     void Promise.all([reload(), loadHint()]);
   };
   const pickAccount = (id: string) => {
-    void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id }); // x.com でログイン中のアカウントは「選んでいない」と同じ (追従する)
+    void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id }).catch(() => {}); // x.com でログイン中のアカウントは「選んでいない」と同じ (追従する)
     switchTo(id);
   };
   const afterAccountChange = async (removedOrMovedId: string, nextId?: string) => {
     if (viewRef.current === removedOrMovedId) {
       const accs = await listAccounts();
       const id = nextId ?? resolveViewAccount('', lastRef.current, accs.filter((a) => a.account.id !== removedOrMovedId));
-      void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id });
+      void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id }).catch(() => {});
       switchTo(id);
     } else await reload();
   };
@@ -264,7 +336,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const allViews = [...smartViews, ...userFolders];
   const curFolder = allViews.find((f) => f.id === current) ?? smartViews[0];
   /** バッジ・チップ・ピッカー用。「未分類」の見た目を統一する */
-  const folderOf = (id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find((f) => f.id === id));
+  const folderOf = useCallback((id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find((f) => f.id === id)), [folders]); // 保存データが変わるまで同じ関数 (Card の memo のため)
   const pickerFolders = [inboxView(storedInbox), ...userFolders];
 
   const now = Date.now();
@@ -272,10 +344,34 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     () => queryBookmarks(bookmarks, { folderId: curFolder.id, search, sort, filters, now }),
     [bookmarks, curFolder.id, search, sort, filters],
   );
-  const shownIds = shown.map((b) => b.tweetId);
+  // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
+  const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
+  const shownSet = useMemo(() => new Set(shownIds), [shownIds]);
+  // 段階表示: 描くのは shown の先頭から renderCount 件。選択・検索・件数の表示・全選択は、全件 (shown / shownIds) のまま
+  const pageSize = surface === 'sidepanel' ? PAGE_SIZE_SIDEPANEL : PAGE_SIZE[view];
+  const resetKey = `${curFolder.id}|${search}|${sort}|${filtersKey}|${view}|${pageSize}`;
+  const [rcState, setRcState] = useState({ key: resetKey, n: pageSize });
+  // フォルダ・検索・並べ替え・絞り込み・表示を替えると初期値に戻る。保存データが変わっただけでは戻らない (スクロール位置が飛ぶため)
+  const renderCount = rcState.key === resetKey ? rcState.n : pageSize;
+  const growTo = (n: number) => setRcState({ key: resetKey, n: Math.min(shown.length, Math.max(renderCount, n)) });
+  const visible = useMemo(() => shown.slice(0, renderCount), [shown, renderCount]);
+  const remaining = shown.length - visible.length;
+  // 「すべて表示」(v36): 一度に全件を描くと固まるので、描画 1 回ごとに SHOW_ALL_STEP 件ずつ増やす。
+  // 始めたときの resetKey を覚え、フォルダ・検索・並べ替えなどが替わって resetKey が変わったら、続きはやめる
+  const [expandKey, setExpandKey] = useState<string | null>(null);
+  const expanding = expandKey === resetKey && remaining > 0;
+  const tabbableId = focusId && shownSet.has(focusId) && shownIds.indexOf(focusId) < renderCount ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
-  const count = (id: string) => countFolder(bookmarks, id, now);
+  // 件数は保存データが変わるまで使い回す (左のメニューと見出しで、描画のたびに全件を数え直さない。「最近の 7 日」の境目は、保存データが変わるまで動かない)
+  const countCache = useMemo(() => new Map<string, number>(), [bookmarks]);
+  const count = (id: string) => {
+    let n = countCache.get(id);
+    if (n === undefined) countCache.set(id, (n = countFolder(bookmarks, id, now)));
+    return n;
+  };
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
+  /** 仕分けモードが「削除されたポストを飛ばす」ために見る ID。保存データが変わらない再描画では、同じ Set を渡す */
+  const liveIds = useMemo(() => new Set(bookmarks.map((b) => b.tweetId)), [bookmarks]);
   const viewerBookmark = viewer ? bookmarks.find((b) => b.tweetId === viewer.tweetId) : undefined;
   const assignSource = accounts.find((a) => a.account.id === assignFrom);
   const unknownCount = accounts.find((a) => a.account.id === UNKNOWN_ACCOUNT_ID)?.count ?? 0;
@@ -348,6 +444,19 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   };
   const targetIds = (): string[] => (selected.size ? [...selected] : focusId ? [focusId] : []);
 
+  /** 描画のあとでフォーカスする行 (未描画の行へ ↓ で移るとき) */
+  const pendingFocus = useRef<string | null>(null);
+  const focusPending = () => {
+    const id = pendingFocus.current;
+    if (!id) return;
+    const row = [...(listRef.current?.querySelectorAll<HTMLElement>('[data-row]') ?? [])].find((r) => r.dataset.row === id);
+    if (row) {
+      pendingFocus.current = null;
+      row.focus();
+    }
+  };
+  useLayoutEffect(focusPending); // 描画のたびに、待っている行があれば試す
+
   const onListKeyDown = (e: JSX.TargetedKeyboardEvent<HTMLDivElement>) => {
     const el = e.target as HTMLElement;
     if (el.closest('input,select,textarea')) return; // 入力欄の操作は邪魔しない
@@ -360,10 +469,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const idx = curId ? shownIds.indexOf(curId) : -1;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
-      const next = shownIds[Math.min(shownIds.length - 1, Math.max(0, idx + (e.key === 'ArrowDown' ? 1 : -1)))];
+      const nextIdx = Math.min(shownIds.length - 1, Math.max(0, idx + (e.key === 'ArrowDown' ? 1 : -1)));
+      const next = shownIds[nextIdx];
       if (next) {
+        // 次が未描画、または末尾の手前に来たときは、先に描く件数を増やす (描画のあとでフォーカスする)
+        if (nextIdx >= renderCount - KEY_LOOKAHEAD && remaining > 0) growTo(nextIdx + pageSize);
         setFocusId(next);
-        [...(listRef.current?.querySelectorAll<HTMLElement>('[data-row]') ?? [])].find((r) => r.dataset.row === next)?.focus();
+        pendingFocus.current = next;
+        focusPending();
       }
     } else if (e.key === ' ' && el.hasAttribute('data-row') && curId) {
       e.preventDefault();
@@ -647,25 +760,53 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   );
 
   const searching = search.trim() !== '' || hasActiveFilters(filters);
+  /** 始めた時点の未分類を、いまの並び順で固定した列にして、仕分けモードを始める。未分類が 0 件なら始めない */
+  const startTriage = async () => {
+    try {
+      // 取り込み完了の直後でも、最後に保存された分が入るよう、始める直前に保存データを読み直す (state が古いことがある)
+      const fresh = await listBookmarks();
+      setBookmarks(fresh);
+      const queue = queryBookmarks(fresh, { folderId: INBOX_ID, search: '', sort, filters: {}, now: Date.now() });
+      if (queue.length) setTriage(queue);
+    } catch {
+      reportStorageError(); // 読み込めなかったときは始めない
+    }
+  };
+  useEffect(() => {
+    if (!triageWanted || !ready) return;
+    setTriageWanted(false);
+    void startTriage();
+  }, [triageWanted, ready]);
+  const clearAll = () => {
+    setSearch('');
+    setFilters({});
+  };
   const empty =
     shown.length === 0 &&
     (bookmarks.length === 0 ? (
       <div class="empty-state">
         <Icon name="ti-bookmarks" />
-        <div class="empty-title">{t('noPostsTitle')}</div>
-        <div>{t('noPostsHint')}</div>
+        <div class="empty-title">{t('onboardTitle')}</div>
+        <ol class="onboard">
+          <li>
+            <span class="onboard-n" aria-hidden="true">1</span>
+            <span class="onboard-text">{t('onboardStep1')}</span>
+          </li>
+          <li>
+            <span class="onboard-n" aria-hidden="true">2</span>
+            <span class="onboard-text">{t('onboardStep2')}</span>
+            <button class="onboard-btn" onClick={() => (autoCfg.enabled && lastSeen ? setAutoOpen(true) : setShowHow(true))}>
+              {t('onboardImport')}
+            </button>
+          </li>
+        </ol>
       </div>
     ) : searching ? (
       <div class="empty-state">
         <Icon name="ti-search" />
         <div class="empty-title">{t('notFoundTitle')}</div>
         <div>{t('notFoundHint')}</div>
-        <button
-          onClick={() => {
-            setSearch('');
-            setFilters({});
-          }}
-        >
+        <button onClick={clearAll}>
           {t('clearFilters')}
         </button>
       </div>
@@ -673,9 +814,86 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       <p class="empty">{t('empty')}</p>
     ));
 
+  // 行の操作は、親が 1 度だけ作る安定したオブジェクト (Card の memo のため)。中身は、描画のたびに最新の関数に差し替える
+  const latest = useRef<RowHandlers>(null as unknown as RowHandlers);
+  latest.current = {
+    select: (id, shift) => toggleSelect(id, shift),
+    focus: (id) => setFocusId(id),
+    removeFromFolder: (id, fid) => void run(removeFromFolders([id], [fid]), 'toastRemoved'),
+    togglePicker: (id) => setPicker(picker === id ? null : id),
+    del: (id) => setConfirmState({ kind: 'posts', ids: [id] }),
+    dragStart: (id, e) => {
+      const ids = selected.has(id) ? [...selected] : [id];
+      e.dataTransfer?.setData(MIME_POSTS, JSON.stringify(ids));
+      if (e.dataTransfer) e.dataTransfer.effectAllowed = 'copyMove';
+    },
+    openImage: (id, index) => setViewer({ kind: 'image', tweetId: id, index }),
+    openVideo: (id) => setViewer({ kind: 'video', tweetId: id }),
+  };
+  const rowHandlers = useMemo<RowHandlers>(
+    () => ({
+      select: (id, shift) => latest.current.select(id, shift),
+      focus: (id) => latest.current.focus(id),
+      removeFromFolder: (id, fid) => latest.current.removeFromFolder(id, fid),
+      togglePicker: (id) => latest.current.togglePicker(id),
+      del: (id) => latest.current.del(id),
+      dragStart: (id, e) => latest.current.dragStart(id, e),
+      openImage: (id, index) => latest.current.openImage(id, index),
+      openVideo: (id) => latest.current.openVideo(id),
+    }),
+    [],
+  );
+  // 末尾の手前 (画面の高さの 1.5 倍) に入ったら、1 回分増やす。IntersectionObserver が無い環境では、「すべて表示」のボタンで増やす
+  // 末尾の要素は、コールバック ref + 状態で持つ。useRef だと、データを読んだ描画ではまだ DOM が無く (ready 前)、
+  // 一覧が描かれたあとも依存の値が変わらないので、効果が再実行されず、30 件で止まった (v36)
+  useEffect(() => {
+    if (!expanding) return;
+    const raf = requestAnimationFrame(() => growTo(renderCount + SHOW_ALL_STEP));
+    return () => cancelAnimationFrame(raf);
+  }, [expanding, renderCount, resetKey, shown]);
+  useEffect(() => {
+    if (expandKey !== null && (expandKey !== resetKey || remaining <= 0)) setExpandKey(null);
+  }, [expandKey, resetKey, remaining]);
+  const [sentinel, setSentinel] = useState<HTMLSpanElement | null>(null);
+  useEffect(() => {
+    const el = sentinel;
+    // 「すべて表示」で増やしている間は付けない (1 フレームごとに作り直して測り直すのは無駄。終われば expanding が変わり、付け直す)
+    if (!el || remaining <= 0 || expanding) return;
+    // IntersectionObserver だけに頼らない。実機で「すべて」が 30 件で止まったのは、末尾の要素が効果より遅れて現れ、効果が再実行されなかったため (v36 で直した。
+    // sentinel を状態にして依存に入れている)。念のため、scroll / resize と、描画のたびに、末尾までの距離も測る。
+    // どちらで増やしても、増やす先は今の renderCount が基準 (同じ値を入れるだけなので、二重には増えない)
+    const check = () => {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0 && r.top === 0) return; // まだ配置されていない (測れない)
+      if (r.top < window.innerHeight * 2) growTo(renderCount + pageSize);
+    };
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        check();
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    onScroll(); // 増やしたあとも、まだ末尾が近ければ続けて増やす
+    let io: IntersectionObserver | undefined;
+    if (typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && growTo(renderCount + pageSize), { rootMargin: `${Math.round(window.innerHeight * 1.5)}px 0px` });
+      io.observe(el);
+    }
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+      io?.disconnect();
+    };
+  }, [sentinel, renderCount, remaining, resetKey, expanding]);
   const rows = (
+    <SearchContext.Provider value={search}>
     <div class={`rows view-${view}${compact ? ' compact' : ''}`} ref={listRef} onKeyDown={onListKeyDown} role="list">
-      {shown.map((b) => (
+      {visible.map((b) => (
         <Card
           key={b.tweetId}
           b={b}
@@ -683,21 +901,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           compact={compact}
           selected={selected.has(b.tweetId)}
           selectionActive={selected.size > 0}
-          tabbable={focusId && shownIds.includes(focusId) ? focusId === b.tweetId : b.tweetId === shownIds[0]}
+          tabbable={b.tweetId === tabbableId}
           folderOf={folderOf}
           pickerOpen={picker === b.tweetId}
-          onSelect={(shift) => toggleSelect(b.tweetId, shift)}
-          onOpenImage={(index) => b.snapshot.media.length > 0 && setViewer({ kind: 'image', tweetId: b.tweetId, index })}
-          onOpenVideo={() => setViewer({ kind: 'video', tweetId: b.tweetId })}
-          onFocus={() => setFocusId(b.tweetId)}
-          onRemoveFromFolder={(fid) => void run(removeFromFolders([b.tweetId], [fid]), 'toastRemoved')}
-          onTogglePicker={() => setPicker(picker === b.tweetId ? null : b.tweetId)}
-          onDelete={() => setConfirmState({ kind: 'posts', ids: [b.tweetId] })}
-          onDragStart={(e) => {
-            const ids = selected.has(b.tweetId) ? [...selected] : [b.tweetId];
-            e.dataTransfer?.setData(MIME_POSTS, JSON.stringify(ids));
-            if (e.dataTransfer) e.dataTransfer.effectAllowed = 'copyMove';
-          }}
+          h={rowHandlers}
           pickerNode={
             picker === b.tweetId ? (
               <Dropdown fixed onClose={() => setPicker(null)} label={t('changeFolder')} class="menu-wide">
@@ -719,6 +926,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         />
       ))}
     </div>
+    {remaining > 0 && (
+      <div class="list-more">
+        <span ref={setSentinel} class="list-sentinel" aria-hidden="true" />
+        <span class="muted">{t('listRemaining', remaining)}</span>
+        <button type="button" disabled={expanding} onClick={() => setExpandKey(resetKey)}>
+          {t('listShowAll')}
+        </button>
+      </div>
+    )}
+    </SearchContext.Provider>
   );
 
   // 案内を出す条件: 自動取り込みを使う設定、判定できたアカウントを表示していて、そのアカウントのデータが 0 件、案内を閉じていない。
@@ -740,6 +957,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       {collectRun && collectRun.updatedAt !== runClosed && autoCfg.enabled && !staleResult(collectRun) && (
         <ProgressBanner
           run={collectRun}
+          onTriage={() => {
+            chooseView(INBOX_ID);
+            if (!compact) setTriageWanted(true);
+          }}
           onClose={() => {
             setRunClosed(collectRun.updatedAt);
             // 終わった状態 (done / stopped) は、保存してある記録も消す。進行中の状態は消さない
@@ -788,6 +1009,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   const dialogs = (
     <>
+      {triage && (
+        <Triage
+          queue={triage}
+          live={liveIds}
+          folders={userFolders}
+          pickerFolders={pickerFolders}
+          onChanged={() => reload()}
+          onClose={() => setTriage(null)}
+        />
+      )}
       {confirmState && (
         <Confirm
           message={confirmMessage(confirmState)}
@@ -930,6 +1161,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               {bulkMenu ?? viewSeg}
             </div>
           )}
+          {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         </header>
         <main class="pbody">
           {page === 'settings' ? (
@@ -938,7 +1170,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             body
           )}
         </main>
-        {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         {dialogs}
       </div>
     );
@@ -976,6 +1207,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         </a>
       </aside>
       <main class="main">
+        {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         {page === 'settings' ? (
           settingsPage
         ) : (
@@ -983,7 +1215,17 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             <div class="top">
               <Icon name={curFolder.icon} color={curFolder.color} />
               <span class="bar-name">{viewName}</span>
-              <span class="muted bar-count">{t('itemCount', count(curFolder.id))}</span>
+              <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
+              {curFolder.id === INBOX_ID && count(INBOX_ID) > 0 && (
+                <button class="triage-start" onClick={() => void startTriage()}>
+                  <Icon name="ti-bolt" /> {t('triageStart')}
+                </button>
+              )}
+              {searching && (
+                <button class="bar-clear" onClick={clearAll}>
+                  {t('clearFilters')}
+                </button>
+              )}
               {searchBox}
               {sortMenu}
               {viewSeg}
@@ -993,7 +1235,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </>
         )}
       </main>
-      {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
       {dialogs}
     </div>
   );

@@ -12,7 +12,7 @@
  * 実機未確認 (docs/MANUAL_TEST.md): X の一覧の仮想化への追従、終わりの判定、制限・エラー表示のセレクタ。
  * 判定の条件は定数にして、調整しやすくしてある。
  */
-import { isBookmarksPath, queryFirst, timelineLoading } from '../shared/selectors';
+import { isBookmarksPath, queryAllFirst, queryFirst, timelineLoading } from '../shared/selectors';
 import {
   clearCollectCommand, clearCollectRun, getCollectRun, getSettings, onCollectCommand, onCollectRunChanged, peekCollectCommand, saveCollectRun, setCollectOffer,
   type CollectCap, type CollectCommand, type CollectReason, type CollectRun, type CollectSpeed,
@@ -21,10 +21,14 @@ import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
 import { requestFullTextBatch } from '../shared/cacheRequest';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible } from './collect';
-import type { Extracted } from './snapshot';
+import { tweetIdOf, type Extracted } from './snapshot';
 
 /** スクロールごとの待ち時間 (ミリ秒) の範囲 */
 export const SPEED_RANGES: Record<CollectSpeed, [number, number]> = { slow: [2000, 4000], normal: [1000, 2500] };
+/** スクロール後の待ちの下限 (v32)。実際の下限は、この値から 1.5 倍までの乱数 (上限 = 速度ごとの待ちの範囲を超えない) */
+export const WAIT_FLOORS: Record<CollectSpeed, number> = { slow: 800, normal: 400 };
+/** 下限を過ぎたあと、新しいポストを調べる間隔。この刻みで一時停止・停止にも反応する */
+export const WAIT_STEP_MS = 100;
 /** 画面の高さのこの割合ずつスクロールする */
 export const SCROLL_RATIO = 0.8;
 /** 新しいポスト (取り込み済みを含む) が、この回数続けて出なかったら、終わりとみなす (読み込み中の表示が無いとき)。実機未確認 */
@@ -64,6 +68,8 @@ export interface CollectDeps {
   scrollY(): number;
   viewportHeight(): number;
   visible(): Extracted[];
+  /** 画面に、seen にまだ無いポストがあるか (ID だけを軽く読む。スナップショットは作らない)。無ければ、待ちは上限まで */
+  hasUnseen(seen: ReadonlySet<string>): boolean;
   isLoading(): boolean;
   hasLimit(): boolean;
   /** /i/history のブックマークのタブか (/i/history/likes などは false) */
@@ -92,6 +98,10 @@ export function defaultDeps(): CollectDeps {
     scrollY: () => window.scrollY,
     viewportHeight: () => window.innerHeight,
     visible: () => collectVisible(),
+    hasUnseen: (seen) => queryAllFirst(document, 'tweet').els.some((a) => {
+      const id = tweetIdOf(a);
+      return !!id && !seen.has(id);
+    }),
     isLoading: () => timelineLoading(document),
     hasLimit: () => !!queryFirst(document, 'xError'),
     pageOk: () => isBookmarksPath(location.pathname),
@@ -270,6 +280,24 @@ export class AutoCollector {
     return Math.round(min + this.d.random() * (max - min));
   }
 
+  /**
+   * スクロール後の待ち (v32)。上限 (ceiling) は従来の delay()。下限 (floor〜floor×1.5 の乱数、ceiling 以内) を待ったあと、
+   * 100ms ごとに新しいポストを調べ、あれば直ちに終える。出なければ ceiling まで待つ (従来と同じ)。
+   * X が新しいポストをいつ DOM に出すかは実機未確認。
+   */
+  private async waitAfterScroll(alive: () => boolean): Promise<void> {
+    const ceiling = this.delay();
+    const probe = this.d.hasUnseen;
+    const floor = Math.min(Math.round(WAIT_FLOORS[this.state!.speed] * (1 + 0.5 * this.d.random())), ceiling);
+    let waited = 0;
+    while (alive() && waited < ceiling) {
+      const step = Math.min(WAIT_STEP_MS, waited < floor ? floor - waited : ceiling - waited);
+      await this.d.sleep(step);
+      waited += step;
+      if (waited >= floor && probe.call(this.d, this.seen)) return;
+    }
+  }
+
   private async loop(token: number): Promise<void> {
     const alive = () => token === this.token;
     while (alive()) {
@@ -291,7 +319,7 @@ export class AutoCollector {
       if ((this.streak >= END_STREAK && !this.d.isLoading()) || this.stalled >= STALL_END) return void (await this.finish());
       const y0 = this.d.scrollY();
       this.d.scrollBy(Math.round(this.d.viewportHeight() * SCROLL_RATIO));
-      await this.d.sleep(this.delay());
+      await this.waitAfterScroll(alive);
       if (!alive()) return;
       // X の一覧は下端で追加のポストを読み込む。読み込み中の表示が消えるまで (上限つきで) 待つ
       for (let waited = 0; alive() && waited < LOAD_WAIT_MS && this.d.isLoading(); waited += LOAD_POLL_MS) await this.d.sleep(LOAD_POLL_MS);

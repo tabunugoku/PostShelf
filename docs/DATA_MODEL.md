@@ -24,6 +24,8 @@
 - 保存し直す (フォルダを変更する) と、その時点のスナップショットで `hasVideo` / `hasLink` が入る
 
 ## `settings`
+
+(v28) 任意の項目 `recentFolderIds?: string[]` (x.com の保存ポップオーバーの「最近使った」。最大 3 件、新しい順。「未分類」と「すべて」は入れない。無い・不正な値は空として扱う)。
 `{ syncNative, buttonMode, actionMode, lastFolderId, viewMode, sortKey, viewAccount, imageCache, autoCollect }`
 - `autoCollect` (**v15**): `{ enabled: true, speed: 'slow' | 'normal', cap: 300 | 100 | 0, offers: Record<accountId, 'dismissed' | 'done'> }`。初期化の対象 (`offers` も戻る)。`cap` の 0 は「止めない」。`offers` は案内の記録 (dismissed = 「このアカウントでは表示しない」/ done = 取り込みが終わった)
 - `imageCache` (**v11**): `{ enabled: false, backend: 'idb' | 'dir', maxBytes: 1 GB, quality: 'large' | 'orig', onFull: 'evict' | 'stop' }`。初期化の対象

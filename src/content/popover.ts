@@ -1,12 +1,12 @@
 import { queryFirst } from '../shared/selectors';
-import { t } from '../shared/strings';
+import { jaWrapRule, t, uiLang } from '../shared/strings';
 import { extractTweet } from './snapshot';
 import { getBookmark, listFolders, removeBookmark, setBookmarkFolders } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
-import { createFolderPicker, divider, flatButton } from '../shared/folderPicker';
+import { createFolderPicker, divider, iconButton } from '../shared/folderPicker';
 import { setNativeBookmark } from './native';
-import { getSettings, type ButtonMode } from '../shared/settings';
+import { getSettings, updateRecentFolders, type ButtonMode } from '../shared/settings';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { requestCache, requestFullText, requestPrune } from '../shared/cacheRequest';
 
@@ -17,8 +17,18 @@ export const setPopoverMode = (m: ButtonMode): void => {
   mode = m;
 };
 
+/** ポップオーバーの日本語の折り返しの規則 (:lang(ja)) を、1 度だけ <style> として入れる */
+function ensureWrapStyle(): void {
+  if (document.getElementById('postshelf-popover-style')) return;
+  const s = document.createElement('style');
+  s.id = 'postshelf-popover-style';
+  s.textContent = jaWrapRule(`.${POP_CLASS}`);
+  document.head.append(s);
+}
+
 /** ポップオーバーのアイコン用に、同梱の Tabler Icons CSS を 1 度だけ読み込む (拡張内ファイル。外部通信なし) */
 export function ensureIconCss(): void {
+  ensureWrapStyle();
   if (document.getElementById('postshelf-icons')) return;
   const link = document.createElement('link');
   link.id = 'postshelf-icons';
@@ -54,13 +64,16 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   const folders = (await listFolders()).filter((f) => !isBuiltinFolder(f.id));
   const existing = await getBookmark(tweetId);
   const selected = new Set(existing?.folderIds ?? []);
+  let chosen = new Set(selected); // 直前の保存時の選択。新しく入れたフォルダを「最近使った」へ入れるために比べる
+  const recentIds = (await getSettings()).recentFolderIds ?? [];
   let isSaved = !!existing; // 「PostShelf から外す」を出すかどうか
 
   const pop = document.createElement('div');
   pop.className = POP_CLASS;
   pop.setAttribute('role', 'dialog');
   const th = xTheme();
-  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif`;
+  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;text-wrap:pretty`;
+  pop.lang = uiLang(); // X のページの lang ではなく UI の言語で折り返す
   pop.addEventListener('click', (e) => e.stopPropagation());
 
   // 保存先の表示 (アバター小 + @ハンドル)。判定できないときは警告だけを出して保存させない
@@ -103,17 +116,23 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     await setBookmarkFolders(tweetId, [...selected], snapshot); // 「未分類」だけでも保存する (保存の解除は「PostShelf から外す」だけ)
     isSaved = true;
     showUnsave(true);
+    const added = [...selected].filter((id) => !chosen.has(id));
+    chosen = new Set(selected);
     if (account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
     if (account && snapshot.truncated) requestFullText(tweetId, account.id); // たたまれた状態で保存したとき: 設定がオンなら、background が全文を取る (v24)
     // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
-    if ((await getSettings()).syncNative) setNativeBookmark(article, true);
+    try {
+      if ((await getSettings()).syncNative) setNativeBookmark(article, true);
+    } catch {
+      /* 設定を読めなくても、保存は成功している。X 側の同期だけ飛ばす */
+    }
+    // 「最近使った」は最後に。失敗しても、保存の流れは止めない (保存はもう成功している)
+    if (added.length) void updateRecentFolders(added).catch(() => {});
   };
-  // 保存の解除は、明示的な操作だけ (保存済みのときだけ表示。区切り線の下に、赤い文字で置く)
-  const unsave = flatButton(th, t('removeFromPostShelf'), 'ti-trash', 'danger');
-  const unsaveLine = divider(th);
+  // 保存の削除は、明示的な操作だけ (保存済みのときだけ表示。確認は出さない)。アイコンだけのボタンで、下部の 1 行の右端に置く
+  const unsave = iconButton(th, t('removeFromPostShelf'), 'ti-trash', 'danger');
   const showUnsave = (on: boolean) => {
     unsave.style.display = on ? 'flex' : 'none';
-    unsaveLine.style.display = on ? 'block' : 'none';
   };
   showUnsave(isSaved);
   unsave.addEventListener('click', async () => {
@@ -122,11 +141,12 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
       await removeBookmark(tweetId);
       isSaved = false;
       selected.clear();
+      chosen = new Set();
       picker.sync();
       showUnsave(false);
       requestPrune();
       if ((await getSettings()).syncNative) setNativeBookmark(article, false);
-      errorEl.style.display = 'none';
+      closePopovers();
     } catch {
       errorEl.textContent = t('errorStorage');
       errorEl.style.display = 'block';
@@ -138,6 +158,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     selected,
     theme: th,
     onChange: () => save(),
+    extras: { recentIds },
   });
   if (account) pop.append(picker.el);
   pop.append(errorEl);
@@ -153,16 +174,20 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     });
     pop.append(rel);
   }
-  // サイドパネルで開く (content script からは直接開けないので background へ依頼する。ユーザーのクリック直後に送る)
-  const side = flatButton(th, t('openSidePanel'), 'ti-layout-sidebar-right', 'sub');
+  // 下部の 1 行: 左端にサイドパネル、右端に削除 (どちらもアイコンだけ)。content script からは直接開けないので、background へ依頼する
+  const side = iconButton(th, t('openSidePanel'), 'ti-layout-sidebar-right');
   side.addEventListener('click', () => {
     void chrome.runtime?.sendMessage?.({ type: 'openSidePanel' });
     closePopovers();
   });
-  pop.append(side);
-  if (account) pop.append(unsaveLine, unsave);
+  const bottom = document.createElement('div');
+  bottom.style.cssText = 'box-sizing:border-box;display:flex;align-items:center;justify-content:space-between';
+  bottom.append(side);
+  if (account) bottom.append(unsave);
+  pop.append(divider(th), bottom);
   document.body.append(pop);
   position(pop, anchor);
+  picker.focusFilter();
   return pop;
 }
 

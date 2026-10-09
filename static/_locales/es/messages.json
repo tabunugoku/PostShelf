@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "carpetas"
   },
+  "popupInbox": {
+    "message": "Ordenar sin clasificar"
+  },
+  "popupSearch": {
+    "message": "Buscar publicaciones guardadas"
+  },
   "recent": {
     "message": "Guardadas recientemente (3)"
   },
@@ -187,6 +193,25 @@
   },
   "settingsJump": {
     "message": "Ir a un grupo de ajustes"
+  },
+  "settingsSearch": {
+    "message": "Buscar ajustes"
+  },
+  "settingsMatchCount": {
+    "message": "$COUNT$ coincidencias con «$QUERY$»",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "Cambios guardados"
   },
   "syncNativeSection": {
     "message": "Sincronización con los marcadores de X"
@@ -383,6 +408,33 @@
   "openSidePanel": {
     "message": "Abrir en el panel lateral"
   },
+  "folderFilter": {
+    "message": "Filtrar carpetas"
+  },
+  "folderRecent": {
+    "message": "Recientes"
+  },
+  "folderAll": {
+    "message": "Todas las carpetas ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "Guardado en $COUNT$ carpeta(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "Guardado en Sin clasificar"
+  },
   "openInTab": {
     "message": "Abrir en una pestaña"
   },
@@ -430,6 +482,19 @@
     "placeholders": {
       "count": {
         "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "itemCountOf": {
+    "message": "$SHOWN$ de $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
         "example": "3"
       }
     }
@@ -500,6 +565,18 @@
   "noPostsHint": {
     "message": "Pulsa el botón de carpeta de una publicación en x.com para guardarla. Las publicaciones que ya marcaste se pueden importar desde Marcadores en el historial de x.com."
   },
+  "onboardTitle": {
+    "message": "Empecemos"
+  },
+  "onboardStep1": {
+    "message": "En x.com, pulsa el botón de carpeta de una publicación"
+  },
+  "onboardStep2": {
+    "message": "Importa tus marcadores actuales"
+  },
+  "onboardImport": {
+    "message": "Importar"
+  },
   "folderMore": {
     "message": "Cambiar nombre, icono, color"
   },
@@ -523,6 +600,67 @@
   },
   "saveCurrentHint": {
     "message": "Se muestra mientras hay una publicación abierta en x.com"
+  },
+  "activePostTitle": {
+    "message": "Publicación abierta"
+  },
+  "activeSaved": {
+    "message": "Guardado ($FOLDER$)",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "$COUNT$ más",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageStart": {
+    "message": "Modo ordenar"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "Omitir"
+  },
+  "triageBack": {
+    "message": "Atrás"
+  },
+  "triageHint": {
+    "message": "1–9 añadir · Esc salir"
+  },
+  "triageDone": {
+    "message": "Orden terminado"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ ordenadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "Otras carpetas"
   },
   "saveCurrentFail": {
     "message": "No se pudo leer esta publicación. Recarga la página e inténtalo de nuevo."
@@ -1128,7 +1266,7 @@
     "message": "Error al guardar o cargar. Inténtalo de nuevo. Si sigue ocurriendo, guarda tus datos con «Exportar» en Ajustes y vuelve a cargar la extensión."
   },
   "removeFromPostShelf": {
-    "message": "Quitar de PostShelf"
+    "message": "Eliminar de PostShelf"
   },
   "acPanelLabel": {
     "message": "Importación automática de marcadores"
@@ -1275,6 +1413,25 @@
   "acBtnPause": {
     "message": "Pausar"
   },
+  "acBtnCollapse": {
+    "message": "Contraer"
+  },
+  "acBtnExpand": {
+    "message": "Abrir"
+  },
+  "acCollapsedLine": {
+    "message": "Importando · $IMPORTED$ importados · $FAILED$ fallidos",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "Detener"
   },
@@ -1289,6 +1446,9 @@
   },
   "acBtnOpenManager": {
     "message": "Abrir el gestor"
+  },
+  "acBtnTriage": {
+    "message": "Ordenar"
   },
   "acBtnClose": {
     "message": "Cerrar"
@@ -1431,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "Ya existe una carpeta con este nombre"
+  },
+  "listRemaining": {
+    "message": "$COUNT$ más",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "Mostrar todo"
   }
 }

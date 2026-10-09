@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "フォルダ"
   },
+  "popupInbox": {
+    "message": "未分類を仕分ける"
+  },
+  "popupSearch": {
+    "message": "保存したポストを検索"
+  },
   "recent": {
     "message": "最近保存した 3 件"
   },
@@ -188,6 +194,25 @@
   "settingsJump": {
     "message": "設定のグループへ移動"
   },
+  "settingsSearch": {
+    "message": "設定を探す"
+  },
+  "settingsMatchCount": {
+    "message": "「$QUERY$」に一致 $COUNT$ 件",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "変更を保存しました"
+  },
   "syncNativeSection": {
     "message": "X のブックマークとの連動"
   },
@@ -219,7 +244,7 @@
     "message": "標準ブックマークボタンの動作"
   },
   "buttonModeSeparate": {
-    "message": "別ボタンを追加する（標準ボタンには触らない）"
+    "message": "別ボタンを追加する（標準ボタンには触れない）"
   },
   "buttonModeReplace": {
     "message": "標準ボタンの動作を置き換える（Shift+クリックで X 標準）"
@@ -383,6 +408,33 @@
   "openSidePanel": {
     "message": "サイドパネルで開く"
   },
+  "folderFilter": {
+    "message": "フォルダを絞り込み"
+  },
+  "folderRecent": {
+    "message": "最近使った"
+  },
+  "folderAll": {
+    "message": "すべてのフォルダ（$COUNT$）",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "$COUNT$ 個のフォルダに保存済み",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "未分類に保存済み"
+  },
   "openInTab": {
     "message": "タブで開く"
   },
@@ -430,6 +482,19 @@
     "placeholders": {
       "count": {
         "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "itemCountOf": {
+    "message": "$TOTAL$ 件中 $SHOWN$ 件",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
         "example": "3"
       }
     }
@@ -500,6 +565,18 @@
   "noPostsHint": {
     "message": "x.com でポストのフォルダボタンを押して保存します。すでにブックマークしてあるポストは、x.com の履歴の「ブックマーク」から取り込めます。"
   },
+  "onboardTitle": {
+    "message": "はじめましょう"
+  },
+  "onboardStep1": {
+    "message": "x.com のポストで、フォルダのボタンを押す"
+  },
+  "onboardStep2": {
+    "message": "いまのブックマークを取り込む"
+  },
+  "onboardImport": {
+    "message": "取り込む"
+  },
   "folderMore": {
     "message": "名前・アイコン・色を変更"
   },
@@ -522,10 +599,71 @@
     "message": "いま開いているポストを保存…"
   },
   "saveCurrentHint": {
-    "message": "x.com のポストを開いているときに表示"
+    "message": "x.com のポストを開いているときに表示されます"
+  },
+  "activePostTitle": {
+    "message": "いま開いているポスト"
+  },
+  "activeSaved": {
+    "message": "保存しました（$FOLDER$）",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "他 $COUNT$ 個",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageStart": {
+    "message": "仕分けモード"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "あとで"
+  },
+  "triageBack": {
+    "message": "戻る"
+  },
+  "triageHint": {
+    "message": "数字キーで入れる · Esc で終了"
+  },
+  "triageDone": {
+    "message": "仕分けが終わりました"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ 件を仕分けました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "他のフォルダ"
   },
   "saveCurrentFail": {
-    "message": "このポストを読み取れませんでした。ページを再読み込みしてから、もう一度お試しください。"
+    "message": "このポストを読み取れませんでした。ページを再読み込みしてから、もう一度試してください。"
   },
   "healthTitle": {
     "message": "X の画面構造"
@@ -555,7 +693,7 @@
     "message": "診断情報"
   },
   "diagNotice": {
-    "message": "この内容がクリップボードにコピーされます。ポストの本文、ユーザー名、URL は含まれません。含まれるのは、拡張のバージョン、ブラウザの情報、表示言語、X の画面構造の骨組みです。"
+    "message": "この内容がクリップボードにコピーされます。ポストの本文、ユーザー名、URL は含まれません。含まれるのは、拡張機能のバージョン、ブラウザの情報、表示言語、X の画面構造の骨組みです。"
   },
   "diagCopy": {
     "message": "コピー"
@@ -613,7 +751,7 @@
     "message": "データの割り当て"
   },
   "accountAssignDesc": {
-    "message": "$NAME$ の保存データ（$COUNT$ 件）を、選んだアカウントへ移します。同じポストがすでにある場合は、そのポストが入っているフォルダを合わせます。",
+    "message": "$NAME$ の保存データ（$COUNT$ 件）を、選んだアカウントへ移します。同じポストがすでにある場合は、両方のフォルダに入った状態にまとめます。",
     "placeholders": {
       "name": {
         "content": "$1"
@@ -809,7 +947,7 @@
     "message": "オンにすると、保存先・容量・画質を選べます"
   },
   "cachePermNote": {
-    "message": "初めてオンにするとき、Chrome が「pbs.twimg.com（X の画像サーバー）へのアクセス」の許可を求めます。許可は、この機能をオンにしたときだけ求めます。"
+    "message": "初めてオンにするとき、Chrome が「pbs.twimg.com（X の画像サーバー）へのアクセス」の許可を求めます。この機能を使わなければ、許可は求めません。"
   },
   "cachePermDenied": {
     "message": "画像サーバーへのアクセスが許可されなかったため、オンにできませんでした。もう一度オンにして、許可してください。"
@@ -856,7 +994,7 @@
     "message": "Chrome を再起動すると、フォルダへのアクセス許可が外れることがあります。許可するまで、画像はフォルダに書き込まず、X の画像サーバーから読みます。"
   },
   "cacheDirTabOnly": {
-    "message": "フォルダの選択はタブ版の管理画面で行います（サイドパネルでは選べません）。タブ版で選んでください。"
+    "message": "サイドパネルではフォルダを選べません。タブ版の管理画面で選んでください。"
   },
   "cacheDirUnsupported": {
     "message": "このブラウザの拡張機能のページでは、フォルダを選べませんでした。保存先は「ブラウザの中」を使ってください。"
@@ -865,7 +1003,7 @@
     "message": "PostShelf の画像キャッシュです。消しても、PostShelf 本体のデータは消えません。\n「images」フォルダの中に、ポスト ID ごとのフォルダがあります。"
   },
   "cacheDirNonEmpty": {
-    "message": "このフォルダは PostShelf が作ったものではなく、すでに別のファイルが入っています。ここに「.postshelf」「README.txt」「images」フォルダを作ってよいですか？ 選んだフォルダにある他のファイルには触りません。"
+    "message": "このフォルダは PostShelf が作ったものではなく、すでに別のファイルが入っています。ここに「.postshelf」「README.txt」「images」フォルダを作ってよいですか？ 選んだフォルダにある他のファイルには触れません。"
   },
   "cacheDirNonEmptyOk": {
     "message": "作成する"
@@ -952,7 +1090,7 @@
     "message": "容量がいっぱいのため、途中で止めました。"
   },
   "cacheBulkHelp": {
-    "message": "まとめてキャッシュは、1 枚ずつ順に読み込みます。進捗を表示し、いつでも止められます。止めても、次に押すと続きから始まります。ポストを削除すると、そのポストの画像も消えます。"
+    "message": "まとめてキャッシュするときは、1 枚ずつ順に読み込みます。進捗を表示し、いつでも止められます。止めても、次に押すと続きから始まります。ポストを削除すると、そのポストの画像も消えます。"
   },
   "cacheClear": {
     "message": "キャッシュを削除"
@@ -1011,13 +1149,13 @@
     "message": "画像を移せませんでした。保存先の許可を確認してください。"
   },
   "cacheCleanupNeeded": {
-    "message": "削除したポストのうち、画像の削除が済んでいないものがあります。保存先の許可を確認してから、「今すぐ整理」を押してください。"
+    "message": "削除したポストのうち、画像の削除が済んでいないものがあります。保存先の許可を確認してから、「いますぐ整理」を押してください。"
   },
   "cacheCleanupNow": {
-    "message": "今すぐ整理"
+    "message": "いますぐ整理"
   },
   "cacheRules": {
-    "message": "保存した画像は、この PC の中だけに置き、外部へは送りません。拡張機能を削除すると、ブラウザの中のキャッシュも消えます（選んだフォルダは消えません）。本当に残したい画像は「自分で選んだフォルダ」に保存してください。保存データ本体の備えには、JSON のエクスポートを使ってください（画像は含まれず、URL のみです）。"
+    "message": "保存した画像は、この PC の中だけに置き、外部へは送りません。拡張機能を削除すると、ブラウザの中のキャッシュも消えます（選んだフォルダは消えません）。本当に残したい画像は「自分で選んだフォルダ」に保存してください。保存データ本体のバックアップには、JSON のエクスポートを使ってください（画像は含まれず、URL のみです）。"
   },
   "fullTextTitle": {
     "message": "長いポストの全文"
@@ -1026,7 +1164,7 @@
     "message": "長いポストの全文を取得する"
   },
   "fullTextSwitchDesc": {
-    "message": "X で「さらに表示」とたたまれたポストを保存すると、そのポストのページを裏のタブで開いて全文を読み、閉じます。1 件ごとに 4〜8 秒の間隔をあけ、いま見ているタブには触れません。X の規約上、自動化されたアクセスとみなされる可能性があります（法的な助言ではありません）。オフにすると、たたまれた分だけを保存します。"
+    "message": "X で「さらに表示」と省略されたポストを保存すると、そのポストのページを裏のタブで開いて全文を読み、閉じます。1 件ごとに 4〜8 秒の間隔をあけ、いま見ているタブには触れません。X の規約上、自動化されたアクセスとみなされる可能性があります（法的な助言ではありません）。オフにすると、省略された分だけを保存します。"
   },
   "fullTextPending": {
     "message": "全文を取得していないポスト: $COUNT$ 件",
@@ -1086,7 +1224,7 @@
     "message": "止める"
   },
   "fullTextStopLimit": {
-    "message": "X が制限や警告を出したようなので、止めました。しばらくあけてから、もう一度試してください。"
+    "message": "X が制限や警告を出したようなので、止めました。しばらく時間をあけてから、もう一度試してください。"
   },
   "fullTextStopFailures": {
     "message": "続けて 3 件取得できなかったので、止めました。"
@@ -1128,7 +1266,7 @@
     "message": "保存または読み込みに失敗しました。もう一度試してください。続くときは、設定の「データ」から「エクスポート」で保存してから、拡張機能を再読み込みしてください。"
   },
   "removeFromPostShelf": {
-    "message": "PostShelf から外す"
+    "message": "PostShelf の保存を削除"
   },
   "acPanelLabel": {
     "message": "ブックマークの自動取り込み"
@@ -1158,7 +1296,7 @@
     }
   },
   "acSubRunning": {
-    "message": "$SPEED$で読み込み中",
+    "message": "速度「$SPEED$」で読み込み中",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1167,7 +1305,7 @@
     }
   },
   "acSubRunningDate": {
-    "message": "速度「$SPEED$」で読み込み中。いま $DATE$ ごろの投稿です",
+    "message": "速度「$SPEED$」で読み込み中。いま $DATE$ ごろのポストです",
     "placeholders": {
       "speed": {
         "content": "$1",
@@ -1234,10 +1372,10 @@
     "message": "このタブを開いたままにしてください。別のタブへ切り替えると、自動で一時停止します。"
   },
   "acNotePaused": {
-    "message": "再開すると、続きから取り込みます。すでに取り込んだ投稿はスキップし、X のブックマークの並びに合わせて整えます。"
+    "message": "再開すると、続きから取り込みます。すでに取り込んだポストはスキップし、X のブックマークの並びに合わせて整えます。"
   },
   "acNoteReload": {
-    "message": "再開すると、一覧の先頭から読み直します。すでに取り込んだ投稿はスキップします。"
+    "message": "再開すると、一覧の先頭から読み直します。すでに取り込んだポストはスキップします。"
   },
   "acNoteDone": {
     "message": "X の並び順どおりに整理しました。「未分類」から、フォルダに振り分けられます。"
@@ -1264,7 +1402,7 @@
     "message": "失敗"
   },
   "acOldest": {
-    "message": "いちばん古い投稿: $DATE$",
+    "message": "いちばん古いポスト: $DATE$",
     "placeholders": {
       "date": {
         "content": "$1",
@@ -1274,6 +1412,25 @@
   },
   "acBtnPause": {
     "message": "一時停止"
+  },
+  "acBtnCollapse": {
+    "message": "たたむ"
+  },
+  "acBtnExpand": {
+    "message": "開く"
+  },
+  "acCollapsedLine": {
+    "message": "取り込み中 · $IMPORTED$ 件 · 失敗 $FAILED$",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
   },
   "acBtnStop": {
     "message": "停止"
@@ -1289,6 +1446,9 @@
   },
   "acBtnOpenManager": {
     "message": "管理画面を開く"
+  },
+  "acBtnTriage": {
+    "message": "仕分ける"
   },
   "acBtnClose": {
     "message": "閉じる"
@@ -1306,7 +1466,7 @@
     "message": "X のブックマークを取り込みますか？"
   },
   "acOfferBody": {
-    "message": "$ACCOUNT$ で、初めて PostShelf を使います。x.com の「履歴」→「ブックマーク」を開き、画面を自動でスクロールしながら取り込みます。",
+    "message": "$ACCOUNT$ で PostShelf を使うのは初めてです。x.com の「履歴」→「ブックマーク」を開き、画面を自動でスクロールしながら取り込みます。",
     "placeholders": {
       "account": {
         "content": "$1",
@@ -1431,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "同名のフォルダがあります"
+  },
+  "listRemaining": {
+    "message": "あと $COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "すべて表示"
   }
 }

@@ -41,14 +41,11 @@ describe('v26-G: SaveCurrent', () => {
     await act(() => void render(<App surface="sidepanel" />, $('#app')));
     await flush();
     await flush();
-    await act(() => void $('.cta').dispatchEvent(new MouseEvent('click', { bubbles: true })));
     await flush();
-    const box = () => $$<HTMLLabelElement>('.pfoot label').find((l) => l.textContent?.includes('Dev'))!.querySelector('input')!;
+    const chip = () => $$<HTMLElement>('.ap-chip').find((l) => l.textContent?.includes('Dev'))!;
     const toggle = async (on: boolean) => {
-      await act(() => {
-        box().checked = on;
-        box().dispatchEvent(new Event('change'));
-      });
+      expect(chip().getAttribute('aria-pressed')).toBe(String(!on));
+      await act(() => void chip().click());
       await flush();
     };
     await toggle(true);
@@ -93,10 +90,10 @@ describe('v26-G: the popover', () => {
   const article = () => document.querySelector('article')!;
   const anchor = () => document.querySelector<HTMLElement>('[data-testid=bookmark], [data-testid=removeBookmark]')!;
 
-  it('「PostShelf から外す」 after an account switch does nothing and closes the popover', async () => {
+  it('「PostShelf の保存を削除」 after an account switch does nothing and closes the popover', async () => {
     await setBookmarkFolders('1234567890', [], { ...snapshot });
     const pop = (await openPopover(article(), anchor()))!;
-    const unsave = [...pop.querySelectorAll<HTMLElement>('button, div')].find((e) => e.textContent?.includes('PostShelf から外す') && e.style.display !== 'none')!;
+    const unsave = pop.querySelector<HTMLElement>('button[aria-label="PostShelf の保存を削除"]')!;
     setAccountScope('me');
     // アカウントの切り替え (購読者によりポップオーバーも閉じるが、すでに押されたあとの経路も確かめる)
     setCurrentAccount({ id: 'other', handle: 'other', lastSeenAt: 1 });

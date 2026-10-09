@@ -138,10 +138,10 @@ describe('v19-6: 管理画面の上部', () => {
     const head = $('.ac-progress .ac-head');
     expect(head.classList.contains('single')).toBe(true);
     expect([...head.children].map((c) => c.className.split(' ')[0])).toEqual(['ac-title', 'ac-row']);
-    expect(head.querySelector('.ac-row button')!.textContent).toBe('閉じる');
+    expect([...head.querySelectorAll('.ac-row button')].at(-1)!.textContent).toBe('閉じる'); // 取り込めた分があれば、その前に「仕分ける」
     expect(css).toMatch(/\.ac-head\.single\{flex-wrap:nowrap\}/);
     expect(css).toMatch(/\.ac-head \.ac-actions\{margin-left:auto/);
-    await click(head.querySelector('.ac-row button')!);
+    await click([...head.querySelectorAll('.ac-row button')].at(-1)!);
     expect($$('.ac-progress')).toHaveLength(0); // 押すと画面から消える
     expect((await chrome.storage.local.get('collectRun')).collectRun).toBeUndefined(); // v22: 閉じると、結果の記録も消える
   });

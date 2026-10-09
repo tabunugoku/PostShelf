@@ -41,7 +41,7 @@ export function MediaImg(props: MediaImgProps) {
 
   // 設定を読み終えるまで / キャッシュを確かめ終えるまでは、X の URL を読みに行かない
   const waiting = !view.ready || (useCache && cached?.key !== key);
-  if (waiting) return <img alt={props.alt ?? ''} style="visibility:hidden" />;
+  if (waiting) return <img alt={props.alt ?? ''} decoding="async" style="visibility:hidden" />;
   const url = useCache && cached?.key === key && cached.url ? cached.url : props.src;
-  return <img src={url} alt={props.alt ?? ''} loading={props.loading} onError={props.onError} />;
+  return <img src={url} alt={props.alt ?? ''} decoding="async" loading={props.loading} onError={props.onError} />;
 }

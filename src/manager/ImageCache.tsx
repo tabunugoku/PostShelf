@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useContext, useEffect, useRef, useState } from 'preact/hooks';
+import { SavedContext } from './settingsSaved';
 import { Icon } from '../shared/Icon';
 import { afterPostsRemoved, cacheMissing, clearAllCaches, evictToFit, migrateStore, openStore, previewEviction, type OpenedStore } from '../shared/cacheops';
+import { reportStorageError } from './errorBus';
 import { DirStore, NotOurFolderError, prepareDirectory, requestDirPermission, saveDirHandle, type DirHandleLike, type ImageStore, type Usage } from '../shared/imagecache';
 import { hasImagePermission, requestImagePermission } from '../shared/permissions';
 import {
@@ -19,7 +21,7 @@ import { listAllBookmarks } from '../shared/storage';
 import type { Bookmark } from '../shared/models';
 import { t } from '../shared/strings';
 import { notifyCacheChanged, refreshCacheView } from './cacheView';
-import { Confirm } from './ui';
+import { Confirm, Sentences } from './ui';
 
 export function formatBytes(n: number): string {
   if (n >= GB) return `${(n / GB).toFixed(n >= 10 * GB ? 0 : 1).replace(/\.0$/, '')} GB`;
@@ -45,6 +47,7 @@ const uniquePosts = (list: Bookmark[]): Bookmark[] => [...new Map(list.map((b) =
  * 初期値はオフ。オンにするクリックの中で、画像サーバー (pbs.twimg.com) への任意の権限を Chrome に求める。
  */
 export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設定の初期化や取り消しのあとに読み直すための値 */ reloadKey?: number }) {
+  const saved = useContext(SavedContext);
   const [cfg, setCfg] = useState<ImageCacheSettings>(DEFAULT_IMAGE_CACHE);
   const [opened, setOpened] = useState<OpenedStore>({ status: 'ok', store: null });
   const [usage, setUsage] = useState<Usage>({ bytes: 0, files: 0, posts: 0 });
@@ -76,7 +79,13 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
   useEffect(() => void load(), [props.reloadKey]);
 
   const save = async (patch: Partial<ImageCacheSettings>) => {
-    await updateImageCache(patch);
+    try {
+      await updateImageCache(patch);
+    } catch {
+      reportStorageError(); // 「変更を保存しました」は出さない。画面の値は、保存できている状態に戻す
+      return void (await load());
+    }
+    saved(); // 「変更を保存しました」
     await load();
   };
   const note = (text: string, error = false) => setMessage({ text, error });
@@ -257,11 +266,11 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
         <input type="checkbox" role="switch" checked={cfg.enabled} onChange={(e) => void toggle((e.target as HTMLInputElement).checked)} />
         <span>
           <strong>{t('cacheEnable')}</strong>
-          <span class="muted setting-desc">{t('cacheEnableDesc')}</span>
+          <span class="muted setting-desc"><Sentences text={t('cacheEnableDesc')} /></span>
         </span>
       </label>
       {/* 初めてオンにするとき Chrome が許可を求める、という補足は、オンにする前に読める位置に置く (畳んでいても残す) */}
-      <p class="muted setting-desc cache-perm-note">{t('cachePermNote')}</p>
+      <p class="muted setting-desc cache-perm-note"><Sentences text={t('cachePermNote')} /></p>
       {message && (
         <p class={message.error ? 'error' : 'muted'} role={message.error ? 'alert' : 'status'}>
           {message.text}
@@ -387,8 +396,8 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
             {t('cacheClear')}
           </button>
         </div>
-        <p class="muted setting-desc">{t('cacheBulkHelp')}</p>
-        <p class="muted setting-desc">{t('cacheRules')}</p>
+        <p class="muted setting-desc"><Sentences text={t('cacheBulkHelp')} /></p>
+        <p class="muted setting-desc"><Sentences text={t('cacheRules')} /></p>
       </div>)}
       {cleanup && (
         <div class="warn" role="alert">

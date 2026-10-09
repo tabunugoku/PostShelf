@@ -242,7 +242,7 @@ describe('page panel', () => {
     expect(el.textContent).toContain('128');
     expect(el.textContent).toContain('スキップ');
     expect(el.textContent).toContain('このタブを開いたままにしてください');
-    expect([...el.querySelectorAll('button')].map((b) => b.textContent)).toEqual(['一時停止', '停止']);
+    expect([...el.querySelectorAll('button')].map((b) => b.textContent)).toEqual(['一時停止', '停止', 'たたむ']);
     expect(document.documentElement.hasAttribute('data-postshelf-panel')).toBe(true); // 右下の取り込みボタンは隠れる
     (el.querySelector('[data-action=pause]') as HTMLElement).click();
     (el.querySelector('[data-action=stop]') as HTMLElement).click();
@@ -261,7 +261,8 @@ describe('page panel', () => {
     expect(limit.buttons.map((b) => b.label)).toEqual(['15 分後に再開する', 'ここで終了']);
     expect(viewOf(st({ status: 'limit', resumeAt: Date.now() + 1000 })).buttons.map((b) => b.label)).toEqual(['ここで終了']);
     expect(viewOf(st({ status: 'done' })).title).toBe('取り込みが終わりました');
-    expect(viewOf(st({ status: 'done' })).buttons.map((b) => b.label)).toEqual(['管理画面を開く', '閉じる']);
+    expect(viewOf(st({ status: 'done' })).buttons.map((b) => b.label)).toEqual(['仕分ける', '閉じる']); // 取り込めた分がある
+    expect(viewOf(st({ status: 'done', imported: 0 })).buttons.map((b) => b.label)).toEqual(['管理画面を開く', '閉じる']);
     expect(viewOf(st({ status: 'stopped', reason: 'user' })).buttons.map((b) => b.label)).toEqual(['閉じる']);
     expect(viewOf(st({ status: 'countdown', countdown: 3 })).title).toBe('3 秒後に始まります');
     expect(viewOf(st({ status: 'countdown', countdown: 3 })).buttons.map((b) => b.label)).toEqual(['キャンセル']);
@@ -278,8 +279,8 @@ describe('page panel', () => {
     (document.querySelector('[data-action=resume]') as HTMLElement).click();
     expect(c.resume).toHaveBeenCalled();
     p.update(st({ status: 'done' }));
-    (document.querySelector('[data-action=openManager]') as HTMLElement).click();
-    expect(open).toHaveBeenCalled();
+    (document.querySelector('[data-action=triage]') as HTMLElement).click();
+    expect(open).toHaveBeenCalledWith('#triage');
     (document.querySelector('[data-action=close]') as HTMLElement).click();
     expect(c.dismiss).toHaveBeenCalled();
   });

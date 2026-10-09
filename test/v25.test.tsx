@@ -45,16 +45,19 @@ const legendsOf = (name: string) => {
 };
 
 describe('v25: 説明の短文化', () => {
-  it('「連動する」: 3 items and a note; the subject 「PostShelf が」 stays; descriptions have a max line length', async () => {
+  it('「連動する」: 4 lines, one sentence each, no bullets (v37: same as the other settings); the subject 「PostShelf が」 stays', async () => {
     await mount();
-    const items = $$('.desc-list .desc-item').map((e) => e.textContent);
+    const desc = $('input[role=switch]').closest('label')!.querySelector('.setting-desc')!;
+    const items = [...desc.querySelectorAll('.desc-line')].map((e) => e.textContent);
     expect(items).toEqual([
       'フォルダに保存したとき、X 標準のブックマークも付けます。',
       'すべてのフォルダから外したとき、X 側のブックマークも外します。',
       'PostShelf が画面上のブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。',
+      '初期値はオフです。',
     ]);
-    expect($('.desc-note').textContent).toBe('初期値はオフです。');
-    expect(css).toMatch(/\.setting-desc\{[^}]*max-width:40em/);
+    expect(document.querySelector('.desc-list, .desc-item, .desc-note')).toBeNull();
+    expect(css).not.toMatch(/\.desc-item::before/);
+    expect(css).toMatch(/\.setting-desc\{[^}]*max-width:none/);
     expect($('input[role=switch]').closest('label')!.getBoundingClientRect).toBeTruthy(); // スイッチは、いまのまま (本物の input)
   });
 });

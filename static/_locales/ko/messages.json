@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "폴더"
   },
+  "popupInbox": {
+    "message": "미분류 정리"
+  },
+  "popupSearch": {
+    "message": "저장한 게시물 검색"
+  },
   "recent": {
     "message": "최근 저장한 3개"
   },
@@ -187,6 +193,25 @@
   },
   "settingsJump": {
     "message": "설정 그룹으로 이동"
+  },
+  "settingsSearch": {
+    "message": "설정 검색"
+  },
+  "settingsMatchCount": {
+    "message": "\"$QUERY$\" 일치 $COUNT$개",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "변경 사항을 저장했습니다"
   },
   "syncNativeSection": {
     "message": "X 북마크와 연동"
@@ -383,6 +408,33 @@
   "openSidePanel": {
     "message": "사이드 패널에서 열기"
   },
+  "folderFilter": {
+    "message": "폴더 필터"
+  },
+  "folderRecent": {
+    "message": "최근 사용"
+  },
+  "folderAll": {
+    "message": "모든 폴더 ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "$COUNT$개에 저장됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "미분류에 저장됨"
+  },
   "openInTab": {
     "message": "탭에서 열기"
   },
@@ -430,6 +482,19 @@
     "placeholders": {
       "count": {
         "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "itemCountOf": {
+    "message": "총 $TOTAL$개 중 $SHOWN$개",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
         "example": "3"
       }
     }
@@ -500,6 +565,18 @@
   "noPostsHint": {
     "message": "x.com에서 게시물의 폴더 버튼을 눌러 저장합니다. 이미 북마크한 게시물은 x.com 기록의 \"북마크\"에서 가져올 수 있습니다."
   },
+  "onboardTitle": {
+    "message": "시작해 볼까요"
+  },
+  "onboardStep1": {
+    "message": "x.com 게시물에서 폴더 버튼 누르기"
+  },
+  "onboardStep2": {
+    "message": "지금의 북마크 가져오기"
+  },
+  "onboardImport": {
+    "message": "가져오기"
+  },
   "folderMore": {
     "message": "이름·아이콘·색 변경"
   },
@@ -523,6 +600,67 @@
   },
   "saveCurrentHint": {
     "message": "x.com에서 게시물을 열었을 때 표시됩니다"
+  },
+  "activePostTitle": {
+    "message": "지금 열린 게시물"
+  },
+  "activeSaved": {
+    "message": "저장됨 ($FOLDER$)",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "외 $COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageStart": {
+    "message": "분류 모드"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "나중에"
+  },
+  "triageBack": {
+    "message": "이전"
+  },
+  "triageHint": {
+    "message": "1–9 추가 · Esc 종료"
+  },
+  "triageDone": {
+    "message": "분류가 끝났습니다"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$개를 분류했습니다",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "다른 폴더"
   },
   "saveCurrentFail": {
     "message": "이 게시물을 읽을 수 없습니다. 페이지를 새로고침한 뒤 다시 시도하세요."
@@ -1128,7 +1266,7 @@
     "message": "저장 또는 불러오기에 실패했습니다. 다시 시도해 주세요. 계속되면 설정의 \"데이터\"에서 \"내보내기\"로 저장한 뒤 확장 프로그램을 새로고침하세요."
   },
   "removeFromPostShelf": {
-    "message": "PostShelf에서 제거"
+    "message": "PostShelf에서 저장 삭제"
   },
   "acPanelLabel": {
     "message": "북마크 자동 가져오기"
@@ -1275,6 +1413,25 @@
   "acBtnPause": {
     "message": "일시 중지"
   },
+  "acBtnCollapse": {
+    "message": "접기"
+  },
+  "acBtnExpand": {
+    "message": "열기"
+  },
+  "acCollapsedLine": {
+    "message": "가져오는 중 · 가져옴 $IMPORTED$ · 실패 $FAILED$",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "중지"
   },
@@ -1289,6 +1446,9 @@
   },
   "acBtnOpenManager": {
     "message": "관리 화면 열기"
+  },
+  "acBtnTriage": {
+    "message": "분류하기"
   },
   "acBtnClose": {
     "message": "닫기"
@@ -1431,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "같은 이름의 폴더가 있습니다"
+  },
+  "listRemaining": {
+    "message": "$COUNT$개 더",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "모두 표시"
   }
 }

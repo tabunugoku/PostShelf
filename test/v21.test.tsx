@@ -45,11 +45,12 @@ describe('v21: ツールバーのポップアップ', () => {
     expect($('.hd .acct-chip').textContent?.trim()).toBe('アカウント未設定');
   });
 
-  it('counts: two tiles (posts / folders, without 「すべて」)', async () => {
+  it('counts: two tiles (posts / 未分類 — quiet and not a button when 0)', async () => {
     await open();
     const tiles = $$('.tiles .tile');
-    expect(tiles.map((t) => [t.querySelector('b')!.textContent, t.querySelector('span')!.textContent])).toEqual([['4', 'ポスト'], ['2', 'フォルダ']]);
+    expect(tiles.map((t) => [t.querySelector('b')!.textContent, t.querySelector('span')!.textContent])).toEqual([['4', 'ポスト'], ['0', '未分類']]);
     expect(document.body.textContent).not.toContain('·');
+    expect($('.tiles .tile-quiet').tagName).toBe('DIV');
   });
 
   it('recent: at most 3, newest first; the handle and the text are separate elements; title holds the whole text', async () => {
@@ -64,13 +65,13 @@ describe('v21: ツールバーのポップアップ', () => {
     expect($('.rec-head').textContent).toBe('最近保存した 3 件');
   });
 
-  it('buttons: 「管理画面を開く」 is the filled main one; 「サイドパネルで開く」 only with the side panel; settings and diagnostics are small, side by side, in the Tab order main → side → settings → diagnostics', async () => {
+  it('buttons: 「管理画面を開く」 is the filled main one; 「サイドパネルで開く」 only with the side panel; settings is the only small one, in the Tab order main → side → settings', async () => {
     await open(true);
     const order = $$('#app button').map((b) => b.textContent?.trim());
-    expect(order).toEqual(['管理画面を開く', 'サイドパネルで開く', '設定', '診断情報をコピー']);
+    expect(order).toEqual(['管理画面を開く', 'サイドパネルで開く', '設定']);
     expect($('.main-btn').textContent).toContain('管理画面を開く');
     expect($('.sub-btn').textContent).toContain('サイドパネルで開く');
-    expect($$('.foot-row .pr.small')).toHaveLength(2);
+    expect($$('.foot-row .pr.small')).toHaveLength(1);
     expect(css).toMatch(/\.main-btn\{background:var\(--accent-strong\)/);
     expect(css).toMatch(/width:320px/);
   });
@@ -78,10 +79,10 @@ describe('v21: ツールバーのポップアップ', () => {
   it('buttons: no 「サイドパネルで開く」 without chrome.sidePanel', async () => {
     await open(false);
     expect($$('.sub-btn')).toHaveLength(0);
-    expect($$('#app button').map((b) => b.textContent?.trim())).toEqual(['管理画面を開く', '設定', '診断情報をコピー']);
+    expect($$('#app button').map((b) => b.textContent?.trim())).toEqual(['管理画面を開く', '設定']);
   });
 
-  it('buttons keep their actions: open manager (with #settings / #diagnostics hashes)', async () => {
+  it('buttons keep their actions: open manager (with the #settings hash)', async () => {
     await open(true);
     const create = vi.fn(async () => ({}));
     (globalThis as any).chrome.tabs = { create, query: async () => [] };
@@ -89,11 +90,8 @@ describe('v21: ツールバーのポップアップ', () => {
     await flush();
     await act(async () => void $$<HTMLElement>('.foot-row .pr')[0].click());
     await flush();
-    await act(async () => void $$<HTMLElement>('.foot-row .pr')[1].click());
-    await flush();
     const urls = create.mock.calls.map((c: any) => c[0]?.url as string);
     expect(urls[0]).toMatch(/manager\.html$/);
     expect(urls[1]).toMatch(/manager\.html#settings$/);
-    expect(urls[2]).toMatch(/manager\.html#diagnostics$/);
   });
 });

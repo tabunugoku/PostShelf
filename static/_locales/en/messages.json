@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "folders"
   },
+  "popupInbox": {
+    "message": "Sort Unsorted"
+  },
+  "popupSearch": {
+    "message": "Search saved posts"
+  },
   "recent": {
     "message": "Recently saved (3)"
   },
@@ -187,6 +193,25 @@
   },
   "settingsJump": {
     "message": "Jump to a settings group"
+  },
+  "settingsSearch": {
+    "message": "Search settings"
+  },
+  "settingsMatchCount": {
+    "message": "$COUNT$ matches for \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "Changes saved"
   },
   "syncNativeSection": {
     "message": "Sync with X bookmarks"
@@ -383,6 +408,33 @@
   "openSidePanel": {
     "message": "Open in side panel"
   },
+  "folderFilter": {
+    "message": "Filter folders"
+  },
+  "folderRecent": {
+    "message": "Recent"
+  },
+  "folderAll": {
+    "message": "All folders ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "Saved in $COUNT$ folder(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "Saved to Unsorted"
+  },
   "openInTab": {
     "message": "Open in a tab"
   },
@@ -430,6 +482,19 @@
     "placeholders": {
       "count": {
         "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "itemCountOf": {
+    "message": "$SHOWN$ of $TOTAL$ posts",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
         "example": "3"
       }
     }
@@ -500,6 +565,18 @@
   "noPostsHint": {
     "message": "Press the folder button on a post on x.com to save it. Posts you have already bookmarked can be imported from Bookmarks in your x.com history."
   },
+  "onboardTitle": {
+    "message": "Let's get started"
+  },
+  "onboardStep1": {
+    "message": "On x.com, press the folder button on a post"
+  },
+  "onboardStep2": {
+    "message": "Import your current bookmarks"
+  },
+  "onboardImport": {
+    "message": "Import"
+  },
   "folderMore": {
     "message": "Change name, icon, color"
   },
@@ -523,6 +600,67 @@
   },
   "saveCurrentHint": {
     "message": "Shown while a post is open on x.com"
+  },
+  "activePostTitle": {
+    "message": "Open post"
+  },
+  "activeSaved": {
+    "message": "Saved ($FOLDER$)",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "$COUNT$ more",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageStart": {
+    "message": "Sort mode"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "Skip"
+  },
+  "triageBack": {
+    "message": "Back"
+  },
+  "triageHint": {
+    "message": "1–9 add · Esc finish"
+  },
+  "triageDone": {
+    "message": "Sorting finished"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ sorted",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "Other folders"
   },
   "saveCurrentFail": {
     "message": "Could not read this post. Reload the page and try again."
@@ -1128,7 +1266,7 @@
     "message": "Saving or loading failed. Please try again. If it keeps happening, save your data with \"Export\" in Settings, then reload the extension."
   },
   "removeFromPostShelf": {
-    "message": "Remove from PostShelf"
+    "message": "Delete from PostShelf"
   },
   "acPanelLabel": {
     "message": "Automatic bookmark import"
@@ -1275,6 +1413,25 @@
   "acBtnPause": {
     "message": "Pause"
   },
+  "acBtnCollapse": {
+    "message": "Collapse"
+  },
+  "acBtnExpand": {
+    "message": "Open"
+  },
+  "acCollapsedLine": {
+    "message": "Importing · $IMPORTED$ imported · $FAILED$ failed",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "Stop"
   },
@@ -1289,6 +1446,9 @@
   },
   "acBtnOpenManager": {
     "message": "Open the manager"
+  },
+  "acBtnTriage": {
+    "message": "Sort now"
   },
   "acBtnClose": {
     "message": "Close"
@@ -1431,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "A folder with this name already exists"
+  },
+  "listRemaining": {
+    "message": "$COUNT$ more",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "Show all"
   }
 }

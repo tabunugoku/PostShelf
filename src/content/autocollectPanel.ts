@@ -3,7 +3,7 @@
  * 配色は X のテーマ (xTheme: ライト / ダーク / ダーク青) から決める。role="status" aria-live="polite"。キーボードで操作できる。
  */
 import { isBookmarksPath } from '../shared/selectors';
-import { formatDate, t } from '../shared/strings';
+import { formatDate, jaWrapRule, t, uiLang } from '../shared/strings';
 import { ACCENT, ACCENT_FILL } from '../shared/tokens';
 import { xTheme } from './theme';
 import type { AutoCollector, CollectState } from './autocollect';
@@ -48,6 +48,7 @@ function ensureStyle(): void {
   const s = document.createElement('style');
   s.id = STYLE_ID;
   s.textContent = `
+${jaWrapRule(`.${PANEL_CLASS}`)}
 @keyframes postshelf-pulse{50%{opacity:.35}}
 @keyframes postshelf-slide{0%{margin-left:-35%}100%{margin-left:100%}}
 .${PANEL_CLASS} button:focus-visible{outline:2px solid ${ACCENT};outline-offset:1px}
@@ -106,7 +107,7 @@ export function viewOf(s: CollectState): PanelView {
           : [{ label: t('acBtnResumeLater'), action: 'resumeLater' }, { label: t('acBtnEnd'), action: 'stop' }],
       };
     case 'done':
-      return { title: t('acPanelDone'), sub: t('acSubDone'), dot: 'done', bar: 'full', note: t('acNoteDone'), alert: '', buttons: [{ label: t('acBtnOpenManager'), action: 'openManager', primary: true }, { label: t('acBtnClose'), action: 'close' }] };
+      return { title: t('acPanelDone'), sub: t('acSubDone'), dot: 'done', bar: 'full', note: t('acNoteDone'), alert: '', buttons: [s.imported >= 1 ? { label: t('acBtnTriage'), action: 'triage', primary: true } : { label: t('acBtnOpenManager'), action: 'openManager', primary: true }, { label: t('acBtnClose'), action: 'close' }] }; // 取り込めた分があれば、仕分けへつなぐ (管理画面を #triage で開く)
     case 'stopped': {
       const refused = s.reason === 'refused-account' ? t('acReasonRefusedAccount') : s.reason === 'refused-unknown' ? t('acReasonRefusedUnknown') : '';
       return { title: t('acPanelStopped'), sub: refused || t('acSubStopped'), dot: refused ? 'ng' : 'pause', bar: 'none', note: '', alert: '', buttons: [{ label: t('acBtnClose'), action: 'close' }] };
@@ -114,12 +115,21 @@ export function viewOf(s: CollectState): PanelView {
   }
 }
 
+/** 畳んだ状態。そのページを開いているあいだだけ覚える (保存しない)。running / paused 以外になったら自動で開く */
+let collapsed = false;
+/** テスト用: 畳んだ状態を戻す */
+export const resetCollapsed = (): void => {
+  collapsed = false;
+};
+
 export class AutoCollectPanel {
   private root: HTMLElement | null = null;
+  private last: CollectState | null = null;
 
-  constructor(private c: AutoCollector, private openManager: () => void) {}
+  constructor(private c: AutoCollector, private openManager: (hash?: string) => void) {}
 
   update(s: CollectState | null): void {
+    this.last = s;
     // ブックマークのタブ以外では出さない (取り込みの状態は保存してあるので、戻ってくれば出る)
     if (!s || !isBookmarksPath(location.pathname)) return void this.hide();
     ensureStyle();
@@ -128,6 +138,7 @@ export class AutoCollectPanel {
     if (!this.root) {
       this.root = el('div');
       this.root.className = PANEL_CLASS;
+      this.root.lang = uiLang();
       this.root.setAttribute('role', 'status');
       this.root.setAttribute('aria-live', 'polite');
       this.root.setAttribute('aria-label', t('acPanelLabel'));
@@ -135,6 +146,11 @@ export class AutoCollectPanel {
       document.documentElement.setAttribute('data-postshelf-panel', ''); // 右下の取り込みボタンは、パネルの間は隠す
     }
     const r = this.root;
+    if (s.status !== 'running' && s.status !== 'paused') collapsed = false; // 見落としたくない状態 (制限・終了・停止・カウントダウン) は、自動で開く
+    if (collapsed) {
+      this.renderBar(r, s, p, v);
+      return;
+    }
     r.style.cssText = `position:fixed;right:14px;bottom:14px;z-index:2147483646;width:340px;max-width:calc(100vw - 28px);box-sizing:border-box;background:${p.bg};color:${p.fg};color-scheme:${p.scheme};border:1px solid ${p.border};border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:14px;font:14px/1.5 system-ui,sans-serif`;
     r.replaceChildren();
 
@@ -165,7 +181,8 @@ export class AutoCollectPanel {
     if (v.note) r.append(el('div', `color:${p.muted};font-size:13px;margin-top:6px`, v.note));
 
     const row = el('div', 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px');
-    for (const b of v.buttons) {
+    const buttons = s.status === 'running' || s.status === 'paused' ? [...v.buttons, { label: t('acBtnCollapse'), action: 'collapse' }] : v.buttons;
+    for (const b of buttons) {
       const btn = el('button', `font:inherit;min-height:32px;padding:4px 12px;border-radius:8px;cursor:pointer;border:1px solid ${b.primary ? ACCENT_FILL : b.danger ? p.ng : p.border};background:${b.primary ? ACCENT_FILL : 'transparent'};color:${b.primary ? '#fff' : b.danger ? p.ng : p.fg}`, b.label);
       btn.type = 'button';
       btn.dataset.action = b.action;
@@ -175,13 +192,31 @@ export class AutoCollectPanel {
     r.append(row);
   }
 
+  /** 畳んだ 1 行のバー (右下。幅は内容なり)。畳んでも取り込みは止まらない */
+  private renderBar(r: HTMLElement, s: CollectState, p: Palette, v: PanelView): void {
+    r.style.cssText = `position:fixed;right:14px;bottom:14px;z-index:2147483646;max-width:calc(100vw - 28px);box-sizing:border-box;display:flex;align-items:center;gap:8px;background:${p.bg};color:${p.fg};color-scheme:${p.scheme};border:1px solid ${p.border};border-radius:999px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:0 6px 0 14px;min-height:44px;font:13px/1.4 system-ui,sans-serif;white-space:nowrap`;
+    const dotColor = { run: ACCENT, pause: p.warnFg, done: p.ok, ng: p.ng }[v.dot];
+    const dot = el('span', `width:10px;height:10px;border-radius:50%;flex:none;background:${dotColor};${v.dot === 'run' ? 'animation:postshelf-pulse 1.2s infinite;' : ''}`);
+    const btn = el('button', `font:inherit;min-height:44px;padding:0 12px;border:0;border-radius:999px;cursor:pointer;background:transparent;color:${p.fg};white-space:nowrap;font-weight:700`, t('acBtnExpand'));
+    btn.type = 'button';
+    btn.dataset.action = 'expand';
+    btn.addEventListener('click', () => this.act('expand'));
+    r.replaceChildren(dot, el('span', 'overflow:hidden;text-overflow:ellipsis', t('acCollapsedLine', s.imported, s.failed)), btn);
+  }
+
   private act(action: string): void {
+    if (action === 'collapse' || action === 'expand') {
+      collapsed = action === 'collapse';
+      this.update(this.last);
+      return;
+    }
     if (action === 'pause') void this.c.pause('user');
     else if (action === 'resume') void this.c.resume();
     else if (action === 'resumeLater') void this.c.resumeLater();
     else if (action === 'stop') void this.c.stop();
     else if (action === 'close') this.c.dismiss();
     else if (action === 'openManager') this.openManager();
+    else if (action === 'triage') this.openManager('#triage');
   }
 
   hide(): void {

@@ -148,7 +148,7 @@ describe('diagnostics dialog (user-initiated copy only)', () => {
     Object.defineProperty(navigator, 'clipboard', { value: { writeText: write }, configurable: true });
     await act(() => void render(<DiagnosticsDialog onClose={() => {}} />, $('#app')));
     await flush();
-    expect($('[role=dialog]').textContent).toContain('この内容がクリップボードにコピーされます。ポストの本文、ユーザー名、URL は含まれません。含まれるのは、拡張のバージョン、ブラウザの情報、表示言語、X の画面構造の骨組みです。');
+    expect($('[role=dialog]').textContent).toContain('この内容がクリップボードにコピーされます。ポストの本文、ユーザー名、URL は含まれません。含まれるのは、拡張機能のバージョン、ブラウザの情報、表示言語、X の画面構造の骨組みです。');
     expect($('.diag-pre').textContent).toContain('PostShelf 9.9.9');
     expect(write).not.toHaveBeenCalled(); // 表示しただけではコピーしない
     const link = $<HTMLAnchorElement>('a.btn-link');

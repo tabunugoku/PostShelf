@@ -18,6 +18,7 @@ describe('v26-A: collected posts are saved to the account the import started wit
     let start = 0;
     let run = null as null | Parameters<CollectDeps['saveRun']>[0];
     const deps: CollectDeps = {
+      hasUnseen: () => false,
       now: () => Date.now(),
       sleep: async () => void (await tick()),
       random: () => 0,

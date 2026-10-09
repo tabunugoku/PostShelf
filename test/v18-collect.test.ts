@@ -16,17 +16,24 @@ const tick = () => new Promise((r) => setTimeout(r, 0));
 function world(total: number, store: { run: CollectRun | null } = { run: null }) {
   const w = {
     start: 0, sleeps: [] as number[], releaseLong: undefined as undefined | (() => void), savedCalls: 0, changed: undefined as undefined | (() => void),
-    failAdds: 0, clock: undefined as undefined | (() => number),
+    failAdds: 0, merge: false, clock: undefined as undefined | (() => number),
   };
   const deps: CollectDeps & { hidden: boolean; limit: boolean } = {
+    hasUnseen: () => false,
     now: () => w.clock?.() ?? Date.now(),
     sleep: async (ms) => {
+      // 待ちは 100ms 刻み (v32): 同じ待ちの刻みは 1 回の待ちにまとめて数える (時計はこの数で進める)
+      if (ms <= 100 && w.merge) {
+        w.sleeps[w.sleeps.length - 1] += ms;
+        return;
+      }
       w.sleeps.push(ms);
+      w.merge = ms <= 100;
       if (ms === LIMIT_RESUME_MS) await new Promise<void>((r) => (w.releaseLong = r));
       else await tick();
     },
     random: () => 0,
-    scrollBy: () => void (w.start = Math.min(w.start + 5, total)),
+    scrollBy: () => void ((w.merge = false), (w.start = Math.min(w.start + 5, total))),
     scrollToTop: () => void (w.start = 0),
     scrollY: () => w.start * 100,
     viewportHeight: () => 1000,

@@ -224,12 +224,14 @@ describe('v24-B: 自動取り込みのあとで、全文を頼む', () => {
     const seenWhileRunning: number[] = [];
     const deps = {
       now: () => Date.now(),
-      sleep: async () => {
+      sleep: async (ms: number) => {
         seenWhileRunning.push(send.mock.calls.length);
+        if (ms <= 100) return; // 待ちは 100ms 刻み (v32): 刻みでは順番を譲らない
         await new Promise<void>((r) => setTimeout(r, 0));
       },
       random: () => 0, scrollBy() {}, scrollToTop() {}, scrollY: () => ++calls, viewportHeight: () => 1000,
       visible: () => [post(1, true), post(2, false), post(3, true)],
+      hasUnseen: () => false,
       isLoading: () => false, hasLimit: () => false, pageOk: () => true, isHidden: () => false, accountId: () => 'me',
       savedIds: async () => new Set<string>(), addCollected: async () => 3, saveRun: async () => {}, clearRun: async () => {},
     };

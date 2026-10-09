@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "pastas"
   },
+  "popupInbox": {
+    "message": "Organizar sem categoria"
+  },
+  "popupSearch": {
+    "message": "Buscar posts salvos"
+  },
   "recent": {
     "message": "Salvos recentemente (3)"
   },
@@ -187,6 +193,25 @@
   },
   "settingsJump": {
     "message": "Ir para um grupo de configurações"
+  },
+  "settingsSearch": {
+    "message": "Buscar configurações"
+  },
+  "settingsMatchCount": {
+    "message": "$COUNT$ resultados para \"$QUERY$\"",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "Alterações salvas"
   },
   "syncNativeSection": {
     "message": "Sincronização com os favoritos do X"
@@ -383,6 +408,33 @@
   "openSidePanel": {
     "message": "Abrir no painel lateral"
   },
+  "folderFilter": {
+    "message": "Filtrar pastas"
+  },
+  "folderRecent": {
+    "message": "Recentes"
+  },
+  "folderAll": {
+    "message": "Todas as pastas ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "Salvo em $COUNT$ pasta(s)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "Salvo em Sem categoria"
+  },
   "openInTab": {
     "message": "Abrir em uma guia"
   },
@@ -430,6 +482,19 @@
     "placeholders": {
       "count": {
         "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "itemCountOf": {
+    "message": "$SHOWN$ de $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
         "example": "3"
       }
     }
@@ -500,6 +565,18 @@
   "noPostsHint": {
     "message": "Pressione o botão de pasta de um post no x.com para salvá-lo. Os posts que você já salvou nos favoritos podem ser importados de Favoritos no histórico do x.com."
   },
+  "onboardTitle": {
+    "message": "Vamos começar"
+  },
+  "onboardStep1": {
+    "message": "No x.com, toque o botão de pasta em um post"
+  },
+  "onboardStep2": {
+    "message": "Importe seus favoritos atuais"
+  },
+  "onboardImport": {
+    "message": "Importar"
+  },
   "folderMore": {
     "message": "Alterar nome, ícone, cor"
   },
@@ -523,6 +600,67 @@
   },
   "saveCurrentHint": {
     "message": "Exibido enquanto um post está aberto no x.com"
+  },
+  "activePostTitle": {
+    "message": "Post aberto"
+  },
+  "activeSaved": {
+    "message": "Salvo ($FOLDER$)",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "mais $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageStart": {
+    "message": "Modo organizar"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "Pular"
+  },
+  "triageBack": {
+    "message": "Voltar"
+  },
+  "triageHint": {
+    "message": "1–9 adicionar · Esc sair"
+  },
+  "triageDone": {
+    "message": "Organização concluída"
+  },
+  "triageDoneSub": {
+    "message": "$COUNT$ organizados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "Outras pastas"
   },
   "saveCurrentFail": {
     "message": "Não foi possível ler este post. Recarregue a página e tente novamente."
@@ -1128,7 +1266,7 @@
     "message": "Falha ao salvar ou carregar. Tente novamente. Se continuar, salve seus dados com \"Exportar\" em Configurações e recarregue a extensão."
   },
   "removeFromPostShelf": {
-    "message": "Remover do PostShelf"
+    "message": "Excluir do PostShelf"
   },
   "acPanelLabel": {
     "message": "Importação automática de favoritos"
@@ -1275,6 +1413,25 @@
   "acBtnPause": {
     "message": "Pausar"
   },
+  "acBtnCollapse": {
+    "message": "Recolher"
+  },
+  "acBtnExpand": {
+    "message": "Abrir"
+  },
+  "acCollapsedLine": {
+    "message": "Importando · $IMPORTED$ importados · $FAILED$ falhas",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "Parar"
   },
@@ -1289,6 +1446,9 @@
   },
   "acBtnOpenManager": {
     "message": "Abrir o gerenciador"
+  },
+  "acBtnTriage": {
+    "message": "Organizar"
   },
   "acBtnClose": {
     "message": "Fechar"
@@ -1431,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "Já existe uma pasta com este nome"
+  },
+  "listRemaining": {
+    "message": "mais $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "Mostrar tudo"
   }
 }

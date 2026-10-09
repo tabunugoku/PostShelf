@@ -113,6 +113,12 @@
   "popupFolders": {
     "message": "文件夹"
   },
+  "popupInbox": {
+    "message": "整理未分类"
+  },
+  "popupSearch": {
+    "message": "搜索已保存的帖子"
+  },
   "recent": {
     "message": "最近保存的 3 条"
   },
@@ -187,6 +193,25 @@
   },
   "settingsJump": {
     "message": "跳转到设置分组"
+  },
+  "settingsSearch": {
+    "message": "搜索设置"
+  },
+  "settingsMatchCount": {
+    "message": "与“$QUERY$”匹配 $COUNT$ 项",
+    "placeholders": {
+      "query": {
+        "content": "$1",
+        "example": "3"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "settingsSaved": {
+    "message": "已保存更改"
   },
   "syncNativeSection": {
     "message": "与 X 书签联动"
@@ -383,6 +408,33 @@
   "openSidePanel": {
     "message": "在侧边栏中打开"
   },
+  "folderFilter": {
+    "message": "筛选文件夹"
+  },
+  "folderRecent": {
+    "message": "最近使用"
+  },
+  "folderAll": {
+    "message": "所有文件夹 ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInFolders": {
+    "message": "已保存到 $COUNT$ 个",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "savedInInbox": {
+    "message": "已保存到未分类"
+  },
   "openInTab": {
     "message": "在标签页中打开"
   },
@@ -430,6 +482,19 @@
     "placeholders": {
       "count": {
         "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "itemCountOf": {
+    "message": "共 $TOTAL$ 条，显示 $SHOWN$ 条",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "3"
+      },
+      "shown": {
+        "content": "$2",
         "example": "3"
       }
     }
@@ -500,6 +565,18 @@
   "noPostsHint": {
     "message": "在 x.com 上点击帖子的文件夹按钮即可保存。已经加入书签的帖子，可以从 x.com 历史记录中的“书签”导入。"
   },
+  "onboardTitle": {
+    "message": "开始吧"
+  },
+  "onboardStep1": {
+    "message": "在 x.com 的帖子上点按文件夹按钮"
+  },
+  "onboardStep2": {
+    "message": "导入现有的书签"
+  },
+  "onboardImport": {
+    "message": "导入"
+  },
   "folderMore": {
     "message": "更改名称、图标、颜色"
   },
@@ -523,6 +600,67 @@
   },
   "saveCurrentHint": {
     "message": "在 x.com 打开帖子时显示"
+  },
+  "activePostTitle": {
+    "message": "当前打开的帖子"
+  },
+  "activeSaved": {
+    "message": "已保存（$FOLDER$）",
+    "placeholders": {
+      "folder": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "activeMoreFolders": {
+    "message": "其他 $COUNT$ 个",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageStart": {
+    "message": "整理模式"
+  },
+  "triageProgress": {
+    "message": "$CURRENT$ / $TOTAL$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "triageSkip": {
+    "message": "稍后"
+  },
+  "triageBack": {
+    "message": "返回"
+  },
+  "triageHint": {
+    "message": "1–9 加入 · Esc 结束"
+  },
+  "triageDone": {
+    "message": "整理完成了"
+  },
+  "triageDoneSub": {
+    "message": "已整理 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "triageOtherFolders": {
+    "message": "其他文件夹"
   },
   "saveCurrentFail": {
     "message": "无法读取此帖子。请刷新页面后重试。"
@@ -1128,7 +1266,7 @@
     "message": "保存或读取失败。请重试。如果问题持续出现，请先在设置的“数据”中用“导出”保存数据，然后重新加载扩展程序。"
   },
   "removeFromPostShelf": {
-    "message": "从 PostShelf 中移除"
+    "message": "从 PostShelf 删除保存"
   },
   "acPanelLabel": {
     "message": "书签自动导入"
@@ -1275,6 +1413,25 @@
   "acBtnPause": {
     "message": "暂停"
   },
+  "acBtnCollapse": {
+    "message": "收起"
+  },
+  "acBtnExpand": {
+    "message": "展开"
+  },
+  "acCollapsedLine": {
+    "message": "导入中 · 已导入 $IMPORTED$ · 失败 $FAILED$",
+    "placeholders": {
+      "imported": {
+        "content": "$1",
+        "example": "3"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
   "acBtnStop": {
     "message": "停止"
   },
@@ -1289,6 +1446,9 @@
   },
   "acBtnOpenManager": {
     "message": "打开管理页面"
+  },
+  "acBtnTriage": {
+    "message": "去整理"
   },
   "acBtnClose": {
     "message": "关闭"
@@ -1431,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "已有同名的文件夹"
+  },
+  "listRemaining": {
+    "message": "还有 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "全部显示"
   }
 }
