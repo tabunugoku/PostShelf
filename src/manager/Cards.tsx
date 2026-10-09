@@ -1,5 +1,5 @@
 import { useRef, useState } from 'preact/hooks';
-import type { ComponentChildren, JSX } from 'preact';
+import { Component, type ComponentChildren, type JSX } from 'preact';
 import { Icon } from '../shared/Icon';
 import { INBOX_ID, displayName, type Bookmark, type Folder } from '../shared/models';
 import { formatDate, t } from '../shared/strings';
@@ -203,7 +203,52 @@ function FolderChips(props: { b: Bookmark; folderOf: CardProps['folderOf']; remo
   );
 }
 
-export function Card(props: CardProps) {
+/** 行の操作。ポストの ID を引数に取る。親が 1 度だけ作る安定したオブジェクト (中身は最新の状態を見る) なので、Card の memo が効く */
+export interface RowHandlers {
+  select(id: string, shift: boolean): void;
+  focus(id: string): void;
+  removeFromFolder(id: string, folderId: string): void;
+  togglePicker(id: string): void;
+  del(id: string): void;
+  dragStart(id: string, e: DragEvent): void;
+  openImage(id: string, index: number): void;
+  openVideo(id: string): void;
+}
+type HandlerKeys = 'onSelect' | 'onFocus' | 'onRemoveFromFolder' | 'onTogglePicker' | 'onDelete' | 'onDragStart' | 'onOpenImage' | 'onOpenVideo';
+export type CardOuterProps = Omit<CardProps, HandlerKeys> & { h: RowHandlers };
+
+/**
+ * 再描画を減らす (memo)。値の props (ポスト・選択・表示形式など) と h (安定) が変わらないカードは、描き直さない。
+ * preact/compat は入力イベントの扱いを変えるので使わず、shouldComponentUpdate の薄い包みにする。
+ */
+export class Card extends Component<CardOuterProps> {
+  shouldComponentUpdate(next: CardOuterProps): boolean {
+    const a = this.props as unknown as Record<string, unknown>;
+    const b = next as unknown as Record<string, unknown>;
+    for (const k in b) if (a[k] !== b[k]) return true;
+    for (const k in a) if (!(k in b)) return true;
+    return false;
+  }
+  render(props: CardOuterProps) {
+    return <CardView {...props} />;
+  }
+}
+
+function CardView(outer: CardOuterProps) {
+  const { h, ...rest } = outer;
+  const id = outer.b.tweetId;
+  const hasMedia = outer.b.snapshot.media.length > 0;
+  const props: CardProps = {
+    ...rest,
+    onSelect: (shift) => h.select(id, shift),
+    onFocus: () => h.focus(id),
+    onRemoveFromFolder: (fid) => h.removeFromFolder(id, fid),
+    onTogglePicker: () => h.togglePicker(id),
+    onDelete: () => h.del(id),
+    onDragStart: (e) => h.dragStart(id, e),
+    onOpenImage: (index) => hasMedia && h.openImage(id, index),
+    onOpenVideo: () => h.openVideo(id),
+  };
   const { b, view, compact } = props;
   const s = b.snapshot;
   const long = useLongPress(() => props.onSelect(false));

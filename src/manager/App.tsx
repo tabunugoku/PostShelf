@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Icon } from '../shared/Icon';
 import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
@@ -53,7 +53,7 @@ import {
 } from '../shared/storage';
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
-import { Card } from './Cards';
+import { Card, type RowHandlers } from './Cards';
 import { BulkMenu } from './BulkMenu';
 import { refreshCacheView } from './cacheView';
 import { afterPostsRemoved, deleteAccountDataAndCache } from '../shared/cacheops';
@@ -328,7 +328,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const allViews = [...smartViews, ...userFolders];
   const curFolder = allViews.find((f) => f.id === current) ?? smartViews[0];
   /** バッジ・チップ・ピッカー用。「未分類」の見た目を統一する */
-  const folderOf = (id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find((f) => f.id === id));
+  const folderOf = useCallback((id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find((f) => f.id === id)), [folders]); // 保存データが変わるまで同じ関数 (Card の memo のため)
   const pickerFolders = [inboxView(storedInbox), ...userFolders];
 
   const now = Date.now();
@@ -336,9 +336,18 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     () => queryBookmarks(bookmarks, { folderId: curFolder.id, search, sort, filters, now }),
     [bookmarks, curFolder.id, search, sort, filters],
   );
-  const shownIds = shown.map((b) => b.tweetId);
+  // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
+  const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
+  const shownSet = useMemo(() => new Set(shownIds), [shownIds]);
+  const tabbableId = focusId && shownSet.has(focusId) ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
-  const count = (id: string) => countFolder(bookmarks, id, now);
+  // 件数は保存データが変わるまで使い回す (左のメニューと見出しで、描画のたびに全件を数え直さない。「最近の 7 日」の境目は、保存データが変わるまで動かない)
+  const countCache = useMemo(() => new Map<string, number>(), [bookmarks]);
+  const count = (id: string) => {
+    let n = countCache.get(id);
+    if (n === undefined) countCache.set(id, (n = countFolder(bookmarks, id, now)));
+    return n;
+  };
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
   /** 仕分けモードが「削除されたポストを飛ばす」ために見る ID。保存データが変わらない再描画では、同じ Set を渡す */
   const liveIds = useMemo(() => new Set(bookmarks.map((b) => b.tweetId)), [bookmarks]);
@@ -767,6 +776,35 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       <p class="empty">{t('empty')}</p>
     ));
 
+  // 行の操作は、親が 1 度だけ作る安定したオブジェクト (Card の memo のため)。中身は、描画のたびに最新の関数に差し替える
+  const latest = useRef<RowHandlers>(null as unknown as RowHandlers);
+  latest.current = {
+    select: (id, shift) => toggleSelect(id, shift),
+    focus: (id) => setFocusId(id),
+    removeFromFolder: (id, fid) => void run(removeFromFolders([id], [fid]), 'toastRemoved'),
+    togglePicker: (id) => setPicker(picker === id ? null : id),
+    del: (id) => setConfirmState({ kind: 'posts', ids: [id] }),
+    dragStart: (id, e) => {
+      const ids = selected.has(id) ? [...selected] : [id];
+      e.dataTransfer?.setData(MIME_POSTS, JSON.stringify(ids));
+      if (e.dataTransfer) e.dataTransfer.effectAllowed = 'copyMove';
+    },
+    openImage: (id, index) => setViewer({ kind: 'image', tweetId: id, index }),
+    openVideo: (id) => setViewer({ kind: 'video', tweetId: id }),
+  };
+  const rowHandlers = useMemo<RowHandlers>(
+    () => ({
+      select: (id, shift) => latest.current.select(id, shift),
+      focus: (id) => latest.current.focus(id),
+      removeFromFolder: (id, fid) => latest.current.removeFromFolder(id, fid),
+      togglePicker: (id) => latest.current.togglePicker(id),
+      del: (id) => latest.current.del(id),
+      dragStart: (id, e) => latest.current.dragStart(id, e),
+      openImage: (id, index) => latest.current.openImage(id, index),
+      openVideo: (id) => latest.current.openVideo(id),
+    }),
+    [],
+  );
   const rows = (
     <SearchContext.Provider value={search}>
     <div class={`rows view-${view}${compact ? ' compact' : ''}`} ref={listRef} onKeyDown={onListKeyDown} role="list">
@@ -778,21 +816,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           compact={compact}
           selected={selected.has(b.tweetId)}
           selectionActive={selected.size > 0}
-          tabbable={focusId && shownIds.includes(focusId) ? focusId === b.tweetId : b.tweetId === shownIds[0]}
+          tabbable={b.tweetId === tabbableId}
           folderOf={folderOf}
           pickerOpen={picker === b.tweetId}
-          onSelect={(shift) => toggleSelect(b.tweetId, shift)}
-          onOpenImage={(index) => b.snapshot.media.length > 0 && setViewer({ kind: 'image', tweetId: b.tweetId, index })}
-          onOpenVideo={() => setViewer({ kind: 'video', tweetId: b.tweetId })}
-          onFocus={() => setFocusId(b.tweetId)}
-          onRemoveFromFolder={(fid) => void run(removeFromFolders([b.tweetId], [fid]), 'toastRemoved')}
-          onTogglePicker={() => setPicker(picker === b.tweetId ? null : b.tweetId)}
-          onDelete={() => setConfirmState({ kind: 'posts', ids: [b.tweetId] })}
-          onDragStart={(e) => {
-            const ids = selected.has(b.tweetId) ? [...selected] : [b.tweetId];
-            e.dataTransfer?.setData(MIME_POSTS, JSON.stringify(ids));
-            if (e.dataTransfer) e.dataTransfer.effectAllowed = 'copyMove';
-          }}
+          h={rowHandlers}
           pickerNode={
             picker === b.tweetId ? (
               <Dropdown fixed onClose={() => setPicker(null)} label={t('changeFolder')} class="menu-wide">
