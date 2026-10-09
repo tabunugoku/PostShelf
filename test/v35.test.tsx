@@ -164,10 +164,10 @@ describe('v35-C: the folder button follows the size of the bookmark button', () 
     const btn = document.createElement('button');
     return { bm, btn };
   };
-  it('uses the measured width/height and the icon height', () => {
+  it('uses the measured height (a circle) and the icon height', () => {
     const { bm, btn } = make(rect(58, 40), rect(22, 22));
     sizeSeparateButton(bm, btn);
-    expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['58px', '40px', '22px']);
+    expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['40px', '40px', '22px']);
   });
   it('falls back to 34px / 19px when it cannot measure (zero size)', () => {
     const { bm, btn } = make(rect(0, 0));

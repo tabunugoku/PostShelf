@@ -1,3 +1,4 @@
+import { sizeSeparateButton } from '../src/content/buttons';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -156,5 +157,47 @@ describe('v36-B: "show all" grows in steps of 100 per frame', () => {
     for (let i = 0; i < 4; i++) await runFrame();
     expect(cardCount()).toBe(30); // 続きはやめた
     expect($$<HTMLButtonElement>('.list-more button')[0].disabled).toBe(false);
+  });
+});
+
+describe('v36-C: the folder button size follows the height, not the width', () => {
+  const rect = (w: number, h: number) => ({ width: w, height: h, top: 0, left: 0, right: w, bottom: h, x: 0, y: 0, toJSON() {} }) as DOMRect;
+  const make = (bmRect: DOMRect, svgH = 22, circle?: { w: number; h: number; radius: string }) => {
+    const bm = document.createElement('button');
+    bm.getBoundingClientRect = () => bmRect;
+    const svgHost = document.createElement('div');
+    bm.append(svgHost);
+    svgHost.innerHTML = '<svg></svg>';
+    svgHost.querySelector('svg')!.getBoundingClientRect = () => rect(svgH, svgH);
+    if (circle) {
+      svgHost.style.borderRadius = circle.radius;
+      svgHost.getBoundingClientRect = () => rect(circle.w, circle.h);
+    }
+    return { bm, btn: document.createElement('button') };
+  };
+  const size = (b: { btn: HTMLElement }) => [b.btn.style.width, b.btn.style.height];
+  it('buttons that differ only in width (digits of the count) give the same size', () => {
+    const a = make(rect(40, 40));
+    const b = make(rect(96, 40));
+    sizeSeparateButton(a.bm, a.btn);
+    sizeSeparateButton(b.bm, b.btn);
+    expect(size(a)).toEqual(['40px', '40px']);
+    expect(size(b)).toEqual(size(a));
+  });
+  it('an ancestor that is a circle (larger than the svg, w≈h, big radius) wins over the height', () => {
+    const c = make(rect(96, 40), 22, { w: 38, h: 39, radius: '50%' });
+    sizeSeparateButton(c.bm, c.btn);
+    expect(size(c)).toEqual(['39px', '39px']);
+    const px = make(rect(96, 40), 22, { w: 44, h: 44, radius: '9999px' });
+    sizeSeparateButton(px.bm, px.btn);
+    expect(size(px)).toEqual(['44px', '44px']);
+  });
+  it('an ancestor that is not round or not square is ignored', () => {
+    const sq = make(rect(96, 40), 22, { w: 44, h: 44, radius: '4px' });
+    sizeSeparateButton(sq.bm, sq.btn);
+    expect(size(sq)).toEqual(['40px', '40px']);
+    const wide = make(rect(96, 40), 22, { w: 70, h: 44, radius: '50%' });
+    sizeSeparateButton(wide.bm, wide.btn);
+    expect(size(wide)).toEqual(['40px', '40px']);
   });
 });

@@ -58,20 +58,36 @@ export function placeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
 }
 
 /**
- * 隣のブックマークのボタンの大きさに合わせる (v35)。実機で、詳細ページのフォルダのボタンの hover の丸 (約 38px) が、
- * ブックマークの丸 (約 58px 幅) より小さかった。ブックマークのボタン (bm) の getBoundingClientRect() を測り、幅・高さをそのまま使う
- * (下限 HIT = 34px、上限 64px)。アイコンは bm の svg の高さに合わせる (下限 19px)。測れない (幅か高さが 0) ときは、HIT と 19px のまま。
- * 実機未確認: 測った幅が、X の hover の丸 (ボタンの外側) の大きさであると想定している。違っていたら、ここの測る対象を直す。
+ * 隣のブックマークのボタンの大きさに合わせる (v35、v36 で高さ基準に変更)。詳細ページでは、ブックマークのボタン (bm) の中に
+ * 数字 (「6,837」など) が入り、幅が桁数で変わる。幅を使うと丸の大きさがポストごとにまちまちになるので、幅は使わない。
+ * 丸の直径 = (1) bm の svg の祖先 (bm まで) で、svg より大きく、幅と高さの差が 2px 以内で、border-radius が大きい (50% か 999px 以上) 最初の要素の直径
+ * (X の hover の丸の要素そのもの)。(2) 無ければ bm の高さ。下限 HIT = 34px、上限 64px。測れない (0) ときは HIT。
+ * アイコンは bm の svg の高さに合わせる (下限 19px)。
+ * 実機未確認: X の hover の丸が bm の高さと同じか、上の祖先の要素であると想定している。違っていたら、ここの測る対象を直す。
  * margin-left は GAP のまま (丸が大きくなっても、詳細ページの数字に重ならないよう、差の半分を減らさない)。
  */
 export function sizeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
-  const r = bm.getBoundingClientRect();
+  const svg = bm.querySelector('svg');
+  const sh = svg?.getBoundingClientRect().height ?? 0;
   const clamp = (v: number) => Math.min(MAX_HIT, Math.max(HIT, Math.round(v)));
-  const ok = r.width > 0 && r.height > 0;
-  btn.style.width = `${ok ? clamp(r.width) : HIT}px`;
-  btn.style.height = `${ok ? clamp(r.height) : HIT}px`;
-  const ih = bm.querySelector('svg')?.getBoundingClientRect().height ?? 0;
-  btn.style.fontSize = `${ih > 0 ? Math.max(ICON_MIN, Math.round(ih)) : ICON_MIN}px`;
+  const round = (el: Element) => {
+    const cs = getComputedStyle(el);
+    const br = cs.borderTopLeftRadius || cs.borderRadius; // 値は "50%" か "9999px" の形。長い書き方が取れない環境では、まとめた書き方を見る
+    return br.endsWith('%') ? parseFloat(br) >= 50 : parseFloat(br) >= 999;
+  };
+  let d = 0;
+  for (let el = svg?.parentElement; svg && el; el = el === bm ? null : el.parentElement) {
+    const r = el.getBoundingClientRect();
+    if (r.height > sh && Math.abs(r.width - r.height) <= 2 && round(el)) {
+      d = r.height;
+      break;
+    }
+  }
+  if (!(d > 0)) d = bm.getBoundingClientRect().height;
+  const size = d > 0 ? clamp(d) : HIT;
+  btn.style.width = `${size}px`;
+  btn.style.height = `${size}px`;
+  btn.style.fontSize = `${sh > 0 ? Math.max(ICON_MIN, Math.round(sh)) : ICON_MIN}px`;
 }
 
 /** 大きさを測るのは、挿入したときと、bm の大きさが変わったとき (ResizeObserver があれば) だけ。X の再描画のたびには測らない */
