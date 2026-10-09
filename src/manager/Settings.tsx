@@ -187,12 +187,12 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
         />
         <span>
           <strong>{t('syncNativeLabel')}</strong>
-          <span class="muted setting-desc desc-list">
-            {(['syncNativeDesc1', 'syncNativeDesc2', 'syncNativeDesc3'] as const).map((k) => (
-              <span class="desc-item">{t(k)}</span>
+          {/* 他の設定と同じく、1 文を 1 行で描く (箇条書きはやめた。v37) */}
+          <span class="muted setting-desc">
+            {(['syncNativeDesc1', 'syncNativeDesc2', 'syncNativeDesc3', 'syncNativeNote'] as const).map((k) => (
+              <span class="desc-line" key={k}>{t(k)}</span>
             ))}
           </span>
-          <span class="muted setting-desc desc-note">{t('syncNativeNote')}</span>
         </span>
       </label>
       </fieldset>
