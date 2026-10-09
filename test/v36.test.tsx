@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { sizeSeparateButton } from '../src/content/buttons';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
@@ -9,6 +10,10 @@ import { setAccountScope } from '../src/shared/storage';
 const flush = (ms = 30) => act(() => new Promise<void>((r) => setTimeout(r, ms)));
 /** act の外で待つ。act の中だと描画がまとめて行われ、実機のように「データを読んだ描画」と「一覧が現れる描画」が分かれない */
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+/** 条件が満たされるまで待つ (useEffect は描画のあと rAF か 100ms の保険で走るので、負荷が高いと遅れる) */
+const until = async (cond: () => boolean, ms = 5000) => {
+  for (let t = 0; t < ms && !cond(); t += 20) await wait(20);
+};
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 const $$ = <T extends HTMLElement>(sel: string) => [...document.querySelectorAll<T>(sel)];
 const snap = (n: number) => ({ text: `post ${n}`, author: `A${n}`, handle: `@u${n}`, media: [], createdAt: '2026-01-01T00:00:00.000Z', url: `https://x.com/u${n}/status/${n}` });
@@ -55,7 +60,8 @@ describe('v36-A: the staged-rendering effect re-runs when the sentinel appears l
     vi.spyOn(chrome.storage.local, 'set').mockImplementation(((items: any) => new Promise((r) => setTimeout(() => r(set(items)), 60))) as any);
     document.body.innerHTML = '<div id="app"></div>';
     render(<App surface="tab" />, $('#app'));
-    await wait(400);
+    await until(() => cardCount() === 30 && ios.some((i) => i.el));
+    await wait(100);
     expect(cardCount()).toBe(30);
     const live = ios.filter((i) => i.el);
     expect(live.length).toBeGreaterThan(0); // 修正前: 監視が付かない
@@ -74,9 +80,12 @@ describe('v36-A: the staged-rendering effect re-runs when the sentinel appears l
     });
     document.body.innerHTML = '<div id="app"></div>';
     render(<App surface="tab" />, $('#app'));
-    await wait(400);
-    await act(() => void window.dispatchEvent(new Event('scroll')));
-    await flush(80);
+    await until(() => cardCount() === 30 && !!document.querySelector('.list-sentinel'));
+    await wait(150); // 効果 (rAF か 100ms の保険) が走って、scroll の監視が付くのを待つ
+    for (let i = 0; i < 20 && cardCount() <= 30; i++) {
+      await act(() => void window.dispatchEvent(new Event('scroll')));
+      await wait(50);
+    }
     expect(cardCount()).toBeGreaterThan(30);
     vi.restoreAllMocks();
   });
@@ -199,5 +208,24 @@ describe('v36-C: the folder button size follows the height, not the width', () =
     const wide = make(rect(96, 40), 22, { w: 70, h: 44, radius: '50%' });
     sizeSeparateButton(wide.bm, wide.btn);
     expect(size(wide)).toEqual(['40px', '40px']);
+  });
+});
+
+describe('v36-D: the settings description is not width-capped and does not use text-wrap: pretty', () => {
+  const css = readFileSync('static/manager.css', 'utf8');
+  it('.setting-desc has max-width:none (no em cap) and keeps overflow-wrap', () => {
+    const rule = css.match(/\.setting-desc\{[^}]*\}/)![0];
+    expect(rule).toContain('max-width:none');
+    expect(rule).not.toMatch(/max-width:\d/);
+    expect(rule).toContain('overflow-wrap:anywhere');
+  });
+  it('text-wrap: pretty is not applied to .setting-desc or .muted; headings keep balance', () => {
+    for (const m of css.matchAll(/([^{}]+)\{[^}]*text-wrap:pretty[^}]*\}/g)) {
+      expect(m[1]).not.toMatch(/\.setting-desc|\.muted/);
+    }
+    expect(css).toMatch(/h1,h2,h3,label,\.sec\{text-wrap:balance\}/);
+  });
+  it('no narrow-width (side panel) rule re-introduces a fixed width on .setting-desc', () => {
+    expect(css).not.toMatch(/\.setting-desc\{[^}]*(?<!max-)width:\d/);
   });
 });

@@ -54,7 +54,7 @@ describe('v25: 説明の短文化', () => {
       'PostShelf が画面上のブックマークボタンを押すのは、操作したポスト 1 件につき 1 回だけです。',
     ]);
     expect($('.desc-note').textContent).toBe('初期値はオフです。');
-    expect(css).toMatch(/\.setting-desc\{[^}]*max-width:52em/);
+    expect(css).toMatch(/\.setting-desc\{[^}]*max-width:none/);
     expect($('input[role=switch]').closest('label')!.getBoundingClientRect).toBeTruthy(); // スイッチは、いまのまま (本物の input)
   });
 });

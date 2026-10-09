@@ -33,7 +33,7 @@ body{margin:0;background:var(--surface-2);color:var(--text-primary);font:14px/1.
 button,.chip,.tab,.badge{white-space:nowrap}
 /* 文言が長くなりうるボタン (ダイアログ・設定・メニューの項目) は折り返す。他言語の長い文言がはみ出さないように (v35)。短い文言のボタン (ツールバー・チップ・タブ) は nowrap のまま */
 .dialog button,.setting-group button,.menu-item{white-space:normal;min-width:0;overflow-wrap:anywhere}
-.muted,.setting-desc,.toast,.text,.empty-state p,.pre{text-wrap:pretty}
+.toast,.text,.empty-state p,.pre{text-wrap:pretty}
 h1,h2,h3,label,.sec{text-wrap:balance}
 h1{font-size:16px;font-weight:500;margin:0 0 4px}
 button,input{min-height:32px;font:inherit;color:inherit;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius);padding:4px 10px;cursor:pointer}
@@ -236,7 +236,7 @@ button:disabled{cursor:not-allowed}
 /* ---- 設定 ---- */
 .setting{display:flex;gap:10px;align-items:flex-start;padding:10px 0;cursor:pointer}
 .setting input{min-height:0;width:20px;height:20px;margin-top:4px;accent-color:var(--accent-strong);flex:none}
-.setting-desc{display:block;font-size:14px;margin-top:2px;max-width:52em}
+.setting-desc{display:block;font-size:14px;margin-top:2px;max-width:none;overflow-wrap:anywhere}
 /* 説明は、短い文の箇条書きにする (v25) */
 .desc-list{display:grid;gap:2px}
 .desc-item{display:block;padding-left:1em;text-indent:-1em}

@@ -142,9 +142,9 @@ describe('v35-A: scroll check without IntersectionObserver', () => {
 });
 
 describe('v35-B: settings description width and ja wording', () => {
-  it('.setting-desc is 52em wide; the post body width is untouched', () => {
+  it('.setting-desc has no width cap (v36: widened from 52em to none)', () => {
     const css = readFileSync('static/manager.css', 'utf8');
-    expect(css).toMatch(/\.setting-desc\{[^}]*max-width:52em/);
+    expect(css).toMatch(/\.setting-desc\{[^}]*max-width:none/);
     expect(css).not.toMatch(/max-width:40em/);
   });
   it('the ja locale no longer uses "たたまれた" (it breaks mid-word)', () => {
