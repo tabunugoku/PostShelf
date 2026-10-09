@@ -125,3 +125,34 @@ export const BOOKMARK_PATHS: readonly string[] = ['/i/history', '/i/bookmarks'];
 
 /** 末尾のスラッシュは無視して完全一致で判定する (クエリ・ハッシュは pathname に含まれない) */
 export const isBookmarksPath = (path: string): boolean => BOOKMARK_PATHS.includes(path.replace(/\/+$/, '') || '/');
+
+/**
+ * ブックマークボタンの svg の高さと hover の丸の直径 (v35〜v37)。
+ * 丸は svg の兄弟・祖先・その他の子孫の順で探す。X の構造の想定は buttons.ts と v37 の fixture に記載。
+ * 計算したスタイルで丸を判定し、余白を含むボタン自身の寸法は使わない。
+ */
+export function bookmarkButtonGeometry(bm: HTMLElement): { iconHeight: number; circleDiameter: number } {
+  const svg = bm.querySelector('svg');
+  const sh = svg?.getBoundingClientRect().height ?? 0;
+  const round = (el: Element) => {
+    const cs = getComputedStyle(el);
+    const br = cs.borderTopLeftRadius || cs.borderRadius;
+    return br.endsWith('%') ? parseFloat(br) >= 50 : parseFloat(br) >= 999;
+  };
+  const circle = (el: Element) => {
+    const r = el.getBoundingClientRect();
+    return r.height > sh && Math.abs(r.width - r.height) <= 2 && round(el) ? r.height : 0;
+  };
+  let d = 0;
+  if (svg && sh > 0) {
+    const rank = (el: Element) => (el.parentElement === svg.parentElement ? 0 : el.contains(svg) ? 1 : 2);
+    const cands = [...bm.querySelectorAll('*')].filter((el) => el !== svg && !svg.contains(el));
+    // 同じ順位の中では、svg に近い祖先が先 (内側から外側)。
+    cands.sort((x, y) => rank(x) - rank(y) || (x.contains(y) ? 1 : y.contains(x) ? -1 : 0));
+    for (const el of cands) {
+      d = circle(el);
+      if (d > 0) break;
+    }
+  }
+  return { iconHeight: sh, circleDiameter: d };
+}
