@@ -9,7 +9,7 @@ import { SavedContext } from './settingsSaved';
 import { reportStorageError } from './errorBus';
 import { getFullTextRun, getSettings, onFullTextRunChanged, updateSettings, type FullTextRun } from '../shared/settings';
 import { getAccountScope, listTruncated, onDataChanged } from '../shared/storage';
-import { Confirm } from './ui';
+import { Confirm, Sentences } from './ui';
 
 export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
   const saved = useContext(SavedContext);
@@ -50,7 +50,7 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
         />
         <span>
           <strong>{t('fullTextSwitch')}</strong>
-          <span class="muted setting-desc">{t('fullTextSwitchDesc')}</span>
+          <span class="muted setting-desc"><Sentences text={t('fullTextSwitchDesc')} /></span>
         </span>
       </label>
       {on && (

@@ -364,3 +364,32 @@ export function SortMenu<T extends string>(props: { value: T; options: [T, strin
     </div>
   );
 }
+
+/** 文に分ける。Intl.Segmenter があればそれで (lang は文書の言語)、無ければ「。」の直後で分ける (「。」は前の文に残す)。前後の空白は落とす */
+export function splitSentences(text: string, lang = ''): string[] {
+  let parts: string[];
+  if (typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function') {
+    try {
+      parts = [...new Intl.Segmenter(lang || undefined, { granularity: 'sentence' }).segment(text)].map((x) => x.segment);
+    } catch {
+      parts = text.split(/(?<=。)/);
+    }
+  } else parts = text.split(/(?<=。)/);
+  const out = parts.map((x) => x.trim()).filter(Boolean);
+  return out.length ? out : [text];
+}
+
+/** 設定の説明 (v37): 文言はそのまま、1 文を 1 行 (display:block) で描く。children は最後の行の末尾に続ける (リンクなど) */
+export function Sentences(props: { text: string; children?: ComponentChildren }) {
+  const lines = splitSentences(props.text, document.documentElement.lang);
+  return (
+    <>
+      {lines.map((x, i) => (
+        <span class="desc-line" key={i}>
+          {x}
+          {i === lines.length - 1 && props.children ? <> {props.children}</> : null}
+        </span>
+      ))}
+    </>
+  );
+}

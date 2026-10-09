@@ -83,3 +83,63 @@ describe('v37-A: the folder button circle follows the circle element among the d
     expect(size(x.btn)).toEqual(['56px', '56px']);
   });
 });
+
+import { readFileSync } from 'node:fs';
+import { render } from 'preact';
+import { act } from 'preact/test-utils';
+import { Sentences, splitSentences } from '../src/manager/ui';
+
+describe('v37-B: settings descriptions are shown one sentence per line (wording unchanged)', () => {
+  const load = (lang: string) => JSON.parse(readFileSync(`static/_locales/${lang}/messages.json`, 'utf8')) as Record<string, { message: string }>;
+  const ja = load('ja').fullTextSwitchDesc.message;
+  const mount = async (text: string, lang: string, link = false) => {
+    document.documentElement.lang = lang;
+    document.body.innerHTML = '<p id="p" class="setting-desc"></p>';
+    await act(() => void render(<Sentences text={text}>{link ? <a href="#x">link</a> : null}</Sentences>, document.getElementById('p')!));
+    return [...document.querySelectorAll('.desc-line')].map((e) => e.textContent ?? '');
+  };
+
+  it('ja: fullTextSwitchDesc becomes one line per 「。」, and nothing is added or lost', async () => {
+    const lines = await mount(ja, 'ja');
+    expect(lines.length).toBe((ja.match(/。/g) ?? []).length);
+    expect(lines.length).toBe(4);
+    expect(lines.join('')).toBe(ja);
+    for (const l of lines) expect(l.endsWith('。')).toBe(true);
+  });
+
+  it('the same result without Intl.Segmenter (split right after 「。」)', async () => {
+    const seg = Intl.Segmenter;
+    (Intl as any).Segmenter = undefined;
+    try {
+      const lines = await mount(ja, 'ja');
+      expect(lines.length).toBe(4);
+      expect(lines.join('')).toBe(ja);
+      expect(splitSentences('一つ目。二つ目。')).toEqual(['一つ目。', '二つ目。']);
+    } finally {
+      (Intl as any).Segmenter = seg;
+    }
+  });
+
+  it('en: one line per sentence; the words are all kept', async () => {
+    const en = load('en').fullTextSwitchDesc.message;
+    const lines = await mount(en, 'en');
+    expect(lines.length).toBeGreaterThanOrEqual(2);
+    expect(lines.join(' ')).toBe(en.replace(/\s+/g, ' ').trim());
+  });
+
+  it('a one-sentence string is one line; the link follows the last line', async () => {
+    expect(await mount('一文だけです。', 'ja')).toEqual(['一文だけです。']);
+    const guide = load('ja').updateGuide.message;
+    const lines = await mount(guide, 'ja', true);
+    expect(lines.length).toBeGreaterThan(1);
+    const all = [...document.querySelectorAll('.desc-line')];
+    expect(all[all.length - 1].querySelector('a')).not.toBeNull();
+    expect(document.querySelectorAll('.desc-line a').length).toBe(1);
+  });
+
+  it('.desc-line is a block; the width cap stays off', () => {
+    const css = readFileSync('static/manager.css', 'utf8');
+    expect(css).toMatch(/\.desc-line\{display:block\}/);
+    expect(css).toMatch(/\.setting-desc\{[^}]*max-width:none/);
+  });
+});

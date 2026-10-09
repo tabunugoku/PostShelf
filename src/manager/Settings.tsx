@@ -4,7 +4,7 @@ import { t } from '../shared/strings';
 import { foldText } from '../shared/fold';
 import { getSettings, onSettingsChanged, resetSettings, restoreSettings, updateAutoCollect, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
 import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
-import { Confirm, TypeToConfirm } from './ui';
+import { Confirm, Sentences, TypeToConfirm } from './ui';
 import { ImageCacheSection } from './ImageCache';
 import { SavedContext } from './settingsSaved';
 import { reportStorageError } from './errorBus';
@@ -209,7 +209,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
             <span>{t(m === 'separate' ? 'buttonModeSeparate' : 'buttonModeReplace')}</span>
           </label>
         ))}
-        <p class="muted setting-desc">{t('buttonModeNote')}</p>
+        <p class="muted setting-desc"><Sentences text={t('buttonModeNote')} /></p>
       </fieldset>
       <SavedContext.Provider value={flashSaved}>
         <FullTextSection reloadKey={cacheKey} />
@@ -227,7 +227,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           />
           <span>
             <strong>{t('acSettingsSwitch')}</strong>
-            <span class="muted setting-desc">{t('acSettingsSwitchDesc')}</span>
+            <span class="muted setting-desc"><Sentences text={t('acSettingsSwitchDesc')} /></span>
           </span>
         </label>
         {autoOn && onAutoCollect && (
@@ -237,7 +237,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
             </button>
           </div>
         )}
-        {autoOn && <p class="muted setting-desc">{t('acSettingsNote')}</p>}
+        {autoOn && <p class="muted setting-desc"><Sentences text={t('acSettingsNote')} /></p>}
       </fieldset>
       {heading('behavior', 'groupBehavior')}
       <fieldset class="setting-group">
@@ -253,12 +253,12 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
             <span>{t(m === 'popup' ? 'actionModePopup' : 'actionModeSidepanel')}</span>
           </label>
         ))}
-        <p class="muted setting-desc">{t('actionModeNote')}</p>
+        <p class="muted setting-desc"><Sentences text={t('actionModeNote')} /></p>
       </fieldset>
       {heading('data', 'groupData')}
       <fieldset class="setting-group">
         <legend>{t('dataMoveSection')}</legend>
-        <p class="muted setting-desc">{t('dataMoveDesc')}</p>
+        <p class="muted setting-desc"><Sentences text={t('dataMoveDesc')} /></p>
         <div class="io">
           <button onClick={() => downloadJson(exportData)}>{t('exportBtn')}</button>
           <label class="file-btn">
@@ -299,16 +299,17 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           <strong>{t('versionLabel', currentVersion())}</strong>
         </p>
         <p class="muted setting-desc">
-          {t('updateGuide')}{' '}
-          <a href={INSTALL_URL} target="_blank" rel="noopener noreferrer">
-            {t('installGuideLink')}
-          </a>
+          <Sentences text={t('updateGuide')}>
+            <a href={INSTALL_URL} target="_blank" rel="noopener noreferrer">
+              {t('installGuideLink')}
+            </a>
+          </Sentences>
         </p>
       </fieldset>
       {heading('reset', 'groupReset')}
       <fieldset class="setting-group">
         <legend>{t('settingsResetHeading')}</legend>
-        <p class="muted setting-desc">{t('settingsResetDesc')}</p>
+        <p class="muted setting-desc"><Sentences text={t('settingsResetDesc')} /></p>
         <div class="io">
           <button onClick={() => setDialog('reset')}>
             <Icon name="ti-restore" /> {t('settingsResetBtn')}
@@ -317,7 +318,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       </fieldset>
       <fieldset class="setting-group danger-zone">
         <legend class="danger-text">{t('dangerHeading')}</legend>
-        <p class="muted setting-desc">{t('deleteAllDesc')}</p>
+        <p class="muted setting-desc"><Sentences text={t('deleteAllDesc')} /></p>
         <div class="io">
           <button class="danger" onClick={() => void openDeleteAll()}>
             <Icon name="ti-trash" /> {t('deleteAllBtn')}

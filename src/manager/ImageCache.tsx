@@ -21,7 +21,7 @@ import { listAllBookmarks } from '../shared/storage';
 import type { Bookmark } from '../shared/models';
 import { t } from '../shared/strings';
 import { notifyCacheChanged, refreshCacheView } from './cacheView';
-import { Confirm } from './ui';
+import { Confirm, Sentences } from './ui';
 
 export function formatBytes(n: number): string {
   if (n >= GB) return `${(n / GB).toFixed(n >= 10 * GB ? 0 : 1).replace(/\.0$/, '')} GB`;
@@ -266,11 +266,11 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
         <input type="checkbox" role="switch" checked={cfg.enabled} onChange={(e) => void toggle((e.target as HTMLInputElement).checked)} />
         <span>
           <strong>{t('cacheEnable')}</strong>
-          <span class="muted setting-desc">{t('cacheEnableDesc')}</span>
+          <span class="muted setting-desc"><Sentences text={t('cacheEnableDesc')} /></span>
         </span>
       </label>
       {/* 初めてオンにするとき Chrome が許可を求める、という補足は、オンにする前に読める位置に置く (畳んでいても残す) */}
-      <p class="muted setting-desc cache-perm-note">{t('cachePermNote')}</p>
+      <p class="muted setting-desc cache-perm-note"><Sentences text={t('cachePermNote')} /></p>
       {message && (
         <p class={message.error ? 'error' : 'muted'} role={message.error ? 'alert' : 'status'}>
           {message.text}
@@ -396,8 +396,8 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
             {t('cacheClear')}
           </button>
         </div>
-        <p class="muted setting-desc">{t('cacheBulkHelp')}</p>
-        <p class="muted setting-desc">{t('cacheRules')}</p>
+        <p class="muted setting-desc"><Sentences text={t('cacheBulkHelp')} /></p>
+        <p class="muted setting-desc"><Sentences text={t('cacheRules')} /></p>
       </div>)}
       {cleanup && (
         <div class="warn" role="alert">
