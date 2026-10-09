@@ -159,7 +159,7 @@ describe('settings UI: usage, capacity, quality', () => {
     expect($$('.image-cache input[name=cacheFull]').length).toBe(2);
     expect(section().textContent).toContain('拡張機能を削除すると、ブラウザの中のキャッシュも消えます');
     expect(section().textContent).toContain('JSON のエクスポート');
-    expect(section().textContent).toContain('許可は、この機能をオンにしたときだけ求めます');
+    expect(section().textContent).toContain('この機能を使わなければ、許可は求めません');
   });
 
   it('changing quality / full policy / capacity is saved', async () => {
@@ -312,7 +312,7 @@ describe('folder back end in the UI', () => {
     await mount('sidepanel');
     await click($$('.menu-item').find((r) => r.textContent?.includes('設定')) ?? $$('.folder-btn')[0]);
     if (!$$('.image-cache').length) await click($$('.menu-item').find((r) => r.textContent?.includes('設定'))!);
-    expect($('.dirbox').textContent).toContain('タブ版で選んでください');
+    expect($('.dirbox').textContent).toContain('タブ版の管理画面で選んでください');
     expect($$('.dirbox button').some((b) => b.textContent?.includes('フォルダを選'))).toBe(false);
     (window as any).innerWidth = 1200;
   });
