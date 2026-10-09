@@ -6,7 +6,7 @@ import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
 import { createFolderPicker, divider, iconButton } from '../shared/folderPicker';
 import { setNativeBookmark } from './native';
-import { getSettings, pushRecentFolders, updateSettings, type ButtonMode } from '../shared/settings';
+import { getSettings, updateRecentFolders, type ButtonMode } from '../shared/settings';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { requestCache, requestFullText, requestPrune } from '../shared/cacheRequest';
 
@@ -107,11 +107,16 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     showUnsave(true);
     const added = [...selected].filter((id) => !chosen.has(id));
     chosen = new Set(selected);
-    if (added.length) void updateSettings({ recentFolderIds: pushRecentFolders((await getSettings()).recentFolderIds ?? [], added) }).catch(() => {});
     if (account) requestCache(tweetId, account.id); // キャッシュがオンなら、background が画像を取得して保存する
     if (account && snapshot.truncated) requestFullText(tweetId, account.id); // たたまれた状態で保存したとき: 設定がオンなら、background が全文を取る (v24)
     // 連動モード (設定オンのときだけ): PostShelf の保存有無に X のブックマークを合わせる
-    if ((await getSettings()).syncNative) setNativeBookmark(article, true);
+    try {
+      if ((await getSettings()).syncNative) setNativeBookmark(article, true);
+    } catch {
+      /* 設定を読めなくても、保存は成功している。X 側の同期だけ飛ばす */
+    }
+    // 「最近使った」は最後に。失敗しても、保存の流れは止めない (保存はもう成功している)
+    if (added.length) void updateRecentFolders(added).catch(() => {});
   };
   // 保存の削除は、明示的な操作だけ (保存済みのときだけ表示。確認は出さない)。アイコンだけのボタンで、下部の 1 行の右端に置く
   const unsave = iconButton(th, t('removeFromPostShelf'), 'ti-trash', 'danger');

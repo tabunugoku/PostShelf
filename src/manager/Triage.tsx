@@ -3,6 +3,7 @@ import { Icon } from '../shared/Icon';
 import { createFolderMenu } from '../shared/folderCreateMenu';
 import { INBOX_ID, displayName, type Bookmark, type Folder } from '../shared/models';
 import { addToFolders, removeFromFolders, setBookmarkFolders } from '../shared/storage';
+import { updateRecentFolders } from '../shared/settings';
 import { formatDate, t } from '../shared/strings';
 import { MediaImg } from './MediaImg';
 import { PostText } from './PostText';
@@ -100,6 +101,7 @@ export function Triage(props: {
       const base = (assigned[b.tweetId] ?? []).filter((id) => id !== INBOX_ID);
       const ids = has ? base.filter((id) => id !== folderId) : [...base, folderId];
       mark(b, ids.length ? ids : [INBOX_ID]);
+      if (!has) void updateRecentFolders([folderId]).catch(() => {}); // 「最近使った」(失敗しても仕分けは続ける)
       setError('');
       void props.onChanged();
       if (!stay && !has) next();
@@ -231,6 +233,8 @@ export function Triage(props: {
                         onChange={async (sel) => {
                           const ids = [...sel];
                           await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
+                          const added = ids.filter((id) => !(assigned[cur.tweetId] ?? []).includes(id));
+                          if (added.length) void updateRecentFolders(added).catch(() => {});
                           mark(cur, ids);
                           void props.onChanged();
                         }}
@@ -250,6 +254,7 @@ export function Triage(props: {
                 existing={props.pickerFolders}
                 onCreated={async (f) => {
                   await addToFolders([cur.tweetId], [f.id]);
+                  void updateRecentFolders([f.id]).catch(() => {});
                   mark(cur, [...(assigned[cur.tweetId] ?? []).filter((id) => id !== INBOX_ID), f.id]);
                   setCreating(false);
                   void props.onChanged();
