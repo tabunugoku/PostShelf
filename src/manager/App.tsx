@@ -838,9 +838,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     [],
   );
   // 末尾の手前 (画面の高さの 1.5 倍) に入ったら、1 回分増やす。IntersectionObserver が無い環境では、「すべて表示」のボタンで増やす
-  const sentinelRef = useRef<HTMLSpanElement>(null);
+  // 末尾の要素は、コールバック ref + 状態で持つ。useRef だと、データを読んだ描画ではまだ DOM が無く (ready 前)、
+  // 一覧が描かれたあとも依存の値が変わらないので、効果が再実行されず、30 件で止まった (v36)
+  const [sentinel, setSentinel] = useState<HTMLSpanElement | null>(null);
   useEffect(() => {
-    const el = sentinelRef.current;
+    const el = sentinel;
     if (!el || remaining <= 0) return;
     // IntersectionObserver だけに頼らない (実機で「すべて」が 30 件で止まった。原因は特定できていない)。scroll / resize と、描画のたびに、末尾までの距離を測る。
     // どちらで増やしても、増やす先は今の renderCount が基準 (同じ値を入れるだけなので、二重には増えない)
@@ -871,7 +873,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       if (raf) cancelAnimationFrame(raf);
       io?.disconnect();
     };
-  }, [renderCount, remaining, resetKey]);
+  }, [sentinel, renderCount, remaining, resetKey]);
   const rows = (
     <SearchContext.Provider value={search}>
     <div class={`rows view-${view}${compact ? ' compact' : ''}`} ref={listRef} onKeyDown={onListKeyDown} role="list">
@@ -910,7 +912,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     </div>
     {remaining > 0 && (
       <div class="list-more">
-        <span ref={sentinelRef} class="list-sentinel" aria-hidden="true" />
+        <span ref={setSentinel} class="list-sentinel" aria-hidden="true" />
         <span class="muted">{t('listRemaining', remaining)}</span>
         <button type="button" onClick={() => growTo(shown.length)}>
           {t('listShowAll')}
