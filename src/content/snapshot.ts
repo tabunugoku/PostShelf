@@ -38,6 +38,13 @@ export interface Extracted {
   snapshot: Snapshot;
 }
 
+/** article 要素から、ポストの ID だけを軽く読む (extractTweet と同じ取り出し方。スナップショットは作らない)。取れなければ null */
+export function tweetIdOf(article: Element): string | null {
+  const time = queryFirst(article, 'time')?.el ?? null;
+  const link = (time?.closest('a') ?? queryFirst(article, 'statusLink')?.el) as HTMLAnchorElement | null;
+  return link?.getAttribute('href')?.match(/^\/[^/]+\/status\/(\d+)/)?.[1] ?? null;
+}
+
 /** article 要素からポストのスナップショットを作る。ID が取れなければ null。 */
 export function extractTweet(article: Element): Extracted | null {
   const time = queryFirst(article, 'time')?.el ?? null;
