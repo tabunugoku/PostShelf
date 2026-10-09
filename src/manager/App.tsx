@@ -258,15 +258,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setEditing(null);
     setMenu(null);
     setFilterOpen(false);
-    void updateSettings({ lastFolderId: id });
+    void updateSettings({ lastFolderId: id }).catch(() => {});
   };
   const chooseMode = (m: ViewMode) => {
     setView(m);
-    void updateSettings({ viewMode: m });
+    void updateSettings({ viewMode: m }).catch(() => {});
   };
   const chooseSort = (s: SortKey) => {
     setSort(s);
-    void updateSettings({ sortKey: s });
+    void updateSettings({ sortKey: s }).catch(() => {});
   };
 
   /** x.com で読み取ったアカウントが変わった。別のアカウントに切り替わったら、そのアカウントの表示に切り替えて知らせる */
@@ -278,7 +278,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     if (!next || next.id === prev?.id) return;
     const s = await getSettings();
     if (prev === null && s.viewAccount) return; // 初めて読み取れた: 手動で選んだ表示があればそのまま
-    if (prev !== null) void updateSettings({ viewAccount: '' }); // 別のアカウントに切り替えた: 手動の選択は解く
+    if (prev !== null) void updateSettings({ viewAccount: '' }).catch(() => {}); // 別のアカウントに切り替えた: 手動の選択は解く
     switchTo(next.id);
     if (prev !== null) setToast({ key: Date.now(), message: t('accountSwitched', accountLabel(next)) });
   };
@@ -303,14 +303,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     void Promise.all([reload(), loadHint()]);
   };
   const pickAccount = (id: string) => {
-    void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id }); // x.com でログイン中のアカウントは「選んでいない」と同じ (追従する)
+    void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id }).catch(() => {}); // x.com でログイン中のアカウントは「選んでいない」と同じ (追従する)
     switchTo(id);
   };
   const afterAccountChange = async (removedOrMovedId: string, nextId?: string) => {
     if (viewRef.current === removedOrMovedId) {
       const accs = await listAccounts();
       const id = nextId ?? resolveViewAccount('', lastRef.current, accs.filter((a) => a.account.id !== removedOrMovedId));
-      void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id });
+      void updateSettings({ viewAccount: id === lastRef.current?.id ? '' : id }).catch(() => {});
       switchTo(id);
     } else await reload();
   };

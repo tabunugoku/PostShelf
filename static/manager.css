@@ -31,6 +31,8 @@ body{margin:0;background:var(--surface-2);color:var(--text-primary);font:14px/1.
 /* 日本語の折り返しは文節の区切りに (Chrome 119 未満では無効 = 通常の折り返し。許容)。<html lang> は起動時に UI の言語を入れる。他の言語には足さない */
 :lang(ja) body{word-break:auto-phrase;line-break:strict}
 button,.chip,.tab,.badge{white-space:nowrap}
+/* 文言が長くなりうるボタン (ダイアログ・設定・メニューの項目) は折り返す。他言語の長い文言がはみ出さないように (v35)。短い文言のボタン (ツールバー・チップ・タブ) は nowrap のまま */
+.dialog button,.setting-group button,.menu-item{white-space:normal;min-width:0;overflow-wrap:anywhere}
 .muted,.setting-desc,.toast,.text,.empty-state p,.pre{text-wrap:pretty}
 h1,h2,h3,label,.sec{text-wrap:balance}
 h1{font-size:16px;font-weight:500;margin:0 0 4px}

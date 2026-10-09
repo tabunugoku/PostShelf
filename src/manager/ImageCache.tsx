@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'preact/hooks';
 import { SavedContext } from './settingsSaved';
 import { Icon } from '../shared/Icon';
 import { afterPostsRemoved, cacheMissing, clearAllCaches, evictToFit, migrateStore, openStore, previewEviction, type OpenedStore } from '../shared/cacheops';
+import { reportStorageError } from './errorBus';
 import { DirStore, NotOurFolderError, prepareDirectory, requestDirPermission, saveDirHandle, type DirHandleLike, type ImageStore, type Usage } from '../shared/imagecache';
 import { hasImagePermission, requestImagePermission } from '../shared/permissions';
 import {
@@ -78,7 +79,12 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
   useEffect(() => void load(), [props.reloadKey]);
 
   const save = async (patch: Partial<ImageCacheSettings>) => {
-    await updateImageCache(patch);
+    try {
+      await updateImageCache(patch);
+    } catch {
+      reportStorageError(); // 「変更を保存しました」は出さない。画面の値は、保存できている状態に戻す
+      return void (await load());
+    }
     saved(); // 「変更を保存しました」
     await load();
   };

@@ -181,3 +181,11 @@ describe('v35-C: the folder button follows the size of the bookmark button', () 
     expect([big.btn.style.width, big.btn.style.height]).toEqual(['64px', '64px']);
   });
 });
+
+describe('v35-F: button nowrap is split', () => {
+  it('buttons in dialogs, settings groups and menu items wrap; toolbar buttons keep nowrap', () => {
+    const css = readFileSync('static/manager.css', 'utf8');
+    expect(css).toMatch(/button,\.chip,\.tab,\.badge\{white-space:nowrap\}/);
+    expect(css).toMatch(/\.dialog button,\.setting-group button,\.menu-item\{white-space:normal;min-width:0;overflow-wrap:anywhere\}/);
+  });
+});
