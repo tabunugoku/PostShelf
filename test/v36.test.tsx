@@ -99,3 +99,62 @@ describe('v36-A: listeners do not leak when the effect re-runs', () => {
     rem.mockRestore();
   });
 });
+
+describe('v36-B: "show all" grows in steps of 100 per frame', () => {
+  let frames: FrameRequestCallback[] = [];
+  const runFrame = async () => {
+    const cbs = frames;
+    frames = [];
+    await act(() => void cbs.forEach((cb) => cb(0)));
+    await flush(5);
+  };
+  const mount = async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+    await act(() => void render(<App surface="tab" />, $('#app')));
+    await flush(80);
+  };
+  beforeEach(() => {
+    frames = [];
+    vi.stubGlobal('IntersectionObserver', undefined);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(((cb: FrameRequestCallback) => frames.push(cb)) as any);
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(((id: number) => void (frames[id - 1] = () => {})) as any);
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({ top: 100000, bottom: 100001, left: 0, right: 1, width: 1, height: 1, x: 0, y: 0, toJSON() {} }) as DOMRect);
+  });
+
+  it('adds 100 per frame, disables the button meanwhile, and the footer goes away at the total', async () => {
+    await seed(350);
+    await mount();
+    expect(cardCount()).toBe(30);
+    const btn = () => $$<HTMLButtonElement>('.list-more button')[0];
+    await act(() => void btn().click());
+    await flush(5);
+    expect(btn().disabled).toBe(true);
+    expect(cardCount()).toBe(30); // まだ 1 フレームも進んでいない
+    await runFrame();
+    expect(cardCount()).toBe(130);
+    expect($('.list-more').textContent).toContain('あと 220 件');
+    await runFrame();
+    expect(cardCount()).toBe(230);
+    await runFrame();
+    expect(cardCount()).toBe(330);
+    await runFrame();
+    expect(cardCount()).toBe(350);
+    expect($$('.list-more').length).toBe(0);
+  });
+
+  it('stops when the resetKey changes (folder / search / sort)', async () => {
+    await seed(350);
+    await mount();
+    await act(() => void $$<HTMLButtonElement>('.list-more button')[0].click());
+    await flush(5);
+    await runFrame();
+    expect(cardCount()).toBe(130);
+    const row = $$('.side .fr').find((r) => r.textContent?.includes('未分類'))!;
+    await act(() => void row.click());
+    await flush(60);
+    expect(cardCount()).toBe(30);
+    for (let i = 0; i < 4; i++) await runFrame();
+    expect(cardCount()).toBe(30); // 続きはやめた
+    expect($$<HTMLButtonElement>('.list-more button')[0].disabled).toBe(false);
+  });
+});

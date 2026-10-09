@@ -108,6 +108,8 @@ export const PAGE_SIZE: Record<ViewMode, number> = { post: 30, list: 60, grid: 6
 export const PAGE_SIZE_SIDEPANEL = 30;
 /** 末尾のこの件数手前まで来たら、↓ キーで先に増やす */
 const KEY_LOOKAHEAD = 5;
+/** 「すべて表示」で、描画 1 回ごとに増やす件数 */
+const SHOW_ALL_STEP = 100;
 
 export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const compact = useCompact();
@@ -354,6 +356,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const growTo = (n: number) => setRcState({ key: resetKey, n: Math.min(shown.length, Math.max(renderCount, n)) });
   const visible = useMemo(() => shown.slice(0, renderCount), [shown, renderCount]);
   const remaining = shown.length - visible.length;
+  // 「すべて表示」(v36): 一度に全件を描くと固まるので、描画 1 回ごとに SHOW_ALL_STEP 件ずつ増やす。
+  // 始めたときの resetKey を覚え、フォルダ・検索・並べ替えなどが替わって resetKey が変わったら、続きはやめる
+  const [expandKey, setExpandKey] = useState<string | null>(null);
+  const expanding = expandKey === resetKey && remaining > 0;
   const tabbableId = focusId && shownSet.has(focusId) && shownIds.indexOf(focusId) < renderCount ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   // 件数は保存データが変わるまで使い回す (左のメニューと見出しで、描画のたびに全件を数え直さない。「最近の 7 日」の境目は、保存データが変わるまで動かない)
@@ -840,6 +846,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   // 末尾の手前 (画面の高さの 1.5 倍) に入ったら、1 回分増やす。IntersectionObserver が無い環境では、「すべて表示」のボタンで増やす
   // 末尾の要素は、コールバック ref + 状態で持つ。useRef だと、データを読んだ描画ではまだ DOM が無く (ready 前)、
   // 一覧が描かれたあとも依存の値が変わらないので、効果が再実行されず、30 件で止まった (v36)
+  useEffect(() => {
+    if (!expanding) return;
+    const raf = requestAnimationFrame(() => growTo(renderCount + SHOW_ALL_STEP));
+    return () => cancelAnimationFrame(raf);
+  }, [expanding, renderCount, resetKey]);
+  useEffect(() => {
+    if (expandKey !== null && (expandKey !== resetKey || remaining <= 0)) setExpandKey(null);
+  }, [expandKey, resetKey, remaining]);
   const [sentinel, setSentinel] = useState<HTMLSpanElement | null>(null);
   useEffect(() => {
     const el = sentinel;
@@ -914,7 +928,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       <div class="list-more">
         <span ref={setSentinel} class="list-sentinel" aria-hidden="true" />
         <span class="muted">{t('listRemaining', remaining)}</span>
-        <button type="button" onClick={() => growTo(shown.length)}>
+        <button type="button" disabled={expanding} onClick={() => setExpandKey(resetKey)}>
           {t('listShowAll')}
         </button>
       </div>
