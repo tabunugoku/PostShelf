@@ -1,6 +1,6 @@
 import type { Snapshot } from '../shared/models';
 import { mergeSegments, safeHref, type Segment } from '../shared/segments';
-import { queryAllFirst, queryFirst } from '../shared/selectors';
+import { ownPostLink, queryAllFirst, queryAllOwn, queryFirst, queryOwn } from '../shared/selectors';
 
 /**
  * 本文の要素から、リンクを含む部品の並びを作る (v24)。リンクは URL / @メンション / #ハッシュタグ (本文中の <a>)。
@@ -40,34 +40,32 @@ export interface Extracted {
 
 /** article 要素から、ポストの ID だけを軽く読む (extractTweet と同じ取り出し方。スナップショットは作らない)。取れなければ null */
 export function tweetIdOf(article: Element): string | null {
-  const time = queryFirst(article, 'time')?.el ?? null;
-  const link = (time?.closest('a') ?? queryFirst(article, 'statusLink')?.el) as HTMLAnchorElement | null;
+  const { link } = ownPostLink(article);
   return link?.getAttribute('href')?.match(/^\/[^/]+\/status\/(\d+)/)?.[1] ?? null;
 }
 
 /** article 要素からポストのスナップショットを作る。ID が取れなければ null。 */
 export function extractTweet(article: Element): Extracted | null {
-  const time = queryFirst(article, 'time')?.el ?? null;
-  const link = (time?.closest('a') ?? queryFirst(article, 'statusLink')?.el) as HTMLAnchorElement | null;
+  const { time, link } = ownPostLink(article);
   const href = link?.getAttribute('href') ?? '';
   const m = href.match(/^\/([^/]+)\/status\/(\d+)/);
   if (!m) return null;
   const [, handle, tweetId] = m;
 
-  const nameEl = queryFirst(article, 'userName')?.el;
-  const author = nameEl?.querySelector('span')?.textContent?.trim() || handle;
-  const textEl = queryFirst(article, 'tweetText')?.el;
+  const nameEl = queryOwn(article, 'userName')?.el;
+  const author = (nameEl ? queryFirst(nameEl, 'nameText')?.el.textContent?.trim() : '') || handle;
+  const textEl = queryOwn(article, 'tweetText')?.el;
   const text = textEl?.textContent?.trim() ?? '';
   const segments = textEl ? extractSegments(textEl) : undefined;
-  const truncated = !!queryFirst(article, 'showMore'); // たたまれた状態か (実機未確認の推測。全文は、保存のあと別に取る)
-  const avatar = queryFirst<HTMLImageElement>(article, 'avatar')?.el.src || undefined;
-  const media = queryAllFirst<HTMLImageElement>(article, 'media').els.map((i) => i.src).filter(Boolean);
+  const truncated = !!queryOwn(article, 'showMore'); // たたまれた状態か (実機未確認の推測。全文は、保存のあと別に取る)
+  const avatar = queryOwn<HTMLImageElement>(article, 'avatar')?.el.src || undefined;
+  const media = queryAllOwn<HTMLImageElement>(article, 'media').els.map((i) => i.src).filter(Boolean);
 
   // 外部リンク: リンクカード、または本文中の t.co 等の外部 URL (メンション/ハッシュタグ/ポスト間リンクは除く)。推測 (実機未確認)
-  const bodyLinks = [...(queryFirst(article, 'tweetText')?.el.querySelectorAll('a[href]') ?? [])].some((a) => /^https?:\/\//i.test(a.getAttribute('href') ?? ''));
-  const hasLink = !!queryFirst(article, 'linkCard') || bodyLinks;
-  const hasVideo = !!queryFirst(article, 'video');
-  const videoPoster = hasVideo ? queryFirst(article, 'videoPoster')?.el.getAttribute('poster') || undefined : undefined;
+  const bodyLinks = (textEl ? queryAllFirst(textEl, 'bodyLink').els : []).some((a) => /^https?:\/\//i.test(a.getAttribute('href') ?? ''));
+  const hasLink = !!queryOwn(article, 'linkCard') || bodyLinks;
+  const hasVideo = !!queryOwn(article, 'video');
+  const videoPoster = hasVideo ? queryOwn(article, 'videoPoster')?.el.getAttribute('poster') || undefined : undefined;
 
   return {
     tweetId,

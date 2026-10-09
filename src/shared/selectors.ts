@@ -30,6 +30,10 @@ export const CANDIDATES = {
   time: ['time'],
   // 候補が 1 つだけ: ポストへのリンクは href の形で判定する
   statusLink: ['a[href*="/status/"]'],
+  // 詳細ページの実機観測: 引用の time はこの入れ物の中。本体の time より先に現れる。
+  quoteContainer: ['div[role="link"]'],
+  nameText: ['span'],
+  bodyLink: ['a[href]'],
   avatar: ['[data-testid="Tweet-User-Avatar"] img', 'a[role="link"][href^="/"]:not([href*="/status/"]) img'],
   media: ['[data-testid="tweetPhoto"] img', 'a[href*="/photo/"] img'],
   // 以下は実機未確認の推測。動画は videoPlayer か video 要素
@@ -99,6 +103,33 @@ export function queryAllFirst<T extends Element = Element>(root: ParentNode, key
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
+}
+
+/** 引用の中の候補を除いてから優先順を判定する。本体の候補が無ければ次の構造的な候補を試す。 */
+export function queryAllOwn<T extends Element = Element>(article: Element, key: SelKey): FoundAll<T> {
+  const list = CANDIDATES[key];
+  for (let i = 0; i < list.length; i++) {
+    const els = [...article.querySelectorAll<T>(list[i])].filter((el) => {
+      const quote = closestFirst(el, 'quoteContainer')?.el;
+      return !quote || !article.contains(quote);
+    });
+    if (els.length) return { els, index: i };
+  }
+  return { els: [], index: -1 };
+}
+
+/** 本体の最初の要素。article の外側の role=link は引用扱いにしない。 */
+export function queryOwn<T extends Element = Element>(article: Element, key: SelKey): Found<T> | null {
+  const { els, index } = queryAllOwn<T>(article, key);
+  return els.length ? { el: els[0], index } : null;
+}
+
+/** 本体の time を囲むポストへのリンク。無ければ本体の最初の statusLink を使う。 */
+export function ownPostLink(article: Element): { time: Element | null; link: HTMLAnchorElement | null } {
+  const time = queryOwn(article, 'time')?.el ?? null;
+  const timedLink = time ? closestFirst<HTMLAnchorElement>(time, 'statusLink')?.el : null;
+  const link = timedLink && article.contains(timedLink) ? timedLink : queryOwn<HTMLAnchorElement>(article, 'statusLink')?.el ?? null;
+  return { time, link };
 }
 
 /** タイムラインの読み込み表示が出ているか (ポスト = article の内側のものは数えない) */
