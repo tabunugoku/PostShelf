@@ -46,9 +46,9 @@ describe('v13-C-1: fixed extension ID', () => {
 });
 
 describe('v13-C-3: release checks', () => {
-  it('the manifest version equals package.json (1.1.1)', () => {
+  it('the manifest version equals package.json (1.1.2)', () => {
     expect(checkVersion(manifest, pkg)).toEqual([]);
-    expect(manifest.version).toBe('1.1.1');
+    expect(manifest.version).toBe('1.1.2');
     expect(checkVersion({ ...manifest, version: '9.9.9' }, pkg)).toHaveLength(1);
   });
   it('an added permission fails the check', () => {
