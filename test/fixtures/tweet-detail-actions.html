@@ -1,0 +1,17 @@
+<!-- ポストの詳細ページの操作の行 (簡略)。X の実際の DOM は未確認で、構造は推測 (docs/TASK_V33.md の「想定」):
+     div[role=group] の中に返信 / リポスト / いいね / ブックマーク / 共有が横に並び、親は display:flex; align-items:flex-start。
+     ブックマークは button[data-testid="bookmark"] で、右に数字の span がある。実機で確かめて、違えば直す。 -->
+<article data-testid="tweet">
+  <a href="/sample_user/status/900"><time datetime="2026-01-01T00:00:00.000Z">Jan 1</time></a>
+  <div data-testid="tweetText">sample post</div>
+  <div role="group" style="display:flex;align-items:flex-start">
+    <button data-testid="reply">r</button>
+    <button data-testid="retweet">rt</button>
+    <button data-testid="like">l</button>
+    <div style="display:flex">
+      <button data-testid="bookmark" aria-label="Bookmark">b</button>
+      <span>785</span>
+    </div>
+    <button aria-label="Share">s</button>
+  </div>
+</article>

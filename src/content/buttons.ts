@@ -42,6 +42,19 @@ function makeBadge(): HTMLElement {
   return b;
 }
 
+/**
+ * 別ボタンの縦位置と間隔 (v33)。ポストの詳細ページ (x.com/<user>/status/<id>) の操作の行は、タイムラインと構造が違うことが
+ * 実機で報告された (ボタンが他のアイコンより上にあり、ブックマークの数字に詰まる)。実機の DOM は未確認の推測:
+ * 親が display:flex; align-items:flex-start で、ブックマークの右に数字の span が続く。
+ * align-self:center で親の align-items によらず中心をそろえ、右に要素が続くときは右にも同じ間隔を空ける。
+ * 親が flex でないときは align-self は効かないので、縦位置は変わらない。タイムラインと詳細ページで同じ規則。
+ */
+export function placeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
+  btn.style.alignSelf = 'center';
+  if (bm.nextElementSibling) btn.style.marginRight = `${GAP}px`;
+  bm.insertAdjacentElement('afterend', btn);
+}
+
 function createSeparateButton(article: Element): HTMLButtonElement {
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -124,7 +137,7 @@ export function injectButtons(root: ParentNode = document): void {
       if (article.querySelector(`[${BTN_ATTR}]`)) continue;
       if (!bm.parentElement) continue;
       const btn = createSeparateButton(article);
-      bm.insertAdjacentElement('afterend', btn);
+      placeSeparateButton(bm, btn);
       fresh.push(article);
     } else {
       if (bm.querySelector(`[${BADGE_ATTR}]`)) continue;
