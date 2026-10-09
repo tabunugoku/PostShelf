@@ -39,6 +39,14 @@ export async function openXTab(): Promise<void> {
     }
   });
   if (tab?.id !== undefined) {
+    let ready = false;
+    try {
+      const reply = await chrome.tabs.sendMessage(tab.id, { type: 'ping' });
+      ready = reply?.ok === true;
+    } catch {
+      // 拡張の更新後などで content script が応答できないタブは読み込み直す。
+    }
+    if (!ready) await chrome.tabs.reload(tab.id);
     await chrome.tabs.update(tab.id, { active: true });
     if (tab.windowId !== undefined) await chrome.windows?.update?.(tab.windowId, { focused: true });
     return;

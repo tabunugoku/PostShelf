@@ -23,7 +23,7 @@ let tabs: { create: ReturnType<typeof vi.fn>; query: ReturnType<typeof vi.fn>; u
 beforeEach(async () => {
   data = installChromeMock() as Record<string, any>;
   tabs = { create: vi.fn(async () => ({})), query: vi.fn(async () => []), update: vi.fn(async () => ({})) };
-  (globalThis as any).chrome.tabs = tabs;
+  (globalThis as any).chrome.tabs = { ...tabs, sendMessage: vi.fn(async () => ({ ok: true })), reload: vi.fn(async () => {}) };
   document.body.innerHTML = '<div id="app"></div>';
   history.replaceState(null, '', '/');
   setAccountScope('unknown');

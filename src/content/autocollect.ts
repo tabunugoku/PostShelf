@@ -20,7 +20,7 @@ import {
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
 import { requestFullTextBatch } from '../shared/cacheRequest';
 import { getCurrentAccount, subscribeAccount } from './account';
-import { collectVisible } from './collect';
+import { collectVisible, pathListeners } from './collect';
 import { tweetIdOf, type Extracted } from './snapshot';
 
 /** スクロールごとの待ち時間 (ミリ秒) の範囲 */
@@ -47,6 +47,7 @@ export const STALL_END = 3;
 export const MAX_RUN_MS = 2 * 60 * 60 * 1000;
 /** 開始のコマンドが有効な時間 (これより古いコマンドは捨てる) */
 export const COMMAND_TTL_MS = 2 * 60 * 1000;
+export const ACCOUNT_WAIT_MS = 15_000;
 
 export interface CollectState extends CollectRun {
   /** countdown の残り秒 */
@@ -76,6 +77,8 @@ export interface CollectDeps {
   pageOk(): boolean;
   isHidden(): boolean;
   accountId(): string | null;
+  /** アカウントの判定を待つための通知。ポーリングはしない。 */
+  subscribeAccount?(cb: () => void): () => void;
   /** 保存先は取り込みを始めたアカウント (state.accountId)。画面の現在のアカウントではない */
   savedIds(accountId: string): Promise<Set<string>>;
   /** 保存データが (他の場所で) 変わったら呼ばれる。解除関数を返す */
@@ -107,6 +110,7 @@ export function defaultDeps(): CollectDeps {
     pageOk: () => isBookmarksPath(location.pathname),
     isHidden: () => document.visibilityState === 'hidden',
     accountId: () => getCurrentAccount()?.id ?? null,
+    subscribeAccount: (cb) => subscribeAccount(cb),
     savedIds: (accountId) => getSavedIds(accountId),
     onDataChanged: (cb) => onDataChanged(cb),
     loadRun: () => getCollectRun(),
@@ -118,6 +122,7 @@ export function defaultDeps(): CollectDeps {
 
 /** 実行中の「いま ○○ ごろ」に使う、直近の投稿日時の件数 */
 const RECENT_POSTS = 10;
+type StartCommand = Pick<CollectCommand, 'consent' | 'speed' | 'cap' | 'accountId'> & { id?: string };
 
 export class AutoCollector {
   state: CollectState | null = null;
@@ -151,6 +156,49 @@ export class AutoCollector {
   private moved = true;
   /** この区間 (開始 / 再開) の始まり。「止めない」のときの時間の上限の基準 */
   private segmentStart = 0;
+  private starting = false;
+  private cancelAccountWait: (() => void) | null = null;
+
+  get waitingForAccount(): boolean {
+    return this.cancelAccountWait !== null;
+  }
+
+  /** 判定の通知と期限だけで待つ。停止・ページ移動・非表示では待機を解いて、同じ開始を取り消す。 */
+  private waitForAccount(token: number): Promise<string | null> {
+    return new Promise((resolve) => {
+      let done = false;
+      let off = () => {};
+      const finish = (id: string | null, cancelled = false) => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        off();
+        pathListeners.delete(cancel);
+        document.removeEventListener('visibilitychange', check);
+        window.removeEventListener('pagehide', cancel);
+        this.cancelAccountWait = null;
+        if (cancelled && token === this.token) this.token++;
+        resolve(id);
+      };
+      const cancel = () => finish(null, true);
+      const check = () => {
+        if (token !== this.token || !this.d.pageOk() || this.d.isHidden()) return cancel();
+        const id = this.d.accountId();
+        if (id) finish(id);
+      };
+      const timer = setTimeout(() => {
+        check();
+        finish(null);
+      }, ACCOUNT_WAIT_MS);
+      this.cancelAccountWait = cancel;
+      pathListeners.add(cancel);
+      document.addEventListener('visibilitychange', check);
+      window.addEventListener('pagehide', cancel);
+      off = (this.d.subscribeAccount ?? subscribeAccount)(check);
+      if (done) off();
+      else check(); // 購読の直前に判定された場合も拾う
+    });
+  }
 
   constructor(private d: CollectDeps) {
     d.onDataChanged?.(() => {
@@ -179,13 +227,25 @@ export class AutoCollector {
   }
 
   /** 開始。同意 (consent) の無いコマンド、ブックマークのタブ以外、アカウントを判定できない / 違うときは始めない */
-  async start(cmd: Pick<CollectCommand, 'consent' | 'speed' | 'cap' | 'accountId'> & { id?: string }): Promise<boolean> {
+  async start(cmd: StartCommand): Promise<boolean> {
     if (cmd.consent !== true) return false;
-    if (this.state && ['countdown', 'running'].includes(this.state.status)) return false;
-    if (!this.d.pageOk()) return false;
+    if (this.starting || (this.state && ['countdown', 'running'].includes(this.state.status))) return false;
+    if (!this.d.pageOk() || this.d.isHidden()) return false;
+    this.starting = true;
+    try {
+      return await this.startConfirmed(cmd);
+    } finally {
+      this.starting = false;
+    }
+  }
+
+  private async startConfirmed(cmd: StartCommand): Promise<boolean> {
+    const token = ++this.token;
+    this.resumeToken++;
     const speed = cmd.speed ?? 'slow';
     const cap = cmd.cap ?? 300;
-    const account = this.d.accountId();
+    const account = this.d.accountId() ?? await this.waitForAccount(token);
+    if (token !== this.token || !this.d.pageOk() || this.d.isHidden()) return false;
     if (!account) return this.refuse('refused-unknown', cmd.accountId ?? '', speed, cap);
     if (cmd.accountId && cmd.accountId !== account) return this.refuse('refused-account', account, speed, cap);
 
@@ -194,8 +254,7 @@ export class AutoCollector {
       const cur = await this.d.loadRun?.().catch(() => null);
       if (cur?.commandId === cmd.id && cur.owner && cur.owner !== this.owner) return false;
     }
-    const token = ++this.token;
-    this.resumeToken++;
+    if (token !== this.token || !this.d.pageOk() || this.d.isHidden()) return false;
     this.state = { status: 'countdown', accountId: account, startedAt: this.d.now(), imported: 0, skipped: 0, failed: 0, speed, cap, countdown: COUNTDOWN_SECONDS, updatedAt: this.d.now(), owner: this.owner, commandId: cmd.id };
     if (cmd.id && !(await this.claim())) {
       this.state = null;
@@ -209,6 +268,10 @@ export class AutoCollector {
       this.emit(false);
       await this.d.sleep(1000);
       if (token !== this.token) return false;
+      if (!this.d.pageOk() || this.d.isHidden()) {
+        await this.stop();
+        return false;
+      }
     }
     this.begin(token, true, true);
     return true;
@@ -430,18 +493,18 @@ export class AutoCollector {
 
   /** 停止 / ここで終了: そこまでの分は保存する */
   async stop(): Promise<void> {
+    this.token++;
+    this.resumeToken++;
+    this.cancelAccountWait?.();
     const s = this.state;
     if (!s) return;
     if (s.status === 'countdown') {
-      this.token++;
       this.state = null;
       await this.d.clearRun().catch(() => {});
       this.emit(false);
       return;
     }
     if (['stopped', 'done'].includes(s.status)) return;
-    this.token++;
-    this.resumeToken++;
     await this.flush(true);
     s.status = 'stopped';
     s.reason = 'user';
@@ -468,6 +531,7 @@ export class AutoCollector {
   }
 
   onHidden(): void {
+    this.cancelAccountWait?.();
     if (this.state?.status === 'running') void this.pause('hidden');
   }
 
@@ -555,6 +619,11 @@ export async function handleCollectCommand(c: AutoCollector, d: Pick<CollectDeps
     await c.start(cmd);
     return;
   }
+  if (cmd.type === 'stop' && c.waitingForAccount) {
+    await clearCollectCommand();
+    await c.stop();
+    return;
+  }
   if (!c.state) return;
   if (!(await c.ownsRun())) return; // 取り込みを動かしているのは別のタブ。そのタブが実行する
   await clearCollectCommand();
@@ -582,13 +651,16 @@ export function installAutoCollect(onState: (s: CollectState | null, c: AutoColl
     lastStatus = s?.status;
     onState(s, c);
   });
+  const tick = () => void handleCollectCommand(c, d).catch(() => {});
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') c.onHidden();
-    else c.onVisible();
+    else {
+      c.onVisible();
+      tick();
+    }
   });
   onCollectRunChanged(() => void getCollectRun().then((run) => c.onRunChanged(run)).catch(() => {}));
   subscribeAccount((a) => c.onAccountChanged(a?.id ?? null));
-  const tick = () => void handleCollectCommand(c, d).catch(() => {});
   onCollectCommand(tick);
   void getCollectRun().then((run) => {
     c.adopt(run);
