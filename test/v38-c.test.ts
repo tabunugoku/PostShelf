@@ -9,7 +9,6 @@ class FakeResizeObserver {
   constructor(public cb: ResizeObserverCallback) { observers.push(this); }
   fire(el: Element) { this.cb([{ target: el } as ResizeObserverEntry], this as unknown as ResizeObserver); }
 }
-const tick = () => new Promise<void>((r) => setTimeout(r, 0));
 function article() {
   // 大きさ用の最小 fixture。丸の構造の想定は v35〜v37 の fixtures と同じ。
   const el = document.createElement('article');
@@ -25,39 +24,47 @@ beforeEach(() => {
   vi.stubGlobal('ResizeObserver', FakeResizeObserver);
   document.body.innerHTML = '';
 });
-afterEach(async () => {
+afterEach(() => {
   document.body.innerHTML = '';
-  await tick();
+  for (const ro of observers) for (const target of [...ro.targets]) ro.fire(target);
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
-it('shares one observer, releases detached subtrees, and observes replacement rows', async () => {
+it('shares one observer and unobserves detached bookmarks on resize notifications without a mutation observer', async () => {
+  const Mutation = globalThis.MutationObserver;
+  const mutations = vi.fn();
+  vi.stubGlobal('MutationObserver', class extends Mutation {
+    constructor(cb: MutationCallback) { super(cb); mutations(); }
+  });
   const { injectButtons } = await import('../src/content/buttons');
   const first = article();
   const second = article();
   injectButtons();
   expect(observers).toHaveLength(1);
+  expect(mutations).not.toHaveBeenCalled();
   const ro = observers[0];
   expect(ro.targets.size).toBe(2);
   const removedBm = first.querySelector('button')!;
   first.remove();
-  await tick();
+  ro.fire(removedBm); // jsdom は ResizeObserver を実装しないので、取り外し時の通知を再現する
   expect(ro.unobserve).toHaveBeenCalledWith(removedBm);
   expect(ro.targets.has(removedBm)).toBe(false);
   expect(ro.targets.has(second.querySelector('button')!)).toBe(true);
   for (let i = 0; i < 5; i++) {
     const replacement = article();
+    const replacementBm = replacement.querySelector('button')!;
     injectButtons();
     expect(ro.targets.size).toBe(2);
     replacement.remove();
-    await tick();
+    ro.fire(replacementBm);
+    expect(ro.unobserve).toHaveBeenCalledWith(replacementBm);
     expect(ro.targets.size).toBe(1);
   }
   expect(observers).toHaveLength(1);
 });
 
-it('resizes the mapped button and stops watching on a mode change or folder-button removal', async () => {
+it('resizes the mapped button, unobserves immediately on mode changes, and handles notifications with a detached folder button', async () => {
   const { injectButtons, applyButtonMode } = await import('../src/content/buttons');
   const el = article();
   let height = 22;
@@ -70,17 +77,19 @@ it('resizes the mapped button and stops watching on a mode change or folder-butt
   ro.fire(bm);
   expect(btn.style.height).toBe('42px');
   applyButtonMode('replace');
-  await tick();
+  expect(ro.unobserve).toHaveBeenCalledWith(bm);
   expect(ro.targets.size).toBe(0);
   applyButtonMode('separate');
   expect(observers).toHaveLength(1);
   expect(ro.targets.size).toBe(1);
-  el.querySelector('[data-postshelf-btn]')!.remove();
-  await tick();
-  expect(ro.targets.size).toBe(0);
+  const replacementBtn = el.querySelector<HTMLElement>('[data-postshelf-btn]')!;
+  replacementBtn.remove();
   height = 30;
+  ro.fire(bm);
+  expect(ro.targets.size).toBe(0);
+  height = 34;
   ro.fire(bm); // 解除済みの遅れて届く通知も無視する
-  expect(btn.style.height).toBe('42px');
+  expect(replacementBtn.style.height).toBe('42px');
 });
 
 it('reads X button geometry through shared selectors', async () => {

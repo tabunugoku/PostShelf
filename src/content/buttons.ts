@@ -84,25 +84,12 @@ export function sizeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
 const sizeButtons = new WeakMap<Element, HTMLElement>();
 const sizeBookmarks = new WeakMap<Element, HTMLElement>();
 let sizeObserver: ResizeObserver | undefined;
-let sizeRemovalObserver: MutationObserver | undefined;
 
 function unwatchSize(bm: Element): void {
   const btn = sizeButtons.get(bm);
   sizeObserver?.unobserve(bm);
   sizeButtons.delete(bm);
   if (btn) sizeBookmarks.delete(btn);
-}
-
-/** 外された部分木だけを見る。DOM 内の移動なら監視を続け、ボタンだけ外された場合も解除する。 */
-function releaseRemovedSizes(node: Node): void {
-  const release = (el: Element) => {
-    const bm = sizeButtons.has(el) ? el : sizeBookmarks.get(el);
-    const btn = bm && sizeButtons.get(bm);
-    if (bm && (!bm.isConnected || !btn?.isConnected)) unwatchSize(bm);
-  };
-  if (node instanceof Element) release(node);
-  const walker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
-  for (let el = walker.nextNode(); el; el = walker.nextNode()) release(el as Element);
 }
 
 /** 共有の ResizeObserver で、挿入時と寸法の変化時だけ測る。監視対象を強参照する一覧は持たない。 */
@@ -118,12 +105,6 @@ function watchSize(bm: HTMLElement, btn: HTMLElement): void {
         else sizeSeparateButton(target as HTMLElement, button);
       }
     });
-  }
-  if (!sizeRemovalObserver) {
-    sizeRemovalObserver = new MutationObserver((records) => {
-      for (const record of records) for (const node of record.removedNodes) releaseRemovedSizes(node);
-    });
-    sizeRemovalObserver.observe(document.documentElement, { childList: true, subtree: true });
   }
   if (sizeButtons.has(bm)) unwatchSize(bm);
   sizeButtons.set(bm, btn);
