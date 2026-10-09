@@ -469,3 +469,9 @@ input[type=number]{width:110px}
 /* ---- 段階表示の末尾 (残りの件数と「すべて表示」) ---- */
 .list-more{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;white-space:nowrap}
 .list-sentinel{position:absolute;left:0;top:0;width:1px;height:1px;pointer-events:none}
+
+/* ---- 描画の省略 (v34): 画面外のカードは描かない。auto で、一度描いた高さを覚える。高さは目安 ----
+   ポスト表示とリスト表示のカードだけ。グリッド表示 (.gc) は、チェックボックスがカードの外 (-12px) に出るため、
+   content-visibility の clip で切れる。壊れるので付けない。フォーカスの outline は内側 (offset -2px) なので切れない */
+.post{content-visibility:auto;contain-intrinsic-size:auto 320px}
+.mini{content-visibility:auto;contain-intrinsic-size:auto 44px}
