@@ -207,88 +207,86 @@ export function createFolderPicker(opts: {
     boxes.clear();
     paints.clear();
     filterEl.style.display = showFilter() ? 'block' : 'none';
-    const all = [inboxOf(folders), ...folders.filter((f) => f.id !== INBOX_ID)];
+    const inbox = inboxOf(folders);
+    const users = folders.filter((f) => f.id !== INBOX_ID);
     const heading = (text: string) => {
       const h = document.createElement('div');
       h.textContent = text;
       h.style.cssText = `box-sizing:border-box;padding:6px 8px 2px;font-size:12px;opacity:.7;white-space:nowrap;color:${th.fg}`;
       listEl.append(h);
     };
-    let shown = all;
-    let recent: Folder[] = [];
     if (query) {
-      shown = all.filter((f) => foldText(displayName(f)).includes(query));
-    } else if (extras && userFolderCount() >= RECENT_MIN_FOLDERS) {
-      recent = (extras.recentIds)
-        .map((id) => folders.find((f) => f.id === id && f.id !== INBOX_ID))
-        .filter((f): f is Folder => !!f)
-        .slice(0, 3);
+      // 絞り込み中は、「未分類」も対象にする (見出しは出さない)
+      for (const f of [inbox, ...users]) if (foldText(displayName(f)).includes(query)) addRow(f);
+    } else {
+      addRow(inbox); // 「未分類」は、見出しの上の先頭に固定する (見出しと件数の対象にしない)
+      const recent =
+        extras && userFolderCount() >= RECENT_MIN_FOLDERS
+          ? extras.recentIds
+              .map((id) => users.find((f) => f.id === id))
+              .filter((f): f is Folder => !!f)
+              .slice(0, 3)
+          : [];
       if (recent.length) {
-        const ids = new Set(recent.map((f) => f.id));
-        shown = all.filter((f) => !ids.has(f.id));
-      }
+        heading(t('folderRecent'));
+        for (const f of recent) addRow(f);
+        heading(t('folderAll', userFolderCount()));
+        for (const f of users) if (!recent.includes(f)) addRow(f);
+      } else for (const f of users) addRow(f);
     }
-    if (recent.length) {
-      heading(t('folderRecent'));
-      for (const f of recent) addRow(f);
-      heading(t('folderAll', userFolderCount()));
-    }
-    for (const f of shown) addRow(f);
     listEl.append(divider(th), addBtn);
   };
   const addRow = (f: Folder) => {
-    {
-      const label = document.createElement('label');
-      label.style.cssText = 'box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
-      let hovered = false;
-      const ico = document.createElement('i');
-      ico.className = `ti ${f.icon}`;
-      ico.style.cssText = `display:block;position:static;margin:0;padding:0;font-size:18px;line-height:1;font-style:normal;color:${f.color ?? th.fg}`;
-      // 自前のチェック (角の丸い四角。選択中はアクセント色で塗り、白いチェック)。実際の入力は input type=checkbox のまま
-      // (キーボードとスクリーンリーダーの操作はそのまま)。appearance:none で見た目だけを変える
-      const box = document.createElement('span');
-      box.style.cssText = 'box-sizing:border-box;position:relative;display:block;width:18px;height:18px;flex:none;margin:0;padding:0';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = selected.has(f.id);
-      cb.style.cssText = `box-sizing:border-box;-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border-radius:5px;cursor:pointer;color:${th.fg}`;
-      const tick = document.createElement('i');
-      tick.className = 'ti ti-check';
-      tick.setAttribute('aria-hidden', 'true');
-      tick.style.cssText = 'position:absolute;inset:0;display:none;align-items:center;justify-content:center;margin:0;padding:0;font-size:13px;line-height:1;font-style:normal;color:#fff;pointer-events:none';
-      box.append(cb, tick);
-      const paintRow = () => {
-        const on = selected.has(f.id);
-        label.setAttribute('data-checked', String(on));
-        cb.style.border = `1.5px solid ${on ? th.accent : th.fg}`;
-        cb.style.opacity = on ? '1' : '.6';
-        cb.style.background = on ? th.accent : 'transparent';
-        tick.style.display = on ? 'flex' : 'none';
-        label.style.background = on || hovered ? th.hover : '';
-      };
-      label.addEventListener('mouseenter', () => {
-        hovered = true;
-        paintRow();
-      });
-      label.addEventListener('mouseleave', () => {
-        hovered = false;
-        paintRow();
-      });
-      boxes.set(f.id, cb);
-      paints.set(f.id, paintRow);
-      cb.addEventListener('change', () => {
-        normalize(f.id, cb.checked);
-        void onChange(selected);
-      });
-      cb.addEventListener('focus', () => (cb.style.outline = `2px solid ${th.accent}`));
-      cb.addEventListener('blur', () => (cb.style.outline = 'none'));
-      const name = document.createElement('span');
-      name.textContent = displayName(f);
-      name.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-      label.append(ico, name, box);
-      listEl.append(label);
+    const label = document.createElement('label');
+    label.style.cssText = 'box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
+    let hovered = false;
+    const ico = document.createElement('i');
+    ico.className = `ti ${f.icon}`;
+    ico.style.cssText = `display:block;position:static;margin:0;padding:0;font-size:18px;line-height:1;font-style:normal;color:${f.color ?? th.fg}`;
+    // 自前のチェック (角の丸い四角。選択中はアクセント色で塗り、白いチェック)。実際の入力は input type=checkbox のまま
+    // (キーボードとスクリーンリーダーの操作はそのまま)。appearance:none で見た目だけを変える
+    const box = document.createElement('span');
+    box.style.cssText = 'box-sizing:border-box;position:relative;display:block;width:18px;height:18px;flex:none;margin:0;padding:0';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = selected.has(f.id);
+    cb.style.cssText = `box-sizing:border-box;-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border-radius:5px;cursor:pointer;color:${th.fg}`;
+    const tick = document.createElement('i');
+    tick.className = 'ti ti-check';
+    tick.setAttribute('aria-hidden', 'true');
+    tick.style.cssText = 'position:absolute;inset:0;display:none;align-items:center;justify-content:center;margin:0;padding:0;font-size:13px;line-height:1;font-style:normal;color:#fff;pointer-events:none';
+    box.append(cb, tick);
+    const paintRow = () => {
+      const on = selected.has(f.id);
+      label.setAttribute('data-checked', String(on));
+      cb.style.border = `1.5px solid ${on ? th.accent : th.fg}`;
+      cb.style.opacity = on ? '1' : '.6';
+      cb.style.background = on ? th.accent : 'transparent';
+      tick.style.display = on ? 'flex' : 'none';
+      label.style.background = on || hovered ? th.hover : '';
+    };
+    label.addEventListener('mouseenter', () => {
+      hovered = true;
       paintRow();
-    }
+    });
+    label.addEventListener('mouseleave', () => {
+      hovered = false;
+      paintRow();
+    });
+    boxes.set(f.id, cb);
+    paints.set(f.id, paintRow);
+    cb.addEventListener('change', () => {
+      normalize(f.id, cb.checked);
+      void onChange(selected);
+    });
+    cb.addEventListener('focus', () => (cb.style.outline = `2px solid ${th.accent}`));
+    cb.addEventListener('blur', () => (cb.style.outline = 'none'));
+    const name = document.createElement('span');
+    name.textContent = displayName(f);
+    name.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    label.append(ico, name, box);
+    listEl.append(label);
+    paintRow();
   };
   el.append(menu.el);
   render();

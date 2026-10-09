@@ -82,7 +82,6 @@ type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: str
 /** undo の無いトースト (アカウントの切替・割り当ての通知) もある */
 type ToastState = { key: number; message: string; undo?: BookmarkUndo; /** 設定の初期化の取り消しなど、ポスト以外の「元に戻す」 */ action?: () => Promise<void> } | null;
 
-/** 「未分類」は保存データにまだ無くても常にスマートビューに出す。アイコンは受け皿らしく inbox に統一する */
 /** ポップアップからの入口: #inbox (未分類で開く) と #q=<検索語> (検索語を入れて開く)。読み取ったらハッシュを消す。ほかのハッシュは触らない */
 export function takeEntryHash(): { inbox?: boolean; triage?: boolean; q?: string } | null {
   const h = location.hash;
@@ -100,6 +99,7 @@ export function takeEntryHash(): { inbox?: boolean; triage?: boolean; q?: string
   return out;
 }
 
+/** 「未分類」は保存データにまだ無くても常にスマートビューに出す。アイコンは受け皿らしく inbox に統一する */
 const inboxView = (stored?: Folder): Folder => ({ id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color });
 const recentView = (): Folder => ({ id: RECENT_ID, name: t('recent7'), icon: 'ti-clock', order: -1 });
 

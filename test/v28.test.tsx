@@ -104,7 +104,9 @@ describe('v28-A: the x.com save popover', () => {
     pop = await open();
     expect(pop.textContent).toContain('最近使った');
     expect(pop.textContent).toContain('すべてのフォルダ（6）');
-    expect(rowNames(pop)).toEqual(['F3', 'Alpha', '未分類', 'ＢＥＴＡ', 'F4', 'F5', 'Six']);
+    expect(rowNames(pop)).toEqual(['未分類', 'F3', 'Alpha', 'ＢＥＴＡ', 'F4', 'F5', 'Six']); // v31: 「未分類」は見出しの上
+    // 「すべてのフォルダ（6）」の下の行数 (ユーザーのフォルダ 6 つのうち、最近使った 2 つを除く 4 つ) と、見出しの数 6 が合う: 2 + 4 = 6
+    expect(rowNames(pop).length - 1).toBe(6);
   });
 
   it('recent is updated on save: newest first, at most 3, never 未分類; invalid stored values become empty', async () => {

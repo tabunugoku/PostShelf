@@ -89,7 +89,9 @@ function Popup() {
             <span class="rec-dots" aria-hidden="true">
               {b.folderIds.slice(0, 3).map((id) => {
                 const f = folders.find((x) => x.id === id);
-                return id === INBOX_ID || !f?.color ? <i class="rec-dot hollow" /> : <i class="rec-dot" style={{ background: f.color }} />;
+                // 「未分類」は中空の点、色のないフォルダは灰色の塗りの点、色のあるフォルダはその色の点
+                if (id === INBOX_ID) return <i class="rec-dot hollow" />;
+                return f?.color ? <i class="rec-dot" style={{ background: f.color }} /> : <i class="rec-dot" />;
               })}
             </span>
             <span class="rec-handle">{b.snapshot.handle}</span> {b.snapshot.text}
