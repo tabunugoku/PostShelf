@@ -1,8 +1,9 @@
 import { foldText, foldWithMap } from './fold';
 
-/** 検索語 (空白区切り) を、一覧の絞り込みと同じ正規化 (foldText) にした語のリスト。空の語は除く */
+/** 検索語全体を、一覧の絞り込みと同じ正規化 (foldText) にした 1 つの句。前後の空白だけ落とす */
 export function searchTerms(q: string): string[] {
-  return [...new Set(q.split(/\s+/).map(foldText).filter(Boolean))];
+  const term = foldText(q.trim());
+  return term ? [term] : [];
 }
 
 /**

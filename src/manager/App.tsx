@@ -760,14 +760,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   );
 
   const searching = search.trim() !== '' || hasActiveFilters(filters);
-  /** 始めた時点の未分類を、いまの並び順で固定した列にして、仕分けモードを始める。未分類が 0 件なら始めない */
+  /** 始めた時点の未分類を、いまの並び順で固定した列にして、仕分けモードを始める。0 件なら完了のダイアログを出す */
   const startTriage = async () => {
     try {
       // 取り込み完了の直後でも、最後に保存された分が入るよう、始める直前に保存データを読み直す (state が古いことがある)
       const fresh = await listBookmarks();
       setBookmarks(fresh);
       const queue = queryBookmarks(fresh, { folderId: INBOX_ID, search: '', sort, filters: {}, now: Date.now() });
-      if (queue.length) setTriage(queue);
+      setTriage(queue);
     } catch {
       reportStorageError(); // 読み込めなかったときは始めない
     }

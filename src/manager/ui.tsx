@@ -142,10 +142,8 @@ function Portal(props: { children: ComponentChildren }) {
  * 右端そろえ (right:0) のメニューが、左の画面の外へはみ出すか。ボタンの位置 (anchor) とメニューの幅から、はみ出さない側を選ぶ。
  * 右そろえで収まれば 'right' (従来どおり)。収まらず、左そろえで収まれば 'left'。どちらでも収まらないときは 'left' (CSS の max-width で画面の幅に合わせる)
  */
-export function pickMenuSide(anchor: { left: number; right: number }, menuWidth: number, viewportWidth: number): 'left' | 'right' {
-  if (anchor.right - menuWidth >= 8) return 'right';
-  if (anchor.left + menuWidth <= viewportWidth - 8) return 'left';
-  return 'left';
+export function pickMenuSide(anchor: { left: number; right: number }, menuWidth: number, _viewportWidth: number): 'left' | 'right' {
+  return anchor.right - menuWidth >= 8 ? 'right' : 'left';
 }
 
 /**
@@ -365,13 +363,19 @@ export function SortMenu<T extends string>(props: { value: T; options: [T, strin
   );
 }
 
+/** 文を分ける Segmenter は文書の言語ごとに再利用する。構築できない言語は null (フォールバック)。 */
+const sentenceSegmenters = new Map<string, Intl.Segmenter | null>();
+
 /** 文に分ける。Intl.Segmenter があればそれで (lang は文書の言語)、無ければ「。」の直後で分ける (「。」は前の文に残す)。前後の空白は落とす */
 export function splitSentences(text: string, lang = ''): string[] {
   let parts: string[];
   if (typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function') {
     try {
-      parts = [...new Intl.Segmenter(lang || undefined, { granularity: 'sentence' }).segment(text)].map((x) => x.segment);
+      if (!sentenceSegmenters.has(lang)) sentenceSegmenters.set(lang, new Intl.Segmenter(lang || undefined, { granularity: 'sentence' }));
+      const segmenter = sentenceSegmenters.get(lang);
+      parts = segmenter ? [...segmenter.segment(text)].map((x) => x.segment) : text.split(/(?<=。)/);
     } catch {
+      sentenceSegmenters.set(lang, null);
       parts = text.split(/(?<=。)/);
     }
   } else parts = text.split(/(?<=。)/);
