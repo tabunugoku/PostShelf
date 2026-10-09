@@ -31,7 +31,9 @@ interface SaveState {
   /** すでに保存してあるか */
   exists: boolean;
   /** 保存の途中か */
-  saving: boolean;
+  saving: Promise<void> | null;
+  removing: boolean;
+  removed: boolean;
 }
 
 interface Current {
@@ -80,7 +82,7 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
       if (!r) return void setError(t('saveCurrentFail'));
       const prev = await getBookmark(r.tweetId);
       if (tweetRef.current !== key) return;
-      const st: SaveState = { sel: prev?.folderIds ?? [], saved: prev?.folderIds ?? [], exists: !!prev, saving: false };
+      const st: SaveState = { sel: prev?.folderIds ?? [], saved: prev?.folderIds ?? [], exists: !!prev, saving: null, removing: false, removed: false };
       stRef.current = st;
       setCur({ st, tweetId: r.tweetId, snapshot: r.snapshot, tabId: post.tabId, selected: prev?.folderIds ?? [], saved: !!prev });
     })();
@@ -132,12 +134,11 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
    * 保存を直列に流す。押した瞬間に最新の選択 (st.sel) とチップの表示を更新し、保存は前の分が終わってから、そのときの最新の選択で行う
    * (連打は最後の状態にまとまる)。失敗したら、最後に保存できた状態に戻してエラーを出す。
    */
-  const flushSave = async (c: Current) => {
+  const flushSave = (c: Current) => {
     const st = c.st; // 始めたときの状態だけを見る。ポストが切り替わっても、押された選択はこのポストへ最後まで保存する (切り替わったあとの画面の更新はしない)
-    if (st.saving) return;
-    st.saving = true;
-    try {
-      while (!sameSel(st.sel, st.saved) || !st.exists) {
+    if (st.saving) return st.saving;
+    st.saving = (async () => {
+      while (!st.removed && (!sameSel(st.sel, st.saved) || !st.exists)) {
         const target = [...st.sel];
         try {
           await commit(c, target);
@@ -151,11 +152,12 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
           break;
         }
       }
-    } finally {
-      st.saving = false;
-    }
+    })().finally(() => { st.saving = null; });
+    return st.saving;
   };
   const select = (c: Current, next: string[]) => {
+    if (c.st.removing) return;
+    c.st.removed = false; // 削除後の明示的な選択でのみ再保存する
     c.st.sel = next;
     setCur((old) => (old && old.st === c.st ? { ...old, selected: next, saved: true } : old));
     void flushSave(c);
@@ -165,18 +167,28 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
     select(c, now.includes(id) ? now.filter((x) => x !== id && x !== INBOX_ID) : [...now.filter((x) => x !== INBOX_ID), id]);
   };
   const remove = async (c: Current) => {
+    const st = c.st;
+    if (st.removing) return;
+    st.removing = true;
     try {
+      await st.saving; // 最新の選択まで保存し終えてから削除する
       await removeBookmark(c.tweetId);
+      st.removed = true;
+      st.sel = [];
+      st.saved = [];
+      st.exists = false;
       requestPrune();
       await requestNativeSync(c.tabId, c.tweetId, false);
-      c.st.sel = [];
-      c.st.saved = [];
-      c.st.exists = false;
-      setCur({ ...c, selected: [], saved: false });
-      setDone('');
+      if (stRef.current === st) {
+        setCur({ ...c, selected: [], saved: false });
+        setDone('');
+        setError('');
+      }
       props.onSaved();
     } catch {
-      setError(t('errorStorage'));
+      if (stRef.current === st) setError(t('errorStorage'));
+    } finally {
+      st.removing = false;
     }
   };
 
