@@ -44,6 +44,8 @@ export function Triage(props: {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const root = useRef<HTMLDivElement>(null);
+  /** choose の実行中 (await のあいだ) は、次の choose を受けない */
+  const busy = useRef(false);
   const latest = useRef({ index, finished, more, creating });
   latest.current = { index, finished, more, creating };
   const cur = queue[index];
@@ -88,7 +90,8 @@ export function Triage(props: {
   };
   /** そのフォルダに入れる (入っていれば外す)。stay: 同じポストに留まる */
   const choose = async (folderId: string, stay: boolean) => {
-    if (!cur || finished) return;
+    if (!cur || finished || busy.current) return;
+    busy.current = true;
     const b = cur;
     const has = (assigned[b.tweetId] ?? []).includes(folderId);
     try {
@@ -102,6 +105,8 @@ export function Triage(props: {
       if (!stay && !has) next();
     } catch {
       setError(t('errorStorage'));
+    } finally {
+      busy.current = false;
     }
   };
 
@@ -128,6 +133,10 @@ export function Triage(props: {
     }
     if (typing || e.ctrlKey || e.metaKey || e.altKey || finished || creating || more) return; // 入力欄・開いているメニューの中では、キーを奪わない
     const d = digitOf(e);
+    if (e.repeat && (d !== null || e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'n' || e.key === 'N')) {
+      e.preventDefault(); // 押しっぱなしの繰り返しは、続くポストに効かせない
+      return;
+    }
     if (d !== null) {
       const f = props.folders[d - 1];
       if (d <= TRIAGE_KEYS && f) {

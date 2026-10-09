@@ -175,6 +175,7 @@ describe('v29-C: triage mode', () => {
     await seed(2);
     history.replaceState(null, '', '/#triage');
     await mount();
+    await flush(60);
     expect($$('[role=dialog].triage')).toHaveLength(1);
     expect(location.hash).toBe('');
     expect($('.fr.on').textContent).toContain('未分類');

@@ -314,6 +314,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   const count = (id: string) => countFolder(bookmarks, id, now);
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
+  /** 仕分けモードが「削除されたポストを飛ばす」ために見る ID。保存データが変わらない再描画では、同じ Set を渡す */
+  const liveIds = useMemo(() => new Set(bookmarks.map((b) => b.tweetId)), [bookmarks]);
   const viewerBookmark = viewer ? bookmarks.find((b) => b.tweetId === viewer.tweetId) : undefined;
   const assignSource = accounts.find((a) => a.account.id === assignFrom);
   const unknownCount = accounts.find((a) => a.account.id === UNKNOWN_ACCOUNT_ID)?.count ?? 0;
@@ -686,15 +688,22 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   const searching = search.trim() !== '' || hasActiveFilters(filters);
   /** 始めた時点の未分類を、いまの並び順で固定した列にして、仕分けモードを始める。未分類が 0 件なら始めない */
-  const startTriage = () => {
-    const queue = queryBookmarks(bookmarks, { folderId: INBOX_ID, search: '', sort, filters: {}, now: Date.now() });
-    if (queue.length) setTriage(queue);
+  const startTriage = async () => {
+    try {
+      // 取り込み完了の直後でも、最後に保存された分が入るよう、始める直前に保存データを読み直す (state が古いことがある)
+      const fresh = await listBookmarks();
+      setBookmarks(fresh);
+      const queue = queryBookmarks(fresh, { folderId: INBOX_ID, search: '', sort, filters: {}, now: Date.now() });
+      if (queue.length) setTriage(queue);
+    } catch {
+      reportStorageError(); // 読み込めなかったときは始めない
+    }
   };
   useEffect(() => {
     if (!triageWanted || !ready) return;
     setTriageWanted(false);
-    startTriage();
-  }, [triageWanted, ready, bookmarks]);
+    void startTriage();
+  }, [triageWanted, ready]);
   const clearAll = () => {
     setSearch('');
     setFilters({});
@@ -856,7 +865,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       {triage && (
         <Triage
           queue={triage}
-          live={new Set(bookmarks.map((b) => b.tweetId))}
+          live={liveIds}
           folders={userFolders}
           pickerFolders={pickerFolders}
           onChanged={() => reload()}
@@ -1061,7 +1070,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               <span class="bar-name">{viewName}</span>
               <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
               {curFolder.id === INBOX_ID && count(INBOX_ID) > 0 && (
-                <button class="triage-start" onClick={startTriage}>
+                <button class="triage-start" onClick={() => void startTriage()}>
                   <Icon name="ti-bolt" /> {t('triageStart')}
                 </button>
               )}
