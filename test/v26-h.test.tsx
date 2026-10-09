@@ -25,6 +25,7 @@ function deps(total: number, failFrom = Infinity, store: { run: CollectRun | nul
   let start = 0;
   let adds = 0;
   const d: CollectDeps = {
+    hasUnseen: () => false,
     now: () => Date.now(),
     sleep: async () => void (await tick()),
     random: () => 0,

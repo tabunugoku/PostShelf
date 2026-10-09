@@ -17,7 +17,7 @@ export const setPopoverMode = (m: ButtonMode): void => {
   mode = m;
 };
 
-/** ポップオーバーのアイコン用に、同梱の Tabler Icons CSS を 1 度だけ読み込む (拡張内ファイル。外部通信なし) */
+/** ポップオーバーの日本語の折り返しの規則 (:lang(ja)) を、1 度だけ <style> として入れる */
 function ensureWrapStyle(): void {
   if (document.getElementById('postshelf-popover-style')) return;
   const s = document.createElement('style');
@@ -26,6 +26,7 @@ function ensureWrapStyle(): void {
   document.head.append(s);
 }
 
+/** ポップオーバーのアイコン用に、同梱の Tabler Icons CSS を 1 度だけ読み込む (拡張内ファイル。外部通信なし) */
 export function ensureIconCss(): void {
   ensureWrapStyle();
   if (document.getElementById('postshelf-icons')) return;

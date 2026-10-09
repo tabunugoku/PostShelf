@@ -68,8 +68,8 @@ export interface CollectDeps {
   scrollY(): number;
   viewportHeight(): number;
   visible(): Extracted[];
-  /** 画面に、seen にまだ無いポストがあるか (ID だけを軽く読む。スナップショットは作らない)。無いと、待ちは従来どおり固定 */
-  hasUnseen?(seen: ReadonlySet<string>): boolean;
+  /** 画面に、seen にまだ無いポストがあるか (ID だけを軽く読む。スナップショットは作らない)。無ければ、待ちは上限まで */
+  hasUnseen(seen: ReadonlySet<string>): boolean;
   isLoading(): boolean;
   hasLimit(): boolean;
   /** /i/history のブックマークのタブか (/i/history/likes などは false) */
@@ -288,7 +288,6 @@ export class AutoCollector {
   private async waitAfterScroll(alive: () => boolean): Promise<void> {
     const ceiling = this.delay();
     const probe = this.d.hasUnseen;
-    if (!probe) return this.d.sleep(ceiling);
     const floor = Math.min(Math.round(WAIT_FLOORS[this.state!.speed] * (1 + 0.5 * this.d.random())), ceiling);
     let waited = 0;
     while (alive() && waited < ceiling) {

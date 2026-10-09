@@ -19,6 +19,7 @@ function makeDeps(total: number, sizes: number[], overrides: Partial<CollectDeps
   let start = 0;
   let run = null as null | Parameters<CollectDeps['saveRun']>[0];
   const deps: CollectDeps = {
+    hasUnseen: () => false,
     now: () => Date.now(),
     sleep: async () => void (await tick()),
     random: () => 0,

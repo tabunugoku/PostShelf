@@ -1,3 +1,5 @@
+import type { Bookmark } from '../src/shared/models';
+import { queryBookmarks } from '../src/shared/query';
 import { sizeSeparateButton } from '../src/content/buttons';
 import { readFileSync } from 'node:fs';
 import { act } from 'preact/test-utils';
@@ -187,5 +189,26 @@ describe('v35-F: button nowrap is split', () => {
     const css = readFileSync('static/manager.css', 'utf8');
     expect(css).toMatch(/button,\.chip,\.tab,\.badge\{white-space:nowrap\}/);
     expect(css).toMatch(/\.dialog button,\.setting-group button,\.menu-item\{white-space:normal;min-width:0;overflow-wrap:anywhere\}/);
+  });
+});
+
+describe('v35-G: the search normalization cache survives a reload', () => {
+  const bm = (id: string, text: string): Bookmark => ({ accountId: 'me', tweetId: id, folderIds: [], savedAt: 1, snapshot: { text, author: 'A', handle: '@a', media: [], url: `https://x.com/a/status/${id}` } });
+  const q = (all: Bookmark[]) => queryBookmarks(all, { folderId: 'all', search: 'キスト', sort: 'savedDesc' });
+  it('a new snapshot object with the same content does not normalize again; a changed text does', () => {
+    const norm = vi.spyOn(String.prototype, 'normalize');
+    q([bm('g1', 'テキストです')]);
+    const first = norm.mock.calls.length;
+    expect(first).toBeGreaterThan(0);
+    q([bm('g1', 'テキストです')]); // 読み込み直しで作り直された、別のオブジェクト
+    const second = norm.mock.calls.length - first;
+    expect(second).toBeLessThanOrEqual(3); // 検索語の分だけ
+    q([bm('g1', 'テキストが変わりました')]);
+    expect(norm.mock.calls.length - first - second).toBeGreaterThan(second);
+    norm.mockRestore();
+  });
+  it('the result is still right after a cache hit', () => {
+    expect(q([bm('g2', 'テキストです'), bm('g3', 'ほか')]).map((b) => b.tweetId)).toEqual(['g2']);
+    expect(q([bm('g2', 'テキストです'), bm('g3', 'ほか')]).map((b) => b.tweetId)).toEqual(['g2']);
   });
 });

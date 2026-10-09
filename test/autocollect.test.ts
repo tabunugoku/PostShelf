@@ -14,20 +14,29 @@ const post = (n: number): Extracted => ({
 });
 
 /** x.com のブックマークの一覧の模擬: p1 が先頭 (新しく追加した順)。画面に出るのは 6 件ずつで、スクロールで 5 件進む (画面外は DOM から外れる = 仮想化) */
-function world(total: number, opts: { loadingAt?: (scrolls: number) => boolean } = {}) {
-  const w = { start: 0, scrolls: 0, toTop: 0, sleeps: [] as number[], hook: undefined as undefined | ((n: number) => void | Promise<void>), saved: new Set<string>(), seq: 0, extraY: 0, grow: false, releaseLong: undefined as undefined | (() => void) };
+function world(total: number, opts: { loadingAt?: (scrolls: number) => boolean; rawSteps?: boolean } = {}) {
+  const w = { start: 0, scrolls: 0, toTop: 0, sleeps: [] as number[], hook: undefined as undefined | ((n: number) => void | Promise<void>), saved: new Set<string>(), seq: 0, extraY: 0, grow: false, merge: false, releaseLong: undefined as undefined | (() => void) };
   const rnd = [0, 1, 0.5];
   const deps: CollectDeps & { limit: boolean; hidden: boolean; page: boolean; account: string | null; loading: boolean } = {
+    hasUnseen: () => false,
     now: () => Date.now(),
     sleep: async (ms) => {
-      w.sleeps.push(ms);
-      await w.hook?.(w.sleeps.length);
+      // 待ちは 100ms 刻みで呼ばれる (v32)。このテストの世界では、同じ待ちの刻みを 1 回の待ちにまとめて数える (従来の「1 回のスクロールの後に 1 回の待ち」)。rawSteps なら刻みのまま
+      if (!opts.rawSteps && ms <= 100 && w.merge) {
+        w.sleeps[w.sleeps.length - 1] += ms;
+        return; // まとめた刻みは、待たずに戻る
+      } else {
+        w.sleeps.push(ms);
+        w.merge = !opts.rawSteps && ms <= 100;
+        await w.hook?.(w.sleeps.length);
+      }
       // 15 分の待ちは、テストが release するまで進まない。それ以外は、ほかのタスクに順番を譲るだけで、すぐ戻る
       if (ms === LIMIT_RESUME_MS) await new Promise<void>((r) => (w.releaseLong = r));
       else await new Promise<void>((r) => setTimeout(r, 0));
     },
     random: () => rnd[w.sleeps.length % 3],
     scrollBy: () => {
+      w.merge = false;
       w.scrolls++;
       if (w.grow) w.extraY += 100; // 読み込み中の表示のまま、ページが伸び続けている
       w.start = Math.min(w.start + 5, total);
@@ -502,7 +511,7 @@ describe('recentPostDate (v27)', () => {
 describe('v32: adaptive wait after a scroll', () => {
   /** world に hasUnseen を足す。newAfter(ms) = スクロール後、この時間が経つと新しいポストが出る (null なら出ない) */
   function adaptive(newAfter: number | null, total = 30) {
-    const { w, deps } = world(total);
+    const { w, deps } = world(total, { rawSteps: true });
     const st = { sinceScroll: 0, loadingFor: 0 };
     const baseScroll = deps.scrollBy;
     deps.scrollBy = (px) => {
@@ -592,15 +601,6 @@ describe('v32: adaptive wait after a scroll', () => {
     // 新しいポストが出ていても、読み込み中の表示が残るあいだは、500ms 刻みで待つだけで、次のスクロールに進まない
     expect(scrollsAtPoll.length).toBeGreaterThanOrEqual(10);
     expect(new Set(scrollsAtPoll.slice(0, 10)).size).toBe(1);
-  });
-
-  it('without hasUnseen the wait is the single fixed sleep (same as before)', async () => {
-    const { w, deps } = world(20);
-    expect(deps.hasUnseen).toBeUndefined();
-    const c = new AutoCollector(deps);
-    await c.start(consent);
-    await until(c, (s) => s.status === 'done');
-    expect(w.sleeps.slice(3).every((ms) => ms >= 2000 && ms <= 4000)).toBe(true);
   });
 
   it('defaultDeps().hasUnseen: true only when a status article is on screen that is not in seen', () => {

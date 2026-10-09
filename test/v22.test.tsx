@@ -103,6 +103,7 @@ describe('v22-2: 結果の帯', () => {
 
 describe('v22-2: the x.com panel', () => {
   const deps = (cleared: { n: number }): CollectDeps => ({
+    hasUnseen: () => false,
     now: () => Date.now(), sleep: async () => {}, random: () => 0, scrollBy() {}, scrollToTop() {}, scrollY: () => 0, viewportHeight: () => 1000,
     visible: () => [], isLoading: () => false, hasLimit: () => false, pageOk: () => true, isHidden: () => false, accountId: () => 'me',
     savedIds: async () => new Set(), addCollected: async () => 0, saveRun: async () => {}, clearRun: async () => void cleared.n++,

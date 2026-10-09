@@ -43,15 +43,23 @@ export function inView(b: Bookmark, folderId: string, now = Date.now()): boolean
 
 export { foldText };
 
-/** ポストごとの、正規化済みの検索対象 (本文・投稿者・ハンドル)。スナップショットのオブジェクトをキーにするので、保存データが変わると作り直される */
-const foldedPost = new WeakMap<object, string>();
-const foldedOf = (s: { text: string; author: string; handle: string }): string => {
-  let v = foldedPost.get(s);
-  if (v === undefined) {
-    v = [s.text, s.author, s.handle].map(foldText).join('\u0000'); // 欄をまたぐ一致を避ける区切り
-    foldedPost.set(s, v);
-  }
-  return v;
+/**
+ * ポストごとの、正規化済みの検索対象 (本文・投稿者・ハンドル)。キーは accountId:tweetId。
+ * 読み込みのたびに snapshot のオブジェクトは作り直される (自動取り込み中は 20 件ごと) ので、オブジェクトではなく ID で持ち、
+ * sig (本文・投稿者・ハンドルそのもの) が同じなら再計算しない。本文が変わったポストだけ作り直す (v35)。
+ */
+const FOLD_CACHE_MAX = 20000;
+const foldedPost = new Map<string, { sig: string; folded: string }>();
+const foldedOf = (b: Bookmark): string => {
+  const s = b.snapshot;
+  const sig = [s.text, s.author, s.handle].join('\u0000');
+  const key = `${b.accountId}:${b.tweetId}`;
+  const hit = foldedPost.get(key);
+  if (hit && hit.sig === sig) return hit.folded;
+  const folded = [s.text, s.author, s.handle].map(foldText).join('\u0000'); // 欄をまたぐ一致を避ける区切り
+  if (foldedPost.size >= FOLD_CACHE_MAX && !hit) foldedPost.clear(); // メモリが増えすぎないよう、上限を超えたら全体を捨てて作り直す
+  foldedPost.set(key, { sig, folded });
+  return folded;
 };
 
 /** ビュー (フォルダ / すべて / 最近の 7 日) で絞り込み → 検索 (本文/投稿者/ハンドル) → 絞り込みチップ (AND) → 並べ替え */
@@ -64,7 +72,7 @@ export function queryBookmarks(
     if (!inView(b, opts.folderId, opts.now)) return false;
     if (opts.filters && !matchesFilters(b, opts.filters)) return false;
     if (!q) return true;
-    return foldedOf(b.snapshot).includes(q);
+    return foldedOf(b).includes(q);
   });
   const cmp: Record<SortKey, (a: Bookmark, b: Bookmark) => number> = {
     savedDesc: (a, b) => b.savedAt - a.savedAt,
