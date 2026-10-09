@@ -841,10 +841,36 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const sentinelRef = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el || remaining <= 0 || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && growTo(renderCount + pageSize), { rootMargin: `${Math.round(window.innerHeight * 1.5)}px 0px` });
-    io.observe(el);
-    return () => io.disconnect();
+    if (!el || remaining <= 0) return;
+    // IntersectionObserver だけに頼らない (実機で「すべて」が 30 件で止まった。原因は特定できていない)。scroll / resize と、描画のたびに、末尾までの距離を測る。
+    // どちらで増やしても、増やす先は今の renderCount が基準 (同じ値を入れるだけなので、二重には増えない)
+    const check = () => {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0 && r.top === 0) return; // まだ配置されていない (測れない)
+      if (r.top < window.innerHeight * 2) growTo(renderCount + pageSize);
+    };
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        check();
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    onScroll(); // 増やしたあとも、まだ末尾が近ければ続けて増やす
+    let io: IntersectionObserver | undefined;
+    if (typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && growTo(renderCount + pageSize), { rootMargin: `${Math.round(window.innerHeight * 1.5)}px 0px` });
+      io.observe(el);
+    }
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+      io?.disconnect();
+    };
   }, [renderCount, remaining, resetKey]);
   const rows = (
     <SearchContext.Provider value={search}>
