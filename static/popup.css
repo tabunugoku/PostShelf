@@ -1,3 +1,6 @@
+/* 日本語の折り返し (manager.css と同じ規則。popup.html は manager.css も読むが、単独でも効くように) */
+:lang(ja) body{word-break:auto-phrase;line-break:strict}
+.sub,.rec-row{text-wrap:pretty}
 body{margin:0;padding:12px;width:320px}
 .hd{display:flex;align-items:center;gap:8px;padding:0 0 10px;min-width:0}.hd .brand{flex:none}.hd-title{font-weight:700;flex:none}
 /* 現在のアカウント (右端の小さな丸い枠)。長いハンドルは省略する */

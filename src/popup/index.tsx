@@ -5,7 +5,7 @@ import { Icon } from '../shared/Icon';
 import { HealthNotice } from '../manager/HealthNotice';
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
 import { INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, type Account, type Bookmark, type Folder } from '../shared/models';
-import { t } from '../shared/strings';
+import { setDocumentLang, t } from '../shared/strings';
 import { countFolder } from '../shared/query';
 import { getLastSeenAccount, listBookmarks, listFolders, onDataChanged, onLastSeenAccountChanged, setAccountScope } from '../shared/storage';
 
@@ -123,4 +123,5 @@ function Popup() {
   );
 }
 
+setDocumentLang();
 render(<Popup />, document.getElementById('app')!);

@@ -1,5 +1,5 @@
 import { queryFirst } from '../shared/selectors';
-import { t } from '../shared/strings';
+import { jaWrapRule, t, uiLang } from '../shared/strings';
 import { extractTweet } from './snapshot';
 import { getBookmark, listFolders, removeBookmark, setBookmarkFolders } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
@@ -18,7 +18,16 @@ export const setPopoverMode = (m: ButtonMode): void => {
 };
 
 /** ポップオーバーのアイコン用に、同梱の Tabler Icons CSS を 1 度だけ読み込む (拡張内ファイル。外部通信なし) */
+function ensureWrapStyle(): void {
+  if (document.getElementById('postshelf-popover-style')) return;
+  const s = document.createElement('style');
+  s.id = 'postshelf-popover-style';
+  s.textContent = jaWrapRule(`.${POP_CLASS}`);
+  document.head.append(s);
+}
+
 export function ensureIconCss(): void {
+  ensureWrapStyle();
   if (document.getElementById('postshelf-icons')) return;
   const link = document.createElement('link');
   link.id = 'postshelf-icons';
@@ -62,7 +71,8 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   pop.className = POP_CLASS;
   pop.setAttribute('role', 'dialog');
   const th = xTheme();
-  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;word-break:auto-phrase;line-break:strict`;
+  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;text-wrap:pretty`;
+  pop.lang = uiLang(); // X のページの lang ではなく UI の言語で折り返す
   pop.addEventListener('click', (e) => e.stopPropagation());
 
   // 保存先の表示 (アバター小 + @ハンドル)。判定できないときは警告だけを出して保存させない

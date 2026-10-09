@@ -3,7 +3,7 @@
  * 配色は X のテーマ (xTheme: ライト / ダーク / ダーク青) から決める。role="status" aria-live="polite"。キーボードで操作できる。
  */
 import { isBookmarksPath } from '../shared/selectors';
-import { formatDate, t } from '../shared/strings';
+import { formatDate, jaWrapRule, t, uiLang } from '../shared/strings';
 import { ACCENT, ACCENT_FILL } from '../shared/tokens';
 import { xTheme } from './theme';
 import type { AutoCollector, CollectState } from './autocollect';
@@ -48,6 +48,7 @@ function ensureStyle(): void {
   const s = document.createElement('style');
   s.id = STYLE_ID;
   s.textContent = `
+${jaWrapRule(`.${PANEL_CLASS}`)}
 @keyframes postshelf-pulse{50%{opacity:.35}}
 @keyframes postshelf-slide{0%{margin-left:-35%}100%{margin-left:100%}}
 .${PANEL_CLASS} button:focus-visible{outline:2px solid ${ACCENT};outline-offset:1px}
@@ -137,6 +138,7 @@ export class AutoCollectPanel {
     if (!this.root) {
       this.root = el('div');
       this.root.className = PANEL_CLASS;
+      this.root.lang = uiLang();
       this.root.setAttribute('role', 'status');
       this.root.setAttribute('aria-live', 'polite');
       this.root.setAttribute('aria-label', t('acPanelLabel'));
@@ -192,7 +194,7 @@ export class AutoCollectPanel {
 
   /** 畳んだ 1 行のバー (右下。幅は内容なり)。畳んでも取り込みは止まらない */
   private renderBar(r: HTMLElement, s: CollectState, p: Palette, v: PanelView): void {
-    r.style.cssText = `position:fixed;right:14px;bottom:14px;z-index:2147483646;max-width:calc(100vw - 28px);box-sizing:border-box;display:flex;align-items:center;gap:8px;background:${p.bg};color:${p.fg};color-scheme:${p.scheme};border:1px solid ${p.border};border-radius:999px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:0 6px 0 14px;min-height:44px;font:13px/1.4 system-ui,sans-serif;white-space:nowrap;word-break:auto-phrase;line-break:strict`;
+    r.style.cssText = `position:fixed;right:14px;bottom:14px;z-index:2147483646;max-width:calc(100vw - 28px);box-sizing:border-box;display:flex;align-items:center;gap:8px;background:${p.bg};color:${p.fg};color-scheme:${p.scheme};border:1px solid ${p.border};border-radius:999px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:0 6px 0 14px;min-height:44px;font:13px/1.4 system-ui,sans-serif;white-space:nowrap`;
     const dotColor = { run: ACCENT, pause: p.warnFg, done: p.ok, ng: p.ng }[v.dot];
     const dot = el('span', `width:10px;height:10px;border-radius:50%;flex:none;background:${dotColor};${v.dot === 'run' ? 'animation:postshelf-pulse 1.2s infinite;' : ''}`);
     const btn = el('button', `font:inherit;min-height:44px;padding:0 12px;border:0;border-radius:999px;cursor:pointer;background:transparent;color:${p.fg};white-space:nowrap;font-weight:700`, t('acBtnExpand'));

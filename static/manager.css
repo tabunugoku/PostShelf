@@ -27,6 +27,11 @@
 option,optgroup{background:var(--surface-2);color:var(--text-primary)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--surface-2);color:var(--text-primary);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif}
+/* 日本語の折り返しは文節の区切りに (Chrome 119 未満では無効 = 通常の折り返し。許容)。<html lang> は起動時に UI の言語を入れる。他の言語には足さない */
+:lang(ja) body{word-break:auto-phrase;line-break:strict}
+button,.chip,.tab,.badge{white-space:nowrap}
+.muted,.setting-desc,.toast,.text,.empty-state p,.pre{text-wrap:pretty}
+h1,h2,h3,label,.sec{text-wrap:balance}
 h1{font-size:16px;font-weight:500;margin:0 0 4px}
 button,input{min-height:32px;font:inherit;color:inherit;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius);padding:4px 10px;cursor:pointer}
 input{cursor:text;background:var(--surface-2)}
