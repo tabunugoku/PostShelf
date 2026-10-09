@@ -19,7 +19,23 @@ export function chipFolders(folders: Folder[], recentIds: string[]): Folder[] {
   return [...recent, ...rest].slice(0, CHIP_COUNT);
 }
 
+/**
+ * 保存の状態。ポスト (tweetId + tabId) ごとに 1 つ作り、Current に持たせる (v35)。
+ * コンポーネント全体で共有すると、保存中にポストが切り替わったとき、前のポストの保存の途中が新しいポストの選択を見て、前のポストへ書き込んでしまう。
+ */
+interface SaveState {
+  /** 最新の選択 (押した瞬間に更新) */
+  sel: string[];
+  /** 最後に保存できた選択 */
+  saved: string[];
+  /** すでに保存してあるか */
+  exists: boolean;
+  /** 保存の途中か */
+  saving: boolean;
+}
+
 interface Current {
+  st: SaveState;
   tweetId: string;
   snapshot: Snapshot;
   tabId: number;
@@ -41,11 +57,8 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
   const [more, setMore] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   const tweetRef = useRef('');
-  /** 最新の選択 (押した瞬間に更新)、最後に保存できた選択、保存中か、すでに保存してあるか */
-  const selRef = useRef<string[]>([]);
-  const savedSel = useRef<string[]>([]);
-  const saving = useRef(false);
-  const existsRef = useRef(false);
+  /** いま表示しているポストの保存の状態。前のポストの保存の途中の分は、自分の状態だけを見る */
+  const stRef = useRef<SaveState | null>(null);
   useEffect(() => watchActivePost((p) => setPost((old) => (old?.tabId === p?.tabId && old?.tweetId === p?.tweetId ? old : p))), []);
   useEffect(() => {
     const load = () => void getSettings().then((s) => setRecent(s.recentFolderIds ?? []));
@@ -55,6 +68,7 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
   const key = post ? `${post.tabId}:${post.tweetId}` : '';
   useEffect(() => {
     tweetRef.current = key;
+    stRef.current = null;
     setCur(null);
     setError('');
     setDone('');
@@ -66,10 +80,9 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
       if (!r) return void setError(t('saveCurrentFail'));
       const prev = await getBookmark(r.tweetId);
       if (tweetRef.current !== key) return;
-      selRef.current = prev?.folderIds ?? [];
-      savedSel.current = prev?.folderIds ?? [];
-      existsRef.current = !!prev;
-      setCur({ tweetId: r.tweetId, snapshot: r.snapshot, tabId: post.tabId, selected: prev?.folderIds ?? [], saved: !!prev });
+      const st: SaveState = { sel: prev?.folderIds ?? [], saved: prev?.folderIds ?? [], exists: !!prev, saving: false };
+      stRef.current = st;
+      setCur({ st, tweetId: r.tweetId, snapshot: r.snapshot, tabId: post.tabId, selected: prev?.folderIds ?? [], saved: !!prev });
     })();
   }, [key, !!props.blockedReason]);
   if (!post) return null; // x.com 以外のタブ / ポスト以外のページでは出さない
@@ -97,56 +110,58 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
   const sameSel = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('\n') === [...b].sort().join('\n');
   /** 保存する (チェックの切り替えの結果)。全フォルダを外しても、保存は残る (「未分類」になる)。保存の解除は、ごみ箱だけ */
   const commit = async (c: Current, sel: string[]) => {
+    const st = c.st;
     await setBookmarkFolders(c.tweetId, sel, c.snapshot);
     // 画像のキャッシュと全文の取得は、保存の状態が変わったとき (新しく保存したとき) だけ要求する
-    if (!existsRef.current) {
-      existsRef.current = true;
+    if (!st.exists) {
+      st.exists = true;
       requestCache(c.tweetId, getAccountScope());
       if (c.snapshot.truncated) requestFullText(c.tweetId, getAccountScope()); // たたまれた状態で保存した (v24)
     }
     await requestNativeSync(c.tabId, c.tweetId, true);
-    const added = sel.filter((id) => !savedSel.current.includes(id));
+    const added = sel.filter((id) => !st.saved.includes(id));
     if (added.length) void updateRecentFolders(added).catch(() => {}); // 「最近使った」(失敗しても保存は成功)
     const names = sel.length ? sel.map((id) => props.folders.find((f) => f.id === id)).filter((f): f is Folder => !!f).map(displayName) : [displayName(props.folders.find((f) => f.id === INBOX_ID) ?? { id: INBOX_ID, name: '', icon: '', order: 0 })];
-    if (tweetRef.current === key) {
+    if (stRef.current === st) {
       setDone(t('activeSaved', joinNames(names)));
       setError('');
     }
     props.onSaved();
   };
   /**
-   * 保存を直列に流す。押した瞬間に最新の選択 (selRef) とチップの表示を更新し、保存は前の分が終わってから、そのときの最新の選択で行う
+   * 保存を直列に流す。押した瞬間に最新の選択 (st.sel) とチップの表示を更新し、保存は前の分が終わってから、そのときの最新の選択で行う
    * (連打は最後の状態にまとまる)。失敗したら、最後に保存できた状態に戻してエラーを出す。
    */
   const flushSave = async (c: Current) => {
-    if (saving.current) return;
-    saving.current = true;
+    const st = c.st; // 始めたときの状態だけを見る。ポストが切り替わっても、押された選択はこのポストへ最後まで保存する (切り替わったあとの画面の更新はしない)
+    if (st.saving) return;
+    st.saving = true;
     try {
-      while (!sameSel(selRef.current, savedSel.current) || !existsRef.current) {
-        const target = [...selRef.current];
+      while (!sameSel(st.sel, st.saved) || !st.exists) {
+        const target = [...st.sel];
         try {
           await commit(c, target);
-          savedSel.current = target;
+          st.saved = target;
         } catch {
-          selRef.current = [...savedSel.current];
-          if (tweetRef.current === key) {
-            setCur((old) => (old ? { ...old, selected: selRef.current } : old));
+          st.sel = [...st.saved];
+          if (stRef.current === st) {
+            setCur((old) => (old && old.st === st ? { ...old, selected: st.sel } : old));
             setError(t('errorStorage'));
           }
           break;
         }
       }
     } finally {
-      saving.current = false;
+      st.saving = false;
     }
   };
   const select = (c: Current, next: string[]) => {
-    selRef.current = next;
-    setCur((old) => (old ? { ...old, selected: next, saved: true } : old));
+    c.st.sel = next;
+    setCur((old) => (old && old.st === c.st ? { ...old, selected: next, saved: true } : old));
     void flushSave(c);
   };
   const toggle = (c: Current, id: string) => {
-    const now = selRef.current;
+    const now = c.st.sel;
     select(c, now.includes(id) ? now.filter((x) => x !== id && x !== INBOX_ID) : [...now.filter((x) => x !== INBOX_ID), id]);
   };
   const remove = async (c: Current) => {
@@ -154,9 +169,9 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
       await removeBookmark(c.tweetId);
       requestPrune();
       await requestNativeSync(c.tabId, c.tweetId, false);
-      selRef.current = [];
-      savedSel.current = [];
-      existsRef.current = false;
+      c.st.sel = [];
+      c.st.saved = [];
+      c.st.exists = false;
       setCur({ ...c, selected: [], saved: false });
       setDone('');
       props.onSaved();
