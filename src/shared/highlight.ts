@@ -1,4 +1,4 @@
-import { foldText } from './query';
+import { foldText, foldWithMap } from './fold';
 
 /** 検索語 (空白区切り) を、一覧の絞り込みと同じ正規化 (foldText) にした語のリスト。空の語は除く */
 export function searchTerms(q: string): string[] {
@@ -7,23 +7,11 @@ export function searchTerms(q: string): string[] {
 
 /**
  * text の中で、いずれかの語に一致する範囲 [start, end) (text の UTF-16 の添字) を返す。重なる・隣り合う範囲は 1 つにまとめる。
- * 比べるときは foldText と同じ 1 文字ずつの正規化 (全角半角・大文字小文字を区別しない) にし、結果は元の文字の位置に戻す。
+ * 比べるときは foldText と同じ書記素ごとの正規化 (全角半角・大文字小文字を区別しない) にし、結果は元の文字の位置に戻す。
  */
 export function highlightRanges(text: string, terms: string[]): [number, number][] {
   if (!terms.length || !text) return [];
-  let folded = '';
-  const start: number[] = []; // 正規化後の各文字 (UTF-16) → 元の文字の始まり
-  const end: number[] = []; // → 元の文字の終わり
-  let pos = 0;
-  for (const ch of text) {
-    const f = ch.normalize('NFKC').toLowerCase();
-    for (let i = 0; i < f.length; i++) {
-      start.push(pos);
-      end.push(pos + ch.length);
-    }
-    folded += f;
-    pos += ch.length;
-  }
+  const { folded, start, end } = foldWithMap(text);
   const found: [number, number][] = [];
   for (const term of terms) {
     for (let at = folded.indexOf(term); at !== -1; at = folded.indexOf(term, at + term.length)) {

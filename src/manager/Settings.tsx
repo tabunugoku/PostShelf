@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
-import { foldText } from '../shared/query';
+import { foldText } from '../shared/fold';
 import { getSettings, onSettingsChanged, resetSettings, restoreSettings, updateAutoCollect, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
 import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
 import { Confirm, TypeToConfirm } from './ui';

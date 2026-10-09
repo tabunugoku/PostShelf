@@ -7,6 +7,7 @@
 import { INBOX_ID, displayName, type Folder } from './models';
 import { t } from './strings';
 import { createFolderMenu } from './folderCreateMenu';
+import { foldText } from './fold';
 
 export interface PickerTheme {
   fg: string;
@@ -19,9 +20,6 @@ export interface PickerTheme {
 export const FILTER_MIN_FOLDERS = 8;
 /** 「最近使った」を出すフォルダ数 (「未分類」を除く) の下限 */
 export const RECENT_MIN_FOLDERS = 6;
-
-/** 絞り込み用の正規化: 大文字小文字・全角半角を区別しない */
-export const foldText = (s: string): string => s.normalize('NFKC').toLowerCase();
 
 export interface FolderPicker {
   el: HTMLElement;

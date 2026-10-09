@@ -1,4 +1,5 @@
 import { ALL_FOLDER_ID, type Bookmark } from './models';
+import { foldText } from './fold';
 
 export type SortKey = 'savedDesc' | 'savedAsc' | 'postedDesc' | 'postedAsc';
 
@@ -40,11 +41,18 @@ export function inView(b: Bookmark, folderId: string, now = Date.now()): boolean
   return b.folderIds.includes(folderId);
 }
 
-/**
- * 検索用の正規化: 1 文字ずつ NFKC (全角半角をそろえる) → 小文字。1 文字ずつなので、元の文字との対応が取れる (強調 highlight.ts)。
- * 一覧の絞り込みと、設定の検索、本文の強調が、同じ判定を使う。
- */
-export const foldText = (s: string): string => [...s].map((c) => c.normalize('NFKC').toLowerCase()).join('');
+export { foldText };
+
+/** ポストごとの、正規化済みの検索対象 (本文・投稿者・ハンドル)。スナップショットのオブジェクトをキーにするので、保存データが変わると作り直される */
+const foldedPost = new WeakMap<object, string>();
+const foldedOf = (s: { text: string; author: string; handle: string }): string => {
+  let v = foldedPost.get(s);
+  if (v === undefined) {
+    v = [s.text, s.author, s.handle].map(foldText).join('\u0000'); // 欄をまたぐ一致を避ける区切り
+    foldedPost.set(s, v);
+  }
+  return v;
+};
 
 /** ビュー (フォルダ / すべて / 最近の 7 日) で絞り込み → 検索 (本文/投稿者/ハンドル) → 絞り込みチップ (AND) → 並べ替え */
 export function queryBookmarks(
@@ -56,8 +64,7 @@ export function queryBookmarks(
     if (!inView(b, opts.folderId, opts.now)) return false;
     if (opts.filters && !matchesFilters(b, opts.filters)) return false;
     if (!q) return true;
-    const s = b.snapshot;
-    return [s.text, s.author, s.handle].some((x) => foldText(x).includes(q));
+    return foldedOf(b.snapshot).includes(q);
   });
   const cmp: Record<SortKey, (a: Bookmark, b: Bookmark) => number> = {
     savedDesc: (a, b) => b.savedAt - a.savedAt,
