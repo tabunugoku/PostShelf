@@ -1,30 +1,80 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>PostShelf: X のブックマークを、フォルダに整理する Chrome 拡張機能</title>
-<meta name="description" content="X (旧 Twitter) のブックマークを、自分のフォルダに分けて整理する無料の Chrome 拡張機能。名前・アイコン・色を自由に選べ、データは端末の中だけに保存します。">
+<title>PostShelf: Sort your X bookmarks into folders (Chrome extension)</title>
+<meta name="description" content="A free Chrome extension that sorts your X (Twitter) bookmarks into your own folders. Pick a name, icon and color. Your data stays on your computer.">
 <link rel="canonical" href="https://tabunugoku.github.io/PostShelf/">
 <meta name="theme-color" content="#000000">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PostShelf">
-<meta property="og:locale" content="ja_JP">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ja_JP">
 <meta property="og:url" content="https://tabunugoku.github.io/PostShelf/">
-<meta property="og:title" content="PostShelf: X のブックマークを、フォルダに整理する">
-<meta property="og:description" content="名前・アイコン・色を自由に選べるフォルダで、X のブックマークを整理。データはパソコンの中だけ。無料・MIT ライセンス。">
+<meta property="og:title" content="PostShelf: Sort your X bookmarks into folders">
+<meta property="og:description" content="Sort your X bookmarks into folders with your own names, icons and colors. Data stays on your computer. Free, MIT licensed.">
 <meta property="og:image" content="https://tabunugoku.github.io/PostShelf/og.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="PostShelf のロゴと、「X のブックマークを自分のフォルダに整理する」の文字。">
+<meta property="og:image:alt" content="The PostShelf logo.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="PostShelf: X のブックマークを、フォルダに整理する">
-<meta name="twitter:description" content="名前・アイコン・色を自由に選べるフォルダで、X のブックマークを整理。データはパソコンの中だけ。無料・MIT ライセンス。">
+<meta name="twitter:title" content="PostShelf: Sort your X bookmarks into folders">
+<meta name="twitter:description" content="Sort your X bookmarks into folders with your own names, icons and colors. Data stays on your computer. Free, MIT licensed.">
 <meta name="twitter:image" content="https://tabunugoku.github.io/PostShelf/og.png">
-<meta name="twitter:image:alt" content="PostShelf のロゴと、「X のブックマークを自分のフォルダに整理する」の文字。">
+<meta name="twitter:image:alt" content="The PostShelf logo.">
 <link rel="icon" type="image/png" sizes="128x128" href="icon-128.png">
+<script>
+/* Language: Japanese for Japanese browsers, English for everything else.
+   A saved choice (toggle in the header) wins. Everything works without JS (English). */
+(function(){
+  var d=document,h=d.documentElement,lang='en';
+  try{
+    var s=localStorage.getItem('ps-lang');
+    if(s==='ja'||s==='en'){lang=s}
+    else{var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';lang=/^ja\b/i.test(l)?'ja':'en'}
+  }catch(e){
+    var l2=navigator.language||'';lang=/^ja\b/i.test(l2)?'ja':'en';
+  }
+  var T={
+    ja:{
+      title:'PostShelf: X のブックマークを、フォルダに整理する Chrome 拡張機能',
+      desc:'X (旧 Twitter) のブックマークを、自分のフォルダに分けて整理する無料の Chrome 拡張機能。名前・アイコン・色を自由に選べ、データは端末の中だけに保存します。',
+      ogt:'PostShelf: X のブックマークを、フォルダに整理する',
+      ogd:'名前・アイコン・色を自由に選べるフォルダで、X のブックマークを整理。データはパソコンの中だけ。無料・MIT ライセンス。',
+      alt:'PostShelf のロゴと、「X のブックマークを自分のフォルダに整理する」の文字。',
+      loc:'ja_JP',alt2:'en_US'
+    },
+    en:{
+      title:'PostShelf: Sort your X bookmarks into folders (Chrome extension)',
+      desc:'A free Chrome extension that sorts your X (Twitter) bookmarks into your own folders. Pick a name, icon and color. Your data stays on your computer.',
+      ogt:'PostShelf: Sort your X bookmarks into folders',
+      ogd:'Sort your X bookmarks into folders with your own names, icons and colors. Data stays on your computer. Free, MIT licensed.',
+      alt:'The PostShelf logo.',
+      loc:'en_US',alt2:'ja_JP'
+    }
+  };
+  function apply(lg){
+    var t=T[lg];h.lang=lg;d.title=t.title;
+    function m(sel,v){var e=d.querySelector(sel);if(e)e.setAttribute('content',v)}
+    m('meta[name="description"]',t.desc);
+    m('meta[property="og:title"]',t.ogt);m('meta[name="twitter:title"]',t.ogt);
+    m('meta[property="og:description"]',t.ogd);m('meta[name="twitter:description"]',t.ogd);
+    m('meta[property="og:image:alt"]',t.alt);m('meta[name="twitter:image:alt"]',t.alt);
+    m('meta[property="og:locale"]',t.loc);m('meta[property="og:locale:alternate"]',t.alt2);
+    var a=d.querySelectorAll('[data-aria-ja]');
+    for(var i=0;i<a.length;i++)a[i].setAttribute('aria-label',a[i].getAttribute('data-aria-'+lg));
+  }
+  window.psSetLang=function(lg){
+    try{localStorage.setItem('ps-lang',lg)}catch(e){}
+    apply(lg);
+  };
+  apply(lang);
+  d.addEventListener('DOMContentLoaded',function(){apply(h.lang)});
+})();
+</script>
 <style>
 :root{
   --bg:#ffffff;--s1:#f7f9f9;--bd:#eff3f4;--bds:#cfd9de;--fg:#0f1419;--mu:#536471;
@@ -37,7 +87,10 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
+/* one language at a time */
+html[lang="ja"] .en,html:not([lang="ja"]) .ja{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,"Segoe UI","Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+html[lang="ja"] body{word-break:auto-phrase;line-break:strict}
 a{color:inherit}
 section[id],div[id]{scroll-margin-top:72px}
 .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
@@ -51,13 +104,17 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--fill);outline-offse
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:18px}
 .links{margin-left:auto;display:flex;gap:20px;font-size:14px;color:var(--mu)}
 .links a{text-decoration:none}.links a:hover{color:var(--fg)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 22px;border-radius:999px;border:1px solid var(--bds);font-weight:700;font-size:15px;text-decoration:none;transition:transform .2s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 22px;border-radius:999px;border:1px solid var(--bds);font-weight:700;font-size:15px;text-decoration:none;transition:transform .2s;background:transparent;color:inherit;font-family:inherit;cursor:pointer}
 .btn:hover{transform:translateY(-2px)}
 .btn.pri{background:var(--fill);border-color:var(--fill);color:#fff}
 .btn.dark{background:var(--fg);border-color:var(--fg);color:var(--bg)}
 .btn.sm{font-size:13px;padding:6px 14px}
 .btn svg{width:18px;height:18px;flex:none}
-@media(max-width:820px){.links{display:none}.nav .btn{margin-left:auto}}
+.lang{display:inline-flex;border:1px solid var(--bds);border-radius:999px;overflow:hidden;font-size:13px}
+.lang button{min-height:36px;min-width:44px;padding:4px 12px;border:0;background:transparent;color:var(--mu);font:inherit;font-weight:700;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.links+.lang{margin-left:0}
+@media(max-width:820px){.links{display:none}.nav .lang{margin-left:auto}}
 
 /* hero */
 .hero{padding:72px 0 48px}
@@ -98,7 +155,7 @@ h1 em{font-style:normal;color:var(--fill)}
 .stats{display:flex;flex-wrap:wrap;gap:14px;padding-bottom:24px}
 .stat{flex:1 1 200px;border:1px solid var(--bd);background:var(--s1);border-radius:16px;padding:18px;text-align:center}
 .stat b{display:block;font-size:34px;line-height:1.25;color:var(--fill)}
-.stat span{font-size:13px;color:var(--mu)}
+.stat>span{font-size:13px;color:var(--mu)}
 
 /* sections */
 .sec{padding:80px 0}
@@ -156,15 +213,25 @@ footer p{max-width:46em}
 </style>
 </head>
 <body>
-<a class="skip" href="#main">本文へ移動</a>
+<a class="skip" href="#main"><span class="ja">本文へ移動</span><span class="en">Skip to content</span></a>
 
 <header class="nav"><div class="wrap">
-  <a class="brand" href="#top" aria-label="PostShelf のトップ">
+  <a class="brand" href="#top" data-aria-ja="PostShelf のトップ" data-aria-en="PostShelf home" aria-label="PostShelf home">
     <svg width="30" height="30" viewBox="0 0 1024 1024" aria-hidden="true"><rect x="110" y="170" width="804" height="580" rx="200" fill="#1D9BF0"/><polygon points="240,720 240,920 450,720" fill="#1D9BF0"/><polygon points="410,170 614,170 614,620 512,510 410,620" fill="var(--bg)"/></svg>
     PostShelf
   </a>
-  <nav class="links" aria-label="ページ内のメニュー"><a href="#features">機能</a><a href="#install">インストール</a><a href="#usage">使い方</a><a href="#compare">比較</a><a href="#author">作者</a></nav>
-  <a class="btn sm" href="https://github.com/tabunugoku/PostShelf" aria-label="GitHub で PostShelf を見る (新しいタブで開きます)" target="_blank" rel="noopener noreferrer">
+  <nav class="links" data-aria-ja="ページ内のメニュー" data-aria-en="On this page" aria-label="On this page">
+    <a href="#features"><span class="ja">機能</span><span class="en">Features</span></a>
+    <a href="#install"><span class="ja">インストール</span><span class="en">Install</span></a>
+    <a href="#usage"><span class="ja">使い方</span><span class="en">How to use</span></a>
+    <a href="#compare"><span class="ja">比較</span><span class="en">Compare</span></a>
+    <a href="#author"><span class="ja">作者</span><span class="en">Author</span></a>
+  </nav>
+  <div class="lang" role="group" aria-label="Language / 言語">
+    <button type="button" id="l-en" aria-pressed="true" lang="en">English</button>
+    <button type="button" id="l-ja" aria-pressed="false" lang="ja">日本語</button>
+  </div>
+  <a class="btn sm" href="https://github.com/tabunugoku/PostShelf" data-aria-ja="GitHub で PostShelf を見る (新しいタブで開きます)" data-aria-en="View PostShelf on GitHub (opens in a new tab)" aria-label="View PostShelf on GitHub (opens in a new tab)" target="_blank" rel="noopener noreferrer">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg>GitHub
   </a>
 </div></header>
@@ -172,132 +239,150 @@ footer p{max-width:46em}
 <main id="main">
 <section class="hero" id="top"><div class="wrap">
   <div class="tx">
-    <span class="pill"><i></i>v1.1.1 · 無料 · MIT ライセンス</span>
-    <h1>X のブックマークを<br><em>自分のフォルダ</em>に整理する</h1>
-    <p class="lead">ポストを好きな名前・アイコン・色のフォルダに分けられる Chrome 拡張機能です。データはあなたのパソコンの中だけに保存します。</p>
+    <span class="pill"><i></i>v1.1.1 · <span class="ja">無料 · MIT ライセンス</span><span class="en">Free · MIT License</span></span>
+    <h1><span class="ja">X のブックマークを<br><em>自分のフォルダ</em>に整理する</span><span class="en">Sort your X bookmarks<br>into <em>your own folders</em></span></h1>
+    <p class="lead"><span class="ja">ポストを好きな名前・アイコン・色のフォルダに分けられる Chrome 拡張機能です。データはあなたのパソコンの中だけに保存します。</span><span class="en">A Chrome extension that files your posts into folders with any name, icon and color you like. Your data is stored only on your own computer.</span></p>
     <div class="cta">
-      <a class="btn pri" href="#install">インストール方法を見る</a>
-      <a class="btn" href="https://github.com/tabunugoku/PostShelf/releases/latest" target="_blank" rel="noopener noreferrer">最新版をダウンロード</a>
+      <a class="btn pri" href="#install"><span class="ja">インストール方法を見る</span><span class="en">See how to install</span></a>
+      <a class="btn" href="https://github.com/tabunugoku/PostShelf/releases/latest" target="_blank" rel="noopener noreferrer"><span class="ja">最新版をダウンロード</span><span class="en">Download the latest version</span></a>
     </div>
-    <p class="note">Chrome 114 以降 · 手動インストール (Chrome ウェブストアでは配布していません)</p>
+    <p class="note"><span class="ja">Chrome 114 以降 · 手動インストール (Chrome ウェブストアでは配布していません)</span><span class="en">Chrome 114 or later · Manual install (not on the Chrome Web Store)</span></p>
   </div>
 
   <div class="demo">
     <div class="win" aria-hidden="true">
       <div class="side">
-        <div class="row on"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2"/></svg>すべて<span class="c">8</span></div>
-        <div class="row"><svg viewBox="0 0 24 24" stroke="var(--mu)"><path d="M4 13h3l2 3h6l2-3h3M4 13V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6l-1.5 6a2 2 0 0 1-2 1.5h-11a2 2 0 0 1-2-1.5z"/></svg>未分類<span class="c">1</span></div>
-        <div class="row bump" style="animation-delay:0s"><svg viewBox="0 0 24 24" stroke="#378ADD"><path d="M7 8l-4 4 4 4M17 8l4 4-4 4M14 4l-4 16"/></svg>開発ネタ<span class="c">5</span></div>
-        <div class="row bump" style="animation-delay:3.2s"><svg viewBox="0 0 24 24" stroke="#BA7517"><path d="M3 19a9 9 0 0 1 9 0 9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0 9 9 0 0 1 9 0M3 6v13M12 6v13M21 6v13"/></svg>あとで読む<span class="c">2</span></div>
-        <div class="row bump" style="animation-delay:1.6s"><svg viewBox="0 0 24 24" stroke="#D4537E"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg>デザイン<span class="c">1</span></div>
+        <div class="row on"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2"/></svg><span class="ja">すべて</span><span class="en">All</span><span class="c">8</span></div>
+        <div class="row"><svg viewBox="0 0 24 24" stroke="var(--mu)"><path d="M4 13h3l2 3h6l2-3h3M4 13V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6l-1.5 6a2 2 0 0 1-2 1.5h-11a2 2 0 0 1-2-1.5z"/></svg><span class="ja">未分類</span><span class="en">Unsorted</span><span class="c">1</span></div>
+        <div class="row bump" style="animation-delay:0s"><svg viewBox="0 0 24 24" stroke="#378ADD"><path d="M7 8l-4 4 4 4M17 8l4 4-4 4M14 4l-4 16"/></svg><span class="ja">開発ネタ</span><span class="en">Dev ideas</span><span class="c">5</span></div>
+        <div class="row bump" style="animation-delay:3.2s"><svg viewBox="0 0 24 24" stroke="#BA7517"><path d="M3 19a9 9 0 0 1 9 0 9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0 9 9 0 0 1 9 0M3 6v13M12 6v13M21 6v13"/></svg><span class="ja">あとで読む</span><span class="en">Read later</span><span class="c">2</span></div>
+        <div class="row bump" style="animation-delay:1.6s"><svg viewBox="0 0 24 24" stroke="#D4537E"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg><span class="ja">デザイン</span><span class="en">Design</span><span class="c">1</span></div>
       </div>
       <div class="pane">
-        <div class="ttl">すべて <small>8 件</small></div>
-        <div class="card fly" style="--dy:16px"><div class="p"><div class="av">DT</div><div><b>Dev Tips</b> <span style="color:var(--mu)">@devtips</span><br>Chrome 拡張の manifest v3 で service worker を長持ちさせる小技まとめ</div></div><span class="tag"><i style="background:#378ADD"></i>開発ネタ</span></div>
-        <div class="card fly" style="--dy:-30px;animation-delay:1.6s"><div class="p"><div class="av">UI</div><div><b>UI Daily</b> <span style="color:var(--mu)">@uidaily</span><br>余白とタイポグラフィだけで画面が締まる理由</div></div><span class="tag"><i style="background:#D4537E"></i>デザイン</span></div>
-        <div class="card fly" style="--dy:-60px;animation-delay:3.2s"><div class="p"><div class="av">MA</div><div><b>Maho</b> <span style="color:var(--mu)">@maho</span><br>長文スレッド: 個人開発で 3 年続けて学んだこと</div></div><span class="tag"><i style="background:#BA7517"></i>あとで読む</span></div>
+        <div class="ttl"><span class="ja">すべて</span><span class="en">All</span> <small><span class="ja">8 件</span><span class="en">8 posts</span></small></div>
+        <div class="card fly" style="--dy:16px"><div class="p"><div class="av">DT</div><div><b>Dev Tips</b> <span style="color:var(--mu)">@devtips</span><br><span class="ja">Chrome 拡張の manifest v3 で service worker を長持ちさせる小技まとめ</span><span class="en">Small tricks to keep a service worker alive in a Chrome extension (manifest v3)</span></div></div><span class="tag"><i style="background:#378ADD"></i><span class="ja">開発ネタ</span><span class="en">Dev ideas</span></span></div>
+        <div class="card fly" style="--dy:-30px;animation-delay:1.6s"><div class="p"><div class="av">UI</div><div><b>UI Daily</b> <span style="color:var(--mu)">@uidaily</span><br><span class="ja">余白とタイポグラフィだけで画面が締まる理由</span><span class="en">Why spacing and typography alone can make a screen feel polished</span></div></div><span class="tag"><i style="background:#D4537E"></i><span class="ja">デザイン</span><span class="en">Design</span></span></div>
+        <div class="card fly" style="--dy:-60px;animation-delay:3.2s"><div class="p"><div class="av">MA</div><div><b>Maho</b> <span style="color:var(--mu)">@maho</span><br><span class="ja">長文スレッド: 個人開発で 3 年続けて学んだこと</span><span class="en">Long thread: what I learned from 3 years of solo development</span></div></div><span class="tag"><i style="background:#BA7517"></i><span class="ja">あとで読む</span><span class="en">Read later</span></span></div>
       </div>
     </div>
-    <p class="cap">ポストが左のフォルダに収まっていきます (イメージ・架空のサンプル)</p>
+    <p class="cap"><span class="ja">ポストが左のフォルダに収まっていきます (イメージ・架空のサンプル)</span><span class="en">Posts settle into the folders on the left (illustration, made-up samples)</span></p>
   </div>
 </div></section>
 
 <div class="wrap"><div class="stats">
-  <div class="stat"><b>0 円</b><span>件数の上限なし</span></div>
-  <div class="stat"><b>0 件</b><span>外部サーバーへの送信</span></div>
-  <div class="stat"><b>8 言語</b><span>対応言語</span></div>
-  <div class="stat"><b>3 つ</b><span>必須の権限</span></div>
+  <div class="stat"><b><span class="ja">0 円</span><span class="en">$0</span></b><span><span class="ja">件数の上限なし</span><span class="en">No limit on saved posts</span></span></div>
+  <div class="stat"><b><span class="ja">0 件</span><span class="en">0</span></b><span><span class="ja">外部サーバーへの送信</span><span class="en">Sent to external servers</span></span></div>
+  <div class="stat"><b><span class="ja">8 言語</span><span class="en">8 languages</span></b><span><span class="ja">対応言語</span><span class="en">Supported in the app</span></span></div>
+  <div class="stat"><b><span class="ja">3 つ</span><span class="en">3</span></b><span><span class="ja">必須の権限</span><span class="en">Required permissions</span></span></div>
 </div></div>
 
 <section class="sec alt" id="features"><div class="wrap">
   <div class="kick">FEATURES</div>
-  <h2>整理に必要な機能</h2>
-  <p class="sub">見た目は X に近く、操作は迷いません。</p>
+  <h2><span class="ja">整理に必要な機能</span><span class="en">Everything you need to sort</span></h2>
+  <p class="sub"><span class="ja">見た目は X に近く、操作は迷いません。</span><span class="en">It looks like X, so there is little to learn.</span></p>
   <div class="grid">
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg></div><h3>自由なフォルダ</h3><p>名前・アイコン・色を自由に選べます。1 つのポストを、複数のフォルダに入れることもできます。</p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2"/></svg></div><h3>x.com でそのまま保存</h3><p>ブックマークボタンの横に、フォルダを選ぶ小さなメニューが出ます。画面を離れずに分類できます。</p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></div><h3>3 つの表示</h3><p>X 風のカード、リスト、グリッドを切り替えられます。サイドパネルでも使えます。</p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6"/></svg></div><h3>探しやすい</h3><p>本文と投稿者の検索、並べ替え、「画像あり」「動画あり」「リンクあり」の絞り込み、最近 7 日のスマートビュー。</p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg></div><h3>動画と画像を見分けられる</h3><p>動画には再生ボタンと「動画」の札、複数枚の画像には枚数の札が付きます。</p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h3>長いポストも全文で</h3><p>たたまれたポストは、保存するときに裏のタブを短く開いて全文を読み取ります (設定でオフにできます)。PostShelf では、たたむ・広げるを切り替えられ、本文中のリンクも開けます。</p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 7a4 4 0 1 0 8 0 4 4 0 1 0-8 0M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.85"/></svg></div><h3>複数アカウント</h3><p>X のアカウントごとに、フォルダとポストを分けて管理します。</p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"/></svg></div><h3>取り込みと書き出し</h3><p>既存のブックマークは、確認のうえで自動取り込みできます (任意)。JSON でのエクスポート / インポートにも対応しています。</p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM11 16a1 1 0 1 0 2 0 1 1 0 1 0-2 0M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3>データは端末の中だけ</h3><p>保存先はブラウザの中だけ。外部への送信も、解析も、アカウント登録もありません。</p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg></div><h3><span class="ja">自由なフォルダ</span><span class="en">Folders your way</span></h3><p><span class="ja">名前・アイコン・色を自由に選べます。1 つのポストを、複数のフォルダに入れることもできます。</span><span class="en">Choose any name, icon and color. One post can go into several folders.</span></p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2"/></svg></div><h3><span class="ja">x.com でそのまま保存</span><span class="en">Save right on x.com</span></h3><p><span class="ja">ブックマークボタンの横に、フォルダを選ぶ小さなメニューが出ます。画面を離れずに分類できます。</span><span class="en">A small folder menu appears next to the bookmark button, so you can sort without leaving the page.</span></p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></div><h3><span class="ja">3 つの表示</span><span class="en">Three views</span></h3><p><span class="ja">X 風のカード、リスト、グリッドを切り替えられます。サイドパネルでも使えます。</span><span class="en">Switch between X-style cards, a list and a grid. It also works in the side panel.</span></p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6"/></svg></div><h3><span class="ja">探しやすい</span><span class="en">Easy to search</span></h3><p><span class="ja">本文と投稿者の検索、並べ替え、「画像あり」「動画あり」「リンクあり」の絞り込み、最近 7 日のスマートビュー。</span><span class="en">Search text and authors, sort, filter by images, videos or links, and use the smart view for the last 7 days.</span></p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg></div><h3><span class="ja">動画と画像を見分けられる</span><span class="en">Videos and images at a glance</span></h3><p><span class="ja">動画には再生ボタンと「動画」の札、複数枚の画像には枚数の札が付きます。</span><span class="en">Videos get a play button and a label, and multi-image posts show how many images they have.</span></p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h3><span class="ja">長いポストも全文で</span><span class="en">Long posts in full</span></h3><p><span class="ja">たたまれたポストは、保存するときに裏のタブを短く開いて全文を読み取ります (設定でオフにできます)。PostShelf では、たたむ・広げるを切り替えられ、本文中のリンクも開けます。</span><span class="en">When you save a collapsed post, PostShelf briefly opens it in a background tab to read the full text (you can turn this off in Settings). You can collapse or expand posts, and links in the text open normally.</span></p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 7a4 4 0 1 0 8 0 4 4 0 1 0-8 0M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.85"/></svg></div><h3><span class="ja">複数アカウント</span><span class="en">Multiple accounts</span></h3><p><span class="ja">X のアカウントごとに、フォルダとポストを分けて管理します。</span><span class="en">Folders and posts are kept separately for each X account.</span></p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"/></svg></div><h3><span class="ja">取り込みと書き出し</span><span class="en">Import and export</span></h3><p><span class="ja">既存のブックマークは、確認のうえで自動取り込みできます (任意)。JSON でのエクスポート / インポートにも対応しています。</span><span class="en">Import your existing bookmarks automatically after a confirmation (optional), and export or import your data as JSON.</span></p></div>
+    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM11 16a1 1 0 1 0 2 0 1 1 0 1 0-2 0M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3><span class="ja">データは端末の中だけ</span><span class="en">Your data stays with you</span></h3><p><span class="ja">保存先はブラウザの中だけ。外部への送信も、解析も、アカウント登録もありません。</span><span class="en">Everything is stored inside your browser. No uploads, no analytics, no sign-up.</span></p></div>
   </div>
   <div class="sw">
-    <div class="t"><b>フォルダの色は 8 色 (と色なし)</b><p>アイコンも、どの色でも選べます。</p></div>
+    <div class="t"><b><span class="ja">フォルダの色は 8 色 (と色なし)</span><span class="en">8 folder colors (or none)</span></b><p><span class="ja">アイコンも、どの色でも選べます。</span><span class="en">Any icon can use any color.</span></p></div>
     <div class="dots" aria-hidden="true"><i style="background:#E24B4A"></i><i style="background:#BA7517"></i><i style="background:#639922"></i><i style="background:#1D9E75"></i><i style="background:#378ADD"></i><i style="background:#7F77DD"></i><i style="background:#D4537E"></i><i style="background:#888780"></i></div>
   </div>
 </div></section>
 
 <section class="sec" id="install"><div class="wrap">
   <div class="kick">INSTALL</div>
-  <h2>インストールの手順</h2>
-  <p class="sub">Chrome ウェブストアでは配布していないため、ZIP を取得して手動で読み込みます。4 ステップ、約 3 分です。</p>
+  <h2><span class="ja">インストールの手順</span><span class="en">How to install</span></h2>
+  <p class="sub"><span class="ja">Chrome ウェブストアでは配布していないため、ZIP を取得して手動で読み込みます。4 ステップ、約 3 分です。</span><span class="en">PostShelf is not on the Chrome Web Store, so you download a ZIP and load it by hand. Four steps, about 3 minutes.</span></p>
   <div class="steps">
-    <div class="st"><span class="n">1</span><h3>ZIP を取得</h3><p>GitHub の Releases から <code>postshelf-1.1.1.zip</code> (最新版) をダウンロードします。</p></div>
-    <div class="st"><span class="n">2</span><h3>展開して置く</h3><p>固定の場所のフォルダに展開します。<b>削除や移動をしない</b>場所にしてください。</p></div>
-    <div class="st"><span class="n">3</span><h3>デベロッパーモード</h3><p><code>chrome://extensions</code> を開き、右上の「デベロッパー モード」をオンにします。</p></div>
-    <div class="st"><span class="n">4</span><h3>読み込む</h3><p>「パッケージ化されていない拡張機能を読み込む」で、展開したフォルダを選びます。</p></div>
+    <div class="st"><span class="n">1</span><h3><span class="ja">ZIP を取得</span><span class="en">Get the ZIP</span></h3><p><span class="ja">GitHub の Releases から <code>postshelf-1.1.1.zip</code> (最新版) をダウンロードします。</span><span class="en">Download <code>postshelf-1.1.1.zip</code> (the latest version) from GitHub Releases.</span></p></div>
+    <div class="st"><span class="n">2</span><h3><span class="ja">展開して置く</span><span class="en">Unzip it</span></h3><p><span class="ja">固定の場所のフォルダに展開します。<b>削除や移動をしない</b>場所にしてください。</span><span class="en">Unzip it into a folder you will keep. Pick a place where it will <b>not be deleted or moved</b>.</span></p></div>
+    <div class="st"><span class="n">3</span><h3><span class="ja">デベロッパーモード</span><span class="en">Developer mode</span></h3><p><span class="ja"><code>chrome://extensions</code> を開き、右上の「デベロッパー モード」をオンにします。</span><span class="en">Open <code>chrome://extensions</code> and turn on "Developer mode" at the top right.</span></p></div>
+    <div class="st"><span class="n">4</span><h3><span class="ja">読み込む</span><span class="en">Load it</span></h3><p><span class="ja">「パッケージ化されていない拡張機能を読み込む」で、展開したフォルダを選びます。</span><span class="en">Choose "Load unpacked" and select the folder you unzipped.</span></p></div>
   </div>
-  <div class="warn"><b>更新するとき:</b> 先に設定の「データの保存と移行」からエクスポートで保存してから、同じフォルダに新しい版を上書きし、「再読み込み」を押します。拡張機能は<b>削除しないでください</b> (保存したデータも消えます)。</div>
-  <div class="cta"><a class="btn pri" href="https://github.com/tabunugoku/PostShelf/releases/latest" target="_blank" rel="noopener noreferrer">最新版をダウンロード</a></div>
+  <div class="warn"><span class="ja"><b>更新するとき:</b> 先に設定の「データの保存と移行」からエクスポートで保存してから、同じフォルダに新しい版を上書きし、「再読み込み」を押します。拡張機能は<b>削除しないでください</b> (保存したデータも消えます)。</span><span class="en"><b>Updating:</b> first export your data in Settings ("Backup and transfer"), then overwrite the same folder with the new version and press "Reload". <b>Do not remove</b> the extension, or your saved data goes with it.</span></div>
+  <div class="cta"><a class="btn pri" href="https://github.com/tabunugoku/PostShelf/releases/latest" target="_blank" rel="noopener noreferrer"><span class="ja">最新版をダウンロード</span><span class="en">Download the latest version</span></a></div>
 </div></section>
 
 <section class="sec" id="usage" style="padding-top:0"><div class="wrap">
   <div class="kick">HOW TO USE</div>
-  <h2>使い方</h2>
-  <p class="sub">場面ごとに、手順を示します。</p>
+  <h2><span class="ja">使い方</span><span class="en">How to use</span></h2>
+  <p class="sub"><span class="ja">場面ごとに、手順を示します。</span><span class="en">Steps for each common task.</span></p>
   <div class="grid">
-    <div class="use"><h3>ポストを保存する</h3><ol><li>x.com で、ブックマークボタンの横にある PostShelf のボタンを押します。</li><li>入れたいフォルダにチェックを付けます (複数可)。決めない場合は「未分類」です。</li><li>新しいフォルダは、「フォルダを追加」から、名前・アイコン・色を決めて作れます。</li></ol></div>
-    <div class="use"><h3>整理して探す</h3><ol><li>ツールバーのアイコンから、管理画面かサイドパネルを開きます。</li><li>左のフォルダを選び、カード・リスト・グリッドで見ます。</li><li>検索、並べ替え、絞り込みで探します。複数選択して、まとめて移動もできます。</li></ol></div>
-    <div class="use"><h3>ブックマークを取り込む</h3><ol><li>設定の「ブックマークの自動取り込み」から始めます (確認の画面で、内容を読んで同意します)。</li><li>速度と、1 回の上限を選びます。一時停止・停止は、いつでもできます。</li><li>X が制限や警告を出したときは、自動で止まります。自動スクロールは、X の規約上の「自動化されたアクセス」とみなされる可能性があります。</li></ol></div>
+    <div class="use"><h3><span class="ja">ポストを保存する</span><span class="en">Save a post</span></h3><ol>
+      <li><span class="ja">x.com で、ブックマークボタンの横にある PostShelf のボタンを押します。</span><span class="en">On x.com, press the PostShelf button next to the bookmark button.</span></li>
+      <li><span class="ja">入れたいフォルダにチェックを付けます (複数可)。決めない場合は「未分類」です。</span><span class="en">Tick the folders you want (more than one is fine). If you pick none, it goes to "Unsorted".</span></li>
+      <li><span class="ja">新しいフォルダは、「フォルダを追加」から、名前・アイコン・色を決めて作れます。</span><span class="en">Make a new folder with "Add folder": choose a name, icon and color.</span></li></ol></div>
+    <div class="use"><h3><span class="ja">整理して探す</span><span class="en">Sort and find</span></h3><ol>
+      <li><span class="ja">ツールバーのアイコンから、管理画面かサイドパネルを開きます。</span><span class="en">Open the manager page or the side panel from the toolbar icon.</span></li>
+      <li><span class="ja">左のフォルダを選び、カード・リスト・グリッドで見ます。</span><span class="en">Pick a folder on the left and view it as cards, a list or a grid.</span></li>
+      <li><span class="ja">検索、並べ替え、絞り込みで探します。複数選択して、まとめて移動もできます。</span><span class="en">Search, sort and filter. You can also select several posts and move them at once.</span></li></ol></div>
+    <div class="use"><h3><span class="ja">ブックマークを取り込む</span><span class="en">Import your bookmarks</span></h3><ol>
+      <li><span class="ja">設定の「ブックマークの自動取り込み」から始めます (確認の画面で、内容を読んで同意します)。</span><span class="en">Start from "Import bookmarks automatically…" in Settings (read the confirmation screen and agree).</span></li>
+      <li><span class="ja">速度と、1 回の上限を選びます。一時停止・停止は、いつでもできます。</span><span class="en">Choose the speed and the limit per run. You can pause or stop at any time.</span></li>
+      <li><span class="ja">X が制限や警告を出したときは、自動で止まります。自動スクロールは、X の規約上の「自動化されたアクセス」とみなされる可能性があります。</span><span class="en">It stops by itself if X shows a limit or a warning. Note that automatic scrolling may be treated as "automated access" under X's terms.</span></li></ol></div>
   </div>
 </div></section>
 
 <section class="sec alt" id="compare"><div class="wrap">
   <div class="kick">COMPARISON</div>
-  <h2>ほかのツールとの比較</h2>
-  <p class="sub">得意なことも、苦手なことも、そのまま書きます。2026-10-08 時点で、各ツールの公開ページに書かれていた内容に基づきます。</p>
-  <div class="tw" role="region" aria-label="比較表 (横にスクロールできます)" tabindex="0">
+  <h2><span class="ja">ほかのツールとの比較</span><span class="en">Compared with other tools</span></h2>
+  <p class="sub"><span class="ja">得意なことも、苦手なことも、そのまま書きます。2026-10-08 時点で、各ツールの公開ページに書かれていた内容に基づきます。</span><span class="en">What it does well and what it does not, stated plainly. Based on what each tool's public pages said as of 2026-10-08.</span></p>
+  <div class="tw" role="region" data-aria-ja="比較表 (横にスクロールできます)" data-aria-en="Comparison table (scrolls sideways)" aria-label="Comparison table (scrolls sideways)" tabindex="0">
   <table>
-    <thead><tr><th></th><th class="me">PostShelf</th><th>小さなローカル型</th><th>クラウド型</th></tr></thead>
+    <thead><tr><th></th><th class="me">PostShelf</th><th><span class="ja">小さなローカル型</span><span class="en">Small local tools</span></th><th><span class="ja">クラウド型</span><span class="en">Cloud services</span></th></tr></thead>
     <tbody>
-      <tr><th scope="row">価格</th><td class="me">無料、件数の上限なし</td><td>無料が中心</td><td>無料枠に上限あり。有料プランあり</td></tr>
-      <tr><th scope="row">データの置き場所</th><td class="me">端末の中だけ</td><td>端末の中が中心</td><td>クラウド、アカウントが必要</td></tr>
-      <tr><th scope="row">フォルダの名前・アイコン・色</th><td class="me">すべて自由</td><td>名前が中心 (記載なし)</td><td>フォルダ・タグ (アイコンや色は記載なし)</td></tr>
-      <tr><th scope="row">1 ポストを複数フォルダに</th><td class="me">できる</td><td>記載なし</td><td>ツールによる</td></tr>
-      <tr><th scope="row">複数の X アカウント</th><td class="me">アカウントごとに分けて管理</td><td>記載なし</td><td>プランにより上限</td></tr>
-      <tr><th scope="row">クラウド同期・モバイル・AI</th><td class="me">ない</td><td>記載なし</td><td>ある (一部は有料)</td></tr>
-      <tr><th scope="row">書き出し形式</th><td class="me">JSON のみ</td><td>JSON / CSV など</td><td>CSV / PDF / Notion ほか</td></tr>
-      <tr><th scope="row">過去のブックマークの取り込み</th><td class="me">自動取り込み (任意、1 回の上限あり)</td><td>自動スクロール型もあり</td><td>全件の取り込みに対応するものが多い</td></tr>
-      <tr><th scope="row">配布方法</th><td class="me">手動インストール (Chrome 114+ のみ)</td><td>Chrome ウェブストアが中心</td><td>Chrome ウェブストアが中心</td></tr>
-      <tr><th scope="row">ソースコード</th><td class="me">MIT で公開</td><td>記載なしが多い</td><td>公開の記載なし</td></tr>
+      <tr><th scope="row"><span class="ja">価格</span><span class="en">Price</span></th><td class="me"><span class="ja">無料、件数の上限なし</span><span class="en">Free, no limit on posts</span></td><td><span class="ja">無料が中心</span><span class="en">Mostly free</span></td><td><span class="ja">無料枠に上限あり。有料プランあり</span><span class="en">Free tier has limits; paid plans exist</span></td></tr>
+      <tr><th scope="row"><span class="ja">データの置き場所</span><span class="en">Where data lives</span></th><td class="me"><span class="ja">端末の中だけ</span><span class="en">Only on your device</span></td><td><span class="ja">端末の中が中心</span><span class="en">Mostly on your device</span></td><td><span class="ja">クラウド、アカウントが必要</span><span class="en">In the cloud; an account is required</span></td></tr>
+      <tr><th scope="row"><span class="ja">フォルダの名前・アイコン・色</span><span class="en">Folder name, icon and color</span></th><td class="me"><span class="ja">すべて自由</span><span class="en">All free to choose</span></td><td><span class="ja">名前が中心 (記載なし)</span><span class="en">Mainly names (not stated)</span></td><td><span class="ja">フォルダ・タグ (アイコンや色は記載なし)</span><span class="en">Folders and tags (icons and colors not stated)</span></td></tr>
+      <tr><th scope="row"><span class="ja">1 ポストを複数フォルダに</span><span class="en">One post in several folders</span></th><td class="me"><span class="ja">できる</span><span class="en">Yes</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">ツールによる</span><span class="en">Depends on the tool</span></td></tr>
+      <tr><th scope="row"><span class="ja">複数の X アカウント</span><span class="en">Multiple X accounts</span></th><td class="me"><span class="ja">アカウントごとに分けて管理</span><span class="en">Kept separately per account</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">プランにより上限</span><span class="en">Limited by plan</span></td></tr>
+      <tr><th scope="row"><span class="ja">クラウド同期・モバイル・AI</span><span class="en">Cloud sync, mobile, AI</span></th><td class="me"><span class="ja">ない</span><span class="en">None</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">ある (一部は有料)</span><span class="en">Yes (some are paid)</span></td></tr>
+      <tr><th scope="row"><span class="ja">書き出し形式</span><span class="en">Export formats</span></th><td class="me"><span class="ja">JSON のみ</span><span class="en">JSON only</span></td><td><span class="ja">JSON / CSV など</span><span class="en">JSON / CSV and others</span></td><td><span class="ja">CSV / PDF / Notion ほか</span><span class="en">CSV / PDF / Notion and others</span></td></tr>
+      <tr><th scope="row"><span class="ja">過去のブックマークの取り込み</span><span class="en">Importing old bookmarks</span></th><td class="me"><span class="ja">自動取り込み (任意、1 回の上限あり)</span><span class="en">Automatic import (optional, with a per-run limit)</span></td><td><span class="ja">自動スクロール型もあり</span><span class="en">Some use auto-scrolling</span></td><td><span class="ja">全件の取り込みに対応するものが多い</span><span class="en">Many can import everything</span></td></tr>
+      <tr><th scope="row"><span class="ja">配布方法</span><span class="en">Distribution</span></th><td class="me"><span class="ja">手動インストール (Chrome 114+ のみ)</span><span class="en">Manual install (Chrome 114+ only)</span></td><td><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td><td><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td></tr>
+      <tr><th scope="row"><span class="ja">ソースコード</span><span class="en">Source code</span></th><td class="me"><span class="ja">MIT で公開</span><span class="en">Public under MIT</span></td><td><span class="ja">記載なしが多い</span><span class="en">Often not stated</span></td><td><span class="ja">公開の記載なし</span><span class="en">No public source stated</span></td></tr>
     </tbody>
   </table>
   </div>
-  <p class="src">「記載なし」は、公開ページに書かれていなかったという意味で、機能がないことの証明ではありません。小さなローカル型は ufofo、XOrganize など、クラウド型は Dewey、Tweetsmash などを指します。X の仕様や各ツールの内容は変わります。</p>
+  <p class="src"><span class="ja">「記載なし」は、公開ページに書かれていなかったという意味で、機能がないことの証明ではありません。小さなローカル型は ufofo、XOrganize など、クラウド型は Dewey、Tweetsmash などを指します。X の仕様や各ツールの内容は変わります。</span><span class="en">"Not stated" means the public pages did not mention it; it does not prove the feature is missing. Small local tools means ufofo, XOrganize and similar; cloud services means Dewey, Tweetsmash and similar. X and these tools change over time.</span></p>
 </div></section>
 
 <section class="sec" id="author"><div class="wrap">
   <div class="kick">AUTHOR</div>
-  <h2 style="margin-bottom:24px">作った人</h2>
+  <h2 style="margin-bottom:24px"><span class="ja">作った人</span><span class="en">Made by</span></h2>
   <div class="au">
-    <img src="https://github.com/tabunugoku.png" alt="たぶぬごく | tabunugoku のアイコン" width="96" height="96">
+    <img src="https://github.com/tabunugoku.png" alt="たぶぬごく | tabunugoku" width="96" height="96">
     <div class="b">
       <h3>たぶぬごく | tabunugoku</h3>
       <div class="h">@tabunugoku_dev</div>
-      <p>個人開発者。Windows 11 向けの IME 表示ツール「Imel」を MIT ライセンスで公開しています。PostShelf も同じ MIT ライセンスです。</p>
+      <p><span class="ja">個人開発者。Windows 11 向けの IME 表示ツール「Imel」を MIT ライセンスで公開しています。PostShelf も同じ MIT ライセンスです。</span><span class="en">Solo developer. Also publishes "Imel", an IME indicator tool for Windows 11, under the MIT License. PostShelf uses the same MIT License.</span></p>
       <div class="l">
-        <a class="btn dark" href="https://x.com/tabunugoku_dev" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X で見る</a>
+        <a class="btn dark" href="https://x.com/tabunugoku_dev" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg><span class="ja">X で見る</span><span class="en">On X</span></a>
         <a class="btn" href="https://github.com/tabunugoku" target="_blank" rel="noopener noreferrer">GitHub: tabunugoku</a>
-        <a class="btn" href="https://github.com/tabunugoku/PostShelf/issues" target="_blank" rel="noopener noreferrer">不具合・要望を送る</a>
+        <a class="btn" href="https://github.com/tabunugoku/PostShelf/issues" target="_blank" rel="noopener noreferrer"><span class="ja">不具合・要望を送る</span><span class="en">Report a bug or request</span></a>
       </div>
     </div>
   </div>
 </div></section>
 </main>
 
-<footer><div class="wrap"><span>© 2026 tabunugoku · MIT License</span><p>PostShelf は X (旧 Twitter) の公式のものではなく、X との提携もありません。利用者は、X の規約を守る責任を負います。</p></div></footer>
+<footer><div class="wrap"><span>© 2026 tabunugoku · MIT License</span><p><span class="ja">PostShelf は X (旧 Twitter) の公式のものではなく、X との提携もありません。利用者は、X の規約を守る責任を負います。</span><span class="en">PostShelf is not an official X (formerly Twitter) product and is not affiliated with X. You are responsible for following X's terms.</span></p></div></footer>
+<script>
+(function(){
+  var en=document.getElementById('l-en'),ja=document.getElementById('l-ja');
+  function sync(){var j=document.documentElement.lang==='ja';en.setAttribute('aria-pressed',String(!j));ja.setAttribute('aria-pressed',String(j))}
+  en.addEventListener('click',function(){psSetLang('en');sync()});
+  ja.addEventListener('click',function(){psSetLang('ja');sync()});
+  sync();
+})();
+</script>
 </body>
 </html>
