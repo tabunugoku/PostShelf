@@ -57,13 +57,18 @@ export function placeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
   bm.insertAdjacentElement('afterend', btn);
 }
 
+/** アイコンの周りに広がる hover の丸の、片側の余白 (X の操作アイコンの丸は、アイコンの周りに約 8px ずつ広がる) */
+const RING = 8;
+
 /**
- * 隣のブックマークのボタンの大きさに合わせる (v35、v36 で高さ基準に変更)。詳細ページでは、ブックマークのボタン (bm) の中に
- * 数字 (「6,837」など) が入り、幅が桁数で変わる。幅を使うと丸の大きさがポストごとにまちまちになるので、幅は使わない。
- * 丸の直径 = (1) bm の svg の祖先 (bm まで) で、svg より大きく、幅と高さの差が 2px 以内で、border-radius が大きい (50% か 999px 以上) 最初の要素の直径
- * (X の hover の丸の要素そのもの)。(2) 無ければ bm の高さ。下限 HIT = 34px、上限 64px。測れない (0) ときは HIT。
+ * 隣のブックマークのボタンの大きさに合わせる (v35、v36 で高さ基準、v37 で丸の探し方を変更)。詳細ページでは、ブックマークのボタン (bm) の中に
+ * 数字 (「6,837」など) が入り、幅が桁数で変わる。幅は使わない。bm の高さも、余白を含んで丸より大きいので使わない (v36 の実機で約 2 割大きかった)。
+ * 丸の直径 = (1) bm の子孫 (svg の祖先だけでなく、svg の兄弟も) で、svg より大きく、幅と高さの差が 2px 以内で、border-radius が大きい
+ * (50% か 999px 以上) 要素の直径。複数あれば、svg と同じ親の中にあるもの、svg の祖先、その他の順に、最初のもの。
+ * (2) 無ければ svg の高さ + 16px。svg の高さが測れない (0) ときは HIT。下限 HIT = 34px、上限 64px。
  * アイコンは bm の svg の高さに合わせる (下限 19px)。
- * 実機未確認: X の hover の丸が bm の高さと同じか、上の祖先の要素であると想定している。違っていたら、ここの測る対象を直す。
+ * 実機未確認 (推測): X の hover の丸は、svg の祖先ではなく、svg の兄弟 (絶対配置で、負の余白で svg より大きく広がる、border-radius: 9999px の空の要素)
+ * であることが多い、という X の操作アイコンの一般的な構造からの想定。違っていたら、ここの探し方を直す。
  * margin-left は GAP のまま (丸が大きくなっても、詳細ページの数字に重ならないよう、差の半分を減らさない)。
  */
 export function sizeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
@@ -75,15 +80,22 @@ export function sizeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
     const br = cs.borderTopLeftRadius || cs.borderRadius; // 値は "50%" か "9999px" の形。長い書き方が取れない環境では、まとめた書き方を見る
     return br.endsWith('%') ? parseFloat(br) >= 50 : parseFloat(br) >= 999;
   };
-  let d = 0;
-  for (let el = svg?.parentElement; svg && el; el = el === bm ? null : el.parentElement) {
+  const circle = (el: Element) => {
     const r = el.getBoundingClientRect();
-    if (r.height > sh && Math.abs(r.width - r.height) <= 2 && round(el)) {
-      d = r.height;
-      break;
+    return r.height > sh && Math.abs(r.width - r.height) <= 2 && round(el) ? r.height : 0;
+  };
+  let d = 0;
+  if (svg && sh > 0) {
+    const rank = (el: Element) => (el.parentElement === svg.parentElement ? 0 : el.contains(svg) ? 1 : 2);
+    const cands = [...bm.querySelectorAll('*')].filter((el) => el !== svg && !svg.contains(el));
+    // 同じ順位の中では、svg に近い祖先が先 (祖先は、内側から外側の順に並べ直す)
+    cands.sort((x, y) => rank(x) - rank(y) || (x.contains(y) ? 1 : y.contains(x) ? -1 : 0));
+    for (const el of cands) {
+      d = circle(el);
+      if (d > 0) break;
     }
+    if (!(d > 0)) d = sh + RING * 2;
   }
-  if (!(d > 0)) d = bm.getBoundingClientRect().height;
   const size = d > 0 ? clamp(d) : HIT;
   btn.style.width = `${size}px`;
   btn.style.height = `${size}px`;

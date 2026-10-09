@@ -164,10 +164,10 @@ describe('v35-C: the folder button follows the size of the bookmark button', () 
     const btn = document.createElement('button');
     return { bm, btn };
   };
-  it('uses the measured height (a circle) and the icon height', () => {
+  it('uses the icon height + 16px (v37: not the bookmark button\'s own height) and the icon height', () => {
     const { bm, btn } = make(rect(58, 40), rect(22, 22));
     sizeSeparateButton(bm, btn);
-    expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['40px', '40px', '22px']);
+    expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['38px', '38px', '22px']);
   });
   it('falls back to 34px / 19px when it cannot measure (zero size)', () => {
     const { bm, btn } = make(rect(0, 0));
@@ -178,7 +178,7 @@ describe('v35-C: the folder button follows the size of the bookmark button', () 
     const small = make(rect(20, 20), rect(10, 10));
     sizeSeparateButton(small.bm, small.btn);
     expect([small.btn.style.width, small.btn.style.fontSize]).toEqual(['34px', '19px']);
-    const big = make(rect(200, 90));
+    const big = make(rect(200, 90), rect(70, 70));
     sizeSeparateButton(big.bm, big.btn);
     expect([big.btn.style.width, big.btn.style.height]).toEqual(['64px', '64px']);
   });

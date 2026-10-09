@@ -190,7 +190,7 @@ describe('v36-C: the folder button size follows the height, not the width', () =
     const b = make(rect(96, 40));
     sizeSeparateButton(a.bm, a.btn);
     sizeSeparateButton(b.bm, b.btn);
-    expect(size(a)).toEqual(['40px', '40px']);
+    expect(size(a)).toEqual(['38px', '38px']); // v37: svg の高さ 22 + 16
     expect(size(b)).toEqual(size(a));
   });
   it('an ancestor that is a circle (larger than the svg, w≈h, big radius) wins over the height', () => {
@@ -204,10 +204,10 @@ describe('v36-C: the folder button size follows the height, not the width', () =
   it('an ancestor that is not round or not square is ignored', () => {
     const sq = make(rect(96, 40), 22, { w: 44, h: 44, radius: '4px' });
     sizeSeparateButton(sq.bm, sq.btn);
-    expect(size(sq)).toEqual(['40px', '40px']);
+    expect(size(sq)).toEqual(['38px', '38px']);
     const wide = make(rect(96, 40), 22, { w: 70, h: 44, radius: '50%' });
     sizeSeparateButton(wide.bm, wide.btn);
-    expect(size(wide)).toEqual(['40px', '40px']);
+    expect(size(wide)).toEqual(['38px', '38px']);
   });
 });
 
