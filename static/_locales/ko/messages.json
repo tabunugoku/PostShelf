@@ -1591,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "같은 이름의 폴더가 있습니다"
+  },
+  "listRemaining": {
+    "message": "$COUNT$개 더",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "모두 표시"
   }
 }

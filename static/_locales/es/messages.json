@@ -1591,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "Ya existe una carpeta con este nombre"
+  },
+  "listRemaining": {
+    "message": "$COUNT$ más",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "Mostrar todo"
   }
 }

@@ -1591,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "Já existe uma pasta com este nome"
+  },
+  "listRemaining": {
+    "message": "mais $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "Mostrar tudo"
   }
 }

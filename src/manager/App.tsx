@@ -103,6 +103,12 @@ export function takeEntryHash(): { inbox?: boolean; triage?: boolean; q?: string
 const inboxView = (stored?: Folder): Folder => ({ id: INBOX_ID, name: stored?.name ?? '', icon: 'ti-inbox', order: -1, color: stored?.color });
 const recentView = (): Folder => ({ id: RECENT_ID, name: t('recent7'), icon: 'ti-clock', order: -1 });
 
+/** 一覧に最初に描くポストの数と、末尾に近づいたときに増やす数 (ビューごと。サイドパネルは 30)。調整しやすいように定数にしてある */
+export const PAGE_SIZE: Record<ViewMode, number> = { post: 30, list: 60, grid: 60 };
+export const PAGE_SIZE_SIDEPANEL = 30;
+/** 末尾のこの件数手前まで来たら、↓ キーで先に増やす */
+const KEY_LOOKAHEAD = 5;
+
 export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const compact = useCompact();
   const SORTS = sorts();
@@ -339,7 +345,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
   const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
   const shownSet = useMemo(() => new Set(shownIds), [shownIds]);
-  const tabbableId = focusId && shownSet.has(focusId) ? focusId : shownIds[0];
+  // 段階表示: 描くのは shown の先頭から renderCount 件。選択・検索・件数の表示・全選択は、全件 (shown / shownIds) のまま
+  const pageSize = surface === 'sidepanel' ? PAGE_SIZE_SIDEPANEL : PAGE_SIZE[view];
+  const resetKey = `${curFolder.id}|${search}|${sort}|${filtersKey}|${view}|${pageSize}`;
+  const [rcState, setRcState] = useState({ key: resetKey, n: pageSize });
+  // フォルダ・検索・並べ替え・絞り込み・表示を替えると初期値に戻る。保存データが変わっただけでは戻らない (スクロール位置が飛ぶため)
+  const renderCount = rcState.key === resetKey ? rcState.n : pageSize;
+  const growTo = (n: number) => setRcState({ key: resetKey, n: Math.min(shown.length, Math.max(renderCount, n)) });
+  const visible = useMemo(() => shown.slice(0, renderCount), [shown, renderCount]);
+  const remaining = shown.length - visible.length;
+  const tabbableId = focusId && shownSet.has(focusId) && shownIds.indexOf(focusId) < renderCount ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   // 件数は保存データが変わるまで使い回す (左のメニューと見出しで、描画のたびに全件を数え直さない。「最近の 7 日」の境目は、保存データが変わるまで動かない)
   const countCache = useMemo(() => new Map<string, number>(), [bookmarks]);
@@ -423,6 +438,19 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   };
   const targetIds = (): string[] => (selected.size ? [...selected] : focusId ? [focusId] : []);
 
+  /** 描画のあとでフォーカスする行 (未描画の行へ ↓ で移るとき) */
+  const pendingFocus = useRef<string | null>(null);
+  const focusPending = () => {
+    const id = pendingFocus.current;
+    if (!id) return;
+    const row = [...(listRef.current?.querySelectorAll<HTMLElement>('[data-row]') ?? [])].find((r) => r.dataset.row === id);
+    if (row) {
+      pendingFocus.current = null;
+      row.focus();
+    }
+  };
+  useLayoutEffect(focusPending); // 描画のたびに、待っている行があれば試す
+
   const onListKeyDown = (e: JSX.TargetedKeyboardEvent<HTMLDivElement>) => {
     const el = e.target as HTMLElement;
     if (el.closest('input,select,textarea')) return; // 入力欄の操作は邪魔しない
@@ -435,10 +463,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const idx = curId ? shownIds.indexOf(curId) : -1;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
-      const next = shownIds[Math.min(shownIds.length - 1, Math.max(0, idx + (e.key === 'ArrowDown' ? 1 : -1)))];
+      const nextIdx = Math.min(shownIds.length - 1, Math.max(0, idx + (e.key === 'ArrowDown' ? 1 : -1)));
+      const next = shownIds[nextIdx];
       if (next) {
+        // 次が未描画、または末尾の手前に来たときは、先に描く件数を増やす (描画のあとでフォーカスする)
+        if (nextIdx >= renderCount - KEY_LOOKAHEAD && remaining > 0) growTo(nextIdx + pageSize);
         setFocusId(next);
-        [...(listRef.current?.querySelectorAll<HTMLElement>('[data-row]') ?? [])].find((r) => r.dataset.row === next)?.focus();
+        pendingFocus.current = next;
+        focusPending();
       }
     } else if (e.key === ' ' && el.hasAttribute('data-row') && curId) {
       e.preventDefault();
@@ -805,10 +837,19 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     }),
     [],
   );
+  // 末尾の手前 (画面の高さの 1.5 倍) に入ったら、1 回分増やす。IntersectionObserver が無い環境では、「すべて表示」のボタンで増やす
+  const sentinelRef = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || remaining <= 0 || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && growTo(renderCount + pageSize), { rootMargin: `${Math.round(window.innerHeight * 1.5)}px 0px` });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [renderCount, remaining, resetKey]);
   const rows = (
     <SearchContext.Provider value={search}>
     <div class={`rows view-${view}${compact ? ' compact' : ''}`} ref={listRef} onKeyDown={onListKeyDown} role="list">
-      {shown.map((b) => (
+      {visible.map((b) => (
         <Card
           key={b.tweetId}
           b={b}
@@ -841,6 +882,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         />
       ))}
     </div>
+    {remaining > 0 && (
+      <div class="list-more">
+        <span ref={sentinelRef} class="list-sentinel" aria-hidden="true" />
+        <span class="muted">{t('listRemaining', remaining)}</span>
+        <button type="button" onClick={() => growTo(shown.length)}>
+          {t('listShowAll')}
+        </button>
+      </div>
+    )}
     </SearchContext.Provider>
   );
 

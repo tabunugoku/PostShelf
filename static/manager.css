@@ -465,3 +465,7 @@ input[type=number]{width:110px}
 
 /* 検索語の強調 (v30): 本文の色のまま、背景だけで示す (下線や太字には頼らない) */
 .post-text mark{background:var(--mark-bg);color:var(--text-primary);border-radius:2px;padding:0 1px}
+
+/* ---- 段階表示の末尾 (残りの件数と「すべて表示」) ---- */
+.list-more{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;white-space:nowrap}
+.list-sentinel{position:absolute;left:0;top:0;width:1px;height:1px;pointer-events:none}

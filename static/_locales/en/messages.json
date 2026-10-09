@@ -1591,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "A folder with this name already exists"
+  },
+  "listRemaining": {
+    "message": "$COUNT$ more",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "Show all"
   }
 }

@@ -1591,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "已有同名的文件夹"
+  },
+  "listRemaining": {
+    "message": "还有 $COUNT$ 条",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "全部显示"
   }
 }

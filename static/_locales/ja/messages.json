@@ -1591,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "同名のフォルダがあります"
+  },
+  "listRemaining": {
+    "message": "あと $COUNT$ 件",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "すべて表示"
   }
 }

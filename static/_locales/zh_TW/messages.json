@@ -1591,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "已有同名的資料夾"
+  },
+  "listRemaining": {
+    "message": "還有 $COUNT$ 則",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "全部顯示"
   }
 }

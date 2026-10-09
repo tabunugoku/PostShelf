@@ -1591,5 +1591,17 @@
   },
   "errDuplicateFolder": {
     "message": "Un dossier portant ce nom existe déjà"
+  },
+  "listRemaining": {
+    "message": "$COUNT$ de plus",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "listShowAll": {
+    "message": "Tout afficher"
   }
 }
