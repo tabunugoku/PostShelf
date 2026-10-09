@@ -424,7 +424,7 @@
     }
   },
   "savedInFolders": {
-    "message": "$COUNT$ つに保存済み",
+    "message": "$COUNT$ 個のフォルダに保存済み",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -614,7 +614,7 @@
     }
   },
   "activeMoreFolders": {
-    "message": "他の $COUNT$ つ",
+    "message": "他 $COUNT$ 個",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -645,7 +645,7 @@
     "message": "戻る"
   },
   "triageHint": {
-    "message": "1〜9 入れる · Esc 終わる"
+    "message": "数字キーで入れる · Esc で終了"
   },
   "triageDone": {
     "message": "仕分けが終わりました"
@@ -1414,13 +1414,13 @@
     "message": "一時停止"
   },
   "acBtnCollapse": {
-    "message": "畳む"
+    "message": "たたむ"
   },
   "acBtnExpand": {
     "message": "開く"
   },
   "acCollapsedLine": {
-    "message": "取り込み中 · 取り込み $IMPORTED$ · 失敗 $FAILED$",
+    "message": "取り込み中 · $IMPORTED$ 件 · 失敗 $FAILED$",
     "placeholders": {
       "imported": {
         "content": "$1",

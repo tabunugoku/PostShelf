@@ -134,7 +134,7 @@ describe('v28-A: the x.com save popover', () => {
     expect((await getSettings()).recentFolderIds).toEqual(['a', 'b', 'c']);
   });
 
-  it('header: nothing when unsaved; 「未分類に保存済み」; 「N つに保存済み」 (未分類 not counted)', async () => {
+  it('header: nothing when unsaved; 「未分類に保存済み」; 「N 個のフォルダに保存済み」 (未分類 not counted)', async () => {
     const fs = await folders(2);
     const pop = await open();
     const header = () => pop.firstElementChild!.nextElementSibling!.firstElementChild as HTMLElement; // 保存先の行のあとの、ピッカーの見出し
@@ -149,7 +149,7 @@ describe('v28-A: the x.com save popover', () => {
       boxes()[i].dispatchEvent(new Event('change'));
       await tick();
     }
-    expect(pop.textContent).toContain('✓ 2 つに保存済み');
+    expect(pop.textContent).toContain('✓ 2 個のフォルダに保存済み');
     expect(pop.textContent).not.toContain('未分類に保存済み');
     void header;
     void fs;
@@ -184,12 +184,12 @@ describe('v28-B: the collapsible auto-collect panel', () => {
     const bar = $('.postshelf-autocollect-panel');
     expect(bar.getAttribute('role')).toBe('status');
     expect(bar.getAttribute('aria-live')).toBe('polite');
-    expect(bar.textContent).toContain('取り込み中 · 取り込み 5 · 失敗 1');
+    expect(bar.textContent).toContain('取り込み中 · 5 件 · 失敗 1');
     expect($$('.postshelf-autocollect-panel button').map((b) => b.textContent)).toEqual(['開く']);
     expect($<HTMLElement>('[data-action=expand]').style.minHeight).toBe('44px');
     expect(document.documentElement.hasAttribute('data-postshelf-panel')).toBe(true);
     p.update(st({ imported: 9 })); // 取り込みが進んでも、畳んだまま
-    expect(bar.textContent).toContain('取り込み 9');
+    expect(bar.textContent).toContain('9 件');
     expect((c as any).pause).not.toHaveBeenCalled();
     expect((c as any).stop).not.toHaveBeenCalled();
     $<HTMLElement>('[data-action=expand]').click();

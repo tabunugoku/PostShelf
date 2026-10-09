@@ -101,7 +101,7 @@ describe('side panel "save the open post" button', () => {
     await updateSettings({ recentFolderIds: [fs[4].id, 'gone', fs[2].id] });
     installTabs('https://x.com/yamada/status/1234567890', { ok: true, tweetId: '1234567890', snapshot });
     await mount();
-    expect($$('.ap-chip').map((c) => c.textContent)).toEqual(['F5', 'F3', 'F1', 'F2', '他の 2 つ']);
+    expect($$('.ap-chip').map((c) => c.textContent)).toEqual(['F5', 'F3', 'F1', 'F2', '他 2 個']);
     await act(() => void $$<HTMLElement>('.ap-chip').at(-1)!.click());
     await flush();
     expect($$('.active-post label').map((l) => l.textContent)).toContain('F6');
