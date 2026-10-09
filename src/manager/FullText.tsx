@@ -2,14 +2,16 @@
  * 設定「長いポストの全文」(v24)。スイッチ、全文を取得していないポストの件数、「いま取得する」(確認を 1 回出す)、進み具合と「止める」、止めた理由。
  * 取得そのものは background (src/background/fulltext.ts) が行う。ここからは、メッセージで依頼するだけ。
  */
-import { useEffect, useState } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
+import { SavedContext } from './settingsSaved';
 import { getFullTextRun, getSettings, onFullTextRunChanged, updateSettings, type FullTextRun } from '../shared/settings';
 import { getAccountScope, listTruncated, onDataChanged } from '../shared/storage';
 import { Confirm } from './ui';
 
 export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
+  const saved = useContext(SavedContext);
   const [on, setOn] = useState(true);
   const [pending, setPending] = useState(0);
   const [run, setRun] = useState<FullTextRun | null>(null);
@@ -36,7 +38,10 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
           type="checkbox"
           role="switch"
           checked={on}
-          onChange={async (e) => setOn((await updateSettings({ fullText: (e.target as HTMLInputElement).checked })).fullText)}
+          onChange={async (e) => {
+            setOn((await updateSettings({ fullText: (e.target as HTMLInputElement).checked })).fullText);
+            saved();
+          }}
         />
         <span>
           <strong>{t('fullTextSwitch')}</strong>

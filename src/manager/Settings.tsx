@@ -6,6 +6,7 @@ import { getSettings, onSettingsChanged, resetSettings, restoreSettings, updateA
 import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
 import { Confirm, TypeToConfirm } from './ui';
 import { ImageCacheSection } from './ImageCache';
+import { SavedContext } from './settingsSaved';
 import { FullTextSection } from './FullText';
 import { deleteAllDataAndCache } from '../shared/cacheops';
 import { refreshCacheView } from './cacheView';
@@ -39,7 +40,6 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   /** 「変更を保存しました」: この画面でスイッチ・選択を変えたあとの 2 秒だけ出す */
   const [flash, setFlash] = useState(false);
   const root = useRef<HTMLElement>(null);
-  const changedAt = useRef(0);
   const load = () =>
     void getSettings().then((s) => {
       setSync(s.syncNative);
@@ -48,21 +48,22 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       setAutoOn(s.autoCollect.enabled);
     });
   useEffect(load, []);
-  // この画面での変更が保存されたとき (他のタブでの変更では出さない): 変更の直後 (3 秒以内) に設定が書き込まれたら出す
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const off = onSettingsChanged(() => {
-      if (Date.now() - changedAt.current > 3000) return;
-      changedAt.current = 0;
-      setFlash(true);
-      clearTimeout(timer);
-      timer = setTimeout(() => setFlash(false), 2000);
-    });
-    return () => {
-      off();
-      clearTimeout(timer);
-    };
-  }, []);
+  /** 「変更を保存しました」を 2 秒出す。この画面で設定を書く処理が成功したときだけ呼ぶ (別タブの書き込みの通知では出さない) */
+  const flashTimer = useRef<ReturnType<typeof setTimeout>>();
+  const flashSaved = () => {
+    setFlash(true);
+    clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(() => setFlash(false), 2000);
+  };
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+  /** この画面での設定の書き込み。成功したら「変更を保存しました」を出す (失敗は例外のまま) */
+  const saveOf = async <T,>(write: Promise<T>): Promise<T> => {
+    const r = await write;
+    flashSaved();
+    return r;
+  };
+  // 別のタブ・別の画面での変更も、画面の値には反映する (フラッシュは出さない)
+  useEffect(() => onSettingsChanged(() => load()), []);
   // 設定の検索: 一致しない行は hidden にする (要素は消さない。状態を失わないため)。子の部品が遅れて描かれても追従する
   useEffect(() => {
     const el = root.current;
@@ -70,9 +71,22 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     const apply = () => setMatchCount(filterSettings(el, query));
     apply();
     if (!query.trim()) return;
-    const mo = new MutationObserver(apply);
+    // 変化の通知は 1 回にまとめる (画像のキャッシュの進捗のように、文字が頻繁に変わる部品があっても、全行を比べ直すのは 100ms に 1 回まで)。
+    // 検索結果・保存の表示の中だけの変化では、何もしない
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const own = (n: Node) => !!(n instanceof Element ? n : n.parentElement)?.closest('.settings-match, .settings-saved');
+    const mo = new MutationObserver((list) => {
+      if (timer !== undefined || list.every((m) => own(m.target))) return;
+      timer = setTimeout(() => {
+        timer = undefined;
+        apply();
+      }, 100);
+    });
     mo.observe(el, { childList: true, subtree: true, characterData: true });
-    return () => mo.disconnect();
+    return () => {
+      mo.disconnect();
+      clearTimeout(timer);
+    };
   }, [query]);
 
   const doReset = async () => {
@@ -128,10 +142,6 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     <section
       ref={root}
       class="settings-page"
-      onChange={(e) => {
-        const el = e.target as HTMLInputElement;
-        if (el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'radio' || el.type === 'range') changedAt.current = Date.now();
-      }}
     >
       <div class="bar">
         <Icon name="ti-settings" />
@@ -168,7 +178,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           type="checkbox"
           role="switch"
           checked={sync}
-          onChange={async (e) => setSync((await updateSettings({ syncNative: (e.target as HTMLInputElement).checked })).syncNative)}
+          onChange={async (e) => setSync((await saveOf(updateSettings({ syncNative: (e.target as HTMLInputElement).checked }))).syncNative)}
         />
         <span>
           <strong>{t('syncNativeLabel')}</strong>
@@ -189,15 +199,17 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
               type="radio"
               name="buttonMode"
               checked={bmode === m}
-              onChange={async () => setBmode((await updateSettings({ buttonMode: m })).buttonMode)}
+              onChange={async () => setBmode((await saveOf(updateSettings({ buttonMode: m }))).buttonMode)}
             />
             <span>{t(m === 'separate' ? 'buttonModeSeparate' : 'buttonModeReplace')}</span>
           </label>
         ))}
         <p class="muted setting-desc">{t('buttonModeNote')}</p>
       </fieldset>
-      <FullTextSection reloadKey={cacheKey} />
-      <ImageCacheSection surface={surface} reloadKey={cacheKey} />
+      <SavedContext.Provider value={flashSaved}>
+        <FullTextSection reloadKey={cacheKey} />
+        <ImageCacheSection surface={surface} reloadKey={cacheKey} />
+      </SavedContext.Provider>
       {heading('collect', 'groupCollect')}
       <fieldset class="setting-group">
         <legend>{t('acSection')}</legend>
@@ -206,7 +218,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
             type="checkbox"
             role="switch"
             checked={autoOn}
-            onChange={async (e) => setAutoOn((await updateAutoCollect({ enabled: (e.target as HTMLInputElement).checked })).autoCollect.enabled)}
+            onChange={async (e) => setAutoOn((await saveOf(updateAutoCollect({ enabled: (e.target as HTMLInputElement).checked }))).autoCollect.enabled)}
           />
           <span>
             <strong>{t('acSettingsSwitch')}</strong>
@@ -231,7 +243,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
               type="radio"
               name="actionMode"
               checked={amode === m}
-              onChange={async () => setAmode((await updateSettings({ actionMode: m })).actionMode)}
+              onChange={async () => setAmode((await saveOf(updateSettings({ actionMode: m }))).actionMode)}
             />
             <span>{t(m === 'popup' ? 'actionModePopup' : 'actionModeSidepanel')}</span>
           </label>

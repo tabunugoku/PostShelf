@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useContext, useEffect, useRef, useState } from 'preact/hooks';
+import { SavedContext } from './settingsSaved';
 import { Icon } from '../shared/Icon';
 import { afterPostsRemoved, cacheMissing, clearAllCaches, evictToFit, migrateStore, openStore, previewEviction, type OpenedStore } from '../shared/cacheops';
 import { DirStore, NotOurFolderError, prepareDirectory, requestDirPermission, saveDirHandle, type DirHandleLike, type ImageStore, type Usage } from '../shared/imagecache';
@@ -45,6 +46,7 @@ const uniquePosts = (list: Bookmark[]): Bookmark[] => [...new Map(list.map((b) =
  * 初期値はオフ。オンにするクリックの中で、画像サーバー (pbs.twimg.com) への任意の権限を Chrome に求める。
  */
 export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設定の初期化や取り消しのあとに読み直すための値 */ reloadKey?: number }) {
+  const saved = useContext(SavedContext);
   const [cfg, setCfg] = useState<ImageCacheSettings>(DEFAULT_IMAGE_CACHE);
   const [opened, setOpened] = useState<OpenedStore>({ status: 'ok', store: null });
   const [usage, setUsage] = useState<Usage>({ bytes: 0, files: 0, posts: 0 });
@@ -77,6 +79,7 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
 
   const save = async (patch: Partial<ImageCacheSettings>) => {
     await updateImageCache(patch);
+    saved(); // 「変更を保存しました」
     await load();
   };
   const note = (text: string, error = false) => setMessage({ text, error });
