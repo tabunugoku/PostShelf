@@ -184,7 +184,7 @@ describe('v28-B: the collapsible auto-collect panel', () => {
     const bar = $('.postshelf-autocollect-panel');
     expect(bar.getAttribute('role')).toBe('status');
     expect(bar.getAttribute('aria-live')).toBe('polite');
-    expect(bar.textContent).toContain('取り込み中 · 取り込み 5 · 失敗 1');
+    expect(bar.textContent).toContain('取り込み中 · 5 件 · 失敗 1');
     expect($$('.postshelf-autocollect-panel button').map((b) => b.textContent)).toEqual(['開く']);
     expect($<HTMLElement>('[data-action=expand]').style.minHeight).toBe('44px');
     expect(document.documentElement.hasAttribute('data-postshelf-panel')).toBe(true);
