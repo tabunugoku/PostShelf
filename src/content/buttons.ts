@@ -16,6 +16,8 @@ const STYLE_ID = 'postshelf-style';
 /** X の操作アイコンに合わせたクリック判定 (34px 以上) と、標準ボタンとの余白 (4px 以上) */
 const HIT = 34;
 const GAP = 4;
+const MAX_HIT = 64;
+const ICON_MIN = 19;
 
 let mode: ButtonMode = 'separate';
 
@@ -53,6 +55,30 @@ export function placeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
   btn.style.alignSelf = 'center';
   if (bm.nextElementSibling) btn.style.marginRight = `${GAP}px`;
   bm.insertAdjacentElement('afterend', btn);
+}
+
+/**
+ * 隣のブックマークのボタンの大きさに合わせる (v35)。実機で、詳細ページのフォルダのボタンの hover の丸 (約 38px) が、
+ * ブックマークの丸 (約 58px 幅) より小さかった。ブックマークのボタン (bm) の getBoundingClientRect() を測り、幅・高さをそのまま使う
+ * (下限 HIT = 34px、上限 64px)。アイコンは bm の svg の高さに合わせる (下限 19px)。測れない (幅か高さが 0) ときは、HIT と 19px のまま。
+ * 実機未確認: 測った幅が、X の hover の丸 (ボタンの外側) の大きさであると想定している。違っていたら、ここの測る対象を直す。
+ * margin-left は GAP のまま (丸が大きくなっても、詳細ページの数字に重ならないよう、差の半分を減らさない)。
+ */
+export function sizeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
+  const r = bm.getBoundingClientRect();
+  const clamp = (v: number) => Math.min(MAX_HIT, Math.max(HIT, Math.round(v)));
+  const ok = r.width > 0 && r.height > 0;
+  btn.style.width = `${ok ? clamp(r.width) : HIT}px`;
+  btn.style.height = `${ok ? clamp(r.height) : HIT}px`;
+  const ih = bm.querySelector('svg')?.getBoundingClientRect().height ?? 0;
+  btn.style.fontSize = `${ih > 0 ? Math.max(ICON_MIN, Math.round(ih)) : ICON_MIN}px`;
+}
+
+/** 大きさを測るのは、挿入したときと、bm の大きさが変わったとき (ResizeObserver があれば) だけ。X の再描画のたびには測らない */
+function watchSize(bm: HTMLElement, btn: HTMLElement): void {
+  sizeSeparateButton(bm, btn);
+  if (typeof ResizeObserver === 'undefined') return;
+  new ResizeObserver(() => sizeSeparateButton(bm, btn)).observe(bm);
 }
 
 function createSeparateButton(article: Element): HTMLButtonElement {
@@ -138,6 +164,7 @@ export function injectButtons(root: ParentNode = document): void {
       if (!bm.parentElement) continue;
       const btn = createSeparateButton(article);
       placeSeparateButton(bm, btn);
+      watchSize(bm, btn);
       fresh.push(article);
     } else {
       if (bm.querySelector(`[${BADGE_ATTR}]`)) continue;

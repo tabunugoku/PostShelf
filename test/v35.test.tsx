@@ -1,3 +1,4 @@
+import { sizeSeparateButton } from '../src/content/buttons';
 import { readFileSync } from 'node:fs';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
@@ -148,5 +149,35 @@ describe('v35-B: settings description width and ja wording', () => {
     const ja = JSON.parse(readFileSync('static/_locales/ja/messages.json', 'utf8')) as Record<string, { message: string }>;
     for (const [k, v] of Object.entries(ja)) expect(v.message, k).not.toContain('たたまれ');
     expect(ja.fullTextSwitchDesc.message).toContain('省略されたポスト');
+  });
+});
+
+describe('v35-C: the folder button follows the size of the bookmark button', () => {
+  const rect = (w: number, h: number) => ({ width: w, height: h, top: 0, left: 0, right: w, bottom: h, x: 0, y: 0, toJSON() {} }) as DOMRect;
+  const make = (bmRect: DOMRect | null, svgRect?: DOMRect) => {
+    const bm = document.createElement('button');
+    bm.innerHTML = '<svg></svg>';
+    if (bmRect) bm.getBoundingClientRect = () => bmRect;
+    if (svgRect) bm.querySelector('svg')!.getBoundingClientRect = () => svgRect;
+    const btn = document.createElement('button');
+    return { bm, btn };
+  };
+  it('uses the measured width/height and the icon height', () => {
+    const { bm, btn } = make(rect(58, 40), rect(22, 22));
+    sizeSeparateButton(bm, btn);
+    expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['58px', '40px', '22px']);
+  });
+  it('falls back to 34px / 19px when it cannot measure (zero size)', () => {
+    const { bm, btn } = make(rect(0, 0));
+    sizeSeparateButton(bm, btn);
+    expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['34px', '34px', '19px']);
+  });
+  it('clamps to at least 34px and at most 64px; the icon is at least 19px', () => {
+    const small = make(rect(20, 20), rect(10, 10));
+    sizeSeparateButton(small.bm, small.btn);
+    expect([small.btn.style.width, small.btn.style.fontSize]).toEqual(['34px', '19px']);
+    const big = make(rect(200, 90));
+    sizeSeparateButton(big.bm, big.btn);
+    expect([big.btn.style.width, big.btn.style.height]).toEqual(['64px', '64px']);
   });
 });
