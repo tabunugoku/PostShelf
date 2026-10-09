@@ -3,7 +3,7 @@ import { Icon } from '../shared/Icon';
 import { requestNativeSync, requestSnapshot, watchActivePost, type ActivePost } from '../shared/activeTab';
 import { INBOX_ID, displayName, type Folder, type Snapshot } from '../shared/models';
 import { getAccountScope, getBookmark, removeBookmark, setBookmarkFolders } from '../shared/storage';
-import { getSettings, onSettingsChanged } from '../shared/settings';
+import { getSettings, onSettingsChanged, updateRecentFolders } from '../shared/settings';
 import { requestCache, requestFullText, requestPrune } from '../shared/cacheRequest';
 import { t } from '../shared/strings';
 import { Dropdown, FolderPickerHost } from './ui';
@@ -41,6 +41,11 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
   const [more, setMore] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   const tweetRef = useRef('');
+  /** 最新の選択 (押した瞬間に更新)、最後に保存できた選択、保存中か、すでに保存してあるか */
+  const selRef = useRef<string[]>([]);
+  const savedSel = useRef<string[]>([]);
+  const saving = useRef(false);
+  const existsRef = useRef(false);
   useEffect(() => watchActivePost((p) => setPost((old) => (old?.tabId === p?.tabId && old?.tweetId === p?.tweetId ? old : p))), []);
   useEffect(() => {
     const load = () => void getSettings().then((s) => setRecent(s.recentFolderIds ?? []));
@@ -61,6 +66,9 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
       if (!r) return void setError(t('saveCurrentFail'));
       const prev = await getBookmark(r.tweetId);
       if (tweetRef.current !== key) return;
+      selRef.current = prev?.folderIds ?? [];
+      savedSel.current = prev?.folderIds ?? [];
+      existsRef.current = !!prev;
       setCur({ tweetId: r.tweetId, snapshot: r.snapshot, tabId: post.tabId, selected: prev?.folderIds ?? [], saved: !!prev });
     })();
   }, [key, !!props.blockedReason]);
@@ -78,28 +86,77 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
       </div>,
     );
 
+  /** フォルダ名の並び。区切りは言語ごとの規則 (Intl.ListFormat)。使えない環境では ', ' */
+  const joinNames = (names: string[]): string => {
+    try {
+      return new Intl.ListFormat(chrome.i18n.getUILanguage(), { style: 'narrow', type: 'conjunction' }).format(names);
+    } catch {
+      return names.join(', ');
+    }
+  };
+  const sameSel = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('\n') === [...b].sort().join('\n');
   /** 保存する (チェックの切り替えの結果)。全フォルダを外しても、保存は残る (「未分類」になる)。保存の解除は、ごみ箱だけ */
   const commit = async (c: Current, sel: string[]) => {
     await setBookmarkFolders(c.tweetId, sel, c.snapshot);
     // 画像のキャッシュと全文の取得は、保存の状態が変わったとき (新しく保存したとき) だけ要求する
-    if (!c.saved) {
+    if (!existsRef.current) {
+      existsRef.current = true;
       requestCache(c.tweetId, getAccountScope());
       if (c.snapshot.truncated) requestFullText(c.tweetId, getAccountScope()); // たたまれた状態で保存した (v24)
     }
     await requestNativeSync(c.tabId, c.tweetId, true);
+    const added = sel.filter((id) => !savedSel.current.includes(id));
+    if (added.length) void updateRecentFolders(added).catch(() => {}); // 「最近使った」(失敗しても保存は成功)
     const names = sel.length ? sel.map((id) => props.folders.find((f) => f.id === id)).filter((f): f is Folder => !!f).map(displayName) : [displayName(props.folders.find((f) => f.id === INBOX_ID) ?? { id: INBOX_ID, name: '', icon: '', order: 0 })];
-    setCur({ ...c, selected: sel, saved: true });
-    setDone(t('activeSaved', names.join('、')));
-    setError('');
+    if (tweetRef.current === key) {
+      setDone(t('activeSaved', joinNames(names)));
+      setError('');
+    }
     props.onSaved();
   };
-  const run = (c: Current, sel: string[]) => void commit(c, sel).catch(() => setError(t('errorStorage')));
-  const toggle = (c: Current, id: string) => run(c, c.selected.includes(id) ? c.selected.filter((x) => x !== id && x !== INBOX_ID) : [...c.selected.filter((x) => x !== INBOX_ID), id]);
+  /**
+   * 保存を直列に流す。押した瞬間に最新の選択 (selRef) とチップの表示を更新し、保存は前の分が終わってから、そのときの最新の選択で行う
+   * (連打は最後の状態にまとまる)。失敗したら、最後に保存できた状態に戻してエラーを出す。
+   */
+  const flushSave = async (c: Current) => {
+    if (saving.current) return;
+    saving.current = true;
+    try {
+      while (!sameSel(selRef.current, savedSel.current) || !existsRef.current) {
+        const target = [...selRef.current];
+        try {
+          await commit(c, target);
+          savedSel.current = target;
+        } catch {
+          selRef.current = [...savedSel.current];
+          if (tweetRef.current === key) {
+            setCur((old) => (old ? { ...old, selected: selRef.current } : old));
+            setError(t('errorStorage'));
+          }
+          break;
+        }
+      }
+    } finally {
+      saving.current = false;
+    }
+  };
+  const select = (c: Current, next: string[]) => {
+    selRef.current = next;
+    setCur((old) => (old ? { ...old, selected: next, saved: true } : old));
+    void flushSave(c);
+  };
+  const toggle = (c: Current, id: string) => {
+    const now = selRef.current;
+    select(c, now.includes(id) ? now.filter((x) => x !== id && x !== INBOX_ID) : [...now.filter((x) => x !== INBOX_ID), id]);
+  };
   const remove = async (c: Current) => {
     try {
       await removeBookmark(c.tweetId);
       requestPrune();
       await requestNativeSync(c.tabId, c.tweetId, false);
+      selRef.current = [];
+      savedSel.current = [];
+      existsRef.current = false;
       setCur({ ...c, selected: [], saved: false });
       setDone('');
       props.onSaved();
@@ -147,7 +204,7 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
               </button>
               {more && (
                 <Dropdown onClose={() => setMore(false)} label={t('activeMoreFolders', rest)} class="menu-wide">
-                  <FolderPickerHost folders={props.folders} selected={cur.selected} onChange={(sel) => run(cur, [...sel])} />
+                  <FolderPickerHost folders={props.folders} selected={cur.selected} onChange={(sel) => select(cur, [...sel].filter((id) => id !== INBOX_ID))} />
                 </Dropdown>
               )}
             </span>

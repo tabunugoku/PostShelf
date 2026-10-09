@@ -141,6 +141,19 @@ export function onSettingsChanged(cb: (s: Settings) => void): () => void {
 // 読み出し → 書き込みの途中で別の更新が入って、片方の変更が消えないよう、更新は 1 つずつ順に行う
 let queue: Promise<unknown> = Promise.resolve();
 
+/**
+ * 「最近使った」を更新する (v31)。読み・計算・書きを、updateSettings と同じ直列化の中の 1 回の操作にする
+ * (続けて呼んでも、後の書き込みが先の追加を消さない)。失敗は呑み込まず、返す。
+ */
+export function updateRecentFolders(used: string[]): Promise<void> {
+  const run = queue.then(async () => {
+    const cur = await getSettings();
+    await chrome.storage.local.set({ [KEY]: { ...cur, recentFolderIds: pushRecentFolders(cur.recentFolderIds ?? [], used) } });
+  });
+  queue = run.catch(() => undefined);
+  return run;
+}
+
 export function updateSettings(patch: Partial<Settings>): Promise<Settings> {
   const run = queue.then(async () => {
     const next = { ...(await getSettings()), ...patch };
