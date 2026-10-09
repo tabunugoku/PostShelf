@@ -189,7 +189,7 @@ describe('v28-B: the collapsible auto-collect panel', () => {
     expect($<HTMLElement>('[data-action=expand]').style.minHeight).toBe('44px');
     expect(document.documentElement.hasAttribute('data-postshelf-panel')).toBe(true);
     p.update(st({ imported: 9 })); // 取り込みが進んでも、畳んだまま
-    expect(bar.textContent).toContain('取り込み 9');
+    expect(bar.textContent).toContain('9 件');
     expect((c as any).pause).not.toHaveBeenCalled();
     expect((c as any).stop).not.toHaveBeenCalled();
     $<HTMLElement>('[data-action=expand]').click();
