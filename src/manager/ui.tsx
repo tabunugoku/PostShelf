@@ -139,6 +139,16 @@ function Portal(props: { children: ComponentChildren }) {
 }
 
 /**
+ * 右端そろえ (right:0) のメニューが、左の画面の外へはみ出すか。ボタンの位置 (anchor) とメニューの幅から、はみ出さない側を選ぶ。
+ * 右そろえで収まれば 'right' (従来どおり)。収まらず、左そろえで収まれば 'left'。どちらでも収まらないときは 'left' (CSS の max-width で画面の幅に合わせる)
+ */
+export function pickMenuSide(anchor: { left: number; right: number }, menuWidth: number, viewportWidth: number): 'left' | 'right' {
+  if (anchor.right - menuWidth >= 8) return 'right';
+  if (anchor.left + menuWidth <= viewportWidth - 8) return 'left';
+  return 'left';
+}
+
+/**
  * 外側クリック / Esc で閉じるドロップダウンの枠。
  * fixed: カードや一覧の overflow に隠れないよう、body 直下 (portal) に出し、きっかけのボタンの近くを基準に、画面の端に収まる位置へ補正する
  * (右にはみ出すときは左へ、下にはみ出すときは上へ)。スクロールやウィンドウの大きさの変更でも閉じる (位置がずれるため)。
@@ -150,7 +160,16 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
   const anchor = () => (props.fixed ? marker.current?.parentElement : ref.current?.parentElement) ?? ref.current;
   const place = () => {
     const el = ref.current;
-    if (!props.fixed || !el) return;
+    if (!el) return;
+    if (!props.fixed) {
+      // 右そろえのメニューが、狭い幅 (サイドパネルなど) で左へはみ出すときは、左そろえにする
+      if (el.classList.contains('menu-left')) return;
+      const a = ref.current?.parentElement?.getBoundingClientRect();
+      if (!a) return;
+      const vw = document.documentElement.clientWidth || window.innerWidth;
+      el.classList.toggle('menu-left', pickMenuSide(a, el.offsetWidth, vw) === 'left');
+      return;
+    }
     const r = (anchor() ?? el).getBoundingClientRect();
     const vw = document.documentElement.clientWidth || window.innerWidth;
     const vh = document.documentElement.clientHeight || window.innerHeight;
@@ -269,6 +288,13 @@ export function SortMenu<T extends string>(props: { value: T; options: [T, strin
     props.onChange(props.options[i][0]);
     close();
   };
+  const [side, setSide] = useState<'left' | 'right'>('right');
+  useLayoutEffect(() => {
+    if (!open) return;
+    const a = btn.current?.getBoundingClientRect();
+    const w = list.current?.offsetWidth ?? 0;
+    if (a) setSide(pickMenuSide(a, w, document.documentElement.clientWidth || window.innerWidth));
+  }, [open]);
   useEffect(() => {
     if (open) list.current?.focus();
   }, [open]);
@@ -319,7 +345,7 @@ export function SortMenu<T extends string>(props: { value: T; options: [T, strin
         <Icon name="ti-chevron-down" />
       </button>
       {open && (
-        <div ref={list} id={uid} class="listbox" role="listbox" tabIndex={-1} aria-label={props.label} aria-activedescendant={`${uid}-${active}`} onKeyDown={onListKey}>
+        <div ref={list} id={uid} class={`listbox${side === 'left' ? ' listbox-left' : ''}`} role="listbox" tabIndex={-1} aria-label={props.label} aria-activedescendant={`${uid}-${active}`} onKeyDown={onListKey}>
           {props.options.map(([v, l], i) => (
             <div
               id={`${uid}-${i}`}
