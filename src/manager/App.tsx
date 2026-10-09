@@ -850,15 +850,17 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     if (!expanding) return;
     const raf = requestAnimationFrame(() => growTo(renderCount + SHOW_ALL_STEP));
     return () => cancelAnimationFrame(raf);
-  }, [expanding, renderCount, resetKey]);
+  }, [expanding, renderCount, resetKey, shown]);
   useEffect(() => {
     if (expandKey !== null && (expandKey !== resetKey || remaining <= 0)) setExpandKey(null);
   }, [expandKey, resetKey, remaining]);
   const [sentinel, setSentinel] = useState<HTMLSpanElement | null>(null);
   useEffect(() => {
     const el = sentinel;
-    if (!el || remaining <= 0) return;
-    // IntersectionObserver だけに頼らない (実機で「すべて」が 30 件で止まった。原因は特定できていない)。scroll / resize と、描画のたびに、末尾までの距離を測る。
+    // 「すべて表示」で増やしている間は付けない (1 フレームごとに作り直して測り直すのは無駄。終われば expanding が変わり、付け直す)
+    if (!el || remaining <= 0 || expanding) return;
+    // IntersectionObserver だけに頼らない。実機で「すべて」が 30 件で止まったのは、末尾の要素が効果より遅れて現れ、効果が再実行されなかったため (v36 で直した。
+    // sentinel を状態にして依存に入れている)。念のため、scroll / resize と、描画のたびに、末尾までの距離も測る。
     // どちらで増やしても、増やす先は今の renderCount が基準 (同じ値を入れるだけなので、二重には増えない)
     const check = () => {
       const r = el.getBoundingClientRect();
@@ -887,7 +889,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       if (raf) cancelAnimationFrame(raf);
       io?.disconnect();
     };
-  }, [sentinel, renderCount, remaining, resetKey]);
+  }, [sentinel, renderCount, remaining, resetKey, expanding]);
   const rows = (
     <SearchContext.Provider value={search}>
     <div class={`rows view-${view}${compact ? ' compact' : ''}`} ref={listRef} onKeyDown={onListKeyDown} role="list">

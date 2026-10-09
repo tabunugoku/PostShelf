@@ -45,6 +45,9 @@ class FakeIO {
 }
 
 beforeEach(() => {
+  // 前のテストの App を外す (外さないと、画面から切り離された App の効果が、あとのテストの window に監視を付け続ける)
+  const old = document.getElementById('app');
+  if (old) render(null, old);
   installChromeMock();
   setAccountScope('me');
   ios.length = 0;
@@ -95,26 +98,35 @@ describe('v36-A: listeners do not leak when the effect re-runs', () => {
   it('scroll / resize listeners added by the staged-rendering effect are all removed on unmount', async () => {
     await seed(200);
     vi.stubGlobal('IntersectionObserver', undefined);
-    const live = new Map<string, number>();
-    const add = vi.spyOn(window, 'addEventListener').mockImplementation(((t: string) => void live.set(t, (live.get(t) ?? 0) + 1)) as any);
-    const rem = vi.spyOn(window, 'removeEventListener').mockImplementation(((t: string) => void live.set(t, (live.get(t) ?? 0) - 1)) as any);
+    // 本物の add / remove を呼んだうえで、scroll / resize の登録を記録する (付けた関数と外した関数の対応で数える)
+    const added: [string, unknown][] = [];
+    const removed: [string, unknown][] = [];
+    const add = vi.spyOn(window, 'addEventListener');
+    const rem = vi.spyOn(window, 'removeEventListener');
     document.body.innerHTML = '<div id="app"></div>';
     render(<App surface="tab" />, $('#app'));
     await wait(300);
     render(null, $('#app'));
     await wait(50);
-    // 自前の scroll / resize だけを数える (他のコードが付けたものは、付けた数と外した数が別でもよい)
-    expect(live.get('scroll') ?? 0).toBeLessThanOrEqual(0);
+    // 段階表示の効果が付けるのは、requestAnimationFrame で間引く関数 (ほかの画面の scroll / resize の監視は数えない)
+    const mine = (t: unknown, fn: unknown) => (t === 'scroll' || t === 'resize') && typeof fn === 'function' && String(fn).includes('requestAnimationFrame');
+    for (const [t, fn] of add.mock.calls) if (mine(t, fn)) added.push([t as string, fn]);
+    for (const [t, fn] of rem.mock.calls) if (mine(t, fn)) removed.push([t as string, fn]);
+    expect(added.length).toBeGreaterThan(0); // 段階表示の効果が付けている
+    expect(removed.length).toBe(added.length);
+    for (const [t, fn] of added) expect(removed.some(([rt, rf]) => rt === t && rf === fn), t).toBe(true);
     add.mockRestore();
     rem.mockRestore();
   });
 });
 
 describe('v36-B: "show all" grows in steps of 100 per frame', () => {
-  let frames: FrameRequestCallback[] = [];
+  // ID と関数の対応で持つ (取り消しは ID で消す。位置で消すと、runFrame で空にしたあとの古い ID が新しい関数を消す)
+  let frames = new Map<number, FrameRequestCallback>();
+  let nextId = 1;
   const runFrame = async () => {
-    const cbs = frames;
-    frames = [];
+    const cbs = [...frames.values()];
+    frames = new Map();
     await act(() => void cbs.forEach((cb) => cb(0)));
     await flush(5);
   };
@@ -124,10 +136,15 @@ describe('v36-B: "show all" grows in steps of 100 per frame', () => {
     await flush(80);
   };
   beforeEach(() => {
-    frames = [];
+    frames = new Map();
+    nextId = 1;
     vi.stubGlobal('IntersectionObserver', undefined);
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(((cb: FrameRequestCallback) => frames.push(cb)) as any);
-    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(((id: number) => void (frames[id - 1] = () => {})) as any);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(((cb: FrameRequestCallback) => {
+      const id = nextId++;
+      frames.set(id, cb);
+      return id;
+    }) as any);
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(((id: number) => void frames.delete(id)) as any);
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({ top: 100000, bottom: 100001, left: 0, right: 1, width: 1, height: 1, x: 0, y: 0, toJSON() {} }) as DOMRect);
   });
 
@@ -149,6 +166,24 @@ describe('v36-B: "show all" grows in steps of 100 per frame', () => {
     expect(cardCount()).toBe(330);
     await runFrame();
     expect(cardCount()).toBe(350);
+    expect($$('.list-more').length).toBe(0);
+  });
+
+  it('v37: while growing, the sentinel watchers are not re-attached every frame; they come back when it ends', async () => {
+    await seed(450);
+    await mount();
+    const mineAdds = () => add.mock.calls.filter(([t, fn]) => t === 'scroll' && String(fn).includes('requestAnimationFrame')).length;
+    const add = vi.spyOn(window, 'addEventListener');
+    await act(() => void $$<HTMLButtonElement>('.list-more button')[0].click());
+    await flush(5);
+    const before = mineAdds();
+    await runFrame();
+    await runFrame();
+    await runFrame();
+    expect(mineAdds()).toBe(before); // 増やしている間は、付け直さない
+    await runFrame();
+    await runFrame();
+    expect(cardCount()).toBe(450);
     expect($$('.list-more').length).toBe(0);
   });
 
@@ -214,15 +249,15 @@ describe('v36-C: the folder button size follows the height, not the width', () =
 describe('v36-D: the settings description is not width-capped and does not use text-wrap: pretty', () => {
   const css = readFileSync('static/manager.css', 'utf8');
   it('.setting-desc has max-width:none (no em cap) and keeps overflow-wrap', () => {
-    const rule = css.match(/\.setting-desc\{[^}]*\}/)![0];
+    const rule = css.match(/(?:^|\n)\.setting-desc\{[^}]*\}/)![0];
     expect(rule).toContain('max-width:none');
     expect(rule).not.toMatch(/max-width:\d/);
     expect(rule).toContain('overflow-wrap:anywhere');
   });
-  it('text-wrap: pretty is not applied to .setting-desc or .muted; headings keep balance', () => {
-    for (const m of css.matchAll(/([^{}]+)\{[^}]*text-wrap:pretty[^}]*\}/g)) {
-      expect(m[1]).not.toMatch(/\.setting-desc|\.muted/);
-    }
+  it('text-wrap: pretty stays on .muted elsewhere (v37), but .setting-desc and .setting-group .muted use wrap; headings keep balance', () => {
+    expect(css).toMatch(/(^|\n)\.muted,[^{]*\{text-wrap:pretty\}/);
+    expect(css).toMatch(/\.setting-group \.muted,\.setting-desc\{text-wrap:wrap\}/);
+    for (const m of css.matchAll(/([^{}]+)\{[^}]*text-wrap:pretty[^}]*\}/g)) expect(m[1]).not.toMatch(/\.setting-desc|\.setting-group/);
     expect(css).toMatch(/h1,h2,h3,label,\.sec\{text-wrap:balance\}/);
   });
   it('no narrow-width (side panel) rule re-introduces a fixed width on .setting-desc', () => {
