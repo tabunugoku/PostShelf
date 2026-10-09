@@ -5,7 +5,7 @@ Chrome 拡張 (Manifest V3)。x.com (旧 Twitter) のブックマークを独自
 詳細な計画は `docs/PLAN.md`。最初に読むこと。
 
 ## 現在のタスク
-v2〜v26 は実装済み (バージョン 1.1.1。v26 はコードレビューの指摘 15 件の修正: 取り込みの保存先、インポートの検証、全文取得、速度、細かい不具合、i18n)。v28〜v30 は実装済み。次は `docs/TASK_V31.md` (v28〜v30 のコードレビューの指摘 17 件の修正) を実施する。実機での確認は `docs/MANUAL_TEST.md` のチェックリストを使う。
+v2〜v26 は実装済み (バージョン 1.1.1。v26 はコードレビューの指摘 15 件の修正: 取り込みの保存先、インポートの検証、全文取得、速度、細かい不具合、i18n)。v28〜v30 は実装済み。v31 (v28〜v30 のコードレビューの指摘 17 件の修正) の次は `docs/TASK_V32.md` (自動取り込みの待ちを適応式にして高速化) を実施する。実機での確認は `docs/MANUAL_TEST.md` のチェックリストを使う。
 
 ## 機能要件
 1. ポスト (tweet) のブックマーク先をフォルダ分けできる (1 ポストが複数フォルダ可)
@@ -45,7 +45,7 @@ Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: num
 - 対応言語は日本語と英語 (`chrome.i18n`, `_locales/{ja,en}`)。UI 文字列は直書きせず `t()` 経由
 
 ## 紹介サイト (GitHub Pages)
-`site/index.html` (静的な 1 ページ。ビルド不要、外部の JS・CSS・フォントは使わない)。`.github/workflows/pages.yml` が、`main` への push で `site/` を公開する (リポジトリの Settings → Pages → Source を「GitHub Actions」にしてから動く)。スクリーンショットは載せず、画面のイメージはマークアップで描く。サンプルは架空のアカウントだけ。比較表は日付つきで、公開ページの記載に基づく (変わったら更新する)。
+`site/index.html` (静的な 1 ページ。日本語と英語の併用で、ブラウザの言語が日本語なら日本語、それ以外は英語を表示し、ヘッダーの切替で変えられる (各文言は `<span class="ja">` / `<span class="en">` の対。新しい文言は両方に書く)。ビルド不要、外部の JS・CSS・フォントは使わない)。`.github/workflows/pages.yml` が、`main` への push で `site/` を公開する (リポジトリの Settings → Pages → Source を「GitHub Actions」にしてから動く)。スクリーンショットは載せず、画面のイメージはマークアップで描く。サンプルは架空のアカウントだけ。比較表は日付つきで、公開ページの記載に基づく (変わったら更新する)。
 
 ## 実装順 (マイルストーン)
 1. M1 骨組み: manifest.json, ビルド, `models.ts`, `storage.ts`, フォルダ CRUD (名前/アイコン/色) と単体テスト
