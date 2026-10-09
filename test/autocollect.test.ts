@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import {
-  AutoCollector, COMMAND_TTL_MS, END_STREAK, FLUSH_EVERY, LIMIT_RESUME_MS, SPEED_RANGES, defaultDeps, handleCollectCommand, type CollectDeps,
+  AutoCollector, COMMAND_TTL_MS, END_STREAK, FLUSH_EVERY, LIMIT_RESUME_MS, SPEED_RANGES, WAIT_FLOORS, defaultDeps, handleCollectCommand, type CollectDeps,
 } from '../src/content/autocollect';
 import { addCollected, getSavedIds, listBookmarks, setAccountScope } from '../src/shared/storage';
 import { peekCollectCommand, sendCollectCommand, updateAutoCollect } from '../src/shared/settings';
@@ -496,5 +496,119 @@ describe('recentPostDate (v27)', () => {
     expect(c2.state!.recentPostDate).toBe(day(9));
     await c2.start(consent); // fresh
     expect(c2.state!.recentPostDate).toBeUndefined();
+  });
+});
+
+describe('v32: adaptive wait after a scroll', () => {
+  /** world に hasUnseen を足す。newAfter(ms) = スクロール後、この時間が経つと新しいポストが出る (null なら出ない) */
+  function adaptive(newAfter: number | null, total = 30) {
+    const { w, deps } = world(total);
+    const st = { sinceScroll: 0, loadingFor: 0 };
+    const baseScroll = deps.scrollBy;
+    deps.scrollBy = (px) => {
+      baseScroll(px);
+      st.sinceScroll = 0;
+    };
+    const baseSleep = deps.sleep;
+    deps.sleep = async (ms) => {
+      st.sinceScroll += ms;
+      await baseSleep(ms);
+    };
+    deps.hasUnseen = () => newAfter !== null && st.sinceScroll >= newAfter;
+    return { w, deps, st };
+  }
+  const waitsOf = (sleeps: number[]) => sleeps.slice(3); // 先頭の 3 回は 3 秒のカウントダウン
+  it('ends the wait just after the floor when a new post is already there (well short of the ceiling)', async () => {
+    const { w, deps } = adaptive(0);
+    const c = new AutoCollector(deps);
+    await c.start({ ...consent, speed: 'slow' });
+    await until(c, (s) => s.status === 'done');
+    const waits = waitsOf(w.sleeps);
+    expect(waits.every((ms) => ms <= 100)).toBe(true); // 100ms 刻み
+    // 1 回のスクロールの待ち = floor (800〜1200) の分の刻み + 検出の 1 刻み。ceiling (2000〜4000) よりずっと短い
+    const perScroll = waits.length / w.scrolls;
+    expect(perScroll * 100).toBeLessThan(2000);
+    expect(perScroll * 100).toBeGreaterThanOrEqual(800);
+  });
+
+  it('keeps waiting until the ceiling when no new post appears (same as before); the end detection is unchanged', async () => {
+    const { w, deps } = adaptive(null, 12);
+    const c = new AutoCollector(deps);
+    await c.start({ ...consent, speed: 'slow' });
+    await until(c, (s) => s.status === 'done');
+    const waits = waitsOf(w.sleeps);
+    const total = waits.reduce((a, b) => a + b, 0);
+    // 新しいポストが出ないスクロールでも、各回 ceiling (slow は 2000〜4000) まで待つ
+    expect(total / w.scrolls).toBeGreaterThanOrEqual(SPEED_RANGES.slow[0] - 1);
+    expect(total / w.scrolls).toBeLessThanOrEqual(SPEED_RANGES.slow[1] + 1);
+    expect(await shelfOrder()).toEqual(ids(12));
+    expect(c.state!.status).toBe('done');
+  });
+
+  it('the floor never exceeds the ceiling, and is never 0', async () => {
+    const { w, deps } = adaptive(0);
+    deps.random = () => 1; // 乱数が最大でも
+    const c = new AutoCollector(deps);
+    await c.start({ ...consent, speed: 'normal' });
+    await until(c, (s) => s.status === 'done');
+    const waits = waitsOf(w.sleeps);
+    expect(waits.every((ms) => ms > 0 && ms <= 100)).toBe(true);
+    // ceiling = 2500、floor = 400×1.5 = 600 を超えて待たない。1 スクロールあたり 600〜700ms
+    const per = (waits.reduce((a, b) => a + b, 0)) / w.scrolls;
+    expect(per).toBeGreaterThanOrEqual(WAIT_FLOORS.normal);
+    expect(per).toBeLessThanOrEqual(WAIT_FLOORS.normal * 1.5 + 100);
+  });
+
+  it('pause during the wait reacts within one 100ms step', async () => {
+    const { w, deps } = adaptive(null, 60);
+    const c = new AutoCollector(deps);
+    let at = -1;
+    w.hook = (n) => {
+      if (n === 8) {
+        at = w.scrolls;
+        void c.pause('user');
+      }
+    };
+    await c.start(consent);
+    await until(c, (s) => s.status === 'paused');
+    const n = w.sleeps.length;
+    for (let i = 0; i < 20; i++) await flushAsync();
+    expect(w.sleeps.length - n).toBeLessThanOrEqual(1); // その 1 刻みのあとは、さらに待たない
+    expect(w.sleeps.slice(3).every((ms) => ms <= 100)).toBe(true);
+    expect(w.scrolls).toBe(at);
+  });
+
+  it('does not move on while the loading indicator is shown, even if a new post is there', async () => {
+    const { w, deps } = adaptive(0, 30);
+    deps.loading = true;
+    const c = new AutoCollector(deps);
+    const scrollsAtPoll: number[] = [];
+    w.hook = (n) => {
+      if (w.sleeps[n - 1] === 500) scrollsAtPoll.push(w.scrolls);
+    };
+    await c.start(consent);
+    for (let i = 0; i < 60 && scrollsAtPoll.length < 10; i++) await flushAsync();
+    await c.stop();
+    // 新しいポストが出ていても、読み込み中の表示が残るあいだは、500ms 刻みで待つだけで、次のスクロールに進まない
+    expect(scrollsAtPoll.length).toBeGreaterThanOrEqual(10);
+    expect(new Set(scrollsAtPoll.slice(0, 10)).size).toBe(1);
+  });
+
+  it('without hasUnseen the wait is the single fixed sleep (same as before)', async () => {
+    const { w, deps } = world(20);
+    expect(deps.hasUnseen).toBeUndefined();
+    const c = new AutoCollector(deps);
+    await c.start(consent);
+    await until(c, (s) => s.status === 'done');
+    expect(w.sleeps.slice(3).every((ms) => ms >= 2000 && ms <= 4000)).toBe(true);
+  });
+
+  it('defaultDeps().hasUnseen: true only when a status article is on screen that is not in seen', () => {
+    document.body.innerHTML = '<article data-testid="tweet"><a href="/a/status/11"><time datetime="2026-01-01T00:00:00Z"></time></a></article>';
+    const d = defaultDeps();
+    expect(d.hasUnseen!(new Set())).toBe(true);
+    expect(d.hasUnseen!(new Set(['11']))).toBe(false);
+    document.body.innerHTML = '';
+    expect(d.hasUnseen!(new Set())).toBe(false);
   });
 });
