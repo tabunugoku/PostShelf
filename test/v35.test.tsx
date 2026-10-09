@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -134,5 +135,18 @@ describe('v35-A: scroll check without IntersectionObserver', () => {
     await goto('未分類');
     expect(cardCount()).toBe(30);
     vi.restoreAllMocks();
+  });
+});
+
+describe('v35-B: settings description width and ja wording', () => {
+  it('.setting-desc is 52em wide; the post body width is untouched', () => {
+    const css = readFileSync('static/manager.css', 'utf8');
+    expect(css).toMatch(/\.setting-desc\{[^}]*max-width:52em/);
+    expect(css).not.toMatch(/max-width:40em/);
+  });
+  it('the ja locale no longer uses "たたまれた" (it breaks mid-word)', () => {
+    const ja = JSON.parse(readFileSync('static/_locales/ja/messages.json', 'utf8')) as Record<string, { message: string }>;
+    for (const [k, v] of Object.entries(ja)) expect(v.message, k).not.toContain('たたまれ');
+    expect(ja.fullTextSwitchDesc.message).toContain('省略されたポスト');
   });
 });
