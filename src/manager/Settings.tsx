@@ -7,6 +7,7 @@ import { countAllData, exportData, importData, type DataCounts } from '../shared
 import { Confirm, TypeToConfirm } from './ui';
 import { ImageCacheSection } from './ImageCache';
 import { SavedContext } from './settingsSaved';
+import { reportStorageError } from './errorBus';
 import { FullTextSection } from './FullText';
 import { deleteAllDataAndCache } from '../shared/cacheops';
 import { refreshCacheView } from './cacheView';
@@ -56,11 +57,15 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     flashTimer.current = setTimeout(() => setFlash(false), 2000);
   };
   useEffect(() => () => clearTimeout(flashTimer.current), []);
-  /** この画面での設定の書き込み。成功したら「変更を保存しました」を出す (失敗は例外のまま) */
-  const saveOf = async <T,>(write: Promise<T>): Promise<T> => {
-    const r = await write;
-    flashSaved();
-    return r;
+  /** この画面での設定の書き込み。成功したら画面の値を合わせて「変更を保存しました」を出す。失敗したときは出さず、エラーを画面に出す */
+  const saveOf = async <T,>(write: Promise<T>, apply: (r: T) => void): Promise<void> => {
+    try {
+      const r = await write;
+      apply(r);
+      flashSaved();
+    } catch {
+      reportStorageError();
+    }
   };
   // 別のタブ・別の画面での変更も、画面の値には反映する (フラッシュは出さない)
   useEffect(() => onSettingsChanged(() => load()), []);
@@ -178,7 +183,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           type="checkbox"
           role="switch"
           checked={sync}
-          onChange={async (e) => setSync((await saveOf(updateSettings({ syncNative: (e.target as HTMLInputElement).checked }))).syncNative)}
+          onChange={(e) => void saveOf(updateSettings({ syncNative: (e.target as HTMLInputElement).checked }), (s) => setSync(s.syncNative))}
         />
         <span>
           <strong>{t('syncNativeLabel')}</strong>
@@ -199,7 +204,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
               type="radio"
               name="buttonMode"
               checked={bmode === m}
-              onChange={async () => setBmode((await saveOf(updateSettings({ buttonMode: m }))).buttonMode)}
+              onChange={() => void saveOf(updateSettings({ buttonMode: m }), (s) => setBmode(s.buttonMode))}
             />
             <span>{t(m === 'separate' ? 'buttonModeSeparate' : 'buttonModeReplace')}</span>
           </label>
@@ -218,7 +223,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
             type="checkbox"
             role="switch"
             checked={autoOn}
-            onChange={async (e) => setAutoOn((await saveOf(updateAutoCollect({ enabled: (e.target as HTMLInputElement).checked }))).autoCollect.enabled)}
+            onChange={(e) => void saveOf(updateAutoCollect({ enabled: (e.target as HTMLInputElement).checked }), (s) => setAutoOn(s.autoCollect.enabled))}
           />
           <span>
             <strong>{t('acSettingsSwitch')}</strong>
@@ -243,7 +248,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
               type="radio"
               name="actionMode"
               checked={amode === m}
-              onChange={async () => setAmode((await saveOf(updateSettings({ actionMode: m }))).actionMode)}
+              onChange={() => void saveOf(updateSettings({ actionMode: m }), (s) => setAmode(s.actionMode))}
             />
             <span>{t(m === 'popup' ? 'actionModePopup' : 'actionModeSidepanel')}</span>
           </label>

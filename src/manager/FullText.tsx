@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
 import { SavedContext } from './settingsSaved';
+import { reportStorageError } from './errorBus';
 import { getFullTextRun, getSettings, onFullTextRunChanged, updateSettings, type FullTextRun } from '../shared/settings';
 import { getAccountScope, listTruncated, onDataChanged } from '../shared/storage';
 import { Confirm } from './ui';
@@ -39,8 +40,12 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
           role="switch"
           checked={on}
           onChange={async (e) => {
-            setOn((await updateSettings({ fullText: (e.target as HTMLInputElement).checked })).fullText);
-            saved();
+            try {
+              setOn((await updateSettings({ fullText: (e.target as HTMLInputElement).checked })).fullText);
+              saved(); // 保存に成功したときだけ
+            } catch {
+              reportStorageError();
+            }
           }}
         />
         <span>
