@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Icon } from '../shared/Icon';
 import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
@@ -216,6 +216,32 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const offs = [() => window.removeEventListener('hashchange', onHash), onSettingsChanged((c) => setAutoCfg(c.autoCollect)), onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
     return () => offs.forEach((o) => o());
   }, []);
+
+  // スクロールしているのは画面全体 (window)。一覧と設定が同じスクロールを共有するので、画面・フォルダ・並べ替え・検索・絞り込みを替えたときに位置を決める。
+  // 保存データが変わっただけの再読み込み (自動取り込み中など) では、この依存が変わらないので、位置は動かさない。位置は保存データに入れない
+  const pageRef = useRef(page);
+  pageRef.current = page;
+  const listScroll = useRef<{ folder: string; y: number } | null>(null);
+  const scrollPrev = useRef({ page, mounted: false });
+  useEffect(() => {
+    const onScroll = () => {
+      if (pageRef.current === 'bookmarks') listScroll.current = { folder: currentRef.current, y: window.scrollY };
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  const currentRef = useRef(current);
+  currentRef.current = current;
+  const filtersKey = JSON.stringify(filters);
+  useLayoutEffect(() => {
+    const prev = scrollPrev.current;
+    scrollPrev.current = { page, mounted: true };
+    if (!prev.mounted) return;
+    const saved = listScroll.current;
+    // 設定から一覧へ戻ったとき: 同じフォルダなら、移る前の位置へ。フォルダが変わっていたら先頭
+    const y = page === 'bookmarks' && prev.page === 'settings' && saved && saved.folder === current ? saved.y : 0;
+    window.scrollTo({ top: y, left: 0, behavior: 'instant' as ScrollBehavior });
+  }, [page, current, sort, search, filtersKey]);
 
   // 最後に開いたフォルダ / 表示形式 / 並べ替えを chrome.storage.local に保存 (localStorage は使わない)
   const chooseView = (id: string) => {

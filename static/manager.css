@@ -24,6 +24,7 @@
 }}
 /* OS のダーク/ライトにフォーム部品 (input, button, スクロールバー等) を追従させる */
 :root{color-scheme:light dark}
+html{scroll-behavior:auto}
 option,optgroup{background:var(--surface-2);color:var(--text-primary)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--surface-2);color:var(--text-primary);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif}
