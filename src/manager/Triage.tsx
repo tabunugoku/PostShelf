@@ -45,6 +45,7 @@ export function Triage(props: {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const root = useRef<HTMLDivElement>(null);
+  const previousMenus = useRef({ creating, more });
   /** choose の実行中 (await のあいだ) は、次の choose を受けない */
   const busy = useRef(false);
   const latest = useRef({ index, finished, more, creating });
@@ -56,6 +57,15 @@ export function Triage(props: {
     root.current?.focus();
     return () => prev?.focus?.();
   }, []);
+
+  useEffect(() => {
+    const prev = previousMenus.current;
+    previousMenus.current = { creating, more };
+    // 入力欄ごとメニューが外れるとフォーカスは body に落ちる。残っているボタンのフォーカスは保つ。
+    if ((prev.creating && !creating) || (prev.more && !more)) {
+      if (!root.current?.contains(document.activeElement)) root.current?.focus();
+    }
+  }, [creating, more]);
 
   const isLive = (i: number) => props.live.has(queue[i].tweetId);
   const step = (from: number, d: 1 | -1): number | null => {
