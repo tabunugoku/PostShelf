@@ -44,7 +44,7 @@ afterEach(() => {
 });
 
 describe('F-1: resetSettings', () => {
-  const custom = { syncNative: true, buttonMode: 'replace' as const, actionMode: 'sidepanel' as const, lastFolderId: 'f_x', viewMode: 'grid' as const, sortKey: 'postedAsc' as const, viewAccount: 'you', imageCache: { enabled: true, backend: 'dir' as const, maxBytes: 5 * 1024 ** 3, quality: 'orig' as const, onFull: 'stop' as const }, autoCollect: { enabled: false, speed: 'normal' as const, cap: 100 as const, offers: { you: 'dismissed' as const } }, fullText: false, triageMulti: true, recentFolderIds: ['f_x'] };
+  const custom = { syncNative: true, buttonMode: 'replace' as const, actionMode: 'sidepanel' as const, lastFolderId: 'f_x', viewMode: 'grid' as const, sortKey: 'postedAsc' as const, viewAccount: 'you', imageCache: { enabled: true, backend: 'dir' as const, maxBytes: 5 * 1024 ** 3, quality: 'orig' as const, onFull: 'stop' as const }, autoCollect: { enabled: false, speed: 'normal' as const, cap: 100 as const, offers: { you: 'dismissed' as const } }, fullText: false, fullTextSpeed: 'standard' as const, fullTextTabs: 3 as const, triageMulti: true, recentFolderIds: ['f_x'] };
 
   it('puts every setting back to DEFAULT_SETTINGS (the only source of defaults), including the manually chosen account', async () => {
     await updateSettings(custom);
