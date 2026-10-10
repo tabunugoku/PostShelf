@@ -240,17 +240,26 @@ export function Triage(props: {
                       <FolderPickerHost
                         folders={props.pickerFolders}
                         selected={assigned[cur.tweetId] ?? []}
-                        onChange={async (sel) => {
+                        onChange={async (sel, source) => {
+                          if (!cur || finished || busy.current) return;
+                          busy.current = true;
                           try {
                             const ids = [...sel];
+                            // 最後のチェックを外して戻る「未分類」は、新しい分類には数えない。
+                            const added = ids.filter((id) => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
                             await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
-                            const added = ids.filter((id) => !(assigned[cur.tweetId] ?? []).includes(id));
                             if (added.length) void updateRecentFolders(added).catch(() => {});
                             mark(cur, ids);
                             setError('');
                             void props.onChanged();
+                            if (added.length && source !== 'created') {
+                              setMore(false);
+                              next();
+                            }
                           } catch {
                             setError(t('errorStorage'));
+                          } finally {
+                            busy.current = false;
                           }
                         }}
                       />

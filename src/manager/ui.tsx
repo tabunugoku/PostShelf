@@ -248,14 +248,16 @@ export function FolderMenu(props: { folders: Folder[]; onPick: (id: string) => v
  * x.com のポップオーバーと共通のチェックボックス式フォルダ選択 (src/shared/folderPicker.ts) を Preact に載せる。
  * 配色は manager の CSS 変数を渡す。
  */
-export function FolderPickerHost(props: { folders: Folder[]; selected: string[]; onChange: (selected: Set<string>) => void | Promise<void> }) {
+export function FolderPickerHost(props: { folders: Folder[]; selected: string[]; onChange: (selected: Set<string>, source?: 'created') => void | Promise<void> }) {
   const host = useRef<HTMLDivElement>(null);
+  const latest = useRef(props);
+  latest.current = props;
   useEffect(() => {
     const picker = createFolderPicker({
       folders: props.folders,
       selected: new Set(props.selected),
       theme: { fg: 'var(--text-primary)', border: 'var(--border-strong)', hover: 'var(--fill-ghost-hover)', accent: 'var(--fill-accent)' },
-      onChange: props.onChange,
+      onChange: (selected, source) => latest.current.onChange(selected, source),
     });
     host.current?.replaceChildren(picker.el);
   }, []);
