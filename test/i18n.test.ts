@@ -5,7 +5,6 @@ import { installChromeMock, loadMessages } from './chrome-mock';
 import { t, formatDate } from '../src/shared/strings';
 import { ALL_FOLDER, displayName, INBOX_ID } from '../src/shared/models';
 import { addCollected, listFolders } from '../src/shared/storage';
-import { ENGLISH_FALLBACK_KEYS } from '../scripts/checks.mjs';
 
 describe('locales', () => {
   const langs = readdirSync(resolve(process.cwd(), 'static/_locales'));
@@ -14,12 +13,10 @@ describe('locales', () => {
     expect(langs.sort()).toEqual(['en', 'es', 'fr', 'ja', 'ko', 'pt_BR', 'zh_CN', 'zh_TW']);
   });
 
-  it.each(langs)('%s has matching keys and placeholders (with v40 English fallbacks), and no empty messages', (lang) => {
+  it.each(langs)('%s has the same keys and placeholders as en, and no empty messages', (lang) => {
     const en = loadMessages('en');
     const d = loadMessages(lang);
-    // v40 は指定された ja/en の 2 キーだけを追加する。他言語では Chrome の default_locale=en に任せる。
-    const expected = Object.keys(en).filter((k) => lang === 'ja' || lang === 'en' || k in d || !ENGLISH_FALLBACK_KEYS.includes(k));
-    expect(Object.keys(d).sort()).toEqual(expected.sort());
+    expect(Object.keys(d).sort()).toEqual(Object.keys(en).sort());
     for (const [k, v] of Object.entries(d)) {
       expect(v.message.trim(), `${lang}.${k}`).not.toBe('');
       expect(v.placeholders, `${lang}.${k} placeholders`).toEqual(en[k].placeholders);

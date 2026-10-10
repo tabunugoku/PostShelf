@@ -122,7 +122,12 @@ it('repositions the fixed menu with the moved row even when menu dimensions are 
   expect(parseFloat(menu.style.top)).toBe(top - 40);
 });
 
-it.each([['ja', '上へ', '下へ'], ['en', 'Move up', 'Move down']])('adds only the specified short labels in %s', (lang, up, down) => {
+it.each([
+  ['ja', '上へ', '下へ'], ['en', 'Move up', 'Move down'],
+  ['zh_CN', '上移', '下移'], ['zh_TW', '上移', '下移'],
+  ['ko', '위로', '아래로'], ['es', 'Subir', 'Bajar'],
+  ['pt_BR', 'Mover para cima', 'Mover para baixo'], ['fr', 'Monter', 'Descendre'],
+])('adds only the specified short labels in %s', (lang, up, down) => {
   const messages = loadMessages(lang);
   expect(messages.folderMoveUp?.message).toBe(up);
   expect(messages.folderMoveDown?.message).toBe(down);

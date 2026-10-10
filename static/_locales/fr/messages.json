@@ -580,6 +580,12 @@
   "folderMore": {
     "message": "Modifier nom, icône, couleur"
   },
+  "folderMoveUp": {
+    "message": "Monter"
+  },
+  "folderMoveDown": {
+    "message": "Descendre"
+  },
   "cardMenu": {
     "message": "Plus d'actions"
   },

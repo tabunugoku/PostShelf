@@ -7,8 +7,6 @@ import { extensionIdFromKey, idFromDoc, listZip } from './lib.mjs';
 export const REQUIRED_PERMISSIONS = ['storage', 'unlimitedStorage', 'sidePanel'];
 export const REQUIRED_HOST_PERMISSIONS = ['https://x.com/*', 'https://twitter.com/*'];
 export const LOCALES = ['ja', 'en', 'zh_CN', 'zh_TW', 'ko', 'es', 'pt_BR', 'fr'];
-/** v40 で ja/en にだけ追加するキー。他言語は default_locale=en にフォールバックする。 */
-export const ENGLISH_FALLBACK_KEYS = ['folderMoveUp', 'folderMoveDown'];
 
 export const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
 
@@ -43,9 +41,7 @@ export function checkLocales(localeMessages) {
   const base = localeMessages.en;
   for (const [loc, msgs] of Object.entries(localeMessages)) {
     if (loc === 'en') continue;
-    for (const k of Object.keys(base)) {
-      if (!(k in msgs) && (loc === 'ja' || !ENGLISH_FALLBACK_KEYS.includes(k))) errors.push(`${loc}: キー ${k} がありません`);
-    }
+    for (const k of Object.keys(base)) if (!(k in msgs)) errors.push(`${loc}: キー ${k} がありません`);
     for (const k of Object.keys(msgs)) if (!(k in base)) errors.push(`${loc}: en にないキー ${k} があります`);
     for (const k of Object.keys(base)) {
       if (!(k in msgs)) continue;

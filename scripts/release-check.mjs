@@ -33,7 +33,7 @@ const results = [
   ['リリースノート (docs/releases/v<version>.md) に「追加」と「修正」の節がある', notesErrors],
   ['version が package.json と一致', checkVersion(manifest, pkg)],
   ['必須の permissions / host_permissions が現在の一覧と同じ', [...checkPermissions(manifest), ...checkPermissions(distManifest)]],
-  ['8 言語の messages.json のキーとプレースホルダーを確認（v40 の 2 キーは英語にフォールバック可）', checkLocales(locales)],
+  ['8 言語の messages.json のキーとプレースホルダーが一致', checkLocales(locales)],
   ['dist に外部スクリプト URL / eval / new Function が無い', checkNoRemoteCode('dist')],
   ['manifest が指すファイルがすべて zip に入っている', checkManifestFilesInZip(manifest, listZip(readFileSync(zipPath)))],
   ['key から求めた拡張機能 ID が docs/INSTALL.md と同じ', checkKeyId(manifest, readFileSync('docs/INSTALL.md', 'utf8'))],

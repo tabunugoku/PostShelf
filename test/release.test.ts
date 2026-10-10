@@ -55,7 +55,7 @@ describe('v13-C-3: release checks', () => {
     expect(checkPermissions({ ...manifest, permissions: [...manifest.permissions, 'tabs'] })).toHaveLength(1);
     expect(checkPermissions({ ...manifest, host_permissions: [...manifest.host_permissions, 'https://pbs.twimg.com/*'] })).toHaveLength(1);
   });
-  it('all 8 locales have matching keys and placeholders with the v40 English fallbacks (and a broken one is reported)', () => {
+  it('all 8 locales have the same keys and placeholders (and a broken one is reported)', () => {
     const all = Object.fromEntries(LOCALES.map((l: string) => [l, JSON.parse(read(`static/_locales/${l}/messages.json`))]));
     expect(LOCALES).toHaveLength(8);
     expect(checkLocales(all)).toEqual([]);
@@ -64,17 +64,10 @@ describe('v13-C-3: release checks', () => {
     broken.ko.importBanner.message = '숫자 없음';
     expect(checkLocales(broken).length).toBeGreaterThanOrEqual(2);
   });
-  it('requires v40 move labels in ja/en and still checks optional translations when present', () => {
+  it('reports a missing key in a language', () => {
     const all = Object.fromEntries(LOCALES.map((l: string) => [l, JSON.parse(read(`static/_locales/${l}/messages.json`))]));
-    delete all.ja.folderMoveUp;
-    all.ko.folderMoveDown = { message: '$COUNT$' };
-    expect(checkLocales(all)).toEqual([
-      'ja: キー folderMoveUp がありません',
-      'ko: folderMoveDown のプレースホルダーが en と一致しません',
-    ]);
-    const missingEnglish = Object.fromEntries(LOCALES.map((l: string) => [l, JSON.parse(read(`static/_locales/${l}/messages.json`))]));
-    delete missingEnglish.en.folderMoveDown;
-    expect(checkLocales(missingEnglish)).toContain('ja: en にないキー folderMoveDown があります');
+    delete all.ko.folderMoveUp;
+    expect(checkLocales(all)).toContain('ko: キー folderMoveUp がありません');
   });
   it('remote code patterns are detected', async () => {
     const { mkdtempSync, writeFileSync } = await import('node:fs');

@@ -580,6 +580,12 @@
   "folderMore": {
     "message": "變更名稱、圖示、顏色"
   },
+  "folderMoveUp": {
+    "message": "上移"
+  },
+  "folderMoveDown": {
+    "message": "下移"
+  },
   "cardMenu": {
     "message": "更多操作"
   },
