@@ -10,7 +10,16 @@ import { hasSameName } from '../shared/folderCreateMenu';
  * アイコンと色は選んだ時点で保存し、名前は Enter / フォーカスを外したときに保存する。
  */
 /** existing: 同名の判定に使う、ほかのフォルダ (「未分類」を含む。このフォルダ自身は含めない) */
-export function FolderEdit(props: { folder: Folder; existing?: Folder[]; onSaved: () => void; onRequestDelete: () => void }) {
+export function FolderEdit(props: {
+  folder: Folder;
+  existing?: Folder[];
+  onSaved: () => void;
+  onRequestDelete: () => void;
+  onMove?: (direction: -1 | 1) => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  moving?: boolean;
+}) {
   const { folder } = props;
   const [name, setName] = useState(displayName(folder));
   const [error, setError] = useState('');
@@ -83,6 +92,16 @@ export function FolderEdit(props: { folder: Folder; existing?: Folder[]; onSaved
         ))}
       </div>
       {error && <p class="error">{error}</p>}
+      {props.onMove && (
+        <div class="folder-reorder">
+          <button class="menu-item" data-action="folder-move-up" disabled={!props.canMoveUp || props.moving} onClick={() => props.onMove?.(-1)}>
+            <Icon name="ti-arrow-up" /> {t('folderMoveUp')}
+          </button>
+          <button class="menu-item" data-action="folder-move-down" disabled={!props.canMoveDown || props.moving} onClick={() => props.onMove?.(1)}>
+            <Icon name="ti-arrow-down" /> {t('folderMoveDown')}
+          </button>
+        </div>
+      )}
       <div class="erow">
         <button class="danger" onClick={props.onRequestDelete}>
           <Icon name="ti-trash" /> {t('delete')}

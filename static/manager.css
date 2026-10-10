@@ -215,6 +215,7 @@ button:disabled{cursor:not-allowed}
 .folder-edit .erow{display:flex;gap:8px;align-items:center;margin-bottom:10px;padding:0 4px}
 .folder-edit .erow.wrap{flex-wrap:wrap;gap:6px}
 .folder-edit .erow:last-child{margin-bottom:0}
+.folder-reorder{border-top:1px solid var(--border-strong);padding-top:6px;margin:0 4px 10px}
 .elabel{font-size:14px;color:var(--text-secondary);min-width:60px;white-space:nowrap;flex:none}
 .ic{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;font-size:18px;border:1px solid var(--border);padding:0}
 .ic.on{background:var(--fill-ghost-selected);border:2px solid var(--text-primary)}

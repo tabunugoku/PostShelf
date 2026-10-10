@@ -140,6 +140,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [triageWanted, setTriageWanted] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
+  const [folderMoving, setFolderMoving] = useState(false);
+  const folderMoveBusy = useRef(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [dragOver, setDragOver] = useState<{ id: string; kind: 'folder' | 'posts' } | null>(null);
   // dragover 中は getData が保護されるため、同じ行へのドロップ判定には dragstart の ID を使う。
@@ -527,12 +529,43 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const bulkIds = [...selected];
   const removableFolders = [inboxView(storedInbox), ...userFolders].filter((f) => bookmarks.some((b) => selected.has(b.tweetId) && b.folderIds.includes(f.id)));
 
-  const editNode = (f: Folder) =>
-    editing === f.id && (
-      <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-edit">
-        <FolderEdit folder={f} existing={[inboxOf(folders), ...folders]} onSaved={() => void reload()} onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }} />
+  const moveFolder = async (id: string, direction: -1 | 1) => {
+    if (folderMoveBusy.current) return;
+    const order = userFolders.map((f) => f.id);
+    const index = order.indexOf(id);
+    const next = index + direction;
+    if (index < 0 || next < 0 || next >= order.length) return;
+    [order[index], order[next]] = [order[next], order[index]];
+    folderMoveBusy.current = true;
+    setFolderMoving(true);
+    try {
+      await reorderFolders(order);
+      await reload();
+    } catch {
+      setToast({ key: Date.now(), message: t('errorStorage') });
+    } finally {
+      folderMoveBusy.current = false;
+      setFolderMoving(false);
+    }
+  };
+  const editNode = (f: Folder) => {
+    if (editing !== f.id) return null;
+    const index = userFolders.findIndex((x) => x.id === f.id);
+    return (
+      <Dropdown fixed positionKey={f.order} onClose={() => setEditing(null)} label={t('folderMore')} class="menu-edit">
+        <FolderEdit
+          folder={f}
+          existing={[inboxOf(folders), ...folders]}
+          onSaved={() => void reload()}
+          onMove={(direction) => void moveFolder(f.id, direction)}
+          canMoveUp={index > 0}
+          canMoveDown={index >= 0 && index < userFolders.length - 1}
+          moving={folderMoving}
+          onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }}
+        />
       </Dropdown>
     );
+  };
 
   const viewRow = (f: Folder, opts: { smart?: boolean } = {}) => {
     const reorderable = !opts.smart;

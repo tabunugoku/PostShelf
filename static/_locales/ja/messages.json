@@ -580,6 +580,12 @@
   "folderMore": {
     "message": "名前・アイコン・色を変更"
   },
+  "folderMoveUp": {
+    "message": "上へ"
+  },
+  "folderMoveDown": {
+    "message": "下へ"
+  },
   "cardMenu": {
     "message": "その他の操作"
   },
