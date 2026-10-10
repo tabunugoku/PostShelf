@@ -64,6 +64,11 @@ describe('v13-C-3: release checks', () => {
     broken.ko.importBanner.message = '숫자 없음';
     expect(checkLocales(broken).length).toBeGreaterThanOrEqual(2);
   });
+  it('reports a missing key in a language', () => {
+    const all = Object.fromEntries(LOCALES.map((l: string) => [l, JSON.parse(read(`static/_locales/${l}/messages.json`))]));
+    delete all.ko.folderMore;
+    expect(checkLocales(all)).toContain('ko: キー folderMore がありません');
+  });
   it('remote code patterns are detected', async () => {
     const { mkdtempSync, writeFileSync } = await import('node:fs');
     const { tmpdir } = await import('node:os');

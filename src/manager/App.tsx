@@ -38,7 +38,6 @@ import {
   onLastSeenAccountChanged,
   setAccountScope,
   type AccountSummary,
-  createFolder,
   deleteBookmarks,
   deleteFolder,
   getBookmark,
@@ -140,8 +139,24 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [triageWanted, setTriageWanted] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
+  const [creatingFolder, setCreatingFolder] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
-  const [dragOver, setDragOver] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState<{ id: string; kind: 'folder' | 'posts' } | null>(null);
+  // dragover 中は getData が保護されるため、同じ行へのドロップ判定には dragstart の ID を使う。
+  const draggedFolder = useRef<string | null>(null);
+  const clearDrag = () => {
+    draggedFolder.current = null;
+    setDragOver(null);
+  };
+  useEffect(() => {
+    const cancel = (e: KeyboardEvent) => { if (e.key === 'Escape') clearDrag(); };
+    document.addEventListener('dragend', clearDrag);
+    document.addEventListener('keydown', cancel);
+    return () => {
+      document.removeEventListener('dragend', clearDrag);
+      document.removeEventListener('keydown', cancel);
+    };
+  }, []);
   const [showHow, setShowHow] = useState(false);
   const [bannerOn, setBannerOn] = useState(false);
   /** 更新した直後の最初の起動だけ出すお知らせ (更新後のバージョン) */
@@ -258,6 +273,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setSelected(new Set());
     setFilters({});
     setEditing(null);
+    setCreatingFolder(false);
     setMenu(null);
     setFilterOpen(false);
     void updateSettings({ lastFolderId: id }).catch(() => {});
@@ -493,7 +509,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const virtual = (id: string) => id === ALL_FOLDER_ID || id === RECENT_ID;
   const onFolderDrop = async (target: Folder, e: DragEvent) => {
     e.preventDefault();
-    setDragOver(null);
+    clearDrag();
     const posts = e.dataTransfer?.getData(MIME_POSTS);
     const dragged = e.dataTransfer?.getData(MIME_FOLDER);
     if (posts && !virtual(target.id)) {
@@ -512,12 +528,19 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const bulkIds = [...selected];
   const removableFolders = [inboxView(storedInbox), ...userFolders].filter((f) => bookmarks.some((b) => selected.has(b.tweetId) && b.folderIds.includes(f.id)));
 
-  const editNode = (f: Folder) =>
-    editing === f.id && (
+  const editNode = (f: Folder) => {
+    if (editing !== f.id) return null;
+    return (
       <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-edit">
-        <FolderEdit folder={f} existing={[inboxOf(folders), ...folders]} onSaved={() => void reload()} onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }} />
+        <FolderEdit
+          folder={f}
+          existing={[inboxOf(folders), ...folders]}
+          onSaved={() => { setEditing(null); void reload(); }}
+          onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }}
+        />
       </Dropdown>
     );
+  };
 
   const viewRow = (f: Folder, opts: { smart?: boolean } = {}) => {
     const reorderable = !opts.smart;
@@ -526,23 +549,33 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     return (
       <div
         key={f.id}
-        class={`fr${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}${dragOver === f.id ? ' drop' : ''}`}
+        class={`fr${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}${dragOver?.id === f.id ? dragOver.kind === 'folder' ? ' drop-before' : ' drop' : ''}`}
         role="button"
         tabIndex={0}
         aria-current={f.id === curFolder.id && page === 'bookmarks' ? 'true' : undefined}
         title={virtual(f.id) ? undefined : t('dragHint')}
         draggable={reorderable && editing !== f.id}
         onDragStart={(e) => {
+          draggedFolder.current = f.id;
+          setDragOver(null);
           e.dataTransfer?.setData(MIME_FOLDER, f.id);
           if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
         }}
         onDragOver={(e) => {
-          if (!folderDroppable(f, e.dataTransfer?.types ?? [])) return;
+          const types = e.dataTransfer?.types ?? [];
+          const kind = types.includes(MIME_POSTS) ? 'posts' : 'folder';
+          if (!folderDroppable(f, types) || (kind === 'folder' && draggedFolder.current === f.id)) {
+            setDragOver(null);
+            return;
+          }
           e.preventDefault();
-          if (e.dataTransfer) e.dataTransfer.dropEffect = e.altKey ? 'move' : 'copy';
-          setDragOver(f.id);
+          if (e.dataTransfer) e.dataTransfer.dropEffect = kind === 'folder' || e.altKey ? 'move' : 'copy';
+          setDragOver({ id: f.id, kind });
         }}
-        onDragLeave={() => setDragOver((d) => (d === f.id ? null : d))}
+        onDragLeave={(e) => {
+          if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+          setDragOver((d) => (d?.id === f.id ? null : d));
+        }}
         onDrop={(e) => void onFolderDrop(f, e)}
         onClick={() => chooseView(f.id)}
         onKeyDown={(e) => {
@@ -565,6 +598,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               aria-expanded={editing === f.id}
               onClick={(e) => {
                 e.stopPropagation();
+                setCreatingFolder(false);
                 setEditing(editing === f.id ? null : f.id);
               }}
             >
@@ -577,12 +611,22 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     );
   };
 
-  const newFolder = async () => {
-    const f = await createFolder({ name: t('newFolder') });
-    await reload();
-    chooseView(f.id);
-    setEditing(f.id);
+  const newFolder = () => {
+    setEditing(null);
+    setMenu(null);
+    setCreatingFolder(true);
   };
+  const createNode = creatingFolder && (
+    <Dropdown fixed onClose={() => setCreatingFolder(false)} label={t('newFolder')} class="menu-edit">
+      <FolderEdit
+        existing={[inboxOf(folders), ...folders]}
+        onSaved={(f) => {
+          setCreatingFolder(false);
+          if (f) void reload().then(() => chooseView(f.id));
+        }}
+      />
+    </Dropdown>
+  );
 
   // ---- 共通パーツ ----
   const searchBox = (
@@ -1119,7 +1163,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                 aria-haspopup="menu"
                 aria-expanded={menu === 'folders'}
                 aria-label={`${t('chooseFolderMenu')}: ${viewName}`}
-                onClick={() => setMenu(menu === 'folders' ? null : 'folders')}
+                onClick={() => { setCreatingFolder(false); setMenu(menu === 'folders' ? null : 'folders'); }}
               >
                 <span class="fb-main">
                   <Icon name={page === 'settings' ? 'ti-settings' : curFolder.icon} color={page === 'settings' ? undefined : curFolder.color} />
@@ -1137,7 +1181,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                       <span class="n">{count(f.id)}</span>
                     </button>
                   ))}
-                  <button class="menu-item" onClick={() => { setMenu(null); void newFolder(); }}>
+                  <button class="menu-item" onClick={newFolder}>
                     <Icon name="ti-plus" /> {t('newFolder')}
                   </button>
                   <button class="menu-item" onClick={() => { setMenu(null); setPage('settings'); }}>
@@ -1145,6 +1189,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                   </button>
                 </Dropdown>
               )}
+              {createNode}
             </span>
             <button class="icon-btn bordered" aria-label={t('searchShow')} title={t('search')} aria-pressed={searchOpen} onClick={() => setSearchOpen(!searchOpen)}>
               <Icon name="ti-search" />
@@ -1184,9 +1229,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         {smartViews.map((f) => viewRow(f, { smart: true }))}
         <div class="sec">{t('foldersSection')}</div>
         {userFolders.map((f) => viewRow(f))}
-        <div class="fr add" role="button" tabIndex={0} onClick={() => void newFolder()} onKeyDown={(e) => e.key === 'Enter' && void newFolder()}>
-          <Icon name="ti-plus" />
-          {t('newFolder')}
+        <div class="menu-anchor folder-create-anchor">
+          <div class="fr add" role="button" tabIndex={0} onClick={newFolder} onKeyDown={(e) => e.key === 'Enter' && newFolder()}>
+            <Icon name="ti-plus" />
+            {t('newFolder')}
+          </div>
+          {createNode}
         </div>
         <div class="grow" />
         {surface === 'tab' && hasSidePanel() && (

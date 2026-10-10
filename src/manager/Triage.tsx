@@ -45,6 +45,7 @@ export function Triage(props: {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const root = useRef<HTMLDivElement>(null);
+  const previousMenus = useRef({ creating, more });
   /** choose の実行中 (await のあいだ) は、次の choose を受けない */
   const busy = useRef(false);
   const latest = useRef({ index, finished, more, creating });
@@ -56,6 +57,15 @@ export function Triage(props: {
     root.current?.focus();
     return () => prev?.focus?.();
   }, []);
+
+  useEffect(() => {
+    const prev = previousMenus.current;
+    previousMenus.current = { creating, more };
+    // 入力欄ごとメニューが外れるとフォーカスは body に落ちる。残っているボタンのフォーカスは保つ。
+    if ((prev.creating && !creating) || (prev.more && !more)) {
+      if (!root.current?.contains(document.activeElement)) root.current?.focus();
+    }
+  }, [creating, more]);
 
   const isLive = (i: number) => props.live.has(queue[i].tweetId);
   const step = (from: number, d: 1 | -1): number | null => {
@@ -226,21 +236,30 @@ export function Triage(props: {
                     <Icon name="ti-chevron-down" />
                   </button>
                   {more && (
-                    <Dropdown onClose={() => setMore(false)} label={t('triageOtherFolders')} class="menu-wide">
+                    <Dropdown fixed onClose={() => setMore(false)} label={t('triageOtherFolders')} class="menu-wide menu-over">
                       <FolderPickerHost
                         folders={props.pickerFolders}
                         selected={assigned[cur.tweetId] ?? []}
-                        onChange={async (sel) => {
+                        onChange={async (sel, source) => {
+                          if (!cur || finished || busy.current) return;
+                          busy.current = true;
                           try {
                             const ids = [...sel];
+                            // 最後のチェックを外して戻る「未分類」は、新しい分類には数えない。
+                            const added = ids.filter((id) => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
                             await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
-                            const added = ids.filter((id) => !(assigned[cur.tweetId] ?? []).includes(id));
                             if (added.length) void updateRecentFolders(added).catch(() => {});
                             mark(cur, ids);
                             setError('');
                             void props.onChanged();
+                            if (added.length && source !== 'created') {
+                              setMore(false);
+                              next();
+                            }
                           } catch {
                             setError(t('errorStorage'));
+                          } finally {
+                            busy.current = false;
                           }
                         }}
                       />

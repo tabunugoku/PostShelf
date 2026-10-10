@@ -176,7 +176,7 @@ describe('manager organizing', () => {
     expect((await listFolders()).map((f) => f.id)).toEqual(['all', 'inbox', b]); // 所属が空になったポストの受け皿 (v18)
   });
 
-  it('folder edit popover: any icon can have a color, "no color" clears it, the name commits on Enter', async () => {
+  it('folder edit popover saves icon/color explicitly, clears color on Save, and saves the name on Enter', async () => {
     await openEdit('Alpha');
     await click($('.folder-edit .ic[data-icon="ti-star"]'));
     const sws = $$<HTMLButtonElement>('.folder-edit .sw');
@@ -184,10 +184,17 @@ describe('manager organizing', () => {
     expect(sws.every((x) => !x.disabled)).toBe(true);
     await click($('.folder-edit .sw[data-color="#378ADD"]'));
     let f = (await listFolders()).find((x) => x.id === a)!;
+    expect(f.icon).toBe('ti-folder');
+    expect(f.color).toBeUndefined();
+    await click($('.folder-edit .primary'));
+    f = (await listFolders()).find((x) => x.id === a)!;
     expect(f).toMatchObject({ icon: 'ti-star', color: '#378ADD' });
+    await openEdit('Alpha');
     await click($('.folder-edit .sw-none'));
+    await click($('.folder-edit .primary'));
     f = (await listFolders()).find((x) => x.id === a)!;
     expect(f.color).toBeUndefined();
+    await openEdit('Alpha');
     const input = $<HTMLInputElement>('.folder-edit input');
     await act(() => {
       input.value = 'Renamed';
