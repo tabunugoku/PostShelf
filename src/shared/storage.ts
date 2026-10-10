@@ -454,14 +454,13 @@ function validBookmark(b: any): b is Bookmark {
 function cleanQuote(raw: unknown): Bookmark['snapshot']['quote'] {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
   const q = raw as Record<string, unknown>;
-  const http = (v: unknown): v is string => isStr(v) && /^https?:\/\//i.test(v);
-  if (!isStr(q.author) || !isStr(q.handle) || !isStr(q.text) || !Array.isArray(q.media) || !q.media.every(http) ||
-      (q.avatar !== undefined && !http(q.avatar)) || (q.createdAt !== undefined && !isStr(q.createdAt)) ||
+  const httpsOnly = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
+  if (!isStr(q.author) || !isStr(q.handle) || !isStr(q.text) || !Array.isArray(q.media) || (q.createdAt !== undefined && !isStr(q.createdAt)) ||
       (q.url !== undefined && (!isStr(q.url) || !X_URL.test(q.url)))) return undefined;
   const segments = sanitizeSegments(q.segments);
   return {
-    author: q.author, handle: q.handle, text: q.text, media: q.media,
-    ...(q.avatar !== undefined ? { avatar: q.avatar } : {}), ...(isStr(q.createdAt) ? { createdAt: q.createdAt } : {}),
+    author: q.author, handle: q.handle, text: q.text, media: q.media.filter(httpsOnly),
+    ...(httpsOnly(q.avatar) ? { avatar: q.avatar } : {}), ...(isStr(q.createdAt) ? { createdAt: q.createdAt } : {}),
     ...(isStr(q.url) ? { url: q.url } : {}), ...(segments ? { segments } : {}), ...(q.translated === true ? { translated: true } : {}),
   };
 }

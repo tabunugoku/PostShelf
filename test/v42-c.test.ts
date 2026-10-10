@@ -7,7 +7,7 @@ import { FullTextQueue, defaultDeps, type AskResult } from '../src/background/fu
 import { handleMessage } from '../src/content/messages';
 import { updateFromStatusPage } from '../src/content/fulltext';
 import { resetAccount, setCurrentAccount } from '../src/content/account';
-const quote: QuoteSnapshot = { text: 'Sample quote', author: 'Sample Quote', handle: '@sample_quote', media: ['http://example.invalid/q.jpg'], avatar: 'https://example.invalid/avatar.jpg', url: 'https://x.com/sample_quote/status/333', createdAt: '2026-10-10T00:00:00Z', segments: [{ t: 'link', v: 'link', href: 'https://example.invalid/link' }], translated: true };
+const quote: QuoteSnapshot = { text: 'Sample quote', author: 'Sample Quote', handle: '@sample_quote', media: ['https://example.invalid/q.jpg'], avatar: 'https://example.invalid/avatar.jpg', url: 'https://x.com/sample_quote/status/333', createdAt: '2026-10-10T00:00:00Z', segments: [{ t: 'link', v: 'link', href: 'https://example.invalid/link' }], translated: true };
 const snap = (over: Partial<Snapshot> = {}): Snapshot => ({ text: 'Sample main', author: 'Sample Main', handle: '@sample_main', media: [], url: 'https://x.com/sample_main/status/111', ...over });
 beforeEach(() => { installChromeMock(); resetAccount(); setAccountScope('me'); history.pushState(null, '', '/home'); });
 describe('v42-C: resaving and import compatibility', () => {
@@ -35,7 +35,7 @@ describe('v42-C: resaving and import compatibility', () => {
     installChromeMock(); setAccountScope('me'); expect(await importData(JSON.parse(JSON.stringify(out)))).toBe(1);
     expect((await getBookmark('111'))!.snapshot).toEqual(snap({ quote, translated: true }));
   });
-  it.each([{ media: [5] }, { media: ['javascript:alert(1)'] }, { media: ['data:image/png,x'] }, { url: 'https://example.invalid/post' }, { url: 'https://x.com.example.invalid/sample_quote/status/333' }, { author: 5 }, { text: null }, { handle: [] }, { avatar: 5 }, { createdAt: 5 }])('drops only invalid quote %j', async invalid => {
+  it.each([{ media: 'not an array' }, { url: 'https://example.invalid/post' }, { url: 'https://x.com.example.invalid/sample_quote/status/333' }, { author: 5 }, { text: null }, { handle: [] }, { createdAt: 5 }])('drops only invalid quote %j', async invalid => {
     await setBookmarkFolders('111', [], snap({ quote, translated: true })); const out = await exportData();
     (out.bookmarks[0].snapshot as any).quote = { ...quote, ...invalid };
     installChromeMock(); setAccountScope('me'); expect(await importData(out)).toBe(1);
