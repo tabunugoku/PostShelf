@@ -66,6 +66,17 @@
     m('meta[property="og:locale"]',t.loc);m('meta[property="og:locale:alternate"]',t.alt2);
     var a=d.querySelectorAll('[data-aria-ja]');
     for(var i=0;i<a.length;i++)a[i].setAttribute('aria-label',a[i].getAttribute('data-aria-'+lg));
+    var table=d.querySelector('#compare table');
+    if(table){
+      var headings=table.querySelectorAll('thead th'),rows=table.querySelectorAll('tbody tr');
+      for(var r=0;r<rows.length;r++){
+        var cells=rows[r].querySelectorAll('td');
+        for(var c=0;c<cells.length;c++){
+          var heading=headings[c+1],translated=heading.querySelector('.'+lg);
+          cells[c].setAttribute('data-label',(translated||heading).textContent.trim());
+        }
+      }
+    }
   }
   window.psSetLang=function(lg){
     try{localStorage.setItem('ps-lang',lg)}catch(e){}
@@ -115,6 +126,19 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--fill);outline-offse
 .lang button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
 .links+.lang{margin-left:0}
 @media(max-width:820px){.links{display:none}.nav .lang{margin-left:auto}}
+.lang-short,.mobile-tabs{display:none}
+@media(max-width:600px){
+  .nav .wrap{height:58px;padding:0 16px;gap:8px}
+  .nav .brand{gap:6px;flex:none;white-space:nowrap}
+  .nav .lang{flex:none;white-space:nowrap}
+  .nav .lang button{min-height:44px;padding:4px 8px}
+  .lang-wide{display:none}.lang-short{display:inline}
+  #l-ja{order:1}#l-en{order:3}
+  .lang:after{content:'/';order:2;align-self:center;color:var(--mu);padding:0 2px}
+  .nav .github{width:44px;padding:0;flex:none}.github .label{display:none}
+  .mobile-tabs{display:flex;gap:4px;overflow-x:auto;padding:4px 16px;border-bottom:1px solid var(--bd);color:var(--mu)}
+  .mobile-tabs a{flex:none;min-height:44px;display:flex;align-items:center;padding:0 12px;white-space:nowrap;text-decoration:none}
+}
 
 /* hero */
 .hero{padding:72px 0 48px}
@@ -128,6 +152,18 @@ h1 em{font-style:normal;color:var(--fill)}
 .lead{font-size:18px;line-height:1.8;color:var(--mu);max-width:30em}
 .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
 .note{margin-top:14px;font-size:13px;color:var(--mu)}
+.device-note{display:none}
+@media (pointer:coarse) and (max-width:820px){
+  .device-note{display:block;margin-top:24px;padding:16px;border:1px solid var(--bds);border-radius:12px;background:var(--s1)}
+  .device-note h2{font-size:17px;margin:0 0 6px}.device-note p{font-size:14px;color:var(--mu)}
+  .device-note .btn{margin-top:12px}
+  .device-note [hidden]{display:none}
+}
+@media(max-width:600px){
+  .hero .cta{flex-direction:column}.hero .cta .btn,.device-note .btn{width:100%}
+  .btn.pri{background:var(--at);border-color:var(--at);color:var(--bg)}
+  h1 em{color:var(--at)}
+}
 
 /* app window drawn in markup */
 .demo{flex:1 1 440px;min-width:0}
@@ -150,12 +186,25 @@ h1 em{font-style:normal;color:var(--fill)}
 @keyframes fly{0%,10%{transform:none;opacity:1}40%{transform:translate(-108%,var(--dy)) scale(.4);opacity:1}48%,100%{transform:translate(-108%,var(--dy)) scale(.15);opacity:0}}
 .bump{animation:bump 9s infinite}
 @keyframes bump{0%,32%{transform:none}42%{transform:scale(1.05)}56%,100%{transform:none}}
+.cap-small{display:none}
+@media(max-width:600px){
+  .win{flex-direction:column}
+  .win .side{width:auto;flex-direction:row;overflow-x:auto;padding:10px;gap:6px;border-right:0;border-bottom:1px solid var(--bd)}
+  .win .side .row{flex:none;white-space:nowrap;border:1px solid var(--bds);border-radius:999px}
+  .win .pane{min-height:0}
+  .fly,.bump{animation:none;transform:none;opacity:1}
+  .cap-wide{display:none}.cap-small{display:inline}
+}
 
 /* stats */
 .stats{display:flex;flex-wrap:wrap;gap:14px;padding-bottom:24px}
 .stat{flex:1 1 200px;border:1px solid var(--bd);background:var(--s1);border-radius:16px;padding:18px;text-align:center}
 .stat b{display:block;font-size:34px;line-height:1.25;color:var(--fill)}
 .stat>span{font-size:13px;color:var(--mu)}
+@media(max-width:600px){
+  .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat{padding:12px;border-radius:12px}.stat b{font-size:25px;color:var(--at)}.stat>span{font-size:12px}
+}
 
 /* sections */
 .sec{padding:80px 0}
@@ -172,6 +221,17 @@ h2{font-size:clamp(26px,3.4vw,34px);line-height:1.3;margin:6px 0 8px}
 .sw{margin-top:36px;border:1px solid var(--bd);background:var(--bg);border-radius:16px;padding:22px;display:flex;flex-wrap:wrap;gap:24px;align-items:center}
 .sw .t{flex:1 1 280px}.sw .t b{font-size:17px}.sw .t p{font-size:14px;color:var(--mu);margin-top:4px}
 .dots{display:flex;gap:10px;flex-wrap:wrap}.dots i{width:30px;height:30px;border-radius:50%;display:block}
+.dots .none{display:none}
+@media(max-width:600px){
+  #features .grid{gap:8px}
+  .fc{display:grid;grid-template-columns:36px minmax(0,1fr);gap:4px 10px;padding:14px;border-radius:12px}
+  .fc .ic{width:36px;height:36px;margin:0;grid-column:1;grid-row:1}
+  .fc h3{grid-column:2;grid-row:1;align-self:center;margin:0;font-size:16px}
+  .fc p{grid-column:1 / -1;font-size:14px}
+  .sw{padding:14px;gap:14px;margin-top:20px}.sw .t{flex-basis:100%}
+  .dots{gap:8px;flex-wrap:nowrap}.dots i{width:24px;height:24px;flex:none}
+  .dots .none{display:block;border:2px dashed var(--mu)}
+}
 
 /* install */
 .steps{display:flex;flex-wrap:wrap;gap:16px;margin-top:8px}
@@ -196,6 +256,21 @@ th.me,td.me{background:var(--bgacc)}
 th.me{color:var(--at)}td.me{font-weight:700}
 tbody th{font-weight:400;color:var(--mu)}
 .src{margin-top:12px;font-size:12.5px;line-height:1.7;color:var(--mu)}
+.compare-toggle{display:none}
+@media(max-width:600px){
+  .tw{overflow:visible;border:0;border-radius:0;background:transparent}
+  .tw table{display:block;min-width:0}
+  .tw thead{display:none}.tw tbody{display:grid;gap:12px}
+  .tw tr{display:block;border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--bg)}
+  .tw tbody th{display:block;padding:12px;font-weight:700;color:var(--fg);background:var(--s1);border-top:0;border-bottom:1px solid var(--bd)}
+  .tw td{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px;padding:10px 12px}
+  .tw tbody th+td{border-top:0}
+  .tw td:before{content:attr(data-label);color:var(--mu);font-weight:600}
+  .tw td.me:before{color:var(--at)}
+  .tw td>span{grid-column:2;min-width:0;overflow-wrap:anywhere}
+  #compare[data-collapsible]:not([data-expanded]) tbody tr:nth-child(n+5){display:none}
+  .compare-toggle:not([hidden]){display:inline-flex;width:100%;margin-top:14px}
+}
 
 /* author */
 .au{border:1px solid var(--bd);background:var(--s1);border-radius:20px;padding:28px;display:flex;flex-wrap:wrap;gap:24px;align-items:center}
@@ -204,6 +279,27 @@ tbody th{font-weight:400;color:var(--mu)}
 .au h3{font-size:22px}.au .h{color:var(--mu);font-size:14px}
 .au p{margin:10px 0 16px;font-size:15px;line-height:1.8}
 .au .l{display:flex;gap:10px;flex-wrap:wrap}
+@media(max-width:820px){
+  .nav .brand,.nav .lang button{min-height:44px}
+  .btn.pri,.st .n{background:var(--at);border-color:var(--at);color:var(--bg)}
+  h1 em,.stat b{color:var(--at)}
+}
+@media(max-width:600px){
+  .st{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px 10px;padding:16px}
+  .st .n{position:static;grid-column:1;grid-row:1;align-self:center;background:var(--at);color:var(--bg)}
+  .st h3{grid-column:2;grid-row:1;align-self:center;margin:0}
+  .st p{grid-column:1 / -1;min-width:0;overflow-x:auto}
+  .st code{white-space:nowrap}
+  .au{display:grid;grid-template-columns:56px minmax(0,1fr);gap:4px 12px;padding:16px}
+  .au img{width:56px;height:56px;grid-column:1;grid-row:1 / 3;align-self:center}
+  .au .b{display:contents}
+  .au h3{grid-column:2;grid-row:1;font-size:18px;align-self:end}
+  .au .h{grid-column:2;grid-row:2;align-self:start}
+  .au p{grid-column:1 / -1;margin:12px 0}
+  .au .l{grid-column:1 / -1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .au .l .btn{width:100%;min-width:0;padding:8px;font-size:13px;text-align:center;overflow-wrap:anywhere}
+  .au .l .btn:first-child{grid-column:1 / -1}
+}
 
 footer{border-top:1px solid var(--bd);padding:32px 0;font-size:13px;color:var(--mu)}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
@@ -228,13 +324,20 @@ footer p{max-width:46em}
     <a href="#author"><span class="ja">作者</span><span class="en">Author</span></a>
   </nav>
   <div class="lang" role="group" aria-label="Language / 言語">
-    <button type="button" id="l-en" aria-pressed="true" lang="en">English</button>
+    <button type="button" id="l-en" aria-pressed="true" lang="en" data-aria-ja="英語" data-aria-en="English" aria-label="English"><span class="lang-wide">English</span><span class="lang-short">EN</span></button>
     <button type="button" id="l-ja" aria-pressed="false" lang="ja">日本語</button>
   </div>
-  <a class="btn sm" href="https://github.com/tabunugoku/PostShelf" data-aria-ja="GitHub で PostShelf を見る (新しいタブで開きます)" data-aria-en="View PostShelf on GitHub (opens in a new tab)" aria-label="View PostShelf on GitHub (opens in a new tab)" target="_blank" rel="noopener noreferrer">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg>GitHub
+  <a class="btn sm github" href="https://github.com/tabunugoku/PostShelf" data-aria-ja="GitHub で PostShelf を見る (新しいタブで開きます)" data-aria-en="View PostShelf on GitHub (opens in a new tab)" aria-label="View PostShelf on GitHub (opens in a new tab)" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg><span class="label">GitHub</span>
   </a>
 </div></header>
+<nav class="mobile-tabs" data-aria-ja="ページ内のメニュー" data-aria-en="On this page" aria-label="On this page">
+  <a href="#features"><span class="ja">機能</span><span class="en">Features</span></a>
+  <a href="#install"><span class="ja">インストール</span><span class="en">Install</span></a>
+  <a href="#usage"><span class="ja">使い方</span><span class="en">How to use</span></a>
+  <a href="#compare"><span class="ja">比較</span><span class="en">Compare</span></a>
+  <a href="#author"><span class="ja">作った人</span><span class="en">Made by</span></a>
+</nav>
 
 <main id="main">
 <section class="hero" id="top"><div class="wrap">
@@ -242,6 +345,14 @@ footer p{max-width:46em}
     <span class="pill"><i></i>v1.1.2 · <span class="ja">無料 · MIT ライセンス</span><span class="en">Free · MIT License</span></span>
     <h1><span class="ja">X のブックマークを<br><em>自分のフォルダ</em>に整理する</span><span class="en">Sort your X bookmarks<br>into <em>your own folders</em></span></h1>
     <p class="lead"><span class="ja">ポストを好きな名前・アイコン・色のフォルダに分けられる Chrome 拡張機能です。データはあなたのパソコンの中だけに保存します。</span><span class="en">A Chrome extension that files your posts into folders with any name, icon and color you like. Your data is stored only on your own computer.</span></p>
+    <aside class="device-note">
+      <h2><span class="ja">パソコンの Chrome で使う拡張機能です</span><span class="en">A Chrome extension for your computer</span></h2>
+      <p><span class="ja">スマホには入れられません。このページのリンクを、あとでパソコンで開いてください。</span><span class="en">It can't be installed on a phone. Open this page on your computer later.</span></p>
+      <button class="btn" type="button" id="share-link" hidden>
+        <span class="share-ready"><span class="ja">リンクを共有</span><span class="en">Share link</span></span>
+        <span class="share-copied" hidden><span class="ja">コピーしました</span><span class="en">Copied</span></span>
+      </button>
+    </aside>
     <div class="cta">
       <a class="btn pri" href="#install"><span class="ja">インストール方法を見る</span><span class="en">See how to install</span></a>
       <a class="btn" href="https://github.com/tabunugoku/PostShelf/releases/latest" target="_blank" rel="noopener noreferrer"><span class="ja">最新版をダウンロード</span><span class="en">Download the latest version</span></a>
@@ -260,12 +371,12 @@ footer p{max-width:46em}
       </div>
       <div class="pane">
         <div class="ttl"><span class="ja">すべて</span><span class="en">All</span> <small><span class="ja">8 件</span><span class="en">8 posts</span></small></div>
-        <div class="card fly" style="--dy:16px"><div class="p"><div class="av">DT</div><div><b>Dev Tips</b> <span style="color:var(--mu)">@devtips</span><br><span class="ja">Chrome 拡張の manifest v3 で service worker を長持ちさせる小技まとめ</span><span class="en">Small tricks to keep a service worker alive in a Chrome extension (manifest v3)</span></div></div><span class="tag"><i style="background:#378ADD"></i><span class="ja">開発ネタ</span><span class="en">Dev ideas</span></span></div>
-        <div class="card fly" style="--dy:-30px;animation-delay:1.6s"><div class="p"><div class="av">UI</div><div><b>UI Daily</b> <span style="color:var(--mu)">@uidaily</span><br><span class="ja">余白とタイポグラフィだけで画面が締まる理由</span><span class="en">Why spacing and typography alone can make a screen feel polished</span></div></div><span class="tag"><i style="background:#D4537E"></i><span class="ja">デザイン</span><span class="en">Design</span></span></div>
-        <div class="card fly" style="--dy:-60px;animation-delay:3.2s"><div class="p"><div class="av">MA</div><div><b>Maho</b> <span style="color:var(--mu)">@maho</span><br><span class="ja">長文スレッド: 個人開発で 3 年続けて学んだこと</span><span class="en">Long thread: what I learned from 3 years of solo development</span></div></div><span class="tag"><i style="background:#BA7517"></i><span class="ja">あとで読む</span><span class="en">Read later</span></span></div>
+        <div class="card fly" style="--dy:16px"><div class="p"><div class="av">DT</div><div><b>Dev Tips</b> <span style="color:var(--mu)">@sample_dev</span><br><span class="ja">Chrome 拡張の manifest v3 で service worker を長持ちさせる小技まとめ</span><span class="en">Small tricks to keep a service worker alive in a Chrome extension (manifest v3)</span></div></div><span class="tag"><i style="background:#378ADD"></i><span class="ja">開発ネタ</span><span class="en">Dev ideas</span></span></div>
+        <div class="card fly" style="--dy:-30px;animation-delay:1.6s"><div class="p"><div class="av">UI</div><div><b>UI Daily</b> <span style="color:var(--mu)">@sample_ui</span><br><span class="ja">余白とタイポグラフィだけで画面が締まる理由</span><span class="en">Why spacing and typography alone can make a screen feel polished</span></div></div><span class="tag"><i style="background:#D4537E"></i><span class="ja">デザイン</span><span class="en">Design</span></span></div>
+        <div class="card fly" style="--dy:-60px;animation-delay:3.2s"><div class="p"><div class="av">MA</div><div><b>Maho</b> <span style="color:var(--mu)">@sample_reader</span><br><span class="ja">長文スレッド: 個人開発で 3 年続けて学んだこと</span><span class="en">Long thread: what I learned from 3 years of solo development</span></div></div><span class="tag"><i style="background:#BA7517"></i><span class="ja">あとで読む</span><span class="en">Read later</span></span></div>
       </div>
     </div>
-    <p class="cap"><span class="ja">ポストが左のフォルダに収まっていきます (イメージ・架空のサンプル)</span><span class="en">Posts settle into the folders on the left (illustration, made-up samples)</span></p>
+    <p class="cap"><span class="cap-wide"><span class="ja">ポストが左のフォルダに収まっていきます (イメージ・架空のサンプル)</span><span class="en">Posts settle into the folders on the left (illustration, made-up samples)</span></span><span class="cap-small"><span class="ja">画面のイメージ (架空のサンプル)</span><span class="en">Illustration with made-up samples</span></span></p>
   </div>
 </div></section>
 
@@ -293,7 +404,7 @@ footer p{max-width:46em}
   </div>
   <div class="sw">
     <div class="t"><b><span class="ja">フォルダの色は 8 色 (と色なし)</span><span class="en">8 folder colors (or none)</span></b><p><span class="ja">アイコンも、どの色でも選べます。</span><span class="en">Any icon can use any color.</span></p></div>
-    <div class="dots" aria-hidden="true"><i style="background:#E24B4A"></i><i style="background:#BA7517"></i><i style="background:#639922"></i><i style="background:#1D9E75"></i><i style="background:#378ADD"></i><i style="background:#7F77DD"></i><i style="background:#D4537E"></i><i style="background:#888780"></i></div>
+    <div class="dots" aria-hidden="true"><i style="background:#E24B4A"></i><i style="background:#BA7517"></i><i style="background:#639922"></i><i style="background:#1D9E75"></i><i style="background:#378ADD"></i><i style="background:#7F77DD"></i><i style="background:#D4537E"></i><i style="background:#888780"></i><i class="none"></i></div>
   </div>
 </div></section>
 
@@ -335,23 +446,27 @@ footer p{max-width:46em}
   <div class="kick">COMPARISON</div>
   <h2><span class="ja">ほかのツールとの比較</span><span class="en">Compared with other tools</span></h2>
   <p class="sub"><span class="ja">得意なことも、苦手なことも、そのまま書きます。2026-10-08 時点で、各ツールの公開ページに書かれていた内容に基づきます。</span><span class="en">What it does well and what it does not, stated plainly. Based on what each tool's public pages said as of 2026-10-08.</span></p>
-  <div class="tw" role="region" data-aria-ja="比較表 (横にスクロールできます)" data-aria-en="Comparison table (scrolls sideways)" aria-label="Comparison table (scrolls sideways)" tabindex="0">
-  <table>
+  <div class="tw" role="region" data-aria-ja="比較表" data-aria-en="Comparison table" aria-label="Comparison table" tabindex="0">
+  <table role="table">
     <thead><tr><th></th><th class="me">PostShelf</th><th><span class="ja">小さなローカル型</span><span class="en">Small local tools</span></th><th><span class="ja">クラウド型</span><span class="en">Cloud services</span></th></tr></thead>
-    <tbody>
-      <tr><th scope="row"><span class="ja">価格</span><span class="en">Price</span></th><td class="me"><span class="ja">無料、件数の上限なし</span><span class="en">Free, no limit on posts</span></td><td><span class="ja">無料が中心</span><span class="en">Mostly free</span></td><td><span class="ja">無料枠に上限あり。有料プランあり</span><span class="en">Free tier has limits; paid plans exist</span></td></tr>
-      <tr><th scope="row"><span class="ja">データの置き場所</span><span class="en">Where data lives</span></th><td class="me"><span class="ja">端末の中だけ</span><span class="en">Only on your device</span></td><td><span class="ja">端末の中が中心</span><span class="en">Mostly on your device</span></td><td><span class="ja">クラウド、アカウントが必要</span><span class="en">In the cloud; an account is required</span></td></tr>
-      <tr><th scope="row"><span class="ja">フォルダの名前・アイコン・色</span><span class="en">Folder name, icon and color</span></th><td class="me"><span class="ja">すべて自由</span><span class="en">All free to choose</span></td><td><span class="ja">名前が中心 (記載なし)</span><span class="en">Mainly names (not stated)</span></td><td><span class="ja">フォルダ・タグ (アイコンや色は記載なし)</span><span class="en">Folders and tags (icons and colors not stated)</span></td></tr>
-      <tr><th scope="row"><span class="ja">1 ポストを複数フォルダに</span><span class="en">One post in several folders</span></th><td class="me"><span class="ja">できる</span><span class="en">Yes</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">ツールによる</span><span class="en">Depends on the tool</span></td></tr>
-      <tr><th scope="row"><span class="ja">複数の X アカウント</span><span class="en">Multiple X accounts</span></th><td class="me"><span class="ja">アカウントごとに分けて管理</span><span class="en">Kept separately per account</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">プランにより上限</span><span class="en">Limited by plan</span></td></tr>
-      <tr><th scope="row"><span class="ja">クラウド同期・モバイル・AI</span><span class="en">Cloud sync, mobile, AI</span></th><td class="me"><span class="ja">ない</span><span class="en">None</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">ある (一部は有料)</span><span class="en">Yes (some are paid)</span></td></tr>
-      <tr><th scope="row"><span class="ja">書き出し形式</span><span class="en">Export formats</span></th><td class="me"><span class="ja">JSON のみ</span><span class="en">JSON only</span></td><td><span class="ja">JSON / CSV など</span><span class="en">JSON / CSV and others</span></td><td><span class="ja">CSV / PDF / Notion ほか</span><span class="en">CSV / PDF / Notion and others</span></td></tr>
-      <tr><th scope="row"><span class="ja">過去のブックマークの取り込み</span><span class="en">Importing old bookmarks</span></th><td class="me"><span class="ja">自動取り込み (任意、1 回の上限あり)</span><span class="en">Automatic import (optional, with a per-run limit)</span></td><td><span class="ja">自動スクロール型もあり</span><span class="en">Some use auto-scrolling</span></td><td><span class="ja">全件の取り込みに対応するものが多い</span><span class="en">Many can import everything</span></td></tr>
-      <tr><th scope="row"><span class="ja">配布方法</span><span class="en">Distribution</span></th><td class="me"><span class="ja">手動インストール (Chrome 114+ のみ)</span><span class="en">Manual install (Chrome 114+ only)</span></td><td><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td><td><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td></tr>
-      <tr><th scope="row"><span class="ja">ソースコード</span><span class="en">Source code</span></th><td class="me"><span class="ja">MIT で公開</span><span class="en">Public under MIT</span></td><td><span class="ja">記載なしが多い</span><span class="en">Often not stated</span></td><td><span class="ja">公開の記載なし</span><span class="en">No public source stated</span></td></tr>
+    <tbody id="comparison-rows">
+      <tr><th scope="row"><span class="ja">価格</span><span class="en">Price</span></th><td class="me" data-label="PostShelf"><span class="ja">無料、件数の上限なし</span><span class="en">Free, no limit on posts</span></td><td data-label="Small local tools"><span class="ja">無料が中心</span><span class="en">Mostly free</span></td><td data-label="Cloud services"><span class="ja">無料枠に上限あり。有料プランあり</span><span class="en">Free tier has limits; paid plans exist</span></td></tr>
+      <tr><th scope="row"><span class="ja">データの置き場所</span><span class="en">Where data lives</span></th><td class="me" data-label="PostShelf"><span class="ja">端末の中だけ</span><span class="en">Only on your device</span></td><td data-label="Small local tools"><span class="ja">端末の中が中心</span><span class="en">Mostly on your device</span></td><td data-label="Cloud services"><span class="ja">クラウド、アカウントが必要</span><span class="en">In the cloud; an account is required</span></td></tr>
+      <tr><th scope="row"><span class="ja">フォルダの名前・アイコン・色</span><span class="en">Folder name, icon and color</span></th><td class="me" data-label="PostShelf"><span class="ja">すべて自由</span><span class="en">All free to choose</span></td><td data-label="Small local tools"><span class="ja">名前が中心 (記載なし)</span><span class="en">Mainly names (not stated)</span></td><td data-label="Cloud services"><span class="ja">フォルダ・タグ (アイコンや色は記載なし)</span><span class="en">Folders and tags (icons and colors not stated)</span></td></tr>
+      <tr><th scope="row"><span class="ja">1 ポストを複数フォルダに</span><span class="en">One post in several folders</span></th><td class="me" data-label="PostShelf"><span class="ja">できる</span><span class="en">Yes</span></td><td data-label="Small local tools"><span class="ja">記載なし</span><span class="en">Not stated</span></td><td data-label="Cloud services"><span class="ja">ツールによる</span><span class="en">Depends on the tool</span></td></tr>
+      <tr><th scope="row"><span class="ja">複数の X アカウント</span><span class="en">Multiple X accounts</span></th><td class="me" data-label="PostShelf"><span class="ja">アカウントごとに分けて管理</span><span class="en">Kept separately per account</span></td><td data-label="Small local tools"><span class="ja">記載なし</span><span class="en">Not stated</span></td><td data-label="Cloud services"><span class="ja">プランにより上限</span><span class="en">Limited by plan</span></td></tr>
+      <tr><th scope="row"><span class="ja">クラウド同期・モバイル・AI</span><span class="en">Cloud sync, mobile, AI</span></th><td class="me" data-label="PostShelf"><span class="ja">ない</span><span class="en">None</span></td><td data-label="Small local tools"><span class="ja">記載なし</span><span class="en">Not stated</span></td><td data-label="Cloud services"><span class="ja">ある (一部は有料)</span><span class="en">Yes (some are paid)</span></td></tr>
+      <tr><th scope="row"><span class="ja">書き出し形式</span><span class="en">Export formats</span></th><td class="me" data-label="PostShelf"><span class="ja">JSON のみ</span><span class="en">JSON only</span></td><td data-label="Small local tools"><span class="ja">JSON / CSV など</span><span class="en">JSON / CSV and others</span></td><td data-label="Cloud services"><span class="ja">CSV / PDF / Notion ほか</span><span class="en">CSV / PDF / Notion and others</span></td></tr>
+      <tr><th scope="row"><span class="ja">過去のブックマークの取り込み</span><span class="en">Importing old bookmarks</span></th><td class="me" data-label="PostShelf"><span class="ja">自動取り込み (任意、1 回の上限あり)</span><span class="en">Automatic import (optional, with a per-run limit)</span></td><td data-label="Small local tools"><span class="ja">自動スクロール型もあり</span><span class="en">Some use auto-scrolling</span></td><td data-label="Cloud services"><span class="ja">全件の取り込みに対応するものが多い</span><span class="en">Many can import everything</span></td></tr>
+      <tr><th scope="row"><span class="ja">配布方法</span><span class="en">Distribution</span></th><td class="me" data-label="PostShelf"><span class="ja">手動インストール (Chrome 114+ のみ)</span><span class="en">Manual install (Chrome 114+ only)</span></td><td data-label="Small local tools"><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td><td data-label="Cloud services"><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td></tr>
+      <tr><th scope="row"><span class="ja">ソースコード</span><span class="en">Source code</span></th><td class="me" data-label="PostShelf"><span class="ja">MIT で公開</span><span class="en">Public under MIT</span></td><td data-label="Small local tools"><span class="ja">記載なしが多い</span><span class="en">Often not stated</span></td><td data-label="Cloud services"><span class="ja">公開の記載なし</span><span class="en">No public source stated</span></td></tr>
     </tbody>
   </table>
   </div>
+  <button class="btn compare-toggle" type="button" aria-expanded="false" aria-controls="comparison-rows" hidden>
+    <span class="more-label"><span class="ja">残りの 6 項目を見る</span><span class="en">Show 6 more</span></span>
+    <span class="less-label" hidden><span class="ja">たたむ</span><span class="en">Show less</span></span>
+  </button>
   <p class="src"><span class="ja">「記載なし」は、公開ページに書かれていなかったという意味で、機能がないことの証明ではありません。小さなローカル型は ufofo、XOrganize など、クラウド型は Dewey、Tweetsmash などを指します。X の仕様や各ツールの内容は変わります。</span><span class="en">"Not stated" means the public pages did not mention it; it does not prove the feature is missing. Small local tools means ufofo, XOrganize and similar; cloud services means Dewey, Tweetsmash and similar. X and these tools change over time.</span></p>
 </div></section>
 
@@ -382,6 +497,38 @@ footer p{max-width:46em}
   en.addEventListener('click',function(){psSetLang('en');sync()});
   ja.addEventListener('click',function(){psSetLang('ja');sync()});
   sync();
+})();
+(function(){
+  var button=document.getElementById('share-link');
+  var canShare=typeof navigator.share==='function';
+  var canCopy=navigator.clipboard&&typeof navigator.clipboard.writeText==='function';
+  if(!canShare&&!canCopy)return;
+  button.hidden=false;
+  var ready=button.querySelector('.share-ready'),copied=button.querySelector('.share-copied'),timer;
+  button.addEventListener('click',async function(){
+    button.disabled=true;
+    try{
+      if(canShare){await navigator.share({url:location.href})}
+      else{
+        await navigator.clipboard.writeText(location.href);
+        ready.hidden=true;copied.hidden=false;
+        clearTimeout(timer);
+        timer=setTimeout(function(){ready.hidden=false;copied.hidden=true},2000);
+      }
+    }catch(e){/* Cancellation or denied access leaves the original label available to retry. */}
+    finally{button.disabled=false}
+  });
+})();
+(function(){
+  var section=document.getElementById('compare'),button=section.querySelector('.compare-toggle');
+  section.setAttribute('data-collapsible','');button.hidden=false;
+  button.addEventListener('click',function(){
+    var expanded=button.getAttribute('aria-expanded')!=='true';
+    button.setAttribute('aria-expanded',String(expanded));
+    if(expanded)section.setAttribute('data-expanded','');else section.removeAttribute('data-expanded');
+    button.querySelector('.more-label').hidden=expanded;
+    button.querySelector('.less-label').hidden=!expanded;
+  });
 })();
 </script>
 </body>
