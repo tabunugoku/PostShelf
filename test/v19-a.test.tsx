@@ -26,16 +26,16 @@ const menu = () => {
   document.body.append(m.el);
   return m;
 };
-const iconBtns = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>('button[data-icon]')];
+const iconBtns = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>('[data-main-icons] > button[data-icon]')];
 const swatches = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>('button[data-color]')].filter((b) => b.type === 'button' && !b.textContent);
 
 describe('v19-1: 「フォルダを作成」メニュー', () => {
-  it('icons: 8 buttons in one 8-column grid; each is a square grid-centered box holding one block-level icon; the label sits above the row', () => {
+  it('icons: 8 buttons plus More in one 9-column grid; each is a square grid-centered box holding one block-level icon; the label sits above the row', () => {
     const { el } = menu();
     const btns = iconBtns(el);
     expect(btns).toHaveLength(8);
     const grid = btns[0].parentElement!;
-    expect(grid.style.gridTemplateColumns).toMatch(/^repeat\(8,\s*1fr\)$/);
+    expect(grid.style.gridTemplateColumns).toMatch(/^repeat\(9,\s*1fr\)$/);
     expect(btns.every((b) => b.parentElement === grid)).toBe(true);
     for (const b of btns) {
       expect(b.style.display).toBe('grid');

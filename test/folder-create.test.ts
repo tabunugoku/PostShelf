@@ -75,11 +75,11 @@ describe('v16-A: 「フォルダを追加」 menu in the popover', () => {
     expect(btn(pop, '作成').disabled).toBe(false);
   });
 
-  it('offers the same icons and colors as the manager (ICONS first 8 / COLORS + none), starting with ti-folder and no color', async () => {
+  it('offers the same icons and colors as the manager (all ICONS / COLORS + none), starting with ti-folder and no color', async () => {
     const pop = await open();
     btn(pop, 'フォルダを追加').click();
     const icons = [...menu(pop).querySelectorAll('button[data-icon]')];
-    expect(icons.map((b) => (b as HTMLElement).dataset.icon)).toEqual(ICONS.slice(0, 8));
+    expect(icons.map((b) => (b as HTMLElement).dataset.icon)).toEqual([...ICONS]);
     expect((icons.find((b) => b.getAttribute('aria-pressed') === 'true') as HTMLElement).dataset.icon).toBe(FOLDER_ICON);
     const sw = [...menu(pop).querySelectorAll('button[data-color]')];
     expect(sw.length).toBe(COLORS.length + 1);
