@@ -15,6 +15,10 @@ export function findArticle(tweetId: string, root: ParentNode = document): Eleme
 
 /** サイドパネル / popup からの問い合わせ。ユーザーが画面で見ているポストの DOM だけを読む */
 export function handleMessage(msg: { type?: string; tweetId?: string; want?: boolean }, sendResponse: (r: unknown) => void): boolean {
+  if (msg?.type === 'ping') {
+    sendResponse({ ok: true });
+    return false;
+  }
   if (msg?.type === 'getPostSnapshot' && msg.tweetId) {
     const ex = (() => {
       const a = findArticle(msg.tweetId!);

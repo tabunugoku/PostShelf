@@ -30,6 +30,10 @@ export const CANDIDATES = {
   time: ['time'],
   // 候補が 1 つだけ: ポストへのリンクは href の形で判定する
   statusLink: ['a[href*="/status/"]'],
+  // 詳細ページの実機観測: 引用の time はこの入れ物の中。本体の time より先に現れる。
+  quoteContainer: ['div[role="link"]'],
+  nameText: ['span'],
+  bodyLink: ['a[href]'],
   avatar: ['[data-testid="Tweet-User-Avatar"] img', 'a[role="link"][href^="/"]:not([href*="/status/"]) img'],
   media: ['[data-testid="tweetPhoto"] img', 'a[href*="/photo/"] img'],
   // 以下は実機未確認の推測。動画は videoPlayer か video 要素
@@ -101,6 +105,33 @@ export function queryAllFirst<T extends Element = Element>(root: ParentNode, key
   return { els: [], index: -1 };
 }
 
+/** 引用の中の候補を除いてから優先順を判定する。本体の候補が無ければ次の構造的な候補を試す。 */
+export function queryAllOwn<T extends Element = Element>(article: Element, key: SelKey): FoundAll<T> {
+  const list = CANDIDATES[key];
+  for (let i = 0; i < list.length; i++) {
+    const els = [...article.querySelectorAll<T>(list[i])].filter((el) => {
+      const quote = closestFirst(el, 'quoteContainer')?.el;
+      return !quote || !article.contains(quote);
+    });
+    if (els.length) return { els, index: i };
+  }
+  return { els: [], index: -1 };
+}
+
+/** 本体の最初の要素。article の外側の role=link は引用扱いにしない。 */
+export function queryOwn<T extends Element = Element>(article: Element, key: SelKey): Found<T> | null {
+  const { els, index } = queryAllOwn<T>(article, key);
+  return els.length ? { el: els[0], index } : null;
+}
+
+/** 本体の time を囲むポストへのリンク。無ければ本体の最初の statusLink を使う。 */
+export function ownPostLink(article: Element): { time: Element | null; link: HTMLAnchorElement | null } {
+  const time = queryOwn(article, 'time')?.el ?? null;
+  const timedLink = time ? closestFirst<HTMLAnchorElement>(time, 'statusLink')?.el : null;
+  const link = timedLink && article.contains(timedLink) ? timedLink : queryOwn<HTMLAnchorElement>(article, 'statusLink')?.el ?? null;
+  return { time, link };
+}
+
 /** タイムラインの読み込み表示が出ているか (ポスト = article の内側のものは数えない) */
 export function timelineLoading(root: ParentNode): boolean {
   return queryAllFirst(root, 'loadingIndicator').els.some((el) => !el.closest('article'));
@@ -125,3 +156,34 @@ export const BOOKMARK_PATHS: readonly string[] = ['/i/history', '/i/bookmarks'];
 
 /** 末尾のスラッシュは無視して完全一致で判定する (クエリ・ハッシュは pathname に含まれない) */
 export const isBookmarksPath = (path: string): boolean => BOOKMARK_PATHS.includes(path.replace(/\/+$/, '') || '/');
+
+/**
+ * ブックマークボタンの svg の高さと hover の丸の直径 (v35〜v37)。
+ * 丸は svg の兄弟・祖先・その他の子孫の順で探す。X の構造の想定は buttons.ts と v37 の fixture に記載。
+ * 計算したスタイルで丸を判定し、余白を含むボタン自身の寸法は使わない。
+ */
+export function bookmarkButtonGeometry(bm: HTMLElement): { iconHeight: number; circleDiameter: number } {
+  const svg = bm.querySelector('svg');
+  const sh = svg?.getBoundingClientRect().height ?? 0;
+  const round = (el: Element) => {
+    const cs = getComputedStyle(el);
+    const br = cs.borderTopLeftRadius || cs.borderRadius;
+    return br.endsWith('%') ? parseFloat(br) >= 50 : parseFloat(br) >= 999;
+  };
+  const circle = (el: Element) => {
+    const r = el.getBoundingClientRect();
+    return r.height > sh && Math.abs(r.width - r.height) <= 2 && round(el) ? r.height : 0;
+  };
+  let d = 0;
+  if (svg && sh > 0) {
+    const rank = (el: Element) => (el.parentElement === svg.parentElement ? 0 : el.contains(svg) ? 1 : 2);
+    const cands = [...bm.querySelectorAll('*')].filter((el) => el !== svg && !svg.contains(el));
+    // 同じ順位の中では、svg に近い祖先が先 (内側から外側)。
+    cands.sort((x, y) => rank(x) - rank(y) || (x.contains(y) ? 1 : y.contains(x) ? -1 : 0));
+    for (const el of cands) {
+      d = circle(el);
+      if (d > 0) break;
+    }
+  }
+  return { iconHeight: sh, circleDiameter: d };
+}

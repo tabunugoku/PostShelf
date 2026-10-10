@@ -139,7 +139,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     h.focus({ preventScroll: true });
   };
   const heading = (id: string, key: string) => (
-    <h3 class="set-h" id={`set-group-${id}`} tabIndex={-1}>
+    <h3 class="set-h" id={`set-group-${id}`} data-group={id} tabIndex={-1}>
       {t(key)}
     </h3>
   );
@@ -170,7 +170,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       </div>
       <nav class="settings-nav" aria-label={t('settingsJump')}>
         {groups.map(([id, key]) => (
-          <button type="button" class="nav-chip" onClick={() => jump(id)}>
+          <button type="button" class="nav-chip" data-group={id} onClick={() => jump(id)}>
             {t(key)}
           </button>
         ))}
@@ -374,13 +374,14 @@ export function filterSettings(root: HTMLElement, raw: string): number {
   }
   // 見出しと目次: 次の見出しまでのグループが 1 つでも見えているものだけ残す
   const heads = [...root.querySelectorAll<HTMLElement>('h3.set-h')];
+  const chips = new Map([...root.querySelectorAll<HTMLElement>('.settings-nav .nav-chip')].map((c) => [c.dataset.group, c]));
   heads.forEach((h) => {
     let any = false;
     for (let n = h.nextElementSibling; n && !n.matches('h3.set-h'); n = n.nextElementSibling) {
       if (!(n as HTMLElement).hidden && (n.matches('fieldset.setting-group') || n.querySelector('fieldset.setting-group:not([hidden])'))) any = true;
     }
     h.hidden = !any;
-    const chip = [...root.querySelectorAll<HTMLElement>('.settings-nav .nav-chip')].find((c) => c.textContent === h.textContent);
+    const chip = chips.get(h.dataset.group);
     if (chip) chip.hidden = !any;
   });
   return count;

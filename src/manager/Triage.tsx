@@ -231,12 +231,17 @@ export function Triage(props: {
                         folders={props.pickerFolders}
                         selected={assigned[cur.tweetId] ?? []}
                         onChange={async (sel) => {
-                          const ids = [...sel];
-                          await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
-                          const added = ids.filter((id) => !(assigned[cur.tweetId] ?? []).includes(id));
-                          if (added.length) void updateRecentFolders(added).catch(() => {});
-                          mark(cur, ids);
-                          void props.onChanged();
+                          try {
+                            const ids = [...sel];
+                            await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
+                            const added = ids.filter((id) => !(assigned[cur.tweetId] ?? []).includes(id));
+                            if (added.length) void updateRecentFolders(added).catch(() => {});
+                            mark(cur, ids);
+                            setError('');
+                            void props.onChanged();
+                          } catch {
+                            setError(t('errorStorage'));
+                          }
                         }}
                       />
                     </Dropdown>
@@ -253,11 +258,17 @@ export function Triage(props: {
               <NewFolder
                 existing={props.pickerFolders}
                 onCreated={async (f) => {
-                  await addToFolders([cur.tweetId], [f.id]);
-                  void updateRecentFolders([f.id]).catch(() => {});
-                  mark(cur, [...(assigned[cur.tweetId] ?? []).filter((id) => id !== INBOX_ID), f.id]);
-                  setCreating(false);
-                  void props.onChanged();
+                  if (latest.current.finished) return;
+                  try {
+                    await addToFolders([cur.tweetId], [f.id]);
+                    void updateRecentFolders([f.id]).catch(() => {});
+                    mark(cur, [...(assigned[cur.tweetId] ?? []).filter((id) => id !== INBOX_ID), f.id]);
+                    setCreating(false);
+                    setError('');
+                    void props.onChanged();
+                  } catch {
+                    setError(t('errorStorage'));
+                  }
                 }}
                 onClose={() => setCreating(false)}
               />
@@ -282,8 +293,10 @@ export function Triage(props: {
 /** 既存の「フォルダを作成」メニューを、ダイアログの中に置く */
 function NewFolder(props: { existing: Folder[]; onCreated: (f: Folder) => void | Promise<void>; onClose: () => void }) {
   const host = useRef<HTMLDivElement>(null);
+  const latest = useRef(props);
+  latest.current = props;
   useEffect(() => {
-    const menu = createFolderMenu({ theme: THEME, existing: () => props.existing, onCreated: props.onCreated, onClose: props.onClose });
+    const menu = createFolderMenu({ theme: THEME, existing: () => latest.current.existing, onCreated: (f) => latest.current.onCreated(f), onClose: () => latest.current.onClose() });
     host.current?.replaceChildren(menu.el);
     menu.focus();
   }, []);

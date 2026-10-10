@@ -1,4 +1,4 @@
-import { closestFirst, queryAllFirst, queryFirst } from '../shared/selectors';
+import { bookmarkButtonGeometry, closestFirst, queryAllFirst, queryFirst } from '../shared/selectors';
 import { isBroken, subscribeHealth } from './health';
 import { t } from '../shared/strings';
 import { listBookmarks, onDataChanged, listFolders } from '../shared/storage';
@@ -68,45 +68,48 @@ const RING = 8;
  * (2) 無ければ svg の高さ + 16px。svg の高さが測れない (0) ときは HIT。下限 HIT = 34px、上限 64px。
  * アイコンは bm の svg の高さに合わせる (下限 19px)。
  * 実機未確認 (推測): X の hover の丸は、svg の祖先ではなく、svg の兄弟 (絶対配置で、負の余白で svg より大きく広がる、border-radius: 9999px の空の要素)
- * であることが多い、という X の操作アイコンの一般的な構造からの想定。違っていたら、ここの探し方を直す。
+ * であることが多い、という X の操作アイコンの一般的な構造からの想定。違っていたら、selectors.ts の bookmarkButtonGeometry を直す。
  * margin-left は GAP のまま (丸が大きくなっても、詳細ページの数字に重ならないよう、差の半分を減らさない)。
  */
 export function sizeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
-  const svg = bm.querySelector('svg');
-  const sh = svg?.getBoundingClientRect().height ?? 0;
+  const { iconHeight: sh, circleDiameter } = bookmarkButtonGeometry(bm);
   const clamp = (v: number) => Math.min(MAX_HIT, Math.max(HIT, Math.round(v)));
-  const round = (el: Element) => {
-    const cs = getComputedStyle(el);
-    const br = cs.borderTopLeftRadius || cs.borderRadius; // 値は "50%" か "9999px" の形。長い書き方が取れない環境では、まとめた書き方を見る
-    return br.endsWith('%') ? parseFloat(br) >= 50 : parseFloat(br) >= 999;
-  };
-  const circle = (el: Element) => {
-    const r = el.getBoundingClientRect();
-    return r.height > sh && Math.abs(r.width - r.height) <= 2 && round(el) ? r.height : 0;
-  };
-  let d = 0;
-  if (svg && sh > 0) {
-    const rank = (el: Element) => (el.parentElement === svg.parentElement ? 0 : el.contains(svg) ? 1 : 2);
-    const cands = [...bm.querySelectorAll('*')].filter((el) => el !== svg && !svg.contains(el));
-    // 同じ順位の中では、svg に近い祖先が先 (祖先は、内側から外側の順に並べ直す)
-    cands.sort((x, y) => rank(x) - rank(y) || (x.contains(y) ? 1 : y.contains(x) ? -1 : 0));
-    for (const el of cands) {
-      d = circle(el);
-      if (d > 0) break;
-    }
-    if (!(d > 0)) d = sh + RING * 2;
-  }
+  const d = circleDiameter > 0 ? circleDiameter : sh > 0 ? sh + RING * 2 : 0;
   const size = d > 0 ? clamp(d) : HIT;
   btn.style.width = `${size}px`;
   btn.style.height = `${size}px`;
   btn.style.fontSize = `${sh > 0 ? Math.max(ICON_MIN, Math.round(sh)) : ICON_MIN}px`;
 }
 
-/** 大きさを測るのは、挿入したときと、bm の大きさが変わったとき (ResizeObserver があれば) だけ。X の再描画のたびには測らない */
+const sizeButtons = new WeakMap<Element, HTMLElement>();
+const sizeBookmarks = new WeakMap<Element, HTMLElement>();
+let sizeObserver: ResizeObserver | undefined;
+
+function unwatchSize(bm: Element): void {
+  const btn = sizeButtons.get(bm);
+  sizeObserver?.unobserve(bm);
+  sizeButtons.delete(bm);
+  if (btn) sizeBookmarks.delete(btn);
+}
+
+/** 共有の ResizeObserver で、挿入時と寸法の変化時だけ測る。監視対象を強参照する一覧は持たない。 */
 function watchSize(bm: HTMLElement, btn: HTMLElement): void {
   sizeSeparateButton(bm, btn);
   if (typeof ResizeObserver === 'undefined') return;
-  new ResizeObserver(() => sizeSeparateButton(bm, btn)).observe(bm);
+  if (!sizeObserver) {
+    sizeObserver = new ResizeObserver((entries) => {
+      for (const { target } of entries) {
+        const button = sizeButtons.get(target);
+        if (!button) continue;
+        if (!target.isConnected || !button.isConnected) unwatchSize(target);
+        else sizeSeparateButton(target as HTMLElement, button);
+      }
+    });
+  }
+  if (sizeButtons.has(bm)) unwatchSize(bm);
+  sizeButtons.set(bm, btn);
+  sizeBookmarks.set(btn, bm);
+  sizeObserver.observe(bm);
 }
 
 function createSeparateButton(article: Element): HTMLButtonElement {
@@ -227,7 +230,11 @@ function onCaptureClick(e: MouseEvent): void {
 }
 
 function removeSeparate(): void {
-  document.querySelectorAll(`[${BTN_ATTR}]`).forEach((b) => b.remove());
+  document.querySelectorAll(`[${BTN_ATTR}]`).forEach((b) => {
+    const bm = sizeBookmarks.get(b);
+    if (bm) unwatchSize(bm);
+    b.remove();
+  });
 }
 
 function removeBadges(): void {

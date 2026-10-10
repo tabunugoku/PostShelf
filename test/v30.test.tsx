@@ -168,9 +168,10 @@ describe('v30-C: the first-run guide', () => {
 });
 
 describe('v30-D: search highlight', () => {
-  it('ranges: several terms, full/half width, case, overlap merged; positions are in the original text', () => {
-    expect(highlightRanges('Hello ＷＯＲＬＤ', searchTerms('world HELLO'))).toEqual([[0, 5], [6, 11]]);
-    expect(highlightRanges('abcdef', searchTerms('bc cd'))).toEqual([[1, 4]]);
+  it('ranges: phrases, full/half width, case, overlap merged; positions are in the original text', () => {
+    expect(highlightRanges('Hello ＷＯＲＬＤ', searchTerms('HELLO world'))).toEqual([[0, 11]]);
+    expect(highlightRanges('Hello ＷＯＲＬＤ', searchTerms('world HELLO'))).toEqual([]);
+    expect(highlightRanges('abcdef', ['bc', 'cd'])).toEqual([[1, 4]]);
     expect(highlightRanges('ｱｲｳ', searchTerms('アイ'))).toEqual([[0, 2]]); // 半角カナも一致する
     expect(highlightRanges('abc', [])).toEqual([]);
     expect(highlightRanges('😀猫', searchTerms('猫'))).toEqual([[2, 3]]);
@@ -181,20 +182,20 @@ describe('v30-D: search highlight', () => {
     document.body.innerHTML = '<div id="app"></div>';
     await act(() => void render(<SearchContext.Provider value={q}><PostText s={s} /></SearchContext.Provider>, $('#app')));
   };
-  it('marks the matches (several terms, 全角半角); no marks without a query', async () => {
+  it('marks the matching phrase (全角半角); no marks without a query', async () => {
     await show(snap('Hello ＷＯＲＬＤ 猫'), 'world 猫');
-    expect($$('mark').map((m) => m.textContent)).toEqual(['ＷＯＲＬＤ', '猫']);
+    expect($$('mark').map((m) => m.textContent)).toEqual(['ＷＯＲＬＤ 猫']);
     await show(snap('Hello'), '');
     expect($$('mark')).toHaveLength(0);
   });
   it('marks inside a link text and across parts; href and attributes are unchanged; HTML is not interpreted', async () => {
     const segs = [{ t: 'text', v: 'see ' }, { t: 'link', v: 'example.com/page', href: 'https://example.com/page' }, { t: 'text', v: ' <b>x</b>' }];
-    await show(snap('see example.com/page <b>x</b>', segs), 'example <b>');
+    await show(snap('see example.com/page <b>x</b>', segs), 'page <b>');
     const a = $<HTMLAnchorElement>('a.tl');
     expect(a.getAttribute('href')).toBe('https://example.com/page');
     expect(a.getAttribute('rel')).toBe('noopener noreferrer');
-    expect(a.querySelector('mark')!.textContent).toBe('example');
-    expect($$('mark').map((m) => m.textContent)).toEqual(['example', '<b>']);
+    expect(a.querySelector('mark')!.textContent).toBe('page');
+    expect($$('mark').map((m) => m.textContent)).toEqual(['page', ' <b>']);
     expect(document.querySelector('b')).toBeNull();
   });
   it('the list passes the search words to the cards', async () => {

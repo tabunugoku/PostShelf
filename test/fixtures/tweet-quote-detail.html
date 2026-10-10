@@ -1,0 +1,22 @@
+<!-- 実機で確認された値: 詳細ページの article に time が 2 つあり、先頭は引用内、末尾は本体。
+     引用の入れ物は div[role="link"]。以下はその観測に合わせた簡略・推測の構造。
+     アカウント・本文・画像名はすべて架空。本体の本文・画像は引用の後ろに置き、DOM 順への依存も検証する。 -->
+<article data-testid="tweet">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample_main/avatar.jpg"></div>
+  <div data-testid="User-Name"><span>Sample Main</span><span>@sample_main</span></div>
+  <div role="link">
+    <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample_quote/avatar.jpg"></div>
+    <div data-testid="User-Name"><span>Sample Quote</span><span>@sample_quote</span>
+      <a href="/sample_quote/status/222"><time datetime="2026-10-01T10:00:00.000Z">quoted date</time></a>
+    </div>
+    <div data-testid="tweetText">引用の架空の本文。<a href="https://example.com/sample">sample link</a></div>
+    <div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample_quote.jpg"></div>
+    <div data-testid="videoPlayer"><video poster="https://pbs.twimg.com/media/sample_quote_video.jpg"></video></div>
+    <div data-testid="card.wrapper">架空の引用カード</div>
+    <a data-testid="tweet-text-show-more-link" href="/sample_quote/status/222">quoted more</a>
+  </div>
+  <div data-testid="tweetText">本体の架空の全文です。</div>
+  <div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample_main.jpg"></div>
+  <a href="/sample_main/status/111"><time datetime="2026-10-02T12:00:00.000Z">main date</time></a>
+  <div role="group"><button data-testid="bookmark"></button></div>
+</article>

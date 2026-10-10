@@ -148,7 +148,14 @@ describe('consent: nothing starts without the user starting it', () => {
     const a = world(20);
     a.deps.account = null;
     const c1 = new AutoCollector(a.deps);
-    expect(await c1.start(consent)).toBe(false);
+    vi.useFakeTimers();
+    try {
+      const start = c1.start(consent);
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect(await start).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
     expect(c1.state).toMatchObject({ status: 'stopped', reason: 'refused-unknown' });
     expect(a.w.scrolls).toBe(0);
     const b = world(20);
