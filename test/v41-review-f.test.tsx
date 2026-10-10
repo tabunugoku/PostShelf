@@ -17,7 +17,7 @@ beforeEach(async () => {
   for (const id of ['111', '222']) await storage.setBookmarkFolders(id, [], {
     text: `Sample post ${id}`, author: 'Sample', handle: '@sample_user', media: [], url: `https://x.com/sample_user/status/${id}`,
   });
-  document.body.innerHTML = '<div id="app"></div>';
+  document.body.innerHTML = '<style>.bookmark-toolbar{' + rule('.bookmark-toolbar') + '}</style><div id="app"></div>';
 });
 afterEach(async () => { await act(() => void render(null, document.querySelector('#app')!)); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 const mount = async (surface: 'tab' | 'sidepanel' = 'tab') => {
@@ -64,11 +64,11 @@ it('lets tall wrapped filters scroll away when the toolbar exceeds half the view
   expect(toolbar).not.toBeNull();
   expect(document.querySelector('.top')?.parentElement).toBe(toolbar);
   expect(document.querySelector('.main .chips')?.parentElement).toBe(document.querySelector('.main'));
-  expect(document.querySelector<HTMLElement>('.main')!.style.getPropertyValue('--toolbar-offset')).toBe('76px');
+  expect(document.querySelector<HTMLElement>('.main')!.style.getPropertyValue('--toolbar-offset')).toBe('96px');
   filtersHeight = 40;
   await act(() => void window.dispatchEvent(new Event('resize'))); await flush();
   expect(document.querySelector('.main .chips')?.parentElement).toBe(toolbar);
-  expect(document.querySelector<HTMLElement>('.main')!.style.getPropertyValue('--toolbar-offset')).toBe('128px');
+  expect(document.querySelector<HTMLElement>('.main')!.style.getPropertyValue('--toolbar-offset')).toBe('148px');
 });
 
 it('remeasures wrapped controls with ResizeObserver and releases it on settings navigation', async () => {
@@ -86,7 +86,7 @@ it('remeasures wrapped controls with ResizeObserver and releases it on settings 
   });
   await mount(); expect(observe).toHaveBeenCalledWith(document.querySelector('.top')); expect(observe).toHaveBeenCalledWith(document.querySelector('.main .chips'));
   topHeight = 80; await act(() => notify()); await flush();
-  expect(document.querySelector<HTMLElement>('.main')!.style.getPropertyValue('--toolbar-offset')).toBe('108px');
+  expect(document.querySelector<HTMLElement>('.main')!.style.getPropertyValue('--toolbar-offset')).toBe('128px');
   await act(() => void document.querySelector<HTMLElement>('.fr.add.on, .fr.add:has(.ti-settings)')!.click()); await flush();
   expect(document.querySelector('.bookmark-toolbar')).toBeNull(); expect(disconnect).toHaveBeenCalled();
 });

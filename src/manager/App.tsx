@@ -179,6 +179,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewRef = useRef(UNKNOWN_ACCOUNT_ID);
   const lastRef = useRef<Account | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
   const chipsRef = useRef<HTMLDivElement>(null);
   const [splitFilters, setSplitFilters] = useState(false);
@@ -188,14 +189,20 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const measure = () => {
       const topHeight = topRef.current?.getBoundingClientRect().height ?? 0;
       const filtersHeight = chipsRef.current?.getBoundingClientRect().height ?? 0;
-      // バーの上余白 8px + 行間 12px。小さい画面ではフィルタだけ固定を解く。
-      const combined = topHeight + filtersHeight + 20;
+      const toolbar = toolbarRef.current;
+      if (!toolbar) return;
+      const style = getComputedStyle(toolbar);
+      const px = (value: string) => parseFloat(value) || 0;
+      const inset = px(style.paddingTop) + px(style.paddingBottom) + px(style.borderTopWidth) + px(style.borderBottomWidth);
+      // 折り返した行と不透明な内側余白を含める。小さい画面ではフィルタだけ固定を解く。
+      const combined = topHeight + filtersHeight + inset + px(style.rowGap || style.gap);
       const split = combined > window.innerHeight / 2;
       setSplitFilters(split);
-      setToolbarOffset(Math.ceil((split ? topHeight + 8 : combined) + 8));
+      setToolbarOffset(Math.ceil((split ? topHeight + inset : combined) + 8));
     };
     measure();
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    if (toolbarRef.current) observer?.observe(toolbarRef.current);
     if (topRef.current) observer?.observe(topRef.current);
     if (chipsRef.current) observer?.observe(chipsRef.current);
     window.addEventListener('resize', measure);
@@ -1292,7 +1299,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           settingsPage
         ) : (
           <>
-            <div class="bookmark-toolbar">
+            <div class="bookmark-toolbar" ref={toolbarRef}>
               <div class="top" ref={topRef}>
                 <Icon name={curFolder.icon} color={curFolder.color} />
                 <span class="bar-name">{viewName}</span>
