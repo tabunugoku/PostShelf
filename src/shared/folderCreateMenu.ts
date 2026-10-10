@@ -4,7 +4,7 @@
  * アイコンと色の選択肢は models.ts のもの (manager の編集パネルと同じ: アイコンは先頭の 8 種、色は色なし + COLORS)。
  * manager の FolderEdit は Preact なので、DOM 版をここに別に持つ (選択肢は共有)。
  */
-import { COLORS, FOLDER_ICON, ICONS, colorLabel, displayName, iconLabel, type Folder } from './models';
+import { COLORS, FOLDER_ICON, MAIN_ICONS, colorLabel, displayName, iconLabel, type Folder } from './models';
 import { createFolder, StorageError } from './storage';
 import { t } from './strings';
 import { ACCENT_FILL } from './tokens';
@@ -85,7 +85,7 @@ export function createFolderMenu(opts: {
   const iconGrid = document.createElement('div');
   iconGrid.style.cssText = `${RESET};display:grid;grid-template-columns:repeat(8,1fr);gap:4px;width:100%`;
   const iconBtns = new Map<string, HTMLButtonElement>();
-  for (const i of ICONS.slice(0, 8)) {
+  for (const i of MAIN_ICONS) {
     const b = document.createElement('button');
     b.type = 'button';
     b.setAttribute('aria-label', iconLabel(i));

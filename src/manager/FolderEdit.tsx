@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
-import { COLORS, FOLDER_ICON, ICONS, colorLabel, displayName, iconLabel, type Folder } from '../shared/models';
+import { COLORS, FOLDER_ICON, MAIN_ICONS, MORE_ICONS, colorLabel, displayName, iconLabel, type Folder } from '../shared/models';
 import { t } from '../shared/strings';
 import { createFolder, StorageError, updateFolder } from '../shared/storage';
 import { hasSameName } from '../shared/folderCreateMenu';
@@ -22,6 +22,9 @@ export function FolderEdit(props: {
   const [color, setColor] = useState(folder?.color);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [moreIcons, setMoreIcons] = useState(false);
+  const moreButton = useRef<HTMLButtonElement>(null);
+  const extraIcon = !(MAIN_ICONS as readonly string[]).includes(icon);
   const busy = useRef(false);
   const mounted = useRef(true);
   const input = useRef<HTMLInputElement>(null);
@@ -79,12 +82,24 @@ export function FolderEdit(props: {
       </div>
       <div class="erow wrap">
         <span class="elabel">{t('icon')}</span>
-        {ICONS.slice(0, 8).map((i) => (
+        {MAIN_ICONS.map((i) => (
           <button class={`ic${i === icon ? ' on' : ''}`} aria-label={iconLabel(i)} data-icon={i} aria-pressed={i === icon} disabled={saving} onClick={() => setIcon(i)}>
             <Icon name={i} />
           </button>
         ))}
+        <button ref={moreButton} class={`icon-more${extraIcon ? ' on' : ''}`} aria-label={t('iconMore')}
+          aria-pressed={extraIcon} aria-expanded={moreIcons} disabled={saving} onClick={() => setMoreIcons(!moreIcons)}>
+          {extraIcon && <Icon name={icon} />}{t('iconMore')}
+        </button>
       </div>
+      {moreIcons && <div class="folder-icon-grid">
+        {MORE_ICONS.map(i => <button class={`ic${i === icon ? ' on' : ''}`} aria-label={iconLabel(i)}
+          data-icon={i} aria-pressed={i === icon} disabled={saving} onClick={() => {
+            setIcon(i);
+            setMoreIcons(false);
+            moreButton.current?.focus();
+          }}><Icon name={i} /></button>)}
+      </div>}
       <div class="erow wrap">
         <span class="elabel">{t('color')}</span>
         <button
