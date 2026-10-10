@@ -26,6 +26,8 @@ export function digitOf(e: { code: string }): number | null {
  * キーは、ダイアログの要素だけが受ける (window には付けない)。
  */
 export function Triage(props: {
+  /** 始めた時点の設定。オフなら従来の即時保存 */
+  multi?: boolean;
   queue: Bookmark[];
   /** いま保存されているポストの ID (キューのポストが削除されたかの判定) */
   live: Set<string>;
@@ -44,6 +46,7 @@ export function Triage(props: {
   const [more, setMore] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
+  const [draft, setDraft] = useState<{ tweetId: string; ids: Set<string> } | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const previousMenus = useRef({ creating, more });
   /** choose の実行中 (await のあいだ) は、次の choose を受けない */
@@ -51,6 +54,9 @@ export function Triage(props: {
   const latest = useRef({ index, finished, more, creating });
   latest.current = { index, finished, more, creating };
   const cur = queue[index];
+  const multi = props.multi === true;
+  const savedIds = (b: Bookmark) => (assigned[b.tweetId] ?? []).filter(id => id !== INBOX_ID);
+  const marks = cur && draft?.tweetId === cur.tweetId ? draft.ids : new Set(cur ? savedIds(cur) : []);
 
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -73,11 +79,13 @@ export function Triage(props: {
     return null;
   };
   const next = () => {
+    setDraft(null);
     const i = step(index, 1);
     if (i === null) setFinished(true);
     else setIndex(i);
   };
   const back = () => {
+    setDraft(null);
     const i = step(index, -1);
     if (i !== null) setIndex(i);
   };
@@ -102,6 +110,15 @@ export function Triage(props: {
   /** そのフォルダに入れる (入っていれば外す)。stay: 同じポストに留まる */
   const choose = async (folderId: string, stay: boolean) => {
     if (!cur || finished || busy.current) return;
+    if (multi) {
+      setDraft(prev => {
+        const ids = new Set(prev?.tweetId === cur.tweetId ? prev.ids : savedIds(cur));
+        if (ids.has(folderId)) ids.delete(folderId);
+        else ids.add(folderId);
+        return { tweetId: cur.tweetId, ids };
+      });
+      return;
+    }
     busy.current = true;
     const b = cur;
     const has = (assigned[b.tweetId] ?? []).includes(folderId);
@@ -115,6 +132,29 @@ export function Triage(props: {
       setError('');
       void props.onChanged();
       if (!stay && !has) next();
+    } catch {
+      setError(t('errorStorage'));
+    } finally {
+      busy.current = false;
+    }
+  };
+
+  const confirm = async () => {
+    if (!cur || finished || busy.current) return;
+    busy.current = true;
+    try {
+      const ids = [...marks];
+      const before = savedIds(cur);
+      if (ids.length !== before.length || ids.some(id => !before.includes(id))) {
+        await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
+        const added = ids.filter(id => !before.includes(id));
+        if (added.length) void updateRecentFolders(added).catch(() => {});
+        mark(cur, ids.length ? ids : [INBOX_ID]);
+        void props.onChanged();
+      }
+      setError('');
+      setMore(false);
+      next();
     } catch {
       setError(t('errorStorage'));
     } finally {
@@ -143,6 +183,15 @@ export function Triage(props: {
       items[nx].focus();
       return;
     }
+    // 通常の入力・ボタン・リンクの Enter はブラウザに任せる。チェックからは確定できる。
+    const target = e.target as HTMLElement;
+    const checkbox = target instanceof HTMLInputElement && target.type === 'checkbox';
+    if (multi && e.key === 'Enter' && !creating && !finished && !e.ctrlKey && !e.metaKey && !e.altKey
+      && (!typing || checkbox) && !target.closest('button,a[href]')) {
+      e.preventDefault();
+      if (!e.repeat) void confirm();
+      return;
+    }
     if (typing || e.ctrlKey || e.metaKey || e.altKey || finished || creating || more) return; // 入力欄・開いているメニューの中では、キーを奪わない
     const d = digitOf(e);
     if (e.repeat && (d !== null || e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'n' || e.key === 'N')) {
@@ -157,10 +206,10 @@ export function Triage(props: {
       }
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      next();
+      if (!multi || !busy.current) next();
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      back();
+      if (!multi || !busy.current) back();
     } else if (e.key === 'n' || e.key === 'N') {
       e.preventDefault();
       setCreating(true);
@@ -220,7 +269,7 @@ export function Triage(props: {
             )}
             <div class="triage-folders">
               {keyed.map((f, i) => {
-                const on = (assigned[cur.tweetId] ?? []).includes(f.id);
+                const on = multi ? marks.has(f.id) : (assigned[cur.tweetId] ?? []).includes(f.id);
                 return (
                   <button key={f.id} class={`triage-folder${on ? ' on' : ''}`} aria-pressed={on} onClick={(e) => void choose(f.id, e.shiftKey)}>
                     <kbd>{i + 1}</kbd>
@@ -237,32 +286,38 @@ export function Triage(props: {
                   </button>
                   {more && (
                     <Dropdown fixed onClose={() => setMore(false)} label={t('triageOtherFolders')} class="menu-wide menu-over">
-                      <FolderPickerHost
-                        folders={props.pickerFolders}
-                        selected={assigned[cur.tweetId] ?? []}
-                        onChange={async (sel, source) => {
-                          if (!cur || finished || busy.current) return;
-                          busy.current = true;
-                          try {
-                            const ids = [...sel];
-                            // 最後のチェックを外して戻る「未分類」は、新しい分類には数えない。
-                            const added = ids.filter((id) => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
-                            await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
-                            if (added.length) void updateRecentFolders(added).catch(() => {});
-                            mark(cur, ids);
-                            setError('');
-                            void props.onChanged();
-                            if (added.length && source !== 'created') {
-                              setMore(false);
-                              next();
+                      <div onKeyDown={multi ? (e) => { if (e.key === 'Enter') onKey(e); } : undefined}>
+                        <FolderPickerHost
+                          folders={props.pickerFolders}
+                          selected={multi ? [...marks] : assigned[cur.tweetId] ?? []}
+                          onChange={async (sel, source) => {
+                            if (!cur || finished || busy.current) return;
+                            if (multi && source !== 'created') {
+                              setDraft({ tweetId: cur.tweetId, ids: new Set([...sel].filter(id => id !== INBOX_ID)) });
+                              return;
                             }
-                          } catch {
-                            setError(t('errorStorage'));
-                          } finally {
-                            busy.current = false;
-                          }
-                        }}
-                      />
+                            busy.current = true;
+                            try {
+                              const ids = [...sel];
+                              // 最後のチェックを外して戻る「未分類」は、新しい分類には数えない。
+                              const added = ids.filter((id) => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
+                              await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
+                              if (added.length) void updateRecentFolders(added).catch(() => {});
+                              mark(cur, ids);
+                              setError('');
+                              void props.onChanged();
+                              if (added.length && (source !== 'created' || multi)) {
+                                setMore(false);
+                                next();
+                              }
+                            } catch {
+                              setError(t('errorStorage'));
+                            } finally {
+                              busy.current = false;
+                            }
+                          }}
+                        />
+                      </div>
                     </Dropdown>
                   )}
                 </span>
@@ -285,6 +340,7 @@ export function Triage(props: {
                     setCreating(false);
                     setError('');
                     void props.onChanged();
+                    if (multi) next();
                   } catch {
                     setError(t('errorStorage'));
                   }
@@ -293,12 +349,13 @@ export function Triage(props: {
               />
             )}
             <div class="dialog-actions triage-actions">
-              <span class="muted triage-hint">{t('triageHint')}</span>
+              <span class="muted triage-hint">{t(multi ? 'triageMultiDesc' : 'triageHint')}</span>
               <span class="grow" />
-              <button disabled={step(index, -1) === null} aria-keyshortcuts="ArrowLeft" onClick={back}>
+              {multi && <button class="primary triage-confirm" aria-keyshortcuts="Enter" onClick={() => void confirm()}><kbd>Enter</kbd> {t('triageConfirm')}</button>}
+              <button disabled={step(index, -1) === null} aria-keyshortcuts="ArrowLeft" onClick={() => { if (!multi || !busy.current) back(); }}>
                 {t('triageBack')}
               </button>
-              <button aria-keyshortcuts="ArrowRight" onClick={next}>
+              <button aria-keyshortcuts="ArrowRight" onClick={() => { if (!multi || !busy.current) next(); }}>
                 {t('triageSkip')}
               </button>
             </div>

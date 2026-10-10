@@ -136,6 +136,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [startMissed, setStartMissed] = useState(false);
   /** 未分類の仕分けモード (v29): 始めた時点のキュー。#triage で開かれたときは、データが読めてから始める */
   const [triage, setTriage] = useState<Bookmark[] | null>(null);
+  const [triageMulti, setTriageMulti] = useState(false);
   const [triageWanted, setTriageWanted] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
@@ -808,9 +809,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const startTriage = async () => {
     try {
       // 取り込み完了の直後でも、最後に保存された分が入るよう、始める直前に保存データを読み直す (state が古いことがある)
-      const fresh = await listBookmarks();
+      const [fresh, settings] = await Promise.all([listBookmarks(), getSettings()]);
       setBookmarks(fresh);
       const queue = queryBookmarks(fresh, { folderId: INBOX_ID, search: '', sort, filters: {}, now: Date.now() });
+      setTriageMulti(settings.triageMulti === true);
       setTriage(queue);
     } catch {
       reportStorageError(); // 読み込めなかったときは始めない
@@ -1055,6 +1057,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     <>
       {triage && (
         <Triage
+          multi={triageMulti}
           queue={triage}
           live={liveIds}
           folders={userFolders}

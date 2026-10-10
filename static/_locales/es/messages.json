@@ -1605,5 +1605,6 @@
     "message": "Mostrar todo"
   },
   "triageMultiSwitch": { "message": "Elegir varias carpetas al ordenar" },
-  "triageMultiDesc": { "message": "Marca con las teclas numéricas y pulsa Enter para confirmar y avanzar." }
+  "triageMultiDesc": { "message": "Marca con las teclas numéricas y pulsa Enter para confirmar y avanzar." },
+  "triageConfirm": { "message": "Confirmar" }
 }

@@ -1605,5 +1605,6 @@
     "message": "全部显示"
   },
   "triageMultiSwitch": { "message": "分类时选择多个文件夹" },
-  "triageMultiDesc": { "message": "用数字键标记，按 Enter 确认并进入下一条。" }
+  "triageMultiDesc": { "message": "用数字键标记，按 Enter 确认并进入下一条。" },
+  "triageConfirm": { "message": "确认" }
 }

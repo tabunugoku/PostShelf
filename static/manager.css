@@ -482,3 +482,6 @@ input[type=number]{width:110px}
    content-visibility の clip で切れる。壊れるので付けない。フォーカスの outline は内側 (offset -2px) なので切れない */
 .post{content-visibility:auto;contain-intrinsic-size:auto 320px}
 .mini{content-visibility:auto;contain-intrinsic-size:auto 44px}
+
+.triage-confirm{white-space:nowrap}
+.triage:has(.triage-confirm) .triage-hint{white-space:normal}
