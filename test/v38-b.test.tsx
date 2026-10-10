@@ -82,7 +82,8 @@ it('shows errorStorage for a failed other-folder save and clears it after a succ
 it('shows errorStorage if assigning a newly created folder fails', async () => {
   await openCreate();
   const created = await storage.createFolder({ name: 'New sample' });
-  const onCreated = vi.mocked(menus.createFolderMenu).mock.calls.at(-1)![0].onCreated;
+  const onCreated = vi.mocked(menus.createFolderMenu).mock.calls.at(-1)![0].onCreated!;
+  expect(onCreated).toBeTypeOf('function');
   vi.spyOn(storage, 'addToFolders').mockRejectedValueOnce(new Error('failed'));
   await act(async () => { await expect(onCreated(created)).resolves.toBeUndefined(); });
   await flush();

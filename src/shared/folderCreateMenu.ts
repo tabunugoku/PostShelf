@@ -1,18 +1,17 @@
 /**
  * 「フォルダを作成」メニュー (素の DOM)。x.com のポップオーバー / manager の「フォルダを変更」/ サイドパネルの保存で、
  * フォルダ選択 (folderPicker.ts) の中に、一覧と切り替えて開く。名前・アイコン・色を決めて「作成」を押すとフォルダを作る。
- * アイコンと色の選択肢は models.ts のもの (manager の編集パネルと同じ: アイコンは先頭の 8 種、色は色なし + COLORS)。
- * manager の FolderEdit は Preact なので、DOM 版をここに別に持つ (選択肢は共有)。
+ * 編集では同じ下書きを「保存」で確定する。アイコンと色の選択肢は models.ts のもの。
  */
 import { COLORS, FOLDER_ICON, MAIN_ICONS, MORE_ICONS, colorLabel, displayName, iconLabel, type Folder } from './models';
-import { createFolder, StorageError } from './storage';
+import { createFolder, StorageError, updateFolder } from './storage';
 import { t } from './strings';
 import { ACCENT_FILL } from './tokens';
 import type { PickerTheme } from './folderPicker';
 
 export interface FolderCreateMenu {
   el: HTMLElement;
-  /** 開く前の状態 (入力を空に、アイコンと色を初期値に、エラーを消す) に戻す */
+  /** 開く前の下書き (作成の初期値 / 編集対象の値) に戻す */
   reset: () => void;
   focus: () => void;
 }
@@ -28,13 +27,23 @@ export function createFolderMenu(opts: {
   /** 同名の判定に使う、いまあるフォルダ */
   existing: () => Folder[];
   /** false なら作成済みのフォルダを保持し、次の送信でこの処理だけを再試行する */
-  onCreated: (folder: Folder) => void | boolean | Promise<void | boolean>;
+  onCreated?: (folder: Folder) => void | boolean | Promise<void | boolean>;
+  /** 渡すと編集。existing はこのフォルダ自身を除く */
+  folder?: Folder;
+  head?: boolean;
+  preview?: boolean;
+  onSaved?: () => void | Promise<void>;
+  onDelete?: () => void;
+  /** 管理画面の作成も保存中は全操作を無効にする。既存の作成呼び出しは従来どおり */
+  lockWhileSaving?: boolean;
   /** 「キャンセル」と「← 戻る」 */
   onClose: () => void;
 }): FolderCreateMenu {
   const th = opts.theme;
+  const editing = opts.folder;
+  const lockWhileSaving = !!editing || !!opts.lockWhileSaving;
   const el = document.createElement('form');
-  el.setAttribute('aria-label', t('createFolder'));
+  el.setAttribute('aria-label', t(editing ? 'folderMore' : 'createFolder'));
   el.noValidate = true;
   el.style.cssText = 'box-sizing:border-box;margin:0;display:grid;gap:12px;min-width:0';
 
@@ -57,7 +66,7 @@ export function createFolderMenu(opts: {
   const back = mk(`← ${t('back')}`);
   back.style.cssText = btnCss + ';border:0;padding:4px 8px';
   const title = document.createElement('strong');
-  title.textContent = t('createFolder');
+  title.textContent = t(editing ? 'folderMore' : 'createFolder');
   title.style.cssText = `${RESET};flex:1;min-width:0;font-weight:700`;
   head.append(back, title);
 
@@ -158,9 +167,21 @@ export function createFolderMenu(opts: {
   error.style.cssText = `${RESET};display:none;color:#f4212e;font-size:13px;overflow-wrap:anywhere`;
 
   const actions = document.createElement('div');
-  actions.style.cssText = `${RESET};display:flex;gap:8px;justify-content:flex-end`;
+  actions.dataset.folderActions = '';
+  actions.style.cssText = `${RESET};display:flex;gap:8px;justify-content:flex-end;flex-wrap:nowrap`;
+  const del = opts.onDelete ? mk(t('delete')) : undefined;
+  if (del) {
+    del.style.marginRight = 'auto';
+    del.style.color = '#f4212e';
+    const trash = document.createElement('i');
+    trash.className = 'ti ti-trash';
+    trash.setAttribute('aria-hidden', 'true');
+    trash.style.cssText = 'display:inline-block;margin:0;padding:0;line-height:1;font-style:normal';
+    del.prepend(trash, ' ');
+    actions.append(del);
+  }
   const cancel = mk(t('cancel'));
-  const create = mk(t('create'), 'submit');
+  const create = mk(t(editing ? 'save' : 'create'), 'submit');
   create.style.cssText = `${RESET};min-height:32px;padding:4px 12px;border-radius:8px;cursor:pointer;border:0;background:${ACCENT_FILL};color:#fff`;
   actions.append(cancel, create);
 
@@ -198,7 +219,7 @@ export function createFolderMenu(opts: {
     prevName.textContent = name || t('newFolderPlaceholder');
     prevName.style.opacity = name ? '1' : '.5';
     const empty = input.value.trim() === '';
-    create.disabled = empty; // 空のときは「作成」を押せない
+    create.disabled = empty || (lockWhileSaving && busy);
     create.style.opacity = empty ? '.5' : '1';
     create.style.cursor = empty ? 'not-allowed' : 'pointer';
   };
@@ -213,6 +234,14 @@ export function createFolderMenu(opts: {
 
   let busy = false;
   let pending: Folder | undefined;
+  const lock = (on: boolean) => {
+    if (!lockWhileSaving) return;
+    el.querySelectorAll<HTMLInputElement | HTMLButtonElement>('input,button').forEach(control => { control.disabled = on; });
+    if (!on) {
+      keepCreated(pending);
+      paint();
+    }
+  };
   const keepCreated = (folder?: Folder) => {
     pending = folder;
     // 作成後の再試行で、表示中の下書きと作成済みフォルダの値がずれないようにする。
@@ -223,29 +252,54 @@ export function createFolderMenu(opts: {
   };
   el.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (busy || input.value.trim() === '') return;
+    if (busy) return;
+    if (input.value.trim() === '') {
+      if (lockWhileSaving) showError(t('errEmptyName'));
+      return;
+    }
     if (!pending && hasSameName(opts.existing(), input.value)) return showError(t('errDuplicateFolder'));
     busy = true;
+    lock(true);
+    showError('');
     try {
-      const folder = pending ?? await createFolder({ name: input.value, icon, color });
-      keepCreated(await opts.onCreated(folder) === false ? folder : undefined);
+      if (editing) {
+        const patch: Parameters<typeof updateFolder>[1] = {};
+        const name = input.value.trim();
+        if (name !== editing.name) patch.name = name;
+        if (icon !== editing.icon) patch.icon = icon;
+        if (color !== editing.color) patch.color = color ?? null;
+        if (Object.keys(patch).length) await updateFolder(editing.id, patch);
+        await opts.onSaved?.();
+      } else {
+        const folder = pending ?? await createFolder({ name: input.value, icon, color });
+        keepCreated(await opts.onCreated?.(folder) === false ? folder : undefined);
+      }
     } catch (err) {
-      if (!(err instanceof StorageError)) throw err;
-      showError(err.message);
+      if (!(err instanceof StorageError) && !lockWhileSaving) throw err;
+      showError(err instanceof StorageError ? err.message : t('errorStorage'));
     } finally {
       busy = false;
+      lock(false);
     }
   });
-  back.addEventListener('click', () => opts.onClose());
-  cancel.addEventListener('click', () => opts.onClose());
+  if (lockWhileSaving) input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); if (!busy) el.dispatchEvent(new Event('submit', { cancelable: true })); }
+  });
+  const close = () => { if (!lockWhileSaving || !busy) opts.onClose(); };
+  back.addEventListener('click', close);
+  cancel.addEventListener('click', close);
+  del?.addEventListener('click', () => { if (!busy) opts.onDelete?.(); });
 
-  el.append(head, input, iconGroup, colorGroup, preview, error, actions);
+  if (opts.head !== false) el.append(head);
+  el.append(input, iconGroup, colorGroup);
+  if (opts.preview !== false) el.append(preview);
+  el.append(error, actions);
   const reset = () => {
     keepCreated();
     expanded = false;
-    input.value = '';
-    icon = FOLDER_ICON;
-    color = undefined;
+    input.value = editing ? displayName(editing) : '';
+    icon = editing?.icon ?? FOLDER_ICON;
+    color = editing?.color;
     showError('');
     paint();
   };
