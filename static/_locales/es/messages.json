@@ -264,12 +264,6 @@
   "bulkMenuLabel": {
     "message": "Acciones para las publicaciones seleccionadas"
   },
-  "bulkAdd": {
-    "message": "Añadir a carpeta"
-  },
-  "bulkRemove": {
-    "message": "Quitar de carpeta"
-  },
   "clearSelection": {
     "message": "Deseleccionar"
   },

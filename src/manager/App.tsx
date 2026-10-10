@@ -51,7 +51,7 @@ import {
   type BookmarkUndo,
 } from '../shared/storage';
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
-import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
+import { Confirm, Dropdown, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card, type RowHandlers } from './Cards';
 import { BulkMenu } from './BulkMenu';
 import { refreshCacheView } from './cacheView';
@@ -127,7 +127,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [anchor, setAnchor] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
-  const [menu, setMenu] = useState<'add' | 'remove' | 'author' | 'folders' | null>(null);
+  const [menu, setMenu] = useState<'author' | 'folders' | null>(null);
   /** サイドパネルの「絞り込み」(4 つの条件を畳んだもの) を開いているか */
   const [filterOpen, setFilterOpen] = useState(false);
   /** お知らせの帯が複数あるとき、いま出している帯の番号 (「他に N 件」で切り替える) */
@@ -527,7 +527,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     (types.includes(MIME_POSTS) && !virtual(f.id)) || (types.includes(MIME_FOLDER) && !virtual(f.id) && f.id !== INBOX_ID);
 
   const bulkIds = [...selected];
-  const removableFolders = [inboxView(storedInbox), ...userFolders].filter((f) => bookmarks.some((b) => selected.has(b.tweetId) && b.folderIds.includes(f.id)));
 
   const editNode = (f: Folder) => {
     if (editing !== f.id) return null;
@@ -765,10 +764,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     selected.size > 0 ? (
       <BulkMenu
         count={selected.size}
-        addFolders={pickerFolders}
-        removeFolders={removableFolders}
-        onAdd={(id) => void run(addToFolders(bulkIds, [id]), 'toastAdded')}
-        onRemove={(id) => void run(removeFromFolders(bulkIds, [id]), 'toastRemoved')}
+        folders={pickerFolders}
+        bookmarks={bookmarks.filter(b => selected.has(b.tweetId))}
+        onToggle={(id, on) => run(id === INBOX_ID ? moveToFolder(bulkIds, null, INBOX_ID) : on ? addToFolders(bulkIds, [id]) : removeFromFolders(bulkIds, [id]), on ? 'toastAdded' : 'toastRemoved')}
         onDelete={() => setConfirmState({ kind: 'posts', ids: bulkIds })}
         onClear={clearSelection}
       />

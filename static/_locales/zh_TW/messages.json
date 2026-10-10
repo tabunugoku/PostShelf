@@ -264,12 +264,6 @@
   "bulkMenuLabel": {
     "message": "對所選貼文的操作"
   },
-  "bulkAdd": {
-    "message": "加入資料夾"
-  },
-  "bulkRemove": {
-    "message": "從資料夾移除"
-  },
   "clearSelection": {
     "message": "取消選取"
   },

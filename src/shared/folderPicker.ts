@@ -81,6 +81,10 @@ export function divider(th: PickerTheme): HTMLElement {
 export function createFolderPicker(opts: {
   folders: Folder[];
   selected: Set<string>;
+  /** 一括選択用。一部のポストだけが入っている行 (省略時は従来の二状態) */
+  partial?: Set<string>;
+  /** 一括選択用。集合の置換ではなく、押した行だけを変更する */
+  onToggle?: (folderId: string, on: boolean) => void | Promise<void>;
   theme: PickerTheme;
   /** チェックの変化 (新規作成フォルダの自動選択を含む) のたびに呼ばれる */
   /** source は新規作成からの選択だけ 'created'。チェック操作では省略する。 */
@@ -100,7 +104,11 @@ export function createFolderPicker(opts: {
   /** 行ごとの見た目の更新 (チェックの塗り / 選択中の行の薄い背景 / 印の data-checked) */
   const paints = new Map<string, () => void>();
   const sync = () => {
-    boxes.forEach((cb, id) => (cb.checked = selected.has(id)));
+    boxes.forEach((cb, id) => {
+      cb.checked = selected.has(id);
+      cb.indeterminate = opts.partial?.has(id) ?? false;
+      if (opts.partial) cb.setAttribute('aria-checked', cb.indeterminate ? 'mixed' : String(cb.checked));
+    });
     paints.forEach((p) => p());
     paintStatus();
   };
@@ -167,8 +175,11 @@ export function createFolderPicker(opts: {
     onCreated: async (f) => {
       // 作ったフォルダを、このポストの保存先として選んで一覧に戻る (「未分類」との排他は normalize)
       folders.push(f);
-      normalize(f.id, true);
-      await onChange(selected, 'created');
+      if (opts.onToggle) await opts.onToggle(f.id, true);
+      else {
+        normalize(f.id, true);
+        await onChange(selected, 'created');
+      }
       closeMenu();
     },
     onClose: () => closeMenu(),
@@ -259,12 +270,17 @@ export function createFolderPicker(opts: {
     box.append(cb, tick);
     const paintRow = () => {
       const on = selected.has(f.id);
-      label.setAttribute('data-checked', String(on));
-      cb.style.border = `1.5px solid ${on ? th.accent : th.fg}`;
-      cb.style.opacity = on ? '1' : '.6';
-      cb.style.background = on ? th.accent : 'transparent';
-      tick.style.display = on ? 'flex' : 'none';
-      label.style.background = on || hovered ? th.hover : '';
+      const mixed = opts.partial?.has(f.id) ?? false;
+      cb.checked = on;
+      cb.indeterminate = mixed;
+      if (opts.partial) cb.setAttribute('aria-checked', mixed ? 'mixed' : String(on));
+      label.setAttribute('data-checked', mixed ? 'mixed' : String(on));
+      cb.style.border = `1.5px solid ${on || mixed ? th.accent : th.fg}`;
+      cb.style.opacity = on || mixed ? '1' : '.6';
+      cb.style.background = on || mixed ? th.accent : 'transparent';
+      tick.className = mixed ? 'ti ti-minus' : 'ti ti-check';
+      tick.style.display = on || mixed ? 'flex' : 'none';
+      label.style.background = on || mixed || hovered ? th.hover : '';
     };
     label.addEventListener('mouseenter', () => {
       hovered = true;
@@ -277,6 +293,7 @@ export function createFolderPicker(opts: {
     boxes.set(f.id, cb);
     paints.set(f.id, paintRow);
     cb.addEventListener('change', () => {
+      if (opts.onToggle) return void opts.onToggle(f.id, cb.checked);
       normalize(f.id, cb.checked);
       void onChange(selected);
     });

@@ -264,12 +264,6 @@
   "bulkMenuLabel": {
     "message": "对所选帖子的操作"
   },
-  "bulkAdd": {
-    "message": "添加到文件夹"
-  },
-  "bulkRemove": {
-    "message": "从文件夹移除"
-  },
   "clearSelection": {
     "message": "取消选择"
   },

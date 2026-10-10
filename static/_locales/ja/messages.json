@@ -264,12 +264,6 @@
   "bulkMenuLabel": {
     "message": "選択したポストの操作"
   },
-  "bulkAdd": {
-    "message": "フォルダに追加"
-  },
-  "bulkRemove": {
-    "message": "フォルダから外す"
-  },
   "clearSelection": {
     "message": "選択解除"
   },

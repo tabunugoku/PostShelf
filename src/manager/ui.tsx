@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 import { render } from 'preact';
 import { createFolderPicker } from '../shared/folderPicker';
-import { displayName, type Folder } from '../shared/models';
+import type { Folder } from '../shared/models';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
 
@@ -229,38 +229,36 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
   );
 }
 
-/** フォルダを 1 つ選ぶメニュー (一括「フォルダに追加」「フォルダから外す」用) */
-export function FolderMenu(props: { folders: Folder[]; onPick: (id: string) => void; onClose: () => void; label: string }) {
-  return (
-    <Dropdown onClose={props.onClose} label={props.label}>
-      {props.folders.length === 0 && <div class="menu-empty">{t('noFolders')}</div>}
-      {props.folders.map((f) => (
-        <button class="menu-item" onClick={() => props.onPick(f.id)}>
-          <Icon name={f.icon} color={f.color} />
-          <span class="fr-name">{displayName(f)}</span>
-        </button>
-      ))}
-    </Dropdown>
-  );
-}
-
 /**
  * x.com のポップオーバーと共通のチェックボックス式フォルダ選択 (src/shared/folderPicker.ts) を Preact に載せる。
  * 配色は manager の CSS 変数を渡す。
  */
-export function FolderPickerHost(props: { folders: Folder[]; selected: string[]; onChange: (selected: Set<string>, source?: 'created') => void | Promise<void> }) {
+export function FolderPickerHost(props: { folders: Folder[]; selected: string[]; partial?: Set<string>; onToggle?: (folderId: string, on: boolean) => void | Promise<void>; onChange: (selected: Set<string>, source?: 'created') => void | Promise<void> }) {
   const host = useRef<HTMLDivElement>(null);
+  const pickerRef = useRef<ReturnType<typeof createFolderPicker> | null>(null);
+  const selected = useRef(new Set(props.selected));
+  const partial = useRef(new Set(props.partial));
   const latest = useRef(props);
   latest.current = props;
   useEffect(() => {
     const picker = createFolderPicker({
       folders: props.folders,
-      selected: new Set(props.selected),
+      selected: selected.current,
+      partial: props.partial ? partial.current : undefined,
+      onToggle: props.onToggle ? (id, on) => latest.current.onToggle?.(id, on) : undefined,
       theme: { fg: 'var(--text-primary)', border: 'var(--border-strong)', hover: 'var(--fill-ghost-hover)', accent: 'var(--fill-accent)' },
       onChange: (selected, source) => latest.current.onChange(selected, source),
     });
     host.current?.replaceChildren(picker.el);
+    pickerRef.current = picker;
   }, []);
+  useLayoutEffect(() => {
+    // 一括操作だけ、保存後の全員 / 一部の状態を同期する。他の呼び出しの挙動は維持する。
+    if (!props.partial) return;
+    selected.current.clear(); props.selected.forEach(id => selected.current.add(id));
+    partial.current.clear(); props.partial.forEach(id => partial.current.add(id));
+    pickerRef.current?.sync();
+  }, [props.selected, props.partial]);
   return <div ref={host} class="picker-host" />;
 }
 

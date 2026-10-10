@@ -264,12 +264,6 @@
   "bulkMenuLabel": {
     "message": "Actions sur les posts sélectionnés"
   },
-  "bulkAdd": {
-    "message": "Ajouter au dossier"
-  },
-  "bulkRemove": {
-    "message": "Retirer du dossier"
-  },
   "clearSelection": {
     "message": "Tout désélectionner"
   },

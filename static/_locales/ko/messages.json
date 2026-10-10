@@ -264,12 +264,6 @@
   "bulkMenuLabel": {
     "message": "선택한 게시물 작업"
   },
-  "bulkAdd": {
-    "message": "폴더에 추가"
-  },
-  "bulkRemove": {
-    "message": "폴더에서 제외"
-  },
   "clearSelection": {
     "message": "선택 해제"
   },

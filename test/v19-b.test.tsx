@@ -155,7 +155,7 @@ describe('v19-6: 管理画面の上部', () => {
     expect(css).toMatch(/\.ac-head\{display:flex;flex-wrap:wrap/);
   });
 
-  it('the bulk bar became a 「N 件選択中 ⌄」 button at the right end of the filter row: hidden with no selection, four actions inside, the list does not move', async () => {
+  it('the bulk bar became a 「N 件選択中 ⌄」 button at the right end of the filter row: hidden with no selection, three actions inside, the list does not move', async () => {
     await mount('tab', 1000);
     const row = $('.chips');
     expect($$('.bulk-btn')).toHaveLength(0);
@@ -170,10 +170,10 @@ describe('v19-6: 管理画面の上部', () => {
     void rowsTop;
     await click($('.bulk-btn'));
     const items = $$('.menu-bulk .menu-item').map((i) => i.textContent!.trim());
-    expect(items).toEqual(['フォルダに追加', 'フォルダから外す', '削除', '選択解除']);
+    expect(items).toEqual(['フォルダを変更', '削除', '選択解除']);
     expect($('.menu-bulk .danger-text').textContent).toContain('削除');
-    // フォルダに追加 → 一覧が切り替わる
-    await click(byText('.menu-bulk .menu-item', 'フォルダに追加'));
-    expect($$('.menu-bulk .menu-item').map((i) => i.textContent!.trim())).toContain('Alpha');
+    // フォルダを変更 → 一覧が切り替わる
+    await click(byText('.menu-bulk .menu-item', 'フォルダを変更'));
+    expect($$('.menu-bulk label').map((i) => i.textContent!.trim())).toContain('Alpha');
   });
 });
