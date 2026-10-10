@@ -14,6 +14,7 @@ export function FolderEdit(props: {
   folder?: Folder;
   existing?: Folder[];
   onSaved: (created?: Folder) => void;
+  onCancel?: () => void;
   onRequestDelete?: () => void;
 }) {
   const folder = useRef(props.folder).current;
@@ -125,10 +126,10 @@ export function FolderEdit(props: {
       </div>
       {error && <p class="error">{error}</p>}
       <div class="erow folder-actions">
-        <button class="primary" disabled={saving || !name.trim()} onClick={() => void save()}>{t('save')}</button>
-        {folder && <button class="danger" disabled={saving} onClick={props.onRequestDelete}>
+        {folder ? <button class="danger" disabled={saving} onClick={props.onRequestDelete}>
           <Icon name="ti-trash" /> {t('delete')}
-        </button>}
+        </button> : <button disabled={saving} onClick={() => { if (!busy.current) props.onCancel?.(); }}>{t('cancel')}</button>}
+        <button class="primary" disabled={saving || !name.trim()} onClick={() => void save()}>{t('save')}</button>
       </div>
     </div>
   );

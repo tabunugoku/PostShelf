@@ -216,6 +216,7 @@ button:disabled{cursor:not-allowed}
 .folder-edit .erow.wrap{flex-wrap:wrap;gap:6px}
 .folder-edit .erow:last-child{margin-bottom:0}
 .folder-edit .folder-actions{justify-content:flex-end;flex-wrap:nowrap}
+.folder-edit .folder-actions > :first-child{margin-right:auto}
 .folder-edit .folder-actions button{flex:none;white-space:nowrap}
 .folder-create-anchor{display:block}
 .elabel{font-size:14px;color:var(--text-secondary);min-width:60px;white-space:nowrap;flex:none}
