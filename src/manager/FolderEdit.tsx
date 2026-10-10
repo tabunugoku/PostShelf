@@ -1,43 +1,61 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
-import { COLORS, ICONS, colorLabel, displayName, iconLabel, type Folder } from '../shared/models';
+import { COLORS, FOLDER_ICON, ICONS, colorLabel, displayName, iconLabel, type Folder } from '../shared/models';
 import { t } from '../shared/strings';
-import { updateFolder } from '../shared/storage';
+import { createFolder, StorageError, updateFolder } from '../shared/storage';
 import { hasSameName } from '../shared/folderCreateMenu';
 
 /**
  * フォルダの編集ポップオーバーの中身 (名前 / アイコン / 色 (色なし含む))。
- * アイコンと色は選んだ時点で保存し、名前は Enter / フォーカスを外したときに保存する。
+ * folder が無ければ作成。選択は下書きにだけ反映し、保存 / Enter でまとめて保存する。
  */
 /** existing: 同名の判定に使う、ほかのフォルダ (「未分類」を含む。このフォルダ自身は含めない) */
 export function FolderEdit(props: {
-  folder: Folder;
+  folder?: Folder;
   existing?: Folder[];
-  onSaved: () => void;
-  onRequestDelete: () => void;
+  onSaved: (created?: Folder) => void;
+  onRequestDelete?: () => void;
 }) {
-  const { folder } = props;
-  const [name, setName] = useState(displayName(folder));
+  const folder = useRef(props.folder).current;
+  const [name, setName] = useState(folder ? displayName(folder) : '');
+  const [icon, setIcon] = useState(folder?.icon ?? FOLDER_ICON);
+  const [color, setColor] = useState(folder?.color);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const busy = useRef(false);
+  const mounted = useRef(true);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
     input.current?.focus();
     input.current?.select();
+    return () => { mounted.current = false; };
   }, []);
 
-  const apply = async (patch: Parameters<typeof updateFolder>[1]) => {
-    try {
-      await updateFolder(folder.id, patch);
-      setError('');
-      props.onSaved();
-    } catch (e) {
-      setError((e as Error).message);
+  const save = async () => {
+    if (busy.current) return;
+    const trimmed = name.trim();
+    if (!trimmed) return setError(t('errEmptyName'));
+    if (hasSameName((props.existing ?? []).filter((f) => f.id !== folder?.id), trimmed)) return setError(t('errDuplicateFolder'));
+    const patch: Parameters<typeof updateFolder>[1] = {};
+    if (folder) {
+      if (trimmed !== folder.name) patch.name = trimmed;
+      if (icon !== folder.icon) patch.icon = icon;
+      if (color !== folder.color) patch.color = color ?? null;
+      if (!Object.keys(patch).length) return props.onSaved();
     }
-  };
-  const commitName = () => {
-    if (name === displayName(folder)) return;
-    if (hasSameName((props.existing ?? []).filter((f) => f.id !== folder.id), name)) return setError(t('errDuplicateFolder'));
-    void apply({ name });
+    busy.current = true;
+    setSaving(true);
+    try {
+      let created: Folder | undefined;
+      if (folder) await updateFolder(folder.id, patch);
+      else created = await createFolder({ name: trimmed, icon, color });
+      if (mounted.current) props.onSaved(created);
+    } catch (e) {
+      if (mounted.current) setError(e instanceof StorageError ? e.message : t('errorStorage'));
+    } finally {
+      busy.current = false;
+      if (mounted.current) setSaving(false);
+    }
   };
 
   return (
@@ -48,13 +66,13 @@ export function FolderEdit(props: {
           ref={input}
           class="grow"
           value={name}
+          disabled={saving}
           aria-label={t('name')}
-          onInput={(e) => setName((e.target as HTMLInputElement).value)}
-          onBlur={commitName}
+          onInput={(e) => { setName((e.target as HTMLInputElement).value); setError(''); }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              commitName();
+              void save();
             }
           }}
         />
@@ -62,7 +80,7 @@ export function FolderEdit(props: {
       <div class="erow wrap">
         <span class="elabel">{t('icon')}</span>
         {ICONS.slice(0, 8).map((i) => (
-          <button class={`ic${i === folder.icon ? ' on' : ''}`} aria-label={iconLabel(i)} data-icon={i} aria-pressed={i === folder.icon} onClick={() => void apply({ icon: i })}>
+          <button class={`ic${i === icon ? ' on' : ''}`} aria-label={iconLabel(i)} data-icon={i} aria-pressed={i === icon} disabled={saving} onClick={() => setIcon(i)}>
             <Icon name={i} />
           </button>
         ))}
@@ -70,28 +88,31 @@ export function FolderEdit(props: {
       <div class="erow wrap">
         <span class="elabel">{t('color')}</span>
         <button
-          class={`sw sw-none${folder.color === undefined ? ' on' : ''}`}
+          class={`sw sw-none${color === undefined ? ' on' : ''}`}
           aria-label={t('colorNone')}
           title={t('colorNone')}
-          aria-pressed={folder.color === undefined}
-          onClick={() => void apply({ color: null })}
+          aria-pressed={color === undefined}
+          disabled={saving}
+          onClick={() => setColor(undefined)}
         />
         {COLORS.map((c) => (
           <button
-            class={`sw${c === folder.color ? ' on' : ''}`}
+            class={`sw${c === color ? ' on' : ''}`}
             style={{ background: c }}
             aria-label={colorLabel(c)}
             data-color={c}
-            aria-pressed={c === folder.color}
-            onClick={() => void apply({ color: c })}
+            aria-pressed={c === color}
+            disabled={saving}
+            onClick={() => setColor(c)}
           />
         ))}
       </div>
       {error && <p class="error">{error}</p>}
-      <div class="erow">
-        <button class="danger" onClick={props.onRequestDelete}>
+      <div class="erow folder-actions">
+        <button class="primary" disabled={saving || !name.trim()} onClick={() => void save()}>{t('save')}</button>
+        {folder && <button class="danger" disabled={saving} onClick={props.onRequestDelete}>
           <Icon name="ti-trash" /> {t('delete')}
-        </button>
+        </button>}
       </div>
     </div>
   );

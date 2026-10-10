@@ -38,7 +38,6 @@ import {
   onLastSeenAccountChanged,
   setAccountScope,
   type AccountSummary,
-  createFolder,
   deleteBookmarks,
   deleteFolder,
   getBookmark,
@@ -140,6 +139,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [triageWanted, setTriageWanted] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
+  const [creatingFolder, setCreatingFolder] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [dragOver, setDragOver] = useState<{ id: string; kind: 'folder' | 'posts' } | null>(null);
   // dragover 中は getData が保護されるため、同じ行へのドロップ判定には dragstart の ID を使う。
@@ -273,6 +273,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setSelected(new Set());
     setFilters({});
     setEditing(null);
+    setCreatingFolder(false);
     setMenu(null);
     setFilterOpen(false);
     void updateSettings({ lastFolderId: id }).catch(() => {});
@@ -534,7 +535,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         <FolderEdit
           folder={f}
           existing={[inboxOf(folders), ...folders]}
-          onSaved={() => void reload()}
+          onSaved={() => { setEditing(null); void reload(); }}
           onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }}
         />
       </Dropdown>
@@ -597,6 +598,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               aria-expanded={editing === f.id}
               onClick={(e) => {
                 e.stopPropagation();
+                setCreatingFolder(false);
                 setEditing(editing === f.id ? null : f.id);
               }}
             >
@@ -609,12 +611,22 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     );
   };
 
-  const newFolder = async () => {
-    const f = await createFolder({ name: t('newFolder') });
-    await reload();
-    chooseView(f.id);
-    setEditing(f.id);
+  const newFolder = () => {
+    setEditing(null);
+    setMenu(null);
+    setCreatingFolder(true);
   };
+  const createNode = creatingFolder && (
+    <Dropdown fixed onClose={() => setCreatingFolder(false)} label={t('newFolder')} class="menu-edit">
+      <FolderEdit
+        existing={[inboxOf(folders), ...folders]}
+        onSaved={(f) => {
+          setCreatingFolder(false);
+          if (f) void reload().then(() => chooseView(f.id));
+        }}
+      />
+    </Dropdown>
+  );
 
   // ---- 共通パーツ ----
   const searchBox = (
@@ -1151,7 +1163,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                 aria-haspopup="menu"
                 aria-expanded={menu === 'folders'}
                 aria-label={`${t('chooseFolderMenu')}: ${viewName}`}
-                onClick={() => setMenu(menu === 'folders' ? null : 'folders')}
+                onClick={() => { setCreatingFolder(false); setMenu(menu === 'folders' ? null : 'folders'); }}
               >
                 <span class="fb-main">
                   <Icon name={page === 'settings' ? 'ti-settings' : curFolder.icon} color={page === 'settings' ? undefined : curFolder.color} />
@@ -1169,7 +1181,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                       <span class="n">{count(f.id)}</span>
                     </button>
                   ))}
-                  <button class="menu-item" onClick={() => { setMenu(null); void newFolder(); }}>
+                  <button class="menu-item" onClick={newFolder}>
                     <Icon name="ti-plus" /> {t('newFolder')}
                   </button>
                   <button class="menu-item" onClick={() => { setMenu(null); setPage('settings'); }}>
@@ -1177,6 +1189,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                   </button>
                 </Dropdown>
               )}
+              {createNode}
             </span>
             <button class="icon-btn bordered" aria-label={t('searchShow')} title={t('search')} aria-pressed={searchOpen} onClick={() => setSearchOpen(!searchOpen)}>
               <Icon name="ti-search" />
@@ -1216,9 +1229,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         {smartViews.map((f) => viewRow(f, { smart: true }))}
         <div class="sec">{t('foldersSection')}</div>
         {userFolders.map((f) => viewRow(f))}
-        <div class="fr add" role="button" tabIndex={0} onClick={() => void newFolder()} onKeyDown={(e) => e.key === 'Enter' && void newFolder()}>
-          <Icon name="ti-plus" />
-          {t('newFolder')}
+        <div class="menu-anchor folder-create-anchor">
+          <div class="fr add" role="button" tabIndex={0} onClick={newFolder} onKeyDown={(e) => e.key === 'Enter' && newFolder()}>
+            <Icon name="ti-plus" />
+            {t('newFolder')}
+          </div>
+          {createNode}
         </div>
         <div class="grow" />
         {surface === 'tab' && hasSidePanel() && (
