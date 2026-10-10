@@ -46,6 +46,7 @@ X のブックマークフォルダは Premium 限定で、名前/アイコン/�
 - Manifest V3、権限 `storage`, `unlimitedStorage`、host `https://x.com/*` `https://twitter.com/*`
 - 構成: `src/content`, `src/manager`, `src/popup`, `src/background`, `src/shared`
 - background: メッセージ中継、JSON エクスポート/インポート
+- 全文取得 (v43): 既定は 4〜8 秒・1 タブ。「標準」は 2〜5 秒・1〜3 タブ。各ワーカーが閉じてから次を開く間隔に加え、全ワーカーで起動を 1 秒以上あける。上限 (自動 30 件 / 手動 50 件)、15 秒の待ち、1 時間の自動再試行制限は維持。X の制限は全タブを停止。連続 3 件の失敗を全タブで合算し、成功で 0 に戻す。自動取り込み中は全ワーカーが待つ。
 
 ## マイルストーン
 M1 骨組み + フォルダ CRUD / M2 content script / M3 manager / M4 取り込み + エクスポート / M5 仕上げ
