@@ -142,7 +142,7 @@ describe('v20-10: サイドパネルの複数選択', () => {
     expect(shape()).toEqual(before); // 上部の段の数は変わらない
     expect([...$('.pbody').children].map((c) => c.className)).toEqual(mainBefore); // 一覧の前に、新しい段が入らない
     await click($('.bulk-btn'));
-    expect($$('.menu-bulk .menu-item').map((i) => i.textContent!.trim())).toEqual(['フォルダに追加', 'フォルダから外す', '削除', '選択解除']);
+    expect($$('.menu-bulk .menu-item').map((i) => i.textContent!.trim())).toEqual(['フォルダを変更', '削除', 'すべて選択', '選択解除']);
     await click($$('.menu-bulk .menu-item').find((i) => i.textContent?.includes('選択解除'))!);
     expect($$('.bulk-btn')).toHaveLength(0);
   });

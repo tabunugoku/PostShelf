@@ -264,11 +264,8 @@
   "bulkMenuLabel": {
     "message": "Actions for selected posts"
   },
-  "bulkAdd": {
-    "message": "Add to folder"
-  },
-  "bulkRemove": {
-    "message": "Remove from folder"
+  "selectAll": {
+    "message": "Select all"
   },
   "clearSelection": {
     "message": "Clear selection"
@@ -1603,5 +1600,43 @@
   },
   "listShowAll": {
     "message": "Show all"
-  }
+  },
+  "triageMultiSwitch": { "message": "Pick several in Sort mode" },
+  "triageMultiDesc": { "message": "Mark with number keys, then press Enter to confirm." },
+  "triageConfirm": { "message": "Confirm" },
+  "iconPalette": { "message": "Palette" },
+  "iconBrush": { "message": "Brush" },
+  "iconPencil": { "message": "Pencil" },
+  "iconCamera": { "message": "Camera" },
+  "iconMicrophone": { "message": "Microphone" },
+  "iconGamepad": { "message": "Game" },
+  "iconDice": { "message": "Dice" },
+  "iconPuzzle": { "message": "Puzzle" },
+  "iconTrophy": { "message": "Trophy" },
+  "iconGhost": { "message": "Ghost" },
+  "iconLeaf": { "message": "Leaf" },
+  "iconPaw": { "message": "Paw print" },
+  "iconCat": { "message": "Cat" },
+  "iconFlame": { "message": "Flame" },
+  "iconMoon": { "message": "Moon" },
+  "iconSun": { "message": "Sun" },
+  "iconCloud": { "message": "Cloud" },
+  "iconPlane": { "message": "Airplane" },
+  "iconBike": { "message": "Bicycle" },
+  "iconCoffee": { "message": "Coffee" },
+  "iconPizza": { "message": "Pizza" },
+  "iconGift": { "message": "Gift" },
+  "iconShoppingBag": { "message": "Shopping" },
+  "iconMapPin": { "message": "Location" },
+  "iconCalendar": { "message": "Schedule" },
+  "iconClock": { "message": "Clock" },
+  "iconTag": { "message": "Tag" },
+  "iconFlag": { "message": "Flag" },
+  "iconRocket": { "message": "Rocket" },
+  "iconDiamond": { "message": "Diamond" },
+  "iconSparkles": { "message": "Sparkles" },
+  "iconWorld": { "message": "Earth" },
+  "iconTicket": { "message": "Ticket" },
+  "iconPlanet": { "message": "Planet" },
+  "iconMore": { "message": "More" }
 }

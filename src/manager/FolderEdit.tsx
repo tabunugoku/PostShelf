@@ -1,120 +1,37 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
-import { Icon } from '../shared/Icon';
-import { COLORS, FOLDER_ICON, ICONS, colorLabel, displayName, iconLabel, type Folder } from '../shared/models';
-import { t } from '../shared/strings';
-import { createFolder, StorageError, updateFolder } from '../shared/storage';
-import { hasSameName } from '../shared/folderCreateMenu';
+import { useEffect, useRef } from 'preact/hooks';
+import type { Folder } from '../shared/models';
+import { createFolderMenu } from '../shared/folderCreateMenu';
 
-/**
- * フォルダの編集ポップオーバーの中身 (名前 / アイコン / 色 (色なし含む))。
- * folder が無ければ作成。選択は下書きにだけ反映し、保存 / Enter でまとめて保存する。
- */
-/** existing: 同名の判定に使う、ほかのフォルダ (「未分類」を含む。このフォルダ自身は含めない) */
+/** 共有の作成・編集メニューを載せる。下書きと保存処理は createFolderMenu に集約する。 */
 export function FolderEdit(props: {
   folder?: Folder;
   existing?: Folder[];
   onSaved: (created?: Folder) => void;
+  onCancel?: () => void;
   onRequestDelete?: () => void;
 }) {
-  const folder = useRef(props.folder).current;
-  const [name, setName] = useState(folder ? displayName(folder) : '');
-  const [icon, setIcon] = useState(folder?.icon ?? FOLDER_ICON);
-  const [color, setColor] = useState(folder?.color);
-  const [error, setError] = useState('');
-  const [saving, setSaving] = useState(false);
-  const busy = useRef(false);
-  const mounted = useRef(true);
-  const input = useRef<HTMLInputElement>(null);
+  const host = useRef<HTMLDivElement>(null);
+  const latest = useRef(props);
+  latest.current = props;
   useEffect(() => {
-    input.current?.focus();
-    input.current?.select();
-    return () => { mounted.current = false; };
+    let mounted = true;
+    const folder = props.folder;
+    const menu = createFolderMenu({
+      theme: { fg: 'var(--text-primary)', border: 'var(--border-strong)', hover: 'var(--fill-ghost-hover)', accent: 'var(--fill-accent)' },
+      folder,
+      head: false,
+      preview: false,
+      lockWhileSaving: true,
+      existing: () => (latest.current.existing ?? []).filter(f => f.id !== folder?.id),
+      onCreated: created => { if (mounted) latest.current.onSaved(created); },
+      onSaved: () => { if (mounted) latest.current.onSaved(); },
+      onClose: () => { if (mounted) latest.current.onCancel?.(); },
+      onDelete: folder && props.onRequestDelete ? () => { if (mounted) latest.current.onRequestDelete?.(); } : undefined,
+    });
+    host.current?.replaceChildren(menu.el);
+    menu.focus();
+    menu.el.querySelector('input')?.select();
+    return () => { mounted = false; };
   }, []);
-
-  const save = async () => {
-    if (busy.current) return;
-    const trimmed = name.trim();
-    if (!trimmed) return setError(t('errEmptyName'));
-    if (hasSameName((props.existing ?? []).filter((f) => f.id !== folder?.id), trimmed)) return setError(t('errDuplicateFolder'));
-    const patch: Parameters<typeof updateFolder>[1] = {};
-    if (folder) {
-      if (trimmed !== folder.name) patch.name = trimmed;
-      if (icon !== folder.icon) patch.icon = icon;
-      if (color !== folder.color) patch.color = color ?? null;
-      if (!Object.keys(patch).length) return props.onSaved();
-    }
-    busy.current = true;
-    setSaving(true);
-    try {
-      let created: Folder | undefined;
-      if (folder) await updateFolder(folder.id, patch);
-      else created = await createFolder({ name: trimmed, icon, color });
-      if (mounted.current) props.onSaved(created);
-    } catch (e) {
-      if (mounted.current) setError(e instanceof StorageError ? e.message : t('errorStorage'));
-    } finally {
-      busy.current = false;
-      if (mounted.current) setSaving(false);
-    }
-  };
-
-  return (
-    <div class="folder-edit">
-      <div class="erow">
-        <span class="elabel">{t('name')}</span>
-        <input
-          ref={input}
-          class="grow"
-          value={name}
-          disabled={saving}
-          aria-label={t('name')}
-          onInput={(e) => { setName((e.target as HTMLInputElement).value); setError(''); }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              void save();
-            }
-          }}
-        />
-      </div>
-      <div class="erow wrap">
-        <span class="elabel">{t('icon')}</span>
-        {ICONS.slice(0, 8).map((i) => (
-          <button class={`ic${i === icon ? ' on' : ''}`} aria-label={iconLabel(i)} data-icon={i} aria-pressed={i === icon} disabled={saving} onClick={() => setIcon(i)}>
-            <Icon name={i} />
-          </button>
-        ))}
-      </div>
-      <div class="erow wrap">
-        <span class="elabel">{t('color')}</span>
-        <button
-          class={`sw sw-none${color === undefined ? ' on' : ''}`}
-          aria-label={t('colorNone')}
-          title={t('colorNone')}
-          aria-pressed={color === undefined}
-          disabled={saving}
-          onClick={() => setColor(undefined)}
-        />
-        {COLORS.map((c) => (
-          <button
-            class={`sw${c === color ? ' on' : ''}`}
-            style={{ background: c }}
-            aria-label={colorLabel(c)}
-            data-color={c}
-            aria-pressed={c === color}
-            disabled={saving}
-            onClick={() => setColor(c)}
-          />
-        ))}
-      </div>
-      {error && <p class="error">{error}</p>}
-      <div class="erow folder-actions">
-        <button class="primary" disabled={saving || !name.trim()} onClick={() => void save()}>{t('save')}</button>
-        {folder && <button class="danger" disabled={saving} onClick={props.onRequestDelete}>
-          <Icon name="ti-trash" /> {t('delete')}
-        </button>}
-      </div>
-    </div>
-  );
+  return <div ref={host} class="folder-editor-host" />;
 }
-

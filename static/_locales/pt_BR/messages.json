@@ -264,11 +264,8 @@
   "bulkMenuLabel": {
     "message": "Ações para os posts selecionados"
   },
-  "bulkAdd": {
-    "message": "Adicionar à pasta"
-  },
-  "bulkRemove": {
-    "message": "Remover da pasta"
+  "selectAll": {
+    "message": "Selecionar tudo"
   },
   "clearSelection": {
     "message": "Limpar seleção"
@@ -1603,5 +1600,43 @@
   },
   "listShowAll": {
     "message": "Mostrar tudo"
-  }
+  },
+  "triageMultiSwitch": { "message": "Selecionar várias ao organizar" },
+  "triageMultiDesc": { "message": "Marque com as teclas numéricas e pressione Enter para confirmar e avançar." },
+  "triageConfirm": { "message": "Confirmar" },
+  "iconPalette": { "message": "Paleta" },
+  "iconBrush": { "message": "Pincel" },
+  "iconPencil": { "message": "Lápis" },
+  "iconCamera": { "message": "Câmera" },
+  "iconMicrophone": { "message": "Microfone" },
+  "iconGamepad": { "message": "Jogo" },
+  "iconDice": { "message": "Dado" },
+  "iconPuzzle": { "message": "Quebra-cabeça" },
+  "iconTrophy": { "message": "Troféu" },
+  "iconGhost": { "message": "Fantasma" },
+  "iconLeaf": { "message": "Folha" },
+  "iconPaw": { "message": "Pegada" },
+  "iconCat": { "message": "Gato" },
+  "iconFlame": { "message": "Chama" },
+  "iconMoon": { "message": "Lua" },
+  "iconSun": { "message": "Sol" },
+  "iconCloud": { "message": "Nuvem" },
+  "iconPlane": { "message": "Avião" },
+  "iconBike": { "message": "Bicicleta" },
+  "iconCoffee": { "message": "Café" },
+  "iconPizza": { "message": "Pizza" },
+  "iconGift": { "message": "Presente" },
+  "iconShoppingBag": { "message": "Compras" },
+  "iconMapPin": { "message": "Local" },
+  "iconCalendar": { "message": "Agenda" },
+  "iconClock": { "message": "Relógio" },
+  "iconTag": { "message": "Etiqueta" },
+  "iconFlag": { "message": "Bandeira" },
+  "iconRocket": { "message": "Foguete" },
+  "iconDiamond": { "message": "Diamante" },
+  "iconSparkles": { "message": "Brilhos" },
+  "iconWorld": { "message": "Terra" },
+  "iconTicket": { "message": "Ingresso" },
+  "iconPlanet": { "message": "Planeta" },
+  "iconMore": { "message": "Mais" }
 }

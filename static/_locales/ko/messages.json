@@ -264,11 +264,8 @@
   "bulkMenuLabel": {
     "message": "선택한 게시물 작업"
   },
-  "bulkAdd": {
-    "message": "폴더에 추가"
-  },
-  "bulkRemove": {
-    "message": "폴더에서 제외"
+  "selectAll": {
+    "message": "모두 선택"
   },
   "clearSelection": {
     "message": "선택 해제"
@@ -1603,5 +1600,43 @@
   },
   "listShowAll": {
     "message": "모두 표시"
-  }
+  },
+  "triageMultiSwitch": { "message": "분류할 때 여러 폴더 선택" },
+  "triageMultiDesc": { "message": "숫자 키로 표시하고 Enter로 확정한 뒤 다음으로 이동합니다." },
+  "triageConfirm": { "message": "확정" },
+  "iconPalette": { "message": "팔레트" },
+  "iconBrush": { "message": "붓" },
+  "iconPencil": { "message": "연필" },
+  "iconCamera": { "message": "카메라" },
+  "iconMicrophone": { "message": "마이크" },
+  "iconGamepad": { "message": "게임" },
+  "iconDice": { "message": "주사위" },
+  "iconPuzzle": { "message": "퍼즐" },
+  "iconTrophy": { "message": "트로피" },
+  "iconGhost": { "message": "유령" },
+  "iconLeaf": { "message": "잎" },
+  "iconPaw": { "message": "발자국" },
+  "iconCat": { "message": "고양이" },
+  "iconFlame": { "message": "불꽃" },
+  "iconMoon": { "message": "달" },
+  "iconSun": { "message": "태양" },
+  "iconCloud": { "message": "구름" },
+  "iconPlane": { "message": "비행기" },
+  "iconBike": { "message": "자전거" },
+  "iconCoffee": { "message": "커피" },
+  "iconPizza": { "message": "피자" },
+  "iconGift": { "message": "선물" },
+  "iconShoppingBag": { "message": "쇼핑" },
+  "iconMapPin": { "message": "장소" },
+  "iconCalendar": { "message": "일정" },
+  "iconClock": { "message": "시계" },
+  "iconTag": { "message": "태그" },
+  "iconFlag": { "message": "깃발" },
+  "iconRocket": { "message": "로켓" },
+  "iconDiamond": { "message": "다이아몬드" },
+  "iconSparkles": { "message": "반짝임" },
+  "iconWorld": { "message": "지구" },
+  "iconTicket": { "message": "티켓" },
+  "iconPlanet": { "message": "행성" },
+  "iconMore": { "message": "더보기" }
 }

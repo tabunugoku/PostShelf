@@ -51,7 +51,7 @@ import {
   type BookmarkUndo,
 } from '../shared/storage';
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
-import { Confirm, Dropdown, FolderMenu, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
+import { Confirm, Dropdown, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card, type RowHandlers } from './Cards';
 import { BulkMenu } from './BulkMenu';
 import { refreshCacheView } from './cacheView';
@@ -127,7 +127,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [anchor, setAnchor] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
-  const [menu, setMenu] = useState<'add' | 'remove' | 'author' | 'folders' | null>(null);
+  const [menu, setMenu] = useState<'author' | 'folders' | null>(null);
   /** サイドパネルの「絞り込み」(4 つの条件を畳んだもの) を開いているか */
   const [filterOpen, setFilterOpen] = useState(false);
   /** お知らせの帯が複数あるとき、いま出している帯の番号 (「他に N 件」で切り替える) */
@@ -136,6 +136,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [startMissed, setStartMissed] = useState(false);
   /** 未分類の仕分けモード (v29): 始めた時点のキュー。#triage で開かれたときは、データが読めてから始める */
   const [triage, setTriage] = useState<Bookmark[] | null>(null);
+  const [triageMulti, setTriageMulti] = useState(false);
   const [triageWanted, setTriageWanted] = useState(false);
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
@@ -178,6 +179,35 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewRef = useRef(UNKNOWN_ACCOUNT_ID);
   const lastRef = useRef<Account | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const chipsRef = useRef<HTMLDivElement>(null);
+  const [splitFilters, setSplitFilters] = useState(false);
+  const [toolbarOffset, setToolbarOffset] = useState(140);
+  useLayoutEffect(() => {
+    if (!ready || compact || page !== 'bookmarks') return;
+    const measure = () => {
+      const topHeight = topRef.current?.getBoundingClientRect().height ?? 0;
+      const filtersHeight = chipsRef.current?.getBoundingClientRect().height ?? 0;
+      const toolbar = toolbarRef.current;
+      if (!toolbar) return;
+      const style = getComputedStyle(toolbar);
+      const px = (value: string) => parseFloat(value) || 0;
+      const inset = px(style.paddingTop) + px(style.paddingBottom) + px(style.borderTopWidth) + px(style.borderBottomWidth);
+      // 折り返した行と不透明な内側余白を含める。小さい画面ではフィルタだけ固定を解く。
+      const combined = topHeight + filtersHeight + inset + px(style.rowGap || style.gap);
+      const split = combined > window.innerHeight / 2;
+      setSplitFilters(split);
+      setToolbarOffset(Math.ceil((split ? topHeight + inset : combined) + 8));
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    if (toolbarRef.current) observer?.observe(toolbarRef.current);
+    if (topRef.current) observer?.observe(topRef.current);
+    if (chipsRef.current) observer?.observe(chipsRef.current);
+    window.addEventListener('resize', measure);
+    return () => { observer?.disconnect(); window.removeEventListener('resize', measure); };
+  }, [ready, compact, page, splitFilters]);
 
   /** 表示するアカウントを切り替える (保存層の対象も合わせる)。データの読み直しは呼び出し側 */
   const applyView = (id: string) => {
@@ -363,6 +393,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
   const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
   const shownSet = useMemo(() => new Set(shownIds), [shownIds]);
+  useEffect(() => {
+    // 削除済みポストの pruneSelection とは別に、検索・フィルタなどで隠れた選択を外す。
+    setSelected(s => [...s].every(id => shownSet.has(id)) ? s : new Set([...s].filter(id => shownSet.has(id))));
+    if (anchor && !shownSet.has(anchor)) setAnchor(null);
+  }, [shownSet]);
   // 段階表示: 描くのは shown の先頭から renderCount 件。選択・検索・件数の表示・全選択は、全件 (shown / shownIds) のまま
   const pageSize = surface === 'sidepanel' ? PAGE_SIZE_SIDEPANEL : PAGE_SIZE[view];
   const resetKey = `${curFolder.id}|${search}|${sort}|${filtersKey}|${view}|${pageSize}`;
@@ -469,6 +504,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     if (row) {
       pendingFocus.current = null;
       row.focus();
+      if (!compact) row.scrollIntoView?.({ block: 'nearest' });
     }
   };
   useLayoutEffect(focusPending); // 描画のたびに、待っている行があれば試す
@@ -526,14 +562,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     (types.includes(MIME_POSTS) && !virtual(f.id)) || (types.includes(MIME_FOLDER) && !virtual(f.id) && f.id !== INBOX_ID);
 
   const bulkIds = [...selected];
-  const removableFolders = [inboxView(storedInbox), ...userFolders].filter((f) => bookmarks.some((b) => selected.has(b.tweetId) && b.folderIds.includes(f.id)));
 
   const editNode = (f: Folder) => {
     if (editing !== f.id) return null;
     return (
-      <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-edit">
+      <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-wide menu-edit">
         <FolderEdit
           folder={f}
+          onCancel={() => setEditing(null)}
           existing={[inboxOf(folders), ...folders]}
           onSaved={() => { setEditing(null); void reload(); }}
           onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }}
@@ -617,8 +653,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setCreatingFolder(true);
   };
   const createNode = creatingFolder && (
-    <Dropdown fixed onClose={() => setCreatingFolder(false)} label={t('newFolder')} class="menu-edit">
+    <Dropdown fixed onClose={() => setCreatingFolder(false)} label={t('newFolder')} class="menu-wide menu-edit">
       <FolderEdit
+        onCancel={() => setCreatingFolder(false)}
         existing={[inboxOf(folders), ...folders]}
         onSaved={(f) => {
           setCreatingFolder(false);
@@ -763,17 +800,18 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     selected.size > 0 ? (
       <BulkMenu
         count={selected.size}
-        addFolders={pickerFolders}
-        removeFolders={removableFolders}
-        onAdd={(id) => void run(addToFolders(bulkIds, [id]), 'toastAdded')}
-        onRemove={(id) => void run(removeFromFolders(bulkIds, [id]), 'toastRemoved')}
+        folders={pickerFolders}
+        bookmarks={bookmarks.filter(b => selected.has(b.tweetId))}
+        onToggle={(id, on) => run(id === INBOX_ID ? moveToFolder(bulkIds, null, INBOX_ID) : on ? addToFolders(bulkIds, [id]) : removeFromFolders(bulkIds, [id]), on ? 'toastAdded' : 'toastRemoved')}
         onDelete={() => setConfirmState({ kind: 'posts', ids: bulkIds })}
+        onSelectAll={() => setSelected(new Set(shownIds))}
+        allSelected={selected.size === shownSet.size}
         onClear={clearSelection}
       />
     ) : null;
   /** 管理画面: 絞り込みの行。複数選択のボタンは右端に置く (行はいつもあるので、選択のたびに一覧はずれない) */
   const chips = (
-    <div class="chips" role="group" aria-label={t('filterAuthor')}>
+    <div class="chips" ref={chipsRef} role="group" aria-label={t('filterAuthor')}>
       {filterItems}
       {bulkMenu}
     </div>
@@ -808,9 +846,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const startTriage = async () => {
     try {
       // 取り込み完了の直後でも、最後に保存された分が入るよう、始める直前に保存データを読み直す (state が古いことがある)
-      const fresh = await listBookmarks();
+      const [fresh, settings] = await Promise.all([listBookmarks(), getSettings()]);
       setBookmarks(fresh);
       const queue = queryBookmarks(fresh, { folderId: INBOX_ID, search: '', sort, filters: {}, now: Date.now() });
+      setTriageMulti(settings.triageMulti === true);
       setTriage(queue);
     } catch {
       reportStorageError(); // 読み込めなかったときは始めない
@@ -1045,7 +1084,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     <>
       {notices}
       {noticeBand}
-      {compact ? null : chips}
       {empty}
       {rows}
     </>
@@ -1055,6 +1093,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     <>
       {triage && (
         <Triage
+          multi={triageMulti}
           queue={triage}
           live={liveIds}
           folders={userFolders}
@@ -1254,31 +1293,35 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           <Icon name="ti-external-link" />
         </a>
       </aside>
-      <main class="main">
+      <main class="main" style={{ '--toolbar-offset': `${toolbarOffset}px` }}>
         {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         {page === 'settings' ? (
           settingsPage
         ) : (
           <>
-            <div class="top">
-              <Icon name={curFolder.icon} color={curFolder.color} />
-              <span class="bar-name">{viewName}</span>
-              <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
-              {curFolder.id === INBOX_ID && count(INBOX_ID) > 0 && (
-                <button class="triage-start" onClick={() => void startTriage()}>
-                  <Icon name="ti-bolt" /> {t('triageStart')}
-                </button>
-              )}
-              {searching && (
-                <button class="bar-clear" onClick={clearAll}>
-                  {t('clearFilters')}
-                </button>
-              )}
-              {searchBox}
-              {sortMenu}
-              {viewSeg}
-              {switchIcons}
+            <div class="bookmark-toolbar" ref={toolbarRef}>
+              <div class="top" ref={topRef}>
+                <Icon name={curFolder.icon} color={curFolder.color} />
+                <span class="bar-name">{viewName}</span>
+                <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
+                {curFolder.id === INBOX_ID && count(INBOX_ID) > 0 && (
+                  <button class="triage-start" onClick={() => void startTriage()}>
+                    <Icon name="ti-bolt" /> {t('triageStart')}
+                  </button>
+                )}
+                {searching && (
+                  <button class="bar-clear" onClick={clearAll}>
+                    {t('clearFilters')}
+                  </button>
+                )}
+                {searchBox}
+                {sortMenu}
+                {viewSeg}
+                {switchIcons}
+              </div>
+              {!splitFilters && chips}
             </div>
+            {splitFilters && chips}
             {body}
           </>
         )}

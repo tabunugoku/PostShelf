@@ -75,6 +75,9 @@ button:disabled{cursor:not-allowed}
 .fr .more-btn{width:32px;height:32px;min-height:32px}
 .fr .more-btn:hover{background:var(--fill-ghost-hover);text-decoration:none}
 .main{padding:16px 20px;min-width:0}
+.bookmark-toolbar{position:sticky;top:0;z-index:10;background:var(--surface-2);display:flex;flex-direction:column;gap:12px;padding:16px 0 12px;margin-top:-16px;margin-bottom:0}
+.bookmark-toolbar > .top,.bookmark-toolbar > .chips{margin:0}
+.layout-wide .rows [data-row]{scroll-margin-top:var(--toolbar-offset,140px)}
 
 /* ---- ヘッダー ---- */
 .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
@@ -122,6 +125,7 @@ button:disabled{cursor:not-allowed}
 .bulk-btn:hover{background:var(--accent-strong);opacity:.92}
 .menu-bulk{min-width:220px}
 .menu-bulk .menu-item{width:100%}
+.bulk-picker{border:0;margin:0;padding:0;min-width:0}
 
 /* ---- ポスト / リスト / グリッド ---- */
 .rows{position:relative}
@@ -204,7 +208,6 @@ button:disabled{cursor:not-allowed}
 .menu.fixed{position:fixed;right:auto;margin:0;z-index:40}
 .menu.fixed.menu-over{z-index:60}
 .menu-wide{min-width:min(300px,calc(100vw - 16px));max-width:min(340px,calc(100vw - 16px))}
-.menu-edit{width:min(440px,calc(100vw - 16px));max-width:none}
 .menu-scroll{max-height:320px;overflow-y:auto}
 .menu-item{display:flex;gap:8px;align-items:center;width:100%;min-height:36px;border:0;text-align:left;padding:4px 8px;border-radius:8px;color:var(--text-primary);text-decoration:none}
 .menu-item.current{font-weight:700;background:var(--fill-ghost-selected)}
@@ -212,22 +215,7 @@ button:disabled{cursor:not-allowed}
 .menu-item .n{margin-left:auto;color:var(--text-secondary)}
 .menu-empty{padding:8px;color:var(--text-secondary)}
 .picker-host{color:var(--text-primary)}
-.folder-edit .erow{display:flex;gap:8px;align-items:center;margin-bottom:10px;padding:0 4px}
-.folder-edit .erow.wrap{flex-wrap:wrap;gap:6px}
-.folder-edit .erow:last-child{margin-bottom:0}
-.folder-edit .folder-actions{justify-content:flex-end;flex-wrap:nowrap}
-.folder-edit .folder-actions button{flex:none;white-space:nowrap}
 .folder-create-anchor{display:block}
-.elabel{font-size:14px;color:var(--text-secondary);min-width:60px;white-space:nowrap;flex:none}
-.ic{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;font-size:18px;border:1px solid var(--border);padding:0}
-.ic.on{background:var(--fill-ghost-selected);border:2px solid var(--text-primary)}
-.sw{position:relative;width:32px;height:32px;min-height:32px;padding:5px;border:0;border-radius:50%;background-clip:content-box}
-.sw.on{box-shadow:0 0 0 2px var(--text-primary) inset}
-.sw.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-shadow:0 0 3px rgba(0,0,0,.7)}
-/* 色なし (既定): 斜線の丸。選ぶと color を削除して文字色で表示 */
-.sw-none{background:linear-gradient(to top right,transparent calc(50% - 1.5px),var(--text-secondary) calc(50% - 1.5px),var(--text-secondary) calc(50% + 1.5px),transparent calc(50% + 1.5px)),var(--surface-2)!important;background-clip:content-box!important;box-shadow:0 0 0 1.5px var(--text-secondary) inset}
-.sw-none.on{box-shadow:0 0 0 2.5px var(--text-primary) inset}
-.sw-none.on::after{content:none}
 
 /* ---- 確認ダイアログ / トースト ---- */
 .overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
@@ -454,7 +442,6 @@ input[type=number]{width:110px}
 .triage-actions{align-items:center}
 .triage-hint{font-size:13px;white-space:nowrap}
 .triage-start{display:inline-flex;gap:4px;align-items:center;white-space:nowrap;min-height:32px;margin-right:4px}
-.triage-new{padding-top:4px}
 @media (prefers-reduced-motion:no-preference){.triage-bar i{transition:width .15s}}
 
 /* ---- 設定の検索 / 保存の表示 (v30) ---- */
@@ -482,3 +469,6 @@ input[type=number]{width:110px}
    content-visibility の clip で切れる。壊れるので付けない。フォーカスの outline は内側 (offset -2px) なので切れない */
 .post{content-visibility:auto;contain-intrinsic-size:auto 320px}
 .mini{content-visibility:auto;contain-intrinsic-size:auto 44px}
+
+.triage-confirm{white-space:nowrap}
+.triage:has(.triage-confirm) .triage-hint{white-space:normal}

@@ -36,7 +36,7 @@ describe('v18-C-1: 「未分類」という名前のフォルダは作れない'
     const stored: Folder[] = all.filter((f) => f.id !== 'all' || true);
     const existing = [inboxOf(stored), ...stored];
     await act(() => void render(<FolderEdit folder={a} existing={existing} onSaved={() => {}} onRequestDelete={() => {}} />, document.getElementById('app')!));
-    const input = document.querySelector<HTMLInputElement>('.folder-edit input')!;
+    const input = document.querySelector<HTMLInputElement>('.folder-editor-host input')!;
     for (const name of ['未分類', 'b']) {
       await act(async () => {
         input.value = name;

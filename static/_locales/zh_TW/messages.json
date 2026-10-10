@@ -264,11 +264,8 @@
   "bulkMenuLabel": {
     "message": "對所選貼文的操作"
   },
-  "bulkAdd": {
-    "message": "加入資料夾"
-  },
-  "bulkRemove": {
-    "message": "從資料夾移除"
+  "selectAll": {
+    "message": "全選"
   },
   "clearSelection": {
     "message": "取消選取"
@@ -1603,5 +1600,43 @@
   },
   "listShowAll": {
     "message": "全部顯示"
-  }
+  },
+  "triageMultiSwitch": { "message": "分類時選擇多個資料夾" },
+  "triageMultiDesc": { "message": "用數字鍵標記，按 Enter 確認並前往下一則。" },
+  "triageConfirm": { "message": "確認" },
+  "iconPalette": { "message": "調色盤" },
+  "iconBrush": { "message": "畫筆" },
+  "iconPencil": { "message": "鉛筆" },
+  "iconCamera": { "message": "相機" },
+  "iconMicrophone": { "message": "麥克風" },
+  "iconGamepad": { "message": "遊戲" },
+  "iconDice": { "message": "骰子" },
+  "iconPuzzle": { "message": "拼圖" },
+  "iconTrophy": { "message": "獎盃" },
+  "iconGhost": { "message": "幽靈" },
+  "iconLeaf": { "message": "葉子" },
+  "iconPaw": { "message": "足跡" },
+  "iconCat": { "message": "貓" },
+  "iconFlame": { "message": "火焰" },
+  "iconMoon": { "message": "月亮" },
+  "iconSun": { "message": "太陽" },
+  "iconCloud": { "message": "雲" },
+  "iconPlane": { "message": "飛機" },
+  "iconBike": { "message": "自行車" },
+  "iconCoffee": { "message": "咖啡" },
+  "iconPizza": { "message": "披薩" },
+  "iconGift": { "message": "禮物" },
+  "iconShoppingBag": { "message": "購物" },
+  "iconMapPin": { "message": "地點" },
+  "iconCalendar": { "message": "行程" },
+  "iconClock": { "message": "時鐘" },
+  "iconTag": { "message": "標籤" },
+  "iconFlag": { "message": "旗幟" },
+  "iconRocket": { "message": "火箭" },
+  "iconDiamond": { "message": "鑽石" },
+  "iconSparkles": { "message": "閃光" },
+  "iconWorld": { "message": "地球" },
+  "iconTicket": { "message": "票券" },
+  "iconPlanet": { "message": "行星" },
+  "iconMore": { "message": "更多" }
 }

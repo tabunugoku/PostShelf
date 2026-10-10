@@ -26,6 +26,8 @@ export function digitOf(e: { code: string }): number | null {
  * キーは、ダイアログの要素だけが受ける (window には付けない)。
  */
 export function Triage(props: {
+  /** 始めた時点の設定。オフなら従来の即時保存 */
+  multi?: boolean;
   queue: Bookmark[];
   /** いま保存されているポストの ID (キューのポストが削除されたかの判定) */
   live: Set<string>;
@@ -44,13 +46,21 @@ export function Triage(props: {
   const [more, setMore] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
+  const [draft, setDraft] = useState<{ tweetId: string; ids: Set<string> } | null>(null);
   const root = useRef<HTMLDivElement>(null);
+  const newButton = useRef<HTMLButtonElement>(null);
+  const confirmButton = useRef<HTMLButtonElement>(null);
+  const focusConfirmation = useRef(false);
+  const closeCreate = () => { setCreating(false); newButton.current?.focus(); };
   const previousMenus = useRef({ creating, more });
   /** choose の実行中 (await のあいだ) は、次の choose を受けない */
   const busy = useRef(false);
   const latest = useRef({ index, finished, more, creating });
   latest.current = { index, finished, more, creating };
   const cur = queue[index];
+  const multi = props.multi === true;
+  const savedIds = (b: Bookmark) => (assigned[b.tweetId] ?? []).filter(id => id !== INBOX_ID);
+  const marks = cur && draft?.tweetId === cur.tweetId ? draft.ids : new Set(cur ? savedIds(cur) : []);
 
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -63,7 +73,10 @@ export function Triage(props: {
     previousMenus.current = { creating, more };
     // 入力欄ごとメニューが外れるとフォーカスは body に落ちる。残っているボタンのフォーカスは保つ。
     if ((prev.creating && !creating) || (prev.more && !more)) {
-      if (!root.current?.contains(document.activeElement)) root.current?.focus();
+      if (focusConfirmation.current) {
+        focusConfirmation.current = false;
+        (confirmButton.current ?? root.current)?.focus();
+      } else if (!root.current?.contains(document.activeElement)) root.current?.focus();
     }
   }, [creating, more]);
 
@@ -73,11 +86,13 @@ export function Triage(props: {
     return null;
   };
   const next = () => {
+    setDraft(null);
     const i = step(index, 1);
     if (i === null) setFinished(true);
     else setIndex(i);
   };
   const back = () => {
+    setDraft(null);
     const i = step(index, -1);
     if (i !== null) setIndex(i);
   };
@@ -99,9 +114,27 @@ export function Triage(props: {
       return n;
     });
   };
+  /** 作成は確定ではない。フォルダだけ保存済みで、割り当ては印として残す。 */
+  const stageCreated = (ids: Iterable<string>) => {
+    setDraft({ tweetId: cur.tweetId, ids: new Set([...ids].filter(id => id !== INBOX_ID)) });
+    focusConfirmation.current = true;
+    setCreating(false);
+    setMore(false);
+    setError('');
+    void props.onChanged(); // 作成したフォルダを一覧へ反映する。
+  };
   /** そのフォルダに入れる (入っていれば外す)。stay: 同じポストに留まる */
-  const choose = async (folderId: string, stay: boolean) => {
-    if (!cur || finished || busy.current) return;
+  const choose = async (folderId: string, stay: boolean): Promise<boolean> => {
+    if (!cur || finished || busy.current) return false;
+    if (multi) {
+      setDraft(prev => {
+        const ids = new Set(prev?.tweetId === cur.tweetId ? prev.ids : savedIds(cur));
+        if (ids.has(folderId)) ids.delete(folderId);
+        else ids.add(folderId);
+        return { tweetId: cur.tweetId, ids };
+      });
+      return true;
+    }
     busy.current = true;
     const b = cur;
     const has = (assigned[b.tweetId] ?? []).includes(folderId);
@@ -115,6 +148,31 @@ export function Triage(props: {
       setError('');
       void props.onChanged();
       if (!stay && !has) next();
+      return true;
+    } catch {
+      setError(t('errorStorage'));
+      return false;
+    } finally {
+      busy.current = false;
+    }
+  };
+
+  const confirm = async () => {
+    if (!cur || finished || busy.current) return;
+    busy.current = true;
+    try {
+      const ids = [...marks];
+      const before = savedIds(cur);
+      if (ids.length !== before.length || ids.some(id => !before.includes(id))) {
+        await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
+        const added = ids.filter(id => !before.includes(id));
+        if (added.length) void updateRecentFolders(added).catch(() => {});
+        mark(cur, ids.length ? ids : [INBOX_ID]);
+        void props.onChanged();
+      }
+      setError('');
+      setMore(false);
+      next();
     } catch {
       setError(t('errorStorage'));
     } finally {
@@ -129,7 +187,7 @@ export function Triage(props: {
       e.preventDefault();
       e.stopPropagation();
       const s = latest.current;
-      if (s.creating) setCreating(false);
+      if (s.creating) closeCreate();
       else if (s.more) setMore(false);
       else props.onClose();
       return;
@@ -141,6 +199,15 @@ export function Triage(props: {
       const nx = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : i === items.length - 1 ? 0 : i + 1;
       e.preventDefault();
       items[nx].focus();
+      return;
+    }
+    // 通常の入力・ボタン・リンクの Enter はブラウザに任せる。チェックからは確定できる。
+    const target = e.target as HTMLElement;
+    const checkbox = target instanceof HTMLInputElement && target.type === 'checkbox';
+    if (multi && e.key === 'Enter' && !creating && !finished && !e.ctrlKey && !e.metaKey && !e.altKey
+      && (!typing || checkbox) && !target.closest('button,a[href]')) {
+      e.preventDefault();
+      if (!e.repeat) void confirm();
       return;
     }
     if (typing || e.ctrlKey || e.metaKey || e.altKey || finished || creating || more) return; // 入力欄・開いているメニューの中では、キーを奪わない
@@ -157,10 +224,10 @@ export function Triage(props: {
       }
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      next();
+      if (!multi || !busy.current) next();
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      back();
+      if (!multi || !busy.current) back();
     } else if (e.key === 'n' || e.key === 'N') {
       e.preventDefault();
       setCreating(true);
@@ -220,7 +287,7 @@ export function Triage(props: {
             )}
             <div class="triage-folders">
               {keyed.map((f, i) => {
-                const on = (assigned[cur.tweetId] ?? []).includes(f.id);
+                const on = multi ? marks.has(f.id) : (assigned[cur.tweetId] ?? []).includes(f.id);
                 return (
                   <button key={f.id} class={`triage-folder${on ? ' on' : ''}`} aria-pressed={on} onClick={(e) => void choose(f.id, e.shiftKey)}>
                     <kbd>{i + 1}</kbd>
@@ -237,68 +304,85 @@ export function Triage(props: {
                   </button>
                   {more && (
                     <Dropdown fixed onClose={() => setMore(false)} label={t('triageOtherFolders')} class="menu-wide menu-over">
-                      <FolderPickerHost
-                        folders={props.pickerFolders}
-                        selected={assigned[cur.tweetId] ?? []}
-                        onChange={async (sel, source) => {
-                          if (!cur || finished || busy.current) return;
-                          busy.current = true;
-                          try {
-                            const ids = [...sel];
-                            // 最後のチェックを外して戻る「未分類」は、新しい分類には数えない。
-                            const added = ids.filter((id) => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
-                            await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
-                            if (added.length) void updateRecentFolders(added).catch(() => {});
-                            mark(cur, ids);
-                            setError('');
-                            void props.onChanged();
-                            if (added.length && source !== 'created') {
-                              setMore(false);
-                              next();
+                      <div onKeyDown={multi ? (e) => { if (e.key === 'Enter') onKey(e); } : undefined}>
+                        <FolderPickerHost
+                          folders={props.pickerFolders}
+                          selected={multi ? [...marks] : assigned[cur.tweetId] ?? []}
+                          onChange={async (sel, source) => {
+                            if (!cur || finished || busy.current) return source === 'created' ? false : undefined;
+                            if (multi) {
+                              if (source === 'created') stageCreated(sel);
+                              else setDraft({ tweetId: cur.tweetId, ids: new Set([...sel].filter(id => id !== INBOX_ID)) });
+                              return;
                             }
-                          } catch {
-                            setError(t('errorStorage'));
-                          } finally {
-                            busy.current = false;
-                          }
-                        }}
-                      />
+                            if (source === 'created') {
+                              const added = [...sel].filter(id => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
+                              const folderId = added[added.length - 1];
+                              if (!folderId || !await choose(folderId, false)) return false;
+                              setMore(false);
+                              return;
+                            }
+                            busy.current = true;
+                            try {
+                              const ids = [...sel];
+                              // 最後のチェックを外して戻る「未分類」は、新しい分類には数えない。
+                              const added = ids.filter((id) => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
+                              await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
+                              if (added.length) void updateRecentFolders(added).catch(() => {});
+                              mark(cur, ids);
+                              setError('');
+                              void props.onChanged();
+                              if (added.length) {
+                                setMore(false);
+                                next();
+                              }
+                            } catch {
+                              setError(t('errorStorage'));
+                            } finally {
+                              busy.current = false;
+                            }
+                          }}
+                        />
+                      </div>
                     </Dropdown>
                   )}
                 </span>
               )}
-              <button class="triage-folder" aria-keyshortcuts="N" onClick={() => setCreating(true)}>
-                <kbd>N</kbd>
-                <Icon name="ti-folder-plus" />
-                <span class="triage-folder-name">{t('newFolder')}</span>
-              </button>
+              <span class="menu-anchor">
+                <button ref={newButton} aria-haspopup="dialog" aria-expanded={creating} class="triage-folder" aria-keyshortcuts="N" onClick={() => setCreating(true)}>
+                  <kbd>N</kbd>
+                  <Icon name="ti-folder-plus" />
+                  <span class="triage-folder-name">{t('newFolder')}</span>
+                </button>
+                {creating && (
+                  <Dropdown fixed onClose={closeCreate} label={t('newFolder')} class="menu-wide menu-over">
+                    <div onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeCreate(); } }}>
+                      <NewFolder
+                        existing={props.pickerFolders}
+                        onCreated={async (f) => {
+                          if (latest.current.finished) return;
+                          if (multi) {
+                            stageCreated([...marks, f.id]);
+                            return;
+                          }
+                          if (!await choose(f.id, false)) return false;
+                          setCreating(false);
+                        }}
+                        onClose={closeCreate}
+                      />
+                    </div>
+                  </Dropdown>
+                )}
+              </span>
             </div>
-            {creating && (
-              <NewFolder
-                existing={props.pickerFolders}
-                onCreated={async (f) => {
-                  if (latest.current.finished) return;
-                  try {
-                    await addToFolders([cur.tweetId], [f.id]);
-                    void updateRecentFolders([f.id]).catch(() => {});
-                    mark(cur, [...(assigned[cur.tweetId] ?? []).filter((id) => id !== INBOX_ID), f.id]);
-                    setCreating(false);
-                    setError('');
-                    void props.onChanged();
-                  } catch {
-                    setError(t('errorStorage'));
-                  }
-                }}
-                onClose={() => setCreating(false)}
-              />
-            )}
             <div class="dialog-actions triage-actions">
-              <span class="muted triage-hint">{t('triageHint')}</span>
+              <span class="muted triage-hint">{t(multi ? 'triageMultiDesc' : 'triageHint')}</span>
               <span class="grow" />
-              <button disabled={step(index, -1) === null} aria-keyshortcuts="ArrowLeft" onClick={back}>
+              {multi && <button ref={confirmButton} class="primary triage-confirm" aria-keyshortcuts="Enter" onClick={() => void confirm()}>{t('triageConfirm')}</button>}
+              <button disabled={step(index, -1) === null} aria-keyshortcuts="ArrowLeft" onClick={() => { if (!multi || !busy.current) back(); }}>
                 {t('triageBack')}
               </button>
-              <button aria-keyshortcuts="ArrowRight" onClick={next}>
+              <button aria-keyshortcuts="ArrowRight" onClick={() => { if (!multi || !busy.current) next(); }}>
                 {t('triageSkip')}
               </button>
             </div>
@@ -310,7 +394,7 @@ export function Triage(props: {
 }
 
 /** 既存の「フォルダを作成」メニューを、ダイアログの中に置く */
-function NewFolder(props: { existing: Folder[]; onCreated: (f: Folder) => void | Promise<void>; onClose: () => void }) {
+function NewFolder(props: { existing: Folder[]; onCreated: (f: Folder) => void | boolean | Promise<void | boolean>; onClose: () => void }) {
   const host = useRef<HTMLDivElement>(null);
   const latest = useRef(props);
   latest.current = props;

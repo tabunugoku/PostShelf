@@ -1,18 +1,17 @@
 /**
  * 「フォルダを作成」メニュー (素の DOM)。x.com のポップオーバー / manager の「フォルダを変更」/ サイドパネルの保存で、
  * フォルダ選択 (folderPicker.ts) の中に、一覧と切り替えて開く。名前・アイコン・色を決めて「作成」を押すとフォルダを作る。
- * アイコンと色の選択肢は models.ts のもの (manager の編集パネルと同じ: アイコンは先頭の 8 種、色は色なし + COLORS)。
- * manager の FolderEdit は Preact なので、DOM 版をここに別に持つ (選択肢は共有)。
+ * 編集では同じ下書きを「保存」で確定する。アイコンと色の選択肢は models.ts のもの。
  */
-import { COLORS, FOLDER_ICON, ICONS, colorLabel, displayName, iconLabel, type Folder } from './models';
-import { createFolder, StorageError } from './storage';
+import { COLORS, FOLDER_ICON, MAIN_ICONS, MORE_ICONS, colorLabel, displayName, iconLabel, type Folder } from './models';
+import { createFolder, StorageError, updateFolder } from './storage';
 import { t } from './strings';
 import { ACCENT_FILL } from './tokens';
 import type { PickerTheme } from './folderPicker';
 
 export interface FolderCreateMenu {
   el: HTMLElement;
-  /** 開く前の状態 (入力を空に、アイコンと色を初期値に、エラーを消す) に戻す */
+  /** 開く前の下書き (作成の初期値 / 編集対象の値) に戻す */
   reset: () => void;
   focus: () => void;
 }
@@ -27,13 +26,24 @@ export function createFolderMenu(opts: {
   theme: PickerTheme;
   /** 同名の判定に使う、いまあるフォルダ */
   existing: () => Folder[];
-  onCreated: (folder: Folder) => void | Promise<void>;
+  /** false なら作成済みのフォルダを保持し、次の送信でこの処理だけを再試行する */
+  onCreated?: (folder: Folder) => void | boolean | Promise<void | boolean>;
+  /** 渡すと編集。existing はこのフォルダ自身を除く */
+  folder?: Folder;
+  head?: boolean;
+  preview?: boolean;
+  onSaved?: () => void | Promise<void>;
+  onDelete?: () => void;
+  /** 管理画面の作成も保存中は全操作を無効にする。既存の作成呼び出しは従来どおり */
+  lockWhileSaving?: boolean;
   /** 「キャンセル」と「← 戻る」 */
   onClose: () => void;
 }): FolderCreateMenu {
   const th = opts.theme;
+  const editing = opts.folder;
+  const lockWhileSaving = !!editing || !!opts.lockWhileSaving;
   const el = document.createElement('form');
-  el.setAttribute('aria-label', t('createFolder'));
+  el.setAttribute('aria-label', t(editing ? 'folderMore' : 'createFolder'));
   el.noValidate = true;
   el.style.cssText = 'box-sizing:border-box;margin:0;display:grid;gap:12px;min-width:0';
 
@@ -56,7 +66,7 @@ export function createFolderMenu(opts: {
   const back = mk(`← ${t('back')}`);
   back.style.cssText = btnCss + ';border:0;padding:4px 8px';
   const title = document.createElement('strong');
-  title.textContent = t('createFolder');
+  title.textContent = t(editing ? 'folderMore' : 'createFolder');
   title.style.cssText = `${RESET};flex:1;min-width:0;font-weight:700`;
   head.append(back, title);
 
@@ -80,29 +90,46 @@ export function createFolderMenu(opts: {
     b.setAttribute('aria-pressed', String(on));
   };
 
-  // アイコン 8 個: 幅いっぱいを 8 等分した 1 行。ボタンは正方形で、中のアイコンを中央に置く
+  // 先頭 8 個 + その他を 9 等分した 1 行。追加 36 個も同じ幅の 9 列。
   const iconGroup = group(t('icon'));
   const iconGrid = document.createElement('div');
-  iconGrid.style.cssText = `${RESET};display:grid;grid-template-columns:repeat(8,1fr);gap:4px;width:100%`;
+  iconGrid.dataset.mainIcons = '';
+  const gridCss = `${RESET};display:grid;grid-template-columns:repeat(9,1fr);gap:4px;width:100%;min-width:0`;
+  iconGrid.style.cssText = gridCss;
+  const moreGrid = document.createElement('div');
+  moreGrid.dataset.moreIcons = '';
+  moreGrid.style.cssText = gridCss;
+  let expanded = false;
   const iconBtns = new Map<string, HTMLButtonElement>();
-  for (const i of ICONS.slice(0, 8)) {
+  const iconButton = () => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.setAttribute('aria-label', iconLabel(i));
-    b.dataset.icon = i;
     b.style.cssText = `${RESET};display:grid;place-items:center;aspect-ratio:1;width:100%;min-width:0;min-height:0;padding:0;border-radius:8px;cursor:pointer;border:.5px solid transparent;background:transparent;color:${th.fg}`;
     const ic = document.createElement('i');
-    ic.className = `ti ${i}`;
     ic.style.cssText = 'display:block;box-sizing:border-box;margin:0;padding:0;width:18px;height:18px;font-size:18px;line-height:1;font-style:normal;position:static;vertical-align:baseline';
     b.append(ic);
+    return b;
+  };
+  const more = iconButton();
+  more.dataset.iconMore = '';
+  more.style.borderStyle = 'dashed';
+  more.addEventListener('click', () => { expanded = !expanded; paint(); });
+  for (const i of [...MAIN_ICONS, ...MORE_ICONS]) {
+    const b = iconButton();
+    b.setAttribute('aria-label', iconLabel(i));
+    b.dataset.icon = i;
+    b.firstElementChild!.className = `ti ${i}`;
+    const extra = !(MAIN_ICONS as readonly string[]).includes(i);
     b.addEventListener('click', () => {
       icon = i;
+      if (extra) { expanded = false; more.focus(); }
       paint();
     });
     iconBtns.set(i, b);
-    iconGrid.append(b);
+    (extra ? moreGrid : iconGrid).append(b);
   }
-  iconGroup.append(iconGrid);
+  iconGrid.append(more);
+  iconGroup.append(iconGrid, moreGrid);
 
   // 色 (色なし + 8 色の 9 個): 幅を 9 等分した 1 行。丸の大きさは、幅に合わせて 20〜24px
   const colorGroup = group(t('color'));
@@ -140,13 +167,37 @@ export function createFolderMenu(opts: {
   error.style.cssText = `${RESET};display:none;color:#f4212e;font-size:13px;overflow-wrap:anywhere`;
 
   const actions = document.createElement('div');
-  actions.style.cssText = `${RESET};display:flex;gap:8px;justify-content:flex-end`;
+  actions.dataset.folderActions = '';
+  actions.style.cssText = `${RESET};display:flex;gap:8px;justify-content:flex-end;flex-wrap:nowrap`;
+  const del = opts.onDelete ? mk(t('delete')) : undefined;
+  if (del) {
+    del.style.marginRight = 'auto';
+    del.style.color = '#f4212e';
+    const trash = document.createElement('i');
+    trash.className = 'ti ti-trash';
+    trash.setAttribute('aria-hidden', 'true');
+    trash.style.cssText = 'display:inline-block;margin:0;padding:0;line-height:1;font-style:normal';
+    del.prepend(trash, ' ');
+    actions.append(del);
+  }
   const cancel = mk(t('cancel'));
-  const create = mk(t('create'), 'submit');
+  const create = mk(t(editing ? 'save' : 'create'), 'submit');
   create.style.cssText = `${RESET};min-height:32px;padding:4px 12px;border-radius:8px;cursor:pointer;border:0;background:${ACCENT_FILL};color:#fff`;
   actions.append(cancel, create);
 
   const paint = () => {
+    const extra = !(MAIN_ICONS as readonly string[]).includes(icon);
+    const label = extra ? `${t('iconMore')}: ${iconLabel(icon)}` : t('iconMore');
+    more.setAttribute('aria-label', label);
+    more.title = label;
+    mark(more, extra);
+    more.setAttribute('aria-expanded', String(expanded));
+    more.firstElementChild!.className = `ti ${extra ? icon : 'ti-dots'}`;
+    more.style.borderColor = extra ? th.accent : th.border;
+    more.style.background = extra ? th.hover : 'transparent';
+    more.style.boxShadow = extra ? `0 0 0 1px ${th.accent} inset` : 'none';
+    moreGrid.hidden = !expanded;
+    moreGrid.style.display = expanded ? 'grid' : 'none';
     iconBtns.forEach((b, i) => {
       const on = i === icon;
       mark(b, on);
@@ -168,7 +219,7 @@ export function createFolderMenu(opts: {
     prevName.textContent = name || t('newFolderPlaceholder');
     prevName.style.opacity = name ? '1' : '.5';
     const empty = input.value.trim() === '';
-    create.disabled = empty; // 空のときは「作成」を押せない
+    create.disabled = empty || (lockWhileSaving && busy);
     create.style.opacity = empty ? '.5' : '1';
     create.style.cursor = empty ? 'not-allowed' : 'pointer';
   };
@@ -182,29 +233,73 @@ export function createFolderMenu(opts: {
   });
 
   let busy = false;
+  let pending: Folder | undefined;
+  const lock = (on: boolean) => {
+    if (!lockWhileSaving) return;
+    el.querySelectorAll<HTMLInputElement | HTMLButtonElement>('input,button').forEach(control => { control.disabled = on; });
+    if (!on) {
+      keepCreated(pending);
+      paint();
+    }
+  };
+  const keepCreated = (folder?: Folder) => {
+    pending = folder;
+    // 作成後の再試行で、表示中の下書きと作成済みフォルダの値がずれないようにする。
+    input.readOnly = !!folder;
+    more.disabled = !!folder;
+    iconBtns.forEach(b => { b.disabled = !!folder; });
+    swatches.forEach(b => { b.disabled = !!folder; });
+  };
   el.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (busy || input.value.trim() === '') return;
-    if (hasSameName(opts.existing(), input.value)) return showError(t('errDuplicateFolder'));
+    if (busy) return;
+    if (input.value.trim() === '') {
+      if (lockWhileSaving) showError(t('errEmptyName'));
+      return;
+    }
+    if (!pending && hasSameName(opts.existing(), input.value)) return showError(t('errDuplicateFolder'));
     busy = true;
+    lock(true);
+    showError('');
     try {
-      const folder = await createFolder({ name: input.value, icon, color });
-      await opts.onCreated(folder);
+      if (editing) {
+        const patch: Parameters<typeof updateFolder>[1] = {};
+        const name = input.value.trim();
+        if (name !== editing.name) patch.name = name;
+        if (icon !== editing.icon) patch.icon = icon;
+        if (color !== editing.color) patch.color = color ?? null;
+        if (Object.keys(patch).length) await updateFolder(editing.id, patch);
+        await opts.onSaved?.();
+      } else {
+        const folder = pending ?? await createFolder({ name: input.value, icon, color });
+        keepCreated(await opts.onCreated?.(folder) === false ? folder : undefined);
+      }
     } catch (err) {
-      if (!(err instanceof StorageError)) throw err;
-      showError(err.message);
+      if (!(err instanceof StorageError) && !lockWhileSaving) throw err;
+      showError(err instanceof StorageError ? err.message : t('errorStorage'));
     } finally {
       busy = false;
+      lock(false);
     }
   });
-  back.addEventListener('click', () => opts.onClose());
-  cancel.addEventListener('click', () => opts.onClose());
+  if (lockWhileSaving) input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); if (!busy) el.dispatchEvent(new Event('submit', { cancelable: true })); }
+  });
+  const close = () => { if (!lockWhileSaving || !busy) opts.onClose(); };
+  back.addEventListener('click', close);
+  cancel.addEventListener('click', close);
+  del?.addEventListener('click', () => { if (!busy) opts.onDelete?.(); });
 
-  el.append(head, input, iconGroup, colorGroup, preview, error, actions);
+  if (opts.head !== false) el.append(head);
+  el.append(input, iconGroup, colorGroup);
+  if (opts.preview !== false) el.append(preview);
+  el.append(error, actions);
   const reset = () => {
-    input.value = '';
-    icon = FOLDER_ICON;
-    color = undefined;
+    keepCreated();
+    expanded = false;
+    input.value = editing ? displayName(editing) : '';
+    icon = editing?.icon ?? FOLDER_ICON;
+    color = editing?.color;
     showError('');
     paint();
   };

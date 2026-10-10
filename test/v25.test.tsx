@@ -68,7 +68,7 @@ describe('v25: 欄の分割と順番', () => {
     expect($$('h3.set-h').map((h) => h.textContent)).toEqual(['保存', '取り込み', '表示と動作', 'データ', '情報', '初期化と削除']);
     expect(legendsOf('保存')).toEqual(['X のブックマークとの連動', '標準ブックマークボタンの動作', '長いポストの全文', '画像のキャッシュ']);
     expect(legendsOf('取り込み')).toEqual(['ブックマークの自動取り込み']);
-    expect(legendsOf('表示と動作')).toEqual(['ツールバーアイコンのクリック時の動作']);
+    expect(legendsOf('表示と動作')).toEqual(['仕分けモード', 'ツールバーアイコンのクリック時の動作']);
     expect(legendsOf('データ')).toEqual(['データの保存と移行']);
     expect(legendsOf('情報')).toEqual(['X の画面構造', 'PostShelf について']);
     expect(legendsOf('初期化と削除')).toEqual(['設定の初期化', '危険な操作']);
