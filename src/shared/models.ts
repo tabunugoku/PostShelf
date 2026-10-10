@@ -47,6 +47,9 @@ export interface QuoteSnapshot {
   createdAt?: string;
   url?: string;
   translated?: true;
+  /** 引用の動画は再生せず、サムネイルと印だけを保存する。 */
+  hasVideo?: true;
+  videoPoster?: string;
 }
 
 export interface Snapshot {

@@ -8,6 +8,7 @@ import { Dropdown } from './ui';
 import { MediaImg } from './MediaImg';
 import { PostText } from './PostText';
 import { QuoteBlock } from './QuoteBlock';
+import { VideoTileContent } from './VideoTile';
 import { MediaGrid } from './MediaGrid';
 import type { Snapshot } from '../shared/models';
 
@@ -163,13 +164,9 @@ function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: nu
       {props.kind === 'image' ? (
         <MediaImg tweetId={card.b.tweetId} name={String(i + 1)} src={s.media[i]} alt="" loading="lazy" />
       ) : (
-        <>
+        <VideoTileContent>
           {s.videoPoster && <MediaImg tweetId={card.b.tweetId} name="video-thumb" src={s.videoPoster} alt="" loading="lazy" />}
-          <span class="play" aria-hidden="true" />
-          <span class="badge" role="img" aria-label={t('videoBadge')}>
-            <Icon name="ti-video" /> {t('videoBadge')}
-          </span>
-        </>
+        </VideoTileContent>
       )}
       {props.kind === 'image' && !card.selectionActive && <span class="hint">{t('zoomHint')}</span>}
       {props.countBadge && (props.total ?? 0) >= 2 && !card.b.snapshot.hasVideo && (

@@ -3,6 +3,7 @@ import { safeHref } from '../shared/segments';
 import { formatDate, t } from '../shared/strings';
 import { MediaImg } from './MediaImg';
 import { MediaGrid } from './MediaGrid';
+import { VideoBadge, VideoTileContent } from './VideoTile';
 import { PostText, SearchContext } from './PostText';
 
 /** 引用は保存時に見えていた範囲だけ。画像は本体のキャッシュと共有せず、URL のまま表示する。 */
@@ -26,8 +27,11 @@ export function QuoteBlock({ quote: q, tweetId }: { quote: QuoteSnapshot; tweetI
         </div>
         <SearchContext.Provider value=""><PostText s={q} /></SearchContext.Provider>
         {q.media.length > 0 && <MediaGrid count={q.media.length}>
-          {q.media.slice(0, 4).map((src, i) => <div class="quote-photo"><MediaImg tweetId={tweetId} name={'quote-' + (i + 1)} src={src} cacheable={false} alt="" loading="lazy" /></div>)}
+          {q.media.slice(0, 4).map((src, i) => <div class="ph quote-photo"><MediaImg tweetId={tweetId} name={'quote-' + (i + 1)} src={src} cacheable={false} alt="" loading="lazy" />{q.hasVideo && i === 0 && <VideoBadge />}</div>)}
         </MediaGrid>}
+        {!q.media.length && q.hasVideo && <div class="ph v quote-video" role="img" aria-label={t('videoBadge')}>
+          <VideoTileContent>{q.videoPoster && <MediaImg tweetId={tweetId} name="quote-video" src={q.videoPoster} cacheable={false} alt="" loading="lazy" />}</VideoTileContent>
+        </div>}
       </div>
     </div>
   );

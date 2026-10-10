@@ -460,6 +460,7 @@ function cleanQuote(raw: unknown): Bookmark['snapshot']['quote'] {
   const segments = sanitizeSegments(q.segments);
   return {
     author: q.author, handle: q.handle, text: q.text, media: q.media.filter(httpsOnly),
+    ...(q.hasVideo === true ? { hasVideo: true, ...(httpsOnly(q.videoPoster) ? { videoPoster: q.videoPoster } : {}) } : {}),
     ...(httpsOnly(q.avatar) ? { avatar: q.avatar } : {}), ...(isStr(q.createdAt) ? { createdAt: q.createdAt } : {}),
     ...(isStr(q.url) ? { url: q.url } : {}), ...(segments ? { segments } : {}), ...(q.translated === true ? { translated: true } : {}),
   };

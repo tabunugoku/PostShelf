@@ -36,6 +36,8 @@ export const CANDIDATES = {
   quotePhotoLink: ['a[href*="/status/"][href*="/photo/"]'],
   quoteAvatarHandle: ['[data-testid^="UserAvatar-Container-"]'],
   quoteMedia: ['[data-testid="tweetPhoto"] img'],
+  quoteVideo: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
+  quoteVideoPoster: ['video[poster]'],
   translationVote: ['[data-testid="thumbsUpVoteButton"], [data-testid="thumbsDownVoteButton"]'],
   nameText: ['span'],
   bodyLink: ['a[href]'],

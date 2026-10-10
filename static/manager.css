@@ -497,3 +497,7 @@ input[type=number]{width:110px}
   .viewer-details{top:calc(56px + 38vh + 8px);left:8px;right:8px;bottom:120px;width:auto}
   .viewer.with-details .nav.r{right:4px}
 }
+
+.quote-block .quote-video{background:#000;cursor:default;pointer-events:auto}
+.quote-block .quote-photo{cursor:inherit}
+.quote-block .ph:hover::after{display:none}

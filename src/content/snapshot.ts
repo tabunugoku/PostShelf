@@ -44,7 +44,7 @@ export function tweetIdOf(article: Element): string | null {
   return link?.getAttribute('href')?.match(/^\/[^/]+\/status\/(\d+)/)?.[1] ?? null;
 }
 
-/** 引用は表示されていた本文・画像だけ。動画や原文の取得はしない。 */
+/** 引用は表示されていた本文・画像と動画のサムネイルだけ。再生や原文の取得はしない。 */
 function extractQuote(article: Element): QuoteSnapshot | undefined {
   const el = findQuote(article);
   if (!el) return undefined;
@@ -56,12 +56,16 @@ function extractQuote(article: Element): QuoteSnapshot | undefined {
   const textEl = queryFirst(el, 'tweetText')?.el;
   const text = textEl?.textContent?.trim() ?? '';
   const media = queryAllFirst<HTMLImageElement>(el, 'quoteMedia').els.map((i) => i.src).filter(Boolean);
-  if (!author && !handle && !text && !media.length) return undefined;
+  const hasVideo = !!queryFirst(el, 'quoteVideo');
+  const poster = hasVideo ? queryFirst(el, 'quoteVideoPoster')?.el.getAttribute('poster') : undefined;
+  const videoPoster = poster && /^https:\/\//i.test(poster) ? poster : undefined;
+  if (!author && !handle && !text && !media.length && !hasVideo) return undefined;
   const avatar = queryFirst<HTMLImageElement>(el, 'avatar')?.el.src;
   const createdAt = queryFirst(el, 'time')?.el.getAttribute('datetime');
   const segments = textEl ? extractSegments(textEl) : undefined;
   const photo = queryAllFirst(el, 'quotePhotoLink').els.map((a) => a.getAttribute('href')?.match(/^\/([A-Za-z0-9_]+)\/status\/(\d+)\/photo\/\d+(?:[?#].*)?$/)).find(Boolean);
   return {
+    ...(hasVideo ? { hasVideo: true as const } : {}), ...(videoPoster ? { videoPoster } : {}),
     author, handle: handle ? '@' + handle : '', text, media,
     ...(avatar ? { avatar } : {}), ...(createdAt ? { createdAt } : {}), ...(segments ? { segments } : {}),
     ...(photo ? { url: 'https://x.com/' + photo[1] + '/status/' + photo[2] } : {}),
