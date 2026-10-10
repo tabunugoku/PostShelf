@@ -1163,6 +1163,30 @@
   "fullTextSwitchDesc": {
     "message": "X で「さらに表示」と省略されたポストを保存すると、そのポストのページを裏のタブで開いて全文を読み、閉じます。1 件ごとに 4〜8 秒の間隔をあけ、いま見ているタブには触れません。X の規約上、自動化されたアクセスとみなされる可能性があります（法的な助言ではありません）。オフにすると、省略された分だけを保存します。"
   },
+  "fullTextSpeed": {
+    "message": "取得の速さ"
+  },
+  "fullTextSpeedSlow": {
+    "message": "ゆっくり (おすすめ)"
+  },
+  "fullTextSpeedStd": {
+    "message": "標準"
+  },
+  "fullTextSpeedDesc": {
+    "message": "速いほど、X に制限されやすくなります。"
+  },
+  "fullTextTabs": {
+    "message": "同時に開くタブ"
+  },
+  "fullTextTabsN": {
+    "message": "$COUNT$ 個",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "fullTextPending": {
     "message": "全文を取得していないポスト: $COUNT$ 件",
     "placeholders": {

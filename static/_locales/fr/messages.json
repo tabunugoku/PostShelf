@@ -1163,6 +1163,30 @@
   "fullTextSwitchDesc": {
     "message": "Quand vous enregistrez un post que X a replié derrière « Afficher plus », PostShelf ouvre la page de ce post dans un onglet en arrière-plan, lit le texte complet puis ferme l’onglet. Il attend 4 à 8 secondes entre deux posts et ne touche jamais l’onglet que vous consultez. Les conditions de X peuvent y voir un accès automatisé (ce n’est pas un avis juridique). Désactivé, seul le texte replié est enregistré."
   },
+  "fullTextSpeed": {
+    "message": "Vitesse de récupération"
+  },
+  "fullTextSpeedSlow": {
+    "message": "Lente (recommandée)"
+  },
+  "fullTextSpeedStd": {
+    "message": "Standard"
+  },
+  "fullTextSpeedDesc": {
+    "message": "Une récupération plus rapide risque davantage d'être limitée par X."
+  },
+  "fullTextTabs": {
+    "message": "Onglets simultanés"
+  },
+  "fullTextTabsN": {
+    "message": "$COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "fullTextPending": {
     "message": "Posts sans texte complet : $COUNT$",
     "placeholders": {

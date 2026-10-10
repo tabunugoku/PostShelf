@@ -1163,6 +1163,30 @@
   "fullTextSwitchDesc": {
     "message": "When you save a post that X has collapsed behind “Show more”, PostShelf opens that post’s page in a background tab, reads the full text and closes the tab. It waits 4–8 seconds between posts and never touches the tab you are viewing. X’s terms may treat this as automated access (this is not legal advice). When off, only the collapsed text is saved."
   },
+  "fullTextSpeed": {
+    "message": "Fetch speed"
+  },
+  "fullTextSpeedSlow": {
+    "message": "Slow (recommended)"
+  },
+  "fullTextSpeedStd": {
+    "message": "Standard"
+  },
+  "fullTextSpeedDesc": {
+    "message": "Faster fetching is more likely to be limited by X."
+  },
+  "fullTextTabs": {
+    "message": "Tabs at once"
+  },
+  "fullTextTabsN": {
+    "message": "$COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "fullTextPending": {
     "message": "Posts without full text: $COUNT$",
     "placeholders": {

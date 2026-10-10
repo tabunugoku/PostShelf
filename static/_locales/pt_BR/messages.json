@@ -1163,6 +1163,30 @@
   "fullTextSwitchDesc": {
     "message": "Ao salvar um post que o X recolheu atrás de “Mostrar mais”, o PostShelf abre a página desse post em uma guia em segundo plano, lê o texto completo e fecha a guia. Espera de 4 a 8 segundos entre posts e nunca mexe na guia que você está vendo. Os termos do X podem tratar isso como acesso automatizado (não é aconselhamento jurídico). Desativado, só o texto recolhido é salvo."
   },
+  "fullTextSpeed": {
+    "message": "Velocidade de busca"
+  },
+  "fullTextSpeedSlow": {
+    "message": "Lenta (recomendada)"
+  },
+  "fullTextSpeedStd": {
+    "message": "Padrão"
+  },
+  "fullTextSpeedDesc": {
+    "message": "Buscar mais rápido aumenta o risco de limites do X."
+  },
+  "fullTextTabs": {
+    "message": "Abas ao mesmo tempo"
+  },
+  "fullTextTabsN": {
+    "message": "$COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "fullTextPending": {
     "message": "Posts sem o texto completo: $COUNT$",
     "placeholders": {

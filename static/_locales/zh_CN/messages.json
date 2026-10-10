@@ -1163,6 +1163,30 @@
   "fullTextSwitchDesc": {
     "message": "保存被 X 折叠为“显示更多”的帖子时，会在后台标签页中打开该帖子的页面，读取全文后关闭。每条之间间隔 4～8 秒，不会操作您正在查看的标签页。按 X 的条款，这可能被视为自动化访问（不构成法律建议）。关闭后，只保存折叠的部分。"
   },
+  "fullTextSpeed": {
+    "message": "获取速度"
+  },
+  "fullTextSpeedSlow": {
+    "message": "慢速（推荐）"
+  },
+  "fullTextSpeedStd": {
+    "message": "标准"
+  },
+  "fullTextSpeedDesc": {
+    "message": "获取越快，越容易受到 X 限制。"
+  },
+  "fullTextTabs": {
+    "message": "同时打开的标签页"
+  },
+  "fullTextTabsN": {
+    "message": "$COUNT$ 个",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "fullTextPending": {
     "message": "尚未获取全文的帖子：$COUNT$ 条",
     "placeholders": {

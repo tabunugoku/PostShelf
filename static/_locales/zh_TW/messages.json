@@ -1163,6 +1163,30 @@
   "fullTextSwitchDesc": {
     "message": "儲存被 X 摺疊為「顯示更多」的貼文時，會在背景分頁中開啟該貼文的頁面，讀取全文後關閉。每則之間間隔 4～8 秒，不會操作您正在檢視的分頁。依 X 的條款，這可能被視為自動化存取（不構成法律建議）。關閉後，只儲存摺疊的部分。"
   },
+  "fullTextSpeed": {
+    "message": "擷取速度"
+  },
+  "fullTextSpeedSlow": {
+    "message": "慢速（建議）"
+  },
+  "fullTextSpeedStd": {
+    "message": "標準"
+  },
+  "fullTextSpeedDesc": {
+    "message": "擷取越快，越容易受到 X 限制。"
+  },
+  "fullTextTabs": {
+    "message": "同時開啟的分頁"
+  },
+  "fullTextTabsN": {
+    "message": "$COUNT$ 個",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "fullTextPending": {
     "message": "尚未取得全文的貼文：$COUNT$ 則",
     "placeholders": {

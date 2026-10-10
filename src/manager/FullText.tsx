@@ -2,23 +2,53 @@
  * 設定「長いポストの全文」(v24)。スイッチ、全文を取得していないポストの件数、「いま取得する」(確認を 1 回出す)、進み具合と「止める」、止めた理由。
  * 取得そのものは background (src/background/fulltext.ts) が行う。ここからは、メッセージで依頼するだけ。
  */
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { useContext, useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
 import { SavedContext } from './settingsSaved';
 import { reportStorageError } from './errorBus';
-import { getFullTextRun, getSettings, onFullTextRunChanged, updateSettings, type FullTextRun } from '../shared/settings';
+import { getFullTextRun, getSettings, onFullTextRunChanged, updateSettings, type FullTextRun, type Settings } from '../shared/settings';
 import { getAccountScope, listTruncated, onDataChanged } from '../shared/storage';
 import { Confirm, Sentences } from './ui';
 
 export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
   const saved = useContext(SavedContext);
   const [on, setOn] = useState(true);
+  const [speed, setSpeed] = useState<Settings['fullTextSpeed']>('slow');
+  const [tabs, setTabs] = useState<Settings['fullTextTabs']>(1);
+  const [changing, setChanging] = useState(false);
+  const changingRef = useRef(false);
+  const root = useRef<HTMLFieldSetElement>(null);
+  const change = async (patch: Partial<Settings>) => {
+    if (changingRef.current) return;
+    changingRef.current = true;
+    setChanging(true);
+    let current = { fullTextSpeed: speed, fullTextTabs: tabs };
+    try {
+      const s = await updateSettings(patch);
+      current = s;
+      setSpeed(s.fullTextSpeed);
+      setTabs(s.fullTextTabs);
+      saved();
+    } catch {
+      reportStorageError();
+    } finally {
+      // radio はブラウザが先に切り替える。失敗時も保存値と同じ選択へ戻す。
+      root.current?.querySelectorAll<HTMLInputElement>('input[name="ft-speed"],input[name="ft-tabs"]').forEach(input => {
+        input.checked = input.name === 'ft-speed' ? input.value === current.fullTextSpeed : Number(input.value) === current.fullTextTabs;
+      });
+      changingRef.current = false;
+      setChanging(false);
+    }
+  };
   const [pending, setPending] = useState(0);
   const [run, setRun] = useState<FullTextRun | null>(null);
   const [ask, setAsk] = useState(false);
   const load = async () => {
-    setOn((await getSettings()).fullText);
+    const settings = await getSettings();
+    setOn(settings.fullText);
+    setSpeed(settings.fullTextSpeed);
+    setTabs(settings.fullTextTabs);
     setPending((await listTruncated()).length);
     setRun(await getFullTextRun());
   };
@@ -32,7 +62,7 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
   const running = !!run?.running;
   const reason = !running && run?.stopReason ? { limit: 'fullTextStopLimit', failures: 'fullTextStopFailures', user: 'fullTextStopUser' }[run.stopReason] : null;
   return (
-    <fieldset class="setting-group full-text">
+    <fieldset ref={root} class="setting-group full-text">
       <legend>{t('fullTextTitle')}</legend>
       <label class="setting">
         <input
@@ -53,6 +83,27 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
           <span class="muted setting-desc"><Sentences text={t('fullTextSwitchDesc')} /></span>
         </span>
       </label>
+      {on && <div class="ft-speed-setting">
+        <strong>{t('fullTextSpeed')}</strong>
+        <div class="ft-speed-options" role="radiogroup" aria-label={t('fullTextSpeed')}>
+          {(['slow', 'standard'] as const).map(value => <label class="setting ft-choice">
+            <input type="radio" name="ft-speed" value={value} checked={speed === value} disabled={changing}
+              onChange={() => void change({ fullTextSpeed: value })} />
+            <span>{t(value === 'slow' ? 'fullTextSpeedSlow' : 'fullTextSpeedStd')}</span>
+          </label>)}
+        </div>
+        <p class="muted setting-desc ft-speed-desc">{t('fullTextSpeedDesc')}</p>
+        {speed === 'standard' && <div class="ft-tab-setting">
+          <strong>{t('fullTextTabs')}</strong>
+          <div class="ft-speed-options" role="radiogroup" aria-label={t('fullTextTabs')}>
+            {([1, 2, 3] as const).map(value => <label class="setting ft-choice">
+              <input type="radio" name="ft-tabs" value={value} checked={tabs === value} disabled={changing}
+                onChange={() => void change({ fullTextTabs: value })} />
+              <span>{t('fullTextTabsN', value)}</span>
+            </label>)}
+          </div>
+        </div>}
+      </div>}
       {on && (
         <>
           <div class="io ft-row">
