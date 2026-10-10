@@ -1,0 +1,23 @@
+<!-- 実機 (2026-10) の DOM を元にした骨組み。値はすべて架空。実機未確認の推測を含む -->
+<article data-testid="tweet" role="article">
+ <div data-testid="Tweet-User-Avatar"><div data-testid="UserAvatar-Container-sample_main"><a href="/sample_main"><img src="https://example.invalid/main-avatar.jpg"></a></div></div>
+ <div data-testid="User-Name"><a href="/sample_main"><span>Sample Main</span></a><span>@sample_main</span><a href="/sample_main/status/111"><time datetime="2026-10-10T09:52:19.000Z">sample main date</time></a></div>
+ <div data-testid="tweetText" lang="ja">Sample main body</div>
+ <div><div dir="ltr"><span>引用</span></div><div role="link" tabindex="0">
+  <div data-testid="Tweet-User-Avatar"><div data-testid="UserAvatar-Container-sample_quote"><div role="presentation"><img src="https://example.invalid/quote-avatar.jpg"></div></div></div>
+  <div data-testid="User-Name"><div dir="ltr"><span>Sample Quote</span></div><div dir="ltr"><span>@sample_quote</span></div><time datetime="2026-10-09T19:17:26.000Z">sample quote date</time></div>
+  <div dir="ltr"><svg viewBox="0 0 33 32"></svg><span>架空の本文の翻訳</span></div>
+  <div data-testid="tweetText" lang="ja">Sample translated quote body</div>
+  <div data-testid="tweetPhoto"><div data-testid="placementTracking"><div data-testid="videoPlayer"><div data-testid="videoComponent"><div><video poster="https://example.invalid/amplify_video_thumb/sample.jpg" src="blob:https://example.invalid/sample-video" aria-label="埋め込み動画"></video></div></div></div></div><span>0:02</span><button aria-label="ミュート解除"></button></div>
+<div><div dir="ltr"><span>引用</span></div>
+  <div data-testid="nestedQuotePreview" role="link" tabindex="0">
+   <div data-testid="Tweet-User-Avatar"><div data-testid="UserAvatar-Container-sample_nested"><div role="presentation"><img src="https://example.invalid/nested-avatar.jpg"></div></div></div>
+   <div data-testid="User-Name"><div dir="ltr"><span>Sample Nested</span></div><span>@sample_nested</span><time datetime="2026-10-08T12:34:56.000Z">sample nested date</time></div>
+   <div dir="ltr"><svg></svg><span>架空の入れ子の翻訳</span></div>
+   <div data-testid="tweetText" lang="ja" style="-webkit-line-clamp:2">Nested-only fictional body</div>
+  </div>
+ </div>
+ </div></div>
+ 
+ <div role="group"><button data-testid="bookmark"></button></div>
+</article>
