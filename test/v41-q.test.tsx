@@ -129,13 +129,13 @@ it.each(['skip', 'close'] as const)('leaves the created folder but no assignment
   expect((await getSettings()).recentFolderIds).toEqual([]);
 });
 
-it('keeps N creation as an additive save without advancing when multi mode is off', async () => {
+it('adds the N-created folder and advances when multi mode is off', async () => {
   queue[0].folderIds = [folders[0].id]; await storage.setBookmarkFolders('111', queue[0].folderIds, queue[0].snapshot);
   await mount(false); await prepare(); const add = vi.spyOn(storage, 'addToFolders'); const save = vi.spyOn(storage, 'setBookmarkFolders');
   await submit(); const f = await created();
   expect(add).toHaveBeenCalledExactlyOnceWith(['111'], [f.id]); expect(save).not.toHaveBeenCalled();
   expect((await storage.getBookmark('111'))?.folderIds).toEqual([folders[0].id, f.id]);
-  progress(1); expect(document.querySelector('.triage-new')).toBeNull(); expect(changed).toHaveBeenCalledOnce();
+  progress(2); expect(document.querySelector('.triage-new')).toBeNull(); expect(changed).toHaveBeenCalledOnce();
 });
 
 it('stages creation through other folders and removes the inbox mark without confirming', async () => {

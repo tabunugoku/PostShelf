@@ -88,7 +88,8 @@ export function createFolderPicker(opts: {
   theme: PickerTheme;
   /** チェックの変化 (新規作成フォルダの自動選択を含む) のたびに呼ばれる */
   /** source は新規作成からの選択だけ 'created'。チェック操作では省略する。 */
-  onChange: (selected: Set<string>, source?: 'created') => void | Promise<void>;
+  /** 作成時に false を返すと、作成済みフォルダへの割り当てだけを再試行できる。 */
+  onChange: (selected: Set<string>, source?: 'created') => void | boolean | Promise<void | boolean>;
   /**
    * x.com のポップオーバー用の追加機能 (v28): 保存状態の見出し、絞り込み欄 (8 つ以上)、「最近使った」(6 つ以上)。
    * 渡さなければ有効にしない (manager の「フォルダを変更」は見た目を変えない)。recentIds は新しい順。存在しないフォルダは飛ばす
@@ -174,11 +175,11 @@ export function createFolderPicker(opts: {
     existing: () => [inboxOf(folders), ...folders], // 「未分類」(まだ保存されていないときの仮想の行) も同名の判定に含める
     onCreated: async (f) => {
       // 作ったフォルダを、このポストの保存先として選んで一覧に戻る (「未分類」との排他は normalize)
-      folders.push(f);
+      if (!folders.some(folder => folder.id === f.id)) folders.push(f);
       if (opts.onToggle) await opts.onToggle(f.id, true);
       else {
         normalize(f.id, true);
-        await onChange(selected, 'created');
+        if (await onChange(selected, 'created') === false) return false;
       }
       closeMenu();
     },

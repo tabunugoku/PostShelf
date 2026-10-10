@@ -71,8 +71,9 @@ it('restores focus after successful folder creation removes its focused input', 
   expect(dialog().contains(document.activeElement)).toBe(true);
   const created = (await storage.listFolders()).find((f) => f.name === 'Created sample')!;
   expect((await storage.getBookmark('111'))?.folderIds).toEqual([created.id]);
+  expect(dialog().textContent).toContain('Sample post 222');
   await key('1', 'Digit1');
-  expect((await storage.getBookmark('111'))?.folderIds).toContain(folders[0].id);
+  expect((await storage.getBookmark('222'))?.folderIds).toEqual([folders[0].id]);
 });
 
 it('preserves focus on a remaining trigger when closing its menu', async () => {

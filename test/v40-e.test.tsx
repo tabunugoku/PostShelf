@@ -100,7 +100,7 @@ it('shows the storage error without advancing and allows a successful retry', as
   expect(document.querySelector('.triage .error')).toBeNull();
 });
 
-it('keeps the picker open and stays on the same post when a folder is created within it', async () => {
+it('advances after picker creation and remembers its assignment when revisiting', async () => {
   await mount();
   await open();
   const add = [...document.querySelectorAll<HTMLButtonElement>('.menu button')].find((b) => b.textContent === t('addFolder'))!;
@@ -114,6 +114,11 @@ it('keeps the picker open and stays on the same post when a folder is created wi
   await flush();
   const created = (await storage.listFolders()).find((f) => f.name === 'Created sample')!;
   expect((await storage.getBookmark('111'))?.folderIds).toEqual([created.id]);
+  expectProgress(2);
+  expect(document.querySelector('.menu')).toBeNull();
+  folders.push(created); await mount();
+  await act(() => void document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true })));
+  await flush(); await open();
   expectProgress(1);
   expect(document.querySelector('.menu')).not.toBeNull();
   expect(box(created.name).checked).toBe(true);

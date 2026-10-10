@@ -62,7 +62,9 @@ it('keeps the latest assignment when another folder is chosen with the create me
   await act(() => void document.querySelector('.triage-folder')!.dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true })));
   await flush();
   await submit();
-  expect(document.querySelector('.triage-folder')?.getAttribute('aria-pressed')).toBe('true');
+  const created = (await storage.listFolders()).find(f => f.name === 'Created sample')!;
+  expect((await storage.getBookmark('111'))?.folderIds).toEqual([folders[0].id, created.id]);
+  expect(document.querySelector('.triage-post')?.textContent).toContain('sample post 222');
 });
 
 it('shows errorStorage for a failed other-folder save and clears it after a successful retry', async () => {
@@ -85,7 +87,7 @@ it('shows errorStorage if assigning a newly created folder fails', async () => {
   const onCreated = vi.mocked(menus.createFolderMenu).mock.calls.at(-1)![0].onCreated!;
   expect(onCreated).toBeTypeOf('function');
   vi.spyOn(storage, 'addToFolders').mockRejectedValueOnce(new Error('failed'));
-  await act(async () => { await expect(onCreated(created)).resolves.toBeUndefined(); });
+  await act(async () => { await expect(onCreated(created)).resolves.toBe(false); });
   await flush();
   expect(document.querySelector('.triage > .error')?.textContent).toBe(t('errorStorage'));
   expect(changed).not.toHaveBeenCalled();

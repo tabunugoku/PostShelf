@@ -124,8 +124,8 @@ export function Triage(props: {
     void props.onChanged(); // 作成したフォルダを一覧へ反映する。
   };
   /** そのフォルダに入れる (入っていれば外す)。stay: 同じポストに留まる */
-  const choose = async (folderId: string, stay: boolean) => {
-    if (!cur || finished || busy.current) return;
+  const choose = async (folderId: string, stay: boolean): Promise<boolean> => {
+    if (!cur || finished || busy.current) return false;
     if (multi) {
       setDraft(prev => {
         const ids = new Set(prev?.tweetId === cur.tweetId ? prev.ids : savedIds(cur));
@@ -133,7 +133,7 @@ export function Triage(props: {
         else ids.add(folderId);
         return { tweetId: cur.tweetId, ids };
       });
-      return;
+      return true;
     }
     busy.current = true;
     const b = cur;
@@ -148,8 +148,10 @@ export function Triage(props: {
       setError('');
       void props.onChanged();
       if (!stay && !has) next();
+      return true;
     } catch {
       setError(t('errorStorage'));
+      return false;
     } finally {
       busy.current = false;
     }
@@ -307,10 +309,17 @@ export function Triage(props: {
                           folders={props.pickerFolders}
                           selected={multi ? [...marks] : assigned[cur.tweetId] ?? []}
                           onChange={async (sel, source) => {
-                            if (!cur || finished || busy.current) return;
+                            if (!cur || finished || busy.current) return source === 'created' ? false : undefined;
                             if (multi) {
                               if (source === 'created') stageCreated(sel);
                               else setDraft({ tweetId: cur.tweetId, ids: new Set([...sel].filter(id => id !== INBOX_ID)) });
+                              return;
+                            }
+                            if (source === 'created') {
+                              const added = [...sel].filter(id => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
+                              const folderId = added[added.length - 1];
+                              if (!folderId || !await choose(folderId, false)) return false;
+                              setMore(false);
                               return;
                             }
                             busy.current = true;
@@ -323,7 +332,7 @@ export function Triage(props: {
                               mark(cur, ids);
                               setError('');
                               void props.onChanged();
-                              if (added.length && (source !== 'created' || multi)) {
+                              if (added.length) {
                                 setMore(false);
                                 next();
                               }
@@ -356,16 +365,8 @@ export function Triage(props: {
                             stageCreated([...marks, f.id]);
                             return;
                           }
-                          try {
-                            await addToFolders([cur.tweetId], [f.id]);
-                            void updateRecentFolders([f.id]).catch(() => {});
-                            mark(cur, [...(assigned[cur.tweetId] ?? []).filter((id) => id !== INBOX_ID), f.id]);
-                            setCreating(false);
-                            setError('');
-                            void props.onChanged();
-                          } catch {
-                            setError(t('errorStorage'));
-                          }
+                          if (!await choose(f.id, false)) return false;
+                          setCreating(false);
                         }}
                         onClose={closeCreate}
                       />
