@@ -1,15 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createRequire } from 'node:module';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const html = readFileSync(resolve('site/index.html'), 'utf8');
 // Use the installed jsdom without adding a dependency just for its declarations.
 const { JSDOM } = createRequire(import.meta.url)('jsdom') as {
-  JSDOM: new (html: string, options: { url: string; runScripts: string }) => { window: Window & typeof globalThis };
+  JSDOM: new (html: string, options: { url: string; runScripts: string; beforeParse?: (window: Window & typeof globalThis) => void }) => { window: Window & typeof globalThis };
 };
-function page() {
-  return new JSDOM(html, { url: 'https://tabunugoku.github.io/PostShelf/', runScripts: 'dangerously' });
+function page(beforeParse?: (window: Window & typeof globalThis) => void) {
+  return new JSDOM(html, { url: 'https://tabunugoku.github.io/PostShelf/', runScripts: 'dangerously', beforeParse });
 }
 
 describe('紹介サイト', () => {
@@ -49,6 +49,62 @@ describe('紹介サイト', () => {
     const tabs = d.querySelectorAll('.mobile-tabs a');
     expect(tabs).toHaveLength(5);
     for (const tab of tabs) expect(d.querySelector(tab.getAttribute('href')!)).not.toBeNull();
+    dom.window.close();
+  });
+
+  it('hides sharing when neither browser API is available', () => {
+    const dom = page();
+    expect(dom.window.document.querySelector<HTMLButtonElement>('#share-link')?.hidden).toBe(true);
+    dom.window.close();
+  });
+
+  it('uses the native share dialog when available, without copying', async () => {
+    const share = vi.fn().mockResolvedValue(undefined), writeText = vi.fn();
+    const dom = page(w => {
+      Object.defineProperty(w.navigator, 'share', { value: share });
+      Object.defineProperty(w.navigator, 'clipboard', { value: { writeText } });
+    });
+    const button = dom.window.document.querySelector<HTMLButtonElement>('#share-link')!;
+    expect(button.hidden).toBe(false);
+    button.click();
+    await vi.waitFor(() => expect(button.disabled).toBe(false));
+    expect(share).toHaveBeenCalledWith({ url: dom.window.location.href });
+    expect(writeText).not.toHaveBeenCalled();
+    expect(button.disabled).toBe(false);
+    dom.window.close();
+  });
+
+  it('copies the URL and temporarily shows bilingual confirmation', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    let restore: (() => void) | undefined;
+    const dom = page(w => {
+      Object.defineProperty(w.navigator, 'clipboard', { value: { writeText } });
+      w.setTimeout = ((callback: () => void) => { restore = callback; return 1; }) as typeof w.setTimeout;
+    });
+    const d = dom.window.document;
+    d.querySelector<HTMLButtonElement>('#share-link')!.click();
+    await vi.waitFor(() => expect(d.querySelector<HTMLElement>('.share-copied')?.hidden).toBe(false));
+    expect(writeText).toHaveBeenCalledWith(dom.window.location.href);
+    expect(d.querySelector<HTMLElement>('.share-copied')?.hidden).toBe(false);
+    expect(d.querySelector<HTMLElement>('.share-ready')?.hidden).toBe(true);
+    expect(d.querySelector('.share-copied .ja')?.textContent).toBe('コピーしました');
+    expect(d.querySelector('.share-copied .en')?.textContent).toBe('Copied');
+    restore!();
+    expect(d.querySelector<HTMLElement>('.share-copied')?.hidden).toBe(true);
+    expect(d.querySelector<HTMLElement>('.share-ready')?.hidden).toBe(false);
+    dom.window.close();
+  });
+
+  it.each(['share', 'clipboard'])('handles a rejected %s operation without a false confirmation', async api => {
+    const reject = vi.fn().mockRejectedValue(new Error('Denied'));
+    const dom = page(w => {
+      Object.defineProperty(w.navigator, api, { value: api === 'share' ? reject : { writeText: reject } });
+    });
+    const d = dom.window.document, button = d.querySelector<HTMLButtonElement>('#share-link')!;
+    button.click();
+    await vi.waitFor(() => expect(button.disabled).toBe(false));
+    expect(button.disabled).toBe(false);
+    expect(d.querySelector<HTMLElement>('.share-copied')?.hidden).toBe(true);
     dom.window.close();
   });
 });

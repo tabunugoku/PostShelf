@@ -141,6 +141,18 @@ h1 em{font-style:normal;color:var(--fill)}
 .lead{font-size:18px;line-height:1.8;color:var(--mu);max-width:30em}
 .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
 .note{margin-top:14px;font-size:13px;color:var(--mu)}
+.device-note{display:none}
+@media (pointer:coarse) and (max-width:820px){
+  .device-note{display:block;margin-top:24px;padding:16px;border:1px solid var(--bds);border-radius:12px;background:var(--s1)}
+  .device-note h2{font-size:17px;margin:0 0 6px}.device-note p{font-size:14px;color:var(--mu)}
+  .device-note .btn{margin-top:12px}
+  .device-note [hidden]{display:none}
+}
+@media(max-width:600px){
+  .hero .cta{flex-direction:column}.hero .cta .btn,.device-note .btn{width:100%}
+  .btn.pri{background:var(--at);border-color:var(--at);color:var(--bg)}
+  h1 em{color:var(--at)}
+}
 
 /* app window drawn in markup */
 .demo{flex:1 1 440px;min-width:0}
@@ -262,6 +274,14 @@ footer p{max-width:46em}
     <span class="pill"><i></i>v1.1.2 · <span class="ja">無料 · MIT ライセンス</span><span class="en">Free · MIT License</span></span>
     <h1><span class="ja">X のブックマークを<br><em>自分のフォルダ</em>に整理する</span><span class="en">Sort your X bookmarks<br>into <em>your own folders</em></span></h1>
     <p class="lead"><span class="ja">ポストを好きな名前・アイコン・色のフォルダに分けられる Chrome 拡張機能です。データはあなたのパソコンの中だけに保存します。</span><span class="en">A Chrome extension that files your posts into folders with any name, icon and color you like. Your data is stored only on your own computer.</span></p>
+    <aside class="device-note">
+      <h2><span class="ja">パソコンの Chrome で使う拡張機能です</span><span class="en">A Chrome extension for your computer</span></h2>
+      <p><span class="ja">スマホには入れられません。このページのリンクを、あとでパソコンで開いてください。</span><span class="en">It can't be installed on a phone. Open this page on your computer later.</span></p>
+      <button class="btn" type="button" id="share-link" hidden>
+        <span class="share-ready"><span class="ja">リンクを共有</span><span class="en">Share link</span></span>
+        <span class="share-copied" hidden><span class="ja">コピーしました</span><span class="en">Copied</span></span>
+      </button>
+    </aside>
     <div class="cta">
       <a class="btn pri" href="#install"><span class="ja">インストール方法を見る</span><span class="en">See how to install</span></a>
       <a class="btn" href="https://github.com/tabunugoku/PostShelf/releases/latest" target="_blank" rel="noopener noreferrer"><span class="ja">最新版をダウンロード</span><span class="en">Download the latest version</span></a>
@@ -402,6 +422,27 @@ footer p{max-width:46em}
   en.addEventListener('click',function(){psSetLang('en');sync()});
   ja.addEventListener('click',function(){psSetLang('ja');sync()});
   sync();
+})();
+(function(){
+  var button=document.getElementById('share-link');
+  var canShare=typeof navigator.share==='function';
+  var canCopy=navigator.clipboard&&typeof navigator.clipboard.writeText==='function';
+  if(!canShare&&!canCopy)return;
+  button.hidden=false;
+  var ready=button.querySelector('.share-ready'),copied=button.querySelector('.share-copied'),timer;
+  button.addEventListener('click',async function(){
+    button.disabled=true;
+    try{
+      if(canShare){await navigator.share({url:location.href})}
+      else{
+        await navigator.clipboard.writeText(location.href);
+        ready.hidden=true;copied.hidden=false;
+        clearTimeout(timer);
+        timer=setTimeout(function(){ready.hidden=false;copied.hidden=true},2000);
+      }
+    }catch(e){/* Cancellation or denied access leaves the original label available to retry. */}
+    finally{button.disabled=false}
+  });
 })();
 </script>
 </body>
