@@ -42,3 +42,4 @@
 | iconTicket | チケット | Ticket | 票券 | 票券 | 티켓 | Entrada | Ingresso | Billet |
 | iconPlanet | 惑星 | Planet | 行星 | 行星 | 행성 | Planeta | Planeta | Planète |
 | iconMore | その他 | More | 更多 | 更多 | 더보기 | Más | Mais | Plus |
+| selectAll | すべて選択 | Select all | 全选 | 全選 | 모두 선택 | Seleccionar todo | Selecionar tudo | Tout sélectionner |

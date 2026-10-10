@@ -11,6 +11,8 @@ export function BulkMenu(props: {
   bookmarks: Bookmark[];
   onToggle: (folderId: string, on: boolean) => Promise<void>;
   onDelete: () => void;
+  onSelectAll: () => void;
+  allSelected: boolean;
   onClear: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -41,6 +43,7 @@ export function BulkMenu(props: {
         {view === 'main' ? <>
           <button class="menu-item" onClick={() => setView('folders')}><Icon name="ti-folder-plus" /> {t('changeFolder')}</button>
           <button class="menu-item danger-text" onClick={() => { close(); props.onDelete(); }}><Icon name="ti-trash" /> {t('delete')}</button>
+          <button class="menu-item" disabled={props.allSelected} onClick={() => { close(); props.onSelectAll(); }}><Icon name="ti-checks" /> {t('selectAll')}</button>
           <button class="menu-item" onClick={() => { close(); props.onClear(); }}><Icon name="ti-x" /> {t('clearSelection')}</button>
         </> : <>
           <button class="menu-item" onClick={() => setView('main')}><Icon name="ti-arrow-left" /> {t('back')}</button>

@@ -264,6 +264,9 @@
   "bulkMenuLabel": {
     "message": "对所选帖子的操作"
   },
+  "selectAll": {
+    "message": "全选"
+  },
   "clearSelection": {
     "message": "取消选择"
   },

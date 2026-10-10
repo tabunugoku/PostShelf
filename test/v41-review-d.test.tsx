@@ -36,7 +36,7 @@ const open = () => click(byText(t('changeFolder')));
 
 it.each(['tab', 'sidepanel'] as const)('shows mixed states and adds to every selected post on %s', async surface => {
   await mount(surface);
-  expect([...document.querySelectorAll('.menu-bulk .menu-item')].map(b => b.textContent?.trim())).toEqual([t('changeFolder'), t('delete'), t('clearSelection')]);
+  expect([...document.querySelectorAll('.menu-bulk .menu-item')].map(b => b.textContent?.trim())).toEqual([t('changeFolder'), t('delete'), t('selectAll'), t('clearSelection')]);
   await open();
   for (const name of ['Sample A', 'Sample B']) {
     expect(box(name).indeterminate).toBe(true); expect(box(name).getAttribute('aria-checked')).toBe('mixed'); expect(box(name).checked).toBe(false);

@@ -264,6 +264,9 @@
   "bulkMenuLabel": {
     "message": "選択したポストの操作"
   },
+  "selectAll": {
+    "message": "すべて選択"
+  },
   "clearSelection": {
     "message": "選択解除"
   },

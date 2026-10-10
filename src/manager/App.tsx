@@ -364,6 +364,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
   const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
   const shownSet = useMemo(() => new Set(shownIds), [shownIds]);
+  useEffect(() => {
+    // 削除済みポストの pruneSelection とは別に、検索・フィルタなどで隠れた選択を外す。
+    setSelected(s => [...s].every(id => shownSet.has(id)) ? s : new Set([...s].filter(id => shownSet.has(id))));
+    if (anchor && !shownSet.has(anchor)) setAnchor(null);
+  }, [shownSet]);
   // 段階表示: 描くのは shown の先頭から renderCount 件。選択・検索・件数の表示・全選択は、全件 (shown / shownIds) のまま
   const pageSize = surface === 'sidepanel' ? PAGE_SIZE_SIDEPANEL : PAGE_SIZE[view];
   const resetKey = `${curFolder.id}|${search}|${sort}|${filtersKey}|${view}|${pageSize}`;
@@ -768,6 +773,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         bookmarks={bookmarks.filter(b => selected.has(b.tweetId))}
         onToggle={(id, on) => run(id === INBOX_ID ? moveToFolder(bulkIds, null, INBOX_ID) : on ? addToFolders(bulkIds, [id]) : removeFromFolders(bulkIds, [id]), on ? 'toastAdded' : 'toastRemoved')}
         onDelete={() => setConfirmState({ kind: 'posts', ids: bulkIds })}
+        onSelectAll={() => setSelected(new Set(shownIds))}
+        allSelected={selected.size === shownSet.size}
         onClear={clearSelection}
       />
     ) : null;

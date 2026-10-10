@@ -264,6 +264,9 @@
   "bulkMenuLabel": {
     "message": "Acciones para las publicaciones seleccionadas"
   },
+  "selectAll": {
+    "message": "Seleccionar todo"
+  },
   "clearSelection": {
     "message": "Deseleccionar"
   },

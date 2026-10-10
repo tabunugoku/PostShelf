@@ -264,6 +264,9 @@
   "bulkMenuLabel": {
     "message": "Actions sur les posts sélectionnés"
   },
+  "selectAll": {
+    "message": "Tout sélectionner"
+  },
   "clearSelection": {
     "message": "Tout désélectionner"
   },

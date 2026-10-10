@@ -264,6 +264,9 @@
   "bulkMenuLabel": {
     "message": "선택한 게시물 작업"
   },
+  "selectAll": {
+    "message": "모두 선택"
+  },
   "clearSelection": {
     "message": "선택 해제"
   },
