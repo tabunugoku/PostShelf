@@ -580,12 +580,6 @@
   "folderMore": {
     "message": "이름·아이콘·색 변경"
   },
-  "folderMoveUp": {
-    "message": "위로"
-  },
-  "folderMoveDown": {
-    "message": "아래로"
-  },
   "cardMenu": {
     "message": "더보기"
   },

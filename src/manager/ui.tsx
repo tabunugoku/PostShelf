@@ -151,7 +151,7 @@ export function pickMenuSide(anchor: { left: number; right: number }, menuWidth:
  * fixed: カードや一覧の overflow に隠れないよう、body 直下 (portal) に出し、きっかけのボタンの近くを基準に、画面の端に収まる位置へ補正する
  * (右にはみ出すときは左へ、下にはみ出すときは上へ)。スクロールやウィンドウの大きさの変更でも閉じる (位置がずれるため)。
  */
-export function Dropdown(props: { onClose: () => void; children: ComponentChildren; label?: string; class?: string; fixed?: boolean; positionKey?: number }) {
+export function Dropdown(props: { onClose: () => void; children: ComponentChildren; label?: string; class?: string; fixed?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const marker = useRef<HTMLSpanElement>(null);
   /** きっかけのボタンを含む入れ物 (fixed のときは、目印の span の親。そうでなければ、このメニューの親) */
@@ -180,8 +180,7 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
     const above = r.top - 4 - h;
     el.style.top = `${below + h > vh - 8 && above >= 8 ? above : Math.max(8, Math.min(below, vh - h - 8))}px`;
   };
-  // 並べ替えでアンカーが動いたときは、中身のサイズが変わらなくても位置を更新する。
-  useLayoutEffect(place, [props.positionKey]);
+  useLayoutEffect(place, []);
   useLayoutEffect(() => {
     // 中身があとから増える (フォルダの一覧など) ときも、画面の端に収まる位置に補正し直す
     const el = ref.current;

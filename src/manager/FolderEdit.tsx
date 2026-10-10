@@ -15,10 +15,6 @@ export function FolderEdit(props: {
   existing?: Folder[];
   onSaved: () => void;
   onRequestDelete: () => void;
-  onMove?: (direction: -1 | 1) => void;
-  canMoveUp?: boolean;
-  canMoveDown?: boolean;
-  moving?: boolean;
 }) {
   const { folder } = props;
   const [name, setName] = useState(displayName(folder));
@@ -92,16 +88,6 @@ export function FolderEdit(props: {
         ))}
       </div>
       {error && <p class="error">{error}</p>}
-      {props.onMove && (
-        <div class="folder-reorder">
-          <button class="menu-item" data-action="folder-move-up" disabled={!props.canMoveUp || props.moving} onClick={() => props.onMove?.(-1)}>
-            <Icon name="ti-arrow-up" /> {t('folderMoveUp')}
-          </button>
-          <button class="menu-item" data-action="folder-move-down" disabled={!props.canMoveDown || props.moving} onClick={() => props.onMove?.(1)}>
-            <Icon name="ti-arrow-down" /> {t('folderMoveDown')}
-          </button>
-        </div>
-      )}
       <div class="erow">
         <button class="danger" onClick={props.onRequestDelete}>
           <Icon name="ti-trash" /> {t('delete')}
