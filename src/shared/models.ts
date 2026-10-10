@@ -36,7 +36,21 @@ export const accountIdOf = (handle: string): string => handle.replace(/^@/, '').
 export const accountLabel = (a: Pick<Account, 'id' | 'handle'>): string =>
   a.id === UNKNOWN_ACCOUNT_ID ? t('accountUnknownName') : `@${a.handle}`;
 
+/** 見えていた範囲を、そのまま保存する。本文は X の側で途中までのことがあり、翻訳後の文のこともある。 */
+export interface QuoteSnapshot {
+  author: string;
+  handle: string;
+  avatar?: string;
+  text: string;
+  segments?: Segment[];
+  media: string[];
+  createdAt?: string;
+  url?: string;
+  translated?: true;
+}
+
 export interface Snapshot {
+  quote?: QuoteSnapshot;
   text: string;
   author: string;
   handle: string;

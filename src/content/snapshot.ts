@@ -1,6 +1,6 @@
-import type { Snapshot } from '../shared/models';
+import type { QuoteSnapshot, Snapshot } from '../shared/models';
 import { mergeSegments, safeHref, type Segment } from '../shared/segments';
-import { ownPostLink, queryAllFirst, queryAllOwn, queryFirst, queryOwn } from '../shared/selectors';
+import { findQuote, ownPostLink, queryAllFirst, queryAllOwn, queryFirst, queryOwn } from '../shared/selectors';
 
 /**
  * 本文の要素から、リンクを含む部品の並びを作る (v24)。リンクは URL / @メンション / #ハッシュタグ (本文中の <a>)。
@@ -44,6 +44,30 @@ export function tweetIdOf(article: Element): string | null {
   return link?.getAttribute('href')?.match(/^\/[^/]+\/status\/(\d+)/)?.[1] ?? null;
 }
 
+/** 引用は表示されていた本文・画像だけ。動画や原文の取得はしない。 */
+function extractQuote(article: Element): QuoteSnapshot | undefined {
+  const el = findQuote(article);
+  if (!el) return undefined;
+  const name = queryFirst(el, 'userName')?.el;
+  const author = (name ? queryFirst(name, 'nameText')?.el.textContent?.trim() : '') ?? '';
+  const avatarHandle = queryFirst(el, 'quoteAvatarHandle')?.el.getAttribute('data-testid')?.match(/^UserAvatar-Container-([A-Za-z0-9_]+)$/)?.[1];
+  const visibleHandle = name?.textContent?.match(/@([A-Za-z0-9_]+)/)?.[1];
+  const handle = avatarHandle || visibleHandle;
+  const textEl = queryFirst(el, 'tweetText')?.el;
+  const text = textEl?.textContent?.trim() ?? '';
+  const media = queryAllFirst<HTMLImageElement>(el, 'quoteMedia').els.map((i) => i.src).filter(Boolean);
+  if (!author && !handle && !text && !media.length) return undefined;
+  const avatar = queryFirst<HTMLImageElement>(el, 'avatar')?.el.src;
+  const createdAt = queryFirst(el, 'time')?.el.getAttribute('datetime');
+  const segments = textEl ? extractSegments(textEl) : undefined;
+  const photo = queryAllFirst(el, 'quotePhotoLink').els.map((a) => a.getAttribute('href')?.match(/^\/([A-Za-z0-9_]+)\/status\/(\d+)\/photo\/\d+(?:[?#].*)?$/)).find(Boolean);
+  return {
+    author, handle: handle ? '@' + handle : '', text, media,
+    ...(avatar ? { avatar } : {}), ...(createdAt ? { createdAt } : {}), ...(segments ? { segments } : {}),
+    ...(photo ? { url: 'https://x.com/' + photo[1] + '/status/' + photo[2] } : {}),
+  };
+}
+
 /** article 要素からポストのスナップショットを作る。ID が取れなければ null。 */
 export function extractTweet(article: Element): Extracted | null {
   const { time, link } = ownPostLink(article);
@@ -67,9 +91,11 @@ export function extractTweet(article: Element): Extracted | null {
   const hasVideo = !!queryOwn(article, 'video');
   const videoPoster = hasVideo ? queryOwn(article, 'videoPoster')?.el.getAttribute('poster') || undefined : undefined;
 
+  const quote = extractQuote(article);
   return {
     tweetId,
     snapshot: {
+      ...(quote ? { quote } : {}),
       text,
       author,
       handle: `@${handle}`,

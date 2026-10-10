@@ -13,7 +13,10 @@ describe.each(['tweet-quote-detail', 'tweet-quote-timeline'])('%s', (fixture) =>
   it('reads only the main post ID, author, text, media and expansion state', () => {
     const article = load();
     expect(tweetIdOf(article)).toBe('111');
-    expect(extractTweet(article)).toEqual({ tweetId: '111', snapshot: {
+    const ex = extractTweet(article)!;
+    const { quote, ...main } = ex.snapshot;
+    expect(quote?.text).toBe('引用の架空の本文。sample link');
+    expect({ tweetId: ex.tweetId, snapshot: main }).toEqual({ tweetId: '111', snapshot: {
       text: '本体の架空の全文です。', author: 'Sample Main', handle: '@sample_main',
       avatar: 'https://pbs.twimg.com/profile_images/sample_main/avatar.jpg',
       media: ['https://pbs.twimg.com/media/sample_main.jpg'], createdAt: '2026-10-02T12:00:00.000Z',
