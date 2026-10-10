@@ -364,12 +364,13 @@ export function setBookmarkFolders(
 
 /**
  * たたまれた状態の snapshot で保存し直すとき、すでに全文を取れている (truncated が偽で、本文が長い) 保存分の本文を、
- * たたまれた短い本文で上書きしない (v24)。ほかの項目は、新しい snapshot を使う。
+ * たたまれた短い本文で上書きしない (v24)。引用は新しい snapshot に無ければ保存分を残す。翻訳の印は採用した本文に合わせる。
  */
 export function keepFullText(prev: Bookmark['snapshot'] | undefined, next: Bookmark['snapshot']): Bookmark['snapshot'] {
-  if (!prev || next.truncated !== true || prev.truncated === true || prev.text.length < next.text.length) return next;
-  const { truncated: _t, segments: _s, ...rest } = next;
-  return { ...rest, text: prev.text, ...(prev.segments ? { segments: prev.segments } : {}), truncated: false };
+  const merged = next.quote || !prev?.quote ? next : { ...next, quote: prev.quote };
+  if (!prev || next.truncated !== true || prev.truncated === true || prev.text.length < next.text.length) return merged;
+  const { truncated: _t, segments: _s, translated: _tr, ...rest } = merged;
+  return { ...rest, text: prev.text, ...(prev.segments ? { segments: prev.segments } : {}), ...(prev.translated ? { translated: true } : {}), truncated: false };
 }
 
 /** 全文を取れていない (truncated が真の) 現在のアカウントのポスト */
@@ -383,18 +384,18 @@ export async function listAllTruncated(): Promise<Bookmark[]> {
 }
 
 /**
- * 全文を取れたとき、保存してあるポストの text / segments / truncated だけを更新する (v24)。
+ * 全文を取れたとき、保存してあるポストの text / segments / translated / truncated だけを更新する (v24)。
  * ほかの項目 (フォルダ、保存日時、メディアなど) は変えない。保存されていない / truncated が真でないポストは何もしない。
  * アカウントは引数で指定する (裏方は、画面のアカウントの範囲とは無関係に動かすため)。更新したら true
  */
-export function refreshFullText(accountId: string, tweetId: string, full: { text: string; segments?: Segment[] }): Promise<boolean> {
+export function refreshFullText(accountId: string, tweetId: string, full: { text: string; segments?: Segment[]; translated?: true }): Promise<boolean> {
   return serial(async () => {
     const map = await readMap();
     const k = bookmarkKey(accountId, tweetId);
     const cur = map[k];
     if (!cur || cur.snapshot.truncated !== true || !full.text) return false;
-    const { segments: _s, ...rest } = cur.snapshot;
-    map[k] = { ...cur, snapshot: { ...rest, text: full.text, ...(full.segments ? { segments: full.segments } : {}), truncated: false } };
+    const { segments: _s, translated: _tr, ...rest } = cur.snapshot;
+    map[k] = { ...cur, snapshot: { ...rest, text: full.text, ...(full.segments ? { segments: full.segments } : {}), ...(full.translated === true ? { translated: true } : {}), truncated: false } };
     await write(KEY_BOOKMARKS, map);
     return true;
   });
@@ -449,10 +450,27 @@ function validBookmark(b: any): b is Bookmark {
     isStr(b.snapshot.handle) && isStr(b.snapshot.author) && Array.isArray(b.snapshot.media)
   );
 }
+/** 引用が不正なら引用だけ落とす。翻訳の印と segments は独立に検証する。 */
+function cleanQuote(raw: unknown): Bookmark['snapshot']['quote'] {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const q = raw as Record<string, unknown>;
+  const http = (v: unknown): v is string => isStr(v) && /^https?:\/\//i.test(v);
+  if (!isStr(q.author) || !isStr(q.handle) || !isStr(q.text) || !Array.isArray(q.media) || !q.media.every(http) ||
+      (q.avatar !== undefined && !http(q.avatar)) || (q.createdAt !== undefined && !isStr(q.createdAt)) ||
+      (q.url !== undefined && (!isStr(q.url) || !X_URL.test(q.url)))) return undefined;
+  const segments = sanitizeSegments(q.segments);
+  return {
+    author: q.author, handle: q.handle, text: q.text, media: q.media,
+    ...(q.avatar !== undefined ? { avatar: q.avatar } : {}), ...(isStr(q.createdAt) ? { createdAt: q.createdAt } : {}),
+    ...(isStr(q.url) ? { url: q.url } : {}), ...(segments ? { segments } : {}), ...(q.translated === true ? { translated: true } : {}),
+  };
+}
+
 /** 取り込んだ JSON の snapshot の、省略できる項目 (v24) を検証する。不正なら、その項目だけ捨てる (text で表示する) */
 function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
-  const { segments, truncated, avatar, media, ...rest } = s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown };
+  const { segments, truncated, avatar, media, quote, translated, ...rest } = s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown };
   const seg = segments === undefined ? undefined : sanitizeSegments(segments);
+  const clean = cleanQuote(quote);
   // 画像・アバターは https の URL だけ (x.com 以外への勝手な要求や javascript: を通さない)。満たさない要素だけ捨てる
   const httpsOnly = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
   return {
@@ -461,6 +479,8 @@ function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
     ...(httpsOnly(avatar) ? { avatar } : {}),
     ...(seg ? { segments: seg } : {}),
     ...(typeof truncated === 'boolean' ? { truncated } : {}),
+    ...(clean ? { quote: clean } : {}),
+    ...(translated === true ? { translated: true } : {}),
   };
 }
 function validAccount(a: any): a is Account {
