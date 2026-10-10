@@ -486,8 +486,9 @@ input[type=number]{width:110px}
 .triage-confirm{white-space:nowrap}
 .triage:has(.triage-confirm) .triage-hint{white-space:normal}
 
-.folder-edit .icon-more{display:inline-flex;align-items:center;gap:4px;min-height:34px;border:1px dashed var(--border-strong);padding:0 6px;font-size:12px}
+.folder-edit .icon-more{border:1px dashed var(--border-strong)}
 .folder-edit .icon-more.on{background:var(--fill-ghost-selected);border:2px dashed var(--text-primary)}
-.folder-edit .icon-more i{font-size:18px}
+.folder-edit .folder-icon-row{display:grid;grid-template-columns:60px repeat(9,minmax(0,1fr));gap:4px}
+.folder-edit .folder-icon-row .ic{width:100%;max-width:34px;height:auto;min-width:0;min-height:0;aspect-ratio:1;justify-self:center}
 .folder-icon-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px 12px;min-width:0}
 .folder-icon-grid .ic{justify-self:center;max-width:100%}

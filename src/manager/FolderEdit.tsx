@@ -25,6 +25,7 @@ export function FolderEdit(props: {
   const [moreIcons, setMoreIcons] = useState(false);
   const moreButton = useRef<HTMLButtonElement>(null);
   const extraIcon = !(MAIN_ICONS as readonly string[]).includes(icon);
+  const moreLabel = extraIcon ? `${t('iconMore')}: ${iconLabel(icon)}` : t('iconMore');
   const busy = useRef(false);
   const mounted = useRef(true);
   const input = useRef<HTMLInputElement>(null);
@@ -80,16 +81,16 @@ export function FolderEdit(props: {
           }}
         />
       </div>
-      <div class="erow wrap">
+      <div class="erow folder-icon-row">
         <span class="elabel">{t('icon')}</span>
         {MAIN_ICONS.map((i) => (
           <button class={`ic${i === icon ? ' on' : ''}`} aria-label={iconLabel(i)} data-icon={i} aria-pressed={i === icon} disabled={saving} onClick={() => setIcon(i)}>
             <Icon name={i} />
           </button>
         ))}
-        <button ref={moreButton} class={`icon-more${extraIcon ? ' on' : ''}`} aria-label={t('iconMore')}
+        <button ref={moreButton} class={`ic icon-more${extraIcon ? ' on' : ''}`} aria-label={moreLabel} title={moreLabel}
           aria-pressed={extraIcon} aria-expanded={moreIcons} disabled={saving} onClick={() => setMoreIcons(!moreIcons)}>
-          {extraIcon && <Icon name={icon} />}{t('iconMore')}
+          <Icon name={extraIcon ? icon : 'ti-dots'} />
         </button>
       </div>
       {moreIcons && <div class="folder-icon-grid">
