@@ -60,6 +60,13 @@ describe('紹介サイト', () => {
     dom.window.close();
   });
 
+  it('illustrates eight colors and the no-color option', () => {
+    const dom = page();
+    expect(dom.window.document.querySelectorAll('.dots i')).toHaveLength(9);
+    expect(dom.window.document.querySelectorAll('.dots .none')).toHaveLength(1);
+    dom.window.close();
+  });
+
   it('hides sharing when neither browser API is available', () => {
     const dom = page();
     expect(dom.window.document.querySelector<HTMLButtonElement>('#share-link')?.hidden).toBe(true);

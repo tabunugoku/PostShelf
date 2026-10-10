@@ -210,6 +210,17 @@ h2{font-size:clamp(26px,3.4vw,34px);line-height:1.3;margin:6px 0 8px}
 .sw{margin-top:36px;border:1px solid var(--bd);background:var(--bg);border-radius:16px;padding:22px;display:flex;flex-wrap:wrap;gap:24px;align-items:center}
 .sw .t{flex:1 1 280px}.sw .t b{font-size:17px}.sw .t p{font-size:14px;color:var(--mu);margin-top:4px}
 .dots{display:flex;gap:10px;flex-wrap:wrap}.dots i{width:30px;height:30px;border-radius:50%;display:block}
+.dots .none{display:none}
+@media(max-width:600px){
+  #features .grid{gap:8px}
+  .fc{display:grid;grid-template-columns:36px minmax(0,1fr);gap:4px 10px;padding:14px;border-radius:12px}
+  .fc .ic{width:36px;height:36px;margin:0;grid-column:1;grid-row:1}
+  .fc h3{grid-column:2;grid-row:1;align-self:center;margin:0;font-size:16px}
+  .fc p{grid-column:1 / -1;font-size:14px}
+  .sw{padding:14px;gap:14px;margin-top:20px}.sw .t{flex-basis:100%}
+  .dots{gap:8px;flex-wrap:nowrap}.dots i{width:24px;height:24px;flex:none}
+  .dots .none{display:block;border:2px dashed var(--mu)}
+}
 
 /* install */
 .steps{display:flex;flex-wrap:wrap;gap:16px;margin-top:8px}
@@ -346,7 +357,7 @@ footer p{max-width:46em}
   </div>
   <div class="sw">
     <div class="t"><b><span class="ja">フォルダの色は 8 色 (と色なし)</span><span class="en">8 folder colors (or none)</span></b><p><span class="ja">アイコンも、どの色でも選べます。</span><span class="en">Any icon can use any color.</span></p></div>
-    <div class="dots" aria-hidden="true"><i style="background:#E24B4A"></i><i style="background:#BA7517"></i><i style="background:#639922"></i><i style="background:#1D9E75"></i><i style="background:#378ADD"></i><i style="background:#7F77DD"></i><i style="background:#D4537E"></i><i style="background:#888780"></i></div>
+    <div class="dots" aria-hidden="true"><i style="background:#E24B4A"></i><i style="background:#BA7517"></i><i style="background:#639922"></i><i style="background:#1D9E75"></i><i style="background:#378ADD"></i><i style="background:#7F77DD"></i><i style="background:#D4537E"></i><i style="background:#888780"></i><i class="none"></i></div>
   </div>
 </div></section>
 
