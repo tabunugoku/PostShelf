@@ -236,7 +236,7 @@ export function Triage(props: {
                     <Icon name="ti-chevron-down" />
                   </button>
                   {more && (
-                    <Dropdown onClose={() => setMore(false)} label={t('triageOtherFolders')} class="menu-wide">
+                    <Dropdown fixed onClose={() => setMore(false)} label={t('triageOtherFolders')} class="menu-wide menu-over">
                       <FolderPickerHost
                         folders={props.pickerFolders}
                         selected={assigned[cur.tweetId] ?? []}
