@@ -51,6 +51,8 @@ export interface QuoteSnapshot {
 
 export interface Snapshot {
   quote?: QuoteSnapshot;
+  /** 画面の本文が翻訳後のものだった場合だけ true。原文は取らない。 */
+  translated?: true;
   text: string;
   author: string;
   handle: string;

@@ -36,6 +36,7 @@ export const CANDIDATES = {
   quotePhotoLink: ['a[href*="/status/"][href*="/photo/"]'],
   quoteAvatarHandle: ['[data-testid^="UserAvatar-Container-"]'],
   quoteMedia: ['[data-testid="tweetPhoto"] img'],
+  translationVote: ['[data-testid="thumbsUpVoteButton"], [data-testid="thumbsDownVoteButton"]'],
   nameText: ['span'],
   bodyLink: ['a[href]'],
   avatar: ['[data-testid="Tweet-User-Avatar"] img', 'a[role="link"][href^="/"]:not([href*="/status/"]) img'],
@@ -107,6 +108,12 @@ export function queryAllFirst<T extends Element = Element>(root: ParentNode, key
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
+}
+
+/** 引用の帯には data-testid もボタンも無いので構造で見分ける。壊れやすい (実機の観測のみ)。 */
+export function isTranslatedQuoteText(text: Element): boolean {
+  const band = text.previousElementSibling;
+  return !!band?.querySelector('svg') && !band.querySelector('button');
 }
 
 /** User-Name を含む最も外側の入れ物。所属バッジの role=link は引用にしない (2026-10 の実機観測)。 */

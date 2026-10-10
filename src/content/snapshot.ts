@@ -1,6 +1,6 @@
 import type { QuoteSnapshot, Snapshot } from '../shared/models';
 import { mergeSegments, safeHref, type Segment } from '../shared/segments';
-import { findQuote, ownPostLink, queryAllFirst, queryAllOwn, queryFirst, queryOwn } from '../shared/selectors';
+import { isTranslatedQuoteText, findQuote, ownPostLink, queryAllFirst, queryAllOwn, queryFirst, queryOwn } from '../shared/selectors';
 
 /**
  * 本文の要素から、リンクを含む部品の並びを作る (v24)。リンクは URL / @メンション / #ハッシュタグ (本文中の <a>)。
@@ -65,6 +65,7 @@ function extractQuote(article: Element): QuoteSnapshot | undefined {
     author, handle: handle ? '@' + handle : '', text, media,
     ...(avatar ? { avatar } : {}), ...(createdAt ? { createdAt } : {}), ...(segments ? { segments } : {}),
     ...(photo ? { url: 'https://x.com/' + photo[1] + '/status/' + photo[2] } : {}),
+    ...(textEl && isTranslatedQuoteText(textEl) ? { translated: true } : {}),
   };
 }
 
@@ -91,11 +92,14 @@ export function extractTweet(article: Element): Extracted | null {
   const hasVideo = !!queryOwn(article, 'video');
   const videoPoster = hasVideo ? queryOwn(article, 'videoPoster')?.el.getAttribute('poster') || undefined : undefined;
 
+  // 自動翻訳後に出る「この翻訳を評価」のボタンを、翻訳済みの目印にする。実機で確認した範囲の推測。
+  const translated = !!queryOwn(article, 'translationVote');
   const quote = extractQuote(article);
   return {
     tweetId,
     snapshot: {
       ...(quote ? { quote } : {}),
+      ...(translated ? { translated: true } : {}),
       text,
       author,
       handle: `@${handle}`,
