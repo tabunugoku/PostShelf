@@ -1638,5 +1638,8 @@
   "iconWorld": { "message": "Terre" },
   "iconTicket": { "message": "Billet" },
   "iconPlanet": { "message": "Planète" },
-  "iconMore": { "message": "Plus" }
+  "iconMore": { "message": "Plus" },
+  "translatedBadge": { "message": "Traduit" },
+  "quoteLabel": { "message": "Citation" },
+  "quoteAsSeen": { "message": "Enregistré tel qu'affiché sur X" }
 }

@@ -1143,6 +1143,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       {viewerBookmark && viewer?.kind === 'image' && viewerBookmark.snapshot.media.length > 0 && (
         <ImageViewer
           tweetId={viewerBookmark.tweetId}
+          snapshot={viewerBookmark.snapshot}
           urls={viewerBookmark.snapshot.media}
           index={Math.min(viewer.index, viewerBookmark.snapshot.media.length - 1)}
           postUrl={viewerBookmark.snapshot.url}
@@ -1151,7 +1152,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         />
       )}
       {viewerBookmark && viewer?.kind === 'video' && (
-        <VideoGuide tweetId={viewerBookmark.tweetId} poster={viewerBookmark.snapshot.videoPoster} postUrl={viewerBookmark.snapshot.url} onClose={() => setViewer(null)} />
+        <VideoGuide snapshot={viewerBookmark.snapshot} tweetId={viewerBookmark.tweetId} poster={viewerBookmark.snapshot.videoPoster} postUrl={viewerBookmark.snapshot.url} onClose={() => setViewer(null)} />
       )}
       {autoOpen && autoCfg.enabled && (
         <AutoCollectDialog

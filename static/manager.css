@@ -472,3 +472,28 @@ input[type=number]{width:110px}
 
 .triage-confirm{white-space:nowrap}
 .triage:has(.triage-confirm) .triage-hint{white-space:normal}
+
+/* v42: 保存時に見えていた引用と翻訳の印。本体とは独立して、狭い列にも収まる。 */
+.translated-badge{display:inline-block;font-size:12px;line-height:1.5;padding:1px 6px;border:1px solid var(--border-strong);border-radius:4px;color:var(--text-secondary);background:var(--surface-2)}
+.quote-block{position:relative;min-width:0;max-width:440px;margin-top:10px;border:1px solid var(--border);border-radius:12px;color:inherit;overflow-wrap:anywhere}
+.quote-block.linked{cursor:pointer}
+.quote-open{position:absolute;inset:0;border-radius:inherit;z-index:0}
+.quote-content{position:relative;z-index:1;padding:10px;pointer-events:none}
+.quote-content a,.quote-content button{pointer-events:auto}
+.quote-head{display:flex;gap:8px;align-items:center;min-width:0;font-size:13px}
+.quote-avatar{width:24px;height:24px;flex:none;object-fit:cover;border-radius:50%}
+.quote-identity{min-width:0}
+.quote-author{color:inherit;text-decoration:none}
+.quote-author:hover{text-decoration:underline}
+.quote-block .text{font-size:14px}
+.quote-photo{aspect-ratio:16/10;overflow:hidden}
+.quote-block .media{max-width:none}
+.viewer-details{position:absolute;top:56px;right:16px;bottom:96px;width:340px;padding:12px;overflow:auto;background:#16181c;border-radius:12px;--text-primary:#e7e9ea;--text-secondary:#cfd9de;--border:#536471;--border-strong:#71808b;--surface-2:#16181c}
+.viewer-details .quote-block{max-width:none}
+.viewer.with-details .viewer-img{right:388px}
+.viewer.with-details .nav.r{right:372px}
+@media(max-width:760px){
+  .viewer.with-details .viewer-img{inset:56px 8px auto;height:38vh}
+  .viewer-details{top:calc(56px + 38vh + 8px);left:8px;right:8px;bottom:120px;width:auto}
+  .viewer.with-details .nav.r{right:4px}
+}

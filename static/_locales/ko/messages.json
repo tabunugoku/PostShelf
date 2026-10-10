@@ -1638,5 +1638,8 @@
   "iconWorld": { "message": "지구" },
   "iconTicket": { "message": "티켓" },
   "iconPlanet": { "message": "행성" },
-  "iconMore": { "message": "더보기" }
+  "iconMore": { "message": "더보기" },
+  "translatedBadge": { "message": "번역됨" },
+  "quoteLabel": { "message": "인용" },
+  "quoteAsSeen": { "message": "X에 표시된 내용 그대로 저장됨" }
 }

@@ -1638,5 +1638,8 @@
   "iconWorld": { "message": "地球" },
   "iconTicket": { "message": "チケット" },
   "iconPlanet": { "message": "惑星" },
-  "iconMore": { "message": "その他" }
+  "iconMore": { "message": "その他" },
+  "translatedBadge": { "message": "翻訳済み" },
+  "quoteLabel": { "message": "引用" },
+  "quoteAsSeen": { "message": "X に表示されていた分を保存しています" }
 }

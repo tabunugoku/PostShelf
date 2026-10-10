@@ -7,6 +7,8 @@ import type { ViewMode } from '../shared/settings';
 import { Dropdown } from './ui';
 import { MediaImg } from './MediaImg';
 import { PostText } from './PostText';
+import { QuoteBlock } from './QuoteBlock';
+import { MediaGrid } from './MediaGrid';
 import type { Snapshot } from '../shared/models';
 
 /**
@@ -322,16 +324,17 @@ function CardView(outer: CardOuterProps) {
           {s.createdAt && <span class="muted"> · {formatDate(s.createdAt)}</span>}
         </div>
         <PostText s={s} />
+        {s.quote && <QuoteBlock quote={s.quote} tweetId={b.tweetId} />}
         {s.hasVideo === true ? (
-          <div class="media m1">
+          <MediaGrid count={1}>
             <MediaTile card={props} kind="video" />
-          </div>
+          </MediaGrid>
         ) : s.media.length > 0 ? (
-          <div class={`media m${Math.min(s.media.length, 4)}`}>
+          <MediaGrid count={s.media.length}>
             {s.media.slice(0, 4).map((_, i) => (
               <MediaTile card={props} kind="image" index={i} total={s.media.length} extra={i === 3 && s.media.length > 4 ? s.media.length - 4 : 0} />
             ))}
-          </div>
+          </MediaGrid>
         ) : null}
         <FolderChips b={b} folderOf={props.folderOf} removable onRemove={props.onRemoveFromFolder} />
       </div>

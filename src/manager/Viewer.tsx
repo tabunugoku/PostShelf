@@ -4,6 +4,9 @@ import { Icon } from '../shared/Icon';
 import { viewerCandidates } from '../shared/media';
 import { t } from '../shared/strings';
 import { MediaImg } from './MediaImg';
+import type { Snapshot } from '../shared/models';
+import { QuoteBlock } from './QuoteBlock';
+import { PostText } from './PostText';
 
 const FOCUSABLE = 'button:not([disabled]),a[href]';
 
@@ -12,7 +15,7 @@ const FOCUSABLE = 'button:not([disabled]),a[href]';
  * role=dialog / aria-modal。開いたら閉じるボタンにフォーカスし、閉じたら元のボタンへ戻す。
  * Tab はダイアログの中で循環する。Esc と背景のクリックで閉じる。
  */
-function Shell(props: { label: string; counter?: string; onClose: () => void; onKey?: (e: KeyboardEvent) => boolean; children: ComponentChildren }) {
+function Shell(props: { label: string; counter?: string; details?: boolean; onClose: () => void; onKey?: (e: KeyboardEvent) => boolean; children: ComponentChildren }) {
   const root = useRef<HTMLDivElement>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
   const latest = useRef(props); // キーボードの処理は最初の 1 回だけ登録するので、常に最新の props を参照する
@@ -42,7 +45,7 @@ function Shell(props: { label: string; counter?: string; onClose: () => void; on
     };
   }, []);
   return (
-    <div class="viewer" ref={root} role="dialog" aria-modal="true" aria-label={props.label} onClick={(e) => e.target === e.currentTarget && props.onClose()}>
+    <div class={`viewer${props.details ? ' with-details' : ''}`} ref={root} role="dialog" aria-modal="true" aria-label={props.label} onClick={(e) => e.target === e.currentTarget && props.onClose()}>
       <div class="viewer-bar">
         <span class="viewer-count">{props.counter}</span>
         <button ref={closeBtn} class="round" aria-label={t('viewerClose')} title={t('viewerClose')} onClick={props.onClose}>
@@ -58,7 +61,7 @@ function Shell(props: { label: string; counter?: string; onClose: () => void; on
  * 画像の全面表示。保存済みの URL (小さいサイズ) を大きいサイズに差し替えて読む。読めなければ失敗の表示。
  * media が空のときは何も描かない (開く入口でも止めている)。
  */
-export function ImageViewer(props: { tweetId: string; urls: string[]; index: number; postUrl: string; onIndex: (i: number) => void; onClose: () => void }) {
+export function ImageViewer(props: { tweetId: string; urls: string[]; index: number; postUrl: string; snapshot?: Snapshot; onIndex: (i: number) => void; onClose: () => void }) {
   const { urls } = props;
   const n = urls.length;
   if (n === 0) return null;
@@ -70,7 +73,7 @@ export function ImageViewer(props: { tweetId: string; urls: string[]; index: num
     return false;
   };
   return (
-    <Shell label={t('viewerLabel')} counter={`${index + 1} / ${n}`} onClose={props.onClose} onKey={onKey}>
+    <Shell label={t('viewerLabel')} counter={`${index + 1} / ${n}`} onClose={props.onClose} onKey={onKey} details={!!(props.snapshot?.quote || props.snapshot?.translated)}>
       {n > 1 && (
         <>
           <button class="round nav l" aria-label={t('viewerPrev')} onClick={() => go(-1)}>
@@ -82,9 +85,19 @@ export function ImageViewer(props: { tweetId: string; urls: string[]; index: num
         </>
       )}
       {/* 読み込みの状態 (試した候補・失敗) は、画像ごとに持つ。key を変えて作り直すので、切り替えの最初の描画から初期値になる */}
+      <ViewerDetails snapshot={props.snapshot} tweetId={props.tweetId} />
       <ImageBody key={`${index}:${urls[index]}`} tweetId={props.tweetId} index={index} stored={urls[index]} postUrl={props.postUrl} />
     </Shell>
   );
+}
+
+function ViewerDetails({ snapshot: s, tweetId }: { snapshot?: Snapshot; tweetId: string }) {
+  if (!s || (!s.quote && !s.translated)) return null;
+  return <div class="viewer-details" onClick={e => e.stopPropagation()}>
+    <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
+    <PostText s={s} />
+    {s.quote && <QuoteBlock quote={s.quote} tweetId={tweetId} />}
+  </div>;
 }
 
 function ImageBody(props: { tweetId: string; index: number; stored: string; postUrl: string }) {
@@ -134,9 +147,10 @@ function ImageBody(props: { tweetId: string; index: number; stored: string; post
 }
 
 /** 動画のクリック: 再生用のファイルは保存できないので、X で再生するよう案内する (サムネイルがあれば背景に出す) */
-export function VideoGuide(props: { poster?: string; tweetId: string; postUrl: string; onClose: () => void }) {
+export function VideoGuide(props: { poster?: string; tweetId: string; postUrl: string; snapshot?: Snapshot; onClose: () => void }) {
   return (
-    <Shell label={t('videoDialogTitle')} counter={t('videoBadge')} onClose={props.onClose}>
+    <Shell label={t('videoDialogTitle')} counter={t('videoBadge')} onClose={props.onClose} details={!!(props.snapshot?.quote || props.snapshot?.translated)}>
+      <ViewerDetails snapshot={props.snapshot} tweetId={props.tweetId} />
       <div class="viewer-img viewer-video">
         {props.poster && <MediaImg tweetId={props.tweetId} name="video-thumb" src={props.poster} alt="" />}
         <span class="play" aria-hidden="true" />
