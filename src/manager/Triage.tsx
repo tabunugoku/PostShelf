@@ -48,6 +48,8 @@ export function Triage(props: {
   const [error, setError] = useState('');
   const [draft, setDraft] = useState<{ tweetId: string; ids: Set<string> } | null>(null);
   const root = useRef<HTMLDivElement>(null);
+  const newButton = useRef<HTMLButtonElement>(null);
+  const closeCreate = () => { setCreating(false); newButton.current?.focus(); };
   const previousMenus = useRef({ creating, more });
   /** choose の実行中 (await のあいだ) は、次の choose を受けない */
   const busy = useRef(false);
@@ -169,7 +171,7 @@ export function Triage(props: {
       e.preventDefault();
       e.stopPropagation();
       const s = latest.current;
-      if (s.creating) setCreating(false);
+      if (s.creating) closeCreate();
       else if (s.more) setMore(false);
       else props.onClose();
       return;
@@ -322,55 +324,61 @@ export function Triage(props: {
                   )}
                 </span>
               )}
-              <button class="triage-folder" aria-keyshortcuts="N" onClick={() => setCreating(true)}>
-                <kbd>N</kbd>
-                <Icon name="ti-folder-plus" />
-                <span class="triage-folder-name">{t('newFolder')}</span>
-              </button>
+              <span class="menu-anchor">
+                <button ref={newButton} aria-haspopup="dialog" aria-expanded={creating} class="triage-folder" aria-keyshortcuts="N" onClick={() => setCreating(true)}>
+                  <kbd>N</kbd>
+                  <Icon name="ti-folder-plus" />
+                  <span class="triage-folder-name">{t('newFolder')}</span>
+                </button>
+                {creating && (
+                  <Dropdown fixed onClose={closeCreate} label={t('newFolder')} class="menu-wide menu-over">
+                    <div onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeCreate(); } }}>
+                      <NewFolder
+                        existing={props.pickerFolders}
+                        onCreated={async (f) => {
+                          if (latest.current.finished) return;
+                          if (multi) {
+                            if (busy.current) return false;
+                            busy.current = true;
+                            try {
+                              const ids = [...new Set([...marks, f.id])];
+                              await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
+                              const before = savedIds(cur);
+                              const added = ids.filter(id => !before.includes(id));
+                              if (added.length) void updateRecentFolders(added).catch(() => {});
+                              mark(cur, ids.length ? ids : [INBOX_ID]);
+                              void props.onChanged();
+                              setCreating(false);
+                              setError('');
+                              setMore(false);
+                              next();
+                            } catch {
+                              setError(t('errorStorage'));
+                              // 作成自体は済んでいる。同じフォルダへの割り当てだけを再試行する。
+                              return false;
+                            } finally {
+                              busy.current = false;
+                            }
+                            return;
+                          }
+                          try {
+                            await addToFolders([cur.tweetId], [f.id]);
+                            void updateRecentFolders([f.id]).catch(() => {});
+                            mark(cur, [...(assigned[cur.tweetId] ?? []).filter((id) => id !== INBOX_ID), f.id]);
+                            setCreating(false);
+                            setError('');
+                            void props.onChanged();
+                          } catch {
+                            setError(t('errorStorage'));
+                          }
+                        }}
+                        onClose={closeCreate}
+                      />
+                    </div>
+                  </Dropdown>
+                )}
+              </span>
             </div>
-            {creating && (
-              <NewFolder
-                existing={props.pickerFolders}
-                onCreated={async (f) => {
-                  if (latest.current.finished) return;
-                  if (multi) {
-                    if (busy.current) return false;
-                    busy.current = true;
-                    try {
-                      const ids = [...new Set([...marks, f.id])];
-                      await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
-                      const before = savedIds(cur);
-                      const added = ids.filter(id => !before.includes(id));
-                      if (added.length) void updateRecentFolders(added).catch(() => {});
-                      mark(cur, ids.length ? ids : [INBOX_ID]);
-                      void props.onChanged();
-                      setCreating(false);
-                      setError('');
-                      setMore(false);
-                      next();
-                    } catch {
-                      setError(t('errorStorage'));
-                      // 作成自体は済んでいる。同じフォルダへの割り当てだけを再試行する。
-                      return false;
-                    } finally {
-                      busy.current = false;
-                    }
-                    return;
-                  }
-                  try {
-                    await addToFolders([cur.tweetId], [f.id]);
-                    void updateRecentFolders([f.id]).catch(() => {});
-                    mark(cur, [...(assigned[cur.tweetId] ?? []).filter((id) => id !== INBOX_ID), f.id]);
-                    setCreating(false);
-                    setError('');
-                    void props.onChanged();
-                  } catch {
-                    setError(t('errorStorage'));
-                  }
-                }}
-                onClose={() => setCreating(false)}
-              />
-            )}
             <div class="dialog-actions triage-actions">
               <span class="muted triage-hint">{t(multi ? 'triageMultiDesc' : 'triageHint')}</span>
               <span class="grow" />

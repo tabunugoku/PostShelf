@@ -455,7 +455,6 @@ input[type=number]{width:110px}
 .triage-actions{align-items:center}
 .triage-hint{font-size:13px;white-space:nowrap}
 .triage-start{display:inline-flex;gap:4px;align-items:center;white-space:nowrap;min-height:32px;margin-right:4px}
-.triage-new{padding-top:4px}
 @media (prefers-reduced-motion:no-preference){.triage-bar i{transition:width .15s}}
 
 /* ---- 設定の検索 / 保存の表示 (v30) ---- */
