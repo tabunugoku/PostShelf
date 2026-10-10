@@ -27,7 +27,8 @@ export function createFolderMenu(opts: {
   theme: PickerTheme;
   /** 同名の判定に使う、いまあるフォルダ */
   existing: () => Folder[];
-  onCreated: (folder: Folder) => void | Promise<void>;
+  /** false なら作成済みのフォルダを保持し、次の送信でこの処理だけを再試行する */
+  onCreated: (folder: Folder) => void | boolean | Promise<void | boolean>;
   /** 「キャンセル」と「← 戻る」 */
   onClose: () => void;
 }): FolderCreateMenu {
@@ -182,14 +183,22 @@ export function createFolderMenu(opts: {
   });
 
   let busy = false;
+  let pending: Folder | undefined;
+  const keepCreated = (folder?: Folder) => {
+    pending = folder;
+    // 作成後の再試行で、表示中の下書きと作成済みフォルダの値がずれないようにする。
+    input.readOnly = !!folder;
+    iconBtns.forEach(b => { b.disabled = !!folder; });
+    swatches.forEach(b => { b.disabled = !!folder; });
+  };
   el.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (busy || input.value.trim() === '') return;
-    if (hasSameName(opts.existing(), input.value)) return showError(t('errDuplicateFolder'));
+    if (!pending && hasSameName(opts.existing(), input.value)) return showError(t('errDuplicateFolder'));
     busy = true;
     try {
-      const folder = await createFolder({ name: input.value, icon, color });
-      await opts.onCreated(folder);
+      const folder = pending ?? await createFolder({ name: input.value, icon, color });
+      keepCreated(await opts.onCreated(folder) === false ? folder : undefined);
     } catch (err) {
       if (!(err instanceof StorageError)) throw err;
       showError(err.message);
@@ -202,6 +211,7 @@ export function createFolderMenu(opts: {
 
   el.append(head, input, iconGroup, colorGroup, preview, error, actions);
   const reset = () => {
+    keepCreated();
     input.value = '';
     icon = FOLDER_ICON;
     color = undefined;

@@ -101,14 +101,14 @@ it('does not save an unchanged assigned set when revisiting a post', async () =>
   await key('1'); await key('1'); await key('Enter');
   expect(save).not.toHaveBeenCalled(); progress(2);
 });
-it('creates from N immediately and advances, without saving unrelated draft marks', async () => {
+it('creates from N with draft marks and advances', async () => {
   await mount(); await key('1'); await key('n');
   const input=document.querySelector<HTMLInputElement>('.triage-new form input')!;
   await act(()=>{input.value='Sample created';input.dispatchEvent(new Event('input',{bubbles:true}));});
   await act(()=>void document.querySelector('form')!.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
   await flush();
   const created=(await storage.listFolders()).find(f=>f.name==='Sample created')!;
-  expect((await storage.getBookmark('111'))?.folderIds).toEqual([created.id]);
+  expect((await storage.getBookmark('111'))?.folderIds).toEqual([folders[0].id, created.id]);
   progress(2); expect(root().contains(document.activeElement)).toBe(true);
 });
 it('leaves check marks uncommitted when closing with Escape', async () => {

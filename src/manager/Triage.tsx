@@ -333,6 +333,30 @@ export function Triage(props: {
                 existing={props.pickerFolders}
                 onCreated={async (f) => {
                   if (latest.current.finished) return;
+                  if (multi) {
+                    if (busy.current) return false;
+                    busy.current = true;
+                    try {
+                      const ids = [...new Set([...marks, f.id])];
+                      await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
+                      const before = savedIds(cur);
+                      const added = ids.filter(id => !before.includes(id));
+                      if (added.length) void updateRecentFolders(added).catch(() => {});
+                      mark(cur, ids.length ? ids : [INBOX_ID]);
+                      void props.onChanged();
+                      setCreating(false);
+                      setError('');
+                      setMore(false);
+                      next();
+                    } catch {
+                      setError(t('errorStorage'));
+                      // 作成自体は済んでいる。同じフォルダへの割り当てだけを再試行する。
+                      return false;
+                    } finally {
+                      busy.current = false;
+                    }
+                    return;
+                  }
                   try {
                     await addToFolders([cur.tweetId], [f.id]);
                     void updateRecentFolders([f.id]).catch(() => {});
@@ -340,7 +364,6 @@ export function Triage(props: {
                     setCreating(false);
                     setError('');
                     void props.onChanged();
-                    if (multi) next();
                   } catch {
                     setError(t('errorStorage'));
                   }
@@ -367,7 +390,7 @@ export function Triage(props: {
 }
 
 /** 既存の「フォルダを作成」メニューを、ダイアログの中に置く */
-function NewFolder(props: { existing: Folder[]; onCreated: (f: Folder) => void | Promise<void>; onClose: () => void }) {
+function NewFolder(props: { existing: Folder[]; onCreated: (f: Folder) => void | boolean | Promise<void | boolean>; onClose: () => void }) {
   const host = useRef<HTMLDivElement>(null);
   const latest = useRef(props);
   latest.current = props;
