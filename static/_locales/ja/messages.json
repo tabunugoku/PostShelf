@@ -1603,5 +1603,7 @@
   },
   "listShowAll": {
     "message": "すべて表示"
-  }
+  },
+  "triageMultiSwitch": { "message": "仕分けで複数選ぶ" },
+  "triageMultiDesc": { "message": "数字キーで印を付け、Enter で確定して次へ進みます。" }
 }

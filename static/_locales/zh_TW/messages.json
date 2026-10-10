@@ -1603,5 +1603,7 @@
   },
   "listShowAll": {
     "message": "全部顯示"
-  }
+  },
+  "triageMultiSwitch": { "message": "分類時選擇多個資料夾" },
+  "triageMultiDesc": { "message": "用數字鍵標記，按 Enter 確認並前往下一則。" }
 }

@@ -1603,5 +1603,7 @@
   },
   "listShowAll": {
     "message": "Show all"
-  }
+  },
+  "triageMultiSwitch": { "message": "Pick several in Sort mode" },
+  "triageMultiDesc": { "message": "Mark with number keys, then press Enter to confirm." }
 }

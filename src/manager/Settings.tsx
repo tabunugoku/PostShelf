@@ -32,6 +32,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [bmode, setBmode] = useState<ButtonMode>('separate');
   const [amode, setAmode] = useState<ActionMode>('popup');
   const [autoOn, setAutoOn] = useState(true);
+  const [triageMulti, setTriageMulti] = useState(false);
   const [diag, setDiag] = useState(location.hash === '#diagnostics');
   const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
   const [counts, setCounts] = useState<DataCounts | null>(null);
@@ -47,6 +48,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       setBmode(s.buttonMode);
       setAmode(s.actionMode);
       setAutoOn(s.autoCollect.enabled);
+      setTriageMulti(s.triageMulti === true);
     });
   useEffect(load, []);
   /** 「変更を保存しました」を 2 秒出す。この画面で設定を書く処理が成功したときだけ呼ぶ (別タブの書き込みの通知では出さない) */
@@ -240,6 +242,17 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
         {autoOn && <p class="muted setting-desc"><Sentences text={t('acSettingsNote')} /></p>}
       </fieldset>
       {heading('behavior', 'groupBehavior')}
+      <fieldset class="setting-group">
+        <legend>{t('triageStart')}</legend>
+        <label class="setting">
+          <input type="checkbox" role="switch" checked={triageMulti}
+            onChange={(e) => void saveOf(updateSettings({ triageMulti: (e.target as HTMLInputElement).checked }), (s) => setTriageMulti(s.triageMulti === true))} />
+          <span>
+            <strong>{t('triageMultiSwitch')}</strong>
+            <span class="muted setting-desc"><Sentences text={t('triageMultiDesc')} /></span>
+          </span>
+        </label>
+      </fieldset>
       <fieldset class="setting-group">
         <legend>{t('actionModeHeading')}</legend>
         {(['popup', 'sidepanel'] as const).map((m) => (

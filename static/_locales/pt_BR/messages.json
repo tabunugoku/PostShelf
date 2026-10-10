@@ -1603,5 +1603,7 @@
   },
   "listShowAll": {
     "message": "Mostrar tudo"
-  }
+  },
+  "triageMultiSwitch": { "message": "Selecionar várias ao organizar" },
+  "triageMultiDesc": { "message": "Marque com as teclas numéricas e pressione Enter para confirmar e avançar." }
 }

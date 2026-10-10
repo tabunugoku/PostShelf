@@ -1603,5 +1603,7 @@
   },
   "listShowAll": {
     "message": "모두 표시"
-  }
+  },
+  "triageMultiSwitch": { "message": "분류할 때 여러 폴더 선택" },
+  "triageMultiDesc": { "message": "숫자 키로 표시하고 Enter로 확정한 뒤 다음으로 이동합니다." }
 }

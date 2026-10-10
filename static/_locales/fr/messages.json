@@ -1603,5 +1603,7 @@
   },
   "listShowAll": {
     "message": "Tout voir"
-  }
+  },
+  "triageMultiSwitch": { "message": "Choisir plusieurs dossiers lors du tri" },
+  "triageMultiDesc": { "message": "Marquez avec les touches numériques, puis appuyez sur Entrée pour confirmer et avancer." }
 }
