@@ -141,7 +141,22 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
-  const [dragOver, setDragOver] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState<{ id: string; kind: 'folder' | 'posts' } | null>(null);
+  // dragover 中は getData が保護されるため、同じ行へのドロップ判定には dragstart の ID を使う。
+  const draggedFolder = useRef<string | null>(null);
+  const clearDrag = () => {
+    draggedFolder.current = null;
+    setDragOver(null);
+  };
+  useEffect(() => {
+    const cancel = (e: KeyboardEvent) => { if (e.key === 'Escape') clearDrag(); };
+    document.addEventListener('dragend', clearDrag);
+    document.addEventListener('keydown', cancel);
+    return () => {
+      document.removeEventListener('dragend', clearDrag);
+      document.removeEventListener('keydown', cancel);
+    };
+  }, []);
   const [showHow, setShowHow] = useState(false);
   const [bannerOn, setBannerOn] = useState(false);
   /** 更新した直後の最初の起動だけ出すお知らせ (更新後のバージョン) */
@@ -493,7 +508,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const virtual = (id: string) => id === ALL_FOLDER_ID || id === RECENT_ID;
   const onFolderDrop = async (target: Folder, e: DragEvent) => {
     e.preventDefault();
-    setDragOver(null);
+    clearDrag();
     const posts = e.dataTransfer?.getData(MIME_POSTS);
     const dragged = e.dataTransfer?.getData(MIME_FOLDER);
     if (posts && !virtual(target.id)) {
@@ -526,23 +541,33 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     return (
       <div
         key={f.id}
-        class={`fr${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}${dragOver === f.id ? ' drop' : ''}`}
+        class={`fr${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}${dragOver?.id === f.id ? dragOver.kind === 'folder' ? ' drop-before' : ' drop' : ''}`}
         role="button"
         tabIndex={0}
         aria-current={f.id === curFolder.id && page === 'bookmarks' ? 'true' : undefined}
         title={virtual(f.id) ? undefined : t('dragHint')}
         draggable={reorderable && editing !== f.id}
         onDragStart={(e) => {
+          draggedFolder.current = f.id;
+          setDragOver(null);
           e.dataTransfer?.setData(MIME_FOLDER, f.id);
           if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
         }}
         onDragOver={(e) => {
-          if (!folderDroppable(f, e.dataTransfer?.types ?? [])) return;
+          const types = e.dataTransfer?.types ?? [];
+          const kind = types.includes(MIME_POSTS) ? 'posts' : 'folder';
+          if (!folderDroppable(f, types) || (kind === 'folder' && draggedFolder.current === f.id)) {
+            setDragOver(null);
+            return;
+          }
           e.preventDefault();
-          if (e.dataTransfer) e.dataTransfer.dropEffect = e.altKey ? 'move' : 'copy';
-          setDragOver(f.id);
+          if (e.dataTransfer) e.dataTransfer.dropEffect = kind === 'folder' || e.altKey ? 'move' : 'copy';
+          setDragOver({ id: f.id, kind });
         }}
-        onDragLeave={() => setDragOver((d) => (d === f.id ? null : d))}
+        onDragLeave={(e) => {
+          if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
+          setDragOver((d) => (d?.id === f.id ? null : d));
+        }}
         onDrop={(e) => void onFolderDrop(f, e)}
         onClick={() => chooseView(f.id)}
         onKeyDown={(e) => {
