@@ -72,6 +72,7 @@ button:disabled{cursor:not-allowed}
 .fr:hover:has(.more) .n,.fr:focus-within:has(.more) .n,.fr:has(.more [aria-expanded=true]) .n,
 .fr:hover:has(.more) .badge,.fr:focus-within:has(.more) .badge,.fr:has(.more [aria-expanded=true]) .badge{visibility:hidden}
 .fr .more-btn{width:32px;height:32px;min-height:32px}
+.fr .more-btn:hover{background:var(--fill-ghost-hover);text-decoration:none}
 .main{padding:16px 20px;min-width:0}
 
 /* ---- ヘッダー ---- */
