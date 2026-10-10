@@ -52,6 +52,14 @@ describe('紹介サイト', () => {
     dom.window.close();
   });
 
+  it('uses only sample account handles in the demo', () => {
+    const dom = page();
+    const handles = dom.window.document.querySelector('.demo')!.textContent!.match(/@[a-zA-Z0-9_]+/g)!;
+    expect(handles).toHaveLength(3);
+    for (const handle of handles) expect(handle).toMatch(/^@sample_/);
+    dom.window.close();
+  });
+
   it('hides sharing when neither browser API is available', () => {
     const dom = page();
     expect(dom.window.document.querySelector<HTMLButtonElement>('#share-link')?.hidden).toBe(true);

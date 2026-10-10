@@ -175,12 +175,25 @@ h1 em{font-style:normal;color:var(--fill)}
 @keyframes fly{0%,10%{transform:none;opacity:1}40%{transform:translate(-108%,var(--dy)) scale(.4);opacity:1}48%,100%{transform:translate(-108%,var(--dy)) scale(.15);opacity:0}}
 .bump{animation:bump 9s infinite}
 @keyframes bump{0%,32%{transform:none}42%{transform:scale(1.05)}56%,100%{transform:none}}
+.cap-small{display:none}
+@media(max-width:600px){
+  .win{flex-direction:column}
+  .win .side{width:auto;flex-direction:row;overflow-x:auto;padding:10px;gap:6px;border-right:0;border-bottom:1px solid var(--bd)}
+  .win .side .row{flex:none;white-space:nowrap;border:1px solid var(--bds);border-radius:999px}
+  .win .pane{min-height:0}
+  .fly,.bump{animation:none;transform:none;opacity:1}
+  .cap-wide{display:none}.cap-small{display:inline}
+}
 
 /* stats */
 .stats{display:flex;flex-wrap:wrap;gap:14px;padding-bottom:24px}
 .stat{flex:1 1 200px;border:1px solid var(--bd);background:var(--s1);border-radius:16px;padding:18px;text-align:center}
 .stat b{display:block;font-size:34px;line-height:1.25;color:var(--fill)}
 .stat>span{font-size:13px;color:var(--mu)}
+@media(max-width:600px){
+  .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat{padding:12px;border-radius:12px}.stat b{font-size:25px;color:var(--at)}.stat>span{font-size:12px}
+}
 
 /* sections */
 .sec{padding:80px 0}
@@ -300,12 +313,12 @@ footer p{max-width:46em}
       </div>
       <div class="pane">
         <div class="ttl"><span class="ja">すべて</span><span class="en">All</span> <small><span class="ja">8 件</span><span class="en">8 posts</span></small></div>
-        <div class="card fly" style="--dy:16px"><div class="p"><div class="av">DT</div><div><b>Dev Tips</b> <span style="color:var(--mu)">@devtips</span><br><span class="ja">Chrome 拡張の manifest v3 で service worker を長持ちさせる小技まとめ</span><span class="en">Small tricks to keep a service worker alive in a Chrome extension (manifest v3)</span></div></div><span class="tag"><i style="background:#378ADD"></i><span class="ja">開発ネタ</span><span class="en">Dev ideas</span></span></div>
-        <div class="card fly" style="--dy:-30px;animation-delay:1.6s"><div class="p"><div class="av">UI</div><div><b>UI Daily</b> <span style="color:var(--mu)">@uidaily</span><br><span class="ja">余白とタイポグラフィだけで画面が締まる理由</span><span class="en">Why spacing and typography alone can make a screen feel polished</span></div></div><span class="tag"><i style="background:#D4537E"></i><span class="ja">デザイン</span><span class="en">Design</span></span></div>
-        <div class="card fly" style="--dy:-60px;animation-delay:3.2s"><div class="p"><div class="av">MA</div><div><b>Maho</b> <span style="color:var(--mu)">@maho</span><br><span class="ja">長文スレッド: 個人開発で 3 年続けて学んだこと</span><span class="en">Long thread: what I learned from 3 years of solo development</span></div></div><span class="tag"><i style="background:#BA7517"></i><span class="ja">あとで読む</span><span class="en">Read later</span></span></div>
+        <div class="card fly" style="--dy:16px"><div class="p"><div class="av">DT</div><div><b>Dev Tips</b> <span style="color:var(--mu)">@sample_dev</span><br><span class="ja">Chrome 拡張の manifest v3 で service worker を長持ちさせる小技まとめ</span><span class="en">Small tricks to keep a service worker alive in a Chrome extension (manifest v3)</span></div></div><span class="tag"><i style="background:#378ADD"></i><span class="ja">開発ネタ</span><span class="en">Dev ideas</span></span></div>
+        <div class="card fly" style="--dy:-30px;animation-delay:1.6s"><div class="p"><div class="av">UI</div><div><b>UI Daily</b> <span style="color:var(--mu)">@sample_ui</span><br><span class="ja">余白とタイポグラフィだけで画面が締まる理由</span><span class="en">Why spacing and typography alone can make a screen feel polished</span></div></div><span class="tag"><i style="background:#D4537E"></i><span class="ja">デザイン</span><span class="en">Design</span></span></div>
+        <div class="card fly" style="--dy:-60px;animation-delay:3.2s"><div class="p"><div class="av">MA</div><div><b>Maho</b> <span style="color:var(--mu)">@sample_reader</span><br><span class="ja">長文スレッド: 個人開発で 3 年続けて学んだこと</span><span class="en">Long thread: what I learned from 3 years of solo development</span></div></div><span class="tag"><i style="background:#BA7517"></i><span class="ja">あとで読む</span><span class="en">Read later</span></span></div>
       </div>
     </div>
-    <p class="cap"><span class="ja">ポストが左のフォルダに収まっていきます (イメージ・架空のサンプル)</span><span class="en">Posts settle into the folders on the left (illustration, made-up samples)</span></p>
+    <p class="cap"><span class="cap-wide"><span class="ja">ポストが左のフォルダに収まっていきます (イメージ・架空のサンプル)</span><span class="en">Posts settle into the folders on the left (illustration, made-up samples)</span></span><span class="cap-small"><span class="ja">画面のイメージ (架空のサンプル)</span><span class="en">Illustration with made-up samples</span></span></p>
   </div>
 </div></section>
 
