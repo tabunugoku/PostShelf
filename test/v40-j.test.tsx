@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -10,8 +9,8 @@ import { installChromeMock, installPanelMock } from './chrome-mock';
 
 const flush = () => act(() => new Promise<void>(r => setTimeout(r, 30)));
 const row = (name: string) => [...document.querySelectorAll('.fr')].find(r => r.querySelector('.fr-name')?.textContent === name)!;
-const editor = () => document.querySelector<HTMLElement>('.folder-edit')!;
-const save = () => editor()?.querySelector<HTMLButtonElement>('button.primary')!;
+const editor = () => document.querySelector<HTMLElement>('.folder-editor-host')!;
+const save = () => editor()?.querySelector<HTMLButtonElement>('button[type=submit]')!;
 let folders: Folder[];
 beforeEach(async () => {
   installChromeMock();
@@ -82,7 +81,7 @@ it.each(['Escape', 'outside', 'other'])('discards the draft on %s and reopens th
   await open();
   expect(editor().querySelector<HTMLInputElement>('input')?.value).toBe('Sample A');
   expect(editor().querySelector('[data-icon="ti-folder"]')?.getAttribute('aria-pressed')).toBe('true');
-  expect(editor().querySelector('.sw-none')?.getAttribute('aria-pressed')).toBe('true');
+  expect(editor().querySelector('[data-color=""]')?.getAttribute('aria-pressed')).toBe('true');
 });
 
 it('closes unchanged drafts without a storage write', async () => {
@@ -98,7 +97,7 @@ it('saves only the changed fields on Enter and can clear a color', async () => {
   await flush();
   const update = vi.spyOn(storage, 'updateFolder');
   await open();
-  await click(editor().querySelector('.sw-none')!);
+  await click(editor().querySelector('[data-color=""]')!);
   await key('Enter');
   expect(update).toHaveBeenCalledExactlyOnceWith(folders[0].id, { color: null });
   expect((await stored()).color).toBeUndefined();
@@ -136,7 +135,7 @@ it('starts creation without writing and creates once with all draft values', asy
   expect(await storage.listFolders()).toHaveLength(3);
   expect(editor().querySelector<HTMLInputElement>('input')?.value).toBe('');
   expect(save().disabled).toBe(true);
-  expect(editor().querySelector('.danger')).toBeNull();
+  expect(editor().querySelector('.ti-trash')).toBeNull();
   await customize();
   expect(create).not.toHaveBeenCalled();
   await click(save());
@@ -180,22 +179,20 @@ it('discards edits when deleting and retains the confirmation flow', async () =>
   const update = vi.spyOn(storage, 'updateFolder');
   await open();
   await customize();
-  await click(editor().querySelector('.danger')!);
+  await click(editor().querySelector('[data-folder-actions] button:first-child')!);
   expect(update).not.toHaveBeenCalled();
   expect(editor()).toBeNull();
   expect(document.querySelector('[role=alertdialog]')).not.toBeNull();
   expect((await stored()).name).toBe('Sample A');
 });
 
-it('puts Delete at the left and Save last on a single action row', async () => {
+it('puts Delete at the left and adjacent Cancel/Save at the right on a single action row', async () => {
   await open();
   const actions = save().parentElement!;
-  expect(actions.classList.contains('erow')).toBe(true);
-  expect([...actions.querySelectorAll('button')].map(b => b.textContent?.trim())).toEqual([t('delete'), t('save')]);
-  const css = readFileSync('static/manager.css', 'utf8');
-  expect(css).toMatch(/\.folder-edit \.folder-actions\{[^}]*justify-content:flex-end/);
-  expect(css).toMatch(/\.folder-edit \.folder-actions\{[^}]*flex-wrap:nowrap/);
-  expect(css).toMatch(/\.folder-edit \.folder-actions > :first-child\{[^}]*margin-right:auto/);
+  expect([...actions.querySelectorAll('button')].map(b => b.textContent?.trim())).toEqual([t('delete'), t('cancel'), t('save')]);
+  expect(actions.style.justifyContent).toBe('flex-end');
+  expect(actions.style.flexWrap).toBe('nowrap');
+  expect(actions.querySelector('button')!.style.marginRight).toBe('auto');
 });
 
 it('allows only one save while pending', async () => {
@@ -247,22 +244,22 @@ it('also opens draft creation from the narrow folder menu', async () => {
   expect(document.querySelector('.folder-btn .fr-name')?.textContent).toBe('Sample Narrow');
 });
 
-it('puts Cancel before Save for creation and cancels without creating', async () => {
+it('puts Cancel before Create for creation and cancels without creating', async () => {
   const create = vi.spyOn(storage, 'createFolder');
   await click(newButton()); await name('Sample cancelled');
-  const buttons = [...editor().querySelectorAll<HTMLButtonElement>('.folder-actions button')];
-  expect(buttons.map(b => b.textContent?.trim())).toEqual([t('cancel'), t('save')]);
-  expect(editor().querySelector('.danger')).toBeNull();
+  const buttons = [...editor().querySelectorAll<HTMLButtonElement>('[data-folder-actions] button')];
+  expect(buttons.map(b => b.textContent?.trim())).toEqual([t('cancel'), t('create')]);
+  expect(editor().querySelector('.ti-trash')).toBeNull();
   await click(buttons[0]);
   expect(editor()).toBeNull(); expect(create).not.toHaveBeenCalled();
 });
-it('disables both Cancel and Save while creation is pending', async () => {
+it('disables both Cancel and Create while creation is pending', async () => {
   await click(newButton()); await name('Sample pending');
   const original = storage.createFolder; let finish!: () => void;
   const gate = new Promise<void>(r => { finish = r; });
   vi.spyOn(storage, 'createFolder').mockImplementation(async input => { await gate; return original(input); });
   await click(save());
-  const buttons = [...editor().querySelectorAll<HTMLButtonElement>('.folder-actions button')];
+  const buttons = [...editor().querySelectorAll<HTMLButtonElement>('[data-folder-actions] button')];
   expect(buttons).toHaveLength(2); expect(buttons.every(b => b.disabled)).toBe(true);
   await act(async () => { finish(); await gate; }); await flush();
   expect(editor()).toBeNull();

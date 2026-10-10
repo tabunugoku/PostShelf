@@ -12,14 +12,14 @@ const mount = async (icon = folder.icon) => {
   await act(() => void render(<FolderEdit folder={{ ...folder, icon }} onSaved={() => {}} />, document.querySelector('#app')!));
 };
 const click = async (el: Element) => act(() => void (el as HTMLElement).click());
-const more = () => document.querySelector<HTMLButtonElement>('.icon-more')!;
+const more = () => document.querySelector<HTMLButtonElement>('[data-icon-more]')!;
 beforeEach(() => { installChromeMock(); document.body.innerHTML = '<div id="app"></div>'; });
 afterEach(() => act(() => void render(null, document.querySelector('#app')!)));
 
 it('shows a square icon-only More control with its existing accessible name and title', async () => {
   await mount();
   expect(more().textContent).toBe('');
-  expect(more().classList.contains('ic')).toBe(true);
+  expect(more().style.aspectRatio).toBe('1');
   expect(more().querySelector('.ti-dots')).not.toBeNull();
   expect(more().getAttribute('aria-label')).toBe(t('iconMore'));
   expect(more().title).toBe(t('iconMore'));
@@ -47,14 +47,14 @@ it('shows and announces an already saved extra icon when opened', async () => {
   expect(more().querySelector('.ti-movie')).not.toBeNull();
   expect(more().getAttribute('aria-label')).toContain(iconLabel('ti-movie'));
 });
-it('keeps nine controls on a dedicated row, scales only this row and retains the menu width', async () => {
+it('keeps nine controls on a dedicated row, scales only this row and uses the shared menu width', async () => {
   await mount();
-  expect(document.querySelectorAll('.folder-icon-row > button')).toHaveLength(9);
-  expect(document.querySelector('.folder-icon-row')?.classList.contains('wrap')).toBe(false);
+  const row=document.querySelector<HTMLElement>('[data-main-icons]')!;
+  expect(row.querySelectorAll(':scope > button')).toHaveLength(9);
+  expect(row.style.display).toBe('grid'); expect(row.style.gridTemplateColumns).toMatch(/repeat\(9,\s*1fr\)/);
+  expect(more().style.aspectRatio).toBe('1');expect(more().style.width).toBe('100%');expect(more().style.minWidth).toBe('0');
+  expect(more().style.borderStyle).toBe('dashed');
   const css = readFileSync('static/manager.css', 'utf8');
-  expect(css).toMatch(/\.folder-edit \.folder-icon-row\{[^}]*grid-template-columns:[^}]*repeat\(9,/);
-  expect(css).toMatch(/\.folder-edit \.folder-icon-row \.ic\{[^}]*aspect-ratio:1/);
-  expect(css).toMatch(/\.folder-edit \.icon-more\{[^}]*border:[^}]*dashed/);
-  expect(css).toContain('.menu-edit{width:min(440px,calc(100vw - 16px));max-width:none}');
+  expect(css).toContain('.menu-wide{min-width:min(300px,calc(100vw - 16px));max-width:min(340px,calc(100vw - 16px))}');
   expect(readFileSync('node_modules/@tabler/icons-webfont/dist/tabler-icons.min.css', 'utf8')).toContain('.ti-dots:before');
 });

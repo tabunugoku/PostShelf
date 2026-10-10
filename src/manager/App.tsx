@@ -559,9 +559,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const editNode = (f: Folder) => {
     if (editing !== f.id) return null;
     return (
-      <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-edit">
+      <Dropdown fixed onClose={() => setEditing(null)} label={t('folderMore')} class="menu-wide menu-edit">
         <FolderEdit
           folder={f}
+          onCancel={() => setEditing(null)}
           existing={[inboxOf(folders), ...folders]}
           onSaved={() => { setEditing(null); void reload(); }}
           onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }}
@@ -645,7 +646,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setCreatingFolder(true);
   };
   const createNode = creatingFolder && (
-    <Dropdown fixed onClose={() => setCreatingFolder(false)} label={t('newFolder')} class="menu-edit">
+    <Dropdown fixed onClose={() => setCreatingFolder(false)} label={t('newFolder')} class="menu-wide menu-edit">
       <FolderEdit
         onCancel={() => setCreatingFolder(false)}
         existing={[inboxOf(folders), ...folders]}

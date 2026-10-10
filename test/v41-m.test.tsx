@@ -27,7 +27,7 @@ const mount = async (f = folder) => {
   await act(()=>void render(<FolderEdit folder={f} onSaved={saved} onRequestDelete={()=>{}} />,document.querySelector('#app')!)); await flush();
 };
 const click = async (el: Element) => {expect(el).not.toBeNull();await act(()=>void (el as HTMLElement).click());await flush();};
-const more = () => document.querySelector<HTMLButtonElement>('.icon-more')!;
+const more = () => document.querySelector<HTMLButtonElement>('[data-icon-more]')!;
 
 it('keeps the main eight, followed by the 36 additional icons without duplicates',()=>{
   expect(ICONS.slice(0,8)).toEqual(main);
@@ -41,37 +41,37 @@ it.each(['ja','en','zh_CN','zh_TW','ko','es','pt_BR','fr'])('names all extra ico
 });
 it('opens a 36-button grid, picks a draft icon, closes the grid and saves only on Save',async()=>{
   await mount(); const update=vi.spyOn(storage,'updateFolder');
-  expect(document.querySelectorAll('.folder-edit [data-icon]')).toHaveLength(8);
+  expect(document.querySelectorAll('[data-main-icons] [data-icon]')).toHaveLength(8);
   await click(more()); expect(more().getAttribute('aria-expanded')).toBe('true');
-  const grid=document.querySelector('.folder-icon-grid')!;
+  const grid=document.querySelector('[data-more-icons]')!;
   expect([...grid.querySelectorAll<HTMLElement>('button')].map(b=>b.dataset.icon)).toEqual(extra);
   for(const button of grid.querySelectorAll('button')){expect(button.getAttribute('aria-label')).toBeTruthy();expect(button.getAttribute('aria-pressed')).toBe('false');}
   await click(grid.querySelector('[data-icon="ti-cat"]')!);
-  expect(document.querySelector('.folder-icon-grid')).toBeNull();
+  expect(document.querySelector<HTMLElement>('[data-more-icons]')?.hidden).toBe(true);
   expect(more().getAttribute('aria-pressed')).toBe('true');
   expect(more().querySelector('.ti-cat')).not.toBeNull();
   expect(document.activeElement).toBe(more());
   expect(update).not.toHaveBeenCalled();expect((await storage.listFolders()).find(f=>f.id===folder.id)?.icon).toBe('ti-folder');
-  await click(document.querySelector('.folder-actions .primary')!);
+  await click(document.querySelector('[data-folder-actions] [type=submit]')!);
   expect(update).toHaveBeenCalledExactlyOnceWith(folder.id,{icon:'ti-cat'});expect(saved).toHaveBeenCalledOnce();
 });
 it('toggles More closed and retains the selected icon on reopening',async()=>{
   await mount({...folder,icon:'ti-movie'}); expect(more().getAttribute('aria-pressed')).toBe('true');
   expect(more().querySelector('.ti-movie')).not.toBeNull();
   await click(more());expect(document.querySelector('[data-icon="ti-movie"]')?.getAttribute('aria-pressed')).toBe('true');
-  await click(more());expect(document.querySelector('.folder-icon-grid')).toBeNull();
+  await click(more());expect(document.querySelector<HTMLElement>('[data-more-icons]')?.hidden).toBe(true);
   await click(document.querySelector('[data-icon="ti-star"]')!);expect(more().getAttribute('aria-pressed')).toBe('false');
   expect(document.querySelector('[data-icon="ti-star"]')?.getAttribute('aria-pressed')).toBe('true');
-  await click(document.querySelector('.primary')!);expect((await storage.listFolders()).find(f=>f.id===folder.id)?.icon).toBe('ti-star');
+  await click(document.querySelector('[type=submit]')!);expect((await storage.listFolders()).find(f=>f.id===folder.id)?.icon).toBe('ti-star');
 });
-it('saves a new folder with its drafted extra icon only on Save',async()=>{
+it('creates a new folder with its drafted extra icon only on Create',async()=>{
   await act(()=>void render(<FolderEdit onSaved={saved} />,document.querySelector('#app')!));await flush();
   const create=vi.spyOn(storage,'createFolder');
-  const input=document.querySelector<HTMLInputElement>('.folder-edit input')!;
+  const input=document.querySelector<HTMLInputElement>('.folder-editor-host input')!;
   await act(()=>{input.value='Sample new icon';input.dispatchEvent(new Event('input',{bubbles:true}));});
   await click(more()); await click(document.querySelector('[data-icon="ti-rocket"]')!);
   expect(create).not.toHaveBeenCalled();
-  await click(document.querySelector('.folder-actions .primary')!);
+  await click(document.querySelector('[data-folder-actions] [type=submit]')!);
   expect(create).toHaveBeenCalledExactlyOnceWith({name:'Sample new icon',icon:'ti-rocket',color:undefined});
   expect((await storage.listFolders()).find(f=>f.name==='Sample new icon')?.icon).toBe('ti-rocket');
 });
@@ -79,10 +79,11 @@ it('uses only icons available in the bundled Tabler font',()=>{
   const css=readFileSync('node_modules/@tabler/icons-webfont/dist/tabler-icons.min.css','utf8');
   for(const icon of extra)expect(css).toContain(`.${icon}:before`);
 });
-it('defines a nine-column grid and a dashed More button inside the editor',()=>{
-  const css=readFileSync('static/manager.css','utf8');
-  expect(css).toMatch(/\.folder-icon-grid\{[^}]*display:grid[^}]*grid-template-columns:repeat\(9,\s*(?:minmax\(0,\s*1fr\)|1fr)\)/);
-  expect(css).toMatch(/\.folder-edit \.icon-more\{[^}]*border[^}]*dashed/);
+it('defines a nine-column grid and a dashed More button inside the editor',async()=>{
+  await mount(); await click(more());
+  const grid=document.querySelector<HTMLElement>('[data-more-icons]')!;
+  expect(grid.style.display).toBe('grid');expect(grid.style.gridTemplateColumns).toMatch(/repeat\(9,\s*1fr\)/);
+  expect(more().style.borderStyle).toBe('dashed');
 });
 it('creates, updates and exports/imports every extra icon without changing its stored value',async()=>{
   const folders: Folder[]=[];

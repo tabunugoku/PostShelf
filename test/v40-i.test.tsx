@@ -23,7 +23,7 @@ it('offers folder editing without move-up or move-down actions', async () => {
   await act(() => new Promise<void>((r) => setTimeout(r, 40)));
   const row = [...document.querySelectorAll('.fr')].find(r => r.querySelector('.fr-name')?.textContent === 'Sample A')!;
   await act(() => void row.querySelector<HTMLButtonElement>('.more-btn')!.click());
-  expect(document.querySelector('.folder-edit')).not.toBeNull();
+  expect(document.querySelector('.folder-editor-host')).not.toBeNull();
   expect(document.querySelector('.folder-reorder')).toBeNull();
   expect(document.querySelector('[data-action^="folder-move-"]')).toBeNull();
 });

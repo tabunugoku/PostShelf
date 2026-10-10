@@ -3,6 +3,7 @@ import { render } from 'preact';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { COLORS, ICONS, colorLabel, iconLabel } from '../src/shared/models';
+import { t } from '../src/shared/strings';
 import { FolderEdit } from '../src/manager/FolderEdit';
 
 const L = ['ja', 'en', 'zh_CN', 'zh_TW', 'ko', 'es', 'pt_BR', 'fr'];
@@ -27,13 +28,18 @@ describe('v26-I: aria-labels of the icon and color buttons go through t()', () =
     }
   });
 
-  it('the manager folder editor labels its buttons with names', async () => {
+  it.each(L)('the manager folder editor labels every icon and color in %s', async (lang) => {
+    installChromeMock(lang);
     document.body.innerHTML = '<div id="app"></div>';
-    const folder = { id: 'f', name: 'x', icon: 'ti-folder', order: 0, accountId: 'me' };
+    const folder = { id: 'f', name: 'Sample folder', icon: 'ti-folder', order: 0, accountId: 'me' };
     await act(() => void render(<FolderEdit folder={folder} onSaved={() => {}} onRequestDelete={() => {}} />, document.getElementById('app')!));
-    const labels = [...document.querySelectorAll('.ic, .sw')].map((b) => b.getAttribute('aria-label'));
-    expect(labels.some((l) => /^ti-|^#/.test(l ?? ''))).toBe(false);
-    expect(labels).toContain('星');
-    expect(labels).toContain('赤');
+    const icons = [...document.querySelectorAll<HTMLElement>('[data-icon]')];
+    expect(icons).toHaveLength(ICONS.length);
+    expect(icons.map(b => b.getAttribute('aria-label'))).toEqual(ICONS.map(iconLabel));
+    const colors = [...document.querySelectorAll<HTMLElement>('[data-color]')];
+    expect(colors).toHaveLength(COLORS.length + 1);
+    expect(colors.slice(1).map(b => b.getAttribute('aria-label'))).toEqual(COLORS.map(colorLabel));
+    expect(colors[0].getAttribute('aria-label')).toBe(t('colorNone'));
+    await act(() => void render(null, document.getElementById('app')!));
   });
 });

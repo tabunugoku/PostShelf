@@ -170,7 +170,7 @@ describe('manager organizing', () => {
 
   it('deleting a folder from its edit popover uses the in-app confirm', async () => {
     await openEdit('Alpha');
-    await click($('.folder-edit .danger'));
+    await click($('.folder-editor-host [data-folder-actions] button:first-child'));
     expect($('[role=alertdialog]')).toBeTruthy();
     await click($$('.dialog-actions button')[1]);
     expect((await listFolders()).map((f) => f.id)).toEqual(['all', 'inbox', b]); // 所属が空になったポストの受け皿 (v18)
@@ -178,24 +178,24 @@ describe('manager organizing', () => {
 
   it('folder edit popover saves icon/color explicitly, clears color on Save, and saves the name on Enter', async () => {
     await openEdit('Alpha');
-    await click($('.folder-edit .ic[data-icon="ti-star"]'));
-    const sws = $$<HTMLButtonElement>('.folder-edit .sw');
+    await click($('.folder-editor-host [data-icon="ti-star"]'));
+    const sws = $$<HTMLButtonElement>('.folder-editor-host [data-color]');
     expect(sws.length).toBe(9); // 色なし + 8 色
     expect(sws.every((x) => !x.disabled)).toBe(true);
-    await click($('.folder-edit .sw[data-color="#378ADD"]'));
+    await click($('.folder-editor-host [data-color="#378ADD"]'));
     let f = (await listFolders()).find((x) => x.id === a)!;
     expect(f.icon).toBe('ti-folder');
     expect(f.color).toBeUndefined();
-    await click($('.folder-edit .primary'));
+    await click($('.folder-editor-host [type=submit]'));
     f = (await listFolders()).find((x) => x.id === a)!;
     expect(f).toMatchObject({ icon: 'ti-star', color: '#378ADD' });
     await openEdit('Alpha');
-    await click($('.folder-edit .sw-none'));
-    await click($('.folder-edit .primary'));
+    await click($('.folder-editor-host [data-color=""]'));
+    await click($('.folder-editor-host [type=submit]'));
     f = (await listFolders()).find((x) => x.id === a)!;
     expect(f.color).toBeUndefined();
     await openEdit('Alpha');
-    const input = $<HTMLInputElement>('.folder-edit input');
+    const input = $<HTMLInputElement>('.folder-editor-host input');
     await act(() => {
       input.value = 'Renamed';
       input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -245,7 +245,7 @@ describe('v7 manager layout', () => {
     expect(names).toEqual(['スマートビュー', 'フォルダ']);
     expect($$('.side .fr .fr-name').map((x) => x.textContent).slice(0, 3)).toEqual(['すべて', '未分類', '最近の 7 日']);
     await click($('.fr [aria-label="名前・アイコン・色を変更: Alpha"]')); // 「…」から編集ポップオーバー
-    expect($('.folder-edit')).toBeTruthy();
+    expect($('.folder-editor-host')).toBeTruthy();
     expect($$('[aria-label=編集]').length).toBe(0); // ヘッダーの編集パネルは廃止
     expect(folderRow('最近の 7 日').querySelector('.n')!.textContent).toBe('0'); // beforeEach の savedAt (1..4) は 7 日より前
     const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
