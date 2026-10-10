@@ -540,20 +540,36 @@ export function onFullTextRunChanged(cb: () => void): () => void {
 }
 
 /** 取得のために開いた裏のタブの記録 (閉じ忘れを、起動時に閉じるため) */
-export async function getFullTextTab(): Promise<number | null> {
+export async function getFullTextTab(): Promise<number[]> {
   const v = (await chrome.storage.local.get(FT_TAB_KEY))[FT_TAB_KEY];
-  return typeof v === 'number' ? v : null;
+  // 旧形式の数値 1 つ・null も読める。次の追加・削除で配列として保存する。
+  const ids = Array.isArray(v) ? v : typeof v === 'number' ? [v] : [];
+  return [...new Set(ids.filter((id): id is number => typeof id === 'number' && Number.isInteger(id) && id >= 0))];
 }
-export const setFullTextTab = (id: number | null): Promise<void> =>
-  id === null ? (chrome.storage.local.remove(FT_TAB_KEY) as Promise<void>) : chrome.storage.local.set({ [FT_TAB_KEY]: id });
+let tabQueue: Promise<unknown> = Promise.resolve();
+/** ID 1 つの追加 / 削除を直列化。他のワーカーの記録を消さない。 */
+export function setFullTextTab(id: number, present = true): Promise<void> {
+  const run = tabQueue.then(async () => {
+    const ids = await getFullTextTab();
+    const next = present ? [...new Set([...ids, id])] : ids.filter(x => x !== id);
+    await chrome.storage.local.set({ [FT_TAB_KEY]: next });
+  });
+  tabQueue = run.catch(() => {});
+  return run;
+}
 
 /** ポストごとの、最後に取りに行った時刻 (同じポストの再試行は 1 時間に 1 回まで)。古い記録は書くときに捨てる */
 export async function getFullTextTries(): Promise<Record<string, number>> {
   return ((await chrome.storage.local.get(FT_TRY_KEY))[FT_TRY_KEY] ?? {}) as Record<string, number>;
 }
-export async function recordFullTextTry(key: string, now: number, keepMs: number): Promise<void> {
-  const cur = await getFullTextTries();
-  const next = Object.fromEntries(Object.entries(cur).filter(([, t]) => now - t < keepMs));
-  next[key] = now;
-  await chrome.storage.local.set({ [FT_TRY_KEY]: next });
+let tryQueue: Promise<unknown> = Promise.resolve();
+export function recordFullTextTry(key: string, now: number, keepMs: number): Promise<void> {
+  const run = tryQueue.then(async () => {
+    const cur = await getFullTextTries();
+    const next = Object.fromEntries(Object.entries(cur).filter(([, t]) => now - t < keepMs));
+    next[key] = now;
+    await chrome.storage.local.set({ [FT_TRY_KEY]: next });
+  });
+  tryQueue = run.catch(() => {});
+  return run;
 }
