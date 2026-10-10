@@ -351,7 +351,7 @@ export function Triage(props: {
             <div class="dialog-actions triage-actions">
               <span class="muted triage-hint">{t(multi ? 'triageMultiDesc' : 'triageHint')}</span>
               <span class="grow" />
-              {multi && <button class="primary triage-confirm" aria-keyshortcuts="Enter" onClick={() => void confirm()}><kbd>Enter</kbd> {t('triageConfirm')}</button>}
+              {multi && <button class="primary triage-confirm" aria-keyshortcuts="Enter" onClick={() => void confirm()}>{t('triageConfirm')}</button>}
               <button disabled={step(index, -1) === null} aria-keyshortcuts="ArrowLeft" onClick={() => { if (!multi || !busy.current) back(); }}>
                 {t('triageBack')}
               </button>
