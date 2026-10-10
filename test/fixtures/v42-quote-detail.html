@@ -1,0 +1,16 @@
+<!-- 実機 (2026-10) の DOM を元にした骨組み。実機未確認の推測を含む。値はすべて架空。 -->
+<article data-testid="tweet" role="article">
+  <div data-testid="Tweet-User-Avatar"><div data-testid="UserAvatar-Container-sample_main"><a href="/sample_main"><img src="https://example.invalid/a1.jpg"></a></div></div>
+  <div data-testid="User-Name"><a href="/sample_main"><div dir="ltr"><span><span>Sample Main</span></span></div></a><div><a href="/sample_main" tabindex="-1"><div dir="ltr"><span>@sample_main</span></div></a></div></div>
+  <button data-testid="caret"></button>
+  <div dir="ltr"><svg viewBox="0 0 33 32"></svg><button aria-label="翻訳を表示"><span>翻訳を表示</span></button><button aria-label="自動翻訳について"></button></div>
+  <div dir="auto" lang="en" data-testid="tweetText"><span>Main body</span></div>
+  <div aria-labelledby="x y"><div><div dir="ltr"><span>引用</span></div>
+    <div role="link" tabindex="0">
+      <div data-testid="Tweet-User-Avatar"><div data-testid="UserAvatar-Container-sample_quote"><div aria-hidden="true" role="presentation"><img src="https://example.invalid/a2_normal.jpg"></div></div></div>
+      <div data-testid="User-Name"><div dir="ltr"><span><span>Sample Quote</span></span></div><div role="link" tabindex="0"><div><img src="https://example.invalid/badge.jpg"></div></div><div tabindex="-1"><div dir="ltr"><span>@sample_quote</span></div></div><span>·</span><div dir="ltr" aria-label="23 時間前"><time datetime="2026-10-09T19:17:26.000Z">23時間</time></div></div>
+      <div><div dir="ltr">返信先: <span>@sample_other</span>さん</div><div dir="auto" lang="en" data-testid="tweetText"><span>Quote body</span></div></div>
+    </div></div></div>
+  <div><a href="/sample_main/status/111"><time datetime="2026-10-10T09:52:19.000Z">午後6:52 · 2026年10月10日</time></a></div>
+  <div role="group"><button data-testid="reply"></button><button data-testid="bookmark"></button></div>
+</article>

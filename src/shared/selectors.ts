@@ -32,6 +32,14 @@ export const CANDIDATES = {
   statusLink: ['a[href*="/status/"]'],
   // 詳細ページの実機観測: 引用の time はこの入れ物の中。本体の time より先に現れる。
   quoteContainer: ['div[role="link"]'],
+  nestedQuote: ['[data-testid="nestedQuotePreview"]'],
+  // 引用内の写真リンクからだけ、引用元の ID を読む (time は a に包まれない)。
+  quotePhotoLink: ['a[href*="/status/"][href*="/photo/"]'],
+  quoteAvatarHandle: ['[data-testid^="UserAvatar-Container-"]'],
+  quoteMedia: ['[data-testid="tweetPhoto"] img'],
+  quoteVideo: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
+  quoteVideoPoster: ['video[poster]'],
+  translationVote: ['[data-testid="thumbsUpVoteButton"], [data-testid="thumbsDownVoteButton"]'],
   nameText: ['span'],
   bodyLink: ['a[href]'],
   avatar: ['[data-testid="Tweet-User-Avatar"] img', 'a[role="link"][href^="/"]:not([href*="/status/"]) img'],
@@ -40,7 +48,7 @@ export const CANDIDATES = {
   video: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
   // 動画のサムネイル (poster 属性)。実機未確認の推測
   videoPoster: ['[data-testid="videoPlayer"] video[poster]', 'video[poster]'],
-  // 長いポストのたたみ (「さらに表示」)。ポストのページへのリンクで、たたまれたポストにだけある。実機未確認の推測 (docs/MANUAL_TEST.md)。
+  // 長いポストのたたみ (「さらに表示」)。本文の後ろのボタンで、たたまれたポストにだけある (2026-10 の実機観測)。
   // 候補が 1 つだけ: data-testid 以外に目印が無い (文言は表示言語で変わる)
   showMore: ['[data-testid="tweet-text-show-more-link"]'],
   // 候補が 1 つだけ: リンクカードは data-testid 以外に目印が無い
@@ -103,6 +111,34 @@ export function queryAllFirst<T extends Element = Element>(root: ParentNode, key
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
+}
+
+/** 引用の帯には data-testid もボタンも無いので構造で見分ける。壊れやすい (実機の観測のみ)。 */
+export function isTranslatedQuoteText(text: Element): boolean {
+  const band = text.previousElementSibling;
+  return !!band?.querySelector('svg') && !band.querySelector('button');
+}
+
+/** User-Name または動画を含む最も外側の入れ物。所属バッジの role=link は引用にしない (2026-10 の実機観測)。 */
+export function findQuote(article: Element): Element | null {
+  const containers = queryAllFirst(article, 'quoteContainer').els.filter(el => !closestFirst(el, 'nestedQuote'));
+  return containers.find((el) => (queryFirstInQuote(el, 'userName') || queryFirstInQuote(el, 'quoteVideo')) && !containers.some((parent) => parent !== el && parent.contains(el))) ?? null;
+}
+
+/** 引用の引用を除いてから候補の優先順を判定する。入れ子自身も対象にしない。 */
+export function queryAllInQuote<T extends Element = Element>(root: Element, key: SelKey): FoundAll<T> {
+  const list = CANDIDATES[key];
+  for (let i = 0; i < list.length; i++) {
+    const els = [...root.querySelectorAll<T>(list[i])].filter(el => !closestFirst(el, 'nestedQuote'));
+    if (els.length) return { els, index: i };
+  }
+  return { els: [], index: -1 };
+}
+
+/** 外側の引用に属する最初の要素。 */
+export function queryFirstInQuote<T extends Element = Element>(root: Element, key: SelKey): Found<T> | null {
+  const { els, index } = queryAllInQuote<T>(root, key);
+  return els.length ? { el: els[0], index } : null;
 }
 
 /** 引用の中の候補を除いてから優先順を判定する。本体の候補が無ければ次の構造的な候補を試す。 */

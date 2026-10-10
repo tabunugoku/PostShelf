@@ -7,6 +7,9 @@ import type { ViewMode } from '../shared/settings';
 import { Dropdown } from './ui';
 import { MediaImg } from './MediaImg';
 import { PostText } from './PostText';
+import { QuoteBlock } from './QuoteBlock';
+import { VideoTileContent } from './VideoTile';
+import { MediaGrid } from './MediaGrid';
 import type { Snapshot } from '../shared/models';
 
 /**
@@ -161,13 +164,9 @@ function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: nu
       {props.kind === 'image' ? (
         <MediaImg tweetId={card.b.tweetId} name={String(i + 1)} src={s.media[i]} alt="" loading="lazy" />
       ) : (
-        <>
+        <VideoTileContent>
           {s.videoPoster && <MediaImg tweetId={card.b.tweetId} name="video-thumb" src={s.videoPoster} alt="" loading="lazy" />}
-          <span class="play" aria-hidden="true" />
-          <span class="badge" role="img" aria-label={t('videoBadge')}>
-            <Icon name="ti-video" /> {t('videoBadge')}
-          </span>
-        </>
+        </VideoTileContent>
       )}
       {props.kind === 'image' && !card.selectionActive && <span class="hint">{t('zoomHint')}</span>}
       {props.countBadge && (props.total ?? 0) >= 2 && !card.b.snapshot.hasVideo && (
@@ -322,16 +321,17 @@ function CardView(outer: CardOuterProps) {
           {s.createdAt && <span class="muted"> · {formatDate(s.createdAt)}</span>}
         </div>
         <PostText s={s} />
+        {s.quote && <QuoteBlock quote={s.quote} tweetId={b.tweetId} />}
         {s.hasVideo === true ? (
-          <div class="media m1">
+          <MediaGrid count={1}>
             <MediaTile card={props} kind="video" />
-          </div>
+          </MediaGrid>
         ) : s.media.length > 0 ? (
-          <div class={`media m${Math.min(s.media.length, 4)}`}>
+          <MediaGrid count={s.media.length}>
             {s.media.slice(0, 4).map((_, i) => (
               <MediaTile card={props} kind="image" index={i} total={s.media.length} extra={i === 3 && s.media.length > 4 ? s.media.length - 4 : 0} />
             ))}
-          </div>
+          </MediaGrid>
         ) : null}
         <FolderChips b={b} folderOf={props.folderOf} removable onRemove={props.onRemoveFromFolder} />
       </div>

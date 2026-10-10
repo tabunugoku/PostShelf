@@ -36,7 +36,26 @@ export const accountIdOf = (handle: string): string => handle.replace(/^@/, '').
 export const accountLabel = (a: Pick<Account, 'id' | 'handle'>): string =>
   a.id === UNKNOWN_ACCOUNT_ID ? t('accountUnknownName') : `@${a.handle}`;
 
+/** 見えていた範囲を、そのまま保存する。本文は X の側で途中までのことがあり、翻訳後の文のこともある。 */
+export interface QuoteSnapshot {
+  author: string;
+  handle: string;
+  avatar?: string;
+  text: string;
+  segments?: Segment[];
+  media: string[];
+  createdAt?: string;
+  url?: string;
+  translated?: true;
+  /** 引用の動画は再生せず、サムネイルと印だけを保存する。 */
+  hasVideo?: true;
+  videoPoster?: string;
+}
+
 export interface Snapshot {
+  quote?: QuoteSnapshot;
+  /** 画面の本文が翻訳後のものだった場合だけ true。原文は取らない。 */
+  translated?: true;
   text: string;
   author: string;
   handle: string;

@@ -1638,5 +1638,8 @@
   "iconWorld": { "message": "地球" },
   "iconTicket": { "message": "票券" },
   "iconPlanet": { "message": "行星" },
-  "iconMore": { "message": "更多" }
+  "iconMore": { "message": "更多" },
+  "translatedBadge": { "message": "已翻譯" },
+  "quoteLabel": { "message": "引用" },
+  "quoteAsSeen": { "message": "依 X 上顯示的內容儲存" }
 }

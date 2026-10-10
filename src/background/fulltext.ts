@@ -31,7 +31,7 @@ export interface FullTextItem {
   accountId: string;
   tweetId: string;
 }
-export type AskResult = { ok: true; text: string; segments?: Segment[] } | { ok: false; reason: 'wait' | 'limit' };
+export type AskResult = { ok: true; text: string; segments?: Segment[]; translated?: true } | { ok: false; reason: 'wait' | 'limit' };
 
 export interface FullTextDeps {
   now(): number;
@@ -44,7 +44,7 @@ export interface FullTextDeps {
   enabled(): Promise<boolean>;
   collectActive(): Promise<boolean>;
   lookup(item: FullTextItem): Promise<Bookmark | undefined>;
-  refresh(item: FullTextItem, full: { text: string; segments?: Segment[] }): Promise<boolean>;
+  refresh(item: FullTextItem, full: { text: string; segments?: Segment[]; translated?: true }): Promise<boolean>;
   tries(): Promise<Record<string, number>>;
   recordTry(key: string, now: number): Promise<void>;
   saveRun(r: FullTextRun): Promise<void>;
@@ -198,7 +198,7 @@ export class FullTextQueue {
         try {
           const r = await this.d.ask(tab, item.tweetId);
           if (r?.ok) {
-            if (await this.d.refresh(item, { text: r.text, segments: r.segments })) return 'ok';
+            if (await this.d.refresh(item, { text: r.text, segments: r.segments, ...(r.translated === true ? { translated: true } : {}) })) return 'ok';
             // 更新されなかった: 裏のタブの content script が先に更新した / すでにたたまれていない / 削除済み、なら失敗ではない
             return (await this.d.lookup(item)) ? 'fail' : 'skip';
           }

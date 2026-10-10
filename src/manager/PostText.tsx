@@ -30,7 +30,7 @@ function marked(text: string, ranges: [number, number][]) {
   return out;
 }
 
-export function PostText({ s, class: cls = 'text' }: { s: Snapshot; class?: string }) {
+export function PostText({ s, class: cls = 'text' }: { s: Pick<Snapshot, 'text' | 'segments' | 'translated'> & Partial<Pick<Snapshot, 'truncated' | 'url'>>; class?: string }) {
   const [open, setOpen] = useState(false);
   const [overflow, setOverflow] = useState<boolean | null>(null);
   const box = useRef<HTMLDivElement>(null);
@@ -50,6 +50,7 @@ export function PostText({ s, class: cls = 'text' }: { s: Snapshot; class?: stri
   const toggle = open || (overflow ?? looksLong(s.text));
   return (
     <div class="post-text">
+      {s.translated === true && <span class="translated-badge">{t('translatedBadge')}</span>}
       <div ref={box} id={id} class={`${cls}${open ? '' : ' clamp'}`}>
         {(() => {
           const parts = segmentsOf(s);

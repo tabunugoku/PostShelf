@@ -20,7 +20,7 @@ export async function updateFromStatusPage(): Promise<boolean> {
   const ex = article ? extractTweet(article) : null;
   if (!ex || ex.snapshot.truncated || !ex.snapshot.text) return false; // まだ読み込み中、または、このページでもたたまれている
   checked.add(`${account.id}:${id}`);
-  return refreshFullText(account.id, id, { text: ex.snapshot.text, segments: ex.snapshot.segments }).catch(() => false);
+  return refreshFullText(account.id, id, { text: ex.snapshot.text, segments: ex.snapshot.segments, ...(ex.snapshot.translated ? { translated: true } : {}) }).catch(() => false);
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined;

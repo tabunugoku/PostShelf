@@ -1,0 +1,15 @@
+<!-- 実機 (2026-10) の DOM を元にした骨組み。実機未確認の推測を含む。値はすべて架空。 -->
+<article data-testid="tweet" role="article">
+  <div data-testid="Tweet-User-Avatar"><div data-testid="UserAvatar-Container-sample_main"><a href="/sample_main"><img src="https://example.invalid/a1.jpg"></a></div></div>
+  <div data-testid="User-Name"><a href="/sample_main"><div dir="ltr"><span><span>Sample Main</span></span></div></a><div><a href="/sample_main" tabindex="-1"><div dir="ltr"><span>@sample_main</span></div></a></div></div>
+  <a href="/sample_main/status/222"><time datetime="2026-10-10T10:57:28.000Z">8時間</time></a>
+  <div dir="ltr"><svg viewBox="0 0 33 32"></svg><button aria-label="翻訳を表示"><span>翻訳を表示</span></button><button aria-label="自動翻訳について"></button></div>
+  <div dir="auto" lang="zh" data-testid="tweetText"><span>Main body</span></div><button data-testid="tweet-text-show-more-link"><span>さらに表示</span></button>
+  <div aria-labelledby="x y"><div><div dir="ltr"><span>引用</span></div>
+    <div role="link" tabindex="0">
+      <div data-testid="Tweet-User-Avatar"><div data-testid="UserAvatar-Container-sample_quote"><div aria-hidden="true" role="presentation"><img src="https://example.invalid/a2_normal.jpg"></div></div></div>
+      <div data-testid="User-Name"><div dir="ltr"><span><span>Sample Quote</span></span></div><div role="link" tabindex="0"><div><img src="https://example.invalid/badge.jpg"></div></div><div tabindex="-1"><div dir="ltr"><span>@sample_quote</span></div></div><span>·</span><div dir="ltr" aria-label="23 時間前"><time datetime="2026-10-10T05:39:53.000Z">23時間</time></div></div>
+      <div><div dir="ltr">返信先: <span>@sample_other</span>さん</div><div dir="ltr"><svg viewBox="0 0 33 32"></svg><span>中国語からの翻訳</span></div><div dir="auto" lang="ja" data-testid="tweetText"><span>引用の翻訳後の本文</span></div><div><a href="/sample_quote/status/333/photo/1" role="link"><div data-testid="tweetPhoto" aria-label="画像"><div style="background-image:url(&quot;https://example.invalid/media/q1?format=jpg&amp;name=900x900&quot;)"></div><img alt="画像" src="https://example.invalid/media/q1?format=jpg&amp;name=900x900"></div></a></div></div>
+    </div></div></div>
+  <div role="group"><button data-testid="reply"></button><button data-testid="bookmark"></button></div>
+</article>
