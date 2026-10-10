@@ -67,6 +67,44 @@ describe('紹介サイト', () => {
     dom.window.close();
   });
 
+  it('labels all 30 comparison values, using the selected language from the column headings', () => {
+    const dom = page(), d = dom.window.document;
+    const cells = d.querySelectorAll('#compare td');
+    expect(cells).toHaveLength(30);
+    for (const lang of ['ja', 'en']) {
+      d.querySelector<HTMLButtonElement>(`#l-${lang}`)!.click();
+      const headings = d.querySelectorAll('#compare thead th');
+      for (const row of d.querySelectorAll('#compare tbody tr')) {
+        [...row.querySelectorAll('td')].forEach((cell, i) => {
+          expect(cell.hasAttribute('data-label')).toBe(true);
+          const heading = headings[i + 1];
+          expect(cell.getAttribute('data-label')).toBe((heading.querySelector(`.${lang}`) ?? heading).textContent!.trim());
+        });
+      }
+    }
+    dom.window.close();
+  });
+
+  it('expands and collapses six comparison items without duplicating any values', () => {
+    const dom = page(), d = dom.window.document;
+    const section = d.getElementById('compare')!, button = d.querySelector<HTMLButtonElement>('.compare-toggle')!;
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(section.hasAttribute('data-collapsible')).toBe(true);
+    expect(section.hasAttribute('data-expanded')).toBe(false);
+    expect(button.getAttribute('aria-controls')).toBe(d.querySelector('tbody')?.id);
+    const values = [...section.querySelectorAll('td')].map(c => c.textContent);
+    button.click();
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(section.hasAttribute('data-expanded')).toBe(true);
+    expect(button.querySelector<HTMLElement>('.less-label')?.hidden).toBe(false);
+    button.click();
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(section.hasAttribute('data-expanded')).toBe(false);
+    expect(button.querySelector<HTMLElement>('.more-label')?.hidden).toBe(false);
+    expect([...section.querySelectorAll('td')].map(c => c.textContent)).toEqual(values);
+    dom.window.close();
+  });
+
   it('hides sharing when neither browser API is available', () => {
     const dom = page();
     expect(dom.window.document.querySelector<HTMLButtonElement>('#share-link')?.hidden).toBe(true);

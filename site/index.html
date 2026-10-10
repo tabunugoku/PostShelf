@@ -66,6 +66,17 @@
     m('meta[property="og:locale"]',t.loc);m('meta[property="og:locale:alternate"]',t.alt2);
     var a=d.querySelectorAll('[data-aria-ja]');
     for(var i=0;i<a.length;i++)a[i].setAttribute('aria-label',a[i].getAttribute('data-aria-'+lg));
+    var table=d.querySelector('#compare table');
+    if(table){
+      var headings=table.querySelectorAll('thead th'),rows=table.querySelectorAll('tbody tr');
+      for(var r=0;r<rows.length;r++){
+        var cells=rows[r].querySelectorAll('td');
+        for(var c=0;c<cells.length;c++){
+          var heading=headings[c+1],translated=heading.querySelector('.'+lg);
+          cells[c].setAttribute('data-label',(translated||heading).textContent.trim());
+        }
+      }
+    }
   }
   window.psSetLang=function(lg){
     try{localStorage.setItem('ps-lang',lg)}catch(e){}
@@ -245,6 +256,21 @@ th.me,td.me{background:var(--bgacc)}
 th.me{color:var(--at)}td.me{font-weight:700}
 tbody th{font-weight:400;color:var(--mu)}
 .src{margin-top:12px;font-size:12.5px;line-height:1.7;color:var(--mu)}
+.compare-toggle{display:none}
+@media(max-width:600px){
+  .tw{overflow:visible;border:0;border-radius:0;background:transparent}
+  .tw table{display:block;min-width:0}
+  .tw thead{display:none}.tw tbody{display:grid;gap:12px}
+  .tw tr{display:block;border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--bg)}
+  .tw tbody th{display:block;padding:12px;font-weight:700;color:var(--fg);background:var(--s1);border-top:0;border-bottom:1px solid var(--bd)}
+  .tw td{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px;padding:10px 12px}
+  .tw tbody th+td{border-top:0}
+  .tw td:before{content:attr(data-label);color:var(--mu);font-weight:600}
+  .tw td.me:before{color:var(--at)}
+  .tw td>span{grid-column:2;min-width:0;overflow-wrap:anywhere}
+  #compare[data-collapsible]:not([data-expanded]) tbody tr:nth-child(n+5){display:none}
+  .compare-toggle:not([hidden]){display:inline-flex;width:100%;margin-top:14px}
+}
 
 /* author */
 .au{border:1px solid var(--bd);background:var(--s1);border-radius:20px;padding:28px;display:flex;flex-wrap:wrap;gap:24px;align-items:center}
@@ -399,23 +425,27 @@ footer p{max-width:46em}
   <div class="kick">COMPARISON</div>
   <h2><span class="ja">ほかのツールとの比較</span><span class="en">Compared with other tools</span></h2>
   <p class="sub"><span class="ja">得意なことも、苦手なことも、そのまま書きます。2026-10-08 時点で、各ツールの公開ページに書かれていた内容に基づきます。</span><span class="en">What it does well and what it does not, stated plainly. Based on what each tool's public pages said as of 2026-10-08.</span></p>
-  <div class="tw" role="region" data-aria-ja="比較表 (横にスクロールできます)" data-aria-en="Comparison table (scrolls sideways)" aria-label="Comparison table (scrolls sideways)" tabindex="0">
-  <table>
+  <div class="tw" role="region" data-aria-ja="比較表" data-aria-en="Comparison table" aria-label="Comparison table" tabindex="0">
+  <table role="table">
     <thead><tr><th></th><th class="me">PostShelf</th><th><span class="ja">小さなローカル型</span><span class="en">Small local tools</span></th><th><span class="ja">クラウド型</span><span class="en">Cloud services</span></th></tr></thead>
-    <tbody>
-      <tr><th scope="row"><span class="ja">価格</span><span class="en">Price</span></th><td class="me"><span class="ja">無料、件数の上限なし</span><span class="en">Free, no limit on posts</span></td><td><span class="ja">無料が中心</span><span class="en">Mostly free</span></td><td><span class="ja">無料枠に上限あり。有料プランあり</span><span class="en">Free tier has limits; paid plans exist</span></td></tr>
-      <tr><th scope="row"><span class="ja">データの置き場所</span><span class="en">Where data lives</span></th><td class="me"><span class="ja">端末の中だけ</span><span class="en">Only on your device</span></td><td><span class="ja">端末の中が中心</span><span class="en">Mostly on your device</span></td><td><span class="ja">クラウド、アカウントが必要</span><span class="en">In the cloud; an account is required</span></td></tr>
-      <tr><th scope="row"><span class="ja">フォルダの名前・アイコン・色</span><span class="en">Folder name, icon and color</span></th><td class="me"><span class="ja">すべて自由</span><span class="en">All free to choose</span></td><td><span class="ja">名前が中心 (記載なし)</span><span class="en">Mainly names (not stated)</span></td><td><span class="ja">フォルダ・タグ (アイコンや色は記載なし)</span><span class="en">Folders and tags (icons and colors not stated)</span></td></tr>
-      <tr><th scope="row"><span class="ja">1 ポストを複数フォルダに</span><span class="en">One post in several folders</span></th><td class="me"><span class="ja">できる</span><span class="en">Yes</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">ツールによる</span><span class="en">Depends on the tool</span></td></tr>
-      <tr><th scope="row"><span class="ja">複数の X アカウント</span><span class="en">Multiple X accounts</span></th><td class="me"><span class="ja">アカウントごとに分けて管理</span><span class="en">Kept separately per account</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">プランにより上限</span><span class="en">Limited by plan</span></td></tr>
-      <tr><th scope="row"><span class="ja">クラウド同期・モバイル・AI</span><span class="en">Cloud sync, mobile, AI</span></th><td class="me"><span class="ja">ない</span><span class="en">None</span></td><td><span class="ja">記載なし</span><span class="en">Not stated</span></td><td><span class="ja">ある (一部は有料)</span><span class="en">Yes (some are paid)</span></td></tr>
-      <tr><th scope="row"><span class="ja">書き出し形式</span><span class="en">Export formats</span></th><td class="me"><span class="ja">JSON のみ</span><span class="en">JSON only</span></td><td><span class="ja">JSON / CSV など</span><span class="en">JSON / CSV and others</span></td><td><span class="ja">CSV / PDF / Notion ほか</span><span class="en">CSV / PDF / Notion and others</span></td></tr>
-      <tr><th scope="row"><span class="ja">過去のブックマークの取り込み</span><span class="en">Importing old bookmarks</span></th><td class="me"><span class="ja">自動取り込み (任意、1 回の上限あり)</span><span class="en">Automatic import (optional, with a per-run limit)</span></td><td><span class="ja">自動スクロール型もあり</span><span class="en">Some use auto-scrolling</span></td><td><span class="ja">全件の取り込みに対応するものが多い</span><span class="en">Many can import everything</span></td></tr>
-      <tr><th scope="row"><span class="ja">配布方法</span><span class="en">Distribution</span></th><td class="me"><span class="ja">手動インストール (Chrome 114+ のみ)</span><span class="en">Manual install (Chrome 114+ only)</span></td><td><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td><td><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td></tr>
-      <tr><th scope="row"><span class="ja">ソースコード</span><span class="en">Source code</span></th><td class="me"><span class="ja">MIT で公開</span><span class="en">Public under MIT</span></td><td><span class="ja">記載なしが多い</span><span class="en">Often not stated</span></td><td><span class="ja">公開の記載なし</span><span class="en">No public source stated</span></td></tr>
+    <tbody id="comparison-rows">
+      <tr><th scope="row"><span class="ja">価格</span><span class="en">Price</span></th><td class="me" data-label="PostShelf"><span class="ja">無料、件数の上限なし</span><span class="en">Free, no limit on posts</span></td><td data-label="Small local tools"><span class="ja">無料が中心</span><span class="en">Mostly free</span></td><td data-label="Cloud services"><span class="ja">無料枠に上限あり。有料プランあり</span><span class="en">Free tier has limits; paid plans exist</span></td></tr>
+      <tr><th scope="row"><span class="ja">データの置き場所</span><span class="en">Where data lives</span></th><td class="me" data-label="PostShelf"><span class="ja">端末の中だけ</span><span class="en">Only on your device</span></td><td data-label="Small local tools"><span class="ja">端末の中が中心</span><span class="en">Mostly on your device</span></td><td data-label="Cloud services"><span class="ja">クラウド、アカウントが必要</span><span class="en">In the cloud; an account is required</span></td></tr>
+      <tr><th scope="row"><span class="ja">フォルダの名前・アイコン・色</span><span class="en">Folder name, icon and color</span></th><td class="me" data-label="PostShelf"><span class="ja">すべて自由</span><span class="en">All free to choose</span></td><td data-label="Small local tools"><span class="ja">名前が中心 (記載なし)</span><span class="en">Mainly names (not stated)</span></td><td data-label="Cloud services"><span class="ja">フォルダ・タグ (アイコンや色は記載なし)</span><span class="en">Folders and tags (icons and colors not stated)</span></td></tr>
+      <tr><th scope="row"><span class="ja">1 ポストを複数フォルダに</span><span class="en">One post in several folders</span></th><td class="me" data-label="PostShelf"><span class="ja">できる</span><span class="en">Yes</span></td><td data-label="Small local tools"><span class="ja">記載なし</span><span class="en">Not stated</span></td><td data-label="Cloud services"><span class="ja">ツールによる</span><span class="en">Depends on the tool</span></td></tr>
+      <tr><th scope="row"><span class="ja">複数の X アカウント</span><span class="en">Multiple X accounts</span></th><td class="me" data-label="PostShelf"><span class="ja">アカウントごとに分けて管理</span><span class="en">Kept separately per account</span></td><td data-label="Small local tools"><span class="ja">記載なし</span><span class="en">Not stated</span></td><td data-label="Cloud services"><span class="ja">プランにより上限</span><span class="en">Limited by plan</span></td></tr>
+      <tr><th scope="row"><span class="ja">クラウド同期・モバイル・AI</span><span class="en">Cloud sync, mobile, AI</span></th><td class="me" data-label="PostShelf"><span class="ja">ない</span><span class="en">None</span></td><td data-label="Small local tools"><span class="ja">記載なし</span><span class="en">Not stated</span></td><td data-label="Cloud services"><span class="ja">ある (一部は有料)</span><span class="en">Yes (some are paid)</span></td></tr>
+      <tr><th scope="row"><span class="ja">書き出し形式</span><span class="en">Export formats</span></th><td class="me" data-label="PostShelf"><span class="ja">JSON のみ</span><span class="en">JSON only</span></td><td data-label="Small local tools"><span class="ja">JSON / CSV など</span><span class="en">JSON / CSV and others</span></td><td data-label="Cloud services"><span class="ja">CSV / PDF / Notion ほか</span><span class="en">CSV / PDF / Notion and others</span></td></tr>
+      <tr><th scope="row"><span class="ja">過去のブックマークの取り込み</span><span class="en">Importing old bookmarks</span></th><td class="me" data-label="PostShelf"><span class="ja">自動取り込み (任意、1 回の上限あり)</span><span class="en">Automatic import (optional, with a per-run limit)</span></td><td data-label="Small local tools"><span class="ja">自動スクロール型もあり</span><span class="en">Some use auto-scrolling</span></td><td data-label="Cloud services"><span class="ja">全件の取り込みに対応するものが多い</span><span class="en">Many can import everything</span></td></tr>
+      <tr><th scope="row"><span class="ja">配布方法</span><span class="en">Distribution</span></th><td class="me" data-label="PostShelf"><span class="ja">手動インストール (Chrome 114+ のみ)</span><span class="en">Manual install (Chrome 114+ only)</span></td><td data-label="Small local tools"><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td><td data-label="Cloud services"><span class="ja">Chrome ウェブストアが中心</span><span class="en">Mostly the Chrome Web Store</span></td></tr>
+      <tr><th scope="row"><span class="ja">ソースコード</span><span class="en">Source code</span></th><td class="me" data-label="PostShelf"><span class="ja">MIT で公開</span><span class="en">Public under MIT</span></td><td data-label="Small local tools"><span class="ja">記載なしが多い</span><span class="en">Often not stated</span></td><td data-label="Cloud services"><span class="ja">公開の記載なし</span><span class="en">No public source stated</span></td></tr>
     </tbody>
   </table>
   </div>
+  <button class="btn compare-toggle" type="button" aria-expanded="false" aria-controls="comparison-rows" hidden>
+    <span class="more-label"><span class="ja">残りの 6 項目を見る</span><span class="en">Show 6 more</span></span>
+    <span class="less-label" hidden><span class="ja">たたむ</span><span class="en">Show less</span></span>
+  </button>
   <p class="src"><span class="ja">「記載なし」は、公開ページに書かれていなかったという意味で、機能がないことの証明ではありません。小さなローカル型は ufofo、XOrganize など、クラウド型は Dewey、Tweetsmash などを指します。X の仕様や各ツールの内容は変わります。</span><span class="en">"Not stated" means the public pages did not mention it; it does not prove the feature is missing. Small local tools means ufofo, XOrganize and similar; cloud services means Dewey, Tweetsmash and similar. X and these tools change over time.</span></p>
 </div></section>
 
@@ -466,6 +496,17 @@ footer p{max-width:46em}
       }
     }catch(e){/* Cancellation or denied access leaves the original label available to retry. */}
     finally{button.disabled=false}
+  });
+})();
+(function(){
+  var section=document.getElementById('compare'),button=section.querySelector('.compare-toggle');
+  section.setAttribute('data-collapsible','');button.hidden=false;
+  button.addEventListener('click',function(){
+    var expanded=button.getAttribute('aria-expanded')!=='true';
+    button.setAttribute('aria-expanded',String(expanded));
+    if(expanded)section.setAttribute('data-expanded','');else section.removeAttribute('data-expanded');
+    button.querySelector('.more-label').hidden=expanded;
+    button.querySelector('.less-label').hidden=!expanded;
   });
 })();
 </script>
