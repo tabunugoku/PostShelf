@@ -179,6 +179,28 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewRef = useRef(UNKNOWN_ACCOUNT_ID);
   const lastRef = useRef<Account | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const chipsRef = useRef<HTMLDivElement>(null);
+  const [splitFilters, setSplitFilters] = useState(false);
+  const [toolbarOffset, setToolbarOffset] = useState(140);
+  useLayoutEffect(() => {
+    if (!ready || compact || page !== 'bookmarks') return;
+    const measure = () => {
+      const topHeight = topRef.current?.getBoundingClientRect().height ?? 0;
+      const filtersHeight = chipsRef.current?.getBoundingClientRect().height ?? 0;
+      // バーの上余白 8px + 行間 12px。小さい画面ではフィルタだけ固定を解く。
+      const combined = topHeight + filtersHeight + 20;
+      const split = combined > window.innerHeight / 2;
+      setSplitFilters(split);
+      setToolbarOffset(Math.ceil((split ? topHeight + 8 : combined) + 8));
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    if (topRef.current) observer?.observe(topRef.current);
+    if (chipsRef.current) observer?.observe(chipsRef.current);
+    window.addEventListener('resize', measure);
+    return () => { observer?.disconnect(); window.removeEventListener('resize', measure); };
+  }, [ready, compact, page, splitFilters]);
 
   /** 表示するアカウントを切り替える (保存層の対象も合わせる)。データの読み直しは呼び出し側 */
   const applyView = (id: string) => {
@@ -475,6 +497,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     if (row) {
       pendingFocus.current = null;
       row.focus();
+      if (!compact) row.scrollIntoView?.({ block: 'nearest' });
     }
   };
   useLayoutEffect(focusPending); // 描画のたびに、待っている行があれば試す
@@ -780,7 +803,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     ) : null;
   /** 管理画面: 絞り込みの行。複数選択のボタンは右端に置く (行はいつもあるので、選択のたびに一覧はずれない) */
   const chips = (
-    <div class="chips" role="group" aria-label={t('filterAuthor')}>
+    <div class="chips" ref={chipsRef} role="group" aria-label={t('filterAuthor')}>
       {filterItems}
       {bulkMenu}
     </div>
@@ -1053,7 +1076,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     <>
       {notices}
       {noticeBand}
-      {compact ? null : chips}
       {empty}
       {rows}
     </>
@@ -1263,31 +1285,35 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           <Icon name="ti-external-link" />
         </a>
       </aside>
-      <main class="main">
+      <main class="main" style={{ '--toolbar-offset': `${toolbarOffset}px` }}>
         {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         {page === 'settings' ? (
           settingsPage
         ) : (
           <>
-            <div class="top">
-              <Icon name={curFolder.icon} color={curFolder.color} />
-              <span class="bar-name">{viewName}</span>
-              <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
-              {curFolder.id === INBOX_ID && count(INBOX_ID) > 0 && (
-                <button class="triage-start" onClick={() => void startTriage()}>
-                  <Icon name="ti-bolt" /> {t('triageStart')}
-                </button>
-              )}
-              {searching && (
-                <button class="bar-clear" onClick={clearAll}>
-                  {t('clearFilters')}
-                </button>
-              )}
-              {searchBox}
-              {sortMenu}
-              {viewSeg}
-              {switchIcons}
+            <div class="bookmark-toolbar">
+              <div class="top" ref={topRef}>
+                <Icon name={curFolder.icon} color={curFolder.color} />
+                <span class="bar-name">{viewName}</span>
+                <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
+                {curFolder.id === INBOX_ID && count(INBOX_ID) > 0 && (
+                  <button class="triage-start" onClick={() => void startTriage()}>
+                    <Icon name="ti-bolt" /> {t('triageStart')}
+                  </button>
+                )}
+                {searching && (
+                  <button class="bar-clear" onClick={clearAll}>
+                    {t('clearFilters')}
+                  </button>
+                )}
+                {searchBox}
+                {sortMenu}
+                {viewSeg}
+                {switchIcons}
+              </div>
+              {!splitFilters && chips}
             </div>
+            {splitFilters && chips}
             {body}
           </>
         )}
