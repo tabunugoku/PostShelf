@@ -79,9 +79,9 @@ it('uses only icons available in the bundled Tabler font',()=>{
   const css=readFileSync('node_modules/@tabler/icons-webfont/dist/tabler-icons.min.css','utf8');
   for(const icon of extra)expect(css).toContain(`.${icon}:before`);
 });
-it('defines a six-column grid and a dashed More button inside the editor',()=>{
+it('defines a nine-column grid and a dashed More button inside the editor',()=>{
   const css=readFileSync('static/manager.css','utf8');
-  expect(css).toMatch(/\.folder-icon-grid\{[^}]*display:grid[^}]*grid-template-columns:repeat\(6,\s*(?:minmax\(0,\s*1fr\)|1fr)\)/);
+  expect(css).toMatch(/\.folder-icon-grid\{[^}]*display:grid[^}]*grid-template-columns:repeat\(9,\s*(?:minmax\(0,\s*1fr\)|1fr)\)/);
   expect(css).toMatch(/\.folder-edit \.icon-more\{[^}]*border[^}]*dashed/);
 });
 it('creates, updates and exports/imports every extra icon without changing its stored value',async()=>{
