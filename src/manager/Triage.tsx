@@ -49,6 +49,8 @@ export function Triage(props: {
   const [draft, setDraft] = useState<{ tweetId: string; ids: Set<string> } | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const newButton = useRef<HTMLButtonElement>(null);
+  const confirmButton = useRef<HTMLButtonElement>(null);
+  const focusConfirmation = useRef(false);
   const closeCreate = () => { setCreating(false); newButton.current?.focus(); };
   const previousMenus = useRef({ creating, more });
   /** choose の実行中 (await のあいだ) は、次の choose を受けない */
@@ -71,7 +73,10 @@ export function Triage(props: {
     previousMenus.current = { creating, more };
     // 入力欄ごとメニューが外れるとフォーカスは body に落ちる。残っているボタンのフォーカスは保つ。
     if ((prev.creating && !creating) || (prev.more && !more)) {
-      if (!root.current?.contains(document.activeElement)) root.current?.focus();
+      if (focusConfirmation.current) {
+        focusConfirmation.current = false;
+        (confirmButton.current ?? root.current)?.focus();
+      } else if (!root.current?.contains(document.activeElement)) root.current?.focus();
     }
   }, [creating, more]);
 
@@ -108,6 +113,15 @@ export function Triage(props: {
       else n.delete(b.tweetId);
       return n;
     });
+  };
+  /** 作成は確定ではない。フォルダだけ保存済みで、割り当ては印として残す。 */
+  const stageCreated = (ids: Iterable<string>) => {
+    setDraft({ tweetId: cur.tweetId, ids: new Set([...ids].filter(id => id !== INBOX_ID)) });
+    focusConfirmation.current = true;
+    setCreating(false);
+    setMore(false);
+    setError('');
+    void props.onChanged(); // 作成したフォルダを一覧へ反映する。
   };
   /** そのフォルダに入れる (入っていれば外す)。stay: 同じポストに留まる */
   const choose = async (folderId: string, stay: boolean) => {
@@ -294,8 +308,9 @@ export function Triage(props: {
                           selected={multi ? [...marks] : assigned[cur.tweetId] ?? []}
                           onChange={async (sel, source) => {
                             if (!cur || finished || busy.current) return;
-                            if (multi && source !== 'created') {
-                              setDraft({ tweetId: cur.tweetId, ids: new Set([...sel].filter(id => id !== INBOX_ID)) });
+                            if (multi) {
+                              if (source === 'created') stageCreated(sel);
+                              else setDraft({ tweetId: cur.tweetId, ids: new Set([...sel].filter(id => id !== INBOX_ID)) });
                               return;
                             }
                             busy.current = true;
@@ -338,27 +353,7 @@ export function Triage(props: {
                         onCreated={async (f) => {
                           if (latest.current.finished) return;
                           if (multi) {
-                            if (busy.current) return false;
-                            busy.current = true;
-                            try {
-                              const ids = [...new Set([...marks, f.id])];
-                              await setBookmarkFolders(cur.tweetId, ids, cur.snapshot);
-                              const before = savedIds(cur);
-                              const added = ids.filter(id => !before.includes(id));
-                              if (added.length) void updateRecentFolders(added).catch(() => {});
-                              mark(cur, ids.length ? ids : [INBOX_ID]);
-                              void props.onChanged();
-                              setCreating(false);
-                              setError('');
-                              setMore(false);
-                              next();
-                            } catch {
-                              setError(t('errorStorage'));
-                              // 作成自体は済んでいる。同じフォルダへの割り当てだけを再試行する。
-                              return false;
-                            } finally {
-                              busy.current = false;
-                            }
+                            stageCreated([...marks, f.id]);
                             return;
                           }
                           try {
@@ -382,7 +377,7 @@ export function Triage(props: {
             <div class="dialog-actions triage-actions">
               <span class="muted triage-hint">{t(multi ? 'triageMultiDesc' : 'triageHint')}</span>
               <span class="grow" />
-              {multi && <button class="primary triage-confirm" aria-keyshortcuts="Enter" onClick={() => void confirm()}>{t('triageConfirm')}</button>}
+              {multi && <button ref={confirmButton} class="primary triage-confirm" aria-keyshortcuts="Enter" onClick={() => void confirm()}>{t('triageConfirm')}</button>}
               <button disabled={step(index, -1) === null} aria-keyshortcuts="ArrowLeft" onClick={() => { if (!multi || !busy.current) back(); }}>
                 {t('triageBack')}
               </button>
