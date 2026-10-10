@@ -62,13 +62,15 @@ button:disabled{cursor:not-allowed}
 .fr.on{background:var(--fill-ghost-selected);font-weight:700}
 .fr i{font-size:18px}
 .fr .n{margin-left:auto;font-size:14px;color:var(--text-secondary)}
+.fr .n,.fr .badge{min-width:32px;text-align:right;flex-shrink:0}
 .fr.on .n{color:var(--text-primary)}
 .fr-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fr.add{color:var(--text-secondary)}
 .fr.drop{outline:2px dashed var(--fill-accent);outline-offset:-2px;background:var(--bg-accent)}
-.fr .more{display:none;margin-left:6px}
+.fr .more{display:none;position:absolute;right:6px;top:50%;transform:translateY(-50%)}
 .fr:hover .more,.fr:focus-within .more,.fr .more:has([aria-expanded=true]){display:inline-block}
-.fr:hover .n,.fr:focus-within .n{margin-left:0}
+.fr:hover:has(.more) .n,.fr:focus-within:has(.more) .n,.fr:has(.more [aria-expanded=true]) .n,
+.fr:hover:has(.more) .badge,.fr:focus-within:has(.more) .badge,.fr:has(.more [aria-expanded=true]) .badge{visibility:hidden}
 .fr .more-btn{width:32px;height:32px;min-height:32px}
 .main{padding:16px 20px;min-width:0}
 
