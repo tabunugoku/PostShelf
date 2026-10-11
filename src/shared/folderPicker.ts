@@ -8,7 +8,7 @@ import { ALL_FOLDER_ID, INBOX_ID, displayName, type Folder } from './models';
 import { t } from './strings';
 import { createFolderMenu } from './folderCreateMenu';
 import { foldText } from './fold';
-import { ancestors, flattenFolders, folderPath, withAncestors, withoutDescendants } from './folderTree';
+import { ancestors, flattenFolders, withAncestors, withoutDescendants } from './folderTree';
 import { getCollapsedFolders, setCollapsedFolders } from './storage';
 
 export interface PickerTheme {
@@ -320,9 +320,6 @@ export function createFolderPicker(opts: {
     const name = document.createElement('span');
     name.textContent = displayName(f);
     name.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-    if(recent && f.parentId) {
-      const path=document.createElement('small');path.dataset.recentPath='';path.textContent=ancestors(folders,f.id).map(displayName).join(' / ');path.style.cssText='display:block;font-size:11px;opacity:.7;overflow:hidden;text-overflow:ellipsis';name.append(path);
-    }
     label.append(ico, name, box);
     label.style.flex='1';label.style.minWidth='0';
     if(hasChildren){

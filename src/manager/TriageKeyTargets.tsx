@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { displayName, type Folder } from '../shared/models';
-import { folderPath } from '../shared/folderTree';
 import { getSettings, updateSettings } from '../shared/settings';
 import { triageKeyTargets } from '../shared/triageKeys';
 import { t } from '../shared/strings';
@@ -72,7 +71,7 @@ export function TriageKeyTargets(props: {folders:Folder[];onClose:()=>void;onSav
         <div class="key-target-slots">
           <b>{t('triageKeyOrder')}</b><span class="muted">{t('triageKeyOrderHint')}</span>
           {slots.map((f,i)=><button class={'key-target-slot'+(!f?' empty':'')} data-key-slot={i} draggable={mode==='manual'&&!saving&&!replacement} disabled={!ready||saving} onDragStart={e=>{dragging.current=i;e.dataTransfer?.setData('text/plain',String(i));if(e.dataTransfer)e.dataTransfer.effectAllowed='move';}} onDragEnd={()=>{dragging.current=null;}} onDragOver={e=>{if(mode==='manual'&&dragging.current!==null&&!saving&&!replacement)e.preventDefault();}} onDrop={e=>{e.preventDefault();const from=dragging.current;dragging.current=null;if(from===null||mode!=='manual'||saving||replacement)return;const next=slots.map(f=>f?.id??'');const [id]=next.splice(from,1);next.splice(i,0,id);setIds(next);}} onClick={()=>{if(replacement){setIds(slots.map((f,n)=>n===i?replacement.id:f?.id??''));setReplacement(null);}}}>
-            <kbd>{i+1}</kbd>{f&&<Icon name={f.icon} color={f.color}/>}<span>{f?displayName(f):t('triageKeyEmpty')}{f?.parentId&&<small class="muted">{folderPath(props.folders,f.id)}</small>}</span>
+            <kbd>{i+1}</kbd>{f&&<Icon name={f.icon} color={f.color}/>}<span>{f?displayName(f):t('triageKeyEmpty')}</span>
           </button>)}
         </div>
       </div>

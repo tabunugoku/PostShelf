@@ -7,7 +7,6 @@ import { INBOX_ID, displayName, type Bookmark, type Folder } from '../shared/mod
 import { addToFolders, removeFromFolders, setBookmarkFolders } from '../shared/storage';
 import { getSettings, onSettingsChanged, updateRecentFolders, type Settings } from '../shared/settings';
 import { triageKeyTargets, TRIAGE_KEY_COUNT } from '../shared/triageKeys';
-import { folderPath } from '../shared/folderTree';
 import { TriageKeyTargets } from './TriageKeyTargets';
 import { formatDate, t } from '../shared/strings';
 import { MediaImg } from './MediaImg';
@@ -306,7 +305,7 @@ export function Triage(props: {
                   <button key={i} data-key-slot={i} disabled={!f} class={`triage-folder${on ? ' on' : ''}`} aria-pressed={on} onClick={(e) => { if(f)void choose(f.id, e.shiftKey); }}>
                     <kbd>{i + 1}</kbd>
                     {f && (on ? <Icon name="ti-check" /> : <Icon name={f.icon} color={f.color} />)}
-                    <span class="triage-folder-name">{f ? displayName(f) : t('triageKeyEmpty')}{f?.parentId && <small class="muted">{folderPath(props.folders,f.id)}</small>}</span>
+                    <span class="triage-folder-name">{f ? displayName(f) : t('triageKeyEmpty')}</span>
                   </button>
                 );
               })}

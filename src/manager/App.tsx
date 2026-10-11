@@ -399,7 +399,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const allViews = [...smartViews, ...userFolders];
   const curFolder = allViews.find((f) => f.id === current) ?? smartViews[0];
   /** バッジ・チップ・ピッカー用。「未分類」の見た目を統一する */
-  const folderOf = useCallback((id: string) => (id === INBOX_ID ? inboxView(storedInbox) : (()=>{const f=folders.find(f=>f.id===id);return f ? {...f,name:folderPath(folders,id)} : undefined;})()), [folders]); // 保存データが変わるまで同じ関数 (Card の memo のため)
+  const folderOf = useCallback((id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find(f=>f.id===id)), [folders]); // 保存データが変わるまで同じ関数 (Card の memo のため)
   const pickerFolders = [inboxView(storedInbox), ...userFolders];
 
   const now = Date.now();
@@ -612,7 +612,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewRow = (f: Folder, opts: { smart?: boolean; depth?:number; hasChildren?:boolean } = {}) => {
     const reorderable = !opts.smart;
     const n = count(f.id);
-    const label = f.id === RECENT_ID ? f.name : folderPath(folders, f.id) || displayName(f);
+    const label = f.id === RECENT_ID ? f.name : displayName(f);
     return (
       <div
         key={f.id}
