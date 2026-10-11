@@ -120,3 +120,24 @@ it('saves the last value when the post disappears from the DOM during the wait',
   expect(w.settleSleeps()).toBe(2);
   expect((await listBookmarks()).map((b) => b.tweetId)).toEqual(['1']);
 });
+
+it('saves what has been read when stopped during the wait', async () => {
+  const w = world(
+    () => [post('1', false)],
+    (c, now) => { if (now === SETTLE_POLL_MS) void c.stop(); },
+  );
+  await w.read();
+  await new Promise((r) => setTimeout(r, 0));
+  expect(w.c.state!.status).toBe('stopped');
+  expect((await listBookmarks()).map((b) => b.tweetId)).toEqual(['1']);
+  expect(w.c.state!.failed).toBe(0);
+});
+
+it('saves a waiting post when the run finishes', async () => {
+  const w = world(() => [post('1', false)]);
+  w.c.state!.status = 'running';
+  await w.read();
+  await (w.c as any).finish();
+  expect(w.c.state!.status).toBe('done');
+  expect((await listBookmarks()).map((b) => b.tweetId)).toEqual(['1']);
+});
