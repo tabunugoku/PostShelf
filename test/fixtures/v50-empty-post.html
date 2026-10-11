@@ -1,0 +1,44 @@
+<!-- 実機未確認の推測: 画像だけのポストでは、アイコンとポストへのリンクが先に現れ、写真の a と img は後から DOM に入る。
+     空白だけの本文と、本文要素がまだ無い状態の両方を置く。投票・削除済みなど本当に空の表示とは区別できない。
+     動画・リンクカード・引用の構造も、既存セレクタが読める最小構造であり、実機の完全な DOM ではない。 -->
+<article data-testid="tweet" id="empty-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-v50.jpg"></div>
+  <a href="/sample_empty/status/601"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText">   </div>
+</article>
+<article data-testid="tweet" id="image-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-v50.jpg"></div>
+  <a href="/sample_image/status/602"><time datetime="2026-01-02"></time></a>
+  <a href="/sample_image/status/602/photo/1"><div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample-v50.jpg"></div></a>
+</article>
+<article data-testid="tweet" id="video-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-v50.jpg"></div>
+  <a href="/sample_video/status/603"><time datetime="2026-01-03"></time></a>
+  <div data-testid="videoPlayer"><video id="video" poster="https://pbs.twimg.com/media/sample-video-v50.jpg"></video></div>
+</article>
+<article data-testid="tweet" id="link-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-v50.jpg"></div>
+  <a href="/sample_link/status/604"><time datetime="2026-01-04"></time></a>
+  <div data-testid="card.wrapper"></div>
+</article>
+<article data-testid="tweet" id="quote-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-v50.jpg"></div>
+  <a href="/sample_main/status/605"><time datetime="2026-01-05"></time></a>
+  <div role="link">
+    <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-quote-v50.jpg"></div>
+    <div data-testid="User-Name"><span>Sample Quote</span><span>@sample_quote</span></div>
+    <div data-testid="tweetText">架空の引用本文</div>
+  </div>
+</article>
+<article data-testid="tweet" id="text-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-v50.jpg"></div>
+  <a href="/sample_text/status/606"><time datetime="2026-01-06"></time></a>
+  <div data-testid="tweetText">架空の本文だけのポスト</div>
+</article>
+<article data-testid="tweet" id="no-text-element">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-v50.jpg"></div>
+  <a href="/sample_empty/status/607"><time datetime="2026-01-07"></time></a>
+</article>
+<template id="late-photo">
+  <a href="/sample_empty/status/601/photo/1"><div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample-late-v50.jpg"></div></a>
+</template>
