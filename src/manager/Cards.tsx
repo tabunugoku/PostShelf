@@ -9,6 +9,7 @@ import { Dropdown } from './ui';
 import { MediaImg } from './MediaImg';
 import { PostText } from './PostText';
 import { QuoteBlock } from './QuoteBlock';
+import { useAvatar } from './avatars';
 import { VideoTileContent } from './VideoTile';
 import { MediaGrid } from './MediaGrid';
 import type { Snapshot } from '../shared/models';
@@ -291,6 +292,7 @@ function CardView(outer: CardOuterProps) {
   };
   const { b, view, compact } = props;
   const s = b.snapshot;
+  const avatar = useAvatar(s.avatar, s.handle);
   const long = useLongPress(() => props.onSelect(false));
   const showCheck = !compact || props.selectionActive;
   const check = showCheck ? (
@@ -354,7 +356,7 @@ function CardView(outer: CardOuterProps) {
   return (
     <article {...common}>
       {check}
-      {s.avatar ? <img class="av" src={s.avatar} alt="" /> : <span class="av">{initials(s.author)}</span>}
+      {avatar ? <img class="av" src={avatar} alt="" /> : <span class="av">{initials(s.author)}</span>}
       <div class="post-body">
         <div class="post-head">
           <strong>{s.author}</strong> <span class="muted">{s.handle}</span>
