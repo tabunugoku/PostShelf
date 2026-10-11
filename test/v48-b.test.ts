@@ -113,11 +113,11 @@ it('saves what has been read when paused during the wait', async () => {
   expect((await listBookmarks()).map((b) => b.tweetId)).toEqual(['1']);
 });
 
-it('saves the last value when the post disappears from the DOM during the wait', async () => {
+it('待ち中の消失には猶予を設けて最後に読めた値を保持する', async () => {
   const w = world((now) => (now >= 600 ? [] : [post('1', false)]));
   await w.read();
   await w.flush();
-  expect(w.settleSleeps()).toBe(2);
+  expect(w.settleSleeps()).toBe(9);
   expect((await listBookmarks()).map((b) => b.tweetId)).toEqual(['1']);
 });
 

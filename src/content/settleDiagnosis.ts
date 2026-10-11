@@ -3,6 +3,7 @@ import type { Extracted } from './snapshot';
 type Outcome = 'resolved' | 'timedOut' | 'vanished' | 'forced';
 type Vanished = 'unreadable' | 'removed';
 type PendingKind = 'avatar' | 'media' | 'quoteAvatar';
+type VanishTiming = { disappearedAfterMs: number; vanishElapsedMs: number };
 type Waiting = {
   tweetId: string;
   pending: PendingKind[];
@@ -16,13 +17,15 @@ type Result = Omit<Waiting, 'startedAt'> & {
   elapsedMs: number;
   visibilityEnd: DocumentVisibilityState;
   vanished?: Vanished;
+  disappearedAfterMs?: number;
+  vanishElapsedMs?: number;
 };
 const RECORD_LIMIT = 50;
 
 /** 待ちの結果だけを実行中のメモリで数える。本文・名前・ハンドル・URL は保持せず、保存処理に関与しない。 */
 export class SettleDiagnosis {
   private active = new Map<string, Waiting>();
-  private counts = { resolved: 0, timedOut: 0, vanished: 0, forced: 0, unflagged: 0 };
+  private counts = { resolved: 0, timedOut: 0, vanished: 0, forced: 0, unflagged: 0, vanishedReturned: 0, vanishedGone: 0 };
   private vanished = { unreadable: 0, removed: 0 };
   private unresolved: Result[] = [];
   private unflagged: string[] = [];
@@ -34,7 +37,7 @@ export class SettleDiagnosis {
   /** 新しい取り込みだけでリセットする。同じ取り込みの一時停止・再開では出力を増やさない。 */
   reset(): void {
     this.active.clear();
-    this.counts = { resolved: 0, timedOut: 0, vanished: 0, forced: 0, unflagged: 0 };
+    this.counts = { resolved: 0, timedOut: 0, vanished: 0, forced: 0, unflagged: 0, vanishedReturned: 0, vanishedGone: 0 };
     this.vanished = { unreadable: 0, removed: 0 };
     this.unresolved = [];
     this.unflagged = [];
@@ -65,11 +68,13 @@ export class SettleDiagnosis {
   }
 
   /** 保存へ回す分岐の理由を数える。未解決の詳細だけ先頭 50 件を残す。 */
-  complete(tweetId: string, reason: Outcome, vanished?: Vanished): void {
+  complete(tweetId: string, reason: Outcome, vanished?: Vanished, timing?: VanishTiming, returned = false): void {
     const record = this.active.get(tweetId);
     if (!record) return;
     this.active.delete(tweetId);
     this.counts[reason]++;
+    if (reason === 'resolved' && returned) this.counts.vanishedReturned++;
+    if (reason === 'vanished') this.counts.vanishedGone++;
     if (vanished) this.vanished[vanished]++;
     if (reason === 'resolved' || this.unresolved.length >= RECORD_LIMIT) return;
     const { startedAt, ...fields } = record;
@@ -77,6 +82,7 @@ export class SettleDiagnosis {
       ...fields, reason, elapsedMs: this.now() - startedAt,
       visibilityEnd: document.visibilityState,
       ...(vanished ? { vanished } : {}),
+      ...timing,
     });
   }
 

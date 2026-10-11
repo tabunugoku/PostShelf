@@ -823,3 +823,21 @@ v52 の実機結果では、1000 件を 2 回取り込み、アイコンなし�
 - 未解決 (timedOut / vanished / forced) の詳細と unflagged の ID は、それぞれ先頭 50 件まで。件数は制限せず全件を数える。screens は settle を始めた画面の回数、position は待ちを始めた visible の配列での 1 始まりの番号。pending は待ち開始時の avatar / media / quoteAvatar の種類。
 - waitedMs は完了した待ちの刻みの合計、elapsedMs は d.now() の差。中断中の刻みは waitedMs に加算せず、経過した分が elapsedMs に現れる。visibilityStart / visibilityEnd は document.visibilityState の開始・終了時の値で、途中の可視状態の履歴は保持しない。
 - 診断はメモリとコンソールだけ。保存データの形、storage の項目、権限、外部通信、ユーザーに見える文言、_locales、バージョンは変更しない。
+
+## v54: 待ちの間に消えるポストの取りこぼし (すべて実機未確認)
+
+v53 の実機ログでは、待ちを始めた 134 件のうち resolved は 101 件、removed は 33 件、timedOut は 0 件だった。
+33 件は最初か 2 回目の確認 (0.3〜0.5 秒後) で消え、visible の 13〜18 番目にあり、タブは visible だった。
+下側の領域を X が作り直している可能性は実機 DOM 未確認の推測。
+
+- [ ] 実機未確認: v53 と同じ手順で DevTools のコンソールを開き、1000 件取り込み、[PostShelf] settle summary をコピーする。counts.vanishedGone が v53 の 33 件より大きく減ること。
+- [ ] 実機未確認: 保存したデータで、アイコンなしが v52 の 19〜25 件より大きく減ること。
+- [ ] 実機未確認: 所要時間が v52 (6 分 24〜27 秒) から 1 分以内の増加に収まること。
+- [ ] 実機未確認: 件数が 1000 件ちょうどで、重複・抜けが無く、savedAt による一覧順が X と一致すること。
+- [ ] 実機未確認: 一時的に消えて戻ったポストのアイコン・画像が保存され、counts.vanishedReturned に現れること。一時停止・停止時も未保存のポストを失わないこと。
+
+### 判断
+
+- A: visible から消えた時点をポストごとに持ち、VANISH_GRACE_MS = 2000 を待った刻みの合計で数える。戻って pending なら待ち続け、再び消えれば猶予を数え直す。DOM の作り直しという原因は推測であり、断定しない。
+- 全体の SETTLE_MAX_MS = 8000 は維持する。最後の刻みが上限を跨ぐ既存の数え方 (300〜500 ms ごと) は変えず、猶予のために刻みを追加しない。pending でないポストの待ち、スクロールの量・間隔・終了条件は変更しない。
+- 診断の既存キーを残し、counts.vanishedReturned (消えた後に戻って解決) と counts.vanishedGone (戻らず打ち切り) を追加する。vanishedGone の詳細には disappearedAfterMs (消失検知まで) と vanishElapsedMs (消失検知後) を加える。全体上限に先に達した場合も vanishedGone に含める。
