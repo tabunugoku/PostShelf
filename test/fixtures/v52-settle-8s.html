@@ -1,0 +1,18 @@
+<!-- 実機未確認の推測: アイコン・写真・本文が 4 秒を過ぎてから同じ article に現れる。
+     実機の読み込み速度や仮想化は未確認。template は通信せず遅い読み込みを再現するテスト用部品。 -->
+<article data-testid="tweet" id="main-post">
+  <div data-testid="Tweet-User-Avatar" id="main-avatar"></div>
+  <div data-testid="User-Name"><span>Sample Slow</span><span>@sample_slow</span></div>
+  <a href="/sample_slow/status/1001"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText" id="main-text"></div>
+</article>
+<article data-testid="tweet" id="ready-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-ready-v52.jpg"></div>
+  <div data-testid="User-Name"><span>Sample Ready</span><span>@sample_ready</span></div>
+  <a href="/sample_ready/status/1002"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText">架空の読み込み済みポスト。</div>
+</article>
+<template id="late-avatar"><img src="https://pbs.twimg.com/profile_images/sample-slow-v52.jpg"></template>
+<template id="late-photo">
+  <a href="/sample_slow/status/1001/photo/1"><div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample-slow-v52.jpg"></div></a>
+</template>

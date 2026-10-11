@@ -69,7 +69,7 @@ it('1 秒後に写真リンクと画像が現れたら待って画像つきで�
   expect((await listBookmarks())[0].snapshot.media).toEqual(['https://pbs.twimg.com/media/sample-late-v50.jpg']);
 });
 
-it('本当に空のポストも既存の 4 秒で打ち切り保存する', async () => {
+it('本当に空のポストも既存の 8 秒で打ち切り保存する', async () => {
   keepOnly('empty-post');
   const world = collectorWorld();
   await world.read();
