@@ -341,7 +341,7 @@ function CardView(outer: CardOuterProps) {
         </div>
         <div class="gc-text">{s.text}</div>
         <div class="gc-foot">
-          <FolderChips b={b} folderOf={props.folderOf} folders={props.folders} removable={false} onRemove={props.onRemoveFromFolder} />
+          <FolderChips b={b} folderOf={props.folderOf} folders={props.folders} removable onRemove={props.onRemoveFromFolder} />
           <Actions {...props} />
         </div>
       </article>
