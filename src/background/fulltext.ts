@@ -106,6 +106,7 @@ export class FullTextQueue {
   private tabs = new Set<number>();
   private closing = new Map<number, Promise<void>>();
   private cancelled: Promise<void> = Promise.resolve();
+  private readCancelled: Promise<null> = Promise.resolve(null);
   private cancel = () => {};
 
   constructor(private d: FullTextDeps = defaultDeps()) {}
@@ -147,8 +148,8 @@ export class FullTextQueue {
         this.looping = true;
         this.aborted = false;
         this.failures = 0;
-        this.lastOpen = -Infinity;
         this.cancelled = new Promise(r => { this.cancel = r; });
+        this.readCancelled = this.cancelled.then(() => null);
         const published = this.publish({ running: true, kind, total: fresh.length, done: 0, failed: 0, skipped: 0, stopReason: undefined });
         // stop() が初期設定の読み込み中でも、この実行の終了を待てるよう先に登録する。
         this.finished = this.loop(published);
@@ -330,7 +331,7 @@ export class FullTextQueue {
           let r: AskResult | null;
           try {
             r = await Promise.race([
-              this.d.ask(tab, item.tweetId), this.cancelled.then(() => null),
+              this.d.ask(tab, item.tweetId), this.readCancelled,
               new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), Math.max(0, deadline - this.d.now())); }),
             ]);
           } finally { clearTimeout(timer); }
