@@ -44,6 +44,8 @@ export const CANDIDATES = {
   bodyLink: ['a[href]'],
   avatar: ['[data-testid="Tweet-User-Avatar"] img', 'a[role="link"][href^="/"]:not([href*="/status/"]) img'],
   media: ['[data-testid="tweetPhoto"] img', 'a[href*="/photo/"] img'],
+  // 写真のリンクが先に出て img/src が後から入る場合の印 (実機未確認の推測)。
+  photoLink: ['a[href*="/photo/"]'],
   // 以下は実機未確認の推測。動画は videoPlayer か video 要素
   video: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
   // 動画のサムネイル (poster 属性)。実機未確認の推測

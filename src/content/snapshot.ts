@@ -36,6 +36,8 @@ export function extractSegments(el: Element): Segment[] | undefined {
 export interface Extracted {
   tweetId: string;
   snapshot: Snapshot;
+  /** DOM のメディアがまだ読めない印。snapshot には含めず、保存しない。 */
+  mediaPending?: true;
 }
 
 /** article 要素から、ポストの ID だけを軽く読む (extractTweet と同じ取り出し方。スナップショットは作らない)。取れなければ null */
@@ -88,7 +90,7 @@ export function extractTweet(article: Element): Extracted | null {
   const segments = textEl ? extractSegments(textEl) : undefined;
   const truncated = !!queryOwn(article, 'showMore'); // たたまれた状態か (実機未確認の推測。全文は、保存のあと別に取る)
   const avatar = queryOwn<HTMLImageElement>(article, 'avatar')?.el.src || undefined;
-  const media = queryAllOwn<HTMLImageElement>(article, 'media').els.map((i) => i.src).filter(Boolean);
+  const media = queryAllOwn<HTMLImageElement>(article, 'media').els.filter((i) => i.getAttribute('src')?.trim()).map((i) => i.src).filter(Boolean);
 
   // 外部リンク: リンクカード、または本文中の t.co 等の外部 URL (メンション/ハッシュタグ/ポスト間リンクは除く)。推測 (実機未確認)
   const bodyLinks = (textEl ? queryAllFirst(textEl, 'bodyLink').els : []).some((a) => /^https?:\/\//i.test(a.getAttribute('href') ?? ''));
@@ -101,6 +103,7 @@ export function extractTweet(article: Element): Extracted | null {
   const quote = extractQuote(article);
   return {
     tweetId,
+    ...((hasVideo ? !videoPoster : !media.length && !!queryOwn(article, 'photoLink')) ? { mediaPending: true as const } : {}),
     snapshot: {
       ...(quote ? { quote } : {}),
       ...(translated ? { translated: true } : {}),
