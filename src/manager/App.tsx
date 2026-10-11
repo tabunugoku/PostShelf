@@ -31,6 +31,7 @@ import {
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
 import {
   addToFolders,
+  changeBookmarkFolders,
   assignAccount,
   deleteAccountData,
   getLastSeenAccount,
@@ -456,10 +457,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       await reload();
       const n = Object.keys(undo).length;
       if (n > 0) setToast({ key: Date.now(), message: t(msgKey, n), undo });
+      return true;
     } catch {
       // 保存の失敗 (容量・保存のエラー): 通知を出し、画面は読み直して実際の状態に合わせる
       setToast({ key: Date.now(), message: t('errorStorage') });
       await reload().catch(() => {});
+      return false;
     }
   };
   const doUndo = async () => {
@@ -802,7 +805,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         count={selected.size}
         folders={pickerFolders}
         bookmarks={bookmarks.filter(b => selected.has(b.tweetId))}
-        onToggle={(id, on) => run(id === INBOX_ID ? moveToFolder(bulkIds, null, INBOX_ID) : on ? addToFolders(bulkIds, [id]) : removeFromFolders(bulkIds, [id]), on ? 'toastAdded' : 'toastRemoved')}
+        onConfirm={(addIds, removeIds) => run(changeBookmarkFolders(bulkIds, addIds, removeIds), addIds.length ? 'toastAdded' : 'toastRemoved')}
         onDelete={() => setConfirmState({ kind: 'posts', ids: bulkIds })}
         onSelectAll={() => setSelected(new Set(shownIds))}
         allSelected={selected.size === shownSet.size}

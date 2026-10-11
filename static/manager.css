@@ -126,6 +126,7 @@ button:disabled{cursor:not-allowed}
 .menu-bulk{min-width:220px}
 .menu-bulk .menu-item{width:100%}
 .bulk-picker{border:0;margin:0;padding:0;min-width:0}
+.bulk-actions{display:flex;justify-content:flex-end;margin-top:8px}
 
 /* ---- ポスト / リスト / グリッド ---- */
 .rows{position:relative}

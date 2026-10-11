@@ -620,6 +620,14 @@ function mutateBookmarks(
 const uniq = (a: string[]) => [...new Set(a)];
 const realIds = (ids: string[]) => ids.filter((id) => !isBuiltinFolder(id));
 
+/** 一括メニューの確定。追加と解除を同じ書き込み・同じ取り消しにまとめる。 */
+export const changeBookmarkFolders = (tweetIds: string[], addIds: string[], removeIds: string[]) =>
+  mutateBookmarks(tweetIds, (b) => ({
+    ...b,
+    folderIds: addIds.includes(INBOX_ID) ? [INBOX_ID]
+      : uniq([...b.folderIds.filter(id => !removeIds.includes(id)), ...realIds(addIds)]),
+  }));
+
 export const addToFolders = (tweetIds: string[], folderIds: string[]) =>
   mutateBookmarks(tweetIds, (b) => ({ ...b, folderIds: uniq([...b.folderIds, ...realIds(folderIds)]) }));
 
