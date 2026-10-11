@@ -6,6 +6,8 @@
 import { COLORS, FOLDER_ICON, MAIN_ICONS, MORE_ICONS, colorLabel, displayName, iconLabel, type Folder } from './models';
 import { createFolder, StorageError, updateFolder } from './storage';
 import { t } from './strings';
+import { canParent, flattenFolders, folderPath } from './folderTree';
+import { getAccountScope } from './storage';
 import { ACCENT_FILL } from './tokens';
 import type { PickerTheme } from './folderPicker';
 
@@ -30,6 +32,8 @@ export function createFolderMenu(opts: {
   onCreated?: (folder: Folder) => void | boolean | Promise<void | boolean>;
   /** 渡すと編集。existing はこのフォルダ自身を除く */
   folder?: Folder;
+  parents?: () => Folder[];
+  defaultParentId?: string;
   head?: boolean;
   preview?: boolean;
   onSaved?: () => void | Promise<void>;
@@ -49,6 +53,7 @@ export function createFolderMenu(opts: {
 
   let icon: string = FOLDER_ICON;
   let color: string | undefined;
+  let parentId: string | undefined;
 
   // x.com 側の CSS (button / i の余白・基準線・フォントなど) に引きずられないよう、部品ごとに明示する (v19)
   const RESET = 'box-sizing:border-box;margin:0;line-height:1.4;font:inherit;-webkit-appearance:none;appearance:none';
@@ -89,6 +94,26 @@ export function createFolderMenu(opts: {
   const mark = (b: HTMLElement, on: boolean) => {
     b.setAttribute('aria-pressed', String(on));
   };
+
+  const parentGroup = group(t('folderParent'));
+  const parent = document.createElement('select');
+  parent.dataset.parentFolder = '';
+  parent.setAttribute('aria-label', t('folderParent'));
+  parent.style.cssText = input.style.cssText;
+  const renderParents = () => {
+    parent.replaceChildren();
+    const root = document.createElement('option'); root.value = ''; root.textContent = t('folderRoot'); parent.append(root);
+    const all = opts.parents?.() ?? [];
+    for (const {folder:f,depth} of flattenFolders(all.filter(f=>f.id!=='all' && f.id!=='inbox'))) {
+      const option = document.createElement('option'); option.value = f.id;
+      option.textContent = '　'.repeat(depth-1) + folderPath(all, f.id);
+      option.disabled = !canParent(all, editing?.id, f.id, editing?.accountId ?? getAccountScope());
+      parent.append(option);
+    }
+    parent.value = parentId ?? '';
+  };
+  parent.addEventListener('change',()=>{parentId=parent.value || undefined;});
+  parentGroup.append(parent);
 
   // 先頭 8 個 + その他を 9 等分した 1 行。追加 36 個も同じ幅の 9 列。
   const iconGroup = group(t('icon'));
@@ -236,7 +261,7 @@ export function createFolderMenu(opts: {
   let pending: Folder | undefined;
   const lock = (on: boolean) => {
     if (!lockWhileSaving) return;
-    el.querySelectorAll<HTMLInputElement | HTMLButtonElement>('input,button').forEach(control => { control.disabled = on; });
+    el.querySelectorAll<HTMLInputElement | HTMLButtonElement>('input,button,select').forEach(control => { control.disabled = on; });
     if (!on) {
       keepCreated(pending);
       paint();
@@ -246,6 +271,7 @@ export function createFolderMenu(opts: {
     pending = folder;
     // 作成後の再試行で、表示中の下書きと作成済みフォルダの値がずれないようにする。
     input.readOnly = !!folder;
+    parent.disabled = !!folder;
     more.disabled = !!folder;
     iconBtns.forEach(b => { b.disabled = !!folder; });
     swatches.forEach(b => { b.disabled = !!folder; });
@@ -268,10 +294,11 @@ export function createFolderMenu(opts: {
         if (name !== editing.name) patch.name = name;
         if (icon !== editing.icon) patch.icon = icon;
         if (color !== editing.color) patch.color = color ?? null;
+        if (opts.parents && parentId !== editing.parentId) patch.parentId = parentId ?? null;
         if (Object.keys(patch).length) await updateFolder(editing.id, patch);
         await opts.onSaved?.();
       } else {
-        const folder = pending ?? await createFolder({ name: input.value, icon, color });
+        const folder = pending ?? await createFolder({ name: input.value, icon, color, ...(opts.parents && parentId ? { parentId } : {}) });
         keepCreated(await opts.onCreated?.(folder) === false ? folder : undefined);
       }
     } catch (err) {
@@ -291,7 +318,9 @@ export function createFolderMenu(opts: {
   del?.addEventListener('click', () => { if (!busy) opts.onDelete?.(); });
 
   if (opts.head !== false) el.append(head);
-  el.append(input, iconGroup, colorGroup);
+  el.append(input);
+  if (opts.parents) el.append(parentGroup);
+  el.append(iconGroup, colorGroup);
   if (opts.preview !== false) el.append(preview);
   el.append(error, actions);
   const reset = () => {
@@ -300,6 +329,8 @@ export function createFolderMenu(opts: {
     input.value = editing ? displayName(editing) : '';
     icon = editing?.icon ?? FOLDER_ICON;
     color = editing?.color;
+    parentId = editing?.parentId ?? opts.defaultParentId;
+    renderParents();
     showError('');
     paint();
   };

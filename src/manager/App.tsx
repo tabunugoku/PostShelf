@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
+import { ancestors, canParent, descendants, flattenFolders, folderPath } from '../shared/folderTree';
 import { Icon } from '../shared/Icon';
 import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
 import {
@@ -41,6 +42,8 @@ import {
   type AccountSummary,
   deleteBookmarks,
   deleteFolder,
+  folderDeletionImpact,
+  setCollapsedFolders,
   getBookmark,
   listBookmarks,
   listFolders,
@@ -78,7 +81,7 @@ const sorts = (): [SortKey, string][] => [
   ['postedAsc', t('sortPostedAsc')],
 ];
 
-type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: string } | { kind: 'account'; id: string } | null;
+type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: string; impact?: { folders:number; posts:number } } | { kind: 'account'; id: string } | null;
 /** undo の無いトースト (アカウントの切替・割り当ての通知) もある */
 type ToastState = { key: number; message: string; undo?: BookmarkUndo; /** 設定の初期化の取り消しなど、ポスト以外の「元に戻す」 */ action?: () => Promise<void> } | null;
 
@@ -142,8 +145,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [picker, setPicker] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [creatingFolder, setCreatingFolder] = useState(false);
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<ToastState>(null);
-  const [dragOver, setDragOver] = useState<{ id: string; kind: 'folder' | 'posts' } | null>(null);
+  const [dragOver, setDragOver] = useState<{ id: string; kind: 'folder' | 'posts'; inside?: boolean } | null>(null);
   // dragover 中は getData が保護されるため、同じ行へのドロップ判定には dragstart の ID を使う。
   const draggedFolder = useRef<string | null>(null);
   const clearDrag = () => {
@@ -236,6 +240,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       lastRef.current = last;
       setLastSeen(last);
       setAutoCfg(s.autoCollect);
+      setCollapsed(new Set(s.folderTreeCollapsed));
       applyView(resolveViewAccount(s.viewAccount, last, accs));
       await Promise.all([reload(), loadHint()]);
       const ver = currentVersion();
@@ -267,7 +272,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       if (location.hash === '#autocollect') setAutoOpen(true); // x.com の「自動で取り込む…」から開かれた
     };
     window.addEventListener('hashchange', onHash);
-    const offs = [() => window.removeEventListener('hashchange', onHash), onSettingsChanged((c) => setAutoCfg(c.autoCollect)), onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
+    const offs = [() => window.removeEventListener('hashchange', onHash), onSettingsChanged((c) => { setAutoCfg(c.autoCollect); setCollapsed(new Set(c.folderTreeCollapsed)); }), onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
     return () => offs.forEach((o) => o());
   }, []);
 
@@ -380,6 +385,17 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const storedInbox = folders.find((f) => f.id === INBOX_ID);
   const userFolders = userFoldersOf(folders);
   const smartViews: Folder[] = [folders[0] ?? { id: ALL_FOLDER_ID, name: '', icon: 'ti-bookmarks', order: -1 }, inboxView(storedInbox), recentView()];
+  const treeRows = flattenFolders(userFolders, collapsed);
+  const toggleTree = (id:string) => {
+    const next = new Set(collapsed); if(next.has(id))next.delete(id);else next.add(id);
+    setCollapsed(next); void setCollapsedFolders([...next]).catch(reportStorageError);
+  };
+  useEffect(() => {
+    const parents = ancestors(userFolders, current).map(f=>f.id);
+    if (!parents.some(id=>collapsed.has(id))) return;
+    const next = new Set([...collapsed].filter(id=>!parents.includes(id)));
+    setCollapsed(next); void setCollapsedFolders([...next]).catch(reportStorageError);
+  }, [current, folders, collapsed]);
   const allViews = [...smartViews, ...userFolders];
   const curFolder = allViews.find((f) => f.id === current) ?? smartViews[0];
   /** バッジ・チップ・ピッカー用。「未分類」の見た目を統一する */
@@ -433,7 +449,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       const a = accounts.find((x) => x.account.id === c.id);
       return t('accountDeleteConfirm', a ? accountLabel(a.account) : c.id, a?.count ?? 0);
     }
-    return t('confirmDelete');
+    return c.impact && c.impact.folders > 1 ? t('folderDeleteTree',c.impact.folders,c.impact.posts)+' '+t('folderAncestorsRemain') : t('confirmDelete');
   };
   /** ログイン中のアカウントを判定できていて、「アカウント未設定」にデータが残っているとき、割り当てを案内する */
   const unknownOn = unknownCount > 0 && viewId !== UNKNOWN_ACCOUNT_ID && !!lastSeen && page === 'bookmarks';
@@ -548,6 +564,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const virtual = (id: string) => id === ALL_FOLDER_ID || id === RECENT_ID;
   const onFolderDrop = async (target: Folder, e: DragEvent) => {
     e.preventDefault();
+    const inside = dragOver?.id === target.id ? dragOver.inside : folderInside(target, e);
     clearDrag();
     const posts = e.dataTransfer?.getData(MIME_POSTS);
     const dragged = e.dataTransfer?.getData(MIME_FOLDER);
@@ -556,10 +573,21 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       if (e.altKey) await run(moveToFolder(ids, virtual(current) ? null : current, target.id), 'toastMoved');
       else await run(addToFolders(ids, [target.id]), 'toastAdded');
     } else if (dragged && !virtual(target.id) && target.id !== INBOX_ID) {
-      const order = userFolders.map((f) => f.id);
-      await reorderFolders(moveBefore(order, dragged, target.id));
-      await reload();
+      const parentId = inside ? target.id : target.parentId ?? null;
+      if (!canParent(userFolders, dragged, parentId, viewId)) return;
+      const order = userFolders.map(f=>f.id);
+      try { await reorderFolders(inside ? [...order.filter(id=>id!==dragged),dragged] : moveBefore(order,dragged,target.id), {id:dragged,parentId}); await reload(); }
+      catch { reportStorageError(); }
     }
+  };
+  const folderInside = (f:Folder,e:DragEvent) => {
+    const r=(e.currentTarget as HTMLElement).getBoundingClientRect();
+    return r.height > 0 && e.clientY >= r.top+r.height/3 && e.clientY < r.bottom-r.height/3;
+  };
+  const requestDeleteFolder = async (f:Folder) => {
+    setEditing(null);
+    try { setConfirmState({kind:'folder',id:f.id,impact:await folderDeletionImpact(f.id)}); }
+    catch { reportStorageError(); }
   };
   const folderDroppable = (f: Folder, types: readonly string[]) =>
     (types.includes(MIME_POSTS) && !virtual(f.id)) || (types.includes(MIME_FOLDER) && !virtual(f.id) && f.id !== INBOX_ID);
@@ -575,20 +603,22 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           onCancel={() => setEditing(null)}
           existing={[inboxOf(folders), ...folders]}
           onSaved={() => { setEditing(null); void reload(); }}
-          onRequestDelete={() => { setEditing(null); setConfirmState({ kind: 'folder', id: f.id }); }}
+          onRequestDelete={() => void requestDeleteFolder(f)}
         />
       </Dropdown>
     );
   };
 
-  const viewRow = (f: Folder, opts: { smart?: boolean } = {}) => {
+  const viewRow = (f: Folder, opts: { smart?: boolean; depth?:number; hasChildren?:boolean } = {}) => {
     const reorderable = !opts.smart;
     const n = count(f.id);
     const label = f.id === RECENT_ID ? f.name : displayName(f);
     return (
       <div
         key={f.id}
-        class={`fr${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}${dragOver?.id === f.id ? dragOver.kind === 'folder' ? ' drop-before' : ' drop' : ''}`}
+        class={`fr${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}${dragOver?.id === f.id ? dragOver.kind === 'folder' ? dragOver.inside ? ' drop-child' : ' drop-before' : ' drop' : ''}`}
+        data-folder-id={f.id} data-depth={opts.depth ?? 1}
+        style={reorderable ? {paddingLeft: (10+((opts.depth ?? 1)-1)*18)+'px', '--drop-indent': (10+((opts.depth ?? 1)-1+(dragOver?.inside ? 1 : 0))*18)+'px'} : undefined}
         role="button"
         tabIndex={0}
         aria-current={f.id === curFolder.id && page === 'bookmarks' ? 'true' : undefined}
@@ -603,13 +633,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         onDragOver={(e) => {
           const types = e.dataTransfer?.types ?? [];
           const kind = types.includes(MIME_POSTS) ? 'posts' : 'folder';
-          if (!folderDroppable(f, types) || (kind === 'folder' && draggedFolder.current === f.id)) {
+          const inside = kind === 'folder' && folderInside(f,e);
+          if (!folderDroppable(f, types) || (kind === 'folder' && (!draggedFolder.current || !canParent(userFolders, draggedFolder.current, inside ? f.id : f.parentId, viewId) || draggedFolder.current === f.id))) {
             setDragOver(null);
             return;
           }
           e.preventDefault();
           if (e.dataTransfer) e.dataTransfer.dropEffect = kind === 'folder' || e.altKey ? 'move' : 'copy';
-          setDragOver({ id: f.id, kind });
+          setDragOver({ id: f.id, kind, inside });
         }}
         onDragLeave={(e) => {
           if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) return;
@@ -625,6 +656,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           }
         }}
       >
+        {reorderable && (opts.hasChildren ? <button data-tree-toggle class="tree-toggle" aria-label={t(collapsed.has(f.id)?'treeExpand':'treeCollapse')} aria-expanded={!collapsed.has(f.id)} onClick={e=>{e.stopPropagation();toggleTree(f.id);}}><Icon name={collapsed.has(f.id)?'ti-chevron-right':'ti-chevron-down'}/></button> : <span class="tree-spacer"/>)}
         <Icon name={f.icon} color={f.color} />
         <span class="fr-name">{label}</span>
         {f.id === INBOX_ID && n > 0 ? <span class="badge">{n}</span> : <span class="n">{n}</span>}
@@ -658,6 +690,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const createNode = creatingFolder && (
     <Dropdown fixed onClose={() => setCreatingFolder(false)} label={t('newFolder')} class="menu-wide menu-edit">
       <FolderEdit
+        defaultParentId={userFolders.some(f=>f.id===current) && canParent(userFolders,undefined,current,viewId) ? current : undefined}
         onCancel={() => setCreatingFolder(false)}
         existing={[inboxOf(folders), ...folders]}
         onSaved={(f) => {
@@ -1122,7 +1155,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               await afterAccountChange(c.id);
             } else {
               await deleteFolder(c.id);
-              if (current === c.id) chooseView(ALL_FOLDER_ID);
+              if (current === c.id || descendants(userFolders,c.id).some(f=>f.id===current)) chooseView(ALL_FOLDER_ID);
               await reload();
             }
           }}
@@ -1271,7 +1304,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         <div class="sec">{t('smartViews')}</div>
         {smartViews.map((f) => viewRow(f, { smart: true }))}
         <div class="sec">{t('foldersSection')}</div>
-        {userFolders.map((f) => viewRow(f))}
+        {treeRows.map(r => viewRow(r.folder, {depth:r.depth,hasChildren:r.hasChildren}))}
         <div class="menu-anchor folder-create-anchor">
           <div class="fr add" role="button" tabIndex={0} onClick={newFolder} onKeyDown={(e) => e.key === 'Enter' && newFolder()}>
             <Icon name="ti-plus" />
@@ -1307,6 +1340,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               <div class="top" ref={topRef}>
                 <Icon name={curFolder.icon} color={curFolder.color} />
                 <span class="bar-name">{viewName}</span>
+                {curFolder.parentId && <span class="folder-breadcrumb muted">{folderPath(userFolders,curFolder.id,' › ')}</span>}
                 <span class="muted bar-count">{searching ? t('itemCountOf', count(curFolder.id), shown.length) : t('itemCount', count(curFolder.id))}</span>
                 {curFolder.id === INBOX_ID && count(INBOX_ID) > 0 && (
                   <button class="triage-start" onClick={() => void startTriage()}>

@@ -28,6 +28,8 @@ export interface Settings {
   fullTextTabs: 1 | 2 | 3;
   /** 仕分けで複数のフォルダを選び、Enter で確定する (省略時はオフ) */
   triageMulti?: boolean;
+  /** IDs of collapsed parents, local to this device. */
+  folderTreeCollapsed?: string[];
   /** x.com の保存ポップオーバーの「最近使った」フォルダ (v28)。最大 RECENT_FOLDERS 件、新しい順。無い・不正な値は空として扱う */
   recentFolderIds?: string[];
 }
@@ -110,7 +112,7 @@ export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, recentFolderIds: [] };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, folderTreeCollapsed: [], recentFolderIds: [] };
 
 export interface FullTextPlan { gapMinMs: number; gapMaxMs: number; tabs: 1 | 2 | 3 }
 /** 「ゆっくり」は、保存されたタブ数にかかわらず従来の間隔・1 タブを使う。 */
@@ -138,6 +140,7 @@ export async function getSettings(): Promise<Settings> {
   merged.fullTextSpeed = stored.fullTextSpeed === 'standard' ? 'standard' : 'slow';
   merged.fullTextTabs = stored.fullTextTabs === 2 || stored.fullTextTabs === 3 ? stored.fullTextTabs : 1;
   merged.triageMulti = stored.triageMulti === true;
+  merged.folderTreeCollapsed = Array.isArray(stored.folderTreeCollapsed) ? [...new Set(stored.folderTreeCollapsed.filter((id):id is string => typeof id === 'string'))] : [];
   merged.recentFolderIds = Array.isArray(stored.recentFolderIds)
     ? [...new Set(stored.recentFolderIds.filter((x): x is string => typeof x === 'string'))].slice(0, RECENT_FOLDERS)
     : [];

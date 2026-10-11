@@ -1665,5 +1665,11 @@
   "iconMore": { "message": "更多" },
   "translatedBadge": { "message": "已翻譯" },
   "quoteLabel": { "message": "引用" },
-  "quoteAsSeen": { "message": "依 X 上顯示的內容儲存" }
+  "quoteAsSeen": { "message": "依 X 上顯示的內容儲存" },
+  "folderParent": {"message":"父資料夾"},
+  "folderRoot": {"message":"最上層"},
+  "treeExpand": {"message":"展開"},
+  "treeCollapse": {"message":"收合"},
+  "folderDeleteTree": {"message":"刪除 $FOLDERS$ 個資料夾（含子孫），並從 $POSTS$ 則貼文移除這些歸屬。貼文保留。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
+  "folderAncestorsRemain": {"message":"祖先資料夾及其歸屬保留。"}
 }

@@ -6,6 +6,7 @@ import { createFolderMenu } from '../shared/folderCreateMenu';
 export function FolderEdit(props: {
   folder?: Folder;
   existing?: Folder[];
+  defaultParentId?: string;
   onSaved: (created?: Folder) => void;
   onCancel?: () => void;
   onRequestDelete?: () => void;
@@ -19,6 +20,8 @@ export function FolderEdit(props: {
     const menu = createFolderMenu({
       theme: { fg: 'var(--text-primary)', border: 'var(--border-strong)', hover: 'var(--fill-ghost-hover)', accent: 'var(--fill-accent)' },
       folder,
+      parents: () => latest.current.existing ?? [],
+      defaultParentId: props.defaultParentId,
       head: false,
       preview: false,
       lockWhileSaving: true,

@@ -33,6 +33,7 @@ import {
   type Folder,
 } from './models';
 import { t } from './strings';
+import { getSettings, updateSettings } from './settings';
 import { canParent, descendants, flattenFolders, sanitizeParents, withAncestors, withoutDescendants } from './folderTree';
 import { assignOrder } from './ordering';
 import { sanitizeSegments, type Segment } from './segments';
@@ -883,3 +884,7 @@ export function deleteAllData(): Promise<void> {
     await chrome.storage.local.remove?.(KEY_LAST_ACCOUNT);
   });
 }
+
+/** Tree state is a device-local setting; callers never access chrome.storage directly. */
+export const getCollapsedFolders = async ():Promise<string[]> => (await getSettings()).folderTreeCollapsed ?? [];
+export const setCollapsedFolders = async (ids:string[]):Promise<void> => { await updateSettings({folderTreeCollapsed:[...new Set(ids)]}); };
