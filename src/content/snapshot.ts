@@ -1,4 +1,5 @@
 import type { QuoteSnapshot, Snapshot } from '../shared/models';
+import type { FillView } from '../shared/storage';
 import { mergeSegments, safeHref, type Segment } from '../shared/segments';
 import { isTranslatedQuoteText, findQuote, ownPostLink, queryAllFirst, queryAllInQuote, queryAllOwn, queryFirst, queryFirstInQuote, queryOwn } from '../shared/selectors';
 
@@ -53,8 +54,9 @@ function imageReady(img: HTMLImageElement | undefined): boolean {
  * 保存済みポストの補完 (fillMissing / missingFields) に渡す、画面側の値。
  * 読み込み途中の項目 (アイコン・メディア) は外す。空の値を「画面側の値」として扱わないため。
  */
-export function fillSource(ex: Extracted): Snapshot {
-  const source = { ...ex.snapshot };
+export function fillSource(ex: Extracted): FillView {
+  const { author, handle, avatar, media, hasVideo, hasLink, videoPoster, createdAt, quote } = ex.snapshot;
+  const source: FillView = { author, handle, avatar, media, hasVideo, hasLink, videoPoster, createdAt, quote };
   if (ex.avatarPending) delete source.avatar;
   if (ex.mediaPending) {
     source.media = [];

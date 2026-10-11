@@ -2,7 +2,6 @@
 import { fillMissing, getFillViews, missingFields, onDataChanged, type FillView } from '../shared/storage';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible, pathListeners, SAVED_TTL_MS } from './collect';
-import type { Snapshot } from '../shared/models';
 import { fillSource, type Extracted } from './snapshot';
 
 interface MediaDeps {
@@ -11,7 +10,7 @@ interface MediaDeps {
   path(): string;
   visible(): Extracted[];
   fillViews(accountId: string): Promise<Map<string, FillView>>;
-  backfill(items: { tweetId: string; snapshot: Snapshot }[], accountId: string): Promise<number>;
+  backfill(items: { tweetId: string; snapshot: FillView }[], accountId: string): Promise<number>;
 }
 
 export class VisibleMediaBackfill {
@@ -53,7 +52,7 @@ export class VisibleMediaBackfill {
     const present = new Set(visible.map(it => it.tweetId));
     for (const id of this.checked) if (!present.has(id)) this.checked.delete(id);
     // 補える項目があるものだけ送る。読み込み途中 (アイコン・メディア) のものは、読み込まれてから補えるよう、確認済みにしない
-    const sources: { tweetId: string; snapshot: Snapshot }[] = [];
+    const sources: { tweetId: string; snapshot: FillView }[] = [];
     for (const it of visible) {
       const view = this.cache.views.get(it.tweetId);
       if (!view || this.checked.has(it.tweetId)) continue;

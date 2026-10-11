@@ -575,7 +575,7 @@ export function importData(json: unknown): Promise<number> {
   });
 }
 
-type FillItem = { tweetId: string; snapshot?: Bookmark['snapshot'] };
+type FillItem = { tweetId: string; snapshot?: FillView };
 
 /** 補えるかの判定に要る、保存側の項目 */
 export type FillView = Pick<Snapshot, 'author' | 'handle' | 'avatar' | 'media' | 'hasVideo' | 'hasLink' | 'videoPoster' | 'createdAt' | 'quote'>;
@@ -596,7 +596,7 @@ function fillQuote(saved: QuoteSnapshot, incoming: QuoteSnapshot): QuoteSnapshot
  * 保存側が空で、画面側に値がある項目だけを返す。既にある値は上書きしない。補えるものが無ければ null。
  * 保存データの更新 (fillMissing) と、画面側での「補える項目があるか」の判定の両方が、この 1 か所の規則を使う。
  */
-export function missingFields(saved: FillView, incoming: Snapshot): Partial<Snapshot> | null {
+export function missingFields(saved: FillView, incoming: FillView): Partial<Snapshot> | null {
   const patch: Partial<Snapshot> = {};
   if (!saved.avatar && httpsUrl(incoming.avatar)) patch.avatar = incoming.avatar;
   const media = incoming.media.filter(httpsUrl);
