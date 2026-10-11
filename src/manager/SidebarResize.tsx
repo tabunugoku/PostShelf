@@ -29,6 +29,10 @@ export function fitSidebarWidth(sidebar: HTMLElement, viewport: number): number 
       const css = getComputedStyle(child);
       return css.display !== 'none' && css.position !== 'absolute' && css.position !== 'fixed';
     });
+    // 行を内容の幅にしてから測る。そうしないと、件数の margin-left:auto が、余っている幅 (= いまのサイドバーの幅) の分に解決され、
+    // ダブルクリックのたびに少しずつ広がってしまう
+    const rowWidth = row.style.width;
+    row.style.width = 'max-content';
     const content = children.reduce((sum, child) => {
       const css = getComputedStyle(child);
       // 名前は省略されて隠れている分も含めた、本来の幅で測る
@@ -37,6 +41,7 @@ export function fitSidebarWidth(sidebar: HTMLElement, viewport: number): number 
         : Math.max(child.getBoundingClientRect().width, child.scrollWidth, pixels(css.width), pixels(css.minWidth));
       return sum + measured + pixels(css.marginLeft) + pixels(css.marginRight);
     }, 0);
+    row.style.width = rowWidth;
     const gaps = Math.max(0, children.length - 1) * pixels(style.columnGap || style.gap);
     const padding = pixels(style.paddingLeft) + pixels(style.paddingRight) + pixels(style.borderLeftWidth) + pixels(style.borderRightWidth);
     longest = Math.max(longest, content + gaps + padding);

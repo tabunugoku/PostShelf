@@ -181,7 +181,7 @@ function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: nu
   );
 }
 
-/** 所属先のチップ。左のアイコンで「親 › 子 › 孫」の経路を開閉し、名前の部分を押すと所属を外す。開いた状態は保存しない */
+/** 所属先のチップ。左のアイコンで「親 › 子 › 孫」の経路を開閉し、× を押すと所属を外す (名前だけを押しても外れない)。開いた状態は保存しない */
 function MembershipChip(props: { b: Bookmark; f: Folder; folders: readonly Folder[]; removable: boolean; onRemove: (id: string) => void }) {
   const { b, f } = props;
   const [expanded, setExpanded] = useState(false);
@@ -191,14 +191,7 @@ function MembershipChip(props: { b: Bookmark; f: Folder; folders: readonly Folde
   const removeLabel = t('removeFromFolder', displayName(f));
   const name = expanded && hasPath ? path : displayName(f);
   return (
-    <span
-      class="tag folder-membership"
-      data-member-folder={f.id}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (removable && !(e.target as HTMLElement).closest('button')) props.onRemove(f.id);
-      }}
-    >
+    <span class="tag folder-membership" data-member-folder={f.id} onClick={(e) => e.stopPropagation()}>
       {hasPath ? (
         <button
           type="button"
@@ -215,10 +208,11 @@ function MembershipChip(props: { b: Bookmark; f: Folder; folders: readonly Folde
       ) : (
         <Icon name={f.icon} color={f.color} />
       )}
-      {removable ? (
+      <span class="folder-chip-label">{name}</span>
+      {removable && (
         <button
           type="button"
-          class="chip folder-chip-label"
+          class="chip folder-chip-remove"
           title={removeLabel}
           aria-label={removeLabel}
           onClick={(e) => {
@@ -226,10 +220,8 @@ function MembershipChip(props: { b: Bookmark; f: Folder; folders: readonly Folde
             props.onRemove(f.id);
           }}
         >
-          {name} <Icon name="ti-x" />
+          <Icon name="ti-x" />
         </button>
-      ) : (
-        <span class="folder-chip-label">{name}</span>
       )}
     </span>
   );
