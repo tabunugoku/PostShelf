@@ -2,7 +2,7 @@
 import { fillMissing, getFillViews, missingFields, onDataChanged, type FillView } from '../shared/storage';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible, pathListeners, SAVED_TTL_MS } from './collect';
-import { fillSource, type Extracted } from './snapshot';
+import { fillSource, hasPending, type Extracted } from './snapshot';
 
 interface MediaDeps {
   now(): number;
@@ -59,7 +59,7 @@ export class VisibleMediaBackfill {
       const snapshot = fillSource(it);
       const patch = missingFields(view, snapshot);
       if (!patch) continue;
-      if (!it.mediaPending && !it.avatarPending && !it.quoteAvatarPending) this.checked.add(it.tweetId);
+      if (!hasPending(it)) this.checked.add(it.tweetId);
       sources.push({ tweetId: it.tweetId, snapshot });
     }
     return sources.length ? this.d.backfill(sources, account) : 0;
