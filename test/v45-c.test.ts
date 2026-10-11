@@ -3,7 +3,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { collectVisible } from '../src/content/collect';
 import { VisibleMediaBackfill } from '../src/content/media';
-import { addCollected, fillMissing, getSavedIds, setAccountScope } from '../src/shared/storage';
+import { addCollected, fillMissing, getFillViews, getSavedIds, setAccountScope } from '../src/shared/storage';
 import { AutoCollector, defaultDeps } from '../src/content/autocollect';
 
 let data: Record<string, unknown>;
@@ -19,8 +19,8 @@ function seed(id: string, extra = {}, accountId = 'me') {
 }
 function watcher() {
   let clock = 0, account: string | null = 'me', path = '/home';
-  const savedIds = vi.fn(getSavedIds), fill = vi.fn(fillMissing);
-  const w = new VisibleMediaBackfill({ now: () => clock, accountId: () => account, path: () => path, visible: () => collectVisible(), savedIds, backfill: fill });
+  const savedIds = vi.fn(getFillViews), fill = vi.fn(fillMissing);
+  const w = new VisibleMediaBackfill({ now: () => clock, accountId: () => account, path: () => path, visible: () => collectVisible(), fillViews: savedIds, backfill: fill });
   return { w, savedIds, fill, time: (n:number) => clock=n, account: (id:string|null) => account=id, path: (p:string) => path=p };
 }
 
@@ -59,7 +59,7 @@ it('invalidates saved IDs on data changes and scopes attempts by account and pat
   const r=watcher(); await r.w.update(); seed('102'); r.w.invalidate();
   expect(await r.w.update()).toBe(1);
   seed('102',{},'sample_other'); r.account('sample_other'); expect(await r.w.update()).toBe(1);
-  r.path('/sample_image/status/102'); await r.w.update(); expect(r.fill).toHaveBeenCalledTimes(3);
+  seed('102',{},'sample_other'); r.path('/sample_image/status/102'); await r.w.update(); expect(r.fill).toHaveBeenCalledTimes(3);
   r.account(null); await r.w.update(); expect(r.fill).toHaveBeenCalledTimes(3);
 });
 
