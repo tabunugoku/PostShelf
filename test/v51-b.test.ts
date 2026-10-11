@@ -133,7 +133,7 @@ it('時間切れ後の読み直しがスクロールの量と間隔と終端判�
     });
     await (world.collector as any).loop(0);
     expect(world.collector.state!.status).toBe('done');
-    return { scrolls: scrollBy.mock.calls, waits: world.clock.sleeps.filter(ms => ms === WAIT_STEP_MS) };
+    return { scrolls: scrollBy.mock.calls, waits: world.clock.sleeps.filter((ms) => ms === WAIT_STEP_MS) };
   };
   const normal = await run(false);
   const timeout = await run(true);

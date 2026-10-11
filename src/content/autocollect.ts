@@ -455,7 +455,7 @@ export class AutoCollector {
         sources.push({ tweetId: it.tweetId, snapshot: source });
       } else {
         // 20 件ごとの保存前にも次の画面で見える。保存間隔を保ち、seq と共有する保留内容の欠けだけを補う。
-        const pending = this.pending.find(entry => entry.tweetId === it.tweetId);
+        const pending = this.pending.find((entry) => entry.tweetId === it.tweetId);
         const patch = pending ? missingFields(pending.snapshot, source) : null;
         if (pending && patch) pending.snapshot = { ...pending.snapshot, ...patch };
       }

@@ -116,7 +116,7 @@ export function queryEveryCandidate<T extends Element = Element>(root: ParentNod
 export function queryAllFirst<T extends Element = Element>(root: ParentNode, key: SelKey): FoundAll<T> {
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
-    const els = [...root.querySelectorAll<T>(list[i])].filter(el => avatarCandidate(el, key));
+    const els = [...root.querySelectorAll<T>(list[i])].filter((el) => avatarCandidate(el, key));
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
@@ -145,7 +145,7 @@ export function queryAllInQuote<T extends Element = Element>(root: Element, key:
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
     const els = [...root.querySelectorAll<T>(list[i])]
-      .filter(el => !closestFirst(el, 'nestedQuote') && avatarCandidate(el, key));
+      .filter((el) => !closestFirst(el, 'nestedQuote') && avatarCandidate(el, key));
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
