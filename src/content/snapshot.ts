@@ -1,4 +1,5 @@
 import type { QuoteSnapshot, Snapshot } from '../shared/models';
+import type { FillView } from '../shared/storage';
 import { mergeSegments, safeHref, type Segment } from '../shared/segments';
 import { isTranslatedQuoteText, findQuote, ownPostLink, queryAllFirst, queryAllInQuote, queryAllOwn, queryFirst, queryFirstInQuote, queryOwn } from '../shared/selectors';
 
@@ -38,6 +39,35 @@ export interface Extracted {
   snapshot: Snapshot;
   /** DOM のメディアがまだ読めない印。snapshot には含めず、保存しない。 */
   mediaPending?: true;
+  /** プロフィールアイコンの img はあるが、まだ読み込まれていない印 (src が空、または読み込み前)。snapshot には含めず、保存しない。 */
+  avatarPending?: true;
+  /** 引用のアイコンについての、avatarPending と同じ印 */
+  quoteAvatarPending?: true;
+}
+
+/** 画像が読み込み済みか。src が空のままの img は、src プロパティがページの URL を返すことがあるので、属性で見る */
+function imageReady(img: HTMLImageElement | undefined): boolean {
+  return !!img && !!img.getAttribute('src')?.trim() && img.complete && img.naturalWidth > 0;
+}
+
+/**
+ * 保存済みポストの補完 (fillMissing / missingFields) に渡す、画面側の値。
+ * 読み込み途中の項目 (アイコン・メディア) は外す。空の値を「画面側の値」として扱わないため。
+ */
+export function fillSource(ex: Extracted): FillView {
+  const { author, handle, avatar, media, hasVideo, hasLink, videoPoster, createdAt, quote } = ex.snapshot;
+  const source: FillView = { author, handle, avatar, media, hasVideo, hasLink, videoPoster, createdAt, quote };
+  if (ex.avatarPending) delete source.avatar;
+  if (ex.mediaPending) {
+    source.media = [];
+    delete source.hasVideo;
+    delete source.videoPoster;
+  }
+  if (source.quote && ex.quoteAvatarPending) {
+    source.quote = { ...source.quote };
+    delete source.quote.avatar;
+  }
+  return source;
 }
 
 /** article 要素から、ポストの ID だけを軽く読む (extractTweet と同じ取り出し方。スナップショットは作らない)。取れなければ null */
@@ -89,7 +119,8 @@ export function extractTweet(article: Element): Extracted | null {
   const text = textEl?.textContent?.trim() ?? '';
   const segments = textEl ? extractSegments(textEl) : undefined;
   const truncated = !!queryOwn(article, 'showMore'); // たたまれた状態か (実機未確認の推測。全文は、保存のあと別に取る)
-  const avatar = queryOwn<HTMLImageElement>(article, 'avatar')?.el.src || undefined;
+  const avatarEl = queryOwn<HTMLImageElement>(article, 'avatar')?.el;
+  const avatar = avatarEl?.src || undefined;
   const media = queryAllOwn<HTMLImageElement>(article, 'media').els.filter((i) => i.getAttribute('src')?.trim()).map((i) => i.src).filter(Boolean);
 
   // 外部リンク: リンクカード、または本文中の t.co 等の外部 URL (メンション/ハッシュタグ/ポスト間リンクは除く)。推測 (実機未確認)
@@ -101,8 +132,12 @@ export function extractTweet(article: Element): Extracted | null {
   // 自動翻訳後に出る「この翻訳を評価」のボタンを、翻訳済みの目印にする。実機で確認した範囲の推測。
   const translated = !!queryOwn(article, 'translationVote');
   const quote = extractQuote(article);
+  const quoteEl = quote ? findQuote(article) : null;
+  const quoteAvatarEl = quoteEl ? queryFirstInQuote<HTMLImageElement>(quoteEl, 'avatar')?.el : undefined;
   return {
     tweetId,
+    ...(avatarEl && !imageReady(avatarEl) ? { avatarPending: true as const } : {}),
+    ...(quoteAvatarEl && !imageReady(quoteAvatarEl) ? { quoteAvatarPending: true as const } : {}),
     ...((hasVideo ? !videoPoster : !media.length && !!queryOwn(article, 'photoLink')) ? { mediaPending: true as const } : {}),
     snapshot: {
       ...(quote ? { quote } : {}),

@@ -17,7 +17,7 @@ import {
   fullTextPlan, getCollectRun, getFullTextTab, getFullTextTries, getFullTextRun, getSettings, recordFullTextTry, saveFullTextRun, setFullTextTab,
   type FullTextKind, type FullTextRun, type FullTextStop, type FullTextPlan,
 } from '../shared/settings';
-import { listAllTruncated, refreshFullText } from '../shared/storage';
+import { fillMissing, listAllTruncated, refreshFullText, type FillView } from '../shared/storage';
 
 export const GAP_MIN_MS = 4000;
 export const GAP_MAX_MS = 8000;
@@ -32,7 +32,10 @@ export interface FullTextItem {
   accountId: string;
   tweetId: string;
 }
-export type AskResult = { ok: true; text: string; segments?: Segment[]; translated?: true } | { ok: false; reason: 'wait' | 'limit' };
+/** fill: 読んだ snapshot の、補える項目 (アイコンなど)。本文の更新とは別に、保存済みの空の項目へ入れる */
+export type AskResult =
+  | { ok: true; text: string; segments?: Segment[]; translated?: true; fill?: FillView }
+  | { ok: false; reason: 'wait' | 'limit' };
 
 export interface FullTextDeps {
   now(): number;
@@ -47,6 +50,8 @@ export interface FullTextDeps {
   collectActive(): Promise<boolean>;
   lookup(item: FullTextItem): Promise<Bookmark | undefined>;
   refresh(item: FullTextItem, full: { text: string; segments?: Segment[]; translated?: true }): Promise<boolean>;
+  /** 読んだ snapshot の、補える項目を保存済みの空の項目へ入れる。本文の更新が失敗しても行う */
+  fill(item: FullTextItem, view: FillView): Promise<number>;
   tries(): Promise<Record<string, number>>;
   recordTry(key: string, now: number): Promise<void>;
   saveRun(r: FullTextRun): Promise<void>;
@@ -73,6 +78,7 @@ export function defaultDeps(): FullTextDeps {
     },
     lookup: async (it) => (await listAllTruncated()).find((b) => b.accountId === it.accountId && b.tweetId === it.tweetId),
     refresh: (it, full) => refreshFullText(it.accountId, it.tweetId, full),
+    fill: (it, view) => fillMissing([{ tweetId: it.tweetId, snapshot: view }], it.accountId),
     tries: () => getFullTextTries(),
     recordTry: (key, now) => recordFullTextTry(key, now, RETRY_MS),
     saveRun: (r) => saveFullTextRun(r),
@@ -338,7 +344,18 @@ export class FullTextQueue {
           if (r === null) return this.aborted ? 'abort' : 'fail';
           if (this.aborted) return 'abort';
           if (r?.ok) {
-            if (await this.d.refresh(item, { text: r.text, segments: r.segments, ...(r.translated === true ? { translated: true } : {}) })) return 'ok';
+            let refreshed = false;
+            try {
+              refreshed = await this.d.refresh(item, {
+                text: r.text,
+                segments: r.segments,
+                ...(r.translated === true ? { translated: true } : {}),
+              });
+            } finally {
+              // 本文の更新が失敗しても、補える項目は補う
+              if (r.fill) await this.d.fill(item, r.fill).catch(() => 0);
+            }
+            if (refreshed) return 'ok';
             return (await this.d.lookup(item)) ? 'fail' : 'skip';
           }
           if (r && !r.ok && r.reason === 'limit') {

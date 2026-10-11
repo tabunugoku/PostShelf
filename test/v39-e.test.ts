@@ -29,7 +29,7 @@ describe.each(['tweet-quote-detail', 'tweet-quote-timeline'])('%s', (fixture) =>
     expect(findArticle('222')).toBeNull();
     const reply = vi.fn();
     handleMessage({ type: 'readFullText', tweetId: '111' }, reply);
-    expect(reply).toHaveBeenCalledWith({ ok: true, text: '本体の架空の全文です。', segments: undefined });
+    expect(reply).toHaveBeenCalledWith({ ok: true, text: '本体の架空の全文です。', segments: undefined, fill: expect.objectContaining({ handle: '@sample_main' }) });
   });
   it('uses the own status-link fallback when the main time is absent', () => {
     const article = load();

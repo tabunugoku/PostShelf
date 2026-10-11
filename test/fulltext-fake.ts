@@ -10,7 +10,7 @@ export function fakeFullText(tabs:1|2|3=3) {
  const d:FullTextDeps={...defaultDeps(),now:()=>Date.now(),random:()=>0,sleep,plan,
   collectActive:vi.fn(async()=>false),
   lookup:async it=>({snapshot:{url:'https://x.com/sample_one/status/'+it.tweetId}} as Bookmark),
-  tries:async()=>({}),recordTry:async()=>{},refresh:async()=>true,
+  fill:async()=>0,tries:async()=>({}),recordTry:async()=>{},refresh:async()=>true,
   openTab:async url=>{const id=++serial;live.add(id);max=Math.max(max,live.size);opened.push({id,at:Date.now(),url});return id;},
   closeTab:async id=>{live.delete(id);},setTab:async()=>{},
   ask:async(_tab,id):Promise<AskResult>=>{await sleep(4500);return {ok:true,text:'架空の全文 '+id,translated:true};},

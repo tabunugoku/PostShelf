@@ -17,7 +17,7 @@ const seed = (snapshot: Snapshot, accountId = 'me') => {
   data.bookmarks = { ...(data.bookmarks as object), [`${accountId}:123`]: b };
   return structuredClone(b);
 };
-const fill = (snapshot: Snapshot, accountId = 'me') => storage.backfillMedia([{ tweetId: '123', snapshot }], accountId);
+const fill = (snapshot: Snapshot, accountId = 'me') => storage.fillMissing([{ tweetId: '123', snapshot }], accountId);
 
 it.each([
   [snap(), snap({ media: [image], text: '別の架空の本文', translated: true }), { media: [image] }],

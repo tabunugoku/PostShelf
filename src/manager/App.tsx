@@ -67,6 +67,7 @@ import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
 import { Triage } from './Triage';
 import { SearchContext } from './PostText';
+import { AvatarContext, buildAvatarFallback } from './avatars';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
 import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
@@ -454,6 +455,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     return n;
   };
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
+  const avatarFallback = useMemo(() => buildAvatarFallback(bookmarks), [bookmarks]);
   /** 仕分けモードが「削除されたポストを飛ばす」ために見る ID。保存データが変わらない再描画では、同じ Set を渡す */
   const liveIds = useMemo(() => new Set(bookmarks.map((b) => b.tweetId)), [bookmarks]);
   const viewerBookmark = viewer ? bookmarks.find((b) => b.tweetId === viewer.tweetId) : undefined;
@@ -1058,6 +1060,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   }, [sentinel, renderCount, remaining, resetKey, expanding]);
   const rows = (
     <SearchContext.Provider value={search}>
+    <AvatarContext.Provider value={avatarFallback}>
     <div class={`rows view-${view}${compact ? ' compact' : ''}`} ref={listRef} onKeyDown={onListKeyDown} role="list">
       {visible.map((b) => (
         <Card
@@ -1102,6 +1105,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         </button>
       </div>
     )}
+    </AvatarContext.Provider>
     </SearchContext.Provider>
   );
 
@@ -1339,7 +1343,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             body
           )}
         </main>
-        {dialogs}
+        <AvatarContext.Provider value={avatarFallback}>{dialogs}</AvatarContext.Provider>
       </div>
     );
   }
@@ -1413,7 +1417,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </>
         )}
       </main>
-      {dialogs}
+      <AvatarContext.Provider value={avatarFallback}>{dialogs}</AvatarContext.Provider>
     </div>
   );
 }
