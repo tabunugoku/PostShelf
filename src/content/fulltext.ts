@@ -7,7 +7,7 @@
 import { fillMissing, refreshFullText } from '../shared/storage';
 import { getCurrentAccount } from './account';
 import { findArticle } from './messages';
-import { extractTweet, fillSource, type Extracted } from './snapshot';
+import { extractTweet, fillSource, hasPending, type Extracted } from './snapshot';
 
 const STATUS_PATH = /^\/[^/]+\/status\/(\d+)/;
 const checked = new Set<string>();
@@ -18,7 +18,7 @@ async function fillFromPage(accountId: string, ex: Extracted): Promise<void> {
   const key = `${accountId}:${ex.tweetId}`;
   if (filled.has(key)) return;
   await fillMissing([{ tweetId: ex.tweetId, snapshot: fillSource(ex) }], accountId).catch(() => 0);
-  if (!ex.mediaPending && !ex.avatarPending && !ex.quoteAvatarPending) filled.add(key);
+  if (!hasPending(ex)) filled.add(key);
 }
 
 /** いまのページが個別ページで、主役のポストが全文なら、保存済みの分を更新する。更新したら true */

@@ -45,6 +45,9 @@ export interface Extracted {
   quoteAvatarPending?: true;
 }
 
+/** まだ読み込み中の項目 (メディア・アイコン・引用のアイコン) があるか。取り込みの待ちと、補完の確認済みの判定が、この 1 か所を使う */
+export const hasPending = (ex: Extracted): boolean => !!(ex.mediaPending || ex.avatarPending || ex.quoteAvatarPending);
+
 /** 画像が読み込み済みか。src が空のままの img は、src プロパティがページの URL を返すことがあるので、属性で見る */
 function imageReady(img: HTMLImageElement | undefined): boolean {
   return !!img && !!img.getAttribute('src')?.trim() && img.complete && img.naturalWidth > 0;
@@ -131,6 +134,10 @@ export function extractTweet(article: Element): Extracted | null {
 
   // 自動翻訳後に出る「この翻訳を評価」のボタンを、翻訳済みの目印にする。実機で確認した範囲の推測。
   const translated = !!queryOwn(article, 'translationVote');
+  // 写真が未読み込み: 写真リンクがあるのに画像が 0 枚、または、1 枚以上あるのにリンクの数より少ない (複数枚の一部だけ読み込み済み)。
+  // リンクと画像の数が X の DOM で常に合うかは実機未確認の推測 (自分の部分だけを数える。合わなければ待ちが 1 ポストあたり最大 4 秒になるだけで、保存は止まらない)
+  const photoLinks = queryAllOwn(article, 'photoLink').els.length;
+  const photoPending = photoLinks > 0 && media.length < photoLinks;
   const quote = extractQuote(article);
   const quoteEl = quote ? findQuote(article) : null;
   const quoteAvatarEl = quoteEl ? queryFirstInQuote<HTMLImageElement>(quoteEl, 'avatar')?.el : undefined;
@@ -138,7 +145,7 @@ export function extractTweet(article: Element): Extracted | null {
     tweetId,
     ...(avatarEl && !imageReady(avatarEl) ? { avatarPending: true as const } : {}),
     ...(quoteAvatarEl && !imageReady(quoteAvatarEl) ? { quoteAvatarPending: true as const } : {}),
-    ...((hasVideo ? !videoPoster : !media.length && !!queryOwn(article, 'photoLink')) ? { mediaPending: true as const } : {}),
+    ...((hasVideo ? !videoPoster : photoPending) ? { mediaPending: true as const } : {}),
     snapshot: {
       ...(quote ? { quote } : {}),
       ...(translated ? { translated: true } : {}),
