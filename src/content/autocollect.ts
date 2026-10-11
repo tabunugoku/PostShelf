@@ -12,7 +12,7 @@
  * 実機未確認 (docs/MANUAL_TEST.md): X の一覧の仮想化への追従、終わりの判定、制限・エラー表示のセレクタ。
  * 判定の条件は定数にして、調整しやすくしてある。
  */
-import { isBookmarksPath, queryAllFirst, queryFirst, timelineLoading } from '../shared/selectors';
+import { hasTweetStatusLink, isBookmarksPath, queryAllFirst, queryFirst, timelineLoading } from '../shared/selectors';
 import {
   clearCollectCommand, clearCollectRun, getCollectRun, getSettings, onCollectCommand, onCollectRunChanged, peekCollectCommand, saveCollectRun, setCollectOffer,
   type CollectCap, type CollectCommand, type CollectReason, type CollectRun, type CollectSpeed,
@@ -22,6 +22,7 @@ import { requestFullTextBatch } from '../shared/cacheRequest';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible, pathListeners } from './collect';
 import { fillSource, hasPending, tweetIdOf, type Extracted } from './snapshot';
+import { SettleDiagnosis } from './settleDiagnosis';
 
 /** スクロールごとの待ち時間 (ミリ秒) の範囲 */
 export const SPEED_RANGES: Record<CollectSpeed, [number, number]> = { slow: [2000, 4000], normal: [1000, 2500] };
@@ -146,6 +147,7 @@ export class AutoCollector {
   private mediaRetry = new Map<string, Extracted>();
   /** 8 秒待っても pending だった ID。次の画面で 1 回だけ確認し、保存はしない */
   private timedOut = new Set<string>();
+  private diagnosis = new SettleDiagnosis(() => this.d.now());
   private streak = 0;
   /** 上限の数え始め (再開のたびに、その時点の imported から数え直す) */
   private base = 0;
@@ -307,6 +309,7 @@ export class AutoCollector {
   private begin(token: number, fresh: boolean, rewind: boolean): void {
     const s = this.state!;
     if (fresh) {
+      this.diagnosis.reset();
       this.timedOut.clear();
       this.truncatedIds = [];
       this.adopted = false;
@@ -415,7 +418,7 @@ export class AutoCollector {
     await this.rereadTimedOut(items, saved, s.accountId);
     if (token !== this.token) return 0;
     let fresh = 0;
-    for (const it of items) {
+    for (const [index, it] of items.entries()) {
       if (this.seen.has(it.tweetId)) continue; // 同じ取り込みの中で、同じポストを二重に数えない
       this.seen.add(it.tweetId);
       fresh++;
@@ -428,6 +431,7 @@ export class AutoCollector {
         s.recentPostDate = sorted[Math.ceil(sorted.length / 2) - 1];
       }
       if (!saved.has(it.tweetId) && hasPending(it)) {
+        this.diagnosis.begin(it, index + 1);
         this.mediaRetry.set(it.tweetId, it);
         this.seq.push({ tweetId: it.tweetId }); // 保存前も画面に出た順序を保つ
         s.imported++; // 上限の数え方を変えず、保存だけを読み込みのあとへ回す
@@ -436,6 +440,7 @@ export class AutoCollector {
         s.skipped++;
       }
       else {
+        this.diagnosis.checkUnflagged(it);
         this.seq.push(it);
         this.pending.push(it);
         s.imported++;
@@ -469,17 +474,23 @@ export class AutoCollector {
    * 待ちの長さは、実際の時計ではなく待った刻みの合計で数える。一時停止・停止 (token の変化) では、待たずに戻る
    */
   private async settle(token: number): Promise<void> {
+    this.diagnosis.screen();
     let waited = 0;
     while (this.mediaRetry.size) {
       const step = SETTLE_POLL_MS + Math.round(this.d.random() * SETTLE_POLL_JITTER_MS);
       await this.d.sleep(step);
       waited += step;
       if (token !== this.token) return; // 残りは flush(true) が、最後に読めた値で保存する
+      this.diagnosis.step(step);
       const visible = new Map(this.d.visible().map((it) => [it.tweetId, it]));
       for (const [id, last] of [...this.mediaRetry]) {
         const current = visible.get(id);
-        if (!current) this.acceptMedia(last);
+        if (!current) {
+          this.diagnosis.complete(id, 'vanished', hasTweetStatusLink(document, id) ? 'unreadable' : 'removed');
+          this.acceptMedia(last);
+        }
         else if (!hasPending(current) || waited >= SETTLE_MAX_MS) {
+          this.diagnosis.complete(id, hasPending(current) ? 'timedOut' : 'resolved');
           if (hasPending(current)) this.timedOut.add(id);
           this.acceptMedia(current);
         }
@@ -504,7 +515,10 @@ export class AutoCollector {
     this.flushing = this.flushing.then(async () => {
       if (!this.state) return;
       // 停止時には追加の読み取りをせず、保留していた最初の内容も保存する。
-      if (final) for (const it of this.mediaRetry.values()) this.acceptMedia(it);
+      if (final) for (const it of this.mediaRetry.values()) {
+        this.diagnosis.complete(it.tweetId, 'forced');
+        this.acceptMedia(it);
+      }
       const deferredAt = this.seq.findIndex((it) => this.mediaRetry.has(it.tweetId));
       const sent = deferredAt < 0 ? this.seq : this.seq.slice(0, deferredAt);
       const ready = new Set(sent.map((it) => it.tweetId));
@@ -540,6 +554,7 @@ export class AutoCollector {
     await this.flush(true);
     s.status = reason === 'limit' ? 'limit' : 'paused';
     s.reason = reason;
+    this.diagnosis.report();
     this.emit();
   }
 
@@ -591,6 +606,7 @@ export class AutoCollector {
     this.timedOut.clear();
     s.reason = 'user';
     s.resumeAt = undefined;
+    this.diagnosis.report();
     this.emit();
   }
 
@@ -601,6 +617,7 @@ export class AutoCollector {
     s.status = 'done';
     this.timedOut.clear();
     s.reason = undefined;
+    this.diagnosis.report();
     this.emit();
   }
 

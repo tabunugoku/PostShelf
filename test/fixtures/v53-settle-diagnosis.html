@@ -1,0 +1,29 @@
+<!-- 実機未確認の推測: 待ち中に status リンクが絶対 URL に変わり、extractTweet が読めない article と、
+     article 全体が消える場合を区別する。実機の仮想化・DOM の変化は未確認。template は遅い読み込みの模擬用。 -->
+<article data-testid="tweet" id="ready-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-ready-v53.jpg"></div>
+  <div data-testid="User-Name"><span>Sample Ready</span><span>@sample_ready</span></div>
+  <a href="/sample_ready/status/1101"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText">架空の読み込み済み本文。</div>
+</article>
+<article data-testid="tweet" id="main-post">
+  <div data-testid="Tweet-User-Avatar" id="main-avatar"></div>
+  <div data-testid="User-Name" id="main-name"><span>Sample Slow</span><span>@sample_slow</span></div>
+  <a href="/sample_slow/status/1102" id="main-status"><time datetime="2026-01-02"></time></a>
+  <div data-testid="tweetText" id="main-text"></div>
+</article>
+<article data-testid="tweet" id="quote-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-quote-v53.jpg"></div>
+  <div data-testid="User-Name"><span>Sample Quote</span><span>@sample_quote</span></div>
+  <a href="/sample_quote/status/1103"><time datetime="2026-01-03"></time></a>
+  <div data-testid="tweetText">架空の引用つき本文。</div>
+  <div role="link">
+    <div data-testid="Tweet-User-Avatar"></div>
+    <div data-testid="User-Name"><span>Sample Source</span><span>@sample_source</span></div>
+    <div data-testid="tweetText">架空の引用本文。</div>
+  </div>
+</article>
+<template id="late-avatar"><img src="https://pbs.twimg.com/profile_images/sample-slow-v53.jpg"></template>
+<template id="late-photo">
+  <a href="/sample_slow/status/1102/photo/1"><div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample-slow-v53.jpg"></div></a>
+</template>

@@ -14,6 +14,13 @@
  */
 import { isEmojiImageUrl } from './avatar';
 
+/** 診断用の status リンクの存在確認。リンクが残るのに読めない DOM という原因は実機未確認の推測。 */
+export function hasTweetStatusLink(root: ParentNode, tweetId: string): boolean {
+  return queryAllFirst(root, 'statusLink').els.some((link) =>
+    link.getAttribute('href')?.match(/\/status\/([^/?#]+)(?:[/?#]|$)/)?.[1] === tweetId,
+  );
+}
+
 export const CANDIDATES = {
   // 2 番目: X の article は role="article" を持つ (推測)
   tweet: ['article[data-testid="tweet"]', 'article[role="article"]'],
