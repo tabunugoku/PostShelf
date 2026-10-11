@@ -549,6 +549,9 @@ input[type=number]{width:110px}
 .folder-membership .folder-path-toggle{display:inline-flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;min-height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit}
 .folder-membership .folder-path-toggle:hover{background:var(--fill-ghost-hover)}
 .folder-membership .folder-chip-label{min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* 経路を開いたチップは、狭いグリッドのカードでも読めるように、折り返して全部を見せる */
+.folder-membership.expanded,.gc .folder-membership.expanded{white-space:normal;overflow:visible;padding-top:2px;padding-bottom:2px}
+.folder-membership.expanded .folder-chip-label{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
 .folder-membership .folder-chip-remove{display:inline-flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;min-height:24px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit}
 .folder-membership .folder-chip-remove:hover{background:var(--fill-ghost-hover)}
 .folder-membership .ti-x{font-size:12px;opacity:.7;flex:none}
@@ -556,6 +559,6 @@ input[type=number]{width:110px}
 
 /* タブの管理画面のサイドバーの幅 (端末ごとの設定)。サイドパネルの配置は変えない */
 .layout-wide.surface-tab{grid-template-columns:var(--sidebar-width,240px) minmax(0,1fr)}
-.sidebar-resizer{position:fixed;left:calc(var(--sidebar-width,240px) - 4px);top:0;width:8px;height:100vh;z-index:30;cursor:col-resize;touch-action:none;user-select:none;background:transparent}
+.sidebar-resizer{outline:none;position:fixed;left:calc(var(--sidebar-width,240px) - 4px);top:0;width:8px;height:100vh;z-index:30;cursor:col-resize;touch-action:none;user-select:none;background:transparent}
 .sidebar-resizer::after{content:"";position:absolute;top:0;bottom:0;left:3px;width:2px;background:var(--fill-accent);opacity:0}
 .sidebar-resizer:hover::after,.sidebar-resizer:focus-visible::after,.sidebar-resizer.dragging::after{opacity:1}

@@ -191,7 +191,11 @@ function MembershipChip(props: { b: Bookmark; f: Folder; folders: readonly Folde
   const removeLabel = t('removeFromFolder', displayName(f));
   const name = expanded && hasPath ? path : displayName(f);
   return (
-    <span class="tag folder-membership" data-member-folder={f.id} onClick={(e) => e.stopPropagation()}>
+    <span
+      class={'tag folder-membership' + (expanded && hasPath ? ' expanded' : '')}
+      data-member-folder={f.id}
+      onClick={(e) => e.stopPropagation()}
+    >
       {hasPath ? (
         <button
           type="button"
