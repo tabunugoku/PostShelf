@@ -181,22 +181,70 @@ function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: nu
   );
 }
 
+/** 所属先のチップ。左のアイコンで「親 › 子 › 孫」の経路を開閉し、名前の部分を押すと所属を外す。開いた状態は保存しない */
 function MembershipChip(props: { b: Bookmark; f: Folder; folders: readonly Folder[]; removable: boolean; onRemove: (id: string) => void }) {
   const { b, f } = props;
   const [expanded, setExpanded] = useState(false);
   const path = folderPath(props.folders, f.id, ' › ');
   const hasPath = !!f.parentId && path !== displayName(f);
-  const removable = props.removable && !(b.folderIds.length === 1 && f.id === INBOX_ID);
+  const removable = props.removable && !(b.folderIds.length === 1 && f.id === INBOX_ID); // 未分類しか無いときは外す意味がない
   const removeLabel = t('removeFromFolder', displayName(f));
   const name = expanded && hasPath ? path : displayName(f);
-  return <span class="tag folder-membership" data-member-folder={f.id} onClick={e=>{e.stopPropagation();if(removable && !(e.target as HTMLElement).closest('button'))props.onRemove(f.id);}}>
-    {hasPath ? <button type="button" class="folder-path-toggle" aria-label={t(expanded?'treeCollapse':'treeExpand')+': '+displayName(f)} aria-expanded={expanded} onClick={e=>{e.stopPropagation();setExpanded(!expanded);}}><Icon name={f.icon} color={f.color}/></button> : <Icon name={f.icon} color={f.color}/>}
-    {removable ? <button type="button" class="chip folder-chip-label" title={removeLabel} aria-label={removeLabel} onClick={e=>{e.stopPropagation();props.onRemove(f.id);}}>{name} <Icon name="ti-x"/></button> : <span class="folder-chip-label">{name}</span>}
-  </span>;
+  return (
+    <span
+      class="tag folder-membership"
+      data-member-folder={f.id}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (removable && !(e.target as HTMLElement).closest('button')) props.onRemove(f.id);
+      }}
+    >
+      {hasPath ? (
+        <button
+          type="button"
+          class="folder-path-toggle"
+          aria-label={t(expanded ? 'treeCollapse' : 'treeExpand') + ': ' + displayName(f)}
+          aria-expanded={expanded}
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpanded(!expanded);
+          }}
+        >
+          <Icon name={f.icon} color={f.color} />
+        </button>
+      ) : (
+        <Icon name={f.icon} color={f.color} />
+      )}
+      {removable ? (
+        <button
+          type="button"
+          class="chip folder-chip-label"
+          title={removeLabel}
+          aria-label={removeLabel}
+          onClick={(e) => {
+            e.stopPropagation();
+            props.onRemove(f.id);
+          }}
+        >
+          {name} <Icon name="ti-x" />
+        </button>
+      ) : (
+        <span class="folder-chip-label">{name}</span>
+      )}
+    </span>
+  );
 }
+
+/** 投稿の所属先。いちばん下のフォルダだけを、管理画面のツリーの順に出す */
 function FolderChips(props: { b: Bookmark; folderOf: CardProps['folderOf']; folders?: readonly Folder[]; removable: boolean; onRemove: (id: string) => void }) {
-  const folders = props.folders ?? props.b.folderIds.map(props.folderOf).filter((f): f is Folder=>!!f);
-  return <div class="act">{leafMemberFolders(folders,props.b.folderIds).map(f=><MembershipChip key={f.id} b={props.b} f={f} folders={folders} removable={props.removable} onRemove={props.onRemove}/>)}</div>;
+  const folders = props.folders ?? props.b.folderIds.map(props.folderOf).filter((f): f is Folder => !!f);
+  return (
+    <div class="act">
+      {leafMemberFolders(folders, props.b.folderIds).map((f) => (
+        <MembershipChip key={f.id} b={props.b} f={f} folders={folders} removable={props.removable} onRemove={props.onRemove} />
+      ))}
+    </div>
+  );
 }
 
 /** 行の操作。ポストの ID を引数に取る。親が 1 度だけ作る安定したオブジェクト (中身は最新の状態を見る) なので、Card の memo が効く */

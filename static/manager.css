@@ -544,7 +544,7 @@ input[type=number]{width:110px}
 
 .triage-folder-panel>.folder-tree{max-height:50vh;overflow:auto}
 
-/* Deepest membership chips; icon path toggles are independent of removal. */
+/* 所属先のチップ (いちばん下のフォルダ)。アイコンの経路の開閉は、所属を外す操作とは別 */
 .folder-membership{min-height:32px;padding:0 8px;border-radius:16px;min-width:0;max-width:100%}
 .folder-membership .folder-path-toggle{display:inline-flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;min-height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit}
 .folder-membership .folder-path-toggle:hover{background:var(--fill-ghost-hover)}
@@ -554,7 +554,7 @@ input[type=number]{width:110px}
 .folder-membership .ti-x{font-size:12px;opacity:.7;flex:none}
 .mini .act{margin:0;min-width:0;max-width:40%}
 
-/* Device-local tab sidebar width. The side panel keeps its current layout. */
+/* タブの管理画面のサイドバーの幅 (端末ごとの設定)。サイドパネルの配置は変えない */
 .layout-wide.surface-tab{grid-template-columns:var(--sidebar-width,240px) minmax(0,1fr)}
 .sidebar-resizer{position:fixed;left:calc(var(--sidebar-width,240px) - 4px);top:0;width:8px;height:100vh;z-index:30;cursor:col-resize;touch-action:none;user-select:none;background:transparent}
 .sidebar-resizer::after{content:"";position:absolute;top:0;bottom:0;left:3px;width:2px;background:var(--fill-accent);opacity:0}

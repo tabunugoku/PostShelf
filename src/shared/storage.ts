@@ -227,8 +227,9 @@ function checkColor(color: string): void {
 /** 「すべて」+ 保存済みフォルダ (order 昇順) */
 export async function listFolders(): Promise<Folder[]> {
   const folders = await readFolders();
-  // 「未分類」は常に「すべて」の次。残りは order 昇順
-  return [ALL_FOLDER, ...folders.filter(f => f.id === INBOX_ID), ...flattenFolders(folders.filter(f => f.id !== INBOX_ID)).map(r => r.folder)];
+  // 「未分類」は常に「すべて」の次。残りは、ツリーの表示順 (親 → 子 → 孫。同じ親の中は order 昇順)
+  const userFolders = folders.filter(f => f.id !== INBOX_ID);
+  return [ALL_FOLDER, ...folders.filter(f => f.id === INBOX_ID), ...flattenFolders(userFolders).map(r => r.folder)];
 }
 
 export function createFolder(input: {
@@ -285,7 +286,10 @@ export function updateFolder(
     if (patch.parentId !== undefined) {
       if (!canParent(folders, id, patch.parentId, scope)) throw new StorageError(t('errInvalidImport'));
       if (patch.parentId) next.parentId = patch.parentId; else delete next.parentId;
-      if (next.parentId !== folders[idx].parentId) next.order = folders.filter(f => f.parentId === next.parentId).reduce((m,f) => Math.max(m,f.order), -1) + 1;
+      // 親が変わったら、新しい親の子の末尾に置く
+      if (next.parentId !== folders[idx].parentId) {
+        next.order = folders.filter(f => f.parentId === next.parentId).reduce((m, f) => Math.max(m, f.order), -1) + 1;
+      }
     }
     folders[idx] = next;
     if (patch.parentId !== undefined) await writeReparented(folders);
@@ -294,29 +298,43 @@ export function updateFolder(
   });
 }
 
-/** Count the subtree and affected posts without changing storage. */
-export async function folderDeletionImpact(id:string):Promise<{folders:number;posts:number}> {
- const folders=await readFolders();const ids=new Set([id,...descendants(folders,id).map(f=>f.id)]);
- return {folders:folders.filter(f=>ids.has(f.id)).length,posts:(await listBookmarks()).filter(b=>b.folderIds.some(id=>ids.has(id))).length};
+/** フォルダを削除したときに消える、フォルダ (子・孫を含む) と、所属が外れるポストの数。保存は変えない */
+export async function folderDeletionImpact(id: string): Promise<{ folders: number; posts: number }> {
+  const folders = await readFolders();
+  const ids = new Set([id, ...descendants(folders, id).map(f => f.id)]);
+  const posts = (await listBookmarks()).filter(b => b.folderIds.some(fid => ids.has(fid))).length;
+  return { folders: folders.filter(f => ids.has(f.id)).length, posts };
 }
-/** Reparenting keeps existing memberships and adds the new ancestors in the same write. */
-async function writeReparented(folders:Folder[]):Promise<void> {
- const all=await readAllFolders();const map=await readMap();
- for(const [k,b] of Object.entries(map))if(inScope(b))map[k]={...b,folderIds:withAncestors(b.folderIds,folders)};
- await chrome.storage.local.set({[KEY_FOLDERS]:[...all.filter(f=>!mine(f)),...folders],[KEY_BOOKMARKS]:map});
+
+/** 親を付け替えたときの保存。既存の所属は保ち、新しい祖先への所属を足す。フォルダとポストを 1 回の書き込みで保存する */
+async function writeReparented(folders: Folder[]): Promise<void> {
+  const all = await readAllFolders();
+  const map = await readMap();
+  for (const [k, b] of Object.entries(map)) {
+    if (inScope(b)) map[k] = { ...b, folderIds: withAncestors(b.folderIds, folders) };
+  }
+  await chrome.storage.local.set({ [KEY_FOLDERS]: [...all.filter(f => !mine(f)), ...folders], [KEY_BOOKMARKS]: map });
 }
-/** Remove the target subtree in one write; surviving ancestor memberships remain. */
-export function deleteFolder(id:string):Promise<void> {
- return serial(async()=>{
-  if(isBuiltinFolder(id))throw new StorageError(t('errBuiltinImmutable'));
-  const all=await readAllFolders();const folders=all.filter(mine);
-  if(!folders.some(f=>f.id===id))throw new StorageError(t('errNotFound'));
-  const removed=new Set([id,...descendants(folders,id).map(f=>f.id)]);
-  const next=all.filter(f=>!mine(f) || !removed.has(f.id));const map=await readMap();
-  for(const [k,b] of Object.entries(map))if(inScope(b))map[k]={...b,folderIds:normalizeFolderIds(b.folderIds.filter(id=>!removed.has(id)))};
-  if(Object.values(map).some(b=>inScope(b)&&b.folderIds.includes(INBOX_ID))&&!next.some(f=>mine(f)&&f.id===INBOX_ID))next.push({id:INBOX_ID,name:'',icon:'ti-star',order:0,accountId:scope});
-  await chrome.storage.local.set({[KEY_FOLDERS]:next,[KEY_BOOKMARKS]:map});
- });
+
+/** フォルダを、子・孫ごと 1 回の書き込みで削除する。残る祖先への所属は保つ。所属がすべて無くなったポストは、未分類に入る */
+export function deleteFolder(id: string): Promise<void> {
+  return serial(async () => {
+    if (isBuiltinFolder(id)) throw new StorageError(t('errBuiltinImmutable'));
+    const all = await readAllFolders();
+    const folders = all.filter(mine);
+    if (!folders.some(f => f.id === id)) throw new StorageError(t('errNotFound'));
+    const removed = new Set([id, ...descendants(folders, id).map(f => f.id)]);
+    const next = all.filter(f => !mine(f) || !removed.has(f.id));
+    const map = await readMap();
+    for (const [k, b] of Object.entries(map)) {
+      if (inScope(b)) map[k] = { ...b, folderIds: normalizeFolderIds(b.folderIds.filter(fid => !removed.has(fid))) };
+    }
+    const needsInbox = Object.values(map).some(b => inScope(b) && b.folderIds.includes(INBOX_ID));
+    if (needsInbox && !next.some(f => mine(f) && f.id === INBOX_ID)) {
+      next.push({ id: INBOX_ID, name: '', icon: 'ti-star', order: 0, accountId: scope });
+    }
+    await chrome.storage.local.set({ [KEY_FOLDERS]: next, [KEY_BOOKMARKS]: map });
+  });
 }
 
 // ---- Bookmarks ----
@@ -538,7 +556,9 @@ export function importData(json: unknown): Promise<number> {
     const map = await readMap();
     for (const b of bookmarks) map[bookmarkKey(b.accountId, b.tweetId)] = b;
     const accounts = await read<Record<string, Account>>(KEY_ACCOUNTS, {});
-    for (const [k,b] of Object.entries(map)) map[k] = { ...b, folderIds: withAncestors(b.folderIds, repairedFolders.filter(f => f.accountId === b.accountId)) };
+    for (const [k, b] of Object.entries(map)) {
+      map[k] = { ...b, folderIds: withAncestors(b.folderIds, repairedFolders.filter(f => f.accountId === b.accountId)) };
+    }
     if (!legacy && Array.isArray(d.accounts)) {
       for (const a of d.accounts.filter(validAccount)) {
         const id = accountIdOf(a.id);
@@ -717,7 +737,13 @@ export function reorderFolders(orderedIds: string[], move?: { id:string; parentI
     const rank = new Map(realIds(orderedIds).map((id, i) => [id, i]));
     const sorted = [...folders].sort((a, b) => (rank.get(a.id) ?? Infinity) - (rank.get(b.id) ?? Infinity) || a.order - b.order);
     const counts = new Map<string,number>();
-    const next = sorted.map(f => { const p = f.parentId ?? ''; const i = counts.get(p) ?? 0; counts.set(p,i+1); return {...f, order:i}; });
+    // order は、同じ親の中での連番に振り直す
+    const next = sorted.map(f => {
+      const parent = f.parentId ?? '';
+      const order = counts.get(parent) ?? 0;
+      counts.set(parent, order + 1);
+      return { ...f, order };
+    });
     if (move) await writeReparented(next); else await writeFolders(next);
   });
 }
@@ -840,7 +866,9 @@ export function assignAccount(from: string, to: string): Promise<{ moved: number
         moved++;
       }
     }
-    for (const [k,b] of Object.entries(map)) if(b.accountId===to) map[k]={...b,folderIds:withAncestors(b.folderIds,[...dest,...movedFolders])};
+    for (const [k, b] of Object.entries(map)) {
+      if (b.accountId === to) map[k] = { ...b, folderIds: withAncestors(b.folderIds, [...dest, ...movedFolders]) };
+    }
     delete accounts[from];
     await chrome.storage.local.set({
       [KEY_FOLDERS]: [...folders.filter((f) => f.accountId !== from), ...movedFolders],
@@ -885,6 +913,8 @@ export function deleteAllData(): Promise<void> {
   });
 }
 
-/** Tree state is a device-local setting; callers never access chrome.storage directly. */
-export const getCollapsedFolders = async ():Promise<string[]> => (await getSettings()).folderTreeCollapsed ?? [];
-export const setCollapsedFolders = async (ids:string[]):Promise<void> => { await updateSettings({folderTreeCollapsed:[...new Set(ids)]}); };
+/** ツリーの開閉は端末ごとの設定。呼び出し側は chrome.storage を直接触らず、この 2 つを使う */
+export const getCollapsedFolders = async (): Promise<string[]> => (await getSettings()).folderTreeCollapsed ?? [];
+export const setCollapsedFolders = async (ids: string[]): Promise<void> => {
+  await updateSettings({ folderTreeCollapsed: [...new Set(ids)] });
+};

@@ -82,7 +82,11 @@ const sorts = (): [SortKey, string][] => [
   ['postedAsc', t('sortPostedAsc')],
 ];
 
-type ConfirmState = { kind: 'posts'; ids: string[] } | { kind: 'folder'; id: string; impact?: { folders:number; posts:number } } | { kind: 'account'; id: string } | null;
+type ConfirmState =
+  | { kind: 'posts'; ids: string[] }
+  | { kind: 'folder'; id: string; impact?: { folders: number; posts: number } }
+  | { kind: 'account'; id: string }
+  | null;
 /** undo の無いトースト (アカウントの切替・割り当ての通知) もある */
 type ToastState = { key: number; message: string; undo?: BookmarkUndo; /** 設定の初期化の取り消しなど、ポスト以外の「元に戻す」 */ action?: () => Promise<void> } | null;
 
@@ -274,7 +278,17 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       if (location.hash === '#autocollect') setAutoOpen(true); // x.com の「自動で取り込む…」から開かれた
     };
     window.addEventListener('hashchange', onHash);
-    const offs = [() => window.removeEventListener('hashchange', onHash), onSettingsChanged((c) => { setAutoCfg(c.autoCollect); setCollapsed(new Set(c.folderTreeCollapsed)); }), onDataChanged(() => void reload()), onImportHintChanged(() => void loadHint()), onLastSeenAccountChanged(() => void onLastSeen())]; // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
+    // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
+    const offs = [
+      () => window.removeEventListener('hashchange', onHash),
+      onSettingsChanged((c) => {
+        setAutoCfg(c.autoCollect);
+        setCollapsed(new Set(c.folderTreeCollapsed));
+      }),
+      onDataChanged(() => void reload()),
+      onImportHintChanged(() => void loadHint()),
+      onLastSeenAccountChanged(() => void onLastSeen()),
+    ];
     return () => offs.forEach((o) => o());
   }, []);
 
@@ -578,8 +592,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       const parentId = inside ? target.id : target.parentId ?? null;
       if (!canParent(userFolders, dragged, parentId, viewId)) return;
       const order = userFolders.map(f=>f.id);
-      try { await reorderFolders(inside ? [...order.filter(id=>id!==dragged),dragged] : moveBefore(order,dragged,target.id), {id:dragged,parentId}); await reload(); }
-      catch { reportStorageError(); }
+      // 中へ入れるときは、その親の子の末尾へ。そうでなければ、対象の前へ
+      const ordered = inside ? [...order.filter((id) => id !== dragged), dragged] : moveBefore(order, dragged, target.id);
+      try {
+        await reorderFolders(ordered, { id: dragged, parentId });
+        await reload();
+      } catch {
+        reportStorageError();
+      }
     }
   };
   const folderInside = (f:Folder,e:DragEvent) => {
@@ -615,12 +635,19 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const reorderable = !opts.smart;
     const n = count(f.id);
     const label = f.id === RECENT_ID ? f.name : displayName(f);
+    const depth = opts.depth ?? 1;
+    /** 段に合わせた字下げ (1 段ごとに 18px) */
+    const indent = (d: number) => 10 + (d - 1) * 18 + 'px';
+    /** ドラッグ中の、この行への落とし先の見た目 (フォルダなら、中へ入れる / 前へ入れる) */
+    const dropClass =
+      dragOver?.id !== f.id ? '' : dragOver.kind !== 'folder' ? ' drop' : dragOver.inside ? ' drop-child' : ' drop-before';
     return (
       <div
         key={f.id}
-        class={`fr${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}${dragOver?.id === f.id ? dragOver.kind === 'folder' ? dragOver.inside ? ' drop-child' : ' drop-before' : ' drop' : ''}`}
-        data-folder-id={f.id} data-depth={opts.depth ?? 1}
-        style={reorderable ? {paddingLeft: (10+((opts.depth ?? 1)-1)*18)+'px', '--drop-indent': (10+((opts.depth ?? 1)-1+(dragOver?.inside ? 1 : 0))*18)+'px'} : undefined}
+        class={`fr${f.id === curFolder.id && page === 'bookmarks' ? ' on' : ''}${dropClass}`}
+        data-folder-id={f.id}
+        data-depth={depth}
+        style={reorderable ? { paddingLeft: indent(depth), '--drop-indent': indent(depth + (dragOver?.inside ? 1 : 0)) } : undefined}
         role="button"
         tabIndex={0}
         aria-current={f.id === curFolder.id && page === 'bookmarks' ? 'true' : undefined}
@@ -636,7 +663,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           const types = e.dataTransfer?.types ?? [];
           const kind = types.includes(MIME_POSTS) ? 'posts' : 'folder';
           const inside = kind === 'folder' && folderInside(f,e);
-          if (!folderDroppable(f, types) || (kind === 'folder' && (!draggedFolder.current || !canParent(userFolders, draggedFolder.current, inside ? f.id : f.parentId, viewId) || draggedFolder.current === f.id))) {
+          const from = draggedFolder.current;
+          const badFolderDrop =
+            kind === 'folder' && (!from || from === f.id || !canParent(userFolders, from, inside ? f.id : f.parentId, viewId));
+          if (!folderDroppable(f, types) || badFolderDrop) {
             setDragOver(null);
             return;
           }
@@ -658,7 +688,23 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           }
         }}
       >
-        {reorderable && (opts.hasChildren ? <button data-tree-toggle class="tree-toggle" aria-label={t(collapsed.has(f.id)?'treeExpand':'treeCollapse')} aria-expanded={!collapsed.has(f.id)} onClick={e=>{e.stopPropagation();toggleTree(f.id);}}><Icon name={collapsed.has(f.id)?'ti-chevron-right':'ti-chevron-down'}/></button> : <span class="tree-spacer"/>)}
+        {reorderable &&
+          (opts.hasChildren ? (
+            <button
+              data-tree-toggle
+              class="tree-toggle"
+              aria-label={t(collapsed.has(f.id) ? 'treeExpand' : 'treeCollapse')}
+              aria-expanded={!collapsed.has(f.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleTree(f.id);
+              }}
+            >
+              <Icon name={collapsed.has(f.id) ? 'ti-chevron-right' : 'ti-chevron-down'} />
+            </button>
+          ) : (
+            <span class="tree-spacer" />
+          ))}
         <Icon name={f.icon} color={f.color} />
         <span class="fr-name">{label}</span>
         {f.id === INBOX_ID && n > 0 ? <span class="badge">{n}</span> : <span class="n">{n}</span>}

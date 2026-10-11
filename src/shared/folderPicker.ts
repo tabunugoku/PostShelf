@@ -189,8 +189,9 @@ export function createFolderPicker(opts: {
       if (opts.onToggle) await opts.onToggle(f.id, true);
       else {
         normalize(f.id, true);
-        // Keep the created folder last for callers which identify the newly created choice.
-        selected.delete(f.id); selected.add(f.id);
+        // 作ったフォルダを最後に入れ直す (呼び出し側が、最後の項目を新しく作ったものとして扱うため)
+        selected.delete(f.id);
+        selected.add(f.id);
         if (await onChange(selected, 'created') === false) return false;
       }
       closeMenu();
@@ -259,13 +260,21 @@ export function createFolderPicker(opts: {
         heading(t('folderRecent'));
         for (const f of recent) addRow(f,1,false,true);
         heading(t('folderAll', userFolderCount()));
-        for (const r of flattenFolders(users,collapsed))if(!recent.includes(r.folder)||r.hasChildren||r.folder.parentId)addRow(r.folder,r.depth,r.hasChildren);
-      } else for (const r of flattenFolders(users,collapsed))addRow(r.folder,r.depth,r.hasChildren);
+        // 「最近使った」にある 1 段目の子なしフォルダは、上で出したので、ここでは省く
+        for (const r of flattenFolders(users, collapsed)) {
+          if (!recent.includes(r.folder) || r.hasChildren || r.folder.parentId) addRow(r.folder, r.depth, r.hasChildren);
+        }
+      } else {
+        for (const r of flattenFolders(users, collapsed)) addRow(r.folder, r.depth, r.hasChildren);
+      }
     }
     listEl.append(divider(th), addBtn);
   };
-  const addRow = (f: Folder, depth=1, hasChildren=false, recent=false) => {
-    const row=document.createElement('div');row.dataset.pickerFolder=f.id;row.dataset.depth=String(depth);row.style.cssText='display:flex;align-items:center;min-width:0;padding-left:'+((depth-1)*16)+'px';
+  const addRow = (f: Folder, depth = 1, hasChildren = false, recent = false) => {
+    const row = document.createElement('div');
+    row.dataset.pickerFolder = f.id;
+    row.dataset.depth = String(depth);
+    row.style.cssText = 'display:flex;align-items:center;min-width:0;padding-left:' + (depth - 1) * 16 + 'px';
     const label = document.createElement('label');
     label.style.cssText = 'box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
     let hovered = false;
@@ -321,18 +330,50 @@ export function createFolderPicker(opts: {
     name.textContent = displayName(f);
     name.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
     label.append(ico, name, box);
-    label.style.flex='1';label.style.minWidth='0';
-    if(hasChildren){
-      const arrow=document.createElement('button');arrow.type='button';arrow.dataset.treeToggle='';arrow.setAttribute('aria-label',t(collapsed.has(f.id)?'treeExpand':'treeCollapse'));arrow.setAttribute('aria-expanded',String(!collapsed.has(f.id)));
-      arrow.style.cssText='box-sizing:border-box;display:grid;place-items:center;flex:none;width:20px;min-height:32px;padding:0;margin:0;border:0;background:transparent;color:'+th.fg+';cursor:pointer';
-      const i=document.createElement('i');i.className='ti '+(collapsed.has(f.id)?'ti-chevron-right':'ti-chevron-down');i.style.cssText='font-size:14px;line-height:1;margin:0;padding:0';arrow.append(i);
-      arrow.addEventListener('click',()=>{if(collapsed.has(f.id))collapsed.delete(f.id);else collapsed.add(f.id);void setCollapsedFolders([...collapsed]).catch(()=>{});render();listEl.querySelector<HTMLElement>('[data-picker-folder="'+f.id+'"] [data-tree-toggle]')?.focus();});row.append(arrow);
-    }else if(!recent){const spacer=document.createElement('span');spacer.style.cssText='width:20px;flex:none';row.append(spacer);}
-    row.append(label);listEl.append(row);
+    label.style.flex = '1';
+    label.style.minWidth = '0';
+    if (hasChildren) {
+      // 開閉の矢印。選択とは別のボタン。押したあとも、同じ行の矢印にフォーカスを戻す
+      const closed = collapsed.has(f.id);
+      const arrow = document.createElement('button');
+      arrow.type = 'button';
+      arrow.dataset.treeToggle = '';
+      arrow.setAttribute('aria-label', t(closed ? 'treeExpand' : 'treeCollapse'));
+      arrow.setAttribute('aria-expanded', String(!closed));
+      arrow.style.cssText = `box-sizing:border-box;display:grid;place-items:center;flex:none;width:20px;min-height:32px;padding:0;margin:0;border:0;background:transparent;color:${th.fg};cursor:pointer`;
+      const chevron = document.createElement('i');
+      chevron.className = 'ti ' + (closed ? 'ti-chevron-right' : 'ti-chevron-down');
+      chevron.style.cssText = 'font-size:14px;line-height:1;margin:0;padding:0';
+      arrow.append(chevron);
+      arrow.addEventListener('click', () => {
+        if (collapsed.has(f.id)) collapsed.delete(f.id);
+        else collapsed.add(f.id);
+        void setCollapsedFolders([...collapsed]).catch(() => {});
+        render();
+        listEl.querySelector<HTMLElement>('[data-picker-folder="' + f.id + '"] [data-tree-toggle]')?.focus();
+      });
+      row.append(arrow);
+    } else if (!recent) {
+      // 矢印の無い行も、名前の位置をそろえるために同じ幅を空ける
+      const spacer = document.createElement('span');
+      spacer.style.cssText = 'width:20px;flex:none';
+      row.append(spacer);
+    }
+    row.append(label);
+    listEl.append(row);
     paintRow();
   };
   el.append(menu.el);
   render();
   sync();
-  return { el, sync, setFolders: next => { folders.splice(0,folders.length,...next);render();sync(); }, focusFilter: () => (showFilter() ? (filterEl.focus(), true) : false) };
+  return {
+    el,
+    sync,
+    setFolders: next => {
+      folders.splice(0, folders.length, ...next);
+      render();
+      sync();
+    },
+    focusFilter: () => (showFilter() ? (filterEl.focus(), true) : false),
+  };
 }

@@ -29,17 +29,17 @@ export interface Settings {
   /** 仕分けで複数のフォルダを選び、Enter で確定する (省略時はオフ) */
   triageMulti?: boolean;
   triageKeyMode?: 'auto' | 'manual';
-  /** Slots retain holes when a folder disappears. */
+  /** 数字キー 1〜9 の手動の対象。フォルダが無くなっても、その番号は空きのままにして、後ろを詰めない */
   triageKeyFolders?: string[];
-  /** IDs of collapsed parents, local to this device. */
+  /** たたんでいる親フォルダの ID。端末ごとの設定 */
   folderTreeCollapsed?: string[];
-  /** Tab manager sidebar width, local to this device. */
+  /** タブの管理画面のサイドバーの幅 (px)。端末ごとの設定 */
   sidebarWidth?: number;
   /** x.com の保存ポップオーバーの「最近使った」フォルダ (v28)。最大 RECENT_FOLDERS 件、新しい順。無い・不正な値は空として扱う */
   recentFolderIds?: string[];
 }
 
-/** Invalid/duplicate IDs become empty slots, never shifting later numbers. */
+/** 不正・重複・組み込みの ID は空き ("") にする。後ろの番号は詰めない。最大 9 枠 */
 export function normalizeTriageKeyFolders(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   const seen = new Set<string>();
@@ -160,8 +160,11 @@ export async function getSettings(): Promise<Settings> {
   merged.triageMulti = stored.triageMulti === true;
   merged.triageKeyMode = stored.triageKeyMode === 'manual' ? 'manual' : 'auto';
   merged.triageKeyFolders = normalizeTriageKeyFolders(stored.triageKeyFolders);
-  merged.folderTreeCollapsed = Array.isArray(stored.folderTreeCollapsed) ? [...new Set(stored.folderTreeCollapsed.filter((id):id is string => typeof id === 'string'))] : [];
-  merged.sidebarWidth = typeof stored.sidebarWidth === 'number' && Number.isFinite(stored.sidebarWidth) && stored.sidebarWidth >= 180 ? Math.round(stored.sidebarWidth) : DEFAULT_SIDEBAR_WIDTH;
+  merged.folderTreeCollapsed = Array.isArray(stored.folderTreeCollapsed)
+    ? [...new Set(stored.folderTreeCollapsed.filter((id): id is string => typeof id === 'string'))]
+    : [];
+  const width = stored.sidebarWidth;
+  merged.sidebarWidth = typeof width === 'number' && Number.isFinite(width) && width >= 180 ? Math.round(width) : DEFAULT_SIDEBAR_WIDTH;
   merged.recentFolderIds = Array.isArray(stored.recentFolderIds)
     ? [...new Set(stored.recentFolderIds.filter((x): x is string => typeof x === 'string'))].slice(0, RECENT_FOLDERS)
     : [];
