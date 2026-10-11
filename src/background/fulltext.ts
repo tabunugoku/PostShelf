@@ -82,6 +82,8 @@ export function defaultDeps(): FullTextDeps {
 
 const keyOf = (it: FullTextItem) => `${it.accountId}:${it.tweetId}`;
 
+interface WorkerSlot { readyAt: number; task: Promise<void> | null }
+
 export class FullTextQueue {
   private pending: FullTextItem[] = [];
   // 実行中の項目も含め、その取得の間は重複して取り出さない。
@@ -93,6 +95,10 @@ export class FullTextQueue {
   private manual = new Set<string>();
   private run: FullTextRun = { running: false, kind: 'save', total: 0, done: 0, failed: 0, skipped: 0, updatedAt: 0 };
   private failures = 0;
+  private plan: FullTextPlan | null = null;
+  private slots: WorkerSlot[] = [];
+  private workers = new Set<Promise<void>>();
+  private admissions = new Set<Promise<void>>();
   private finished: Promise<void> = Promise.resolve();
   private publications: Promise<void> = Promise.resolve();
   private opening: Promise<unknown> = Promise.resolve();
@@ -115,28 +121,44 @@ export class FullTextQueue {
   }
 
   async enqueue(items: FullTextItem[], kind: FullTextKind): Promise<void> {
-    if (items.length === 0 || !(await this.d.enabled())) return;
-    while (this.userStopped || this.finishing || (this.looping && this.aborted)) await this.finished.catch(() => {});
-    if (kind === 'manual') for (const it of items) this.manual.add(keyOf(it));
-    const fresh = items.filter(it => {
-      const key = keyOf(it);
-      if (this.known.has(key)) return false;
-      this.known.add(key);
-      return true;
-    });
-    if (fresh.length === 0) return this.finished;
-    this.pending.push(...fresh);
-    if (!this.looping) {
-      this.looping = true;
-      this.aborted = false;
-      this.failures = 0;
-      this.lastOpen = -Infinity;
-      this.cancelled = new Promise(r => { this.cancel = r; });
-      const published = this.publish({ running: true, kind, total: fresh.length, done: 0, failed: 0, skipped: 0, stopReason: undefined });
-      // stop() が初期設定の読み込み中でも、この実行の終了を待てるよう先に登録する。
-      this.finished = this.loop(published);
-    } else await this.publish({ total: this.run.total + fresh.length });
-    return this.finished;
+    if (items.length === 0) return;
+    let admitted = () => {};
+    if (this.looping && !this.aborted && !this.finishing) {
+      let release!: () => void;
+      const admission = new Promise<void>(resolve => { release = resolve; });
+      this.admissions.add(admission);
+      admitted = () => { this.admissions.delete(admission); release(); };
+    }
+    try {
+      if (!(await this.d.enabled())) return;
+      // 停止 / 終了済みの取得は待たせない。依頼は後始末のあとに受け付ける。
+      if (this.userStopped || this.finishing || (this.looping && this.aborted)) admitted();
+      while (this.userStopped || this.finishing || (this.looping && this.aborted)) await this.finished.catch(() => {});
+      if (kind === 'manual') for (const it of items) this.manual.add(keyOf(it));
+      const fresh = items.filter(it => {
+        const key = keyOf(it);
+        if (this.known.has(key)) return false;
+        this.known.add(key);
+        return true;
+      });
+      if (fresh.length === 0) return this.finished;
+      this.pending.push(...fresh);
+      if (!this.looping) {
+        this.looping = true;
+        this.aborted = false;
+        this.failures = 0;
+        this.lastOpen = -Infinity;
+        this.cancelled = new Promise(r => { this.cancel = r; });
+        const published = this.publish({ running: true, kind, total: fresh.length, done: 0, failed: 0, skipped: 0, stopReason: undefined });
+        // stop() が初期設定の読み込み中でも、この実行の終了を待てるよう先に登録する。
+        this.finished = this.loop(published);
+      } else {
+        const published = this.publish({ total: this.run.total + fresh.length });
+        this.startWorkers();
+        await published;
+      }
+      return this.finished;
+    } finally { admitted(); }
   }
 
   async stop(reason: FullTextStop = 'user'): Promise<void> {
@@ -154,14 +176,55 @@ export class FullTextQueue {
     for (let n = 0; n < 360 && !this.aborted && await this.d.collectActive(); n++) await this.wait(5000);
   }
 
+  /** 同じ計画の空きスロットだけ再開する。スロットの待ち時刻は再開後も保つ。 */
+  private startWorkers(): void {
+    const plan = this.plan;
+    if (!plan || this.aborted || this.finishing) return;
+    for (const slot of this.slots) {
+      if (slot.task || !this.pending.length) continue;
+      const task = this.worker(plan, slot).finally(() => { slot.task = null; });
+      slot.task = task;
+      this.workers.add(task);
+      // 途中で追加されたワーカーも、loop の次の待ちで結果を拾う。
+      void task.catch(() => {});
+    }
+  }
+
   private async loop(published: Promise<void>): Promise<void> {
     try {
       const plan = await this.d.plan(); // enqueue で開始した取得ごとに 1 回。途中の設定変更は次回用。
+      this.plan = plan;
+      this.slots = Array.from({ length: plan.tabs }, () => ({ readyAt: 0, task: null }));
       await published;
-      await Promise.all(Array.from({ length: plan.tabs }, () => this.worker(plan)));
+      for (;;) {
+        this.startWorkers();
+        if (this.workers.size) {
+          const workers = [...this.workers];
+          await Promise.all(workers);
+          workers.forEach(worker => this.workers.delete(worker));
+          continue; // 待ちの途中の追加ワーカー・pending をもう一度確認する。
+        }
+        if (this.admissions.size && !this.aborted) {
+          await Promise.all([...this.admissions]);
+          continue; // enabled() を待っている、実行中に届いた依頼も受け付け終えてから判定する。
+        }
+        if (this.pending.length && !this.aborted) continue;
+        // 残りがない判定と finishing の設定の間には await を置かない。
+        this.finishing = true;
+        break;
+      }
+    } catch (error) {
+      this.aborted = true;
+      this.cancel();
+      await this.closeAll();
+      await Promise.allSettled(this.workers);
+      throw error;
     } finally {
       this.finishing = true;
       await this.closeAll();
+      this.plan = null;
+      this.slots = [];
+      this.workers.clear();
       this.manual.clear();
       this.known.clear();
       this.pending = [];
@@ -172,8 +235,7 @@ export class FullTextQueue {
     }
   }
 
-  private async worker(plan: FullTextPlan): Promise<void> {
-    let readyAt = 0;
+  private async worker(plan: FullTextPlan, slot: WorkerSlot): Promise<void> {
     while (this.pending.length && !this.aborted) {
       if (this.aborted) break;
       const item = this.pending.shift(); // 取り出しは同期的に行う。他のワーカーと二重にならない。
@@ -186,11 +248,11 @@ export class FullTextQueue {
         await this.publish({ skipped: (this.run.skipped ?? 0) + 1 });
         continue; // タブを開かないものには待ちを入れない。
       }
-      await this.wait(readyAt - this.d.now());
+      await this.wait(slot.readyAt - this.d.now());
       if (this.aborted) break;
       const r = await this.fetchOne(item, b.snapshot.url);
       // fetchOne の finally が自分のタブを閉じた時刻から間隔を計る。
-      readyAt = this.d.now() + plan.gapMinMs + Math.round(this.d.random() * (plan.gapMaxMs - plan.gapMinMs));
+      slot.readyAt = this.d.now() + plan.gapMinMs + Math.round(this.d.random() * (plan.gapMaxMs - plan.gapMinMs));
       if (this.aborted || r === 'abort' || r === 'limit') break;
       if (r === 'ok') {
         this.failures = 0;
