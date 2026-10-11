@@ -135,17 +135,17 @@ export function extractTweet(article: Element): Extracted | null {
   // 自動翻訳後に出る「この翻訳を評価」のボタンを、翻訳済みの目印にする。実機で確認した範囲の推測。
   const translated = !!queryOwn(article, 'translationVote');
   // 写真が未読み込み: 写真リンクがあるのに画像が 0 枚、または、1 枚以上あるのにリンクの数より少ない (複数枚の一部だけ読み込み済み)。
-  // リンクと画像の数が X の DOM で常に合うかは実機未確認の推測 (自分の部分だけを数える。合わなければ待ちが 1 ポストあたり最大 4 秒になるだけで、保存は止まらない)
+  // リンクと画像の数が X の DOM で常に合うかは実機未確認の推測 (自分の部分だけを数える。合わなければ待ちが 1 ポストあたり最大 8 秒になるだけで、保存は止まらない)
   const photoLinks = queryAllOwn(article, 'photoLink').els.length;
   const photoPending = photoLinks > 0 && media.length < photoLinks;
   const quote = extractQuote(article);
   // 写真リンク自体が後から DOM に入る画像だけのポストを想定 (原因・DOM 構造は実機未確認の推測)。
-  // 投票だけや削除済みなど、本当に本文も添付内容も無い表示でも、最大 4 秒で打ち切り保存は止まらない。
+  // 投票だけや削除済みなど、本当に本文も添付内容も無い表示でも、最大 8 秒で打ち切り保存は止まらない。
   const emptyPending = !text && !media.length && !hasVideo && !hasLink && !quote;
   const quoteEl = findQuote(article);
   const quoteAvatarEl = quoteEl ? queryFirstInQuote<HTMLImageElement>(quoteEl, 'avatar')?.el : undefined;
   // img 自体が後から DOM に入る可能性も待つ (原因・DOM 構造は実機未確認の推測)。
-  // 広告や削除・非表示など、元からアイコンが無い表示も、1 ポストあたり最大 4 秒で打ち切り保存は止まらない。
+  // 広告や削除・非表示など、元からアイコンが無い表示も、1 ポストあたり最大 8 秒で打ち切り保存は止まらない。
   return {
     tweetId,
     ...(!imageReady(avatarEl) ? { avatarPending: true as const } : {}),

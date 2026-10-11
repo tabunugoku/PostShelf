@@ -67,7 +67,7 @@ it('1 秒後にアイコンの img が DOM に現れたら待って保存する'
   expect((await listBookmarks())[0].snapshot.avatar).toBe(avatar);
 });
 
-it('4 秒でアイコン待ちを打ち切り次のポストも保存する', async () => {
+it('8 秒でアイコン待ちを打ち切り次のポストも保存する', async () => {
   document.getElementById('quote-frame')!.remove();
   insertAvatar('quote-main-avatar');
   const world = collectorWorld();

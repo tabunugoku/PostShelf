@@ -70,7 +70,7 @@ it('最初から pending でないポストを読み直しの対象にしない'
   expect(world.clock.sleeps).toEqual([]);
 });
 
-it('4 秒になる前に DOM から消えたポストを時間切れの対象にしない', async () => {
+it('8 秒になる前に DOM から消えたポストを時間切れの対象にしない', async () => {
   const world = collectorWorld(() => document.getElementById('main-post')?.remove());
   await world.read();
   await world.flush();

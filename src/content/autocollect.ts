@@ -43,7 +43,7 @@ export const LOAD_POLL_MS = 500;
  * 読み込み中 (メディア・アイコン) のポストを待つ上限 (1 ポストあたりの合計) と、読み直しの間隔 (最小 + 乱数)。
  * 待つのは、読み込み中のポストがあるときだけ。スクロールの間隔や量は変えない
  */
-export const SETTLE_MAX_MS = 4000;
+export const SETTLE_MAX_MS = 8000;
 export const SETTLE_POLL_MS = 300;
 export const SETTLE_POLL_JITTER_MS = 200;
 /** 「15 分後に再開する」の待ち時間 */
@@ -144,7 +144,7 @@ export class AutoCollector {
   private pending: Extracted[] = [];
   /** 未保存の、読み込み中の項目があるポスト。settle で読み込みを待ち、最後に読めた値を持つ。一時停止・停止のときは、その値で保存する */
   private mediaRetry = new Map<string, Extracted>();
-  /** 4 秒待っても pending だった ID。次の画面で 1 回だけ確認し、保存はしない */
+  /** 8 秒待っても pending だった ID。次の画面で 1 回だけ確認し、保存はしない */
   private timedOut = new Set<string>();
   private streak = 0;
   /** 上限の数え始め (再開のたびに、その時点の imported から数え直す) */
