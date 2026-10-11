@@ -113,7 +113,7 @@ export type ButtonMode = 'separate' | 'replace';
 export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, recentFolderIds: [] };
 
 export interface FullTextPlan { gapMinMs: number; gapMaxMs: number; tabs: 1 | 2 | 3 }
-/** 遅い設定は、保存されたタブ数にかかわらず従来の間隔・1 タブを使う。 */
+/** 「ゆっくり」は、保存されたタブ数にかかわらず従来の間隔・1 タブを使う。 */
 export function fullTextPlan(s: Pick<Settings, 'fullTextSpeed' | 'fullTextTabs'>): FullTextPlan {
   return s.fullTextSpeed === 'standard'
     ? { gapMinMs: 2000, gapMaxMs: 5000, tabs: s.fullTextTabs }
