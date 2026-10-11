@@ -529,6 +529,36 @@ export function importData(json: unknown): Promise<number> {
   });
 }
 
+type MediaItem = { tweetId: string; snapshot?: Bookmark['snapshot'] };
+
+/** 保存済みの欠けたメディアだけを補う。本文・所属先・時刻は変えず、未保存のものは作らない。 */
+export function backfillMedia(items: MediaItem[], accountId: string = scope): Promise<number> {
+  return serial(async () => {
+    const map = await readMap();
+    let changed = 0;
+    for (const it of items) {
+      const k = bookmarkKey(accountId, it.tweetId);
+      const old = map[k];
+      const incoming = it.snapshot;
+      if (!old || !incoming) continue;
+      const snapshot = old.snapshot;
+      const patch: Partial<Bookmark['snapshot']> = {};
+      if (!snapshot.media.length && !snapshot.hasVideo && incoming.media.length) patch.media = [...incoming.media];
+      const poster = incoming.videoPoster && /^https:\/\//i.test(incoming.videoPoster) ? incoming.videoPoster : undefined;
+      if (snapshot.hasVideo && !snapshot.videoPoster && poster) patch.videoPoster = poster;
+      if (!snapshot.hasVideo && !snapshot.media.length && incoming.hasVideo) {
+        patch.hasVideo = true;
+        if (poster) patch.videoPoster = poster;
+      }
+      if (!Object.keys(patch).length) continue;
+      map[k] = { ...old, snapshot: { ...snapshot, ...patch } };
+      changed++;
+    }
+    if (changed) await write(KEY_BOOKMARKS, map); // 読み込みから書き込みまで別の await を挟まない
+    return changed;
+  });
+}
+
 /**
  * フォルダ未所属で取り込む (ページ収集用)。既存ポストは触らない。
  * 取り込んだポストは専用の「未分類」フォルダへ入れる。
