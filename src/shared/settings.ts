@@ -60,8 +60,16 @@ export function pushRecentFolders(list: readonly string[], used: readonly string
 }
 
 export type CollectSpeed = 'slow' | 'normal';
-/** 1 回の上限 (件)。0 = 止めない */
-export type CollectCap = 300 | 100 | 0;
+/** 1 回の上限 (件)。0 = 止めない。通常の選択肢は 300 / 100 / 0 で、開発者用の裏モードでは 1〜CAP_MAX の整数も入る */
+export type CollectCap = number;
+
+/** 1 回の上限の最大 (件) */
+export const CAP_MAX = 100000;
+
+/** 上限の検証。0 (止めない) と 1〜CAP_MAX の整数はそのまま。それ以外 (非数・負・小数・巨大) は既定の 300 に戻す */
+export function normalizeCap(v: unknown): CollectCap {
+  return typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= CAP_MAX ? v : 300;
+}
 
 export interface AutoCollectSettings {
   /** 「自動取り込みを使う」。オフなら、案内も開始ボタンも出さない (既定はオン。ただし自動では始まらない) */
@@ -83,7 +91,7 @@ function normalizeAutoCollect(raw: unknown): AutoCollectSettings {
   return {
     enabled: r.enabled !== false,
     speed: r.speed === 'normal' ? 'normal' : 'slow',
-    cap: r.cap === 100 || r.cap === 0 ? r.cap : 300,
+    cap: normalizeCap(r.cap),
     offers,
   };
 }
@@ -467,7 +475,7 @@ export async function getCollectRun(): Promise<CollectRun | null> {
     oldestSeenPostDate: typeof r.oldestSeenPostDate === 'string' ? r.oldestSeenPostDate : undefined,
     recentPostDate: typeof r.recentPostDate === 'string' ? r.recentPostDate : undefined,
     speed: r.speed === 'normal' ? 'normal' : 'slow',
-    cap: r.cap === 100 || r.cap === 0 ? r.cap : 300,
+    cap: normalizeCap(r.cap),
     reason: r.reason,
     updatedAt: Number(r.updatedAt) || 0,
     owner: typeof r.owner === 'string' ? r.owner : undefined,
@@ -510,7 +518,7 @@ export async function sendCollectCommand(c: Omit<CollectCommand, 'id' | 'at'>): 
 export async function peekCollectCommand(): Promise<CollectCommand | null> {
   const c = (await chrome.storage.local.get(CMD_KEY))[CMD_KEY] as Partial<CollectCommand> | undefined;
   if (!c || typeof c.id !== 'string' || !['start', 'pause', 'resume', 'stop'].includes(c.type as string)) return null;
-  return { id: c.id, type: c.type as CollectCommand['type'], consent: c.consent === true, speed: c.speed === 'normal' ? 'normal' : 'slow', cap: c.cap === 100 || c.cap === 0 ? c.cap : 300, accountId: typeof c.accountId === 'string' ? c.accountId : undefined, at: Number(c.at) || 0 };
+  return { id: c.id, type: c.type as CollectCommand['type'], consent: c.consent === true, speed: c.speed === 'normal' ? 'normal' : 'slow', cap: normalizeCap(c.cap), accountId: typeof c.accountId === 'string' ? c.accountId : undefined, at: Number(c.at) || 0 };
 }
 export const clearCollectCommand = (): Promise<void> => chrome.storage.local.remove(CMD_KEY);
 
