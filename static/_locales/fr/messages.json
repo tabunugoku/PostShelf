@@ -1671,5 +1671,13 @@
   "treeExpand": {"message":"Déplier"},
   "treeCollapse": {"message":"Replier"},
   "folderDeleteTree": {"message":"Supprimer $FOLDERS$ dossiers et leurs descendants, et leurs affectations dans $POSTS$ posts. Les posts sont conservés.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
-  "folderAncestorsRemain": {"message":"Les dossiers parents et leurs affectations sont conservés."}
+  "folderAncestorsRemain": {"message":"Les dossiers parents et leurs affectations sont conservés."},
+  "triageKeyTargets": {"message":"Choisir les dossiers"},
+  "triageKeyTitle": {"message":"Dossiers des touches numériques"},
+  "triageKeyAuto": {"message":"Automatique"},
+  "triageKeyManual": {"message":"Choisir manuellement"},
+  "triageKeyEmpty": {"message":"Vide"},
+  "triageKeyReplace": {"message":"Choisissez le numéro à remplacer."},
+  "triageKeyOrder": {"message":"Ordre des touches"},
+  "triageKeyOrderHint": {"message":"Glissez pour réorganiser."}
 }

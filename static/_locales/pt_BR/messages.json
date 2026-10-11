@@ -1671,5 +1671,13 @@
   "treeExpand": {"message":"Expandir"},
   "treeCollapse": {"message":"Recolher"},
   "folderDeleteTree": {"message":"Excluir $FOLDERS$ pastas, incluindo descendentes, e suas associações em $POSTS$ posts. Os posts permanecem.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
-  "folderAncestorsRemain": {"message":"As pastas superiores e suas associações permanecem."}
+  "folderAncestorsRemain": {"message":"As pastas superiores e suas associações permanecem."},
+  "triageKeyTargets": {"message":"Escolher pastas"},
+  "triageKeyTitle": {"message":"Pastas das teclas numéricas"},
+  "triageKeyAuto": {"message":"Automático"},
+  "triageKeyManual": {"message":"Escolher manualmente"},
+  "triageKeyEmpty": {"message":"Vazio"},
+  "triageKeyReplace": {"message":"Escolha o número a substituir."},
+  "triageKeyOrder": {"message":"Ordem das teclas"},
+  "triageKeyOrderHint": {"message":"Arraste para reordenar."}
 }

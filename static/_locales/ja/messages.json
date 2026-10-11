@@ -1671,5 +1671,13 @@
   "treeExpand": {"message":"開く"},
   "treeCollapse": {"message":"たたむ"},
   "folderDeleteTree": {"message":"$FOLDERS$ 個のフォルダ（子・孫を含む）を削除し、$POSTS$ 件のポストからその所属を外します。ポスト自体は残ります。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
-  "folderAncestorsRemain": {"message":"親フォルダと、親への所属は残ります。"}
+  "folderAncestorsRemain": {"message":"親フォルダと、親への所属は残ります。"},
+  "triageKeyTargets": {"message":"対象を選ぶ"},
+  "triageKeyTitle": {"message":"数字キーのフォルダ"},
+  "triageKeyAuto": {"message":"自動"},
+  "triageKeyManual": {"message":"自分で選ぶ"},
+  "triageKeyEmpty": {"message":"空き"},
+  "triageKeyReplace": {"message":"はずす番号を選んでください。"},
+  "triageKeyOrder": {"message":"番号の順"},
+  "triageKeyOrderHint": {"message":"ドラッグで入れ替えます。"}
 }

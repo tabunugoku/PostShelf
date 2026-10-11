@@ -1671,5 +1671,13 @@
   "treeExpand": {"message":"Expand"},
   "treeCollapse": {"message":"Collapse"},
   "folderDeleteTree": {"message":"Delete $FOLDERS$ folders including descendants and remove their memberships from $POSTS$ posts. The posts remain.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
-  "folderAncestorsRemain": {"message":"Ancestor folders and their memberships remain."}
+  "folderAncestorsRemain": {"message":"Ancestor folders and their memberships remain."},
+  "triageKeyTargets": {"message":"Choose targets"},
+  "triageKeyTitle": {"message":"Number key folders"},
+  "triageKeyAuto": {"message":"Automatic"},
+  "triageKeyManual": {"message":"Choose myself"},
+  "triageKeyEmpty": {"message":"Empty"},
+  "triageKeyReplace": {"message":"Choose a slot to replace."},
+  "triageKeyOrder": {"message":"Key order"},
+  "triageKeyOrderHint": {"message":"Drag to reorder."}
 }

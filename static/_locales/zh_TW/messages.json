@@ -1671,5 +1671,13 @@
   "treeExpand": {"message":"展開"},
   "treeCollapse": {"message":"收合"},
   "folderDeleteTree": {"message":"刪除 $FOLDERS$ 個資料夾（含子孫），並從 $POSTS$ 則貼文移除這些歸屬。貼文保留。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
-  "folderAncestorsRemain": {"message":"祖先資料夾及其歸屬保留。"}
+  "folderAncestorsRemain": {"message":"祖先資料夾及其歸屬保留。"},
+  "triageKeyTargets": {"message":"選擇目標"},
+  "triageKeyTitle": {"message":"數字鍵資料夾"},
+  "triageKeyAuto": {"message":"自動"},
+  "triageKeyManual": {"message":"自行選擇"},
+  "triageKeyEmpty": {"message":"空位"},
+  "triageKeyReplace": {"message":"請選擇要替換的編號。"},
+  "triageKeyOrder": {"message":"編號順序"},
+  "triageKeyOrderHint": {"message":"拖曳以調整順序。"}
 }

@@ -523,3 +523,23 @@ input[type=number]{width:110px}
 .tree-choice>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tree-choice.on{background:var(--fill-ghost-hover);color:var(--fill-accent)}
 @media(max-width:600px){.triage-folder-panel{grid-template-columns:minmax(0,1fr)}}
+
+.triage-key-panel{min-width:0}
+.triage-key-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.triage-key-panel .triage-folders{display:flex;flex-direction:column;gap:6px}
+.triage-key-panel .triage-folder{width:100%;text-align:left}
+.triage-folder-name small,.key-target-slot small{display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-target-overlay{z-index:70}
+.key-targets{max-height:90vh;overflow:auto}
+.key-target-modes{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap}
+.key-target-modes label{display:flex;align-items:center;gap:8px}
+.key-target-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,260px);gap:20px}
+.key-target-columns .folder-tree{max-height:50vh;overflow:auto}
+.key-target-slots{display:flex;flex-direction:column;gap:6px;min-width:0}
+.key-target-slots>.muted{font-size:12px}
+.key-target-slot{display:flex;gap:8px;align-items:center;text-align:left;min-height:38px}
+.key-target-slot>span{min-width:0;overflow:hidden;flex:1}
+.key-target-slot.empty{border-style:dashed;color:var(--text-secondary)}
+@media(max-width:600px){.key-target-columns{grid-template-columns:minmax(0,1fr)}.triage-key-heading{flex-wrap:wrap}}
+
+.triage-folder-panel>.folder-tree{max-height:50vh;overflow:auto}

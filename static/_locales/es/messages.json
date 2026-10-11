@@ -1671,5 +1671,13 @@
   "treeExpand": {"message":"Expandir"},
   "treeCollapse": {"message":"Contraer"},
   "folderDeleteTree": {"message":"Eliminar $FOLDERS$ carpetas, incluidas las descendientes, y sus asignaciones en $POSTS$ publicaciones. Las publicaciones permanecen.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
-  "folderAncestorsRemain": {"message":"Las carpetas superiores y sus asignaciones permanecen."}
+  "folderAncestorsRemain": {"message":"Las carpetas superiores y sus asignaciones permanecen."},
+  "triageKeyTargets": {"message":"Elegir carpetas"},
+  "triageKeyTitle": {"message":"Carpetas de teclas numéricas"},
+  "triageKeyAuto": {"message":"Automático"},
+  "triageKeyManual": {"message":"Elegir manualmente"},
+  "triageKeyEmpty": {"message":"Vacío"},
+  "triageKeyReplace": {"message":"Elige el número que quieres sustituir."},
+  "triageKeyOrder": {"message":"Orden de teclas"},
+  "triageKeyOrderHint": {"message":"Arrastra para reordenar."}
 }

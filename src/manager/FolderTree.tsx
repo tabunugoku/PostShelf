@@ -14,9 +14,9 @@ export function useFolderTreeState() {
  return {collapsed,toggle};
 }
 /** A tree row separates expansion from selection; key slots may use the same rows without ancestor selection. */
-export function FolderTreeList(props:{folders:Folder[];collapsed:ReadonlySet<string>;onToggle:(id:string)=>void;selected:ReadonlySet<string>;onPick:(f:Folder)=>void;disabled?:boolean;numbers?:ReadonlyMap<string,number>}) {
+export function FolderTreeList(props:{folders:Folder[];collapsed:ReadonlySet<string>;onToggle:(id:string)=>void;selected:ReadonlySet<string>;onPick:(f:Folder)=>void;disabled?:boolean;pickDisabled?:boolean;numbers?:ReadonlyMap<string,number>}) {
  return <div class="folder-tree">{flattenFolders(userFoldersOf(props.folders),props.collapsed).map(({folder:f,depth,hasChildren})=><div key={f.id} class="folder-tree-row" data-tree-row={f.id} data-depth={depth} style={{paddingLeft:((depth-1)*18)+'px'}}>
  {hasChildren ? <button class="tree-toggle" data-tree-toggle aria-label={t(props.collapsed.has(f.id)?'treeExpand':'treeCollapse')} aria-expanded={!props.collapsed.has(f.id)} disabled={props.disabled} onClick={()=>props.onToggle(f.id)}><Icon name={props.collapsed.has(f.id)?'ti-chevron-right':'ti-chevron-down'}/></button> : <span class="tree-spacer"/>}
- <button class={'tree-choice'+(props.selected.has(f.id)?' on':'')} data-tree-folder={f.id} aria-pressed={props.selected.has(f.id)} disabled={props.disabled} onClick={()=>props.onPick(f)}><Icon name={f.icon} color={f.color}/><span>{displayName(f)}</span>{props.numbers?.has(f.id)&&<kbd>{props.numbers.get(f.id)}</kbd>}</button>
+ <button class={'tree-choice'+(props.selected.has(f.id)?' on':'')} data-tree-folder={f.id} aria-pressed={props.selected.has(f.id)} disabled={props.disabled || props.pickDisabled} onClick={()=>props.onPick(f)}><Icon name={f.icon} color={f.color}/><span>{displayName(f)}</span>{props.numbers?.has(f.id)&&<kbd>{props.numbers.get(f.id)}</kbd>}</button>
  </div>)}</div>;
 }

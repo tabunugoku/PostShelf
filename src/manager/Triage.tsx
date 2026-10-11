@@ -5,14 +5,17 @@ import { Icon } from '../shared/Icon';
 import { createFolderMenu } from '../shared/folderCreateMenu';
 import { INBOX_ID, displayName, type Bookmark, type Folder } from '../shared/models';
 import { addToFolders, removeFromFolders, setBookmarkFolders } from '../shared/storage';
-import { updateRecentFolders } from '../shared/settings';
+import { getSettings, onSettingsChanged, updateRecentFolders, type Settings } from '../shared/settings';
+import { triageKeyTargets, TRIAGE_KEY_COUNT } from '../shared/triageKeys';
+import { folderPath } from '../shared/folderTree';
+import { TriageKeyTargets } from './TriageKeyTargets';
 import { formatDate, t } from '../shared/strings';
 import { MediaImg } from './MediaImg';
 import { PostText } from './PostText';
 import { Dropdown, FolderPickerHost } from './ui';
 
 /** 数字キーに割り当てるフォルダの数 (残りは「他のフォルダ」から選ぶ) */
-export const TRIAGE_KEYS = 9;
+export const TRIAGE_KEYS = TRIAGE_KEY_COUNT;
 const FOCUSABLE = 'button:not([disabled]),a[href],input,[tabindex="0"]';
 const THEME = { fg: 'var(--text-primary)', border: 'var(--border-strong)', hover: 'var(--fill-ghost-hover)', accent: 'var(--fill-accent)' };
 
@@ -42,6 +45,9 @@ export function Triage(props: {
 }) {
   const { queue } = props;
   const tree = useFolderTreeState();
+  const [keySettings,setKeySettings] = useState<Pick<Settings,'triageKeyMode'|'triageKeyFolders'>>({triageKeyMode:'auto'});
+  const [keyDialog,setKeyDialog] = useState(false);
+  useEffect(()=>{let live=true;void getSettings().then(s=>{if(live)setKeySettings(s);}).catch(()=>setError(t('errorStorage')));const off=onSettingsChanged(s=>{if(live)setKeySettings(s);});return()=>{live=false;off();};},[]);
   const [index, setIndex] = useState(0);
   const [assigned, setAssigned] = useState<Record<string, string[]>>(() => Object.fromEntries(queue.map((b) => [b.tweetId, b.folderIds])));
   const [sorted, setSorted] = useState<Set<string>>(new Set());
@@ -184,6 +190,7 @@ export function Triage(props: {
   };
 
   const onKey = (e: KeyboardEvent) => {
+    if (keyDialog) return;
     const tag = (e.target as HTMLElement)?.tagName;
     const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target as HTMLElement)?.isContentEditable;
     if (e.key === 'Escape') {
@@ -220,7 +227,7 @@ export function Triage(props: {
       return;
     }
     if (d !== null) {
-      const f = props.folders[d - 1];
+      const f = keyed[d - 1];
       if (d <= TRIAGE_KEYS && f) {
         e.preventDefault();
         void choose(f.id, e.shiftKey);
@@ -237,8 +244,8 @@ export function Triage(props: {
     }
   };
 
-  const keyed = props.folders.slice(0, TRIAGE_KEYS);
-  const hasMore = props.folders.length > TRIAGE_KEYS;
+  const keyed = triageKeyTargets(keySettings,props.folders,tree.collapsed);
+  const hasMore = true; // The picker remains available even when every folder has a key.
   const total = queue.length;
   return (
     <div class="overlay" onClick={props.onClose}>
@@ -290,14 +297,16 @@ export function Triage(props: {
             )}
             <div class="triage-folder-panel">
               <FolderTreeList folders={props.folders} collapsed={tree.collapsed} onToggle={tree.toggle} selected={multi ? marks : new Set(assigned[cur.tweetId])} onPick={f=>void choose(f.id,false)}/>
+            <div class="triage-key-panel">
+              <div class="triage-key-heading"><b>{t('triageKeyTitle')}</b><button data-key-targets-open onClick={()=>setKeyDialog(true)}>{t('triageKeyTargets')}</button></div>
             <div class="triage-folders">
               {keyed.map((f, i) => {
-                const on = multi ? marks.has(f.id) : (assigned[cur.tweetId] ?? []).includes(f.id);
+                const on = !!f && (multi ? marks.has(f.id) : (assigned[cur.tweetId] ?? []).includes(f.id));
                 return (
-                  <button key={f.id} class={`triage-folder${on ? ' on' : ''}`} aria-pressed={on} onClick={(e) => void choose(f.id, e.shiftKey)}>
+                  <button key={i} data-key-slot={i} disabled={!f} class={`triage-folder${on ? ' on' : ''}`} aria-pressed={on} onClick={(e) => { if(f)void choose(f.id, e.shiftKey); }}>
                     <kbd>{i + 1}</kbd>
-                    {on ? <Icon name="ti-check" /> : <Icon name={f.icon} color={f.color} />}
-                    <span class="triage-folder-name">{displayName(f)}</span>
+                    {f && (on ? <Icon name="ti-check" /> : <Icon name={f.icon} color={f.color} />)}
+                    <span class="triage-folder-name">{f ? displayName(f) : t('triageKeyEmpty')}{f?.parentId && <small class="muted">{folderPath(props.folders,f.id)}</small>}</span>
                   </button>
                 );
               })}
@@ -381,6 +390,7 @@ export function Triage(props: {
               </span>
             </div>
             </div>
+            </div>
             <div class="dialog-actions triage-actions">
               <span class="muted triage-hint">{t(multi ? 'triageMultiDesc' : 'triageHint')}</span>
               <span class="grow" />
@@ -394,6 +404,7 @@ export function Triage(props: {
             </div>
           </>
         )}
+        {keyDialog && <TriageKeyTargets folders={props.folders} onClose={()=>setKeyDialog(false)}/>}
       </div>
     </div>
   );

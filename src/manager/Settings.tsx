@@ -3,7 +3,7 @@ import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
 import { foldText } from '../shared/fold';
 import { getSettings, onSettingsChanged, resetSettings, restoreSettings, updateAutoCollect, updateSettings, type ActionMode, type ButtonMode } from '../shared/settings';
-import { countAllData, exportData, importData, type DataCounts } from '../shared/storage';
+import { countAllData, exportData, importData, listFolders, type DataCounts } from '../shared/storage';
 import { Confirm, Sentences, TypeToConfirm } from './ui';
 import { ImageCacheSection } from './ImageCache';
 import { SavedContext } from './settingsSaved';
@@ -13,6 +13,8 @@ import { deleteAllDataAndCache } from '../shared/cacheops';
 import { refreshCacheView } from './cacheView';
 import { DiagnosticsDialog } from './Diagnostics';
 import { HealthNotice } from './HealthNotice';
+import { TriageKeyTargets } from './TriageKeyTargets';
+import type { Folder } from '../shared/models';
 import { INSTALL_URL } from '../shared/links';
 import { currentVersion } from '../shared/version';
 
@@ -33,6 +35,8 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [amode, setAmode] = useState<ActionMode>('popup');
   const [autoOn, setAutoOn] = useState(true);
   const [triageMulti, setTriageMulti] = useState(false);
+  const [keyFolders,setKeyFolders] = useState<Folder[]|null>(null);
+  const openKeyTargets = async()=>{try{setKeyFolders(await listFolders());}catch{reportStorageError();}};
   const [diag, setDiag] = useState(location.hash === '#diagnostics');
   const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
   const [counts, setCounts] = useState<DataCounts | null>(null);
@@ -252,6 +256,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
             <span class="muted setting-desc"><Sentences text={t('triageMultiDesc')} /></span>
           </span>
         </label>
+      <div class="setting"><button data-key-targets-open onClick={()=>void openKeyTargets()}>{t('triageKeyTargets')}</button></div>
       </fieldset>
       <fieldset class="setting-group">
         <legend>{t('actionModeHeading')}</legend>
@@ -338,6 +343,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           </button>
         </div>
       </fieldset>
+      {keyFolders && <TriageKeyTargets folders={keyFolders} onClose={()=>setKeyFolders(null)} onSaved={flashSaved}/>}
       {diag && <DiagnosticsDialog onClose={() => setDiag(false)} />}
       {dialog === 'reset' && (
         <Confirm message={t('settingsResetConfirm')} confirmLabel={t('settingsResetConfirmBtn')} onCancel={() => setDialog(null)} onConfirm={() => void doReset()} />
