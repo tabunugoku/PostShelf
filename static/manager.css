@@ -516,3 +516,10 @@ input[type=number]{width:110px}
 .tree-toggle:hover{background:var(--fill-ghost-hover)}
 .folder-breadcrumb{font-size:12px;overflow-wrap:anywhere}
 .fr.drop-child::after{content:"";position:absolute;left:var(--drop-indent,28px);right:10px;bottom:1px;height:3px;border-radius:2px;background:var(--fill-accent);pointer-events:none}
+
+.triage-folder-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.folder-tree-row{display:flex;align-items:center;min-width:0}
+.tree-choice{display:flex;align-items:center;gap:8px;flex:1;min-width:0;text-align:left;min-height:36px;border:0;background:transparent}
+.tree-choice>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tree-choice.on{background:var(--fill-ghost-hover);color:var(--fill-accent)}
+@media(max-width:600px){.triage-folder-panel{grid-template-columns:minmax(0,1fr)}}

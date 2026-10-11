@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { withAncestors, withoutDescendants } from '../shared/folderTree';
+import { FolderTreeList, useFolderTreeState } from './FolderTree';
 import { Icon } from '../shared/Icon';
 import { createFolderMenu } from '../shared/folderCreateMenu';
 import { INBOX_ID, displayName, type Bookmark, type Folder } from '../shared/models';
@@ -39,6 +41,7 @@ export function Triage(props: {
   onClose: () => void;
 }) {
   const { queue } = props;
+  const tree = useFolderTreeState();
   const [index, setIndex] = useState(0);
   const [assigned, setAssigned] = useState<Record<string, string[]>>(() => Object.fromEntries(queue.map((b) => [b.tweetId, b.folderIds])));
   const [sorted, setSorted] = useState<Set<string>>(new Set());
@@ -116,7 +119,7 @@ export function Triage(props: {
   };
   /** 作成は確定ではない。フォルダだけ保存済みで、割り当ては印として残す。 */
   const stageCreated = (ids: Iterable<string>) => {
-    setDraft({ tweetId: cur.tweetId, ids: new Set([...ids].filter(id => id !== INBOX_ID)) });
+    setDraft({ tweetId: cur.tweetId, ids: new Set(withAncestors([...ids],props.folders).filter(id => id !== INBOX_ID)) });
     focusConfirmation.current = true;
     setCreating(false);
     setMore(false);
@@ -124,13 +127,13 @@ export function Triage(props: {
     void props.onChanged(); // 作成したフォルダを一覧へ反映する。
   };
   /** そのフォルダに入れる (入っていれば外す)。stay: 同じポストに留まる */
-  const choose = async (folderId: string, stay: boolean): Promise<boolean> => {
+  const choose = async (folderId: string, stay: boolean, createdIds?:string[]): Promise<boolean> => {
     if (!cur || finished || busy.current) return false;
     if (multi) {
       setDraft(prev => {
         const ids = new Set(prev?.tweetId === cur.tweetId ? prev.ids : savedIds(cur));
-        if (ids.has(folderId)) ids.delete(folderId);
-        else ids.add(folderId);
+        const next=ids.has(folderId) ? withoutDescendants([...ids],[folderId],props.folders) : withAncestors([...ids,folderId],props.folders);
+        ids.clear();next.filter(id=>id!==INBOX_ID).forEach(id=>ids.add(id));
         return { tweetId: cur.tweetId, ids };
       });
       return true;
@@ -142,7 +145,7 @@ export function Triage(props: {
       if (has) await removeFromFolders([b.tweetId], [folderId]);
       else await addToFolders([b.tweetId], [folderId]);
       const base = (assigned[b.tweetId] ?? []).filter((id) => id !== INBOX_ID);
-      const ids = has ? base.filter((id) => id !== folderId) : [...base, folderId];
+      const ids = createdIds ?? (has ? withoutDescendants(base,[folderId],props.folders) : withAncestors([...base,folderId],props.folders));
       mark(b, ids.length ? ids : [INBOX_ID]);
       if (!has) void updateRecentFolders([folderId]).catch(() => {}); // 「最近使った」(失敗しても仕分けは続ける)
       setError('');
@@ -285,6 +288,8 @@ export function Triage(props: {
                 {error}
               </p>
             )}
+            <div class="triage-folder-panel">
+              <FolderTreeList folders={props.folders} collapsed={tree.collapsed} onToggle={tree.toggle} selected={multi ? marks : new Set(assigned[cur.tweetId])} onPick={f=>void choose(f.id,false)}/>
             <div class="triage-folders">
               {keyed.map((f, i) => {
                 const on = multi ? marks.has(f.id) : (assigned[cur.tweetId] ?? []).includes(f.id);
@@ -318,7 +323,7 @@ export function Triage(props: {
                             if (source === 'created') {
                               const added = [...sel].filter(id => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
                               const folderId = added[added.length - 1];
-                              if (!folderId || !await choose(folderId, false)) return false;
+                              if (!folderId || !await choose(folderId, false, [...sel])) return false;
                               setMore(false);
                               return;
                             }
@@ -362,10 +367,10 @@ export function Triage(props: {
                         onCreated={async (f) => {
                           if (latest.current.finished) return;
                           if (multi) {
-                            stageCreated([...marks, f.id]);
+                            stageCreated(withAncestors([...marks, f.id],[...props.folders,f]));
                             return;
                           }
-                          if (!await choose(f.id, false)) return false;
+                          if (!await choose(f.id, false, withAncestors([...savedIds(cur),f.id],[...props.folders,f]))) return false;
                           setCreating(false);
                         }}
                         onClose={closeCreate}
@@ -374,6 +379,7 @@ export function Triage(props: {
                   </Dropdown>
                 )}
               </span>
+            </div>
             </div>
             <div class="dialog-actions triage-actions">
               <span class="muted triage-hint">{t(multi ? 'triageMultiDesc' : 'triageHint')}</span>
