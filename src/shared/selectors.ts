@@ -12,6 +12,8 @@
  *  - 投稿者表示は [data-testid="User-Name"]、本文は [data-testid="tweetText"]
  *  - 投稿日時は <time datetime> で、親の <a href="/{handle}/status/{id}"> に包まれる
  */
+import { isEmojiImageUrl } from './avatar';
+
 export const CANDIDATES = {
   // 2 番目: X の article は role="article" を持つ (推測)
   tweet: ['article[data-testid="tweet"]', 'article[role="article"]'],
@@ -43,6 +45,7 @@ export const CANDIDATES = {
   nameText: ['span'],
   bodyLink: ['a[href]'],
   avatar: ['[data-testid="Tweet-User-Avatar"] img', 'a[role="link"][href^="/"]:not([href*="/status/"]) img'],
+  accountAvatar: ['img'],
   media: ['[data-testid="tweetPhoto"] img', 'a[href*="/photo/"] img'],
   // 写真のリンクが先に出て img/src が後から入る場合の印 (実機未確認の推測)。
   photoLink: ['a[href*="/photo/"]'],
@@ -87,6 +90,10 @@ export interface FoundAll<T extends Element = Element> {
 
 /** 最初に見つかった候補の要素 */
 export function queryFirst<T extends Element = Element>(root: ParentNode, key: SelKey): Found<T> | null {
+  if (key === 'avatar' || key === 'accountAvatar') {
+    const { els, index } = queryAllFirst<T>(root, key);
+    return els.length ? { el: els[0], index } : null;
+  }
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
     const el = root.querySelector<T>(list[i]);
@@ -109,10 +116,16 @@ export function queryEveryCandidate<T extends Element = Element>(root: ParentNod
 export function queryAllFirst<T extends Element = Element>(root: ParentNode, key: SelKey): FoundAll<T> {
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
-    const els = [...root.querySelectorAll<T>(list[i])];
+    const els = [...root.querySelectorAll<T>(list[i])].filter(el => avatarCandidate(el, key));
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
+}
+
+/** 表示名の画像をアイコンと誤認する DOM は実機未確認の推測。URL と User-Name の位置で除く。 */
+function avatarCandidate(el: Element, key: SelKey): boolean {
+  if (key !== 'avatar' && key !== 'accountAvatar') return true;
+  return !el.closest(CANDIDATES.userName[0]) && !isEmojiImageUrl((el as HTMLImageElement).src);
 }
 
 /** 引用の帯には data-testid もボタンも無いので構造で見分ける。壊れやすい (実機の観測のみ)。 */
@@ -131,7 +144,8 @@ export function findQuote(article: Element): Element | null {
 export function queryAllInQuote<T extends Element = Element>(root: Element, key: SelKey): FoundAll<T> {
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
-    const els = [...root.querySelectorAll<T>(list[i])].filter(el => !closestFirst(el, 'nestedQuote'));
+    const els = [...root.querySelectorAll<T>(list[i])]
+      .filter(el => !closestFirst(el, 'nestedQuote') && avatarCandidate(el, key));
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
@@ -148,6 +162,7 @@ export function queryAllOwn<T extends Element = Element>(article: Element, key: 
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
     const els = [...article.querySelectorAll<T>(list[i])].filter((el) => {
+      if (!avatarCandidate(el, key)) return false;
       const quote = closestFirst(el, 'quoteContainer')?.el;
       return !quote || !article.contains(quote);
     });

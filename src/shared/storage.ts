@@ -17,6 +17,7 @@
  *  - 根本の対策案: 保存のキーを 1 件ずつに分ける (`bookmark:<accountId>:<tweetId>`)。ただし全データの移行が要り、
  *    失敗したときの危険が大きいので、まだ行っていない。
  */
+import { isEmojiImageUrl } from './avatar';
 import {
   ALL_FOLDER,
   COLORS,
@@ -588,7 +589,9 @@ const httpsUrl = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
 /** 保存側の引用の、空の項目だけを画面側で埋める。補えるものが無ければ undefined */
 function fillQuote(saved: QuoteSnapshot, incoming: QuoteSnapshot): QuoteSnapshot | undefined {
   const patch: Partial<QuoteSnapshot> = {};
-  if (!saved.avatar && incoming.avatar) patch.avatar = incoming.avatar;
+  if ((!saved.avatar || isEmojiImageUrl(saved.avatar)) && incoming.avatar && !isEmojiImageUrl(incoming.avatar)) {
+    patch.avatar = incoming.avatar;
+  }
   if (!saved.media.length && !saved.hasVideo && incoming.media.length) patch.media = [...incoming.media];
   if (!saved.createdAt && incoming.createdAt) patch.createdAt = incoming.createdAt;
   if (saved.hasVideo && !saved.videoPoster && incoming.videoPoster) patch.videoPoster = incoming.videoPoster;
@@ -601,7 +604,9 @@ function fillQuote(saved: QuoteSnapshot, incoming: QuoteSnapshot): QuoteSnapshot
  */
 export function missingFields(saved: FillView, incoming: FillView): Partial<Snapshot> | null {
   const patch: Partial<Snapshot> = {};
-  if (!saved.avatar && httpsUrl(incoming.avatar)) patch.avatar = incoming.avatar;
+  if ((!saved.avatar || isEmojiImageUrl(saved.avatar)) && httpsUrl(incoming.avatar) && !isEmojiImageUrl(incoming.avatar)) {
+    patch.avatar = incoming.avatar;
+  }
   const media = incoming.media.filter(httpsUrl);
   if (!saved.media.length && !saved.hasVideo && media.length) patch.media = media;
   const poster = httpsUrl(incoming.videoPoster) ? incoming.videoPoster : undefined;
@@ -617,6 +622,7 @@ export function missingFields(saved: FillView, incoming: FillView): Partial<Snap
   if (!saved.createdAt && incoming.createdAt) patch.createdAt = incoming.createdAt;
   if (!saved.hasLink && incoming.hasLink) patch.hasLink = true;
   const quote = cleanQuote(incoming.quote);
+  if (quote && isEmojiImageUrl(quote.avatar)) delete quote.avatar;
   if (quote) {
     const merged = saved.quote ? fillQuote(saved.quote, quote) : quote;
     if (merged) patch.quote = merged;
@@ -851,7 +857,8 @@ export function noteAccount(input: { handle: string; displayName?: string; avata
       id,
       handle,
       displayName: input.displayName ?? prev?.displayName,
-      avatar: input.avatar ?? prev?.avatar,
+      avatar: (isEmojiImageUrl(input.avatar) ? undefined : input.avatar)
+        ?? (isEmojiImageUrl(prev?.avatar) ? undefined : prev?.avatar),
       lastSeenAt: now,
     };
     const same = prev && last?.id === id && prev.handle === next.handle && prev.displayName === next.displayName && prev.avatar === next.avatar;
