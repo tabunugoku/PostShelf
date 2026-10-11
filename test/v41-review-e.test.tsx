@@ -45,6 +45,8 @@ it('selects all filtered results including unrendered posts, excluding other res
   await click(bulk()); await click(menuItem(t('changeFolder')));
   const box = [...document.querySelectorAll('.menu-bulk label')].find(el => el.textContent === folder.name)!.querySelector<HTMLInputElement>('input')!;
   await click(box);
+  expect((await storage.listBookmarks()).every(b => !b.folderIds.includes(folder.id))).toBe(true);
+  await click([...document.querySelectorAll<HTMLButtonElement>('.menu-bulk button')].find(b => b.textContent?.trim() === t('triageConfirm'))!);
   const bookmarks = await storage.listBookmarks();
   expect(bookmarks.filter(b => b.folderIds.includes(folder.id)).map(b => b.tweetId).sort()).toEqual(Array.from({ length: 40 }, (_, i) => String(i + 1)).sort());
   expect(bookmarks.filter(b => Number(b.tweetId) > 40).every(b => b.folderIds.join() === 'inbox')).toBe(true);
