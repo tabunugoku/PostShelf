@@ -17,7 +17,7 @@ describe('v15-B-3: autoCollect settings', () => {
     expect(DEFAULT_SETTINGS.autoCollect).toEqual(DEFAULT_AUTO_COLLECT);
   });
   it('invalid stored values fall back to the defaults', async () => {
-    data.settings = { autoCollect: { enabled: 'x', speed: 'fast', cap: 7, offers: { a: 'done', b: 'nope', c: 1 } } };
+    data.settings = { autoCollect: { enabled: 'x', speed: 'fast', cap: 7.5, offers: { a: 'done', b: 'nope', c: 1 } } };
     expect((await getSettings()).autoCollect).toEqual({ enabled: true, speed: 'slow', cap: 300, offers: { a: 'done' } });
     data.settings = {}; // 古いデータ (v14 以前): autoCollect が無い
     expect((await getSettings()).autoCollect).toEqual(DEFAULT_AUTO_COLLECT);

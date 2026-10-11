@@ -39,7 +39,7 @@
 
 (v28) 任意の項目 `recentFolderIds?: string[]` (x.com の保存ポップオーバーの「最近使った」。最大 3 件、新しい順。「未分類」と「すべて」は入れない。無い・不正な値は空として扱う)。
 `{ syncNative, buttonMode, actionMode, lastFolderId, viewMode, sortKey, viewAccount, imageCache, autoCollect }`
-- `autoCollect` (**v15**): `{ enabled: true, speed: 'slow' | 'normal', cap: 300 | 100 | 0, offers: Record<accountId, 'dismissed' | 'done'> }`。初期化の対象 (`offers` も戻る)。`cap` の 0 は「止めない」。`offers` は案内の記録 (dismissed = 「このアカウントでは表示しない」/ done = 取り込みが終わった)
+- `autoCollect` (**v15**): `{ enabled: true, speed: 'slow' | 'normal', cap: number, offers: Record<accountId, 'dismissed' | 'done'> }`。初期化の対象 (`offers` も戻る)。`cap` は 0 (止めない)、または 1〜100000 の整数 (既定 300。範囲外は 300 に戻す)。`offers` は案内の記録 (dismissed = 「このアカウントでは表示しない」/ done = 取り込みが終わった)
 - `imageCache` (**v11**): `{ enabled: false, backend: 'idb' | 'dir', maxBytes: 1 GB, quality: 'large' | 'orig', onFull: 'evict' | 'stop' }`。初期化の対象
 - `viewAccount` (**v9**): 手動で選んだ表示アカウントの ID。`''` = 選んでいない (x.com で最後に読み取ったアカウントに追従)
 - `lastFolderId` / `viewMode` (`post|list|grid`) / `sortKey` は manager の最後の表示状態 (**v7**。`localStorage` は使わない)
