@@ -56,10 +56,10 @@ it('saves the last reading after the wait budget if still pending', async () => 
   expect((await listBookmarks())[0].snapshot.media).toEqual([]);
 });
 
-it('消失後の猶予を過ぎたポストも終了時には最後の値で保存する', async () => {
+it('消失で次画面へ回したポストも終了時には最後の値で保存する', async () => {
   const items = [pending()]; const r = reader(items, () => { items.length = 0; });
   await r.read(); await r.flush(true);
-  expect(r.sleeps()).toBe(8);
+  expect(r.sleeps()).toBe(1);
   expect(r.write).toHaveBeenCalledTimes(1);
   expect((await listBookmarks())[0].snapshot.media).toEqual([]);
 });

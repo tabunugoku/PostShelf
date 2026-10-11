@@ -27,7 +27,7 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
-it('猶予後は保存せず次の画面で読み直し保存順序と件数を保つ', async () => {
+it('消失の最初の検知では保存せず次の画面で読み直し保存順序と件数を保つ', async () => {
   const world = collectorWorld((now) => {
     if (now === 300) post.remove();
   });
@@ -49,7 +49,7 @@ it('猶予後は保存せず次の画面で読み直し保存順序と件数を�
     ['1201', 1000], ['1202', 0], ['1203', -1000],
   ]);
   expect(world.collector.state!).toMatchObject({ imported: 3, skipped: 0, failed: 0 });
-  expect(world.clock.sleeps).toEqual(Array(8).fill(300));
+  expect(world.clock.sleeps).toEqual([300]);
 });
 
 it('2 回消えて戻らなければ最後の値で保存し 3 回目は待たない', async () => {
@@ -61,10 +61,10 @@ it('2 回消えて戻らなければ最後の値で保存し 3 回目は待た�
   await world.flush();
   expect((await getBookmark('1202'))!.snapshot).toMatchObject({ text: '架空の最後に読めた本文。', media: [] });
   expect(world.collector.state!.imported).toBe(3);
-  expect(world.clock.sleeps).toEqual(Array(16).fill(300));
+  expect(world.clock.sleeps).toEqual([300, 300]);
   restore();
   await world.read();
-  expect(world.clock.sleeps).toHaveLength(16);
+  expect(world.clock.sleeps).toHaveLength(2);
   expect(world.collector.state!.imported).toBe(3);
   expect((await ordered()).map((b) => b.tweetId)).toEqual(['1201', '1202', '1203']);
 });
@@ -135,7 +135,7 @@ it('DOM に status リンクが残る読めない状態は次画面へ回さな�
   expect(await getBookmark('1202')).toBeDefined();
   expect(world.collector.state!.imported).toBe(3);
   expect((world.collector as any).vanishedRetry.size).toBe(0);
-  expect(world.clock.sleeps).toEqual(Array(8).fill(300));
+  expect(world.clock.sleeps).toEqual([300]);
 });
 
 it('通常の時間切れは保存し v51 の追加待ちなしの補完を維持する', async () => {
@@ -152,15 +152,15 @@ it('通常の時間切れは保存し v51 の追加待ちなしの補完を維�
   expect(world.collector.state!.imported).toBe(3);
 });
 
-it('猶予の途中で全体上限に達した消失は次画面へ回さず保存する', async () => {
+it('全体上限に近い消失も猶予を待たず次画面へ回す', async () => {
   const world = collectorWorld((now) => {
     if (now >= 7500) post.remove();
   });
   await world.read();
   await world.flush();
-  expect(await getBookmark('1202')).toBeDefined();
-  expect((world.collector as any).vanishedRetry.size).toBe(0);
-  expect(world.clock.sleeps).toEqual(Array(27).fill(300));
+  expect(await getBookmark('1202')).toBeUndefined();
+  expect((world.collector as any).vanishedRetry.size).toBe(1);
+  expect(world.clock.sleeps).toEqual(Array(25).fill(300));
 });
 
 it('複数の読み直し待ちを終了時に元の順序で戻す', async () => {
@@ -218,7 +218,7 @@ it('スクロールで戻ったポストを読み直して既存の終端条件�
   expect(world.collector.state!).toMatchObject({ status: 'done', imported: 3, failed: 0 });
   expect((await getBookmark('1202'))!.snapshot.avatar).toBeTruthy();
   expect(scrollBy.mock.calls).toEqual(Array.from({ length: 4 }, () => [800]));
-  expect(world.clock.sleeps.filter((ms) => ms === 300)).toHaveLength(8);
+  expect(world.clock.sleeps.filter((ms) => ms === 300)).toHaveLength(1);
   // 再取得待ちが新規として検知される最初のスクロールだけ既存の下限 800 ms、以後は 2000 ms。
   expect(world.clock.sleeps.filter((ms) => ms === 100)).toHaveLength(8 + 3 * 20);
 });

@@ -23,25 +23,27 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
-it('最初の確認で消えて次で戻ったポストを読み込み済みの値で保存する', async () => {
+it('最初の確認で消えたポストを次画面で読み込み済みの値で保存する', async () => {
   const info = vi.spyOn(console, 'info').mockImplementation(() => {});
   const world = collectorWorld((now) => {
     if (now === 300) post.remove();
-    if (now === 600) ready();
   });
+  await world.read();
+  ready();
   await world.read();
   await (world.collector as any).finish();
   expect((await getBookmark('1202'))!.snapshot).toMatchObject({
     avatar: 'https://pbs.twimg.com/profile_images/sample-slow-v54.jpg',
     media: ['https://pbs.twimg.com/media/sample-slow-v54.jpg'], text: '架空の戻った本文。',
   });
-  expect(world.clock.sleeps).toEqual([300, 300]);
+  expect(world.clock.sleeps).toEqual([300]);
   expect(info.mock.calls[0][1]).toMatchObject({
-    counts: { resolved: 1, vanished: 0, vanishedReturned: 1, vanishedGone: 0 }, unresolved: [],
+    counts: { resolved: 0, vanished: 1, vanishedGone: 1 },
+    unresolved: [{ disappearedAfterMs: 300, waitedMs: 300 }],
   });
 });
 
-it('消えるまでと消えてからの猶予を刻みで別に数える', async () => {
+it('消失検知までの時間を実際の時計によらず刻みで数える', async () => {
   const info = vi.spyOn(console, 'info').mockImplementation(() => {});
   const world = collectorWorld((now) => {
     if (now === 900) post.remove();
@@ -49,25 +51,26 @@ it('消えるまでと消えてからの猶予を刻みで別に数える', asyn
   (world.collector as any).d.now = () => 123;
   await world.read();
   await (world.collector as any).finish();
-  expect(world.clock.sleeps).toEqual(Array(10).fill(300));
+  expect(world.clock.sleeps).toEqual(Array(3).fill(300));
   expect(info.mock.calls[0][1]).toMatchObject({
     counts: { vanished: 1, vanishedGone: 1 }, vanished: { removed: 1 },
-    unresolved: [{ disappearedAfterMs: 900, vanishElapsedMs: 2100, waitedMs: 3000, elapsedMs: 0 }],
+    unresolved: [{ disappearedAfterMs: 900, waitedMs: 900, elapsedMs: 0 }],
   });
 });
 
-it('戻っても pending なら待ち続け再び消えたときの猶予を数え直す', async () => {
+it('次画面で戻っても pending なら通常の待ちで解決する', async () => {
   const info = vi.spyOn(console, 'info').mockImplementation(() => {});
   const world = collectorWorld((now) => {
-    if (now === 300 || now === 900) post.remove();
-    if (now === 600) document.getElementById('last-post')!.before(post);
-    if (now === 2700) ready();
+    if (now === 300) post.remove();
+    if (now === 600) ready();
   });
   await world.read();
+  document.getElementById('last-post')!.before(post);
+  await world.read();
   await (world.collector as any).finish();
-  expect(world.clock.now).toBe(2700);
+  expect(world.clock.now).toBe(600);
   expect((await getBookmark('1202'))!.snapshot.avatar).toBeTruthy();
-  expect(info.mock.calls[0][1].counts).toMatchObject({ resolved: 1, vanishedReturned: 1, vanishedGone: 0 });
+  expect(info.mock.calls[0][1].counts).toMatchObject({ resolved: 1, vanishedGone: 1 });
 });
 
 it.each([0, 0.5, 1])('消失が遅くても乱数 %s の刻みで既存の全体上限を延ばさない', async (random) => {
@@ -78,11 +81,11 @@ it.each([0, 0.5, 1])('消失が遅くても乱数 %s の刻みで既存の全体
   await world.read();
   await world.flush();
   const step = 300 + Math.round(random * 200);
-  expect(world.clock.sleeps).toEqual(Array(Math.ceil(SETTLE_MAX_MS / step)).fill(step));
+  expect(world.clock.sleeps).toEqual(Array(Math.ceil(7500 / step)).fill(step));
   expect(world.clock.now).toBeLessThan(SETTLE_MAX_MS + step);
 });
 
-it('最初から pending でなければ猶予の待ちを追加しない', async () => {
+it('最初から pending でなければ待ちを追加しない', async () => {
   ready();
   const world = collectorWorld();
   await world.read();
