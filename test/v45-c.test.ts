@@ -5,16 +5,25 @@ import { collectVisible } from '../src/content/collect';
 import { VisibleMediaBackfill } from '../src/content/media';
 import { addCollected, fillMissing, getFillViews, getSavedIds, setAccountScope } from '../src/shared/storage';
 import { AutoCollector, defaultDeps } from '../src/content/autocollect';
+import { queryOwn } from '../src/shared/selectors';
 
 let data: Record<string, unknown>;
 beforeEach(() => {
   data = installChromeMock(); data.schemaVersion = 2; data.folderIdsRepaired = true; setAccountScope('me');
   document.body.innerHTML = readFileSync('test/fixtures/v45-media.html','utf8');
+  // 「読み込み済み」の補完テストでは、v50 のアイコン待ちも完了している状態を使う。
+  const avatar = queryOwn(document.getElementById('image-ready')!, 'avatar')!.el;
+  Object.defineProperty(avatar, 'complete', { value: true });
+  Object.defineProperty(avatar, 'naturalWidth', { value: 48 });
 });
 const snapshot = { text: '架空の保存済み本文', author: 'Sample', handle: '@sample_user', media: [], createdAt: '2026-01-01', url: 'https://x.com/sample_user/status/102', translated: true as const,
   quote: { author: 'Sample Quote', handle: '@sample_quote', text: '架空の引用', media: [] } };
 function seed(id: string, extra = {}, accountId = 'me') {
-  const b = { accountId, tweetId: id, savedAt: 1234, folderIds: ['sample-folder'], snapshot: { ...snapshot, ...extra } };
+  const avatar = id === '102' ? 'https://pbs.twimg.com/profile_images/sample-ready.jpg' : undefined;
+  const b = {
+    accountId, tweetId: id, savedAt: 1234, folderIds: ['sample-folder'],
+    snapshot: { ...snapshot, ...(avatar ? { avatar } : {}), ...extra },
+  };
   data.bookmarks = { ...(data.bookmarks as object), [`${accountId}:${id}`]: b }; return structuredClone(b);
 }
 function watcher() {

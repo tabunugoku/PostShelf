@@ -1,0 +1,18 @@
+<!-- 実機未確認の推測: ポストのリンク・本文と引用枠が先に置かれ、アイコンの img 自体は後から DOM に入る。
+     読み取りに必要な構造だけを置く。アイコンが元から無い表示との区別は DOM だけではできない。 -->
+<article data-testid="tweet" id="main-post">
+  <div data-testid="Tweet-User-Avatar" id="main-avatar"></div>
+  <div data-testid="User-Name"><span>Sample Avatar</span><span>@sample_avatar</span></div>
+  <a href="/sample_avatar/status/501"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText">架空のアイコン待ちの本文</div>
+</article>
+<article data-testid="tweet" id="quote-post">
+  <div data-testid="Tweet-User-Avatar" id="quote-main-avatar"></div>
+  <a href="/sample_main/status/502"><time datetime="2026-01-02"></time></a>
+  <div data-testid="tweetText">架空の引用つきの本文</div>
+  <div role="link" id="quote-frame">
+    <div data-testid="Tweet-User-Avatar" id="quote-avatar"></div>
+    <div data-testid="User-Name" id="quote-name"><span>Sample Quote</span><span>@sample_quote</span></div>
+    <div data-testid="tweetText" id="quote-text">架空の引用本文</div>
+  </div>
+</article>
