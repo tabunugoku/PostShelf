@@ -151,7 +151,7 @@ export class FullTextQueue {
     if (ms > 0 && !this.aborted) await Promise.race([this.d.sleep(ms), this.cancelled]);
   }
   private async waitForCollect(): Promise<void> {
-    while (!this.aborted && await this.d.collectActive()) await this.wait(5000);
+    for (let n = 0; n < 360 && !this.aborted && await this.d.collectActive(); n++) await this.wait(5000);
   }
 
   private async loop(published: Promise<void>): Promise<void> {
@@ -175,7 +175,6 @@ export class FullTextQueue {
   private async worker(plan: FullTextPlan): Promise<void> {
     let readyAt = 0;
     while (this.pending.length && !this.aborted) {
-      await this.waitForCollect();
       if (this.aborted) break;
       const item = this.pending.shift(); // 取り出しは同期的に行う。他のワーカーと二重にならない。
       if (!item) break;
