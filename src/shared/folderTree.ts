@@ -45,3 +45,15 @@ export function sanitizeParents(folders:Folder[]):Folder[] {
  while(p.parentId && valid){const parent=folders.find(c=>c.id===p.parentId && c.accountId===f.accountId);if(!parent || !user(parent.id) || seen.has(parent.id) || ++depth>MAX_FOLDER_DEPTH){valid=false;break;}seen.add(parent.id);p=parent;}
  if(!valid || typeof f.parentId!=='string' || !f.parentId)delete next.parentId;return next;});
 }
+
+/** Full depth-first tree order, independent of membership order and collapsed rows. */
+export function memberFoldersInTreeOrder(folders: readonly Folder[], ids: readonly string[]): Folder[] {
+ const members = new Set(ids);
+ return flattenFolders(folders).map(row=>row.folder).filter(f=>members.has(f.id));
+}
+/** Keep only memberships with no other member below them; never change stored memberships. */
+export function leafMemberFolders(folders: readonly Folder[], ids: readonly string[]): Folder[] {
+ const ordered = memberFoldersInTreeOrder(folders,ids);
+ const parents = new Set(ordered.flatMap(f=>ancestors(folders,f.id).map(p=>p.id)));
+ return ordered.filter(f=>!parents.has(f.id));
+}

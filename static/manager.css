@@ -543,3 +543,13 @@ input[type=number]{width:110px}
 @media(max-width:600px){.key-target-columns{grid-template-columns:minmax(0,1fr)}.triage-key-heading{flex-wrap:wrap}}
 
 .triage-folder-panel>.folder-tree{max-height:50vh;overflow:auto}
+
+/* Deepest membership chips; icon path toggles are independent of removal. */
+.folder-membership{min-height:32px;padding:0 8px;border-radius:16px;min-width:0;max-width:100%}
+.folder-membership .folder-path-toggle{display:inline-flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;min-height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit}
+.folder-membership .folder-path-toggle:hover{background:var(--fill-ghost-hover)}
+.folder-membership .folder-chip-label{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.folder-membership button.folder-chip-label{display:inline-flex;align-items:center;gap:4px;padding:0;min-height:30px;border:0;background:transparent;color:inherit;font:inherit}
+.folder-membership button.folder-chip-label:hover{background:var(--fill-ghost-hover)}
+.folder-membership .ti-x{font-size:12px;opacity:.7;flex:none}
+.mini .act{margin:0;min-width:0;max-width:40%}

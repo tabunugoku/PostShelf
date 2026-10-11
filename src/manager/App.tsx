@@ -1021,6 +1021,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           selectionActive={selected.size > 0}
           tabbable={b.tweetId === tabbableId}
           folderOf={folderOf}
+          folders={folders}
           pickerOpen={picker === b.tweetId}
           h={rowHandlers}
           pickerNode={
