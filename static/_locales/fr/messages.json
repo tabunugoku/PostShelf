@@ -1161,7 +1161,7 @@
     "message": "Récupérer le texte complet des posts longs"
   },
   "fullTextSwitchDesc": {
-    "message": "Quand vous enregistrez un post que X a replié derrière « Afficher plus », PostShelf ouvre la page de ce post dans un onglet en arrière-plan, lit le texte complet puis ferme l’onglet. Il attend 4 à 8 secondes entre deux posts et ne touche jamais l’onglet que vous consultez. Les conditions de X peuvent y voir un accès automatisé (ce n’est pas un avis juridique). Désactivé, seul le texte replié est enregistré."
+    "message": "Quand vous enregistrez un post que X a replié derrière « Afficher plus », PostShelf ouvre la page de ce post dans un onglet en arrière-plan, lit le texte complet puis ferme l’onglet. Il fait une pause entre deux posts et ne touche jamais l’onglet que vous consultez. Les conditions de X peuvent y voir un accès automatisé (ce n’est pas un avis juridique). Désactivé, seul le texte replié est enregistré."
   },
   "fullTextSpeed": {
     "message": "Vitesse de récupération"
@@ -1200,7 +1200,7 @@
     "message": "Récupérer maintenant"
   },
   "fullTextConfirm": {
-    "message": "Le texte complet de $COUNT$ posts va être récupéré. Chacun prend 4 à 8 secondes et les pages de X s’ouvrent puis se ferment dans un onglet en arrière-plan. Les conditions de X peuvent y voir un accès automatisé. Commencer ?",
+    "message": "Le texte complet de $COUNT$ posts va être récupéré. La récupération prend du temps et les pages de X s’ouvrent puis se ferment dans un onglet en arrière-plan. Les conditions de X peuvent y voir un accès automatisé. Commencer ?",
     "placeholders": {
       "count": {
         "content": "$1",

@@ -1161,7 +1161,7 @@
     "message": "Obter o texto completo de posts longos"
   },
   "fullTextSwitchDesc": {
-    "message": "Ao salvar um post que o X recolheu atrás de “Mostrar mais”, o PostShelf abre a página desse post em uma guia em segundo plano, lê o texto completo e fecha a guia. Espera de 4 a 8 segundos entre posts e nunca mexe na guia que você está vendo. Os termos do X podem tratar isso como acesso automatizado (não é aconselhamento jurídico). Desativado, só o texto recolhido é salvo."
+    "message": "Ao salvar um post que o X recolheu atrás de “Mostrar mais”, o PostShelf abre a página desse post em uma guia em segundo plano, lê o texto completo e fecha a guia. Faz uma pausa entre posts e nunca mexe na guia que você está vendo. Os termos do X podem tratar isso como acesso automatizado (não é aconselhamento jurídico). Desativado, só o texto recolhido é salvo."
   },
   "fullTextSpeed": {
     "message": "Velocidade de busca"
@@ -1200,7 +1200,7 @@
     "message": "Obter agora"
   },
   "fullTextConfirm": {
-    "message": "Será obtido o texto completo de $COUNT$ posts. Cada um leva de 4 a 8 segundos e as páginas do X são abertas e fechadas em uma guia em segundo plano. Os termos do X podem tratar isso como acesso automatizado. Começar?",
+    "message": "Será obtido o texto completo de $COUNT$ posts. A obtenção leva algum tempo e as páginas do X são abertas e fechadas em uma guia em segundo plano. Os termos do X podem tratar isso como acesso automatizado. Começar?",
     "placeholders": {
       "count": {
         "content": "$1",

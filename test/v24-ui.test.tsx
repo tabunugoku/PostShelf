@@ -42,12 +42,12 @@ describe('v24-B: 設定「長いポストの全文」', () => {
     expect($$('.ft-row')).toHaveLength(0); // オフのときは、件数と取得のボタンを出さない
   });
 
-  it('shows the number of posts without full text; 「いま取得する」 asks once (count, 4–8 seconds, background tab, terms), then asks the background', async () => {
+  it('shows the number of posts without full text; 「いま取得する」 asks once (count, takes time, background tab, terms), then asks the background', async () => {
     expect($('.ft-pending').textContent).toBe('全文を取得していないポスト: 3 件');
     await click($$('.ft-row button').find((b) => b.textContent?.includes('いま取得する'))!);
     const msg = $('[role=alertdialog] p').textContent!;
     expect(msg).toContain('3 件');
-    expect(msg).toContain('4〜8 秒');
+    expect(msg).toContain('取得には時間がかかり');
     expect(msg).toContain('裏のタブ');
     expect(msg).toContain('規約');
     expect(send).not.toHaveBeenCalled();

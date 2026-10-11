@@ -47,13 +47,8 @@ describe('locales', () => {
     for (const k of used) expect(keys.has(k), k).toBe(true);
   });
 
-  it('ja uses full-width supplementary parentheses, except the explicitly specified speed label', () => {
+  it('ja uses full-width （ ） for supplementary parentheses (no half-width ones, no space before a bracket)', () => {
     for (const [k, v] of Object.entries(loadMessages('ja'))) {
-      // v43 の指定文言は半角括弧。ほかの文言の規則と、8 言語の整合検査は維持する。
-      if (k === 'fullTextSpeedSlow') {
-        expect(v.message).toBe('ゆっくり (おすすめ)');
-        continue;
-      }
       expect(v.message, k).not.toMatch(/[()]/);
       expect(v.message, k).not.toMatch(/ （/);
     }
