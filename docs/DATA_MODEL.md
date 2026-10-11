@@ -25,6 +25,16 @@
 - 「画像あり」は `media.length > 0` で判定できるので既存データでも使える
 - 保存し直す (フォルダを変更する) と、その時点のスナップショットで `hasVideo` / `hasLink` が入る
 
+### 欠けた項目の補完 (v47)
+保存済みポストの空の項目を、あとから画面で読めた値で埋める (`fillMissing`。規則は `missingFields` に 1 か所)。**既にある値は上書きしない**。本文・所属先・`savedAt` は変えず、保存されていないポストは作らない。補えるものが無ければ書き込まない。
+- `avatar`: 保存側が無く、画面側が https の URL。img が読み込み済み (src があり `complete` で幅が 0 より大きい) のときだけ画面側の値にする
+- `media`: 保存側が空で動画ではなく、画面側に画像がある。`hasVideo` / `videoPoster`: v45 と同じ条件
+- `author`: 保存側が `handle` から @ を除いたもの (= 名前が取れず代用されていた) と同じで、画面側が違う空でない名前
+- `createdAt`: 保存側が無く、画面側にある。`hasLink`: 保存側が偽・無しで、画面側が真
+- `quote`: 保存側に引用が無ければ、検証した引用を丸ごと入れる。あれば、`avatar` / `media` / `createdAt` / `videoPoster` の空のものだけ入れる (https の URL のみ)
+- 補う経路は 3 つ: 画面に出ているポスト (`src/content/media.ts`)、個別ページの主役のポスト (`src/content/fulltext.ts`)、裏のタブの全文取得 (`src/background/fulltext.ts`。本文の更新が失敗しても行う)
+- 表示側 (manager) では、`snapshot.avatar` が空のとき、同じハンドル (小文字) の他のポストのうち `savedAt` が最も新しいもののアイコンを使う。保存データは変えない
+
 ## `settings`
 
 (v28) 任意の項目 `recentFolderIds?: string[]` (x.com の保存ポップオーバーの「最近使った」。最大 3 件、新しい順。「未分類」と「すべて」は入れない。無い・不正な値は空として扱う)。
