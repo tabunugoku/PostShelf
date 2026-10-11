@@ -7,6 +7,7 @@ import { AutoCollectPanel } from './autocollectPanel';
 import { installMessageHandler } from './messages';
 import { installGlobalHandlers } from './popover';
 import { installFullTextWatcher } from './fulltext';
+import { installMediaBackfill, scheduleMediaBackfill } from './media';
 
 installGlobalHandlers();
 installMessageHandler();
@@ -14,11 +15,15 @@ initAccount();
 initHealth();
 initButtons();
 installFullTextWatcher(); // 個別ページで全文が出ているとき、保存済みの「たたまれた」ポストを全文に更新する (v24)
+installMediaBackfill(); // いまの DOM から、保存済みポストの欠けたメディアだけを補う (v45)
 ensureCollectButton();
 // ブックマーク一覧 (/i/history) への SPA 遷移を拾って収集ボタンを出し入れする
 watchCollectData();
 watchPath();
-new MutationObserver(() => scheduleCollectRefresh()).observe(document.body, { childList: true, subtree: true });
+new MutationObserver(() => {
+  scheduleCollectRefresh();
+  scheduleMediaBackfill();
+}).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'poster'] });
 
 // ブックマークの自動取り込み (v15)。管理画面の確認ダイアログで同意して始めたときだけ動く (src/content/autocollect.ts)
 const autoCollector = installAutoCollect((s) => panel.update(s));

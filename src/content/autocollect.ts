@@ -132,6 +132,8 @@ export class AutoCollector {
   /** 前回の保存以降に画面に出た順のポスト。先頭は、保存済みの印 (ID だけ。並び順の基準) のことがある */
   private seq: SeqEntry[] = [];
   private pending: Extracted[] = [];
+  /** 未保存のメディア読み込み待ち。次の既存の読み取りで一度だけ再確認する。 */
+  private mediaRetry = new Map<string, Extracted>();
   private streak = 0;
   /** 上限の数え始め (再開のたびに、その時点の imported から数え直す) */
   private base = 0;
@@ -324,6 +326,7 @@ export class AutoCollector {
     this.seen = new Set();
     this.seq = [];
     this.pending = [];
+    this.mediaRetry.clear();
     this.streak = 0;
     this.rewind = false;
     this.saved = null; // 取り込みの開始のときに、保存済みの ID を 1 回読む
@@ -396,11 +399,13 @@ export class AutoCollector {
     const saved = (this.saved ??= await this.d.savedIds(this.state!.accountId));
     if (token !== this.token) return 0;
     const s = this.state!;
+    const visible = new Map(items.map((it) => [it.tweetId, it]));
+    // 仮想化で消えた場合も最初に読めた分は残す。スクロールや追加の待ちはしない。
+    for (const [id, first] of this.mediaRetry) this.acceptMedia(visible.get(id) ?? first);
     let fresh = 0;
     for (const it of items) {
       if (this.seen.has(it.tweetId)) continue; // 同じ取り込みの中で、同じポストを二重に数えない
       this.seen.add(it.tweetId);
-      this.seq.push(it);
       fresh++;
       const posted = it.snapshot.createdAt;
       if (posted && (!s.oldestSeenPostDate || posted < s.oldestSeenPostDate)) s.oldestSeenPostDate = posted;
@@ -410,13 +415,28 @@ export class AutoCollector {
         const sorted = [...this.recent].sort(); // 偶数件のときは、真ん中の 2 件のうち古い方
         s.recentPostDate = sorted[Math.ceil(sorted.length / 2) - 1];
       }
-      if (saved.has(it.tweetId)) s.skipped++;
+      if (!saved.has(it.tweetId) && it.mediaPending) {
+        this.mediaRetry.set(it.tweetId, it);
+        this.seq.push({ tweetId: it.tweetId }); // 保存前も画面に出た順序を保つ
+        s.imported++; // 上限の数え方を変えず、保存だけを次の読み取りへ回す
+      } else if (saved.has(it.tweetId)) {
+        this.seq.push(it);
+        s.skipped++;
+      }
       else {
+        this.seq.push(it);
         this.pending.push(it);
         s.imported++;
       }
     }
     return fresh;
+  }
+
+  private acceptMedia(it: Extracted): void {
+    this.mediaRetry.delete(it.tweetId);
+    const at = this.seq.findIndex((entry) => entry.tweetId === it.tweetId);
+    if (at >= 0) this.seq[at] = it;
+    this.pending.push(it);
   }
 
   /**
@@ -426,12 +446,17 @@ export class AutoCollector {
    */
   private flush(final = false): Promise<void> {
     this.flushing = this.flushing.then(async () => {
-      const batch = this.pending;
-      this.pending = [];
-      if (batch.length === 0 || !this.state) return;
+      if (!this.state) return;
+      // 停止時には追加の読み取りをせず、保留していた最初の内容も保存する。
+      if (final) for (const it of this.mediaRetry.values()) this.acceptMedia(it);
+      const deferredAt = this.seq.findIndex((it) => this.mediaRetry.has(it.tweetId));
+      const sent = deferredAt < 0 ? this.seq : this.seq.slice(0, deferredAt);
+      const ready = new Set(sent.map((it) => it.tweetId));
+      const batch = this.pending.filter((it) => ready.has(it.tweetId));
+      if (batch.length === 0) return;
+      this.pending = this.pending.filter((it) => !ready.has(it.tweetId));
       this.writing = true;
       try {
-        const sent = this.seq;
         await this.d.addCollected(sent, this.state.startedAt, this.state.accountId);
         for (const it of batch) {
           this.saved?.add(it.tweetId);
@@ -572,6 +597,7 @@ export class AutoCollector {
     this.token++;
     this.resumeToken++;
     this.pending = [];
+    this.mediaRetry.clear();
     this.state = null;
     this.emit(false);
   }
