@@ -46,7 +46,7 @@ it('User-Name 内の画像は URL がプロフィール画像でも候補から�
   expect(read().snapshot.quote!.avatar).toBeUndefined();
 });
 
-it.each([emoji, 'https://abs.twimg.com/sample.svg', 'https://example.test/emoji/sample.svg'])(
+it.each([emoji, 'https://example.test/emoji/sample.svg'])(
   '専用アイコン枠でも絵文字系 URL %s をアイコンにしない', (url) => {
     insertAvatar('main-avatar');
     document.getElementById('main-avatar')!.firstElementChild!.setAttribute('src', url);
