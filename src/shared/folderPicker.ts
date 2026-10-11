@@ -182,7 +182,6 @@ export function createFolderPicker(opts: {
 
   const menu = createFolderMenu({
     theme: th,
-    parents: () => folders,
     existing: () => [inboxOf(folders), ...folders], // 「未分類」(まだ保存されていないときの仮想の行) も同名の判定に含める
     onCreated: async (f) => {
       // 作ったフォルダを、このポストの保存先として選んで一覧に戻る (「未分類」との排他は normalize)

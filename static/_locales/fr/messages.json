@@ -1666,8 +1666,6 @@
   "translatedBadge": { "message": "Traduit" },
   "quoteLabel": { "message": "Citation" },
   "quoteAsSeen": { "message": "Enregistré tel qu'affiché sur X" },
-  "folderParent": {"message":"Dossier parent"},
-  "folderRoot": {"message":"Premier niveau"},
   "treeExpand": {"message":"Déplier"},
   "treeCollapse": {"message":"Replier"},
   "folderDeleteTree": {"message":"Supprimer $FOLDERS$ dossiers et leurs descendants, et leurs affectations dans $POSTS$ posts. Les posts sont conservés.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

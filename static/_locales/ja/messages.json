@@ -1666,8 +1666,6 @@
   "translatedBadge": { "message": "翻訳済み" },
   "quoteLabel": { "message": "引用" },
   "quoteAsSeen": { "message": "X に表示されていた分を保存しています" },
-  "folderParent": {"message":"親フォルダ"},
-  "folderRoot": {"message":"1 段目"},
   "treeExpand": {"message":"開く"},
   "treeCollapse": {"message":"たたむ"},
   "folderDeleteTree": {"message":"$FOLDERS$ 個のフォルダ（子・孫を含む）を削除し、$POSTS$ 件のポストからその所属を外します。ポスト自体は残ります。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

@@ -416,7 +416,7 @@ function NewFolder(props: { existing: Folder[]; onCreated: (f: Folder) => void |
   const latest = useRef(props);
   latest.current = props;
   useEffect(() => {
-    const menu = createFolderMenu({ theme: THEME, parents: () => latest.current.existing, existing: () => latest.current.existing, onCreated: (f) => latest.current.onCreated(f), onClose: () => latest.current.onClose() });
+    const menu = createFolderMenu({ theme: THEME, existing: () => latest.current.existing, onCreated: (f) => latest.current.onCreated(f), onClose: () => latest.current.onClose() });
     host.current?.replaceChildren(menu.el);
     menu.focus();
   }, []);

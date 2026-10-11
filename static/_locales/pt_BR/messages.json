@@ -1666,8 +1666,6 @@
   "translatedBadge": { "message": "Traduzido" },
   "quoteLabel": { "message": "Citação" },
   "quoteAsSeen": { "message": "Salvo como exibido no X" },
-  "folderParent": {"message":"Pasta superior"},
-  "folderRoot": {"message":"Nível superior"},
   "treeExpand": {"message":"Expandir"},
   "treeCollapse": {"message":"Recolher"},
   "folderDeleteTree": {"message":"Excluir $FOLDERS$ pastas, incluindo descendentes, e suas associações em $POSTS$ posts. Os posts permanecem.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

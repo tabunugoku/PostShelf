@@ -1666,8 +1666,6 @@
   "translatedBadge": { "message": "Translated" },
   "quoteLabel": { "message": "Quote" },
   "quoteAsSeen": { "message": "Saved as shown on X" },
-  "folderParent": {"message":"Parent folder"},
-  "folderRoot": {"message":"Top level"},
   "treeExpand": {"message":"Expand"},
   "treeCollapse": {"message":"Collapse"},
   "folderDeleteTree": {"message":"Delete $FOLDERS$ folders including descendants and remove their memberships from $POSTS$ posts. The posts remain.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

@@ -1666,8 +1666,6 @@
   "translatedBadge": { "message": "Traducido" },
   "quoteLabel": { "message": "Cita" },
   "quoteAsSeen": { "message": "Guardado tal como se mostraba en X" },
-  "folderParent": {"message":"Carpeta superior"},
-  "folderRoot": {"message":"Nivel superior"},
   "treeExpand": {"message":"Expandir"},
   "treeCollapse": {"message":"Contraer"},
   "folderDeleteTree": {"message":"Eliminar $FOLDERS$ carpetas, incluidas las descendientes, y sus asignaciones en $POSTS$ publicaciones. Las publicaciones permanecen.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

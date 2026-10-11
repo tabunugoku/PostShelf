@@ -1666,8 +1666,6 @@
   "translatedBadge": { "message": "已翻译" },
   "quoteLabel": { "message": "引用" },
   "quoteAsSeen": { "message": "按 X 上显示的内容保存" },
-  "folderParent": {"message":"父文件夹"},
-  "folderRoot": {"message":"顶层"},
   "treeExpand": {"message":"展开"},
   "treeCollapse": {"message":"收起"},
   "folderDeleteTree": {"message":"删除 $FOLDERS$ 个文件夹（含子孙），并从 $POSTS$ 条帖子中移除这些归属。帖子保留。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

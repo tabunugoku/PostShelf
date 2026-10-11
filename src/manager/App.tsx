@@ -690,7 +690,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const createNode = creatingFolder && (
     <Dropdown fixed onClose={() => setCreatingFolder(false)} label={t('newFolder')} class="menu-wide menu-edit">
       <FolderEdit
-        defaultParentId={userFolders.some(f=>f.id===current) && canParent(userFolders,undefined,current,viewId) ? current : undefined}
         onCancel={() => setCreatingFolder(false)}
         existing={[inboxOf(folders), ...folders]}
         onSaved={(f) => {

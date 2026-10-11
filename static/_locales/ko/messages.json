@@ -1666,8 +1666,6 @@
   "translatedBadge": { "message": "번역됨" },
   "quoteLabel": { "message": "인용" },
   "quoteAsSeen": { "message": "X에 표시된 내용 그대로 저장됨" },
-  "folderParent": {"message":"상위 폴더"},
-  "folderRoot": {"message":"최상위"},
   "treeExpand": {"message":"펼치기"},
   "treeCollapse": {"message":"접기"},
   "folderDeleteTree": {"message":"$FOLDERS$개 폴더(하위 포함)를 삭제하고 $POSTS$개 게시물에서 해당 소속을 제거합니다. 게시물은 남습니다.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

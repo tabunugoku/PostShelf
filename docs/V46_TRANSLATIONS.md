@@ -1,11 +1,9 @@
 # v46 の追加文言
 
-追加した 14 キー。既存の文言は変更しない。folderDeleteTree の $FOLDERS$ は $1、$POSTS$ は $2。8 言語のキー・プレースホルダー一致検査を維持する。
+追加した 12 キー。既存の文言は変更しない。folderDeleteTree の $FOLDERS$ は $1、$POSTS$ は $2。8 言語のキー・プレースホルダー一致検査を維持する。
 
 | キー | ja | en | zh_CN | zh_TW | ko | es | pt_BR | fr |
 |---|---|---|---|---|---|---|---|---|
-| folderParent | 親フォルダ | Parent folder | 父文件夹 | 父資料夾 | 상위 폴더 | Carpeta superior | Pasta superior | Dossier parent |
-| folderRoot | 1 段目 | Top level | 顶层 | 最上層 | 최상위 | Nivel superior | Nível superior | Premier niveau |
 | treeExpand | 開く | Expand | 展开 | 展開 | 펼치기 | Expandir | Expandir | Déplier |
 | treeCollapse | たたむ | Collapse | 收起 | 收合 | 접기 | Contraer | Recolher | Replier |
 | folderDeleteTree | $FOLDERS$ 個のフォルダ（子・孫を含む）を削除し、$POSTS$ 件のポストからその所属を外します。ポスト自体は残ります。 | Delete $FOLDERS$ folders including descendants and remove their memberships from $POSTS$ posts. The posts remain. | 删除 $FOLDERS$ 个文件夹（含子孙），并从 $POSTS$ 条帖子中移除这些归属。帖子保留。 | 刪除 $FOLDERS$ 個資料夾（含子孫），並從 $POSTS$ 則貼文移除這些歸屬。貼文保留。 | $FOLDERS$개 폴더(하위 포함)를 삭제하고 $POSTS$개 게시물에서 해당 소속을 제거합니다. 게시물은 남습니다. | Eliminar $FOLDERS$ carpetas, incluidas las descendientes, y sus asignaciones en $POSTS$ publicaciones. Las publicaciones permanecen. | Excluir $FOLDERS$ pastas, incluindo descendentes, e suas associações em $POSTS$ posts. Os posts permanecem. | Supprimer $FOLDERS$ dossiers et leurs descendants, et leurs affectations dans $POSTS$ posts. Les posts sont conservés. |
