@@ -1,5 +1,5 @@
 /** いまの DOM に出ている保存済みポストだけを補う。スクロール・クリック・ページ移動はしない。 */
-import { backfillMedia, getSavedIds, onDataChanged } from '../shared/storage';
+import { fillMissing, getSavedIds, onDataChanged } from '../shared/storage';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible, pathListeners, SAVED_TTL_MS } from './collect';
 import type { Extracted } from './snapshot';
@@ -22,7 +22,7 @@ export class VisibleMediaBackfill {
   constructor(private d: MediaDeps = {
     now: () => Date.now(), accountId: () => getCurrentAccount()?.id ?? null,
     path: () => location.pathname, visible: () => collectVisible(),
-    savedIds: getSavedIds, backfill: backfillMedia,
+    savedIds: getSavedIds, backfill: fillMissing,
   }) {}
 
   invalidate(): void { this.cache = null; }

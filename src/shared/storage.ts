@@ -31,6 +31,8 @@ import {
   type Account,
   type Bookmark,
   type Folder,
+  type QuoteSnapshot,
+  type Snapshot,
 } from './models';
 import { t } from './strings';
 import { getSettings, updateSettings } from './settings';
@@ -573,29 +575,75 @@ export function importData(json: unknown): Promise<number> {
   });
 }
 
-type MediaItem = { tweetId: string; snapshot?: Bookmark['snapshot'] };
+type FillItem = { tweetId: string; snapshot?: Bookmark['snapshot'] };
 
-/** 保存済みの欠けたメディアだけを補う。本文・所属先・時刻は変えず、未保存のものは作らない。 */
-export function backfillMedia(items: MediaItem[], accountId: string = scope): Promise<number> {
+/** 補えるかの判定に要る、保存側の項目 */
+export type FillView = Pick<Snapshot, 'author' | 'handle' | 'avatar' | 'media' | 'hasVideo' | 'hasLink' | 'videoPoster' | 'createdAt' | 'quote'>;
+
+const httpsUrl = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
+
+/** 保存側の引用の、空の項目だけを画面側で埋める。補えるものが無ければ undefined */
+function fillQuote(saved: QuoteSnapshot, incoming: QuoteSnapshot): QuoteSnapshot | undefined {
+  const patch: Partial<QuoteSnapshot> = {};
+  if (!saved.avatar && incoming.avatar) patch.avatar = incoming.avatar;
+  if (!saved.media.length && !saved.hasVideo && incoming.media.length) patch.media = [...incoming.media];
+  if (!saved.createdAt && incoming.createdAt) patch.createdAt = incoming.createdAt;
+  if (saved.hasVideo && !saved.videoPoster && incoming.videoPoster) patch.videoPoster = incoming.videoPoster;
+  return Object.keys(patch).length ? { ...saved, ...patch } : undefined;
+}
+
+/**
+ * 保存側が空で、画面側に値がある項目だけを返す。既にある値は上書きしない。補えるものが無ければ null。
+ * 保存データの更新 (fillMissing) と、画面側での「補える項目があるか」の判定の両方が、この 1 か所の規則を使う。
+ */
+export function missingFields(saved: FillView, incoming: Snapshot): Partial<Snapshot> | null {
+  const patch: Partial<Snapshot> = {};
+  if (!saved.avatar && httpsUrl(incoming.avatar)) patch.avatar = incoming.avatar;
+  const media = incoming.media.filter(httpsUrl);
+  if (!saved.media.length && !saved.hasVideo && media.length) patch.media = media;
+  const poster = httpsUrl(incoming.videoPoster) ? incoming.videoPoster : undefined;
+  if (saved.hasVideo && !saved.videoPoster && poster) patch.videoPoster = poster;
+  if (!saved.hasVideo && !saved.media.length && incoming.hasVideo) {
+    patch.hasVideo = true;
+    if (poster) patch.videoPoster = poster;
+  }
+  // 名前が取れず、ハンドルで代用されていた保存分だけ
+  const handleName = saved.handle.replace(/^@/, '');
+  const name = incoming.author.trim();
+  if (saved.author === handleName && name && name !== handleName) patch.author = name;
+  if (!saved.createdAt && incoming.createdAt) patch.createdAt = incoming.createdAt;
+  if (!saved.hasLink && incoming.hasLink) patch.hasLink = true;
+  const quote = cleanQuote(incoming.quote);
+  if (quote) {
+    const merged = saved.quote ? fillQuote(saved.quote, quote) : quote;
+    if (merged) patch.quote = merged;
+  }
+  return Object.keys(patch).length ? patch : null;
+}
+
+/** 画面側の判定用に、保存済みポストの補う対象の項目だけを返す (snapshot 全体は運ばない) */
+export async function getFillViews(accountId: string = scope): Promise<Map<string, FillView>> {
+  const views = new Map<string, FillView>();
+  for (const b of Object.values(await readMap())) {
+    if (b.accountId !== accountId) continue;
+    const { author, handle, avatar, media, hasVideo, hasLink, videoPoster, createdAt, quote } = b.snapshot;
+    views.set(b.tweetId, { author, handle, avatar, media, hasVideo, hasLink, videoPoster, createdAt, quote });
+  }
+  return views;
+}
+
+/** 保存済みの欠けた項目だけを補う。既にある値・本文・所属先・時刻は変えず、未保存のものは作らない。変えたポストの件数を返す */
+export function fillMissing(items: FillItem[], accountId: string = scope): Promise<number> {
   return serial(async () => {
     const map = await readMap();
     let changed = 0;
     for (const it of items) {
       const k = bookmarkKey(accountId, it.tweetId);
       const old = map[k];
-      const incoming = it.snapshot;
-      if (!old || !incoming) continue;
-      const snapshot = old.snapshot;
-      const patch: Partial<Bookmark['snapshot']> = {};
-      if (!snapshot.media.length && !snapshot.hasVideo && incoming.media.length) patch.media = [...incoming.media];
-      const poster = incoming.videoPoster && /^https:\/\//i.test(incoming.videoPoster) ? incoming.videoPoster : undefined;
-      if (snapshot.hasVideo && !snapshot.videoPoster && poster) patch.videoPoster = poster;
-      if (!snapshot.hasVideo && !snapshot.media.length && incoming.hasVideo) {
-        patch.hasVideo = true;
-        if (poster) patch.videoPoster = poster;
-      }
-      if (!Object.keys(patch).length) continue;
-      map[k] = { ...old, snapshot: { ...snapshot, ...patch } };
+      if (!old || !it.snapshot) continue;
+      const patch = missingFields(old.snapshot, it.snapshot);
+      if (!patch) continue;
+      map[k] = { ...old, snapshot: { ...old.snapshot, ...patch } };
       changed++;
     }
     if (changed) await write(KEY_BOOKMARKS, map); // 読み込みから書き込みまで別の await を挟まない

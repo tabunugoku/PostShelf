@@ -3,7 +3,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { collectVisible } from '../src/content/collect';
 import { VisibleMediaBackfill } from '../src/content/media';
-import { addCollected, backfillMedia, getSavedIds, setAccountScope } from '../src/shared/storage';
+import { addCollected, fillMissing, getSavedIds, setAccountScope } from '../src/shared/storage';
 import { AutoCollector, defaultDeps } from '../src/content/autocollect';
 
 let data: Record<string, unknown>;
@@ -11,7 +11,7 @@ beforeEach(() => {
   data = installChromeMock(); data.schemaVersion = 2; data.folderIdsRepaired = true; setAccountScope('me');
   document.body.innerHTML = readFileSync('test/fixtures/v45-media.html','utf8');
 });
-const snapshot = { text: '架空の保存済み本文', author: 'Sample', handle: '@sample_user', media: [], url: 'https://x.com/sample_user/status/102', translated: true as const,
+const snapshot = { text: '架空の保存済み本文', author: 'Sample', handle: '@sample_user', media: [], createdAt: '2026-01-01', url: 'https://x.com/sample_user/status/102', translated: true as const,
   quote: { author: 'Sample Quote', handle: '@sample_quote', text: '架空の引用', media: [] } };
 function seed(id: string, extra = {}, accountId = 'me') {
   const b = { accountId, tweetId: id, savedAt: 1234, folderIds: ['sample-folder'], snapshot: { ...snapshot, ...extra } };
@@ -19,7 +19,7 @@ function seed(id: string, extra = {}, accountId = 'me') {
 }
 function watcher() {
   let clock = 0, account: string | null = 'me', path = '/home';
-  const savedIds = vi.fn(getSavedIds), fill = vi.fn(backfillMedia);
+  const savedIds = vi.fn(getSavedIds), fill = vi.fn(fillMissing);
   const w = new VisibleMediaBackfill({ now: () => clock, accountId: () => account, path: () => path, visible: () => collectVisible(), savedIds, backfill: fill });
   return { w, savedIds, fill, time: (n:number) => clock=n, account: (id:string|null) => account=id, path: (p:string) => path=p };
 }
