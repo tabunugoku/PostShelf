@@ -24,6 +24,8 @@ export interface Settings {
    * (間隔・上限あり。CLAUDE.md の「守ること」の例外)。オフのときは、たたまれた分だけを保存する。保存データに無くても、オンとして扱う
    */
   fullText: boolean;
+  fullTextSpeed: 'slow' | 'standard';
+  fullTextTabs: 1 | 2 | 3;
   /** 仕分けで複数のフォルダを選び、Enter で確定する (省略時はオフ) */
   triageMulti?: boolean;
   /** x.com の保存ポップオーバーの「最近使った」フォルダ (v28)。最大 RECENT_FOLDERS 件、新しい順。無い・不正な値は空として扱う */
@@ -108,7 +110,15 @@ export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, triageMulti: false, recentFolderIds: [] };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, recentFolderIds: [] };
+
+export interface FullTextPlan { gapMinMs: number; gapMaxMs: number; tabs: 1 | 2 | 3 }
+/** 「ゆっくり」は、保存されたタブ数にかかわらず従来の間隔・1 タブを使う。 */
+export function fullTextPlan(s: Pick<Settings, 'fullTextSpeed' | 'fullTextTabs'>): FullTextPlan {
+  return s.fullTextSpeed === 'standard'
+    ? { gapMinMs: 2000, gapMaxMs: 5000, tabs: s.fullTextTabs }
+    : { gapMinMs: 4000, gapMaxMs: 8000, tabs: 1 };
+}
 
 const KEY = 'settings';
 
@@ -125,6 +135,8 @@ export async function getSettings(): Promise<Settings> {
   merged.imageCache = normalizeImageCache(stored.imageCache);
   merged.autoCollect = normalizeAutoCollect(stored.autoCollect);
   merged.fullText = stored.fullText !== false; // 省略できる項目: 無ければオン
+  merged.fullTextSpeed = stored.fullTextSpeed === 'standard' ? 'standard' : 'slow';
+  merged.fullTextTabs = stored.fullTextTabs === 2 || stored.fullTextTabs === 3 ? stored.fullTextTabs : 1;
   merged.triageMulti = stored.triageMulti === true;
   merged.recentFolderIds = Array.isArray(stored.recentFolderIds)
     ? [...new Set(stored.recentFolderIds.filter((x): x is string => typeof x === 'string'))].slice(0, RECENT_FOLDERS)
@@ -528,20 +540,36 @@ export function onFullTextRunChanged(cb: () => void): () => void {
 }
 
 /** 取得のために開いた裏のタブの記録 (閉じ忘れを、起動時に閉じるため) */
-export async function getFullTextTab(): Promise<number | null> {
+export async function getFullTextTab(): Promise<number[]> {
   const v = (await chrome.storage.local.get(FT_TAB_KEY))[FT_TAB_KEY];
-  return typeof v === 'number' ? v : null;
+  // 旧形式の数値 1 つ・null も読める。次の追加・削除で配列として保存する。
+  const ids = Array.isArray(v) ? v : typeof v === 'number' ? [v] : [];
+  return [...new Set(ids.filter((id): id is number => typeof id === 'number' && Number.isInteger(id) && id >= 0))];
 }
-export const setFullTextTab = (id: number | null): Promise<void> =>
-  id === null ? (chrome.storage.local.remove(FT_TAB_KEY) as Promise<void>) : chrome.storage.local.set({ [FT_TAB_KEY]: id });
+let tabQueue: Promise<unknown> = Promise.resolve();
+/** ID 1 つの追加 / 削除を直列化。他のワーカーの記録を消さない。 */
+export function setFullTextTab(id: number, present = true): Promise<void> {
+  const run = tabQueue.then(async () => {
+    const ids = await getFullTextTab();
+    const next = present ? [...new Set([...ids, id])] : ids.filter(x => x !== id);
+    await chrome.storage.local.set({ [FT_TAB_KEY]: next });
+  });
+  tabQueue = run.catch(() => {});
+  return run;
+}
 
 /** ポストごとの、最後に取りに行った時刻 (同じポストの再試行は 1 時間に 1 回まで)。古い記録は書くときに捨てる */
 export async function getFullTextTries(): Promise<Record<string, number>> {
   return ((await chrome.storage.local.get(FT_TRY_KEY))[FT_TRY_KEY] ?? {}) as Record<string, number>;
 }
-export async function recordFullTextTry(key: string, now: number, keepMs: number): Promise<void> {
-  const cur = await getFullTextTries();
-  const next = Object.fromEntries(Object.entries(cur).filter(([, t]) => now - t < keepMs));
-  next[key] = now;
-  await chrome.storage.local.set({ [FT_TRY_KEY]: next });
+let tryQueue: Promise<unknown> = Promise.resolve();
+export function recordFullTextTry(key: string, now: number, keepMs: number): Promise<void> {
+  const run = tryQueue.then(async () => {
+    const cur = await getFullTextTries();
+    const next = Object.fromEntries(Object.entries(cur).filter(([, t]) => now - t < keepMs));
+    next[key] = now;
+    await chrome.storage.local.set({ [FT_TRY_KEY]: next });
+  });
+  tryQueue = run.catch(() => {});
+  return run;
 }

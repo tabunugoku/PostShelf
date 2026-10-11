@@ -501,3 +501,12 @@ input[type=number]{width:110px}
 .quote-block .quote-video{background:#000;cursor:default;pointer-events:auto}
 .quote-block .quote-photo{cursor:inherit}
 .quote-block .ph:hover::after{display:none}
+
+/* 全文取得の速度: ラベルは句の切れ目で折り返し、狭い設定画面にも収める。 */
+.ft-speed-setting{margin:8px 0;min-width:0}
+.ft-speed-options{display:flex;flex-wrap:wrap;gap:4px 16px}
+.ft-speed-options .ft-choice{padding:6px 0;align-items:center;min-width:0}
+.ft-choice input{margin-top:0}
+.ft-choice span{min-width:0;overflow-wrap:anywhere}
+.ft-speed-desc{margin:2px 0 8px}
+.ft-tab-setting{margin-top:8px}

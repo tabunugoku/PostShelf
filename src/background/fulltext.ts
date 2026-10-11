@@ -3,9 +3,10 @@
  *
  * 動かすのは「ポストのページを、裏のタブ (active: false) で開いて読んで閉じる」ことだけ。
  * タイムラインの「さらに表示」は押さない。いま見ているタブは移動も操作もしない。自動のスクロールもしない。
- *  - 同時に開く裏のタブは 1 つ。次を開くまで 4〜8 秒のランダムな間隔をあける。1 件の待ちは 15 秒まで
- *  - 自動取り込みの実行中は動かさない (終わるまで待つ)
- *  - X が制限や警告 (selectors の xError) を出したら止める。連続で 3 件失敗しても止める。止めた理由は、設定の画面に出す
+ *  - 既定は 4〜8 秒・1 タブ。「標準」は 2〜5 秒・1〜3 タブ。各ワーカーは自分のタブを閉じてから次まで間隔をあける
+ *  - 全ワーカーでタブを開く間隔は 1 秒以上 (最初の起動もずらす)。1 件の待ちは 15 秒まで
+ *  - 自動取り込みの実行中は、開く直前に 5 秒おきに最大 360 回 (30 分) 待つ
+ *  - X が制限や警告 (selectors の xError) を出したら全タブを閉じて止める。連続 3 件の失敗は全タブで合算し、成功で 0 に戻す。上限と止める条件は、速さの設定にかかわらず同じ。止めた理由は、設定の画面に出す
  *  - 同じポストの再試行は 1 時間に 1 回まで (自動のとき。設定の「いま取得する」は、ユーザーが押したので間隔を無視する)。飛ばした分は done に数えず skipped に数える
  * キューはメモリだけ (service worker が止まれば消える)。続きは、保存してある truncated のポストから作り直せる (設定の「いま取得する」)。
  * tabs の権限は使わない (chrome.tabs.create / remove / sendMessage は、権限なしで使える)。
@@ -13,8 +14,8 @@
 import type { Bookmark } from '../shared/models';
 import type { Segment } from '../shared/segments';
 import {
-  getCollectRun, getFullTextTab, getFullTextTries, getFullTextRun, getSettings, recordFullTextTry, saveFullTextRun, setFullTextTab,
-  type FullTextKind, type FullTextRun, type FullTextStop,
+  fullTextPlan, getCollectRun, getFullTextTab, getFullTextTries, getFullTextRun, getSettings, recordFullTextTry, saveFullTextRun, setFullTextTab,
+  type FullTextKind, type FullTextRun, type FullTextStop, type FullTextPlan,
 } from '../shared/settings';
 import { listAllTruncated, refreshFullText } from '../shared/storage';
 
@@ -42,13 +43,14 @@ export interface FullTextDeps {
   /** 開いたタブの content script に、全文を読ませる。まだ受け取れない (読み込み中) ときは例外 */
   ask(tabId: number, tweetId: string): Promise<AskResult>;
   enabled(): Promise<boolean>;
+  plan(): Promise<FullTextPlan>;
   collectActive(): Promise<boolean>;
   lookup(item: FullTextItem): Promise<Bookmark | undefined>;
   refresh(item: FullTextItem, full: { text: string; segments?: Segment[]; translated?: true }): Promise<boolean>;
   tries(): Promise<Record<string, number>>;
   recordTry(key: string, now: number): Promise<void>;
   saveRun(r: FullTextRun): Promise<void>;
-  setTab(id: number | null): Promise<void>;
+  setTab(id: number, present?: boolean): Promise<void>;
 }
 
 export function defaultDeps(): FullTextDeps {
@@ -64,6 +66,7 @@ export function defaultDeps(): FullTextDeps {
     closeTab: async (id) => void (await chrome.tabs.remove(id).catch(() => {})),
     ask: async (tabId, tweetId) => (await chrome.tabs.sendMessage(tabId, { type: 'readFullText', tweetId })) as AskResult,
     enabled: async () => (await getSettings()).fullText,
+    plan: async () => fullTextPlan(await getSettings()),
     collectActive: async () => {
       const s = (await getCollectRun())?.status;
       return s === 'running' || s === 'countdown';
@@ -73,158 +76,293 @@ export function defaultDeps(): FullTextDeps {
     tries: () => getFullTextTries(),
     recordTry: (key, now) => recordFullTextTry(key, now, RETRY_MS),
     saveRun: (r) => saveFullTextRun(r),
-    setTab: (id) => setFullTextTab(id),
+    setTab: (id, present) => setFullTextTab(id, present),
   };
 }
 
 const keyOf = (it: FullTextItem) => `${it.accountId}:${it.tweetId}`;
 
+interface WorkerSlot { readyAt: number; task: Promise<void> | null }
+
 export class FullTextQueue {
   private pending: FullTextItem[] = [];
+  // 実行中の項目も含め、その取得の間は重複して取り出さない。
+  private known = new Set<string>();
   private looping = false;
   private aborted = false;
   private userStopped = false;
-  /** 「いま取得する」で入れたもの。1 時間の再試行の間隔を無視して取得する */
+  private finishing = false;
   private manual = new Set<string>();
   private run: FullTextRun = { running: false, kind: 'save', total: 0, done: 0, failed: 0, skipped: 0, updatedAt: 0 };
   private failures = 0;
+  private plan: FullTextPlan | null = null;
+  private slots: WorkerSlot[] = [];
+  private workers = new Set<Promise<void>>();
+  private admissions = new Set<Promise<void>>();
+  private finished: Promise<void> = Promise.resolve();
+  private publications: Promise<void> = Promise.resolve();
+  private opening: Promise<unknown> = Promise.resolve();
+  private lastOpen = -Infinity;
+  private tabs = new Set<number>();
+  private closing = new Map<number, Promise<void>>();
+  private cancelled: Promise<void> = Promise.resolve();
+  private readCancelled: Promise<null> = Promise.resolve(null);
+  private cancel = () => {};
 
   constructor(private d: FullTextDeps = defaultDeps()) {}
+  get state(): FullTextRun { return { ...this.run }; }
+  get busy(): boolean { return this.looping; }
 
-  get state(): FullTextRun {
-    return { ...this.run };
-  }
-  get busy(): boolean {
-    return this.looping;
-  }
-
-  private async publish(patch: Partial<FullTextRun> = {}): Promise<void> {
+  private publish(patch: Partial<FullTextRun> = {}): Promise<void> {
+    // 状態の更新は await より前に行う。保存も同じ順番にし、古い進捗が後から上書きしない。
     this.run = { ...this.run, ...patch, updatedAt: this.d.now() };
-    await this.d.saveRun(this.run).catch(() => {});
+    const snapshot = { ...this.run };
+    this.publications = this.publications.then(() => this.d.saveRun(snapshot)).catch(() => {});
+    return this.publications;
   }
 
-  /** 取得の依頼を入れる。設定がオフなら何もしない。依頼が入ったら、動いていなければ動かし始める (完了を待つ Promise を返す) */
   async enqueue(items: FullTextItem[], kind: FullTextKind): Promise<void> {
-    if (items.length === 0 || !(await this.d.enabled())) return;
-    // 止める操作の直後の依頼は、止め終わってから受け付ける (後始末で黙って捨てられないように)
-    while (this.userStopped) await this.finished.catch(() => {});
-    if (kind === 'manual') for (const it of items) this.manual.add(keyOf(it));
-    const known = new Set(this.pending.map(keyOf));
-    const fresh = items.filter((it) => !known.has(keyOf(it)));
-    if (fresh.length === 0) return this.finished;
-    this.pending.push(...fresh);
-    if (!this.looping) {
-      this.looping = true; // 続けて呼ばれても、動かすのは 1 つだけ (同時に開く裏のタブは 1 つ)
-      this.aborted = false;
-      this.failures = 0;
-      await this.publish({ running: true, kind, total: fresh.length, done: 0, failed: 0, skipped: 0, stopReason: undefined });
-      this.finished = this.loop();
-    } else await this.publish({ total: this.run.total + fresh.length });
-    return this.finished;
+    if (items.length === 0) return;
+    let admitted = () => {};
+    if (this.looping && !this.aborted && !this.finishing) {
+      let release!: () => void;
+      const admission = new Promise<void>(resolve => { release = resolve; });
+      this.admissions.add(admission);
+      admitted = () => { this.admissions.delete(admission); release(); };
+    }
+    try {
+      if (!(await this.d.enabled())) return;
+      // 停止 / 終了済みの取得は待たせない。依頼は後始末のあとに受け付ける。
+      if (this.userStopped || this.finishing || (this.looping && this.aborted)) admitted();
+      while (this.userStopped || this.finishing || (this.looping && this.aborted)) await this.finished.catch(() => {});
+      if (kind === 'manual') for (const it of items) this.manual.add(keyOf(it));
+      const fresh = items.filter(it => {
+        const key = keyOf(it);
+        if (this.known.has(key)) return false;
+        this.known.add(key);
+        return true;
+      });
+      if (fresh.length === 0) return this.finished;
+      this.pending.push(...fresh);
+      if (!this.looping) {
+        this.looping = true;
+        this.aborted = false;
+        this.failures = 0;
+        this.cancelled = new Promise(r => { this.cancel = r; });
+        this.readCancelled = this.cancelled.then(() => null);
+        const published = this.publish({ running: true, kind, total: fresh.length, done: 0, failed: 0, skipped: 0, stopReason: undefined });
+        // stop() が初期設定の読み込み中でも、この実行の終了を待てるよう先に登録する。
+        this.finished = this.loop(published);
+      } else {
+        const published = this.publish({ total: this.run.total + fresh.length });
+        this.startWorkers();
+        await published;
+      }
+      return this.finished;
+    } finally { admitted(); }
   }
-  private finished: Promise<void> = Promise.resolve();
 
-  /** 止める (ユーザーの操作)。待っているものを捨て、いまのタブも閉じる */
   async stop(reason: FullTextStop = 'user'): Promise<void> {
-    this.aborted = true;
-    this.pending = [];
     if (this.looping) {
       this.userStopped = true;
-      await this.publish({ stopReason: reason });
-      await this.finished.catch(() => {}); // いまのタブを閉じ、実行中の記録を終えるまで待つ
+      await this.stopWith(reason);
+      await this.finished.catch(() => {});
     } else await this.publish({ running: false, stopReason: reason });
   }
 
-  private async loop(): Promise<void> {
-    this.looping = true;
+  private async wait(ms: number): Promise<void> {
+    if (ms > 0 && !this.aborted) await Promise.race([this.d.sleep(ms), this.cancelled]);
+  }
+  private async waitForCollect(): Promise<void> {
+    for (let n = 0; n < 360 && !this.aborted && await this.d.collectActive(); n++) await this.wait(5000);
+  }
+
+  /** 同じ計画の空きスロットだけ再開する。スロットの待ち時刻は再開後も保つ。 */
+  private startWorkers(): void {
+    const plan = this.plan;
+    if (!plan || this.aborted || this.finishing) return;
+    for (const slot of this.slots) {
+      if (slot.task || !this.pending.length) continue;
+      const task = this.worker(plan, slot).finally(() => { slot.task = null; });
+      slot.task = task;
+      this.workers.add(task);
+      // 途中で追加されたワーカーも、loop の次の待ちで結果を拾う。
+      void task.catch(() => {});
+    }
+  }
+
+  private async loop(published: Promise<void>): Promise<void> {
     try {
-      let first = true;
-      while (this.pending.length && !this.aborted) {
-        if (!first) await this.d.sleep(GAP_MIN_MS + Math.round(this.d.random() * (GAP_MAX_MS - GAP_MIN_MS)));
-        first = false;
-        // 自動取り込みの実行中は動かさない (終わるまで待つ。最大 30 分)
-        for (let w = 0; w < 360 && !this.aborted && (await this.d.collectActive()); w++) await this.d.sleep(5000);
-        if (this.aborted) break;
-        const item = this.pending.shift()!;
-        const b = await this.d.lookup(item);
-        const recent = (await this.d.tries())[keyOf(item)];
-        // 飛ばす: 取得済み (全文が入っている / 削除済み)、または 1 時間以内に試した (自動のときだけ。「いま取得する」は間隔を無視する)
-        const tooSoon = !this.manual.has(keyOf(item)) && recent !== undefined && this.d.now() - recent < RETRY_MS;
-        if (!b || tooSoon) {
-          await this.publish({ skipped: (this.run.skipped ?? 0) + 1 });
-          first = true; // タブを開いていないので、次との間隔は要らない
-          continue;
+      const plan = await this.d.plan(); // enqueue で開始した取得ごとに 1 回。途中の設定変更は次回用。
+      this.plan = plan;
+      this.slots = Array.from({ length: plan.tabs }, () => ({ readyAt: 0, task: null }));
+      await published;
+      for (;;) {
+        this.startWorkers();
+        if (this.workers.size) {
+          const workers = [...this.workers];
+          await Promise.all(workers);
+          workers.forEach(worker => this.workers.delete(worker));
+          continue; // 待ちの途中の追加ワーカー・pending をもう一度確認する。
         }
-        await this.d.recordTry(keyOf(item), this.d.now());
-        const r = await this.fetchOne(item, b.snapshot.url);
-        if (r === 'ok') {
-          this.failures = 0;
-          await this.publish({ done: this.run.done + 1 });
-        } else if (r === 'limit') {
-          await this.publish({ failed: this.run.failed + 1 });
-          await this.stopWith('limit');
-        } else if (r === 'skip' || r === 'abort') {
-          // skip: 読めたが、すでに全文が入っている / ポストが無い (成功でも失敗でもない)。abort: 止める操作による中断 (失敗に数えない)
-          if (r === 'skip') await this.publish({ skipped: (this.run.skipped ?? 0) + 1 });
-        } else {
-          this.failures++;
-          await this.publish({ failed: this.run.failed + 1 });
-          if (this.failures >= MAX_FAILURES) await this.stopWith('failures');
+        if (this.admissions.size && !this.aborted) {
+          await Promise.all([...this.admissions]);
+          continue; // enabled() を待っている、実行中に届いた依頼も受け付け終えてから判定する。
         }
+        if (this.pending.length && !this.aborted) continue;
+        // 残りがない判定と finishing の設定の間には await を置かない。
+        this.finishing = true;
+        break;
       }
+    } catch (error) {
+      this.aborted = true;
+      this.cancel();
+      await this.closeAll();
+      await Promise.allSettled(this.workers);
+      throw error;
     } finally {
-      this.looping = false;
-      this.userStopped = false;
+      this.finishing = true;
+      await this.closeAll();
+      this.plan = null;
+      this.slots = [];
+      this.workers.clear();
       this.manual.clear();
+      this.known.clear();
       this.pending = [];
       await this.publish({ running: false });
+      this.looping = false;
+      this.userStopped = false;
+      this.finishing = false;
+    }
+  }
+
+  private async worker(plan: FullTextPlan, slot: WorkerSlot): Promise<void> {
+    while (this.pending.length && !this.aborted) {
+      if (this.aborted) break;
+      const item = this.pending.shift(); // 取り出しは同期的に行う。他のワーカーと二重にならない。
+      if (!item) break;
+      const b = await this.d.lookup(item);
+      const recent = (await this.d.tries())[keyOf(item)];
+      const tooSoon = !this.manual.has(keyOf(item)) && recent !== undefined && this.d.now() - recent < RETRY_MS;
+      if (this.aborted) break;
+      if (!b || tooSoon) {
+        await this.publish({ skipped: (this.run.skipped ?? 0) + 1 });
+        continue; // タブを開かないものには待ちを入れない。
+      }
+      await this.wait(slot.readyAt - this.d.now());
+      if (this.aborted) break;
+      const r = await this.fetchOne(item, b.snapshot.url);
+      // fetchOne の finally が自分のタブを閉じた時刻から間隔を計る。
+      slot.readyAt = this.d.now() + plan.gapMinMs + Math.round(this.d.random() * (plan.gapMaxMs - plan.gapMinMs));
+      if (this.aborted || r === 'abort' || r === 'limit') break;
+      if (r === 'ok') {
+        this.failures = 0;
+        await this.publish({ done: this.run.done + 1 });
+      } else if (r === 'skip') {
+        await this.publish({ skipped: (this.run.skipped ?? 0) + 1 });
+      } else {
+        this.failures++;
+        const published = this.publish({ failed: this.run.failed + 1 });
+        // 判定と中断は保存を await する前。他の成功で回数が変わっても判定を失わない。
+        if (this.failures >= MAX_FAILURES) await this.stopWith('failures');
+        await published;
+      }
     }
   }
 
   private async stopWith(reason: FullTextStop): Promise<void> {
-    this.aborted = true;
-    this.pending = [];
-    await this.publish({ stopReason: reason });
+    if (!this.aborted) {
+      this.aborted = true;
+      this.pending = [];
+      this.cancel(); // 全ワーカーの間隔・読取待ちを解く。
+      const published = this.publish({ stopReason: reason });
+      await this.closeAll();
+      await published;
+    } else await this.closeAll();
   }
 
-  /** 1 件: 裏のタブで開き、読めるまで待ち (15 秒まで)、閉じる。閉じ忘れを残さない */
+  private close(id: number): Promise<void> {
+    const pending = this.closing.get(id);
+    if (pending) return pending;
+    if (!this.tabs.delete(id)) return Promise.resolve();
+    const closing = (async () => {
+      try { await this.d.closeTab(id); }
+      finally { await this.d.setTab(id, false).catch(() => {}); }
+    })();
+    this.closing.set(id, closing);
+    void closing.finally(() => this.closing.delete(id)).catch(() => {});
+    return closing;
+  }
+  private async closeAll(): Promise<void> {
+    await Promise.all([...this.tabs].map(id => this.close(id)));
+    await Promise.all([...this.closing.values()]);
+  }
+
+  /** 全ワーカー共通の起動ゲート。実際に開いた時刻から次の起動まで必ず 1000ms あける。 */
+  private open(item: FullTextItem, url: string): Promise<number | null> {
+    const opening = this.opening.then(async () => {
+      await this.wait(this.lastOpen + 1000 - this.d.now());
+      await this.waitForCollect();
+      if (this.aborted) return null;
+      await this.d.recordTry(keyOf(item), this.d.now());
+      if (this.aborted) return null;
+      this.lastOpen = this.d.now();
+      const id = await this.d.openTab(url);
+      this.lastOpen = this.d.now();
+      this.tabs.add(id);
+      try { await this.d.setTab(id); }
+      catch (error) { await this.close(id); throw error; }
+      return id;
+    });
+    this.opening = opening.catch(() => {});
+    return opening;
+  }
+
   private async fetchOne(item: FullTextItem, url: string): Promise<'ok' | 'fail' | 'limit' | 'skip' | 'abort'> {
     let tab: number | null = null;
     try {
-      tab = await this.d.openTab(url);
-      await this.d.setTab(tab);
+      tab = await this.open(item, url);
+      if (tab === null || this.aborted) return 'abort';
       const deadline = this.d.now() + TAB_TIMEOUT_MS;
       while (this.d.now() < deadline && !this.aborted) {
         try {
-          const r = await this.d.ask(tab, item.tweetId);
+          // sendMessage 自体が返らない場合も、1 件全体の 15 秒を超えて待たない。
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          let r: AskResult | null;
+          try {
+            r = await Promise.race([
+              this.d.ask(tab, item.tweetId), this.readCancelled,
+              new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), Math.max(0, deadline - this.d.now())); }),
+            ]);
+          } finally { clearTimeout(timer); }
+          if (r === null) return this.aborted ? 'abort' : 'fail';
+          if (this.aborted) return 'abort';
           if (r?.ok) {
             if (await this.d.refresh(item, { text: r.text, segments: r.segments, ...(r.translated === true ? { translated: true } : {}) })) return 'ok';
-            // 更新されなかった: 裏のタブの content script が先に更新した / すでにたたまれていない / 削除済み、なら失敗ではない
             return (await this.d.lookup(item)) ? 'fail' : 'skip';
           }
-          if (r && !r.ok && r.reason === 'limit') return 'limit';
-        } catch {
-          /* まだ読み込み中 (受け取り側がない) */
-        }
-        await this.d.sleep(POLL_MS);
+          if (r && !r.ok && r.reason === 'limit') {
+            const published = this.publish({ failed: this.run.failed + 1 });
+            await this.stopWith('limit');
+            await published;
+            return 'limit';
+          }
+        } catch { /* まだ読み込み中 (受け取り側がない) */ }
+        await this.wait(POLL_MS);
       }
       return this.aborted ? 'abort' : 'fail';
-    } catch {
-      return this.aborted ? 'abort' : 'fail';
-    } finally {
-      if (tab !== null) await this.d.closeTab(tab);
-      await this.d.setTab(null).catch(() => {});
-    }
+    } catch { return this.aborted ? 'abort' : 'fail'; }
+    finally { if (tab !== null) await this.close(tab); }
   }
 }
 
 /** 起動時: 前回、閉じ忘れた裏のタブがあれば閉じる。動いていた記録 (running) が残っていれば止まった扱いにする */
 export async function cleanupAtStartup(d: FullTextDeps = defaultDeps()): Promise<void> {
-  const id = await getFullTextTab().catch(() => null);
-  if (id !== null) {
+  const ids = await getFullTextTab().catch(() => []);
+  await Promise.all(ids.map(async id => {
     await d.closeTab(id);
-    await d.setTab(null).catch(() => {});
-  }
+    await d.setTab(id, false).catch(() => {});
+  }));
   const run = await getFullTextRun().catch(() => null);
   if (run?.running) await d.saveRun({ ...run, running: false, updatedAt: d.now() }).catch(() => {});
 }

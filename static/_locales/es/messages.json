@@ -1161,7 +1161,31 @@
     "message": "Obtener el texto completo de publicaciones largas"
   },
   "fullTextSwitchDesc": {
-    "message": "Al guardar una publicación que X ha plegado tras «Mostrar más», PostShelf abre la página de esa publicación en una pestaña en segundo plano, lee el texto completo y la cierra. Espera de 4 a 8 segundos entre publicaciones y nunca toca la pestaña que estás viendo. Los términos de X podrían considerarlo acceso automatizado (no es asesoramiento legal). Si lo desactivas, solo se guarda el texto plegado."
+    "message": "Al guardar una publicación que X ha plegado tras «Mostrar más», PostShelf abre la página de esa publicación en una pestaña en segundo plano, lee el texto completo y la cierra. Hace una pausa entre publicaciones y nunca toca la pestaña que estás viendo. Los términos de X podrían considerarlo acceso automatizado (no es asesoramiento legal). Si lo desactivas, solo se guarda el texto plegado."
+  },
+  "fullTextSpeed": {
+    "message": "Velocidad de obtención"
+  },
+  "fullTextSpeedSlow": {
+    "message": "Lenta (recomendada)"
+  },
+  "fullTextSpeedStd": {
+    "message": "Estándar"
+  },
+  "fullTextSpeedDesc": {
+    "message": "Obtener más rápido aumenta el riesgo de límites de X."
+  },
+  "fullTextTabs": {
+    "message": "Pestañas a la vez"
+  },
+  "fullTextTabsN": {
+    "message": "$COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
   },
   "fullTextPending": {
     "message": "Publicaciones sin texto completo: $COUNT$",
@@ -1176,7 +1200,7 @@
     "message": "Obtener ahora"
   },
   "fullTextConfirm": {
-    "message": "Se obtendrá el texto completo de $COUNT$ publicaciones. Cada una tarda de 4 a 8 segundos y las páginas de X se abren y se cierran en una pestaña en segundo plano. Los términos de X podrían considerarlo acceso automatizado. ¿Empezar?",
+    "message": "Se obtendrá el texto completo de $COUNT$ publicaciones. La obtención lleva un tiempo y las páginas de X se abren y se cierran en una pestaña en segundo plano. Los términos de X podrían considerarlo acceso automatizado. ¿Empezar?",
     "placeholders": {
       "count": {
         "content": "$1",

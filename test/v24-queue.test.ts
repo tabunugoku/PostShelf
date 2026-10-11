@@ -36,7 +36,7 @@ function fake(answer: (tab: number, id: string, n: number) => AskResult | 'throw
       return r;
     },
     collectActive: async () => w.collect-- > 0,
-    setTab: async (id) => void (w.tab = id),
+    setTab: async (id, present = true) => void (w.tab = present ? id : null),
   };
   return { w, d };
 }
