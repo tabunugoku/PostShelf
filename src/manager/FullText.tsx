@@ -18,25 +18,21 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
   const [tabs, setTabs] = useState<Settings['fullTextTabs']>(1);
   const [changing, setChanging] = useState(false);
   const changingRef = useRef(false);
-  const root = useRef<HTMLFieldSetElement>(null);
+  const [radioKey, setRadioKey] = useState(0);
   const change = async (patch: Partial<Settings>) => {
     if (changingRef.current) return;
     changingRef.current = true;
     setChanging(true);
-    let current = { fullTextSpeed: speed, fullTextTabs: tabs };
     try {
       const s = await updateSettings(patch);
-      current = s;
       setSpeed(s.fullTextSpeed);
       setTabs(s.fullTextTabs);
       saved();
     } catch {
       reportStorageError();
+      // 保存値からラジオを作り直し、ブラウザが先に変えた選択を戻す。
+      setRadioKey(key => key + 1);
     } finally {
-      // radio はブラウザが先に切り替える。失敗時も保存値と同じ選択へ戻す。
-      root.current?.querySelectorAll<HTMLInputElement>('input[name="ft-speed"],input[name="ft-tabs"]').forEach(input => {
-        input.checked = input.name === 'ft-speed' ? input.value === current.fullTextSpeed : Number(input.value) === current.fullTextTabs;
-      });
       changingRef.current = false;
       setChanging(false);
     }
@@ -62,7 +58,7 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
   const running = !!run?.running;
   const reason = !running && run?.stopReason ? { limit: 'fullTextStopLimit', failures: 'fullTextStopFailures', user: 'fullTextStopUser' }[run.stopReason] : null;
   return (
-    <fieldset ref={root} class="setting-group full-text">
+    <fieldset class="setting-group full-text">
       <legend>{t('fullTextTitle')}</legend>
       <label class="setting">
         <input
@@ -85,7 +81,7 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
       </label>
       {on && <div class="ft-speed-setting">
         <strong>{t('fullTextSpeed')}</strong>
-        <div class="ft-speed-options" role="radiogroup" aria-label={t('fullTextSpeed')}>
+        <div key={radioKey} class="ft-speed-options" role="radiogroup" aria-label={t('fullTextSpeed')}>
           {(['slow', 'standard'] as const).map(value => <label class="setting ft-choice">
             <input type="radio" name="ft-speed" value={value} checked={speed === value} disabled={changing}
               onChange={() => void change({ fullTextSpeed: value })} />
@@ -95,7 +91,7 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
         <p class="muted setting-desc ft-speed-desc">{t('fullTextSpeedDesc')}</p>
         {speed === 'standard' && <div class="ft-tab-setting">
           <strong>{t('fullTextTabs')}</strong>
-          <div class="ft-speed-options" role="radiogroup" aria-label={t('fullTextTabs')}>
+          <div key={radioKey} class="ft-speed-options" role="radiogroup" aria-label={t('fullTextTabs')}>
             {([1, 2, 3] as const).map(value => <label class="setting ft-choice">
               <input type="radio" name="ft-tabs" value={value} checked={tabs === value} disabled={changing}
                 onChange={() => void change({ fullTextTabs: value })} />
