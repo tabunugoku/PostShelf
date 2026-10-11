@@ -82,16 +82,16 @@ it.each(['unreadable', 'removed'])('visible から消えた理由 %s を区別�
   const world = collectorWorld(() => {
     if (reason === 'unreadable') {
       document.getElementById('main-status')!.setAttribute('href', 'https://x.com/sample_slow/status/1102');
-    } else document.getElementById('main-post')!.remove();
+    } else document.getElementById('main-post')?.remove();
   });
   await world.read();
   await finish(world);
   expect(summary()).toMatchObject({
     counts: { vanished: 1, timedOut: 0 }, vanished: { [reason]: 1 },
-    unresolved: [{ tweetId: '1102', reason: 'vanished', vanished: reason, waitedMs: 300, elapsedMs: 300 }],
+    unresolved: [{ tweetId: '1102', reason: 'vanished', vanished: reason, waitedMs: 2400, elapsedMs: 2400 }],
   });
   expect((await getBookmark('1102'))!.snapshot.text).toBe('');
-  expect(world.clock.sleeps).toEqual([300]);
+  expect(world.clock.sleeps).toEqual(Array(8).fill(300));
   expect(await order()).toEqual(['1101', '1102']);
 });
 

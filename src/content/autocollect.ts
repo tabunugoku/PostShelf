@@ -47,6 +47,8 @@ export const LOAD_POLL_MS = 500;
 export const SETTLE_MAX_MS = 8000;
 export const SETTLE_POLL_MS = 300;
 export const SETTLE_POLL_JITTER_MS = 200;
+/** DOM の作り直しで一時的に消える想定 (実機未確認の推測)。消失を検知してから待つ刻みの合計 */
+export const VANISH_GRACE_MS = 2000;
 /** 「15 分後に再開する」の待ち時間 */
 export const LIMIT_RESUME_MS = 15 * 60 * 1000;
 /** 動かない (scrollY が増えない) うえに新しいポストも出ない状態がこの回数続いたら、読み込み中の表示があっても終わりとみなす */
@@ -145,6 +147,12 @@ export class AutoCollector {
   private pending: Extracted[] = [];
   /** 未保存の、読み込み中の項目があるポスト。settle で読み込みを待ち、最後に読めた値を持つ。一時停止・停止のときは、その値で保存する */
   private mediaRetry = new Map<string, Extracted>();
+  /** 猶予後も DOM に無いポストの最後の値。次画面で再取得し、終了時には必ず保存へ戻す */
+  private vanishedRetry = new Map<string, Extracted>();
+  /** 初回を含め 2 回消えたら保存する。再開をまたいでも回数をリセットしない */
+  private vanishAttempts = new Set<string>();
+  /** 読み直し待ちを seq から外しても一覧の位置を保持する。保存データには足さない */
+  private positions = new Map<string, number>();
   /** 8 秒待っても pending だった ID。次の画面で 1 回だけ確認し、保存はしない */
   private timedOut = new Set<string>();
   private diagnosis = new SettleDiagnosis(() => this.d.now());
@@ -343,6 +351,9 @@ export class AutoCollector {
     this.seq = [];
     this.pending = [];
     this.mediaRetry.clear();
+    this.vanishedRetry.clear();
+    this.vanishAttempts.clear();
+    this.positions.clear();
     this.streak = 0;
     this.rewind = false;
     this.saved = null; // 取り込みの開始のときに、保存済みの ID を 1 回読む
@@ -394,7 +405,10 @@ export class AutoCollector {
       this.emit();
       if (this.d.hasLimit()) return void (await this.pause('limit'));
       const s = this.state!;
-      if (s.cap > 0 && s.imported - this.base >= s.cap) return void (await this.pause('cap'));
+      // 読み直し待ちも終了時には保存するため、上限の枠を空けない。
+      if (s.cap > 0 && s.imported + this.vanishedRetry.size - this.base >= s.cap) {
+        return void (await this.pause('cap'));
+      }
       // 「止めない」でも、一度の取り込みの時間には上限を設ける
       if (s.cap === 0 && this.d.now() - this.segmentStart >= MAX_RUN_MS) return void (await this.pause('time'));
       // 読み込み中の表示が出たままでも、動かず新しいポストも出ない状態が続いたら、終わりとみなす (実機未確認)
@@ -420,6 +434,8 @@ export class AutoCollector {
     let fresh = 0;
     for (const [index, it] of items.entries()) {
       if (this.seen.has(it.tweetId)) continue; // 同じ取り込みの中で、同じポストを二重に数えない
+      if (!this.positions.has(it.tweetId)) this.positions.set(it.tweetId, this.positions.size);
+      this.vanishedRetry.delete(it.tweetId);
       this.seen.add(it.tweetId);
       fresh++;
       const posted = it.snapshot.createdAt;
@@ -433,21 +449,40 @@ export class AutoCollector {
       if (!saved.has(it.tweetId) && hasPending(it)) {
         this.diagnosis.begin(it, index + 1);
         this.mediaRetry.set(it.tweetId, it);
-        this.seq.push({ tweetId: it.tweetId }); // 保存前も画面に出た順序を保つ
+        this.insertSeq({ tweetId: it.tweetId }); // 保存前も画面に出た順序を保つ
         s.imported++; // 上限の数え方を変えず、保存だけを読み込みのあとへ回す
       } else if (saved.has(it.tweetId)) {
-        this.seq.push(it);
+        this.insertSeq(it);
         s.skipped++;
       }
       else {
         this.diagnosis.checkUnflagged(it);
-        this.seq.push(it);
+        this.insertSeq(it);
         this.pending.push(it);
         s.imported++;
       }
     }
     if (this.mediaRetry.size) await this.settle(token);
     return fresh;
+  }
+
+  /** 次画面へ回したポストも、最初に見えた一覧の位置へ戻す。 */
+  private insertSeq(it: SeqEntry): void {
+    const position = this.positions.get(it.tweetId)!;
+    const at = this.seq.findIndex((entry) => this.positions.get(entry.tweetId)! > position);
+    this.seq.splice(at < 0 ? this.seq.length : at, 0, it);
+  }
+
+  /** 下側の DOM が次のスクロールで戻る想定 (実機未確認の推測)。2 回目は再度外さず保存する。 */
+  private deferVanished(it: Extracted): void {
+    if (this.vanishAttempts.has(it.tweetId)) return this.acceptMedia(it);
+    this.vanishAttempts.add(it.tweetId);
+    this.vanishedRetry.set(it.tweetId, it);
+    this.mediaRetry.delete(it.tweetId);
+    this.seq = this.seq.filter((entry) => entry.tweetId !== it.tweetId);
+    this.pending = this.pending.filter((entry) => entry.tweetId !== it.tweetId);
+    this.seen.delete(it.tweetId);
+    this.state!.imported--;
   }
 
   /** 時間切れの次の画面で、追加の待ちなしに 1 回だけ確認する。DOM に残る時期は実機未確認の推測。 */
@@ -470,12 +505,15 @@ export class AutoCollector {
 
   /**
    * 読み込み中のポストが読み込み終わる (hasPending が偽になる) か、合計 SETTLE_MAX_MS 待つまで、短い間隔で画面を読み直す。
-   * 時間切れ・画面 (DOM) から消えたポストは、最後に読めた値で保存へ回す (取りこぼしより、全体が止まらないことを優先。欠けは補完が拾う)。
+   * 消えたポストは VANISH_GRACE_MS の間、最後に読めた値を保持する。全体の上限は延ばさない。
+   * 猶予後も DOM に無いものだけ次画面へ回す。2 回目の消失と終了時には最後の値で保存する。
    * 待ちの長さは、実際の時計ではなく待った刻みの合計で数える。一時停止・停止 (token の変化) では、待たずに戻る
    */
   private async settle(token: number): Promise<void> {
     this.diagnosis.screen();
     let waited = 0;
+    const vanishedAt = new Map<string, number>();
+    const returned = new Set<string>();
     while (this.mediaRetry.size) {
       const step = SETTLE_POLL_MS + Math.round(this.d.random() * SETTLE_POLL_JITTER_MS);
       await this.d.sleep(step);
@@ -486,15 +524,28 @@ export class AutoCollector {
       for (const [id, last] of [...this.mediaRetry]) {
         const current = visible.get(id);
         if (!current) {
-          this.diagnosis.complete(id, 'vanished', hasTweetStatusLink(document, id) ? 'unreadable' : 'removed');
-          this.acceptMedia(last);
+          const since = vanishedAt.get(id) ?? waited;
+          vanishedAt.set(id, since);
+          if (waited - since >= VANISH_GRACE_MS || waited >= SETTLE_MAX_MS) {
+            const reason = hasTweetStatusLink(document, id) ? 'unreadable' : 'removed';
+            this.diagnosis.complete(id, 'vanished', reason, {
+              disappearedAfterMs: since, vanishElapsedMs: waited - since,
+            });
+            if (reason === 'removed' && waited - since >= VANISH_GRACE_MS) this.deferVanished(last);
+            else this.acceptMedia(last);
+          }
         }
-        else if (!hasPending(current) || waited >= SETTLE_MAX_MS) {
-          this.diagnosis.complete(id, hasPending(current) ? 'timedOut' : 'resolved');
-          if (hasPending(current)) this.timedOut.add(id);
-          this.acceptMedia(current);
+        else {
+          if (vanishedAt.delete(id)) returned.add(id);
+          if (!hasPending(current) || waited >= SETTLE_MAX_MS) {
+            this.diagnosis.complete(
+              id, hasPending(current) ? 'timedOut' : 'resolved', undefined, undefined, returned.has(id),
+            );
+            if (hasPending(current)) this.timedOut.add(id);
+            this.acceptMedia(current);
+          }
+          else this.mediaRetry.set(id, current);
         }
-        else this.mediaRetry.set(id, current);
       }
     }
   }
@@ -514,12 +565,26 @@ export class AutoCollector {
   private flush(final = false): Promise<void> {
     this.flushing = this.flushing.then(async () => {
       if (!this.state) return;
+      if (final) {
+        for (const it of this.vanishedRetry.values()) {
+          this.insertSeq(it);
+          this.pending.push(it);
+          this.seen.add(it.tweetId);
+          this.state.imported++;
+        }
+        this.vanishedRetry.clear();
+      }
       // 停止時には追加の読み取りをせず、保留していた最初の内容も保存する。
       if (final) for (const it of this.mediaRetry.values()) {
         this.diagnosis.complete(it.tweetId, 'forced');
         this.acceptMedia(it);
       }
-      const deferredAt = this.seq.findIndex((it) => this.mediaRetry.has(it.tweetId));
+      // 読み直し待ちより後ろを先に保存すると、戻ったポストの savedAt が逆転する。
+      let firstVanished = Infinity;
+      for (const id of this.vanishedRetry.keys()) firstVanished = Math.min(firstVanished, this.positions.get(id)!);
+      const deferredAt = this.seq.findIndex((it) =>
+        this.mediaRetry.has(it.tweetId) || this.positions.get(it.tweetId)! > firstVanished,
+      );
       const sent = deferredAt < 0 ? this.seq : this.seq.slice(0, deferredAt);
       const ready = new Set(sent.map((it) => it.tweetId));
       const batch = this.pending.filter((it) => ready.has(it.tweetId));
@@ -675,6 +740,9 @@ export class AutoCollector {
     this.mediaRetry.clear();
     this.state = null;
     this.timedOut.clear();
+    this.vanishedRetry.clear();
+    this.vanishAttempts.clear();
+    this.positions.clear();
     this.emit(false);
   }
 
