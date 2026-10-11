@@ -33,6 +33,8 @@ export interface Settings {
   triageKeyFolders?: string[];
   /** IDs of collapsed parents, local to this device. */
   folderTreeCollapsed?: string[];
+  /** Tab manager sidebar width, local to this device. */
+  sidebarWidth?: number;
   /** x.com の保存ポップオーバーの「最近使った」フォルダ (v28)。最大 RECENT_FOLDERS 件、新しい順。無い・不正な値は空として扱う */
   recentFolderIds?: string[];
 }
@@ -126,7 +128,9 @@ export type ActionMode = 'popup' | 'sidepanel';
 
 export type ButtonMode = 'separate' | 'replace';
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, triageKeyMode: 'auto', triageKeyFolders: [], folderTreeCollapsed: [], recentFolderIds: [] };
+export const DEFAULT_SIDEBAR_WIDTH = 240;
+
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, triageKeyMode: 'auto', triageKeyFolders: [], folderTreeCollapsed: [], sidebarWidth: DEFAULT_SIDEBAR_WIDTH, recentFolderIds: [] };
 
 export interface FullTextPlan { gapMinMs: number; gapMaxMs: number; tabs: 1 | 2 | 3 }
 /** 「ゆっくり」は、保存されたタブ数にかかわらず従来の間隔・1 タブを使う。 */
@@ -157,6 +161,7 @@ export async function getSettings(): Promise<Settings> {
   merged.triageKeyMode = stored.triageKeyMode === 'manual' ? 'manual' : 'auto';
   merged.triageKeyFolders = normalizeTriageKeyFolders(stored.triageKeyFolders);
   merged.folderTreeCollapsed = Array.isArray(stored.folderTreeCollapsed) ? [...new Set(stored.folderTreeCollapsed.filter((id):id is string => typeof id === 'string'))] : [];
+  merged.sidebarWidth = typeof stored.sidebarWidth === 'number' && Number.isFinite(stored.sidebarWidth) && stored.sidebarWidth >= 180 ? Math.round(stored.sidebarWidth) : DEFAULT_SIDEBAR_WIDTH;
   merged.recentFolderIds = Array.isArray(stored.recentFolderIds)
     ? [...new Set(stored.recentFolderIds.filter((x): x is string => typeof x === 'string'))].slice(0, RECENT_FOLDERS)
     : [];

@@ -1666,6 +1666,7 @@
   "translatedBadge": { "message": "翻訳済み" },
   "quoteLabel": { "message": "引用" },
   "quoteAsSeen": { "message": "X に表示されていた分を保存しています" },
+  "sidebarResize": { "message": "サイドバーの幅を変更（左右キー・ドラッグ、ダブルクリックで自動調整）" },
   "treeExpand": {"message":"開く"},
   "treeCollapse": {"message":"たたむ"},
   "folderDeleteTree": {"message":"$FOLDERS$ 個のフォルダ（子・孫を含む）を削除し、$POSTS$ 件のポストからその所属を外します。ポスト自体は残ります。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

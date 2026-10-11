@@ -1666,6 +1666,7 @@
   "translatedBadge": { "message": "已翻譯" },
   "quoteLabel": { "message": "引用" },
   "quoteAsSeen": { "message": "依 X 上顯示的內容儲存" },
+  "sidebarResize": { "message": "調整側欄寬度（左右鍵或拖曳；按兩下自動調整）" },
   "treeExpand": {"message":"展開"},
   "treeCollapse": {"message":"收合"},
   "folderDeleteTree": {"message":"刪除 $FOLDERS$ 個資料夾（含子孫），並從 $POSTS$ 則貼文移除這些歸屬。貼文保留。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},

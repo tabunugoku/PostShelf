@@ -1,6 +1,6 @@
 # v46 の追加文言
 
-追加した 12 キー。既存の文言は変更しない。folderDeleteTree の $FOLDERS$ は $1、$POSTS$ は $2。8 言語のキー・プレースホルダー一致検査を維持する。
+追加した 13 キー。既存の文言は変更しない。folderDeleteTree の $FOLDERS$ は $1、$POSTS$ は $2。8 言語のキー・プレースホルダー一致検査を維持する。
 
 | キー | ja | en | zh_CN | zh_TW | ko | es | pt_BR | fr |
 |---|---|---|---|---|---|---|---|---|
@@ -16,3 +16,4 @@
 | triageKeyReplace | はずす番号を選んでください。 | Choose a slot to replace. | 请选择要替换的编号。 | 請選擇要替換的編號。 | 바꿀 번호를 선택하세요. | Elige el número que quieres sustituir. | Escolha o número a substituir. | Choisissez le numéro à remplacer. |
 | triageKeyOrder | 番号の順 | Key order | 编号顺序 | 編號順序 | 번호 순서 | Orden de teclas | Ordem das teclas | Ordre des touches |
 | triageKeyOrderHint | ドラッグで入れ替えます。 | Drag to reorder. | 拖动以调整顺序。 | 拖曳以調整順序。 | 드래그하여 순서를 바꿉니다. | Arrastra para reordenar. | Arraste para reordenar. | Glissez pour réorganiser. |
+| sidebarResize | サイドバーの幅を変更（左右キー・ドラッグ、ダブルクリックで自動調整） | Resize sidebar (arrow keys or drag; double-click to fit) | 调整侧栏宽度（左右键或拖动；双击自动适应） | 調整側欄寬度（左右鍵或拖曳；按兩下自動調整） | 사이드바 너비 조절 (방향키 또는 드래그, 더블 클릭으로 맞춤) | Ajustar barra lateral (flechas o arrastrar; doble clic para ajustar) | Ajustar barra lateral (setas ou arrastar; clique duplo para ajustar) | Redimensionner le panneau (flèches ou glisser ; double-clic pour ajuster) |

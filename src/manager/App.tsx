@@ -72,6 +72,7 @@ import { clearStorageError, reportStorageError, useStorageError } from './errorB
 import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
 import { currentVersion } from '../shared/version';
 import { REPO_URL } from '../shared/links';
+import { SidebarResize } from './SidebarResize';
 import { useCompact } from './useCompact';
 
 const sorts = (): [SortKey, string][] => [
@@ -116,6 +117,7 @@ const SHOW_ALL_STEP = 100;
 
 export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const compact = useCompact();
+  const sidebarRef = useRef<HTMLElement>(null);
   const SORTS = sorts();
   const [ready, setReady] = useState(false);
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -1299,7 +1301,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   // ===== 広いレイアウト (タブ): サイドバー + メイン =====
   return (
     <div class={`app layout-wide surface-${surface}`}>
-      <aside class="side">
+      <aside class="side" ref={sidebarRef}>
         {switcher}
         <div class="sec">{t('smartViews')}</div>
         {smartViews.map((f) => viewRow(f, { smart: true }))}
@@ -1330,6 +1332,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           <Icon name="ti-external-link" />
         </a>
       </aside>
+      {surface === 'tab' && <SidebarResize sidebar={sidebarRef}/>}
       <main class="main" style={{ '--toolbar-offset': `${toolbarOffset}px` }}>
         {surface === 'sidepanel' && <SaveCurrent folders={pickerFolders} blockedReason={saveBlocked} onSaved={() => void reload()} />}
         {page === 'settings' ? (
