@@ -17,11 +17,11 @@ import {
   clearCollectCommand, clearCollectRun, getCollectRun, getSettings, onCollectCommand, onCollectRunChanged, peekCollectCommand, saveCollectRun, setCollectOffer,
   type CollectCap, type CollectCommand, type CollectReason, type CollectRun, type CollectSpeed,
 } from '../shared/settings';
-import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
+import { addCollected, fillMissing, getSavedIds, missingFields, onDataChanged } from '../shared/storage';
 import { requestFullTextBatch } from '../shared/cacheRequest';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible, pathListeners } from './collect';
-import { hasPending, tweetIdOf, type Extracted } from './snapshot';
+import { fillSource, hasPending, tweetIdOf, type Extracted } from './snapshot';
 
 /** スクロールごとの待ち時間 (ミリ秒) の範囲 */
 export const SPEED_RANGES: Record<CollectSpeed, [number, number]> = { slow: [2000, 4000], normal: [1000, 2500] };
@@ -94,6 +94,8 @@ export interface CollectDeps {
   loadRun?(): Promise<CollectRun | null>;
   /** seq = 前回の保存以降に画面に出た順のポスト (先頭は、保存済みの印のことがある)。保存の savedAt は一覧での位置から決める (ordering.ts) */
   addCollected(seq: SeqEntry[], startedAt: number, accountId: string): Promise<number>;
+  /** 時間切れで保存したポストの欠けだけを補う。省略時は保存層の fillMissing を使う */
+  fillMissing?(items: Parameters<typeof fillMissing>[0], accountId: string): Promise<number>;
   saveRun(run: CollectRun): Promise<void>;
   clearRun(): Promise<void>;
 }
@@ -122,6 +124,7 @@ export function defaultDeps(): CollectDeps {
     onDataChanged: (cb) => onDataChanged(cb),
     loadRun: () => getCollectRun(),
     addCollected: (seq, startedAt, accountId) => addCollected(seq, startedAt, accountId),
+    fillMissing,
     saveRun: (run) => saveCollectRun(run),
     clearRun: () => clearCollectRun(),
   };
@@ -141,6 +144,8 @@ export class AutoCollector {
   private pending: Extracted[] = [];
   /** 未保存の、読み込み中の項目があるポスト。settle で読み込みを待ち、最後に読めた値を持つ。一時停止・停止のときは、その値で保存する */
   private mediaRetry = new Map<string, Extracted>();
+  /** 4 秒待っても pending だった ID。次の画面で 1 回だけ確認し、保存はしない */
+  private timedOut = new Set<string>();
   private streak = 0;
   /** 上限の数え始め (再開のたびに、その時点の imported から数え直す) */
   private base = 0;
@@ -302,6 +307,7 @@ export class AutoCollector {
   private begin(token: number, fresh: boolean, rewind: boolean): void {
     const s = this.state!;
     if (fresh) {
+      this.timedOut.clear();
       this.truncatedIds = [];
       this.adopted = false;
       s.startedAt = this.d.now();
@@ -406,7 +412,8 @@ export class AutoCollector {
     const saved = (this.saved ??= await this.d.savedIds(this.state!.accountId));
     if (token !== this.token) return 0;
     const s = this.state!;
-    const visible = new Map(items.map((it) => [it.tweetId, it]));
+    await this.rereadTimedOut(items, saved, s.accountId);
+    if (token !== this.token) return 0;
     let fresh = 0;
     for (const it of items) {
       if (this.seen.has(it.tweetId)) continue; // 同じ取り込みの中で、同じポストを二重に数えない
@@ -438,6 +445,24 @@ export class AutoCollector {
     return fresh;
   }
 
+  /** 時間切れの次の画面で、追加の待ちなしに 1 回だけ確認する。DOM に残る時期は実機未確認の推測。 */
+  private async rereadTimedOut(items: Extracted[], saved: ReadonlySet<string>, accountId: string): Promise<void> {
+    const sources: Parameters<typeof fillMissing>[0] = [];
+    for (const it of items) {
+      if (!this.timedOut.delete(it.tweetId) || hasPending(it)) continue;
+      const source = fillSource(it);
+      if (saved.has(it.tweetId)) {
+        sources.push({ tweetId: it.tweetId, snapshot: source });
+      } else {
+        // 20 件ごとの保存前にも次の画面で見える。保存間隔を保ち、seq と共有する保留内容の欠けだけを補う。
+        const pending = this.pending.find((entry) => entry.tweetId === it.tweetId);
+        const patch = pending ? missingFields(pending.snapshot, source) : null;
+        if (pending && patch) pending.snapshot = { ...pending.snapshot, ...patch };
+      }
+    }
+    if (sources.length) await (this.d.fillMissing ?? fillMissing)(sources, accountId).catch(() => 0);
+  }
+
   /**
    * 読み込み中のポストが読み込み終わる (hasPending が偽になる) か、合計 SETTLE_MAX_MS 待つまで、短い間隔で画面を読み直す。
    * 時間切れ・画面 (DOM) から消えたポストは、最後に読めた値で保存へ回す (取りこぼしより、全体が止まらないことを優先。欠けは補完が拾う)。
@@ -454,7 +479,10 @@ export class AutoCollector {
       for (const [id, last] of [...this.mediaRetry]) {
         const current = visible.get(id);
         if (!current) this.acceptMedia(last);
-        else if (!hasPending(current) || waited >= SETTLE_MAX_MS) this.acceptMedia(current);
+        else if (!hasPending(current) || waited >= SETTLE_MAX_MS) {
+          if (hasPending(current)) this.timedOut.add(id);
+          this.acceptMedia(current);
+        }
         else this.mediaRetry.set(id, current);
       }
     }
@@ -560,6 +588,7 @@ export class AutoCollector {
     if (['stopped', 'done'].includes(s.status)) return;
     await this.flush(true);
     s.status = 'stopped';
+    this.timedOut.clear();
     s.reason = 'user';
     s.resumeAt = undefined;
     this.emit();
@@ -570,6 +599,7 @@ export class AutoCollector {
     this.token++;
     await this.flush(true);
     s.status = 'done';
+    this.timedOut.clear();
     s.reason = undefined;
     this.emit();
   }
@@ -627,6 +657,7 @@ export class AutoCollector {
     this.pending = [];
     this.mediaRetry.clear();
     this.state = null;
+    this.timedOut.clear();
     this.emit(false);
   }
 

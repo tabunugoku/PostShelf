@@ -4,7 +4,7 @@
  * 判定できないときは保存・取り込みをしない (popover / collect が current === null を見て無効にする)。
  */
 import { UNKNOWN_ACCOUNT_ID, accountIdOf, type Account } from '../shared/models';
-import { queryEveryCandidate } from '../shared/selectors';
+import { queryEveryCandidate, queryFirst } from '../shared/selectors';
 import { noteAccount, setAccountScope } from '../shared/storage';
 
 export interface DetectedAccount {
@@ -37,7 +37,7 @@ export function detectAccount(root: ParentNode = document): DetectedAccount | nu
       .filter((n) => n.children.length === 0)
       .map((n) => n.textContent?.trim() ?? '')
       .find((x) => x !== '' && !x.startsWith('@'));
-    const avatar = el.querySelector<HTMLImageElement>('img')?.src || undefined;
+    const avatar = queryFirst<HTMLImageElement>(el, 'accountAvatar')?.el.src || undefined;
     return { handle, displayName: displayName || undefined, avatar };
   }
   return null;

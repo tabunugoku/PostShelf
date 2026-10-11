@@ -1,0 +1,12 @@
+<!-- 実機未確認の推測: 同じポストが次のスクロールでも DOM に残り、4 秒を過ぎてからアイコンと写真が現れる。
+     実機の仮想化は未確認。template は読み込み後の状態を通信せず再現するためのテスト用部品。 -->
+<article data-testid="tweet" id="main-post">
+  <div data-testid="Tweet-User-Avatar" id="main-avatar"></div>
+  <div data-testid="User-Name"><span>Sample Late</span><span>@sample_late</span></div>
+  <a href="/sample_late/status/801"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText"></div>
+</article>
+<template id="late-avatar"><img src="https://pbs.twimg.com/profile_images/sample-late-v51.jpg"></template>
+<template id="late-photo">
+  <a href="/sample_late/status/801/photo/1"><div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample-late-v51.jpg"></div></a>
+</template>

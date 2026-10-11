@@ -1,6 +1,7 @@
 import { createContext } from 'preact';
 import { useContext } from 'preact/hooks';
 import { accountIdOf, type Bookmark } from '../shared/models';
+import { isEmojiImageUrl } from '../shared/avatar';
 
 /** 小文字のハンドル (@ なし) → アイコンの URL。保存データのアイコンが空のときの代用元 */
 export type AvatarFallback = ReadonlyMap<string, string>;
@@ -14,7 +15,7 @@ export function buildAvatarFallback(bookmarks: Bookmark[]): AvatarFallback {
   for (const b of bookmarks) {
     const avatar = b.snapshot.avatar;
     const key = accountIdOf(b.snapshot.handle);
-    if (!avatar || !key) continue;
+    if (!avatar || isEmojiImageUrl(avatar) || !key) continue;
     const cur = newest.get(key);
     if (!cur || b.savedAt > cur.savedAt) newest.set(key, { savedAt: b.savedAt, avatar });
   }
@@ -24,5 +25,5 @@ export function buildAvatarFallback(bookmarks: Bookmark[]): AvatarFallback {
 /** 保存データのアイコンが空なら、同じハンドルの他のポストのアイコンを使う。無ければ undefined (イニシャルを出す) */
 export function useAvatar(avatar: string | undefined, handle: string): string | undefined {
   const fallback = useContext(AvatarContext);
-  return avatar || fallback.get(accountIdOf(handle));
+  return (isEmojiImageUrl(avatar) ? undefined : avatar) || fallback.get(accountIdOf(handle));
 }
