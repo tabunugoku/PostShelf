@@ -54,7 +54,7 @@ import {
 import { MIME_FOLDER, MIME_POSTS, moveBefore, pruneSelection, rangeIds } from './selection';
 import { Confirm, Dropdown, FolderPickerHost, InfoDialog, SortMenu, Toast } from './ui';
 import { Card, type RowHandlers } from './Cards';
-import { BulkMenu } from './BulkMenu';
+import { BulkMenu, bulkFolderToast } from './BulkMenu';
 import { refreshCacheView } from './cacheView';
 import { afterPostsRemoved, deleteAccountDataAndCache } from '../shared/cacheops';
 import { ImageViewer, VideoGuide } from './Viewer';
@@ -451,12 +451,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const saveBlocked = !lastSeen ? t('saveCurrentNoAccount') : lastSeen.id !== viewId ? t('saveCurrentWrongAccount', accountLabel(lastSeen)) : undefined;
 
   /** 一括操作を実行し、件数が変わったら取り消し付きトーストを出す */
-  const run = async (op: Promise<BookmarkUndo>, msgKey: string) => {
+  const run = async (op: Promise<BookmarkUndo>, msgKey: string | ((undo: BookmarkUndo) => string)) => {
     try {
       const undo = await op;
       await reload();
       const n = Object.keys(undo).length;
-      if (n > 0) setToast({ key: Date.now(), message: t(msgKey, n), undo });
+      if (n > 0) setToast({ key: Date.now(), message: t(typeof msgKey === 'string' ? msgKey : msgKey(undo), n), undo });
       return true;
     } catch {
       // 保存の失敗 (容量・保存のエラー): 通知を出し、画面は読み直して実際の状態に合わせる
@@ -805,7 +805,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         count={selected.size}
         folders={pickerFolders}
         bookmarks={bookmarks.filter(b => selected.has(b.tweetId))}
-        onConfirm={(addIds, removeIds) => run(changeBookmarkFolders(bulkIds, addIds, removeIds), addIds.length ? 'toastAdded' : 'toastRemoved')}
+        onConfirm={(addIds, removeIds) => run(changeBookmarkFolders(bulkIds, addIds, removeIds), undo => bulkFolderToast(undo, addIds, removeIds))}
         onDelete={() => setConfirmState({ kind: 'posts', ids: bulkIds })}
         onSelectAll={() => setSelected(new Set(shownIds))}
         allSelected={selected.size === shownSet.size}

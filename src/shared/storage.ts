@@ -585,8 +585,11 @@ export type BookmarkUndo = Record<string, Bookmark | null>;
 function mutateBookmarks(
   tweetIds: string[],
   fn: (b: Bookmark) => Bookmark | null,
+  atomicInbox = false,
 ): Promise<BookmarkUndo> {
   return serial(async () => {
+    // 確定式の一括変更では受け皿も同じ set に含める。map を読む前に準備し、競合する時間を延ばさない。
+    const allFolders = atomicInbox ? await readAllFolders() : undefined;
     const apply = (map: BookmarkMap): BookmarkUndo => {
       const undo: BookmarkUndo = {};
       for (const tid of new Set(tweetIds)) {
@@ -606,6 +609,18 @@ function mutateBookmarks(
     let map = await readMap();
     let undo = apply(map);
     if (Object.keys(undo).length === 0) return undo;
+    if (allFolders) {
+      const mineFolders = allFolders.filter(mine);
+      const needsInbox = hasInbox(map) && !mineFolders.some(f => f.id === INBOX_ID);
+      await chrome.storage.local.set({
+        [KEY_BOOKMARKS]: map,
+        ...(needsInbox ? { [KEY_FOLDERS]: [...allFolders, {
+          id: INBOX_ID, name: '', icon: 'ti-star',
+          order: mineFolders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: scope,
+        }] } : {}),
+      });
+      return undo;
+    }
     if (hasInbox(map)) {
       // 「未分類」に入るポストがあれば、受け皿のフォルダ (名前なし = 表示時に解決) を先に用意し、読み直してから書く
       await ensureInboxFolder();
@@ -626,7 +641,7 @@ export const changeBookmarkFolders = (tweetIds: string[], addIds: string[], remo
     ...b,
     folderIds: addIds.includes(INBOX_ID) ? [INBOX_ID]
       : uniq([...b.folderIds.filter(id => !removeIds.includes(id)), ...realIds(addIds)]),
-  }));
+  }), true);
 
 export const addToFolders = (tweetIds: string[], folderIds: string[]) =>
   mutateBookmarks(tweetIds, (b) => ({ ...b, folderIds: uniq([...b.folderIds, ...realIds(folderIds)]) }));

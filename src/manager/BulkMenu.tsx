@@ -1,11 +1,21 @@
 import { useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Icon } from '../shared/Icon';
-import type { Bookmark, Folder } from '../shared/models';
+import { INBOX_ID, type Bookmark, type Folder } from '../shared/models';
+import type { BookmarkUndo } from '../shared/storage';
 import { t } from '../shared/strings';
 import { Dropdown, FolderPickerHost } from './ui';
 
 type FolderStates = { selected: string[]; partial: Set<string> };
+
+/** 要求された差分のうち、実際に所属が変わった分だけで通知の種類を決める。 */
+export function bulkFolderToast(undo: BookmarkUndo, addIds: string[], removeIds: string[]): string {
+  if (addIds.includes(INBOX_ID)) return 'toastMoved';
+  const before = Object.values(undo).filter((b): b is Bookmark => b !== null);
+  const added = before.some(b => addIds.some(id => id !== INBOX_ID && !b.folderIds.includes(id)));
+  const removed = before.some(b => removeIds.some(id => id !== INBOX_ID && b.folderIds.includes(id) && !addIds.includes(id)));
+  return added && removed ? 'toastMoved' : added ? 'toastAdded' : 'toastRemoved';
+}
 
 /** 管理画面とサイドパネル共通の一括操作。フォルダの下書きは確定するまで保存しない。 */
 export function BulkMenu(props: {
@@ -25,6 +35,7 @@ export function BulkMenu(props: {
   const [draft, setDraft] = useState<FolderStates>({ selected: [], partial: new Set() });
   const draftRef = useRef(draft);
   const original = useRef(draft);
+  const originalBookmarks = useRef(props.bookmarks);
   const busy = useRef(false);
   const states = useMemo(() => {
     const counts = new Map<string, number>();
@@ -38,6 +49,7 @@ export function BulkMenu(props: {
   const close = () => { if (!busy.current) { setOpen(false); discard(); } };
   const folders = () => {
     original.current = states;
+    originalBookmarks.current = props.bookmarks;
     draftRef.current = { selected: [...states.selected], partial: new Set(states.partial) };
     setDraft(draftRef.current); setError(''); setView('folders');
   };
@@ -47,6 +59,18 @@ export function BulkMenu(props: {
     const partial = new Set(draftRef.current.partial);
     partial.delete(id);
     if (on) selected.add(id); else selected.delete(id);
+    if (on && id === INBOX_ID) {
+      selected.clear(); selected.add(INBOX_ID); partial.clear();
+    } else {
+      selected.delete(INBOX_ID); partial.delete(INBOX_ID);
+      // 触らなかった中間状態は各ポストの元の所属を保ち、未分類の見た目だけを再計算する。
+      const addIds = [...selected].filter(fid => !original.current.selected.includes(fid));
+      const removeIds = [...original.current.selected, ...original.current.partial].filter(fid => !selected.has(fid) && !partial.has(fid));
+      const inboxCount = originalBookmarks.current.filter(b =>
+        !b.folderIds.some(fid => fid !== INBOX_ID && !removeIds.includes(fid)) && addIds.length === 0).length;
+      if (inboxCount === originalBookmarks.current.length) selected.add(INBOX_ID);
+      else if (inboxCount > 0) partial.add(INBOX_ID);
+    }
     draftRef.current = { selected: [...selected], partial };
     setDraft(draftRef.current);
   };
