@@ -12,6 +12,7 @@ v2〜v37 は実装済み (バージョン 1.1.3。v28〜v30 は保存ポップ�
 2. 保存済みポストを「リスト表示」と「ポスト表示 (X 風カード)」で見られる
 3. フォルダの名前変更、アイコン変更が可能。どのアイコンでも色を選べる (v5 で変更。以前は folder のみ)
 4. 組み込みフォルダ「すべて」は名前/アイコン/色の変更不可・削除不可
+5. フォルダは最大 3 段のツリーで、開閉を端末に保存する。子・孫への所属は祖先にも保存し、仕分けの数字キーの対象を自動または手動で選べる
 
 ## UI の構成 (3 画面)
 - content script: x.com の各ポストのブックマークボタン横にフォルダ選択ポップオーバー (チェックボックス式、「フォルダを追加」ボタンつき)
@@ -26,7 +27,7 @@ v2〜v37 は実装済み (バージョン 1.1.3。v28〜v30 は保存ポップ�
 
 ## データモデル (`src/shared/models.ts`)
 ```ts
-Folder   { id: string; name: string; icon: string; color?: string; order: number; accountId?: string }
+Folder   { id: string; name: string; icon: string; color?: string; order: number; accountId?: string; parentId?: string }
 Account  { id: string; handle: string; displayName?: string; avatar?: string; lastSeenAt: number }  // v9: id = 小文字のハンドル
 Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: number;  // v9: 保存キーは accountId:tweetId
            snapshot: { text: string; author: string; handle: string; avatar?: string;
