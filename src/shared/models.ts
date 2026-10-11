@@ -7,6 +7,8 @@ export interface Folder {
   icon: string;
   color?: string;
   order: number;
+  /** 親フォルダ (同じアカウントの中)。無ければ 1 段目。最大 3 段 */
+  parentId?: string;
   /** 所有するアカウント (v9)。保存済みのフォルダには必ず入る。「すべて」などの仮想フォルダには無い */
   accountId?: string;
 }

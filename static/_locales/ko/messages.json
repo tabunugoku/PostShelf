@@ -1665,5 +1665,18 @@
   "iconMore": { "message": "더보기" },
   "translatedBadge": { "message": "번역됨" },
   "quoteLabel": { "message": "인용" },
-  "quoteAsSeen": { "message": "X에 표시된 내용 그대로 저장됨" }
+  "quoteAsSeen": { "message": "X에 표시된 내용 그대로 저장됨" },
+  "sidebarResize": { "message": "사이드바 너비 조절 (방향키 또는 드래그, 더블 클릭으로 맞춤)" },
+  "treeExpand": {"message":"펼치기"},
+  "treeCollapse": {"message":"접기"},
+  "folderDeleteTree": {"message":"$FOLDERS$개 폴더(하위 포함)를 삭제하고 $POSTS$개 게시물에서 해당 소속을 제거합니다. 게시물은 남습니다.","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
+  "folderAncestorsRemain": {"message":"상위 폴더와 해당 소속은 남습니다."},
+  "triageKeyTargets": {"message":"대상 선택"},
+  "triageKeyTitle": {"message":"숫자 키 폴더"},
+  "triageKeyAuto": {"message":"자동"},
+  "triageKeyManual": {"message":"직접 선택"},
+  "triageKeyEmpty": {"message":"빈 자리"},
+  "triageKeyReplace": {"message":"바꿀 번호를 선택하세요."},
+  "triageKeyOrder": {"message":"번호 순서"},
+  "triageKeyOrderHint": {"message":"드래그하여 순서를 바꿉니다."}
 }

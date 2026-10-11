@@ -4,10 +4,12 @@
  * x.com のポップオーバーと manager の「フォルダを変更」で共通に使う。
  * 配色は theme で受け取る (x.com では X のテーマ、manager では CSS 変数の文字列を渡す)。
  */
-import { INBOX_ID, displayName, type Folder } from './models';
+import { ALL_FOLDER_ID, INBOX_ID, displayName, type Folder } from './models';
 import { t } from './strings';
 import { createFolderMenu } from './folderCreateMenu';
 import { foldText } from './fold';
+import { ancestors, flattenFolders, withAncestors, withoutDescendants } from './folderTree';
+import { getCollapsedFolders, setCollapsedFolders } from './storage';
 
 export interface PickerTheme {
   fg: string;
@@ -27,6 +29,7 @@ export interface FolderPicker {
   sync: () => void;
   /** 絞り込み欄があればフォーカスを当てる (あれば true) */
   focusFilter: () => boolean;
+  setFolders: (folders: Folder[]) => void;
 }
 
 /** 「未分類」の行 (保存されていなくても、一覧の先頭に出す仮想の行) */
@@ -105,6 +108,11 @@ export function createFolderPicker(opts: {
   /** 行ごとの見た目の更新 (チェックの塗り / 選択中の行の薄い背景 / 印の data-checked) */
   const paints = new Map<string, () => void>();
   const sync = () => {
+    if (selected.size) { const ids=withAncestors([...selected], folders);selected.clear();ids.forEach(id=>selected.add(id)); }
+    if (opts.partial) {
+      for(const id of [...opts.partial])for(const f of ancestors(folders,id))if(!selected.has(f.id))opts.partial.add(f.id);
+      selected.forEach(id=>opts.partial?.delete(id));
+    }
     boxes.forEach((cb, id) => {
       cb.checked = selected.has(id);
       cb.indeterminate = opts.partial?.has(id) ?? false;
@@ -115,8 +123,8 @@ export function createFolderPicker(opts: {
   };
   const normalize = (changed: string, on: boolean) => {
     if (on && changed === INBOX_ID) selected.clear();
-    if (on) selected.add(changed);
-    else selected.delete(changed);
+    if (on) withAncestors([changed],folders).forEach(id=>selected.add(id));
+    else { const ids=withoutDescendants([...selected],[changed],folders);selected.clear();ids.forEach(id=>selected.add(id)); }
     if (on && changed !== INBOX_ID) selected.delete(INBOX_ID);
     if (selected.size === 0) selected.add(INBOX_ID);
     sync();
@@ -126,6 +134,8 @@ export function createFolderPicker(opts: {
   const extras = opts.extras;
   const userFolderCount = () => folders.filter((f) => f.id !== INBOX_ID).length;
   let query = '';
+  let collapsed=new Set<string>();
+  void getCollapsedFolders().then(ids=>{collapsed=new Set(ids);render();}).catch(()=>{});
 
   // 見出し (保存状態) と絞り込み欄。一覧の再描画で消えないよう、一覧とは別の要素に置く
   const headEl = document.createElement('div');
@@ -179,6 +189,9 @@ export function createFolderPicker(opts: {
       if (opts.onToggle) await opts.onToggle(f.id, true);
       else {
         normalize(f.id, true);
+        // 作ったフォルダを最後に入れ直す (呼び出し側が、最後の項目を新しく作ったものとして扱うため)
+        selected.delete(f.id);
+        selected.add(f.id);
         if (await onChange(selected, 'created') === false) return false;
       }
       closeMenu();
@@ -221,7 +234,7 @@ export function createFolderPicker(opts: {
     paints.clear();
     filterEl.style.display = showFilter() ? 'block' : 'none';
     const inbox = inboxOf(folders);
-    const users = folders.filter((f) => f.id !== INBOX_ID);
+    const users = folders.filter((f) => f.id !== INBOX_ID && f.id !== ALL_FOLDER_ID);
     const heading = (text: string) => {
       const h = document.createElement('div');
       h.textContent = text;
@@ -230,7 +243,10 @@ export function createFolderPicker(opts: {
     };
     if (query) {
       // 絞り込み中は、「未分類」も対象にする (見出しは出さない)
-      for (const f of [inbox, ...users]) if (foldText(displayName(f)).includes(query)) addRow(f);
+      const hits=[inbox,...users].filter(f=>foldText(displayName(f)).includes(query));
+      const ids=new Set(hits.flatMap(f=>[f.id,...ancestors(users,f.id).map(p=>p.id)]));
+      if(ids.has(INBOX_ID))addRow(inbox);
+      for(const r of flattenFolders(users.filter(f=>ids.has(f.id))))addRow(r.folder,r.depth,r.hasChildren);
     } else {
       addRow(inbox); // 「未分類」は、見出しの上の先頭に固定する (見出しと件数の対象にしない)
       const recent =
@@ -242,14 +258,23 @@ export function createFolderPicker(opts: {
           : [];
       if (recent.length) {
         heading(t('folderRecent'));
-        for (const f of recent) addRow(f);
+        for (const f of recent) addRow(f,1,false,true);
         heading(t('folderAll', userFolderCount()));
-        for (const f of users) if (!recent.includes(f)) addRow(f);
-      } else for (const f of users) addRow(f);
+        // 「最近使った」にある 1 段目の子なしフォルダは、上で出したので、ここでは省く
+        for (const r of flattenFolders(users, collapsed)) {
+          if (!recent.includes(r.folder) || r.hasChildren || r.folder.parentId) addRow(r.folder, r.depth, r.hasChildren);
+        }
+      } else {
+        for (const r of flattenFolders(users, collapsed)) addRow(r.folder, r.depth, r.hasChildren);
+      }
     }
     listEl.append(divider(th), addBtn);
   };
-  const addRow = (f: Folder) => {
+  const addRow = (f: Folder, depth = 1, hasChildren = false, recent = false) => {
+    const row = document.createElement('div');
+    row.dataset.pickerFolder = f.id;
+    row.dataset.depth = String(depth);
+    row.style.cssText = 'display:flex;align-items:center;min-width:0;padding-left:' + (depth - 1) * 16 + 'px';
     const label = document.createElement('label');
     label.style.cssText = 'box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
     let hovered = false;
@@ -292,7 +317,8 @@ export function createFolderPicker(opts: {
       paintRow();
     });
     boxes.set(f.id, cb);
-    paints.set(f.id, paintRow);
+    const previousPaint=paints.get(f.id);
+    paints.set(f.id,()=>{previousPaint?.();paintRow();});
     cb.addEventListener('change', () => {
       if (opts.onToggle) return void opts.onToggle(f.id, cb.checked);
       normalize(f.id, cb.checked);
@@ -304,11 +330,50 @@ export function createFolderPicker(opts: {
     name.textContent = displayName(f);
     name.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
     label.append(ico, name, box);
-    listEl.append(label);
+    label.style.flex = '1';
+    label.style.minWidth = '0';
+    if (hasChildren) {
+      // 開閉の矢印。選択とは別のボタン。押したあとも、同じ行の矢印にフォーカスを戻す
+      const closed = collapsed.has(f.id);
+      const arrow = document.createElement('button');
+      arrow.type = 'button';
+      arrow.dataset.treeToggle = '';
+      arrow.setAttribute('aria-label', t(closed ? 'treeExpand' : 'treeCollapse'));
+      arrow.setAttribute('aria-expanded', String(!closed));
+      arrow.style.cssText = `box-sizing:border-box;display:grid;place-items:center;flex:none;width:20px;min-height:32px;padding:0;margin:0;border:0;background:transparent;color:${th.fg};cursor:pointer`;
+      const chevron = document.createElement('i');
+      chevron.className = 'ti ' + (closed ? 'ti-chevron-right' : 'ti-chevron-down');
+      chevron.style.cssText = 'font-size:14px;line-height:1;margin:0;padding:0';
+      arrow.append(chevron);
+      arrow.addEventListener('click', () => {
+        if (collapsed.has(f.id)) collapsed.delete(f.id);
+        else collapsed.add(f.id);
+        void setCollapsedFolders([...collapsed]).catch(() => {});
+        render();
+        listEl.querySelector<HTMLElement>('[data-picker-folder="' + f.id + '"] [data-tree-toggle]')?.focus();
+      });
+      row.append(arrow);
+    } else if (!recent) {
+      // 矢印の無い行も、名前の位置をそろえるために同じ幅を空ける
+      const spacer = document.createElement('span');
+      spacer.style.cssText = 'width:20px;flex:none';
+      row.append(spacer);
+    }
+    row.append(label);
+    listEl.append(row);
     paintRow();
   };
   el.append(menu.el);
   render();
-  paintStatus();
-  return { el, sync, focusFilter: () => (showFilter() ? (filterEl.focus(), true) : false) };
+  sync();
+  return {
+    el,
+    sync,
+    setFolders: next => {
+      folders.splice(0, folders.length, ...next);
+      render();
+      sync();
+    },
+    focusFilter: () => (showFilter() ? (filterEl.focus(), true) : false),
+  };
 }

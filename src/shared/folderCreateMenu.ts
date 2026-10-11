@@ -291,7 +291,8 @@ export function createFolderMenu(opts: {
   del?.addEventListener('click', () => { if (!busy) opts.onDelete?.(); });
 
   if (opts.head !== false) el.append(head);
-  el.append(input, iconGroup, colorGroup);
+  el.append(input);
+  el.append(iconGroup, colorGroup);
   if (opts.preview !== false) el.append(preview);
   el.append(error, actions);
   const reset = () => {

@@ -1665,5 +1665,18 @@
   "iconMore": { "message": "更多" },
   "translatedBadge": { "message": "已翻译" },
   "quoteLabel": { "message": "引用" },
-  "quoteAsSeen": { "message": "按 X 上显示的内容保存" }
+  "quoteAsSeen": { "message": "按 X 上显示的内容保存" },
+  "sidebarResize": { "message": "调整侧栏宽度（左右键或拖动；双击自动适应）" },
+  "treeExpand": {"message":"展开"},
+  "treeCollapse": {"message":"收起"},
+  "folderDeleteTree": {"message":"删除 $FOLDERS$ 个文件夹（含子孙），并从 $POSTS$ 条帖子中移除这些归属。帖子保留。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
+  "folderAncestorsRemain": {"message":"祖先文件夹及其归属保留。"},
+  "triageKeyTargets": {"message":"选择目标"},
+  "triageKeyTitle": {"message":"数字键文件夹"},
+  "triageKeyAuto": {"message":"自动"},
+  "triageKeyManual": {"message":"自行选择"},
+  "triageKeyEmpty": {"message":"空位"},
+  "triageKeyReplace": {"message":"请选择要替换的编号。"},
+  "triageKeyOrder": {"message":"编号顺序"},
+  "triageKeyOrderHint": {"message":"拖动以调整顺序。"}
 }

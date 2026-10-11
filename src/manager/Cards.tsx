@@ -1,5 +1,6 @@
 import { useRef, useState } from 'preact/hooks';
 import { Component, type ComponentChildren, type JSX } from 'preact';
+import { folderPath, leafMemberFolders } from '../shared/folderTree';
 import { Icon } from '../shared/Icon';
 import { INBOX_ID, displayName, type Bookmark, type Folder } from '../shared/models';
 import { formatDate, t } from '../shared/strings';
@@ -49,6 +50,7 @@ export interface CardProps {
   selectionActive: boolean;
   tabbable: boolean;
   folderOf: (id: string) => Folder | undefined;
+  folders?: readonly Folder[];
   pickerOpen: boolean;
   pickerNode: ComponentChildren;
   onSelect: (shift: boolean) => void;
@@ -179,25 +181,64 @@ function MediaTile(props: { card: CardProps; kind: 'image' | 'video'; index?: nu
   );
 }
 
-function FolderChips(props: { b: Bookmark; folderOf: CardProps['folderOf']; removable: boolean; onRemove: (id: string) => void }) {
-  const { b, folderOf } = props;
+/** 所属先のチップ。左のアイコンで「親 › 子 › 孫」の経路を開閉し、× を押すと所属を外す (名前だけを押しても外れない)。開いた状態は保存しない */
+function MembershipChip(props: { b: Bookmark; f: Folder; folders: readonly Folder[]; removable: boolean; onRemove: (id: string) => void }) {
+  const { b, f } = props;
+  const [expanded, setExpanded] = useState(false);
+  const path = folderPath(props.folders, f.id, ' › ');
+  const hasPath = !!f.parentId && path !== displayName(f);
+  const removable = props.removable && !(b.folderIds.length === 1 && f.id === INBOX_ID); // 未分類しか無いときは外す意味がない
+  const removeLabel = t('removeFromFolder', displayName(f));
+  const name = expanded && hasPath ? path : displayName(f);
+  return (
+    <span
+      class={'tag folder-membership' + (expanded && hasPath ? ' expanded' : '')}
+      data-member-folder={f.id}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {hasPath ? (
+        <button
+          type="button"
+          class="folder-path-toggle"
+          aria-label={t(expanded ? 'treeCollapse' : 'treeExpand') + ': ' + displayName(f)}
+          aria-expanded={expanded}
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpanded(!expanded);
+          }}
+        >
+          <Icon name={f.icon} color={f.color} />
+        </button>
+      ) : (
+        <Icon name={f.icon} color={f.color} />
+      )}
+      <span class="folder-chip-label">{name}</span>
+      {removable && (
+        <button
+          type="button"
+          class="chip folder-chip-remove"
+          title={removeLabel}
+          aria-label={removeLabel}
+          onClick={(e) => {
+            e.stopPropagation();
+            props.onRemove(f.id);
+          }}
+        >
+          <Icon name="ti-x" />
+        </button>
+      )}
+    </span>
+  );
+}
+
+/** 投稿の所属先。いちばん下のフォルダだけを、管理画面のツリーの順に出す */
+function FolderChips(props: { b: Bookmark; folderOf: CardProps['folderOf']; folders?: readonly Folder[]; removable: boolean; onRemove: (id: string) => void }) {
+  const folders = props.folders ?? props.b.folderIds.map(props.folderOf).filter((f): f is Folder => !!f);
   return (
     <div class="act">
-      {b.folderIds.map((id) => {
-        const f = folderOf(id);
-        if (!f) return null;
-        const only = b.folderIds.length === 1 && id === INBOX_ID; // 未分類しか無いときは外す意味がない
-        const label = t('removeFromFolder', displayName(f));
-        return props.removable && !only ? (
-          <button class="tag chip" title={label} aria-label={label} onClick={() => props.onRemove(id)}>
-            <Icon name={f.icon} color={f.color} /> {displayName(f)} <Icon name="ti-x" />
-          </button>
-        ) : (
-          <span class="tag">
-            <Icon name={f.icon} color={f.color} /> {displayName(f)}
-          </span>
-        );
-      })}
+      {leafMemberFolders(folders, props.b.folderIds).map((f) => (
+        <MembershipChip key={f.id} b={props.b} f={f} folders={folders} removable={props.removable} onRemove={props.onRemove} />
+      ))}
     </div>
   );
 }
@@ -251,7 +292,6 @@ function CardView(outer: CardOuterProps) {
   const { b, view, compact } = props;
   const s = b.snapshot;
   const long = useLongPress(() => props.onSelect(false));
-  const first = props.folderOf(b.folderIds[0]);
   const showCheck = !compact || props.selectionActive;
   const check = showCheck ? (
     <input
@@ -279,7 +319,7 @@ function CardView(outer: CardOuterProps) {
     return (
       <div {...(common as unknown as JSX.HTMLAttributes<HTMLDivElement>)}>
         {check}
-        {first ? <Icon name={first.icon} color={first.color} /> : <Icon name="ti-bookmark" />}
+        <FolderChips b={b} folderOf={props.folderOf} folders={props.folders} removable onRemove={props.onRemoveFromFolder} />
         <span class="handle">{s.handle}</span>
         <span class="t">{s.text}</span>
         <MediaMark s={s} />
@@ -305,7 +345,7 @@ function CardView(outer: CardOuterProps) {
         </div>
         <div class="gc-text">{s.text}</div>
         <div class="gc-foot">
-          <FolderChips b={b} folderOf={props.folderOf} removable={false} onRemove={props.onRemoveFromFolder} />
+          <FolderChips b={b} folderOf={props.folderOf} folders={props.folders} removable onRemove={props.onRemoveFromFolder} />
           <Actions {...props} />
         </div>
       </article>
@@ -333,7 +373,7 @@ function CardView(outer: CardOuterProps) {
             ))}
           </MediaGrid>
         ) : null}
-        <FolderChips b={b} folderOf={props.folderOf} removable onRemove={props.onRemoveFromFolder} />
+        <FolderChips b={b} folderOf={props.folderOf} folders={props.folders} removable onRemove={props.onRemoveFromFolder} />
       </div>
       <Actions {...props} />
     </article>

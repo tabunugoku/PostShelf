@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { withAncestors, withoutDescendants } from '../shared/folderTree';
+import { FolderTreeList, useFolderTreeState } from './FolderTree';
 import { Icon } from '../shared/Icon';
 import { createFolderMenu } from '../shared/folderCreateMenu';
 import { INBOX_ID, displayName, type Bookmark, type Folder } from '../shared/models';
 import { addToFolders, removeFromFolders, setBookmarkFolders } from '../shared/storage';
-import { updateRecentFolders } from '../shared/settings';
+import { getSettings, onSettingsChanged, updateRecentFolders, type Settings } from '../shared/settings';
+import { triageKeyTargets, TRIAGE_KEY_COUNT } from '../shared/triageKeys';
+import { TriageKeyTargets } from './TriageKeyTargets';
 import { formatDate, t } from '../shared/strings';
 import { MediaImg } from './MediaImg';
 import { PostText } from './PostText';
 import { Dropdown, FolderPickerHost } from './ui';
 
 /** 数字キーに割り当てるフォルダの数 (残りは「他のフォルダ」から選ぶ) */
-export const TRIAGE_KEYS = 9;
+export const TRIAGE_KEYS = TRIAGE_KEY_COUNT;
 const FOCUSABLE = 'button:not([disabled]),a[href],input,[tabindex="0"]';
 const THEME = { fg: 'var(--text-primary)', border: 'var(--border-strong)', hover: 'var(--fill-ghost-hover)', accent: 'var(--fill-accent)' };
 
@@ -39,6 +43,25 @@ export function Triage(props: {
   onClose: () => void;
 }) {
   const { queue } = props;
+  const tree = useFolderTreeState();
+  const [keySettings,setKeySettings] = useState<Pick<Settings,'triageKeyMode'|'triageKeyFolders'>>({triageKeyMode:'auto'});
+  const [keyDialog,setKeyDialog] = useState(false);
+  // 数字キーの対象の設定。ほかの画面での変更も反映する
+  useEffect(() => {
+    let live = true;
+    void getSettings()
+      .then((s) => {
+        if (live) setKeySettings(s);
+      })
+      .catch(() => setError(t('errorStorage')));
+    const off = onSettingsChanged((s) => {
+      if (live) setKeySettings(s);
+    });
+    return () => {
+      live = false;
+      off();
+    };
+  }, []);
   const [index, setIndex] = useState(0);
   const [assigned, setAssigned] = useState<Record<string, string[]>>(() => Object.fromEntries(queue.map((b) => [b.tweetId, b.folderIds])));
   const [sorted, setSorted] = useState<Set<string>>(new Set());
@@ -116,7 +139,7 @@ export function Triage(props: {
   };
   /** 作成は確定ではない。フォルダだけ保存済みで、割り当ては印として残す。 */
   const stageCreated = (ids: Iterable<string>) => {
-    setDraft({ tweetId: cur.tweetId, ids: new Set([...ids].filter(id => id !== INBOX_ID)) });
+    setDraft({ tweetId: cur.tweetId, ids: new Set(withAncestors([...ids],props.folders).filter(id => id !== INBOX_ID)) });
     focusConfirmation.current = true;
     setCreating(false);
     setMore(false);
@@ -124,13 +147,17 @@ export function Triage(props: {
     void props.onChanged(); // 作成したフォルダを一覧へ反映する。
   };
   /** そのフォルダに入れる (入っていれば外す)。stay: 同じポストに留まる */
-  const choose = async (folderId: string, stay: boolean): Promise<boolean> => {
+  const choose = async (folderId: string, stay: boolean, createdIds?:string[]): Promise<boolean> => {
     if (!cur || finished || busy.current) return false;
     if (multi) {
       setDraft(prev => {
         const ids = new Set(prev?.tweetId === cur.tweetId ? prev.ids : savedIds(cur));
-        if (ids.has(folderId)) ids.delete(folderId);
-        else ids.add(folderId);
+        // 外すときは子孫も外し、つけるときは祖先にも印をつける
+        const next = ids.has(folderId)
+          ? withoutDescendants([...ids], [folderId], props.folders)
+          : withAncestors([...ids, folderId], props.folders);
+        ids.clear();
+        next.filter((id) => id !== INBOX_ID).forEach((id) => ids.add(id));
         return { tweetId: cur.tweetId, ids };
       });
       return true;
@@ -142,7 +169,8 @@ export function Triage(props: {
       if (has) await removeFromFolders([b.tweetId], [folderId]);
       else await addToFolders([b.tweetId], [folderId]);
       const base = (assigned[b.tweetId] ?? []).filter((id) => id !== INBOX_ID);
-      const ids = has ? base.filter((id) => id !== folderId) : [...base, folderId];
+      const ids =
+        createdIds ?? (has ? withoutDescendants(base, [folderId], props.folders) : withAncestors([...base, folderId], props.folders));
       mark(b, ids.length ? ids : [INBOX_ID]);
       if (!has) void updateRecentFolders([folderId]).catch(() => {}); // 「最近使った」(失敗しても仕分けは続ける)
       setError('');
@@ -181,6 +209,7 @@ export function Triage(props: {
   };
 
   const onKey = (e: KeyboardEvent) => {
+    if (keyDialog) return;
     const tag = (e.target as HTMLElement)?.tagName;
     const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target as HTMLElement)?.isContentEditable;
     if (e.key === 'Escape') {
@@ -217,7 +246,7 @@ export function Triage(props: {
       return;
     }
     if (d !== null) {
-      const f = props.folders[d - 1];
+      const f = keyed[d - 1];
       if (d <= TRIAGE_KEYS && f) {
         e.preventDefault();
         void choose(f.id, e.shiftKey);
@@ -234,8 +263,8 @@ export function Triage(props: {
     }
   };
 
-  const keyed = props.folders.slice(0, TRIAGE_KEYS);
-  const hasMore = props.folders.length > TRIAGE_KEYS;
+  const keyed = triageKeyTargets(keySettings,props.folders,tree.collapsed);
+  const hasMore = true; // すべてのフォルダに数字キーがついていても、「その他のフォルダ」の選択は残す
   const total = queue.length;
   return (
     <div class="overlay" onClick={props.onClose}>
@@ -285,14 +314,38 @@ export function Triage(props: {
                 {error}
               </p>
             )}
+            <div class="triage-folder-panel">
+              <FolderTreeList
+                folders={props.folders}
+                collapsed={tree.collapsed}
+                onToggle={tree.toggle}
+                selected={multi ? marks : new Set(assigned[cur.tweetId])}
+                onPick={(f) => void choose(f.id, false)}
+              />
+            <div class="triage-key-panel">
+              <div class="triage-key-heading">
+                <b>{t('triageKeyTitle')}</b>
+                <button data-key-targets-open onClick={() => setKeyDialog(true)}>
+                  {t('triageKeyTargets')}
+                </button>
+              </div>
             <div class="triage-folders">
               {keyed.map((f, i) => {
-                const on = multi ? marks.has(f.id) : (assigned[cur.tweetId] ?? []).includes(f.id);
+                const on = !!f && (multi ? marks.has(f.id) : (assigned[cur.tweetId] ?? []).includes(f.id));
                 return (
-                  <button key={f.id} class={`triage-folder${on ? ' on' : ''}`} aria-pressed={on} onClick={(e) => void choose(f.id, e.shiftKey)}>
+                  <button
+                    key={i}
+                    data-key-slot={i}
+                    disabled={!f}
+                    class={`triage-folder${on ? ' on' : ''}`}
+                    aria-pressed={on}
+                    onClick={(e) => {
+                      if (f) void choose(f.id, e.shiftKey);
+                    }}
+                  >
                     <kbd>{i + 1}</kbd>
-                    {on ? <Icon name="ti-check" /> : <Icon name={f.icon} color={f.color} />}
-                    <span class="triage-folder-name">{displayName(f)}</span>
+                    {f && (on ? <Icon name="ti-check" /> : <Icon name={f.icon} color={f.color} />)}
+                    <span class="triage-folder-name">{f ? displayName(f) : t('triageKeyEmpty')}</span>
                   </button>
                 );
               })}
@@ -307,7 +360,7 @@ export function Triage(props: {
                       <div onKeyDown={multi ? (e) => { if (e.key === 'Enter') onKey(e); } : undefined}>
                         <FolderPickerHost
                           folders={props.pickerFolders}
-                          selected={multi ? [...marks] : assigned[cur.tweetId] ?? []}
+                          selected={multi ? marks.size ? [...marks] : [INBOX_ID] : assigned[cur.tweetId] ?? []}
                           onChange={async (sel, source) => {
                             if (!cur || finished || busy.current) return source === 'created' ? false : undefined;
                             if (multi) {
@@ -318,7 +371,7 @@ export function Triage(props: {
                             if (source === 'created') {
                               const added = [...sel].filter(id => id !== INBOX_ID && !(assigned[cur.tweetId] ?? []).includes(id));
                               const folderId = added[added.length - 1];
-                              if (!folderId || !await choose(folderId, false)) return false;
+                              if (!folderId || !await choose(folderId, false, [...sel])) return false;
                               setMore(false);
                               return;
                             }
@@ -362,10 +415,10 @@ export function Triage(props: {
                         onCreated={async (f) => {
                           if (latest.current.finished) return;
                           if (multi) {
-                            stageCreated([...marks, f.id]);
+                            stageCreated(withAncestors([...marks, f.id],[...props.folders,f]));
                             return;
                           }
-                          if (!await choose(f.id, false)) return false;
+                          if (!(await choose(f.id, false, withAncestors([...savedIds(cur), f.id], [...props.folders, f])))) return false;
                           setCreating(false);
                         }}
                         onClose={closeCreate}
@@ -374,6 +427,8 @@ export function Triage(props: {
                   </Dropdown>
                 )}
               </span>
+            </div>
+            </div>
             </div>
             <div class="dialog-actions triage-actions">
               <span class="muted triage-hint">{t(multi ? 'triageMultiDesc' : 'triageHint')}</span>
@@ -388,6 +443,7 @@ export function Triage(props: {
             </div>
           </>
         )}
+        {keyDialog && <TriageKeyTargets folders={props.folders} onClose={()=>setKeyDialog(false)}/>}
       </div>
     </div>
   );

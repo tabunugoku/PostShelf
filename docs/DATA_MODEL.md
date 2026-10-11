@@ -3,7 +3,9 @@
 すべて `chrome.storage.local`。スキーマは **v9 でバージョン 2** (`schemaVersion`)。保存と読み込みは `src/shared/storage.ts` (フォルダ/ブックマーク) と `src/shared/settings.ts` (設定・状態) に集約する。
 
 ## `folders`: Folder[]
-`{ id, name, icon, color?, order, accountId }` (**v9**: `accountId` を追加。フォルダはアカウントごとに分かれる)
+`{ id, name, icon, color?, order, accountId, parentId? }` (**v9**: `accountId` を追加。フォルダはアカウントごとに分かれる。**v46**: `parentId` を追加)
+- `parentId` (**v46**、省略可): 親フォルダの ID。同じアカウントの中のユーザーのフォルダだけを指せる。無い = 1 段目。最大 3 段。取り込み時に、存在しない親・循環・4 段目以降は `parentId` を外して 1 段目に戻す。`order` は同じ親の中での連番
+- 子・孫に入れたポストは、祖先にも所属する (`folderIds` に祖先を含めて保存する。`withAncestors`)。フォルダを削除すると、子・孫ごと消え、残る祖先への所属は保つ
 - 「未分類」(`id: 'inbox'`) はアカウントごとに 1 つ。`id` が同じでも `accountId` が違えば別のフォルダ
 - 「すべて」は保存しない仮想フォルダ (`id: 'all'`)。表示名は `t('allFolderName')`
 - 「未分類」(`id: 'inbox'`) は名前を `''` で保存し、表示時に `t('inboxName')` へ解決する (ユーザーが改名したらその名前)
@@ -31,6 +33,7 @@
 - `imageCache` (**v11**): `{ enabled: false, backend: 'idb' | 'dir', maxBytes: 1 GB, quality: 'large' | 'orig', onFull: 'evict' | 'stop' }`。初期化の対象
 - `viewAccount` (**v9**): 手動で選んだ表示アカウントの ID。`''` = 選んでいない (x.com で最後に読み取ったアカウントに追従)
 - `lastFolderId` / `viewMode` (`post|list|grid`) / `sortKey` は manager の最後の表示状態 (**v7**。`localStorage` は使わない)
+- **v46**: `triageKeyMode` (`'auto' | 'manual'`)、`triageKeyFolders` (手動の数字キー 1〜9 に入れるフォルダの ID。最大 9 件。空きは `''` で、後ろを詰めない)、`folderTreeCollapsed` (たたんだ親の ID)、`sidebarWidth` (タブの管理画面のサイドバーの幅 px。初期値 240、180 以上)。いずれも端末ごとで、設定の初期化の対象
 - 不正値は読み込み時に既定値へ戻す
 
 ## `importHint`: Record<accountId, `{ pending, dismissed }`> (v7、v9 でアカウントごとに)

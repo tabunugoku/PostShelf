@@ -5,36 +5,42 @@ Chrome 拡張 (Manifest V3)。x.com (旧 Twitter) のブックマークを独自
 詳細な計画は `docs/PLAN.md`。最初に読むこと。
 
 ## 現在のタスク
-v2〜v37 は実装済み (バージョン 1.1.3。v28〜v30 は保存ポップオーバー・サイドパネル・仕分けモードなど、v31〜v37 はコードレビューの指摘、自動取り込みの待ちの適応式、管理画面の軽量化と段階表示、実機で見つかった不具合、日本語の文言の修正)。次のタスクは未定。実機での確認は `docs/MANUAL_TEST.md` のチェックリストを使う。
+v2〜v44 は実装済みで、バージョン 1.1.3 を公開済み (`docs/releases/`)。それ以降の作業は、進行中のブランチ (`codex/*`) と PR を見る。実機での確認は `docs/MANUAL_TEST.md` のチェックリストを使う (各節の見出しに、実機で確かめたかどうかを書く)。
 
 ## 機能要件
 1. ポスト (tweet) のブックマーク先をフォルダ分けできる (1 ポストが複数フォルダ可)
 2. 保存済みポストを「リスト表示」と「ポスト表示 (X 風カード)」で見られる
 3. フォルダの名前変更、アイコン変更が可能。どのアイコンでも色を選べる (v5 で変更。以前は folder のみ)
 4. 組み込みフォルダ「すべて」は名前/アイコン/色の変更不可・削除不可
+5. フォルダは最大 3 段のツリーで、開閉を端末に保存する。子・孫への所属は祖先にも保存し、仕分けの数字キーの対象を自動または手動で選べる。親子の付け替えは、管理画面のサイドバーでのドラッグだけで行う (作成・編集のメニューに親の選択は無い)。投稿の所属先の表示は、いちばん下のフォルダだけ
+6. このほかの機能: 仕分けモード、サイドパネル、引用元の保存、ブックマーク一覧の取り込み (同意した自動取り込みを含む)、長いポストの全文取得、画像キャッシュ (任意)、JSON の書き出しと取り込み、複数アカウント、8 言語。詳細は `docs/PLAN.md` と `docs/MANUAL_TEST.md`
 
-## UI の構成 (3 画面)
+## UI の構成 (4 画面)
 - content script: x.com の各ポストのブックマークボタン横にフォルダ選択ポップオーバー (チェックボックス式、「フォルダを追加」ボタンつき)
-- manager ページ (`chrome-extension://.../manager.html`): 左にフォルダ一覧、右にポスト一覧。ヘッダーに編集ボタンと「ポスト表示 / リスト表示」切替。編集パネルは名前入力、アイコン 8 種以上のグリッド、色スウォッチ 8 色
+- manager ページ (`chrome-extension://.../manager.html`): 左にフォルダ一覧 (ツリー。幅は変えられる)、右にポスト一覧。ヘッダーに編集ボタンと「ポスト表示 / リスト表示」切替。編集パネルは名前入力、アイコン 8 種以上のグリッド、色スウォッチ 8 色
 - popup: 件数、フォルダ数、「管理画面を開く」
+- サイドパネル: manager と同じコード (`src/manager`) の、狭い画面向けの表示。サイドバーの幅は変えられない
 
 ## 技術スタック
 - TypeScript + esbuild (バンドル) + Preact (manager/popup)
 - アイコンは Tabler Icons (outline) をローカル同梱 (CDN 禁止: MV3 の CSP とプライバシーのため)
 - テスト: vitest + jsdom。x.com の DOM は `test/fixtures/*.html` に固定して検証
-- 権限は最小: `storage`, `unlimitedStorage`, host `https://x.com/*` `https://twitter.com/*`。リモートコード/外部通信は禁止
+- 権限は最小: `storage`, `unlimitedStorage`, `sidePanel`、host `https://x.com/*` `https://twitter.com/*`。画像キャッシュ用の `https://pbs.twimg.com/*` は、利用者が許可したときだけ使う任意の権限。`tabs` の権限は使わない。リモートコード/外部通信は禁止 (`npm run release:check` が検査する)
 
 ## データモデル (`src/shared/models.ts`)
 ```ts
-Folder   { id: string; name: string; icon: string; color?: string; order: number; accountId?: string }
+Folder   { id: string; name: string; icon: string; color?: string; order: number; accountId?: string; parentId?: string }  // accountId: 保存済みのフォルダには必ず入る
 Account  { id: string; handle: string; displayName?: string; avatar?: string; lastSeenAt: number }  // v9: id = 小文字のハンドル
 Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: number;  // v9: 保存キーは accountId:tweetId
            snapshot: { text: string; author: string; handle: string; avatar?: string;
                        media: string[]; createdAt?: string; url: string } }
 ```
-`snapshot` の省略できる項目に `quote` (表示されていた引用元) と `translated` (翻訳済みの印、true のみ) がある。
+`snapshot` の省略できる項目に `quote` (表示されていた引用元)、`translated` (翻訳済みの印、true のみ)、`hasVideo` / `hasLink` / `videoPoster`、`truncated` (X がたたんでいた印)、`segments` (リンクを含む本文の部品) がある。全項目は `src/shared/models.ts` と `docs/DATA_MODEL.md`。
 
-保存は `src/shared/storage.ts` に集約 (`chrome.storage.local`)。他のコードは直接 `chrome.storage` を触らない。
+保存は、役割ごとに 1 か所に集約する。他のコードは直接 `chrome.storage` を触らない。
+- フォルダ・ブックマーク・アカウント: `src/shared/storage.ts` (`chrome.storage.local`)
+- 設定 (端末ごと。ツリーの開閉、サイドバーの幅、数字キーの対象を含む): `src/shared/settings.ts`
+- 画像キャッシュ (IndexedDB): `src/shared/imagecache.ts`, `cacheops.ts`
 
 ## 守ること
 - X の DOM セレクタは `src/shared/selectors.ts` の 1 ファイルに集約 (`data-testid` 優先: `tweet`, `bookmark`, `removeBookmark`, `User-Name`, `tweetText` など)。X の仕様変更はここだけ直せばよい構造にする
@@ -45,25 +51,38 @@ Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: num
 - 外部サーバーへの送信なし。解析/トラッキングなし
 - 公開してはいけないもの: **実在のポスト (本文・投稿者名・アイコン) と、開発者自身のアカウント名を含むスクリーンショット、モックアップ、テスト、文書**。スクリーンショットとモックのサンプルは、架空のアカウント (`@me`、`@sample_*` など) と架空の本文だけを使う。`reports/` と `research_notes/` は Git に入れない (`.gitignore` 済み)
 - 不確かな X の DOM 構造は推測で断定せず、fixture とコメントで前提を明記する
-- 対応言語は日本語と英語 (`chrome.i18n`, `_locales/{ja,en}`)。UI 文字列は直書きせず `t()` 経由
+- 対応言語は 8 言語 (ja, en, zh_CN, zh_TW, ko, es, pt_BR, fr。`chrome.i18n`, `static/_locales/*`、`docs/I18N.md`)。UI 文字列は直書きせず `t()` 経由。`_locales` の文言は、ユーザーが選んだものだけ変える (編集の前に確認が出る)。足す・変える文言は、8 言語の案を `docs/V<番号>_TRANSLATIONS.md` に書いて提案し、勝手に `_locales` へ入れない。キーの集合と placeholders は 8 言語で一致させる (`test/i18n.test.ts`)
+
+## コードとコメントの書き方
+Codex・クラウドのセッション・Claude Code のどれが書いても、同じ見た目にそろえる。
+
+- **整形**: インデントは 2 スペース、文末はセミコロン、文字列は単引用符 (`'...'`)。複数の文を 1 行に詰めない (`if (a) b(); c();` のような書き方、`;` でつないだ複数の文、1 行の長い JSX や三項演算子の入れ子)。1 行はおよそ 120 字まで。超えるときは、引数・属性・条件を 1 つずつ改行する。ただし、もとから長い 1 行の定数 (例: `DEFAULT_SETTINGS`) は、触る必要がなければ、そのままにする
+- **JSX**: 属性が 3 つ以上、またはイベントの処理が複数行になるときは、属性を 1 行に 1 つずつ書く。イベントの処理は `onClick={(e) => { ... }}` と、中を改行して書く
+- **名前**: 変数・関数は、何を表すかが分かる英語の名前にする。1 文字の名前は、ループ・短いコールバック (`f` = folder, `b` = bookmark, `e` = event) だけ。IDs と ID の区別、`parentId` のような既存の呼び名は、既存のコードに合わせる
+- **コメントは日本語**: 新しく書くコメントは、日本語で書く。英語のコメントは書かない (識別子・API 名・定数名はそのまま)。文体は、既存のコードと同じ、短い体言止めまたは「〜する」の常体
+- **コメントの中身**: 「なぜそうするか」「前提・制約・落とし穴」を書く。コードを読めば分かること (`// i を 1 増やす`) は書かない。公開する関数・型・コンポーネントには、1 行の `/** ... */` で役割を書く。複雑な条件や、ブラウザ・X の挙動への推測は、実機未確認かどうかも書く
+- **無駄を足さない**: 使われないコード・コメントアウトした古いコード・「念のため」の分岐は残さない。既存の関数でできることは、新しく作らず、それを使う。既存のコードを整形し直すだけの変更は、機能の変更と同じコミットに入れない (読みづらくなるので、触った部分だけ整える)
+- **文言**: ユーザーに見える文字は、直書きせず `t()` 経由 (上の「守ること」を参照)。コメント・ログ・テスト名は対象外
+- **テスト**: テストの名前 (`it('...')`) は、何を確かめるかが分かる短い文にする。1 つの `it` に、確かめることを詰め込みすぎない。テストの中の説明のコメントも日本語。テストデータは架空のもの (上の「守ること」を参照)
+- **確認**: push の前に、`npm run typecheck`・`npm test`・`npm run build` を通す (ローカルに Node がなければ、CI の結果で確かめる)
 
 ## 紹介サイト (GitHub Pages)
 `site/index.html` (静的な 1 ページ。日本語と英語の併用で、ブラウザの言語が日本語なら日本語、それ以外は英語を表示し、ヘッダーの切替で変えられる (各文言は `<span class="ja">` / `<span class="en">` の対。新しい文言は両方に書く)。ビルド不要、外部の JS・CSS・フォントは使わない)。`.github/workflows/pages.yml` が、`main` への push で `site/` を公開する (リポジトリの Settings → Pages → Source を「GitHub Actions」にしてから動く)。スクリーンショットは載せず、画面のイメージはマークアップで描く。サンプルは架空のアカウントだけ。比較表は日付つきで、公開ページの記載に基づく (変わったら更新する)。
 
-## 実装順 (マイルストーン)
-1. M1 骨組み: manifest.json, ビルド, `models.ts`, `storage.ts`, フォルダ CRUD (名前/アイコン/色) と単体テスト
-2. M2 content script: ブックマークボタン横のポップオーバー、スナップショット保存 (fixture でテスト)
-3. M3 manager ページ: ポスト表示/リスト表示、フォルダ編集 UI、検索、並べ替え
-4. M4 ブックマーク一覧 (`/i/history`。旧 `/i/bookmarks`) 閲覧時の DOM 収集、JSON エクスポート/インポート
-5. M5 README、セレクタ耐性、公開準備メモ
+## 進め方
+- 1 項目 1 コミット。各コミットで `npm run typecheck`・`npm test`・`npm run build` が通る状態を保つ。main へのマージは、ユーザーが指示したときだけ
+- 実機で確かめられないことは、`docs/MANUAL_TEST.md` に「実機未確認」のチェック項目として残す。実機で確かめたら、ユーザーが印をつける
+- 補助ツール (`.claude/`): スキル `ci` (CI の確認と成果物のダウンロード)、`codex-prompt` (Codex に渡すプロンプトの作成)。フック `locales-guard.sh` が、`_locales` の編集の前に確認を求める
 
-各マイルストーンごとにコミットし、`npm test` と `npm run build` が通る状態を保つ。
+## リリース
+バージョンは次の場所を同時に変える (manifest と package.json の食い違いは `npm run release:check` が、サイトの表示と zip の名前は `test/release.test.ts` が検出する): `package.json`、`package-lock.json` (2 か所)、`static/manifest.json`、`site/index.html` (バージョンの表示と zip の名前 2 か所)、`test/release.test.ts`、この文書の「現在のタスク」。リリースノートは `docs/releases/vX.Y.Z.md`。main へマージしたあと、注釈つきタグ `vX.Y.Z` を打つと `.github/workflows/release.yml` が動く。拡張 ID は `static/manifest.json` の `key` で固定しているので、変えない。
 
-## コマンド (M1 で整備する)
+## コマンド
 - `npm install`
 - `npm run build` → `dist/` に出力 (`chrome://extensions` で「パッケージ化されていない拡張機能を読み込む」)
 - `npm test`
 - `npm run typecheck`
+- `npm run package` (配布用の zip)、`npm run release:check` (権限・ロケール・バージョン・リモートコードの検査)
 
 ## クラウド環境での注意
-実ブラウザでの x.com 動作確認はできない。fixture テストとビルド成功で担保し、実機確認項目は `docs/MANUAL_TEST.md` にチェックリストとして残す (ユーザーが後で実施)。
+実ブラウザでの x.com 動作確認はできない。ローカルに Node が無いこともある。fixture テストとビルド成功 (CI の結果) で担保し、実機確認項目は `docs/MANUAL_TEST.md` にチェックリストとして残す (ユーザーが後で実施)。

@@ -67,7 +67,7 @@ button:disabled{cursor:not-allowed}
 .fr-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fr.add{color:var(--text-secondary)}
 .fr.drop{outline:2px dashed var(--fill-accent);outline-offset:-2px;background:var(--bg-accent)}
-.fr.drop-before::before{content:"";position:absolute;left:10px;right:10px;top:-2px;height:3px;border-radius:2px;background:var(--fill-accent);pointer-events:none}
+.fr.drop-before::before{content:"";position:absolute;left:var(--drop-indent,10px);right:10px;top:-2px;height:3px;border-radius:2px;background:var(--fill-accent);pointer-events:none}
 .fr .more{display:none;position:absolute;right:6px;top:50%;transform:translateY(-50%)}
 .fr:hover .more,.fr:focus-within .more,.fr .more:has([aria-expanded=true]){display:inline-block}
 .fr:hover:has(.more) .n,.fr:focus-within:has(.more) .n,.fr:has(.more [aria-expanded=true]) .n,
@@ -511,3 +511,54 @@ input[type=number]{width:110px}
 .ft-choice span{min-width:0;overflow-wrap:anywhere}
 .ft-speed-desc{margin:2px 0 8px}
 .ft-tab-setting{margin-top:8px}
+
+.tree-toggle,.tree-spacer{flex:none;width:18px;height:24px;padding:0;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center}
+.tree-toggle:hover{background:var(--fill-ghost-hover)}
+.folder-breadcrumb{font-size:12px;overflow-wrap:anywhere}
+.fr.drop-child::after{content:"";position:absolute;left:var(--drop-indent,28px);right:10px;bottom:1px;height:3px;border-radius:2px;background:var(--fill-accent);pointer-events:none}
+
+.triage-folder-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.folder-tree-row{display:flex;align-items:center;min-width:0}
+.tree-choice{display:flex;align-items:center;gap:8px;flex:1;min-width:0;text-align:left;min-height:36px;border:0;background:transparent}
+.tree-choice>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tree-choice.on{background:var(--fill-ghost-hover);color:var(--fill-accent)}
+@media(max-width:600px){.triage-folder-panel{grid-template-columns:minmax(0,1fr)}}
+
+.triage-key-panel{min-width:0}
+.triage-key-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.triage-key-panel .triage-folders{display:flex;flex-direction:column;gap:6px}
+.triage-key-panel .triage-folder{width:100%;text-align:left}
+.triage-folder-name small,.key-target-slot small{display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-target-overlay{z-index:70}
+.key-targets{max-height:90vh;overflow:auto}
+.key-target-modes{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap}
+.key-target-modes label{display:flex;align-items:center;gap:8px}
+.key-target-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,260px);gap:20px}
+.key-target-columns .folder-tree{max-height:50vh;overflow:auto}
+.key-target-slots{display:flex;flex-direction:column;gap:6px;min-width:0}
+.key-target-slots>.muted{font-size:12px}
+.key-target-slot{display:flex;gap:8px;align-items:center;text-align:left;min-height:38px}
+.key-target-slot>span{min-width:0;overflow:hidden;flex:1}
+.key-target-slot.empty{border-style:dashed;color:var(--text-secondary)}
+@media(max-width:600px){.key-target-columns{grid-template-columns:minmax(0,1fr)}.triage-key-heading{flex-wrap:wrap}}
+
+.triage-folder-panel>.folder-tree{max-height:50vh;overflow:auto}
+
+/* 所属先のチップ (いちばん下のフォルダ)。アイコンの経路の開閉は、所属を外す操作とは別 */
+.folder-membership{min-height:32px;padding:0 8px;border-radius:16px;min-width:0;max-width:100%}
+.folder-membership .folder-path-toggle{display:inline-flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;min-height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit}
+.folder-membership .folder-path-toggle:hover{background:var(--fill-ghost-hover)}
+.folder-membership .folder-chip-label{min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* 経路を開いたチップは、狭いグリッドのカードでも読めるように、折り返して全部を見せる */
+.folder-membership.expanded,.gc .folder-membership.expanded{white-space:normal;overflow:visible;padding-top:2px;padding-bottom:2px}
+.folder-membership.expanded .folder-chip-label{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.folder-membership .folder-chip-remove{display:inline-flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;min-height:24px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit}
+.folder-membership .folder-chip-remove:hover{background:var(--fill-ghost-hover)}
+.folder-membership .ti-x{font-size:12px;opacity:.7;flex:none}
+.mini .act{margin:0;min-width:0;max-width:40%}
+
+/* タブの管理画面のサイドバーの幅 (端末ごとの設定)。サイドパネルの配置は変えない */
+.layout-wide.surface-tab{grid-template-columns:var(--sidebar-width,240px) minmax(0,1fr)}
+.sidebar-resizer{outline:none;position:fixed;left:calc(var(--sidebar-width,240px) - 4px);top:0;width:8px;height:100vh;z-index:30;cursor:col-resize;touch-action:none;user-select:none;background:transparent}
+.sidebar-resizer::after{content:"";position:absolute;top:0;bottom:0;left:3px;width:2px;background:var(--fill-accent);opacity:0}
+.sidebar-resizer:hover::after,.sidebar-resizer:focus-visible::after,.sidebar-resizer.dragging::after{opacity:1}
