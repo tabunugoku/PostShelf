@@ -33,6 +33,7 @@ import {
   type Folder,
 } from './models';
 import { t } from './strings';
+import { canParent, descendants, flattenFolders, sanitizeParents, withAncestors, withoutDescendants } from './folderTree';
 import { assignOrder } from './ordering';
 import { sanitizeSegments, type Segment } from './segments';
 
@@ -226,25 +227,27 @@ function checkColor(color: string): void {
 export async function listFolders(): Promise<Folder[]> {
   const folders = await readFolders();
   // 「未分類」は常に「すべて」の次。残りは order 昇順
-  const rank = (f: Folder) => (f.id === INBOX_ID ? -Infinity : f.order);
-  return [ALL_FOLDER, ...[...folders].sort((a, b) => rank(a) - rank(b))];
+  return [ALL_FOLDER, ...folders.filter(f => f.id === INBOX_ID), ...flattenFolders(folders.filter(f => f.id !== INBOX_ID)).map(r => r.folder)];
 }
 
 export function createFolder(input: {
   name: string;
   icon?: string;
   color?: string;
+  parentId?: string;
 }): Promise<Folder> {
   return serial(async () => {
     const name = normalizeName(input.name);
     const icon = input.icon ?? FOLDER_ICON;
     checkIcon(icon);
     const folders = await readFolders();
+    if (!canParent(folders, undefined, input.parentId, scope)) throw new StorageError(t('errInvalidImport'));
     const folder: Folder = {
       id: newId(),
       name,
       icon,
-      order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1,
+      order: folders.filter(f => f.parentId === input.parentId).reduce((m, f) => Math.max(m, f.order), -1) + 1,
+      ...(input.parentId ? { parentId: input.parentId } : {}),
       accountId: scope,
     };
     if (input.color !== undefined) {
@@ -258,7 +261,7 @@ export function createFolder(input: {
 
 export function updateFolder(
   id: string,
-  patch: { name?: string; icon?: string; color?: string | null },
+  patch: { name?: string; icon?: string; color?: string | null; parentId?: string | null },
 ): Promise<Folder> {
   return serial(async () => {
     if (isBuiltinFolder(id)) throw new StorageError(t('errBuiltinImmutable'));
@@ -278,26 +281,41 @@ export function updateFolder(
         next.color = patch.color;
       }
     }
+    if (patch.parentId !== undefined) {
+      if (!canParent(folders, id, patch.parentId, scope)) throw new StorageError(t('errInvalidImport'));
+      if (patch.parentId) next.parentId = patch.parentId; else delete next.parentId;
+      if (next.parentId !== folders[idx].parentId) next.order = folders.filter(f => f.parentId === next.parentId).reduce((m,f) => Math.max(m,f.order), -1) + 1;
+    }
     folders[idx] = next;
-    await writeFolders(folders);
+    if (patch.parentId !== undefined) await writeReparented(folders);
+    else await writeFolders(folders);
     return next;
   });
 }
 
-/** フォルダを削除し、ブックマークからも folderId を外す (ポスト自体は残す。所属が空になるポストは「未分類」へ移す) */
-export function deleteFolder(id: string): Promise<void> {
-  return serial(async () => {
-    if (isBuiltinFolder(id)) throw new StorageError(t('errBuiltinImmutable'));
-    if (!(await readFolders()).some((f) => f.id === id)) throw new StorageError(t('errNotFound'));
-    const without = (b: Bookmark) => normalizeFolderIds(b.folderIds.filter((x) => x !== id));
-    const toInbox = (m: BookmarkMap) => Object.values(m).some((b) => inScope(b) && without(b).includes(INBOX_ID));
-    if (toInbox(await readMap())) await ensureInboxFolder(); // 読んだあと書くまでの間に await を挟まないよう、先に用意する
-    const folders = await readFolders();
-    const map = await readMap();
-    for (const b of Object.values(map)) if (inScope(b)) b.folderIds = without(b);
-    await writeFolders(folders.filter((f) => f.id !== id));
-    await write(KEY_BOOKMARKS, map);
-  });
+/** Count the subtree and affected posts without changing storage. */
+export async function folderDeletionImpact(id:string):Promise<{folders:number;posts:number}> {
+ const folders=await readFolders();const ids=new Set([id,...descendants(folders,id).map(f=>f.id)]);
+ return {folders:folders.filter(f=>ids.has(f.id)).length,posts:(await listBookmarks()).filter(b=>b.folderIds.some(id=>ids.has(id))).length};
+}
+/** Reparenting keeps existing memberships and adds the new ancestors in the same write. */
+async function writeReparented(folders:Folder[]):Promise<void> {
+ const all=await readAllFolders();const map=await readMap();
+ for(const [k,b] of Object.entries(map))if(inScope(b))map[k]={...b,folderIds:withAncestors(b.folderIds,folders)};
+ await chrome.storage.local.set({[KEY_FOLDERS]:[...all.filter(f=>!mine(f)),...folders],[KEY_BOOKMARKS]:map});
+}
+/** Remove the target subtree in one write; surviving ancestor memberships remain. */
+export function deleteFolder(id:string):Promise<void> {
+ return serial(async()=>{
+  if(isBuiltinFolder(id))throw new StorageError(t('errBuiltinImmutable'));
+  const all=await readAllFolders();const folders=all.filter(mine);
+  if(!folders.some(f=>f.id===id))throw new StorageError(t('errNotFound'));
+  const removed=new Set([id,...descendants(folders,id).map(f=>f.id)]);
+  const next=all.filter(f=>!mine(f) || !removed.has(f.id));const map=await readMap();
+  for(const [k,b] of Object.entries(map))if(inScope(b))map[k]={...b,folderIds:normalizeFolderIds(b.folderIds.filter(id=>!removed.has(id)))};
+  if(Object.values(map).some(b=>inScope(b)&&b.folderIds.includes(INBOX_ID))&&!next.some(f=>mine(f)&&f.id===INBOX_ID))next.push({id:INBOX_ID,name:'',icon:'ti-star',order:0,accountId:scope});
+  await chrome.storage.local.set({[KEY_FOLDERS]:next,[KEY_BOOKMARKS]:map});
+ });
 }
 
 // ---- Bookmarks ----
@@ -351,7 +369,7 @@ export function setBookmarkFolders(
   snapshot: Bookmark['snapshot'],
 ): Promise<Bookmark> {
   return serial(async () => {
-    const ids = normalizeFolderIds(folderIds); // 「未分類」は他のフォルダと同時には持たない
+    const ids = withAncestors(folderIds, await readFolders()); // 「未分類」は他のフォルダと同時には持たない
     if (ids.includes(INBOX_ID)) await ensureInboxFolder(); // 読んだあと書くまでの間に await を挟まない
     const map = await readMap();
     const prev = map[key(tweetId)];
@@ -506,6 +524,10 @@ export function importData(json: unknown): Promise<number> {
       .map((b) => ({ ...b, folderIds: normalizeFolderIds(b.folderIds), snapshot: cleanSnapshot(b.snapshot), accountId: acc(b.accountId) }));
     const curFolders = new Map((await readAllFolders()).map((f) => [bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f]));
     for (const f of folders) curFolders.set(bookmarkKey(f.accountId, f.id), f);
+    const repairedFolders = sanitizeParents([...curFolders.values()]);
+    curFolders.clear();
+    for (const f of repairedFolders) curFolders.set(bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f);
+    for (const b of bookmarks) b.folderIds = withAncestors(b.folderIds, repairedFolders.filter(f => f.accountId === b.accountId));
     // 「未分類」に入るポストがあるアカウントには、受け皿のフォルダを用意する
     for (const b of bookmarks) {
       if (!b.folderIds.includes(INBOX_ID) || curFolders.has(bookmarkKey(b.accountId, INBOX_ID))) continue;
@@ -515,6 +537,7 @@ export function importData(json: unknown): Promise<number> {
     const map = await readMap();
     for (const b of bookmarks) map[bookmarkKey(b.accountId, b.tweetId)] = b;
     const accounts = await read<Record<string, Account>>(KEY_ACCOUNTS, {});
+    for (const [k,b] of Object.entries(map)) map[k] = { ...b, folderIds: withAncestors(b.folderIds, repairedFolders.filter(f => f.accountId === b.accountId)) };
     if (!legacy && Array.isArray(d.accounts)) {
       for (const a of d.accounts.filter(validAccount)) {
         const id = accountIdOf(a.id);
@@ -584,20 +607,21 @@ export type BookmarkUndo = Record<string, Bookmark | null>;
 
 function mutateBookmarks(
   tweetIds: string[],
-  fn: (b: Bookmark) => Bookmark | null,
+  fn: (b: Bookmark, folders: Folder[]) => Bookmark | null,
   atomicInbox = false,
 ): Promise<BookmarkUndo> {
   return serial(async () => {
     // 確定式の一括変更では受け皿も同じ set に含める。map を読む前に準備し、競合する時間を延ばさない。
-    const allFolders = atomicInbox ? await readAllFolders() : undefined;
+    const treeFolders = await readAllFolders();
+    const allFolders = atomicInbox ? treeFolders : undefined;
     const apply = (map: BookmarkMap): BookmarkUndo => {
       const undo: BookmarkUndo = {};
       for (const tid of new Set(tweetIds)) {
         const k = key(tid);
         const prev = map[k];
         if (!prev) continue;
-        let next = fn(structuredClone(prev));
-        if (next) next = { ...next, folderIds: normalizeFolderIds(next.folderIds) }; // 「未分類」は他のフォルダと同時には持たない
+        let next = fn(structuredClone(prev), treeFolders.filter(mine));
+        if (next) next = { ...next, folderIds: withAncestors(next.folderIds, treeFolders.filter(mine)) }; // 「未分類」は他のフォルダと同時には持たない
         if (JSON.stringify(next) === JSON.stringify(prev)) continue;
         undo[k] = prev;
         if (next) map[k] = next;
@@ -637,10 +661,10 @@ const realIds = (ids: string[]) => ids.filter((id) => !isBuiltinFolder(id));
 
 /** 一括メニューの確定。追加と解除を同じ書き込み・同じ取り消しにまとめる。 */
 export const changeBookmarkFolders = (tweetIds: string[], addIds: string[], removeIds: string[]) =>
-  mutateBookmarks(tweetIds, (b) => ({
+  mutateBookmarks(tweetIds, (b, folders) => ({
     ...b,
     folderIds: addIds.includes(INBOX_ID) ? [INBOX_ID]
-      : uniq([...b.folderIds.filter(id => !removeIds.includes(id)), ...realIds(addIds)]),
+      : uniq([...withoutDescendants(b.folderIds, removeIds, folders), ...realIds(addIds)]),
   }), true);
 
 export const addToFolders = (tweetIds: string[], folderIds: string[]) =>
@@ -651,15 +675,15 @@ export const addToFolders = (tweetIds: string[], folderIds: string[]) =>
  * (ポストを消すのは明示的な deleteBookmarks だけ)。
  */
 export const removeFromFolders = (tweetIds: string[], folderIds: string[]) =>
-  mutateBookmarks(tweetIds, (b) => {
-    const rest = b.folderIds.filter((id) => !folderIds.includes(id));
+  mutateBookmarks(tweetIds, (b, folders) => {
+    const rest = withoutDescendants(b.folderIds, folderIds, folders);
     return { ...b, folderIds: rest.length ? rest : [INBOX_ID] };
   });
 
 /** from から外して to に入れる。from が「すべて」(または未指定) なら追加のみ */
 export const moveToFolder = (tweetIds: string[], fromId: string | null, toId: string) =>
-  mutateBookmarks(tweetIds, (b) => {
-    const rest = fromId && !isBuiltinFolder(fromId) && fromId !== toId ? b.folderIds.filter((id) => id !== fromId) : b.folderIds;
+  mutateBookmarks(tweetIds, (b, folders) => {
+    const rest = fromId && !isBuiltinFolder(fromId) && fromId !== toId ? withoutDescendants(b.folderIds, [fromId], folders) : b.folderIds;
     if (toId === INBOX_ID) return { ...b, folderIds: [INBOX_ID] }; // 行き先が「未分類」なら、ほかのフォルダは外す
     return { ...b, folderIds: uniq([...rest, ...realIds([toId])]) };
   });
@@ -670,9 +694,10 @@ export const deleteBookmarks = (tweetIds: string[]) => mutateBookmarks(tweetIds,
 /** BookmarkUndo の内容で変更前の状態に戻す (1 回の書き込み) */
 export function restoreBookmarks(undo: BookmarkUndo): Promise<void> {
   return serial(async () => {
+    const folders = await readAllFolders();
     const map = await readMap();
     for (const [k, prev] of Object.entries(undo)) {
-      if (prev) map[k] = prev;
+      if (prev) map[k] = { ...prev, folderIds: withAncestors(prev.folderIds, folders.filter(f => f.accountId === prev.accountId)) };
       else delete map[k];
     }
     await write(KEY_BOOKMARKS, map);
@@ -680,12 +705,19 @@ export function restoreBookmarks(undo: BookmarkUndo): Promise<void> {
 }
 
 /** フォルダの並び順を更新する。orderedIds に無いフォルダは末尾に残す。「すべて」は無視、「未分類」は表示側で常に先頭 */
-export function reorderFolders(orderedIds: string[]): Promise<void> {
+export function reorderFolders(orderedIds: string[], move?: { id:string; parentId:string | null }): Promise<void> {
   return serial(async () => {
     const folders = await readFolders();
+    if (move) {
+      if (!canParent(folders, move.id, move.parentId, scope)) throw new StorageError(t('errInvalidImport'));
+      const f = folders.find(f => f.id === move.id)!;
+      if (move.parentId) f.parentId = move.parentId; else delete f.parentId;
+    }
     const rank = new Map(realIds(orderedIds).map((id, i) => [id, i]));
     const sorted = [...folders].sort((a, b) => (rank.get(a.id) ?? Infinity) - (rank.get(b.id) ?? Infinity) || a.order - b.order);
-    await writeFolders(sorted.map((f, i) => ({ ...f, order: i })));
+    const counts = new Map<string,number>();
+    const next = sorted.map(f => { const p = f.parentId ?? ''; const i = counts.get(p) ?? 0; counts.set(p,i+1); return {...f, order:i}; });
+    if (move) await writeReparented(next); else await writeFolders(next);
   });
 }
 
@@ -807,6 +839,7 @@ export function assignAccount(from: string, to: string): Promise<{ moved: number
         moved++;
       }
     }
+    for (const [k,b] of Object.entries(map)) if(b.accountId===to) map[k]={...b,folderIds:withAncestors(b.folderIds,[...dest,...movedFolders])};
     delete accounts[from];
     await chrome.storage.local.set({
       [KEY_FOLDERS]: [...folders.filter((f) => f.accountId !== from), ...movedFolders],

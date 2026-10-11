@@ -7,6 +7,8 @@ export interface Folder {
   icon: string;
   color?: string;
   order: number;
+  /** Parent in the same account; absent means a root (maximum three levels). */
+  parentId?: string;
   /** 所有するアカウント (v9)。保存済みのフォルダには必ず入る。「すべて」などの仮想フォルダには無い */
   accountId?: string;
 }
