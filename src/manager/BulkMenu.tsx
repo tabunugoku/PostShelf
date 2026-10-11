@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { Icon } from '../shared/Icon';
 import { INBOX_ID, type Bookmark, type Folder } from '../shared/models';
+import { ancestors, descendants } from '../shared/folderTree';
 import type { BookmarkUndo } from '../shared/storage';
 import { t } from '../shared/strings';
 import { Dropdown, FolderPickerHost } from './ui';
@@ -58,7 +59,11 @@ export function BulkMenu(props: {
     const selected = new Set(draftRef.current.selected);
     const partial = new Set(draftRef.current.partial);
     partial.delete(id);
-    if (on) selected.add(id); else selected.delete(id);
+    if (on) {
+      for(const fid of [id,...ancestors(props.folders,id).map(f=>f.id)]){selected.add(fid);partial.delete(fid);}
+    } else {
+      for(const fid of [id,...descendants(props.folders,id).map(f=>f.id)]){selected.delete(fid);partial.delete(fid);}
+    }
     if (on && id === INBOX_ID) {
       selected.clear(); selected.add(INBOX_ID); partial.clear();
     } else {

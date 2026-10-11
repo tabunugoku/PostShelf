@@ -59,7 +59,7 @@ describe('v16-A: 「フォルダを追加」 menu in the popover', () => {
     expect(menu(pop).textContent).toContain('フォルダを作成');
     expect(btn(pop, '← 戻る')).toBeTruthy();
     expect([...pop.querySelectorAll('label')].every((l) => l.offsetParent === null || true)).toBe(true);
-    const list = pop.querySelector('label')!.parentElement as HTMLElement;
+    const list = pop.querySelector('label')!.closest('[data-picker-folder]')!.parentElement as HTMLElement;
     expect(list.style.display).toBe('none'); // 一覧は隠れる
   });
 

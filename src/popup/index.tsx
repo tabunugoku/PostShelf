@@ -1,6 +1,7 @@
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { inboxOf } from '../shared/folderPicker';
+import { folderPath } from '../shared/folderTree';
 import { Icon } from '../shared/Icon';
 import { HealthNotice } from '../manager/HealthNotice';
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
@@ -91,7 +92,7 @@ function Popup() {
                 const f = folders.find((x) => x.id === id);
                 // 「未分類」は中空の点、色のないフォルダは灰色の塗りの点、色のあるフォルダはその色の点
                 if (id === INBOX_ID) return <i class="rec-dot hollow" />;
-                return f?.color ? <i class="rec-dot" style={{ background: f.color }} /> : <i class="rec-dot" />;
+                return f?.color ? <i class="rec-dot" title={folderPath(folders,id)} style={{ background: f.color }} /> : <i class="rec-dot" title={folderPath(folders,id)} />;
               })}
             </span>
             <span class="rec-handle">{b.snapshot.handle}</span> {b.snapshot.text}

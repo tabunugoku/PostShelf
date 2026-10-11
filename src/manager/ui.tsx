@@ -254,11 +254,12 @@ export function FolderPickerHost(props: { folders: Folder[]; selected: string[];
   }, []);
   useLayoutEffect(() => {
     // 一括操作だけ、保存後の全員 / 一部の状態を同期する。他の呼び出しの挙動は維持する。
-    if (!props.partial) return;
+    if (!pickerRef.current) return;
     selected.current.clear(); props.selected.forEach(id => selected.current.add(id));
-    partial.current.clear(); props.partial.forEach(id => partial.current.add(id));
+    partial.current.clear(); props.partial?.forEach(id => partial.current.add(id));
     pickerRef.current?.sync();
   }, [props.selected, props.partial]);
+  useLayoutEffect(() => { pickerRef.current?.setFolders(props.folders); }, [props.folders]);
   return <div ref={host} class="picker-host" />;
 }
 

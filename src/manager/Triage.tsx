@@ -307,7 +307,7 @@ export function Triage(props: {
                       <div onKeyDown={multi ? (e) => { if (e.key === 'Enter') onKey(e); } : undefined}>
                         <FolderPickerHost
                           folders={props.pickerFolders}
-                          selected={multi ? [...marks] : assigned[cur.tweetId] ?? []}
+                          selected={multi ? marks.size ? [...marks] : [INBOX_ID] : assigned[cur.tweetId] ?? []}
                           onChange={async (sel, source) => {
                             if (!cur || finished || busy.current) return source === 'created' ? false : undefined;
                             if (multi) {
@@ -399,7 +399,7 @@ function NewFolder(props: { existing: Folder[]; onCreated: (f: Folder) => void |
   const latest = useRef(props);
   latest.current = props;
   useEffect(() => {
-    const menu = createFolderMenu({ theme: THEME, existing: () => latest.current.existing, onCreated: (f) => latest.current.onCreated(f), onClose: () => latest.current.onClose() });
+    const menu = createFolderMenu({ theme: THEME, parents: () => latest.current.existing, existing: () => latest.current.existing, onCreated: (f) => latest.current.onCreated(f), onClose: () => latest.current.onClose() });
     host.current?.replaceChildren(menu.el);
     menu.focus();
   }, []);
