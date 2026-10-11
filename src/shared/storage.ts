@@ -578,7 +578,10 @@ export function importData(json: unknown): Promise<number> {
 type FillItem = { tweetId: string; snapshot?: FillView };
 
 /** 補えるかの判定に要る、保存側の項目 */
-export type FillView = Pick<Snapshot, 'author' | 'handle' | 'avatar' | 'media' | 'hasVideo' | 'hasLink' | 'videoPoster' | 'createdAt' | 'quote'>;
+export type FillView = Pick<
+  Snapshot,
+  'author' | 'handle' | 'avatar' | 'media' | 'hasVideo' | 'hasLink' | 'videoPoster' | 'createdAt' | 'quote'
+>;
 
 const httpsUrl = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
 

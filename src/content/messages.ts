@@ -42,7 +42,15 @@ export function handleMessage(msg: { type?: string; tweetId?: string; want?: boo
     const ex = a ? extractTweet(a) : null;
     if (queryFirst(document, 'xError') && !ex) sendResponse({ ok: false, reason: 'limit' });
     else if (!ex || ex.snapshot.truncated || !ex.snapshot.text) sendResponse({ ok: false, reason: queryFirst(document, 'xError') ? 'limit' : 'wait' });
-    else sendResponse({ ok: true, text: ex.snapshot.text, segments: ex.snapshot.segments, ...(ex.snapshot.translated ? { translated: true } : {}), fill: fillSource(ex) });
+    else {
+      sendResponse({
+        ok: true,
+        text: ex.snapshot.text,
+        segments: ex.snapshot.segments,
+        ...(ex.snapshot.translated ? { translated: true } : {}),
+        fill: fillSource(ex),
+      });
+    }
     return false;
   }
   if (msg?.type === 'getDiagnostics') {

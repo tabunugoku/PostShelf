@@ -19,7 +19,14 @@ beforeEach(() => {
   data.bookmarks = {
     'me:301': {
       accountId: 'me', tweetId: '301', savedAt: 1, folderIds: ['sample-folder'],
-      snapshot: { text: '架空の保存済み本文', author: 'Sample', handle: '@sample_avatar', media: [], createdAt: '2026-01-01', url: 'https://x.com/sample_avatar/status/301' },
+      snapshot: {
+        text: '架空の保存済み本文',
+        author: 'Sample',
+        handle: '@sample_avatar',
+        media: [],
+        createdAt: '2026-01-01',
+        url: 'https://x.com/sample_avatar/status/301',
+      },
     },
   };
 });

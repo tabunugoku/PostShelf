@@ -5,9 +5,20 @@ import type { Snapshot } from '../src/shared/models';
 
 const avatar = 'https://pbs.twimg.com/profile_images/sample.jpg';
 const snap = (extra: Partial<Snapshot> = {}): Snapshot => ({
-  text: '架空の本文', author: 'Sample', handle: '@sample_user', media: [], url: 'https://x.com/sample_user/status/123', ...extra,
+  text: '架空の本文',
+  author: 'Sample',
+  handle: '@sample_user',
+  media: [],
+  url: 'https://x.com/sample_user/status/123',
+  ...extra,
 });
-const quote = (extra = {}) => ({ author: 'Sample Quote', handle: '@sample_quote', text: '架空の引用', media: [], ...extra });
+const quote = (extra = {}) => ({
+  author: 'Sample Quote',
+  handle: '@sample_quote',
+  text: '架空の引用',
+  media: [],
+  ...extra,
+});
 let data: Record<string, unknown>;
 beforeEach(() => {
   data = installChromeMock();
@@ -78,7 +89,8 @@ it('adds the whole quote when the saved post has none', async () => {
 it('fills only the empty fields of an existing quote', async () => {
   const image = 'https://pbs.twimg.com/media/sample.jpg';
   seed(snap({ quote: quote({ createdAt: '2026-01-01' }) }));
-  expect(await fill(snap({ quote: quote({ avatar, media: [image], createdAt: '2026-09-09', text: '別の引用' }) }))).toBe(1);
+  const incoming = quote({ avatar, media: [image], createdAt: '2026-09-09', text: '別の引用' });
+  expect(await fill(snap({ quote: incoming }))).toBe(1);
   expect(saved().snapshot.quote).toEqual(quote({ avatar, media: [image], createdAt: '2026-01-01' }));
 });
 

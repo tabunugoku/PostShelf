@@ -10,7 +10,12 @@ import type { Bookmark } from '../src/shared/models';
 const oldAvatar = 'https://pbs.twimg.com/profile_images/sample-old.jpg';
 const newAvatar = 'https://pbs.twimg.com/profile_images/sample-new.jpg';
 const snap = (id: number, handle: string, avatar?: string) => ({
-  text: `架空の本文 ${id}`, author: 'Sample', handle, media: [], url: `https://x.com/${handle.slice(1)}/status/${id}`, ...(avatar ? { avatar } : {}),
+  text: `架空の本文 ${id}`,
+  author: 'Sample',
+  handle,
+  media: [],
+  url: `https://x.com/${handle.slice(1)}/status/${id}`,
+  ...(avatar ? { avatar } : {}),
 });
 const flush = () => act(() => new Promise<void>((r) => setTimeout(r, 15)));
 const $ = <T extends Element>(sel: string) => document.querySelector<T>(sel)!;
@@ -45,6 +50,10 @@ it('keeps the saved avatar and shows initials when no other post has one', () =>
 it('builds the fallback table from the newest post per handle without touching the posts', () => {
   const b = (tweetId: string, savedAt: number, handle: string, avatar?: string) =>
     ({ accountId: 'me', tweetId, savedAt, folderIds: [], snapshot: snap(Number(tweetId), handle, avatar) }) as Bookmark;
-  const table = buildAvatarFallback([b('1', 1, '@Sample_A', oldAvatar), b('2', 5, '@sample_a', newAvatar), b('3', 9, '@sample_a')]);
+  const table = buildAvatarFallback([
+    b('1', 1, '@Sample_A', oldAvatar),
+    b('2', 5, '@sample_a', newAvatar),
+    b('3', 9, '@sample_a'),
+  ]);
   expect([...table]).toEqual([['sample_a', newAvatar]]);
 });

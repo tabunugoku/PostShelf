@@ -33,7 +33,9 @@ export interface FullTextItem {
   tweetId: string;
 }
 /** fill: 読んだ snapshot の、補える項目 (アイコンなど)。本文の更新とは別に、保存済みの空の項目へ入れる */
-export type AskResult = { ok: true; text: string; segments?: Segment[]; translated?: true; fill?: FillView } | { ok: false; reason: 'wait' | 'limit' };
+export type AskResult =
+  | { ok: true; text: string; segments?: Segment[]; translated?: true; fill?: FillView }
+  | { ok: false; reason: 'wait' | 'limit' };
 
 export interface FullTextDeps {
   now(): number;
@@ -344,7 +346,11 @@ export class FullTextQueue {
           if (r?.ok) {
             let refreshed = false;
             try {
-              refreshed = await this.d.refresh(item, { text: r.text, segments: r.segments, ...(r.translated === true ? { translated: true } : {}) });
+              refreshed = await this.d.refresh(item, {
+                text: r.text,
+                segments: r.segments,
+                ...(r.translated === true ? { translated: true } : {}),
+              });
             } finally {
               // 本文の更新が失敗しても、補える項目は補う
               if (r.fill) await this.d.fill(item, r.fill).catch(() => 0);

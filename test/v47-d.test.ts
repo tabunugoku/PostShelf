@@ -27,7 +27,14 @@ function fake(over: Partial<FullTextDeps> = {}) {
 beforeEach(async () => {
   installChromeMock();
   setAccountScope('me');
-  await setBookmarkFolders('1', [], { text: '短い', author: 'Sample', handle: '@sample_one', media: [], url: 'https://x.com/sample_one/status/1', truncated: true });
+  await setBookmarkFolders('1', [], {
+    text: '短い',
+    author: 'Sample',
+    handle: '@sample_one',
+    media: [],
+    url: 'https://x.com/sample_one/status/1',
+    truncated: true,
+  });
 });
 
 it('fills the avatar together with the full text', async () => {
