@@ -47,8 +47,6 @@ export const LOAD_POLL_MS = 500;
 export const SETTLE_MAX_MS = 8000;
 export const SETTLE_POLL_MS = 300;
 export const SETTLE_POLL_JITTER_MS = 200;
-/** DOM の作り直しで一時的に消える想定 (実機未確認の推測)。消失を検知してから待つ刻みの合計 */
-export const VANISH_GRACE_MS = 2000;
 /** 「15 分後に再開する」の待ち時間 */
 export const LIMIT_RESUME_MS = 15 * 60 * 1000;
 /** 動かない (scrollY が増えない) うえに新しいポストも出ない状態がこの回数続いたら、読み込み中の表示があっても終わりとみなす */
@@ -147,7 +145,7 @@ export class AutoCollector {
   private pending: Extracted[] = [];
   /** 未保存の、読み込み中の項目があるポスト。settle で読み込みを待ち、最後に読めた値を持つ。一時停止・停止のときは、その値で保存する */
   private mediaRetry = new Map<string, Extracted>();
-  /** 猶予後も DOM に無いポストの最後の値。次画面で再取得し、終了時には必ず保存へ戻す */
+  /** DOM から消えたポストの最後の値。次画面で再取得し、終了時には必ず保存へ戻す */
   private vanishedRetry = new Map<string, Extracted>();
   /** 初回を含め 2 回消えたら保存する。再開をまたいでも回数をリセットしない */
   private vanishAttempts = new Set<string>();
@@ -505,15 +503,13 @@ export class AutoCollector {
 
   /**
    * 読み込み中のポストが読み込み終わる (hasPending が偽になる) か、合計 SETTLE_MAX_MS 待つまで、短い間隔で画面を読み直す。
-   * 消えたポストは VANISH_GRACE_MS の間、最後に読めた値を保持する。全体の上限は延ばさない。
-   * 猶予後も DOM に無いものだけ次画面へ回す。2 回目の消失と終了時には最後の値で保存する。
+   * DOM に無いポストは最初の検知で次画面へ回す。リンクが残る読めない状態は最後の値で保存する。
+   * 次画面への読み直し・2 回目の消失・終了時の保存は v54 の仕組みを使う。
    * 待ちの長さは、実際の時計ではなく待った刻みの合計で数える。一時停止・停止 (token の変化) では、待たずに戻る
    */
   private async settle(token: number): Promise<void> {
     this.diagnosis.screen();
     let waited = 0;
-    const vanishedAt = new Map<string, number>();
-    const returned = new Set<string>();
     while (this.mediaRetry.size) {
       const step = SETTLE_POLL_MS + Math.round(this.d.random() * SETTLE_POLL_JITTER_MS);
       await this.d.sleep(step);
@@ -524,23 +520,14 @@ export class AutoCollector {
       for (const [id, last] of [...this.mediaRetry]) {
         const current = visible.get(id);
         if (!current) {
-          const since = vanishedAt.get(id) ?? waited;
-          vanishedAt.set(id, since);
-          if (waited - since >= VANISH_GRACE_MS || waited >= SETTLE_MAX_MS) {
-            const reason = hasTweetStatusLink(document, id) ? 'unreadable' : 'removed';
-            this.diagnosis.complete(id, 'vanished', reason, {
-              disappearedAfterMs: since, vanishElapsedMs: waited - since,
-            });
-            if (reason === 'removed' && waited - since >= VANISH_GRACE_MS) this.deferVanished(last);
-            else this.acceptMedia(last);
-          }
+          const reason = hasTweetStatusLink(document, id) ? 'unreadable' : 'removed';
+          this.diagnosis.complete(id, 'vanished', reason, { disappearedAfterMs: waited });
+          if (reason === 'removed') this.deferVanished(last);
+          else this.acceptMedia(last);
         }
         else {
-          if (vanishedAt.delete(id)) returned.add(id);
           if (!hasPending(current) || waited >= SETTLE_MAX_MS) {
-            this.diagnosis.complete(
-              id, hasPending(current) ? 'timedOut' : 'resolved', undefined, undefined, returned.has(id),
-            );
+            this.diagnosis.complete(id, hasPending(current) ? 'timedOut' : 'resolved');
             if (hasPending(current)) this.timedOut.add(id);
             this.acceptMedia(current);
           }
