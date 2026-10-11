@@ -139,6 +139,9 @@ export function extractTweet(article: Element): Extracted | null {
   const photoLinks = queryAllOwn(article, 'photoLink').els.length;
   const photoPending = photoLinks > 0 && media.length < photoLinks;
   const quote = extractQuote(article);
+  // 写真リンク自体が後から DOM に入る画像だけのポストを想定 (原因・DOM 構造は実機未確認の推測)。
+  // 投票だけや削除済みなど、本当に本文も添付内容も無い表示でも、最大 4 秒で打ち切り保存は止まらない。
+  const emptyPending = !text && !media.length && !hasVideo && !hasLink && !quote;
   const quoteEl = findQuote(article);
   const quoteAvatarEl = quoteEl ? queryFirstInQuote<HTMLImageElement>(quoteEl, 'avatar')?.el : undefined;
   // img 自体が後から DOM に入る可能性も待つ (原因・DOM 構造は実機未確認の推測)。
@@ -147,7 +150,7 @@ export function extractTweet(article: Element): Extracted | null {
     tweetId,
     ...(!imageReady(avatarEl) ? { avatarPending: true as const } : {}),
     ...(quoteEl && !imageReady(quoteAvatarEl) ? { quoteAvatarPending: true as const } : {}),
-    ...((hasVideo ? !videoPoster : photoPending) ? { mediaPending: true as const } : {}),
+    ...((emptyPending || (hasVideo ? !videoPoster : photoPending)) ? { mediaPending: true as const } : {}),
     snapshot: {
       ...(quote ? { quote } : {}),
       ...(translated ? { translated: true } : {}),
