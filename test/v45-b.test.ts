@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { extractTweet, type Extracted } from '../src/content/snapshot';
-import { AutoCollector, defaultDeps, SPEED_RANGES, WAIT_FLOORS, WAIT_STEP_MS, SCROLL_RATIO } from '../src/content/autocollect';
+import { AutoCollector, defaultDeps, SPEED_RANGES, WAIT_FLOORS, WAIT_STEP_MS, SCROLL_RATIO, SETTLE_POLL_MS, SETTLE_MAX_MS } from '../src/content/autocollect';
 import { addCollected, listBookmarks, setAccountScope } from '../src/shared/storage';
 
 beforeEach(() => {
@@ -21,34 +21,45 @@ it('marks missing own media, excludes quote media, and ignores empty src', () =>
   expect(ex('image-pending').mediaPending).toBe(true);
 });
 
-function reader(items: Extracted[]) {
+function reader(items: Extracted[], onSleep: (n: number) => void = () => {}) {
   const write = vi.fn(async (seq, at, account) => addCollected(seq, at, account));
-  const c = new AutoCollector({ ...defaultDeps(), visible: () => items, savedIds: async () => new Set(), addCollected: write, saveRun: async () => {} });
+  let sleeps = 0;
+  // 待ちは実際には待たず、回数だけ数える (v48: 読み込み中のポストは、同じ読み取りの中で待つ)
+  const sleep = async () => void onSleep(++sleeps);
+  const c = new AutoCollector({
+    ...defaultDeps(), visible: () => items, savedIds: async () => new Set(), addCollected: write, saveRun: async () => {},
+    sleep, random: () => 0,
+  });
   c.state = { status: 'running', accountId: 'me', startedAt: 1000, imported: 0, skipped: 0, failed: 0, speed: 'slow', cap: 0, updatedAt: 1000 };
   const read = () => (c as any).readVisible(0) as Promise<number>;
   const flush = (final = false) => (c as any).flush(final) as Promise<void>;
-  return { c, read, flush, write };
+  return { c, read, flush, write, sleeps: () => sleeps };
 }
 
-it.each(['image-pending', 'video-pending'])('defers %s once, then saves the newly read media', async id => {
+it.each(['image-pending', 'video-pending'])('waits for %s in the same reading, then saves the newly read media', async id => {
   const items: Extracted[] = [{ ...ex(id), mediaPending: true as const }];
-  const r = reader(items);
-  await r.read(); await r.flush();
-  expect(r.write).not.toHaveBeenCalled(); expect(await listBookmarks()).toEqual([]);
   const incoming = id === 'image-pending' ? ex('image-ready').snapshot : ex('video-ready').snapshot;
-  items[0] = { tweetId: items[0].tweetId, snapshot: incoming };
+  const r = reader(items, n => { if (n === 2) items[0] = { tweetId: items[0].tweetId, snapshot: incoming }; });
   await r.read(); await r.flush();
+  expect(r.sleeps()).toBe(2);
   expect(r.write).toHaveBeenCalledTimes(1);
   expect((await listBookmarks())[0].snapshot).toEqual(incoming);
   expect((await listBookmarks())[0].snapshot).not.toHaveProperty('mediaPending');
   await r.read(); await r.flush(); expect(r.write).toHaveBeenCalledTimes(1);
 });
 
-it.each([false, true])('saves the first reading if still pending or removed (removed=%s)', async removed => {
+it('saves the last reading after the wait budget if still pending', async () => {
   const items = [pending()]; const r = reader(items);
-  await r.read(); await r.flush(); expect(r.write).not.toHaveBeenCalled();
-  if (removed) items.length = 0;
   await r.read(); await r.flush();
+  expect(r.sleeps() * SETTLE_POLL_MS).toBeGreaterThanOrEqual(SETTLE_MAX_MS);
+  expect(r.write).toHaveBeenCalledTimes(1);
+  expect((await listBookmarks())[0].snapshot.media).toEqual([]);
+});
+
+it('saves the last reading without waiting further when the post is removed', async () => {
+  const items = [pending()]; const r = reader(items, () => { items.length = 0; });
+  await r.read(); await r.flush();
+  expect(r.sleeps()).toBe(1);
   expect(r.write).toHaveBeenCalledTimes(1);
   expect((await listBookmarks())[0].snapshot.media).toEqual([]);
 });
@@ -61,15 +72,14 @@ it('does not defer text-only, loaded videos or saved posts', async () => {
   expect(saved.c.state!.skipped).toBe(1);
 });
 
-it('preserves DOM order and the last pending post on a stop without an extra reading', async () => {
+it('preserves DOM order when a pending post is waited for', async () => {
   const items = [pending(), ex('no-media')]; const r = reader(items);
-  await r.read(); await r.flush(); expect(r.write).not.toHaveBeenCalled();
-  await r.flush(true);
+  await r.read(); await r.flush(true);
   expect((await listBookmarks()).sort((a,b) => b.savedAt-a.savedAt).map(b=>b.tweetId)).toEqual(['101','105']);
   expect(r.c.state!.imported).toBe(2);
 });
 
-it('keeps scroll and wait schedules identical to loaded media', async () => {
+it('keeps scroll and wait schedules identical to loaded media, apart from the extra reading waits', async () => {
   async function run(delayed: boolean, cap: 0 | 100 = 0) {
     let round = 0, y = 0, now = 0;
     const sleeps: number[] = [], scrolls: number[] = [];
@@ -87,8 +97,15 @@ it('keeps scroll and wait schedules identical to loaded media', async () => {
     for (let i=0; i<500 && c.state?.status === 'running'; i++) await Promise.resolve();
     expect(c.state!.status).toBe(cap ? 'paused' : 'done'); return { sleeps, scrolls };
   }
-  expect(await run(true)).toEqual(await run(false));
-  expect(await run(true, 100)).toEqual(await run(false, 100));
+  // 読み込み中のポストがあるときだけ、読み直しの待ち (SETTLE_POLL_MS) が増える。スクロールの量と、ほかの待ちは同じ
+  const withoutSettle = async (delayed: boolean, cap?: 0 | 100) => {
+    const r = await run(delayed, cap);
+    return { ...r, sleeps: r.sleeps.filter(ms => ms !== SETTLE_POLL_MS) };
+  };
+  expect(await withoutSettle(true)).toEqual(await withoutSettle(false));
+  expect(await withoutSettle(true, 100)).toEqual(await withoutSettle(false, 100));
+  expect((await run(true)).sleeps.filter(ms => ms === SETTLE_POLL_MS)).toHaveLength(1);
+  expect((await run(false)).sleeps.filter(ms => ms === SETTLE_POLL_MS)).toHaveLength(0);
   expect(SPEED_RANGES).toEqual({ slow: [2000,4000], normal: [1000,2500] });
   expect(WAIT_FLOORS).toEqual({ slow:800, normal:400 }); expect(WAIT_STEP_MS).toBe(100); expect(SCROLL_RATIO).toBe(.8);
 });
