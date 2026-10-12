@@ -129,6 +129,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [current, setCurrent] = useState(ALL_FOLDER_ID);
+  const [showInAncestors, setShowInAncestors] = useState(true);
   const [view, setView] = useState<ViewMode>('post');
   const [sort, setSort] = useState<SortKey>('savedDesc');
   const [search, setSearch] = useState('');
@@ -249,6 +250,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       lastRef.current = last;
       setLastSeen(last);
       setAutoCfg(s.autoCollect);
+      setShowInAncestors(s.showInAncestors);
       setCollapsed(new Set(s.folderTreeCollapsed));
       applyView(resolveViewAccount(s.viewAccount, last, accs));
       await Promise.all([reload(), loadHint()]);
@@ -286,6 +288,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       () => window.removeEventListener('hashchange', onHash),
       onSettingsChanged((c) => {
         setAutoCfg(c.autoCollect);
+        setShowInAncestors(c.showInAncestors);
         setCollapsed(new Set(c.folderTreeCollapsed));
       }),
       onDataChanged(() => { if (!ownWrites.current) void reload(); }),
@@ -421,10 +424,23 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const folderOf = useCallback((id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find(f=>f.id===id)), [folders]); // 保存データが変わるまで同じ関数 (Card の memo のため)
   const pickerFolders = [inboxView(storedInbox), ...userFolders];
 
+  // ポストごとのツリー走査を避ける。検索・表示設定の変更では作り直さず、フォルダの変更時だけ計算する。
+  const descendantsOf = useMemo(() => {
+    const children = new Map(folders.map((f) => [f.id, new Set<string>()]));
+    for (const folder of folders) {
+      for (const parent of ancestors(folders, folder.id)) {
+        children.get(parent.id)!.add(folder.id);
+      }
+    }
+    return children;
+  }, [folders]);
+  const viewDescendants = showInAncestors ? undefined : descendantsOf;
   const now = Date.now();
   const shown = useMemo(
-    () => queryBookmarks(bookmarks, { folderId: curFolder.id, search, sort, filters, now }),
-    [bookmarks, curFolder.id, search, sort, filters],
+    () => queryBookmarks(bookmarks, {
+      folderId: curFolder.id, search, sort, filters, now, descendantsOf: viewDescendants,
+    }),
+    [bookmarks, curFolder.id, search, sort, filters, viewDescendants],
   );
   // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
   const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
@@ -449,11 +465,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const expanding = expandKey === resetKey && remaining > 0;
   const tabbableId = focusId && shownSet.has(focusId) && shownIds.indexOf(focusId) < renderCount ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
-  // 件数は保存データが変わるまで使い回す (左のメニューと見出しで、描画のたびに全件を数え直さない。「最近の 7 日」の境目は、保存データが変わるまで動かない)
-  const countCache = useMemo(() => new Map<string, number>(), [bookmarks]);
+  // 左のメニューと見出しの件数は、保存データ・表示用の子孫表が変わるまで使い回す。
+  // 「最近の 7 日」の境目も、同じキャッシュを使う間は動かない。
+  const countCache = useMemo(() => new Map<string, number>(), [bookmarks, viewDescendants]);
   const count = (id: string) => {
     let n = countCache.get(id);
-    if (n === undefined) countCache.set(id, (n = countFolder(bookmarks, id, now)));
+    if (n === undefined) countCache.set(id, (n = countFolder(bookmarks, id, now, viewDescendants)));
     return n;
   };
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);

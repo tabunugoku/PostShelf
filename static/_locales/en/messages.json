@@ -1678,5 +1678,7 @@
   "triageKeyEmpty": {"message":"Empty"},
   "triageKeyReplace": {"message":"Choose a slot to replace."},
   "triageKeyOrder": {"message":"Key order"},
-  "triageKeyOrderHint": {"message":"Drag to reorder."}
+  "triageKeyOrderHint": {"message":"Drag to reorder."},
+  "showInAncestorsLabel": {"message":"Also show in parent folders"},
+  "showInAncestorsDesc": {"message":"When off, a post appears only in its lowest folder. Saved data is not changed."}
 }

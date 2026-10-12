@@ -34,6 +34,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [bmode, setBmode] = useState<ButtonMode>('separate');
   const [amode, setAmode] = useState<ActionMode>('popup');
   const [autoOn, setAutoOn] = useState(true);
+  const [showInAncestors, setShowInAncestors] = useState(true);
   const [triageMulti, setTriageMulti] = useState(false);
   const [keyFolders,setKeyFolders] = useState<Folder[]|null>(null);
   const openKeyTargets = async()=>{try{setKeyFolders(await listFolders());}catch{reportStorageError();}};
@@ -53,6 +54,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       setAmode(s.actionMode);
       setAutoOn(s.autoCollect.enabled);
       setTriageMulti(s.triageMulti === true);
+      setShowInAncestors(s.showInAncestors);
     });
   useEffect(load, []);
   /** 「変更を保存しました」を 2 秒出す。この画面で設定を書く処理が成功したときだけ呼ぶ (別タブの書き込みの通知では出さない) */
@@ -254,6 +256,21 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           <span>
             <strong>{t('triageMultiSwitch')}</strong>
             <span class="muted setting-desc"><Sentences text={t('triageMultiDesc')} /></span>
+          </span>
+        </label>
+        <label class="setting">
+          <input
+            type="checkbox"
+            name="showInAncestors"
+            checked={showInAncestors}
+            onChange={(e) => void saveOf(
+              updateSettings({ showInAncestors: (e.target as HTMLInputElement).checked }),
+              (s) => setShowInAncestors(s.showInAncestors),
+            )}
+          />
+          <span>
+            <strong>{t('showInAncestorsLabel')}</strong>
+            <span class="muted setting-desc">{t('showInAncestorsDesc')}</span>
           </span>
         </label>
       <div class="setting"><button data-key-targets-open onClick={()=>void openKeyTargets()}>{t('triageKeyTargets')}</button></div>

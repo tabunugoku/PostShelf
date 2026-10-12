@@ -33,6 +33,8 @@ export interface Settings {
   triageKeyFolders?: string[];
   /** たたんでいる親フォルダの ID。端末ごとの設定 */
   folderTreeCollapsed?: string[];
+  /** 親・祖先のフォルダにも表示する。端末ごとの表示設定で、保存済みの所属は変えない */
+  showInAncestors: boolean;
   /** タブの管理画面のサイドバーの幅 (px)。端末ごとの設定 */
   sidebarWidth?: number;
   /** x.com の保存ポップオーバーの「最近使った」フォルダ (v28)。最大 RECENT_FOLDERS 件、新しい順。無い・不正な値は空として扱う */
@@ -138,7 +140,7 @@ export type ButtonMode = 'separate' | 'replace';
 
 export const DEFAULT_SIDEBAR_WIDTH = 240;
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, triageKeyMode: 'auto', triageKeyFolders: [], folderTreeCollapsed: [], sidebarWidth: DEFAULT_SIDEBAR_WIDTH, recentFolderIds: [] };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, triageKeyMode: 'auto', triageKeyFolders: [], folderTreeCollapsed: [], showInAncestors: true, sidebarWidth: DEFAULT_SIDEBAR_WIDTH, recentFolderIds: [] };
 
 export interface FullTextPlan { gapMinMs: number; gapMaxMs: number; tabs: 1 | 2 | 3 }
 /** 「ゆっくり」は、保存されたタブ数にかかわらず従来の間隔・1 タブを使う。 */
@@ -171,6 +173,7 @@ export async function getSettings(): Promise<Settings> {
   merged.folderTreeCollapsed = Array.isArray(stored.folderTreeCollapsed)
     ? [...new Set(stored.folderTreeCollapsed.filter((id): id is string => typeof id === 'string'))]
     : [];
+  merged.showInAncestors = stored.showInAncestors !== false;
   const width = stored.sidebarWidth;
   merged.sidebarWidth = typeof width === 'number' && Number.isFinite(width) && width >= 180 ? Math.round(width) : DEFAULT_SIDEBAR_WIDTH;
   merged.recentFolderIds = Array.isArray(stored.recentFolderIds)
@@ -518,7 +521,15 @@ export async function sendCollectCommand(c: Omit<CollectCommand, 'id' | 'at'>): 
 export async function peekCollectCommand(): Promise<CollectCommand | null> {
   const c = (await chrome.storage.local.get(CMD_KEY))[CMD_KEY] as Partial<CollectCommand> | undefined;
   if (!c || typeof c.id !== 'string' || !['start', 'pause', 'resume', 'stop'].includes(c.type as string)) return null;
-  return { id: c.id, type: c.type as CollectCommand['type'], consent: c.consent === true, speed: c.speed === 'normal' ? 'normal' : 'slow', cap: normalizeCap(c.cap), accountId: typeof c.accountId === 'string' ? c.accountId : undefined, at: Number(c.at) || 0 };
+  return {
+    id: c.id,
+    type: c.type as CollectCommand['type'],
+    consent: c.consent === true,
+    speed: c.speed === 'normal' ? 'normal' : 'slow',
+    cap: normalizeCap(c.cap),
+    accountId: typeof c.accountId === 'string' ? c.accountId : undefined,
+    at: Number(c.at) || 0,
+  };
 }
 export const clearCollectCommand = (): Promise<void> => chrome.storage.local.remove(CMD_KEY);
 

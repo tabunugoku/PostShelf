@@ -32,7 +32,16 @@ const input = async (el: HTMLInputElement, value: string) => {
 };
 
 let data: Record<string, any>;
+const BodyObserver = globalThis.MutationObserver;
+const observers: MutationObserver[] = [];
 beforeEach(async () => {
+  vi.stubGlobal('MutationObserver', class extends BodyObserver {
+    constructor(callback: MutationCallback) {
+      super(callback);
+      observers.push(this);
+    }
+  });
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => setTimeout(() => callback(0), 0));
   data = installChromeMock() as Record<string, any>;
   document.body.innerHTML = '<div id="app"></div>';
   await noteAccount({ handle: 'me', displayName: 'Me' }, 5);
@@ -41,6 +50,9 @@ beforeEach(async () => {
 afterEach(() => {
   const app = document.getElementById('app');
   if (app) render(null, app);
+  // jsdom の破棄後に、content script の監視が消えたブラウザ API を呼ばないようにする。
+  observers.splice(0).forEach((observer) => observer.disconnect());
+  vi.unstubAllGlobals();
 });
 
 describe('F-1: resetSettings', () => {

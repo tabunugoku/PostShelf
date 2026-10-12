@@ -1678,5 +1678,7 @@
   "triageKeyEmpty": {"message":"空位"},
   "triageKeyReplace": {"message":"请选择要替换的编号。"},
   "triageKeyOrder": {"message":"编号顺序"},
-  "triageKeyOrderHint": {"message":"拖动以调整顺序。"}
+  "triageKeyOrderHint": {"message":"拖动以调整顺序。"},
+  "showInAncestorsLabel": {"message":"也在父文件夹中显示"},
+  "showInAncestorsDesc": {"message":"关闭后，帖子只会显示在其所属的最下层文件夹中。保存的数据不会改变。"}
 }

@@ -1678,5 +1678,7 @@
   "triageKeyEmpty": {"message":"Vacío"},
   "triageKeyReplace": {"message":"Elige el número que quieres sustituir."},
   "triageKeyOrder": {"message":"Orden de teclas"},
-  "triageKeyOrderHint": {"message":"Arrastra para reordenar."}
+  "triageKeyOrderHint": {"message":"Arrastra para reordenar."},
+  "showInAncestorsLabel": {"message":"Mostrar también en las carpetas superiores"},
+  "showInAncestorsDesc": {"message":"Si se desactiva, cada publicación aparece solo en la carpeta de nivel más bajo a la que pertenece. Los datos guardados no cambian."}
 }

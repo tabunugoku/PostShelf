@@ -6,6 +6,7 @@
 import { UNKNOWN_ACCOUNT_ID, accountIdOf, type Account } from '../shared/models';
 import { queryEveryCandidate, queryFirst } from '../shared/selectors';
 import { noteAccount, setAccountScope } from '../shared/storage';
+import { watchBody } from './domwatch';
 
 export interface DetectedAccount {
   handle: string;
@@ -97,5 +98,5 @@ export function resetAccount(): void {
 
 export function initAccount(): void {
   scheduleAccountCheck();
-  new MutationObserver(() => scheduleAccountCheck()).observe(document.body, { childList: true, subtree: true });
+  watchBody(() => scheduleAccountCheck());
 }

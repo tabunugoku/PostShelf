@@ -1678,5 +1678,7 @@
   "triageKeyEmpty": {"message":"空き"},
   "triageKeyReplace": {"message":"はずす番号を選んでください。"},
   "triageKeyOrder": {"message":"番号の順"},
-  "triageKeyOrderHint": {"message":"ドラッグで入れ替えます。"}
+  "triageKeyOrderHint": {"message":"ドラッグで入れ替えます。"},
+  "showInAncestorsLabel": {"message":"親フォルダにも表示する"},
+  "showInAncestorsDesc": {"message":"オフにすると、ポストは所属するいちばん下のフォルダだけに表示されます。保存データは変わりません。"}
 }
