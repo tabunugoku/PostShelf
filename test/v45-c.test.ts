@@ -74,8 +74,11 @@ it('invalidates saved IDs on data changes and scopes attempts by account and pat
 
 it('backfills during auto collection without losing the fresh posts being saved', async () => {
   const old=seed('102'); const r=watcher(); let c:AutoCollector;
+  let now = 5000;
   c=new AutoCollector({ ...defaultDeps(), visible: () => collectVisible(), savedIds: getSavedIds,
-    now: () => 5000, sleep: async () => {}, random: () => 0, scrollToTop: () => {}, scrollY: () => 0, scrollBy: () => {}, viewportHeight: () => 1000,
+    now: () => now,
+    sleep: async (ms) => { now += ms; },
+    random: () => 0, scrollToTop: () => {}, scrollY: () => 0, scrollBy: () => {}, viewportHeight: () => 1000,
     pageOk: () => true, isHidden: () => false, accountId: () => 'me', isLoading: () => false, hasUnseen: () => false, hasLimit: () => false,
     saveRun: async () => {}, clearRun: async () => {}, addCollected: async (seq,at,account) => {
       expect(c.state!.status).toBe('running'); const [n]=await Promise.all([addCollected(seq,at,account),r.w.update()]); return n;

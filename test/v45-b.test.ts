@@ -24,11 +24,15 @@ it('marks missing own media, excludes quote media, and ignores empty src', () =>
 function reader(items: Extracted[], onSleep: (n: number) => void = () => {}) {
   const write = vi.fn(async (seq, at, account) => addCollected(seq, at, account));
   let sleeps = 0;
-  // 待ちは実際には待たず、回数だけ数える (v48: 読み込み中のポストは、同じ読み取りの中で待つ)
-  const sleep = async () => void onSleep(++sleeps);
+  let now = 0;
+  // 待ちは仮想時計を進めるだけ。実時間の予算も実際には待たず検証する。
+  const sleep = async (ms: number) => {
+    now += ms;
+    onSleep(++sleeps);
+  };
   const c = new AutoCollector({
     ...defaultDeps(), visible: () => items, savedIds: async () => new Set(), addCollected: write, saveRun: async () => {},
-    sleep, random: () => 0,
+    sleep, now: () => now, random: () => 0,
   });
   c.state = { status: 'running', accountId: 'me', startedAt: 1000, imported: 0, skipped: 0, failed: 0, speed: 'slow', cap: 0, updatedAt: 1000 };
   const read = () => (c as any).readVisible(0) as Promise<number>;
