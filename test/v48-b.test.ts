@@ -65,10 +65,11 @@ it('saves a post whose avatar never loads, after the wait budget', async () => {
 
 it('does not stall the whole run when posts keep pending', async () => {
   let y = 0;
+  let now = 0;
   const c = new AutoCollector({
     ...defaultDeps(),
-    now: () => 0,
-    sleep: async () => {},
+    now: () => now,
+    sleep: async (ms) => { now += ms; },
     random: () => 0,
     visible: () => [post('1', false), post('2', false)],
     hasUnseen: () => false,

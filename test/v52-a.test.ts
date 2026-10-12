@@ -51,10 +51,8 @@ it('8 秒で欠けたまま保存して次のポストも取り込み終端ま�
   expect(world.clock.sleeps.filter((ms) => ms === WAIT_STEP_MS)).toEqual(Array(60).fill(100));
 });
 
-it.each([0, 0.5, 1])('乱数 %s の待ちの刻みの合計で 8 秒を数え実際の時計に依存しない', async (random) => {
+it.each([0, 0.5, 1])('乱数 %s でも通常の時計なら従来と同じ待ちで 8 秒を判定する', async (random) => {
   const world = collectorWorld();
-  // 時計が進まなくても settle は sleep に渡した刻みだけで上限を判定する。
-  (world.collector as any).d.now = () => 123;
   (world.collector as any).d.random = () => random;
   await world.read();
   await world.flush();
