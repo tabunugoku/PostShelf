@@ -3,7 +3,7 @@ import { isBroken, subscribeHealth } from './health';
 import { t } from '../shared/strings';
 import { listBookmarks, onDataChanged, listFolders } from '../shared/storage';
 import { getSettings, onSettingsChanged, type ButtonMode } from '../shared/settings';
-import { extractTweet } from './snapshot';
+import { extractTweet, tweetIdOf } from './snapshot';
 import { ensureIconCss, openPopover, setPopoverMode } from './popover';
 import { isOwnNativeClick } from './native';
 import { getCurrentAccount, subscribeAccount } from './account';
@@ -155,25 +155,54 @@ interface Shared {
   bookmarks: Map<string, { folderIds: string[] }>;
   folders: Folder[];
 }
+let sharedCache: { account: string; promise: Promise<Shared> } | null = null;
+let sharedEvents: typeof chrome.storage.onChanged | undefined;
+let unwatchShared: (() => void) | undefined;
+let sharedVersion = 0;
+const dropShared = () => {
+  sharedCache = null;
+  sharedVersion++;
+};
+function watchShared(): void {
+  if (sharedEvents === chrome.storage.onChanged) return;
+  unwatchShared?.();
+  sharedEvents = chrome.storage.onChanged;
+  dropShared();
+  unwatchShared = onDataChanged(dropShared);
+}
 async function loadShared(): Promise<Shared> {
-  const [list, folders] = await Promise.all([listBookmarks(), listFolders()]);
-  return { bookmarks: new Map(list.map((b) => [b.tweetId, b])), folders };
+  const account = getCurrentAccount()!.id;
+  if (sharedCache?.account === account) return sharedCache.promise;
+  // 本文・画像の参照はキャッシュに持たない。変更まで同じ Promise を使い、並行更新もまとめる。
+  const entry = {
+    account,
+    promise: Promise.all([listBookmarks(), listFolders()]).then(([list, folders]) => ({
+      bookmarks: new Map(list.map((b) => [b.tweetId, { folderIds: b.folderIds }])), folders,
+    })),
+  };
+  sharedCache = entry;
+  entry.promise.catch(() => { if (sharedCache === entry) dropShared(); });
+  return entry.promise;
 }
 
 function refreshArticle(article: Element, data: Shared): void {
   const marker = article.querySelector<HTMLElement>(`[${BTN_ATTR}], [${BADGE_ATTR}]`);
   const host = marker?.closest<HTMLElement>(`[${BTN_ATTR}]`) ?? (marker ? closestFirst<HTMLElement>(marker, 'bookmarkButton')?.el : undefined);
-  const ex = extractTweet(article);
-  if (!host || !ex) return;
+  const id = tweetIdOf(article);
+  if (!host || !id) return;
   if (!getCurrentAccount()) return void setSaved(host, []); // アカウント不明: どのアカウントの保存か分からないので「未保存」表示
-  const bm = data.bookmarks.get(ex.tweetId);
+  const bm = data.bookmarks.get(id);
   setSaved(host, (bm?.folderIds ?? []).map((id) => data.folders.find((f) => f.id === id)).filter((f): f is Folder => !!f));
 }
 
 /** 指定の記事の表示を更新する。保存データの読み込みは、全体で 1 回 */
 async function refreshArticles(articles: Element[]): Promise<void> {
   if (articles.length === 0) return;
+  watchShared();
+  const version = sharedVersion;
+  const account = getCurrentAccount()?.id;
   const data = getCurrentAccount() ? await loadShared() : { bookmarks: new Map(), folders: [] };
+  if (version !== sharedVersion || account !== getCurrentAccount()?.id) return;
   for (const a of articles) refreshArticle(a, data);
 }
 
@@ -271,11 +300,18 @@ export function applyButtonMode(next: ButtonMode): void {
 }
 
 export function initButtons(): void {
+  watchShared();
   subscribeHealth(() => applyButtonMode(mode)); // broken になったら UI を外し、戻ったら付け直す
   void getSettings().then((s) => applyButtonMode(s.buttonMode));
   onSettingsChanged((s) => applyButtonMode(s.buttonMode));
-  onDataChanged(() => void refreshAll());
-  subscribeAccount(() => void refreshAll()); // アカウントが判定できた / 切り替わったら表示を作り直す
+  onDataChanged(() => {
+    dropShared();
+    void refreshAll();
+  });
+  subscribeAccount(() => {
+    dropShared();
+    void refreshAll();
+  }); // アカウントが判定できた / 切り替わったら表示を作り直す
   new MutationObserver(scheduleInject).observe(document.body, { childList: true, subtree: true });
 }
 

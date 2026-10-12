@@ -914,10 +914,18 @@ export const UNKNOWN_ACCOUNT: Account = { id: UNKNOWN_ACCOUNT_ID, handle: '', la
  * 「アカウント未設定」は、そのデータ (ポストかフォルダ) があるときだけ。新しく見たアカウントが先、未設定は最後。
  */
 export async function listAccounts(): Promise<AccountSummary[]> {
-  await ensureMigrated();
-  const [accounts, map, folders, last] = await Promise.all([
+  return accountSummaries(await readMap());
+}
+
+/** 管理画面の一覧とアカウント別件数を同じ保存データから作る。全件の読み出しは 1 回。 */
+export async function listBookmarksWithAccounts(): Promise<{ bookmarks: Bookmark[]; accounts: AccountSummary[] }> {
+  const map = await readMap();
+  return { bookmarks: Object.values(map).filter(inScope), accounts: await accountSummaries(map) };
+}
+
+async function accountSummaries(map: BookmarkMap): Promise<AccountSummary[]> {
+  const [accounts, folders, last] = await Promise.all([
     read<Record<string, Account>>(KEY_ACCOUNTS, {}),
-    readMap(),
     readAllFolders(),
     getLastSeenAccount(),
   ]);

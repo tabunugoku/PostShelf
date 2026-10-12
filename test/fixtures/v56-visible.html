@@ -1,0 +1,9 @@
+<!-- 実機未確認の簡略 fixture。User-Name と status リンク・操作ボタンが article 内にある想定。
+     再表示では本文や画像の取得状態に関わらず、status リンクの ID だけで保存済み表示を更新する。 -->
+<article data-testid="tweet">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-v56.jpg"></div>
+  <div data-testid="User-Name"><span>Sample User</span><span>@sample_user</span></div>
+  <a href="/sample_user/status/1"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText">架空の表示中の本文。</div>
+  <div role="group"><div><button data-testid="bookmark"></button></div></div>
+</article>

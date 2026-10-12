@@ -2,13 +2,15 @@
 import { fillMissing, getFillViews, missingFields, onDataChanged, type FillView } from '../shared/storage';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible, pathListeners, SAVED_TTL_MS } from './collect';
-import { fillSource, hasPending, type Extracted } from './snapshot';
+import { fillSource, hasPending, tweetIdOf, type Extracted } from './snapshot';
+import { queryAllFirst } from '../shared/selectors';
 
 interface MediaDeps {
   now(): number;
   accountId(): string | null;
   path(): string;
   visible(): Extracted[];
+  visibleIds?(): string[];
   fillViews(accountId: string): Promise<Map<string, FillView>>;
   backfill(items: { tweetId: string; snapshot: FillView }[], accountId: string): Promise<number>;
 }
@@ -22,6 +24,7 @@ export class VisibleMediaBackfill {
   constructor(private d: MediaDeps = {
     now: () => Date.now(), accountId: () => getCurrentAccount()?.id ?? null,
     path: () => location.pathname, visible: () => collectVisible(),
+    visibleIds: () => queryAllFirst(document, 'tweet').els.map(tweetIdOf).filter((id): id is string => !!id),
     fillViews: getFillViews, backfill: fillMissing,
   }) {}
 
@@ -42,6 +45,10 @@ export class VisibleMediaBackfill {
       this.cache = null;
     }
     if (!account) return 0;
+    // 先に ID だけ確認する。確認済みの画面では、保存データの全件も本文・画像も読み直さない。
+    const ids = new Set(this.d.visibleIds?.() ?? this.d.visible().map((it) => it.tweetId));
+    for (const id of this.checked) if (!ids.has(id)) this.checked.delete(id);
+    if (![...ids].some((id) => !this.checked.has(id))) return 0;
     if (!this.cache || this.cache.account !== account || this.d.now() - this.cache.at >= SAVED_TTL_MS) {
       const views = await this.d.fillViews(account);
       if (account !== this.d.accountId() || context !== account + ':' + this.d.path()) return 0;
@@ -58,8 +65,8 @@ export class VisibleMediaBackfill {
       if (!view || this.checked.has(it.tweetId)) continue;
       const snapshot = fillSource(it);
       const patch = missingFields(view, snapshot);
-      if (!patch) continue;
       if (!hasPending(it)) this.checked.add(it.tweetId);
+      if (!patch) continue;
       sources.push({ tweetId: it.tweetId, snapshot });
     }
     return sources.length ? this.d.backfill(sources, account) : 0;

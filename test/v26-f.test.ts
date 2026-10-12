@@ -119,16 +119,17 @@ const KEY = 'bookmarks';
 describe('v26-F: the buttons read the saved data once per refresh', () => {
   const one = readFileSync(resolve(process.cwd(), 'test/fixtures/tweet.html'), 'utf8');
   const html = [1, 2, 3].map((n) => one.replaceAll('1234567890', `123456789${n}`)).join('');
-  it('refreshAll reads the bookmarks once for all articles', async () => {
+  it('refreshAll reuses the shared bookmarks for all articles until a change', async () => {
     document.body.innerHTML = html;
     resetAccount();
     setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 1 });
     injectButtons();
     await tick();
+    await refreshAll(); // 初回の移行・所属修復によるキャッシュ無効化も完了させる。
     const get = vi.spyOn(chrome.storage.local, 'get');
     await refreshAll();
     const reads = (get.mock.calls as unknown as [string][]).filter(([k]) => k === KEY);
-    expect(reads.length).toBe(1);
+    expect(reads.length).toBe(0);
     expect(document.querySelectorAll('[data-postshelf-btn]').length).toBeGreaterThan(1);
   });
 

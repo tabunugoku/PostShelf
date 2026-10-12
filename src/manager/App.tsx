@@ -46,6 +46,7 @@ import {
   setCollapsedFolders,
   getBookmark,
   listBookmarks,
+  listBookmarksWithAccounts,
   listFolders,
   moveToFolder,
   onDataChanged,
@@ -227,8 +228,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setAccountScope(id);
     setViewId(id);
   };
+  const ownWrites = useRef(0);
   const reload = async () => {
-    const [f, b, accs] = await Promise.all([listFolders(), listBookmarks(), listAccounts()]);
+    const [f, { bookmarks: b, accounts: accs }] = await Promise.all([listFolders(), listBookmarksWithAccounts()]);
     setFolders(f);
     setBookmarks(b);
     setAccounts(accs);
@@ -286,7 +288,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         setAutoCfg(c.autoCollect);
         setCollapsed(new Set(c.folderTreeCollapsed));
       }),
-      onDataChanged(() => void reload()),
+      onDataChanged(() => { if (!ownWrites.current) void reload(); }),
       onImportHintChanged(() => void loadHint()),
       onLastSeenAccountChanged(() => void onLastSeen()),
     ];
@@ -486,6 +488,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   /** 一括操作を実行し、件数が変わったら取り消し付きトーストを出す */
   const run = async (op: Promise<BookmarkUndo>, msgKey: string | ((undo: BookmarkUndo) => string)) => {
+    // 自分の書き込みの通知はまとめ、成功・失敗後の reload で外部の変更も含めて読み直す。
+    ownWrites.current++;
     try {
       const undo = await op;
       await reload();
@@ -497,6 +501,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       setToast({ key: Date.now(), message: t('errorStorage') });
       await reload().catch(() => {});
       return false;
+    } finally {
+      ownWrites.current--;
     }
   };
   const doUndo = async () => {
@@ -507,9 +513,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       return;
     }
     if (!toast?.undo) return;
-    await restoreBookmarks(toast.undo);
-    setToast(null);
-    await reload();
+    ownWrites.current++;
+    try {
+      await restoreBookmarks(toast.undo);
+      setToast(null);
+      await reload();
+    } finally {
+      ownWrites.current--;
+    }
   };
 
   const clearSelection = () => {
