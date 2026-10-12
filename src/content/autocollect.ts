@@ -12,7 +12,9 @@
  * 実機未確認 (docs/MANUAL_TEST.md): X の一覧の仮想化への追従、終わりの判定、制限・エラー表示のセレクタ。
  * 判定の条件は定数にして、調整しやすくしてある。
  */
-import { hasTweetStatusLink, isBookmarksPath, queryAllFirst, queryFirst, timelineLoading } from '../shared/selectors';
+import {
+  hasTweetStatusLink, isBookmarksPath, ownPostLink, queryAllFirst, queryFirst, timelineLoading,
+} from '../shared/selectors';
 import {
   clearCollectCommand, clearCollectRun, getCollectRun, getSettings, onCollectCommand, onCollectRunChanged, peekCollectCommand, saveCollectRun, setCollectOffer,
   type CollectCap, type CollectCommand, type CollectReason, type CollectRun, type CollectSpeed,
@@ -118,11 +120,24 @@ export function defaultDeps(): CollectDeps {
       const items = new Map<string, Extracted>();
       for (const article of queryAllFirst(document, 'tweet').els) {
         const id = tweetIdOf(article);
-        if (id && !positions.has(id)) positions.set(id, positions.size + 1);
-        if (id && excluded?.has(id) && !reread?.has(id)) continue;
-        if (only && (!id || !only.has(id))) continue;
+        const excludedId = id && excluded?.has(id) && !reread?.has(id);
+        const outsideOnly = only && (!id || !only.has(id));
+        if (excludedId || outsideOnly) {
+          // 解析を省く前に extractTweet と共通の本体リンクを照合する。不一致は解析結果で判定する。
+          const { link } = ownPostLink(article);
+          const parsedId = link?.getAttribute('href')?.match(/^\/([^/]+)\/status\/(\d+)/)?.[2] ?? null;
+          if (id === parsedId) {
+            if (id && !positions.has(id)) positions.set(id, positions.size + 1);
+            continue;
+          }
+        }
         const item = extractTweet(article);
-        if (item) items.set(item.tweetId, item);
+        const itemId = item?.tweetId ?? id;
+        if (itemId && !positions.has(itemId)) positions.set(itemId, positions.size + 1);
+        if (!item) continue;
+        if (excluded?.has(item.tweetId) && !reread?.has(item.tweetId)) continue;
+        if (only && !only.has(item.tweetId)) continue;
+        items.set(item.tweetId, item);
       }
       return [...items.values()];
     },

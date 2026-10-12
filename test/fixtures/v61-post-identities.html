@@ -1,0 +1,28 @@
+<!-- 実機未確認の推測: 引用・返信先・リポストのリンクが本体より前に出る。
+     本体の time を囲むリンクを選ぶ前提を検証する。アカウント・本文・画像はすべて架空。 -->
+<article data-testid="tweet" id="quoted-post">
+  <div role="link">
+    <div data-testid="User-Name"><span>Sample Quote</span><span>@sample_quote</span></div>
+    <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-quote-v61.jpg"></div>
+    <a href="/sample_quote/status/6199"><time datetime="2026-01-01"></time></a>
+    <div data-testid="tweetText">架空の引用元の本文。</div>
+  </div>
+  <div data-testid="User-Name"><span>Sample Main</span><span>@sample_main</span></div>
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-main-v61.jpg"></div>
+  <a href="/sample_main/status/6101"><time datetime="2026-01-02"></time></a>
+  <div data-testid="tweetText">架空の引用を含む本文。</div>
+</article>
+<article data-testid="tweet" id="reply-post">
+  <a href="/sample_parent/status/6198">架空の返信先</a>
+  <div data-testid="User-Name"><span>Sample Reply</span><span>@sample_reply</span></div>
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-reply-v61.jpg"></div>
+  <a href="/sample_reply/status/6102"><time datetime="2026-01-03"></time></a>
+  <div data-testid="tweetText">架空の返信の本文。</div>
+</article>
+<article data-testid="tweet" id="reposted-post">
+  <div data-testid="socialContext"><a href="/me">架空のリポスト表示</a></div>
+  <div data-testid="User-Name"><span>Sample Repost</span><span>@sample_repost</span></div>
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-repost-v61.jpg"></div>
+  <a href="/sample_repost/status/6103"><time datetime="2026-01-04"></time></a>
+  <div data-testid="tweetText">架空のリポストされた本文。</div>
+</article>
