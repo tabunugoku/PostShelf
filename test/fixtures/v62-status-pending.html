@@ -1,0 +1,14 @@
+<!-- 実機未確認の前提: 本体・引用のアイコンと本体の画像が独立して後から読み込まれる。 -->
+<article data-testid="tweet" id="status-post">
+  <div data-testid="Tweet-User-Avatar" id="avatar-host"></div>
+  <div data-testid="User-Name"><span>Sample Status</span><span>@sample_status</span></div>
+  <a href="/sample_status/status/5901" id="status-link"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText" id="post-text">架空の画像つきポスト。</div>
+  <a href="/sample_status/status/5901/photo/1"><div data-testid="tweetPhoto"><img id="pending-media"></div></a>
+  <div role="link">
+    <div data-testid="Tweet-User-Avatar" id="quote-avatar-host"></div>
+    <div data-testid="User-Name"><span>Sample Quote</span><span>@sample_quote</span></div>
+    <a href="/sample_quote/status/6202"><time datetime="2026-01-01"></time></a>
+    <div data-testid="tweetText">架空の引用本文。</div>
+  </div>
+</article>

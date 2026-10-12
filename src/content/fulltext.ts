@@ -13,7 +13,7 @@ import { watchBody } from './domwatch';
 const STATUS_PATH = /^\/[^/]+\/status\/(\d+)/;
 const checked = new Set<string>();
 const filled = new Set<string>();
-// 個別ページで補完する主役は 1 件。空集合またはアカウント付きの保留 ID を記憶する。
+// 個別ページで補完する主役は 1 件。アカウント付き ID と保留の種類を記憶する。
 let pendingKey: string | null = null;
 
 /** 主役のポストが保存済みなら、欠けた項目 (アイコンなど) を補う。全文の更新とは別に行う。読み込み途中の項目があるうちは、確認済みにしない */
@@ -39,7 +39,9 @@ export async function updateFromStatusPage(): Promise<boolean> {
   }
   const article = findArticle(id);
   const ex = article ? extractTweet(article) : null;
-  const nextPendingKey = ex && hasPending(ex) ? key : null;
+  const nextPendingKey = ex && hasPending(ex)
+    ? `${key}:${!!ex.avatarPending}:${!!ex.mediaPending}:${!!ex.quoteAvatarPending}`
+    : null;
   const unchangedPending = nextPendingKey !== null && nextPendingKey === pendingKey;
   pendingKey = nextPendingKey;
   if (ex && !unchangedPending) await fillFromPage(account.id, ex);

@@ -77,6 +77,51 @@ function readyAvatar(): void {
   document.getElementById('avatar-host')!.append(img);
 }
 
+it('アイコンだけの保留が解けたら、画像が保留中でも欠けたアイコンを補完する', async () => {
+  document.body.innerHTML = readFileSync('test/fixtures/v62-status-pending.html', 'utf8');
+  await update();
+  expect(fills()).toBe(1);
+  readyAvatar();
+  await update();
+  expect(fills()).toBe(2);
+  const saved = (data.bookmarks as Record<string, Bookmark>)['me:5901'];
+  expect(saved.snapshot.avatar).toBe('https://pbs.twimg.com/profile_images/sample-status.jpg');
+  expect(saved.snapshot.media).toEqual([]);
+  const changedReads = reads();
+  await update();
+  expect(fills()).toBe(2);
+  expect(reads()).toBe(changedReads);
+});
+
+it('引用アイコンだけの保留が解けたら、本体の保留中でも再び補完する', async () => {
+  document.body.innerHTML = readFileSync('test/fixtures/v62-status-pending.html', 'utf8');
+  await update();
+  const img = document.createElement('img');
+  img.src = 'https://pbs.twimg.com/profile_images/sample-quote.jpg';
+  Object.defineProperty(img, 'complete', { value: true });
+  Object.defineProperty(img, 'naturalWidth', { value: 48 });
+  document.getElementById('quote-avatar-host')!.append(img);
+  await update();
+  expect(fills()).toBe(2);
+  await update();
+  expect(fills()).toBe(2);
+});
+
+it('メディアだけの保留が解けたら、アイコンの保留中でも画像を補完する', async () => {
+  document.body.innerHTML = readFileSync('test/fixtures/v62-status-pending.html', 'utf8');
+  await update();
+  const img = document.getElementById('pending-media')! as HTMLImageElement;
+  img.src = 'https://pbs.twimg.com/media/sample-pending.jpg';
+  Object.defineProperty(img, 'complete', { value: true });
+  Object.defineProperty(img, 'naturalWidth', { value: 640 });
+  await update();
+  expect(fills()).toBe(2);
+  expect((data.bookmarks as Record<string, Bookmark>)['me:5901'].snapshot.media)
+    .toEqual(['https://pbs.twimg.com/media/sample-pending.jpg']);
+  await update();
+  expect(fills()).toBe(2);
+});
+
 it('同じ保留 ID のままなら 2 回目以降の 1.2 秒の確認で保存データを読まない', async () => {
   install();
   await vi.advanceTimersByTimeAsync(1200);
@@ -164,8 +209,9 @@ it('アイコンの保留が続いていても後から出た全文を更新す�
   const firstReads = reads();
   text.textContent = '架空の後から読み込まれた全文';
   expect(await update()).toBe(true);
-  expect(fills()).toBe(1);
-  expect(reads()).toBe(firstReads + 1);
+  // 空の本文が読めると mediaPending も解けるため、全文更新とは別に補完も再試行する。
+  expect(fills()).toBe(2);
+  expect(reads()).toBe(firstReads + 2);
   expect((data.bookmarks as Record<string, Bookmark>)['me:5901'].snapshot.text)
     .toBe('架空の後から読み込まれた全文');
 });
