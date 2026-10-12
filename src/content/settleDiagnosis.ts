@@ -44,8 +44,10 @@ export class SettleDiagnosis {
     this.reported = false;
   }
 
-  /** 画面内で新しく待ちを始めるポスト。位置は visible の配列での 1 始まりの番号。 */
+  /** 画面内で新しく待ちを始めるポスト。同じ待ちの再通知では開始時の記録を保つ。 */
   begin(it: Extracted, position: number): void {
+    // complete が待ちを閉じ、reset が新しい実行を始める。active に残る ID は同じ待ち。
+    if (this.active.has(it.tweetId)) return;
     const pending: PendingKind[] = [];
     if (it.avatarPending) pending.push('avatar');
     if (it.mediaPending) pending.push('media');
