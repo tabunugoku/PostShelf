@@ -91,7 +91,7 @@ describe('親フォルダにも表示する設定', () => {
       const label = input.closest('label')!;
       expect(label.textContent).toContain('親フォルダにも表示する');
       expect(label.querySelector('.setting-desc')!.textContent).toBe(
-        'オフにすると、ポストは所属するいちばん下のフォルダだけに表示されます。保存データは変わりません。',
+        'オフにすると、ポストは所属するいちばん下のフォルダだけに表示されます。保存データは変わりません。親と子の両方に直接入れたポストは、子にだけ表示されます。',
       );
       await act(() => {
         input.checked = false;

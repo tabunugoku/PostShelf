@@ -12,7 +12,7 @@
 | fullTextProgressSkipped | （飛ばした: $SKIPPED$ 件） | （スキップ: $SKIPPED$ 件） | 自動取り込みの表示にそろえる |
 | removeFromPostShelf | PostShelf の保存を削除 | PostShelf から削除 | 同じ動作の `deletePost` にそろえる |
 | folderDeleteTree | …ポストからその所属を外します。 | …ポストから、これらのフォルダへの所属を外します。 | 「その」の指す先を明示 |
-| triageHint | 数字キーで入れる · Esc で終了 | 数字キーでフォルダに入れる · Esc で終了 | 入れる対象を補う |
+| triageHint | 数字キーで入れる · Esc で終了 | 数字キーで仕分け · Esc で終了 | 入れる対象が分からない。1 行 20 字以内の制約 (v29) を守る |
 | diagNotice | …X の画面構造の骨組みです。 | …X の画面構造の概要です。 | 比喩をやめる |
 | recent7 | 最近の 7 日 | 直近 7 日 | 数値との組み合わせを自然にする |
 

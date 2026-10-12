@@ -642,7 +642,7 @@
     "message": "戻る"
   },
   "triageHint": {
-    "message": "数字キーでフォルダに入れる · Esc で終了"
+    "message": "数字キーで仕分け · Esc で終了"
   },
   "triageDone": {
     "message": "仕分けが終わりました"

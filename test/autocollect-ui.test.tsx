@@ -251,7 +251,7 @@ describe('page panel', () => {
   });
 
   it('every state has its own title and buttons (paused / limit / done / stopped / countdown)', () => {
-    expect(viewOf(st({ status: 'paused', reason: 'hidden' }))).toMatchObject({ title: '一時停止中', sub: '別のタブに切り替えたため、自動で止めました' });
+    expect(viewOf(st({ status: 'paused', reason: 'hidden' }))).toMatchObject({ title: '一時停止中', sub: '別のタブに切り替えたため、自動で一時停止しました' });
     expect(viewOf(st({ status: 'paused', reason: 'hidden' })).buttons.map((b) => b.label)).toEqual(['再開', 'ここで終了']);
     expect(viewOf(st({ status: 'paused', reason: 'cap' })).sub).toBe('上限の 300 件に達したため、止めました');
     expect(viewOf(st({ status: 'paused', reason: 'reload' })).note).toContain('一覧の先頭から読み直します');
