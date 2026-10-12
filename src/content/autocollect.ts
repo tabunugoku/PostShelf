@@ -13,7 +13,7 @@
  * 判定の条件は定数にして、調整しやすくしてある。
  */
 import {
-  hasTweetStatusLink, isBookmarksPath, ownPostLink, queryAllFirst, queryFirst, timelineLoading,
+  hasTweetStatusLink, isBookmarksPath, queryAllFirst, queryFirst, timelineLoading,
 } from '../shared/selectors';
 import {
   clearCollectCommand, clearCollectRun, getCollectRun, getSettings, onCollectCommand, onCollectRunChanged, peekCollectCommand, saveCollectRun, setCollectOffer,
@@ -120,18 +120,11 @@ export function defaultDeps(): CollectDeps {
       const items = new Map<string, Extracted>();
       for (const article of queryAllFirst(document, 'tweet').els) {
         const id = tweetIdOf(article);
-        const excludedId = id && excluded?.has(id) && !reread?.has(id);
-        const outsideOnly = only && (!id || !only.has(id));
-        if (excludedId || outsideOnly) {
-          // 解析を省く前に extractTweet と共通の本体リンクを照合する。不一致は解析結果で判定する。
-          const { link } = ownPostLink(article);
-          const parsedId = link?.getAttribute('href')?.match(/^\/([^/]+)\/status\/(\d+)/)?.[2] ?? null;
-          if (id === parsedId) {
-            if (id && !positions.has(id)) positions.set(id, positions.size + 1);
-            continue;
-          }
-        }
+        if (id && !positions.has(id)) positions.set(id, positions.size + 1);
+        if (id && excluded?.has(id) && !reread?.has(id)) continue;
+        if (only && (!id || !only.has(id))) continue;
         const item = extractTweet(article);
+        // tweetIdOf と ID が食い違う記事の保険。解析に進んだ記事は解析結果で位置と対象を判定する。
         const itemId = item?.tweetId ?? id;
         if (itemId && !positions.has(itemId)) positions.set(itemId, positions.size + 1);
         if (!item) continue;
