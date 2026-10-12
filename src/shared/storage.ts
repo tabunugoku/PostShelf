@@ -126,25 +126,63 @@ export function migrateToV2(raw: { folders?: unknown; bookmarks?: unknown }): { 
 }
 
 let migrating: Promise<void> | undefined;
-let repairing: Promise<void> | undefined;
+let migrationReady = false;
+let migrationVersion = 0;
+let migrationEvents: typeof chrome.storage.onChanged | undefined;
+let unwatchMigration: (() => void) | undefined;
+
+/** 完了の印や保存データの外部削除で、コンテキスト内の移行判定を無効化する。 */
+function watchMigration(): void {
+  if (migrationEvents === chrome.storage.onChanged) return;
+  unwatchMigration?.();
+  migrationEvents = chrome.storage.onChanged;
+  migrationReady = false;
+  migrating = undefined;
+  migrationVersion++;
+  const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
+    if (area !== 'local') return;
+    const schema = changes[KEY_SCHEMA];
+    const repaired = changes[KEY_REPAIRED];
+    const removed = [KEY_BOOKMARKS, KEY_FOLDERS].some((key) => key in changes && changes[key].newValue === undefined);
+    if ((schema && (schema.newValue ?? 0) < SCHEMA_VERSION) || (repaired && repaired.newValue !== true) || removed) {
+      migrationReady = false;
+      migrationVersion++;
+    }
+  };
+  const events = migrationEvents;
+  events.addListener(listener);
+  unwatchMigration = () => events.removeListener(listener);
+}
 
 /** どの公開関数も最初に呼ぶ。schemaVersion が古ければ (1 回だけ) 移行し、所属フォルダの不整合を (1 回だけ) 直す。失敗時は何も書き込まず例外 */
 async function ensureMigrated(): Promise<void> {
-  if ((await read<number>(KEY_SCHEMA, 0)) < SCHEMA_VERSION) {
-    migrating ??= (async () => {
-      const [folders, bookmarks] = await Promise.all([read<unknown>(KEY_FOLDERS, []), read<unknown>(KEY_BOOKMARKS, {})]);
-      const out = migrateToV2({ folders, bookmarks }); // 検証に失敗したらここで例外 = 書き込みなし
-      await chrome.storage.local.set({ [KEY_FOLDERS]: out.folders, [KEY_BOOKMARKS]: out.bookmarks, [KEY_SCHEMA]: SCHEMA_VERSION }); // 1 回の書き込み
-    })().finally(() => {
-      migrating = undefined;
-    });
-    await migrating;
-  }
-  if (await read<boolean>(KEY_REPAIRED, false)) return;
-  repairing ??= repairFolderIds().finally(() => {
-    repairing = undefined;
-  });
-  await repairing;
+  watchMigration();
+  if (migrationReady) return;
+  migrating ??= (async () => {
+    while (!migrationReady) {
+      const version = migrationVersion;
+      const flags = await chrome.storage.local.get([KEY_SCHEMA, KEY_REPAIRED]);
+      if (version !== migrationVersion) continue;
+      const legacy = (flags[KEY_SCHEMA] ?? 0) < SCHEMA_VERSION;
+      if (legacy || !flags[KEY_REPAIRED]) {
+        const raw = await chrome.storage.local.get([KEY_FOLDERS, KEY_BOOKMARKS]);
+        if (version !== migrationVersion) continue;
+        let folders = raw[KEY_FOLDERS] ?? [];
+        let bookmarks = raw[KEY_BOOKMARKS] ?? {};
+        if (legacy) {
+          const out = migrateToV2({ folders, bookmarks });
+          folders = out.folders;
+          bookmarks = out.bookmarks;
+          await chrome.storage.local.set({ [KEY_FOLDERS]: folders, [KEY_BOOKMARKS]: bookmarks, [KEY_SCHEMA]: SCHEMA_VERSION });
+        }
+        if (version !== migrationVersion) continue;
+        if (!flags[KEY_REPAIRED]) await repairFolderData(bookmarks, folders);
+      }
+      // 読み込み・保存中に外から消された場合は、古い判定を記憶せず読み直す。
+      if (version === migrationVersion) migrationReady = true;
+    }
+  })().finally(() => { migrating = undefined; });
+  await migrating;
 }
 
 /**
@@ -153,7 +191,12 @@ async function ensureMigrated(): Promise<void> {
  * 直す対象が 0 件なら、書き込まずに印 (folderIdsRepaired) だけを付ける。
  */
 export async function repairFolderIds(): Promise<void> {
-  const [raw, rawFolders] = await Promise.all([read<unknown>(KEY_BOOKMARKS, {}), read<unknown>(KEY_FOLDERS, [])]);
+  const data = await chrome.storage.local.get([KEY_BOOKMARKS, KEY_FOLDERS]);
+  await repairFolderData(data[KEY_BOOKMARKS], data[KEY_FOLDERS]);
+}
+
+/** 初回の移行と修復で同じ入力を共有し、大きな保存データの再読み込みを避ける。 */
+async function repairFolderData(raw: unknown, rawFolders: unknown): Promise<void> {
   const map = (raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}) as BookmarkMap;
   const folders = (Array.isArray(rawFolders) ? rawFolders : []) as Folder[];
   const out: BookmarkMap = {};

@@ -24,9 +24,11 @@ export function bulkWorld(size = 5000) {
   }));
   Object.assign(data, { schemaVersion: 2, folderIdsRepaired: true, folders, bookmarks: { ...original } });
   // ブラウザ側の複製は測定対象外。get ごとに map だけを新しくし、項目の不変性も検証する。
-  vi.spyOn(chrome.storage.local, 'get').mockImplementation(async (key: any) => ({
-    [key]: key === 'bookmarks' ? { ...(data.bookmarks as Record<string, Bookmark>) } : data[key],
-  }));
+  vi.spyOn(chrome.storage.local, 'get').mockImplementation(async (key: any) => Object.fromEntries(
+    (Array.isArray(key) ? key : [key]).map((k) => [
+      k, k === 'bookmarks' ? { ...(data.bookmarks as Record<string, Bookmark>) } : data[k],
+    ]),
+  ));
   const write = vi.spyOn(chrome.storage.local, 'set').mockImplementation(async (items) => { Object.assign(data, items); });
   return { data, folders, original, write, ids: Array.from({ length: 1000 }, (_, i) => `${i}`) };
 }
