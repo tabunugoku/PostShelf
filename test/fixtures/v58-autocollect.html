@@ -1,0 +1,24 @@
+<!-- 実機未確認の推測: 下側の article が DOM の作り直しで一時的に外れ、同じ位置へ戻る。
+     テストでは article を外して戻し、template の画像を読み込み済みとして挿入する。通信は行わない。 -->
+<article data-testid="tweet" id="first-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-first-v54.jpg"></div>
+  <div data-testid="User-Name"><span>Sample First</span><span>@sample_first</span></div>
+  <a href="/sample_first/status/1201"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText">架空の最初の本文。</div>
+</article>
+<article data-testid="tweet" id="main-post">
+  <div data-testid="Tweet-User-Avatar" id="main-avatar"></div>
+  <div data-testid="User-Name"><span>Sample Slow</span><span>@sample_slow</span></div>
+  <a href="/sample_slow/status/1202" id="main-status"><time datetime="2026-01-02"></time></a>
+  <div data-testid="tweetText" id="main-text"></div>
+</article>
+<article data-testid="tweet" id="last-post">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-last-v54.jpg"></div>
+  <div data-testid="User-Name"><span>Sample Last</span><span>@sample_last</span></div>
+  <a href="/sample_last/status/1203"><time datetime="2026-01-03"></time></a>
+  <div data-testid="tweetText">架空の最後の本文。</div>
+</article>
+<template id="late-avatar"><img src="https://pbs.twimg.com/profile_images/sample-slow-v54.jpg"></template>
+<template id="late-photo">
+  <a href="/sample_slow/status/1202/photo/1"><div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample-slow-v54.jpg"></div></a>
+</template>

@@ -20,8 +20,8 @@ import {
 import { addCollected, fillMissing, getSavedIds, missingFields, onDataChanged } from '../shared/storage';
 import { requestFullTextBatch } from '../shared/cacheRequest';
 import { getCurrentAccount, subscribeAccount } from './account';
-import { collectVisible, pathListeners } from './collect';
-import { fillSource, hasPending, tweetIdOf, type Extracted } from './snapshot';
+import { pathListeners } from './collect';
+import { extractTweet, fillSource, hasPending, tweetIdOf, type Extracted } from './snapshot';
 import { SettleDiagnosis } from './settleDiagnosis';
 
 /** スクロールごとの待ち時間 (ミリ秒) の範囲 */
@@ -76,7 +76,9 @@ export interface CollectDeps {
   /** いまのスクロール位置 (動かなくなったことの判定用) */
   scrollY(): number;
   viewportHeight(): number;
-  visible(): Extracted[];
+  visible(excluded?: ReadonlySet<string>): Extracted[];
+  /** 解析を省いた既読も含め、直前の visible での位置を返す (診断用)。 */
+  visiblePosition?(tweetId: string): number | undefined;
   /** 画面に、seen にまだ無いポストがあるか (ID だけを軽く読む。スナップショットは作らない)。無ければ、待ちは上限まで */
   hasUnseen(seen: ReadonlySet<string>): boolean;
   isLoading(): boolean;
@@ -102,6 +104,7 @@ export interface CollectDeps {
 }
 
 export function defaultDeps(): CollectDeps {
+  const positions = new Map<string, number>();
   return {
     now: () => Date.now(),
     sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
@@ -110,7 +113,19 @@ export function defaultDeps(): CollectDeps {
     scrollToTop: () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }),
     scrollY: () => window.scrollY,
     viewportHeight: () => window.innerHeight,
-    visible: () => collectVisible(),
+    visible: (excluded) => {
+      positions.clear();
+      const items = new Map<string, Extracted>();
+      for (const article of queryAllFirst(document, 'tweet').els) {
+        const id = tweetIdOf(article);
+        if (id && !positions.has(id)) positions.set(id, positions.size + 1);
+        if (id && excluded?.has(id)) continue;
+        const item = extractTweet(article);
+        if (item) items.set(item.tweetId, item);
+      }
+      return [...items.values()];
+    },
+    visiblePosition: (id) => positions.get(id),
     hasUnseen: (seen) => queryAllFirst(document, 'tweet').els.some((a) => {
       const id = tweetIdOf(a);
       return !!id && !seen.has(id);
@@ -423,7 +438,11 @@ export class AutoCollector {
 
   /** 画面に出ているポストを読む。X は画面外のポストを DOM から外す (仮想化) ので、スクロールのたびに読む。新しく見つけた件数を返す */
   private async readVisible(token: number): Promise<number> {
-    const items = this.d.visible();
+    // 時間切れ後の 1 回の補完だけは、既読でも再解析する。
+    const excluded = this.timedOut.size
+      ? new Set([...this.seen].filter((id) => !this.timedOut.has(id)))
+      : this.seen;
+    const items = this.d.visible(excluded);
     const saved = (this.saved ??= await this.d.savedIds(this.state!.accountId));
     if (token !== this.token) return 0;
     const s = this.state!;
@@ -445,7 +464,7 @@ export class AutoCollector {
         s.recentPostDate = sorted[Math.ceil(sorted.length / 2) - 1];
       }
       if (!saved.has(it.tweetId) && hasPending(it)) {
-        this.diagnosis.begin(it, index + 1);
+        this.diagnosis.begin(it, this.d.visiblePosition?.(it.tweetId) ?? index + 1);
         this.mediaRetry.set(it.tweetId, it);
         this.insertSeq({ tweetId: it.tweetId }); // 保存前も画面に出た順序を保つ
         s.imported++; // 上限の数え方を変えず、保存だけを読み込みのあとへ回す
