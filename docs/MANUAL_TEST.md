@@ -1004,3 +1004,7 @@ v54 の実機ログでは、1000 件の取り込みで待ちを始めた 145 件
 - C: visible の既存の excluded / only の引数位置を保ち、再確認集合を第 3 引数に追加する。readVisible は seen と timedOut をそのまま渡し、Set の複製を作らない。引数を無視する既存のスタブと、引数省略の全件解析も維持する。
 - C: 修正前に新規テスト 3 件中 2 件が失敗、修正後は関連 10 件が成功。24000 件の seen の同一参照と、反復されないことを検証する。
 - C: typecheck / npm test (180 ファイル・1557 テスト) / build 成功。
+- [ ] 実機未確認 (D): 保存データの読み込み・補完中に DOM の画面が更新されても、settle summary の画面内位置が最初に読んだ画面を示すこと。
+- D: visible 直後に対象 ID の位置を同期的にローカル Map へ保存し、savedIds と rereadTimedOut の await 後はその Map を使う。visiblePosition が省略されたスタブは従来どおり取得列の番号を使う。CollectDeps は変更しない。
+- D: 保存済み ID の取得待ちと時間切れの補完待ちの両方で位置の競合を再現し、修正前に 2 件が失敗、修正後は関連 20 件が成功。
+- D: typecheck / npm test (181 ファイル・1560 テスト) / build 成功。

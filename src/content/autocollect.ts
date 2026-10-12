@@ -446,13 +446,18 @@ export class AutoCollector {
   private async readVisible(token: number): Promise<number> {
     // 時間切れ後の 1 回の補完だけは、既読でも再解析する。
     const items = this.d.visible(this.seen, undefined, this.timedOut);
+    // visible の内部位置は次の呼び出しで変わるため、await より前にこの画面の値を取る。
+    const visiblePositions = new Map<string, number>();
+    for (const [index, it] of items.entries()) {
+      visiblePositions.set(it.tweetId, this.d.visiblePosition?.(it.tweetId) ?? index + 1);
+    }
     const saved = (this.saved ??= await this.d.savedIds(this.state!.accountId));
     if (token !== this.token) return 0;
     const s = this.state!;
     await this.rereadTimedOut(items, saved, s.accountId);
     if (token !== this.token) return 0;
     let fresh = 0;
-    for (const [index, it] of items.entries()) {
+    for (const it of items) {
       if (this.seen.has(it.tweetId)) continue; // 同じ取り込みの中で、同じポストを二重に数えない
       if (!this.positions.has(it.tweetId)) this.positions.set(it.tweetId, this.nextPosition++);
       this.vanishedRetry.delete(it.tweetId);
@@ -467,7 +472,7 @@ export class AutoCollector {
         s.recentPostDate = sorted[Math.ceil(sorted.length / 2) - 1];
       }
       if (!saved.has(it.tweetId) && hasPending(it)) {
-        this.diagnosis.begin(it, this.d.visiblePosition?.(it.tweetId) ?? index + 1);
+        this.diagnosis.begin(it, visiblePositions.get(it.tweetId)!);
         this.mediaRetry.set(it.tweetId, it);
         this.insertSeq({ tweetId: it.tweetId }); // 保存前も画面に出た順序を保つ
         s.imported++; // 上限の数え方を変えず、保存だけを読み込みのあとへ回す
