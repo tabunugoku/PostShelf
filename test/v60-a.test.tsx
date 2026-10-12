@@ -46,40 +46,62 @@ describe('親フォルダにも表示する設定', () => {
   });
 
   for (const surface of ['tab', 'sidepanel'] as const) {
-    it(surface + ': 表示の設定は見出し直下で仕分けモードの枠の外に置く', async () => {
+    it(surface + ': 表示のスイッチは見出し直下の「フォルダ」の枠に置く', async () => {
       await act(() => void render(
         <SettingsPage surface={surface} onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} />,
         root(),
       ));
       await flush();
-      const label = root().querySelector('input[name="showInAncestors"]')!.closest('label')!;
-      expect(label.closest('fieldset')).toBeNull();
-      expect(label.previousElementSibling?.id).toBe('set-group-behavior');
-      expect(label.nextElementSibling?.matches('fieldset.setting-group')).toBe(true);
-      expect(label.nextElementSibling?.querySelector('legend')?.textContent).toBe('仕分けモード');
+      const input = root().querySelector<HTMLInputElement>('input[name="showInAncestors"]')!;
+      expect(input.type).toBe('checkbox');
+      expect(input.getAttribute('role')).toBe('switch');
+      expect(input.parentElement?.matches('label.setting')).toBe(true);
+      expect(input.nextElementSibling?.matches('span')).toBe(true);
+      expect(input.nextElementSibling?.querySelector('strong')?.textContent).toBe('親フォルダにも表示する');
+      const group = input.closest('fieldset.setting-group')!;
+      expect(group.querySelector('legend')?.textContent).toBe('フォルダ');
+      expect(group.previousElementSibling?.id).toBe('set-group-behavior');
+      expect(group.nextElementSibling?.querySelector('legend')?.textContent).toBe('仕分けモード');
+      expect(root().querySelector('.settings-page > .setting')).toBeNull();
     });
 
-    it(surface + ': 枠の外に移した表示設定も検索でき、見出しと件数が一致する', async () => {
+    it(surface + ': 「親フォルダ」の検索で、枠と見出しが残る', async () => {
       await act(() => void render(
         <SettingsPage surface={surface} onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} />,
         root(),
       ));
       await flush();
       const page = root().querySelector<HTMLElement>('.settings-page')!;
-      const label = page.querySelector<HTMLInputElement>('input[name="showInAncestors"]')!.closest('label')!;
+      const input = page.querySelector<HTMLInputElement>('input[name="showInAncestors"]')!;
+      const group = input.closest<HTMLElement>('fieldset.setting-group')!;
+      const label = input.closest<HTMLElement>('label.setting')!;
       const heading = page.querySelector<HTMLElement>('#set-group-behavior')!;
-      expect(filterSettings(page, '親フォルダにも表示する')).toBe(1);
+      const chip = page.querySelector<HTMLElement>('.nav-chip[data-group="behavior"]')!;
+      const search = page.querySelector<HTMLInputElement>('input[type="search"]')!;
+      await act(() => {
+        search.value = '親フォルダ';
+        search.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      await flush();
+      expect(group.hidden).toBe(false);
+      expect(group.querySelector('legend')?.textContent).toBe('フォルダ');
       expect(label.hidden).toBe(false);
       expect(heading.hidden).toBe(false);
+      expect(chip.hidden).toBe(false);
+      expect(filterSettings(page, '親フォルダ')).toBe(1);
       expect(filterSettings(page, '架空の一致しない検索語')).toBe(0);
+      expect(group.hidden).toBe(true);
       expect(label.hidden).toBe(true);
       expect(heading.hidden).toBe(true);
+      expect(chip.hidden).toBe(true);
       filterSettings(page, '');
+      expect(group.hidden).toBe(false);
       expect(label.hidden).toBe(false);
       expect(heading.hidden).toBe(false);
+      expect(chip.hidden).toBe(false);
     });
 
-    it(surface + ': チェックボックスから保存でき、別画面の変更も反映する', async () => {
+    it(surface + ': スイッチから保存でき、別画面の変更も反映する', async () => {
       await act(() => void render(
         <SettingsPage surface={surface} onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} />,
         root(),
