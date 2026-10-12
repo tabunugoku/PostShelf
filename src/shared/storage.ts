@@ -385,10 +385,19 @@ export async function getBookmarkOf(accountId: string, tweetId: string): Promise
 /** 「未分類」の受け皿のフォルダ (名前なし = 表示時に解決) が無ければ作る */
 async function ensureInboxFolder(accountId: string = scope): Promise<void> {
   const all = await readAllFolders();
+  const next = withInboxFolder(all, accountId);
+  if (next !== all) await write(KEY_FOLDERS, next);
+}
+
+/** 受け皿の作成を同期で計画し、ポストと同じ set にもまとめられるようにする。 */
+function withInboxFolder(all: Folder[], accountId: string): Folder[] {
   const folders = all.filter((f) => f.accountId === accountId);
-  if (folders.some((f) => f.id === INBOX_ID)) return;
+  if (folders.some((f) => f.id === INBOX_ID)) return all;
   const others = all.filter((f) => f.accountId !== accountId);
-  await write(KEY_FOLDERS, [...others, ...folders, { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId }]);
+  return [...others, ...folders, {
+    id: INBOX_ID, name: '', icon: 'ti-star',
+    order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId,
+  }];
 }
 
 /**
@@ -694,8 +703,7 @@ export function addCollected(items: { tweetId: string; snapshot?: Bookmark['snap
       );
       return { order, fresh: usable.filter((it) => !m[keyOf(it.tweetId)] && order.has(it.tweetId)) };
     };
-    if (plan(await readMap()).fresh.length === 0) return 0;
-    await ensureInboxFolder(accountId); // 読んだあと書くまでの間に await を挟まないよう、先に用意して読み直す
+    const folders = await readAllFolders();
     const map = await readMap();
     const { order, fresh } = plan(map);
     if (fresh.length === 0) return 0;
@@ -705,7 +713,12 @@ export function addCollected(items: { tweetId: string; snapshot?: Bookmark['snap
       map[keyOf(it.tweetId)] = { accountId, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot! };
       added++;
     }
-    await write(KEY_BOOKMARKS, map);
+    // map を読んだあと別の await を挟まない。受け皿が無い場合も同じ書き込みで作る。
+    const nextFolders = withInboxFolder(folders, accountId);
+    await chrome.storage.local.set({
+      [KEY_BOOKMARKS]: map,
+      ...(nextFolders !== folders ? { [KEY_FOLDERS]: nextFolders } : {}),
+    });
     return added;
   });
 }
