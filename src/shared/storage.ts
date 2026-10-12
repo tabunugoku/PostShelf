@@ -126,25 +126,63 @@ export function migrateToV2(raw: { folders?: unknown; bookmarks?: unknown }): { 
 }
 
 let migrating: Promise<void> | undefined;
-let repairing: Promise<void> | undefined;
+let migrationReady = false;
+let migrationVersion = 0;
+let migrationEvents: typeof chrome.storage.onChanged | undefined;
+let unwatchMigration: (() => void) | undefined;
+
+/** 完了の印や保存データの外部削除で、コンテキスト内の移行判定を無効化する。 */
+function watchMigration(): void {
+  if (migrationEvents === chrome.storage.onChanged) return;
+  unwatchMigration?.();
+  migrationEvents = chrome.storage.onChanged;
+  migrationReady = false;
+  migrating = undefined;
+  migrationVersion++;
+  const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
+    if (area !== 'local') return;
+    const schema = changes[KEY_SCHEMA];
+    const repaired = changes[KEY_REPAIRED];
+    const removed = [KEY_BOOKMARKS, KEY_FOLDERS].some((key) => key in changes && changes[key].newValue === undefined);
+    if ((schema && (schema.newValue ?? 0) < SCHEMA_VERSION) || (repaired && repaired.newValue !== true) || removed) {
+      migrationReady = false;
+      migrationVersion++;
+    }
+  };
+  const events = migrationEvents;
+  events.addListener(listener);
+  unwatchMigration = () => events.removeListener(listener);
+}
 
 /** どの公開関数も最初に呼ぶ。schemaVersion が古ければ (1 回だけ) 移行し、所属フォルダの不整合を (1 回だけ) 直す。失敗時は何も書き込まず例外 */
 async function ensureMigrated(): Promise<void> {
-  if ((await read<number>(KEY_SCHEMA, 0)) < SCHEMA_VERSION) {
-    migrating ??= (async () => {
-      const [folders, bookmarks] = await Promise.all([read<unknown>(KEY_FOLDERS, []), read<unknown>(KEY_BOOKMARKS, {})]);
-      const out = migrateToV2({ folders, bookmarks }); // 検証に失敗したらここで例外 = 書き込みなし
-      await chrome.storage.local.set({ [KEY_FOLDERS]: out.folders, [KEY_BOOKMARKS]: out.bookmarks, [KEY_SCHEMA]: SCHEMA_VERSION }); // 1 回の書き込み
-    })().finally(() => {
-      migrating = undefined;
-    });
-    await migrating;
-  }
-  if (await read<boolean>(KEY_REPAIRED, false)) return;
-  repairing ??= repairFolderIds().finally(() => {
-    repairing = undefined;
-  });
-  await repairing;
+  watchMigration();
+  if (migrationReady) return;
+  migrating ??= (async () => {
+    while (!migrationReady) {
+      const version = migrationVersion;
+      const flags = await chrome.storage.local.get([KEY_SCHEMA, KEY_REPAIRED]);
+      if (version !== migrationVersion) continue;
+      const legacy = (flags[KEY_SCHEMA] ?? 0) < SCHEMA_VERSION;
+      if (legacy || !flags[KEY_REPAIRED]) {
+        const raw = await chrome.storage.local.get([KEY_FOLDERS, KEY_BOOKMARKS]);
+        if (version !== migrationVersion) continue;
+        let folders = raw[KEY_FOLDERS] ?? [];
+        let bookmarks = raw[KEY_BOOKMARKS] ?? {};
+        if (legacy) {
+          const out = migrateToV2({ folders, bookmarks });
+          folders = out.folders;
+          bookmarks = out.bookmarks;
+          await chrome.storage.local.set({ [KEY_FOLDERS]: folders, [KEY_BOOKMARKS]: bookmarks, [KEY_SCHEMA]: SCHEMA_VERSION });
+        }
+        if (version !== migrationVersion) continue;
+        if (!flags[KEY_REPAIRED]) await repairFolderData(bookmarks, folders);
+      }
+      // 読み込み・保存中に外から消された場合は、古い判定を記憶せず読み直す。
+      if (version === migrationVersion) migrationReady = true;
+    }
+  })().finally(() => { migrating = undefined; });
+  await migrating;
 }
 
 /**
@@ -153,7 +191,12 @@ async function ensureMigrated(): Promise<void> {
  * 直す対象が 0 件なら、書き込まずに印 (folderIdsRepaired) だけを付ける。
  */
 export async function repairFolderIds(): Promise<void> {
-  const [raw, rawFolders] = await Promise.all([read<unknown>(KEY_BOOKMARKS, {}), read<unknown>(KEY_FOLDERS, [])]);
+  const data = await chrome.storage.local.get([KEY_BOOKMARKS, KEY_FOLDERS]);
+  await repairFolderData(data[KEY_BOOKMARKS], data[KEY_FOLDERS]);
+}
+
+/** 初回の移行と修復で同じ入力を共有し、大きな保存データの再読み込みを避ける。 */
+async function repairFolderData(raw: unknown, rawFolders: unknown): Promise<void> {
   const map = (raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}) as BookmarkMap;
   const folders = (Array.isArray(rawFolders) ? rawFolders : []) as Folder[];
   const out: BookmarkMap = {};
@@ -197,6 +240,17 @@ async function readAllFolders(): Promise<Folder[]> {
 async function readMap(): Promise<BookmarkMap> {
   await ensureMigrated();
   return read<BookmarkMap>(KEY_BOOKMARKS, {});
+}
+/** ポストのループで全アカウントのフォルダを絞り直さず、同じ一覧を使い回す。 */
+function foldersByAccount(folders: Folder[]): Map<string, Folder[]> {
+  const groups = new Map<string, Folder[]>();
+  for (const f of folders) {
+    const accountId = f.accountId ?? UNKNOWN_ACCOUNT_ID;
+    const group = groups.get(accountId);
+    if (group) group.push(f);
+    else groups.set(accountId, [f]);
+  }
+  return groups;
 }
 const mine = (f: Folder) => f.accountId === scope;
 /** scope のフォルダ */
@@ -374,10 +428,19 @@ export async function getBookmarkOf(accountId: string, tweetId: string): Promise
 /** 「未分類」の受け皿のフォルダ (名前なし = 表示時に解決) が無ければ作る */
 async function ensureInboxFolder(accountId: string = scope): Promise<void> {
   const all = await readAllFolders();
+  const next = withInboxFolder(all, accountId);
+  if (next !== all) await write(KEY_FOLDERS, next);
+}
+
+/** 受け皿の作成を同期で計画し、ポストと同じ set にもまとめられるようにする。 */
+function withInboxFolder(all: Folder[], accountId: string): Folder[] {
   const folders = all.filter((f) => f.accountId === accountId);
-  if (folders.some((f) => f.id === INBOX_ID)) return;
+  if (folders.some((f) => f.id === INBOX_ID)) return all;
   const others = all.filter((f) => f.accountId !== accountId);
-  await write(KEY_FOLDERS, [...others, ...folders, { id: INBOX_ID, name: '', icon: 'ti-star', order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId }]);
+  return [...others, ...folders, {
+    id: INBOX_ID, name: '', icon: 'ti-star',
+    order: folders.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId,
+  }];
 }
 
 /**
@@ -547,20 +610,21 @@ export function importData(json: unknown): Promise<number> {
     const curFolders = new Map((await readAllFolders()).map((f) => [bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f]));
     for (const f of folders) curFolders.set(bookmarkKey(f.accountId, f.id), f);
     const repairedFolders = sanitizeParents([...curFolders.values()]);
+    const accountFolders = foldersByAccount(repairedFolders);
     curFolders.clear();
     for (const f of repairedFolders) curFolders.set(bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f);
-    for (const b of bookmarks) b.folderIds = withAncestors(b.folderIds, repairedFolders.filter(f => f.accountId === b.accountId));
+    for (const b of bookmarks) b.folderIds = withAncestors(b.folderIds, accountFolders.get(b.accountId) ?? []);
     // 「未分類」に入るポストがあるアカウントには、受け皿のフォルダを用意する
     for (const b of bookmarks) {
       if (!b.folderIds.includes(INBOX_ID) || curFolders.has(bookmarkKey(b.accountId, INBOX_ID))) continue;
-      const mineF = [...curFolders.values()].filter((f) => (f.accountId ?? UNKNOWN_ACCOUNT_ID) === b.accountId);
+      const mineF = accountFolders.get(b.accountId) ?? [];
       curFolders.set(bookmarkKey(b.accountId, INBOX_ID), { id: INBOX_ID, name: '', icon: 'ti-star', order: mineF.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: b.accountId });
     }
     const map = await readMap();
     for (const b of bookmarks) map[bookmarkKey(b.accountId, b.tweetId)] = b;
     const accounts = await read<Record<string, Account>>(KEY_ACCOUNTS, {});
     for (const [k, b] of Object.entries(map)) {
-      map[k] = { ...b, folderIds: withAncestors(b.folderIds, repairedFolders.filter(f => f.accountId === b.accountId)) };
+      map[k] = { ...b, folderIds: withAncestors(b.folderIds, accountFolders.get(b.accountId) ?? []) };
     }
     if (!legacy && Array.isArray(d.accounts)) {
       for (const a of d.accounts.filter(validAccount)) {
@@ -569,9 +633,11 @@ export function importData(json: unknown): Promise<number> {
         if (!accounts[id] || accounts[id].lastSeenAt < a.lastSeenAt) accounts[id] = { ...a, id };
       }
     }
-    await write(KEY_FOLDERS, [...curFolders.values()]);
-    await write(KEY_BOOKMARKS, map);
-    await write(KEY_ACCOUNTS, accounts);
+    await chrome.storage.local.set({
+      [KEY_FOLDERS]: [...curFolders.values()],
+      [KEY_BOOKMARKS]: map,
+      [KEY_ACCOUNTS]: accounts,
+    });
     return bookmarks.length;
   });
 }
@@ -621,10 +687,11 @@ export function missingFields(saved: FillView, incoming: FillView): Partial<Snap
   if (saved.author === handleName && name && name !== handleName) patch.author = name;
   if (!saved.createdAt && incoming.createdAt) patch.createdAt = incoming.createdAt;
   if (!saved.hasLink && incoming.hasLink) patch.hasLink = true;
-  const quote = cleanQuote(incoming.quote);
+  // quote の有無は新規保存時に決める。後から見えた引用候補の誤検出を補完で固定しない。
+  const quote = saved.quote ? cleanQuote(incoming.quote) : undefined;
   if (quote && isEmojiImageUrl(quote.avatar)) delete quote.avatar;
-  if (quote) {
-    const merged = saved.quote ? fillQuote(saved.quote, quote) : quote;
+  if (quote && saved.quote) {
+    const merged = fillQuote(saved.quote, quote);
     if (merged) patch.quote = merged;
   }
   return Object.keys(patch).length ? patch : null;
@@ -682,8 +749,7 @@ export function addCollected(items: { tweetId: string; snapshot?: Bookmark['snap
       );
       return { order, fresh: usable.filter((it) => !m[keyOf(it.tweetId)] && order.has(it.tweetId)) };
     };
-    if (plan(await readMap()).fresh.length === 0) return 0;
-    await ensureInboxFolder(accountId); // 読んだあと書くまでの間に await を挟まないよう、先に用意して読み直す
+    const folders = await readAllFolders();
     const map = await readMap();
     const { order, fresh } = plan(map);
     if (fresh.length === 0) return 0;
@@ -693,7 +759,12 @@ export function addCollected(items: { tweetId: string; snapshot?: Bookmark['snap
       map[keyOf(it.tweetId)] = { accountId, tweetId: it.tweetId, folderIds: [INBOX_ID], savedAt: order.get(it.tweetId)!, snapshot: it.snapshot! };
       added++;
     }
-    await write(KEY_BOOKMARKS, map);
+    // map を読んだあと別の await を挟まない。受け皿が無い場合も同じ書き込みで作る。
+    const nextFolders = withInboxFolder(folders, accountId);
+    await chrome.storage.local.set({
+      [KEY_BOOKMARKS]: map,
+      ...(nextFolders !== folders ? { [KEY_FOLDERS]: nextFolders } : {}),
+    });
     return added;
   });
 }
@@ -715,12 +786,13 @@ export type BookmarkUndo = Record<string, Bookmark | null>;
 
 function mutateBookmarks(
   tweetIds: string[],
-  fn: (b: Bookmark, folders: Folder[]) => Bookmark | null,
+  fn: (b: Readonly<Bookmark>, folders: readonly Folder[]) => Bookmark | null,
   atomicInbox = false,
 ): Promise<BookmarkUndo> {
   return serial(async () => {
     // 確定式の一括変更では受け皿も同じ set に含める。map を読む前に準備し、競合する時間を延ばさない。
     const treeFolders = await readAllFolders();
+    const mineFolders = treeFolders.filter(mine);
     const allFolders = atomicInbox ? treeFolders : undefined;
     const apply = (map: BookmarkMap): BookmarkUndo => {
       const undo: BookmarkUndo = {};
@@ -728,9 +800,13 @@ function mutateBookmarks(
         const k = key(tid);
         const prev = map[k];
         if (!prev) continue;
-        let next = fn(structuredClone(prev), treeFolders.filter(mine));
-        if (next) next = { ...next, folderIds: withAncestors(next.folderIds, treeFolders.filter(mine)) }; // 「未分類」は他のフォルダと同時には持たない
-        if (JSON.stringify(next) === JSON.stringify(prev)) continue;
+        // fn は prev とその中身を変更せず、新しい所属を持つオブジェクトを返す。undo は変更前の参照を保つ。
+        let next = fn(prev, mineFolders);
+        if (next) next = { ...next, folderIds: withAncestors(next.folderIds, mineFolders) };
+        // 本文・画像を文字列化しない。所属以外を変える fn も、別の値・snapshot の参照なら変更として扱う。
+        if (next && next.accountId === prev.accountId && next.tweetId === prev.tweetId &&
+          next.savedAt === prev.savedAt && next.snapshot === prev.snapshot &&
+          next.folderIds.length === prev.folderIds.length && next.folderIds.every((id, i) => id === prev.folderIds[i])) continue;
         undo[k] = prev;
         if (next) map[k] = next;
         else delete map[k];
@@ -742,7 +818,6 @@ function mutateBookmarks(
     let undo = apply(map);
     if (Object.keys(undo).length === 0) return undo;
     if (allFolders) {
-      const mineFolders = allFolders.filter(mine);
       const needsInbox = hasInbox(map) && !mineFolders.some(f => f.id === INBOX_ID);
       await chrome.storage.local.set({
         [KEY_BOOKMARKS]: map,
@@ -803,9 +878,10 @@ export const deleteBookmarks = (tweetIds: string[]) => mutateBookmarks(tweetIds,
 export function restoreBookmarks(undo: BookmarkUndo): Promise<void> {
   return serial(async () => {
     const folders = await readAllFolders();
+    const accountFolders = foldersByAccount(folders);
     const map = await readMap();
     for (const [k, prev] of Object.entries(undo)) {
-      if (prev) map[k] = { ...prev, folderIds: withAncestors(prev.folderIds, folders.filter(f => f.accountId === prev.accountId)) };
+      if (prev) map[k] = { ...prev, folderIds: withAncestors(prev.folderIds, accountFolders.get(prev.accountId) ?? []) };
       else delete map[k];
     }
     await write(KEY_BOOKMARKS, map);
@@ -897,10 +973,18 @@ export const UNKNOWN_ACCOUNT: Account = { id: UNKNOWN_ACCOUNT_ID, handle: '', la
  * 「アカウント未設定」は、そのデータ (ポストかフォルダ) があるときだけ。新しく見たアカウントが先、未設定は最後。
  */
 export async function listAccounts(): Promise<AccountSummary[]> {
-  await ensureMigrated();
-  const [accounts, map, folders, last] = await Promise.all([
+  return accountSummaries(await readMap());
+}
+
+/** 管理画面の一覧とアカウント別件数を同じ保存データから作る。全件の読み出しは 1 回。 */
+export async function listBookmarksWithAccounts(): Promise<{ bookmarks: Bookmark[]; accounts: AccountSummary[] }> {
+  const map = await readMap();
+  return { bookmarks: Object.values(map).filter(inScope), accounts: await accountSummaries(map) };
+}
+
+async function accountSummaries(map: BookmarkMap): Promise<AccountSummary[]> {
+  const [accounts, folders, last] = await Promise.all([
     read<Record<string, Account>>(KEY_ACCOUNTS, {}),
-    readMap(),
     readAllFolders(),
     getLastSeenAccount(),
   ]);

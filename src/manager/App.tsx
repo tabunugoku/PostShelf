@@ -46,6 +46,7 @@ import {
   setCollapsedFolders,
   getBookmark,
   listBookmarks,
+  listBookmarksWithAccounts,
   listFolders,
   moveToFolder,
   onDataChanged,
@@ -67,7 +68,7 @@ import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
 import { Triage } from './Triage';
 import { SearchContext } from './PostText';
-import { AvatarContext, buildAvatarFallback } from './avatars';
+import { AvatarContext, buildAvatarFallback, type AvatarFallback } from './avatars';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
 import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
@@ -227,8 +228,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setAccountScope(id);
     setViewId(id);
   };
+  const ownWrites = useRef(0);
   const reload = async () => {
-    const [f, b, accs] = await Promise.all([listFolders(), listBookmarks(), listAccounts()]);
+    const [f, { bookmarks: b, accounts: accs }] = await Promise.all([listFolders(), listBookmarksWithAccounts()]);
     setFolders(f);
     setBookmarks(b);
     setAccounts(accs);
@@ -286,7 +288,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         setAutoCfg(c.autoCollect);
         setCollapsed(new Set(c.folderTreeCollapsed));
       }),
-      onDataChanged(() => void reload()),
+      onDataChanged(() => { if (!ownWrites.current) void reload(); }),
       onImportHintChanged(() => void loadHint()),
       onLastSeenAccountChanged(() => void onLastSeen()),
     ];
@@ -455,7 +457,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     return n;
   };
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
-  const avatarFallback = useMemo(() => buildAvatarFallback(bookmarks), [bookmarks]);
+  const previousAvatars = useRef<AvatarFallback>(new Map());
+  const avatarFallback = useMemo(() => {
+    const next = buildAvatarFallback(bookmarks, previousAvatars.current);
+    previousAvatars.current = next;
+    return next;
+  }, [bookmarks]);
   /** 仕分けモードが「削除されたポストを飛ばす」ために見る ID。保存データが変わらない再描画では、同じ Set を渡す */
   const liveIds = useMemo(() => new Set(bookmarks.map((b) => b.tweetId)), [bookmarks]);
   const viewerBookmark = viewer ? bookmarks.find((b) => b.tweetId === viewer.tweetId) : undefined;
@@ -486,6 +493,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   /** 一括操作を実行し、件数が変わったら取り消し付きトーストを出す */
   const run = async (op: Promise<BookmarkUndo>, msgKey: string | ((undo: BookmarkUndo) => string)) => {
+    // 自分の書き込みの通知はまとめ、成功・失敗後の reload で外部の変更も含めて読み直す。
+    ownWrites.current++;
     try {
       const undo = await op;
       await reload();
@@ -497,6 +506,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       setToast({ key: Date.now(), message: t('errorStorage') });
       await reload().catch(() => {});
       return false;
+    } finally {
+      ownWrites.current--;
     }
   };
   const doUndo = async () => {
@@ -507,9 +518,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       return;
     }
     if (!toast?.undo) return;
-    await restoreBookmarks(toast.undo);
-    setToast(null);
-    await reload();
+    ownWrites.current++;
+    try {
+      await restoreBookmarks(toast.undo);
+      setToast(null);
+      await reload();
+    } finally {
+      ownWrites.current--;
+    }
   };
 
   const clearSelection = () => {

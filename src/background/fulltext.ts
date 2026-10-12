@@ -17,7 +17,7 @@ import {
   fullTextPlan, getCollectRun, getFullTextTab, getFullTextTries, getFullTextRun, getSettings, recordFullTextTry, saveFullTextRun, setFullTextTab,
   type FullTextKind, type FullTextRun, type FullTextStop, type FullTextPlan,
 } from '../shared/settings';
-import { fillMissing, listAllTruncated, refreshFullText, type FillView } from '../shared/storage';
+import { fillMissing, getBookmarkOf, listAllTruncated, refreshFullText, type FillView } from '../shared/storage';
 
 export const GAP_MIN_MS = 4000;
 export const GAP_MAX_MS = 8000;
@@ -76,7 +76,10 @@ export function defaultDeps(): FullTextDeps {
       const s = (await getCollectRun())?.status;
       return s === 'running' || s === 'countdown';
     },
-    lookup: async (it) => (await listAllTruncated()).find((b) => b.accountId === it.accountId && b.tweetId === it.tweetId),
+    lookup: async (it) => {
+      const bookmark = await getBookmarkOf(it.accountId, it.tweetId);
+      return bookmark?.snapshot.truncated === true ? bookmark : undefined;
+    },
     refresh: (it, full) => refreshFullText(it.accountId, it.tweetId, full),
     fill: (it, view) => fillMissing([{ tweetId: it.tweetId, snapshot: view }], it.accountId),
     tries: () => getFullTextTries(),
