@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>取り込みの流れと取りこぼし</title>
+<style>
+  :root {
+    --bg: #fff; --fg: #1a1a1a; --muted: #666; --line: #d0d4da; --card: #f6f7f9;
+    --ok: #1a7f4b; --ok-bg: #e4f4ea; --ng: #c0392b; --ng-bg: #fbe9e7; --warn: #a66a00; --warn-bg: #fff3d6;
+    --blue: #1d6fd1; --blue-bg: #e6f0fc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111316; --fg: #e8eaed; --muted: #9aa0a6; --line: #343a40; --card: #1b1e22;
+      --ok: #5fcf8f; --ok-bg: #16301f; --ng: #ff8a7a; --ng-bg: #3a1c19; --warn: #f0b84a; --warn-bg: #352a10;
+      --blue: #6cb0ff; --blue-bg: #14263d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.7 system-ui, "Yu Gothic UI", sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 40px 0 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 15px; margin: 20px 0 6px; }
+  p, li { margin: 4px 0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .flow { display: grid; gap: 8px; margin: 12px 0; }
+  .step { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 10px 12px; }
+  .step b { display: block; }
+  .step code, code { font-size: 12.5px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+  .arrow { text-align: center; color: var(--muted); line-height: 1; }
+  .ok { border-color: var(--ok); background: var(--ok-bg); }
+  .ng { border-color: var(--ng); background: var(--ng-bg); }
+  .warn { border-color: var(--warn); background: var(--warn-bg); }
+  .new { border-color: var(--blue); background: var(--blue-bg); }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-right: 6px; color: #fff; }
+  .tag.ng { background: var(--ng); } .tag.warn { background: var(--warn); } .tag.ok { background: var(--ok); } .tag.new { background: var(--blue); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 8px 0; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: var(--card); }
+  td.y { color: var(--ok); font-weight: 700; } td.n { color: var(--ng); font-weight: 700; } td.p { color: var(--warn); font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <h1>取り込みの流れと、取りこぼしが起きる場所</h1>
+  <p class="muted">対象: 自動取り込み (<code>src/content/autocollect.ts</code>) と、あとから補う処理。コードの読み取りで作った図で、X の実際の描画順は実機未確認の推測を含みます。</p>
+
+  <h2>1. 現在のロジック</h2>
+  <div class="flow">
+    <div class="step"><b>① スクロール</b>画面の高さの 0.8 倍ずつ。待ちは下限 0.4〜1.2 秒、上限 1〜4 秒。新しいポストが DOM に出れば、下限を過ぎた時点で次へ進む。</div>
+    <div class="arrow">▼</div>
+    <div class="step"><b>② 読み取り <code>readVisible</code> → <code>extractTweet</code></b>画面にある article を 1 回だけ読み、すぐ <code>seen</code> に入れる (以後、同じ取り込みの中では読み直さない)。
+      読む項目: 本文・投稿者・<b>アイコン</b> (<code>Tweet-User-Avatar img</code> の src)・<b>画像</b> (<code>tweetPhoto img</code> の src)・動画・リンク・引用。</div>
+    <div class="arrow">▼</div>
+    <div class="step warn"><span class="tag warn">待ちの判定</span><b>メディアが未読みか? (<code>mediaPending</code>)</b>
+      「動画なのに poster が無い」または「画像リンク <code>a[href*=/photo/]</code> はあるのに img の src が空」のときだけ、保存を保留する。<br>
+      <b>アイコンは、この判定に入っていない。</b></div>
+    <div class="cols">
+      <div>
+        <div class="arrow">保留なし ▼</div>
+        <div class="step ng"><span class="tag ng">取りこぼし A</span>画像の枠 (写真リンク) がまだ DOM に無い、または img が無い状態で読むと、保留にならず<b>メディアなしで保存</b>される。<br>
+          <span class="tag ng">取りこぼし B</span>アイコンの img が未読み (src が空) でも、そのまま<b>アイコンなしで保存</b>される。</div>
+      </div>
+      <div>
+        <div class="arrow">保留あり ▼</div>
+        <div class="step warn"><code>mediaRetry</code> に入れて、次のループ (次のスクロールのあと、約 1〜5 秒後) の読み取りで 1 回だけ読み直す。<br>
+          <span class="tag ng">取りこぼし C</span>読み直しても空なら、そのまま (空のまま) 保存する。ポストが仮想化で DOM から消えていれば、最初に読んだ内容で保存する。</div>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="step"><b>③ 保存 <code>addCollected</code></b>20 件たまるごと、または一時停止・終了のときに保存。保存済みのポストは<b>触らない</b> (既存の判定は ID だけ)。<br>
+      <span class="tag ng">取りこぼし D</span>「抜けたまま保存した」という印が、保存データに残らない。あとで、抜けを見つける手がかりがない。</div>
+    <div class="arrow">▼</div>
+    <div class="step"><b>④ 全文の取得 (たたまれたポストだけ)</b>終わったあと、裏のタブで個別ページを開き、<b>本文だけ</b>を読む (<code>refreshFullText</code> は text / segments / translated しか更新しない)。1 回 30 件まで。<br>
+      <span class="tag ng">取りこぼし E</span>同じページを開いているのに、そのページにあるアイコン・画像は読まずに捨てている。30 件を超えた分は、手動の「いま取得する」まで待つ。</div>
+  </div>
+
+  <h2>2. あとから補う処理 (いまの実装)</h2>
+  <div class="flow">
+    <div class="step"><b>画面にあるポストを見張る</b><code>MutationObserver</code> (<code>src/content/index.ts</code>) が、DOM の変化のたびに 300ms まとめて <code>VisibleMediaBackfill</code> を動かす。ブックマーク一覧・ホーム・個別ページのどれでも動く。</div>
+    <div class="arrow">▼</div>
+    <div class="step"><b>補う条件 <code>backfillMedia</code></b>保存済みで、画面側にメディアがあり、保存側にメディアが無いときだけ。</div>
+    <table>
+      <tr><th>項目</th><th>元の投稿を開いたとき</th></tr>
+      <tr><td>画像 (<code>media</code>)</td><td class="y">補う (保存側が空のとき)</td></tr>
+      <tr><td>動画の印・poster</td><td class="y">補う</td></tr>
+      <tr><td><b>アイコン (<code>avatar</code>)</b></td><td class="n">補わない ← 今回の症状</td></tr>
+      <tr><td>投稿者名 (<code>author</code>。取れないと @ハンドルで代用される)</td><td class="n">補わない</td></tr>
+      <tr><td>投稿日時・リンクカード・引用元</td><td class="n">補わない</td></tr>
+      <tr><td>本文</td><td class="p">たたまれた (truncated) ポストだけ、全文を個別ページで更新</td></tr>
+    </table>
+  </div>
+
+  <h2>3. 取りこぼしの原因 (まとめ)</h2>
+  <table>
+    <tr><th>#</th><th>原因</th><th>どこ</th><th>確度</th></tr>
+    <tr><td>A</td><td>画像の枠が出る前に読むと、保留の条件に当たらず、メディアなしで保存される</td><td><code>snapshot.ts</code> の <code>mediaPending</code></td><td>高い (画像が抜ける症状と一致)</td></tr>
+    <tr><td>B</td><td>アイコンは未読みの判定が無い。<code>src</code> が空でも、そのまま保存される</td><td><code>snapshot.ts</code> の <code>avatar</code></td><td>高い (アイコンが抜ける症状と一致)</td></tr>
+    <tr><td>C</td><td>読み直しは 1 回だけで、それでも空なら空のまま保存</td><td><code>autocollect.ts</code> の <code>acceptMedia</code></td><td>高い (コードから確定)</td></tr>
+    <tr><td>D</td><td>抜けた状態の印が無い</td><td>データモデル</td><td>確定</td></tr>
+    <tr><td>E</td><td>裏のタブで個別ページを読むのに、本文しか使わない</td><td><code>fulltext.ts</code> / <code>refreshFullText</code></td><td>確定</td></tr>
+    <tr><td>F</td><td>「あとから補う」がメディアだけで、アイコンなど他の項目に対応していない</td><td><code>storage.ts</code> の <code>backfillMedia</code></td><td>確定 (今回の症状)</td></tr>
+  </table>
+  <p class="muted">X が、写真の枠・img の src・アイコンの img を、どの順で、どれだけ遅れて DOM に出すかは未確認です。A・B が実際に起きている順序は、実機の診断 (後述の提案 4) で確かめるのが確実です。</p>
+
+  <h2>4. 改善案 1: 取りこぼさない (取り込み側)</h2>
+  <div class="flow">
+    <div class="step new"><span class="tag new">案 1-1</span><b>「そろった」の判定を作る (<code>isComplete</code>)</b>
+      アイコン: img があり、src が空でなく、<code>img.complete && naturalWidth &gt; 0</code>。<br>
+      画像: 写真リンクの数と、img の数が同じで、すべて読み込み済み。動画: poster がある。<br>
+      <b>そろっていないポストは、保存しない</b> (アイコンも判定に入れる)。</div>
+    <div class="step new"><span class="tag new">案 1-2</span><b>1 回の読み直しをやめて、待つ</b>
+      そろっていないポストは、そのポストの中の <code>load</code> イベントと DOM の変化で、そろうまで最大 3〜5 秒待つ。<br>
+      待つ間も、スクロールは止めない (保留の件数に上限を付ける。ポストが DOM から消える前に、最後にもう 1 回読む)。</div>
+    <div class="step new"><span class="tag new">案 1-3</span><b>待っても、そろわなかったとき: 印を付けて保存する</b>
+      保存データに <code>partial</code> (抜けがあるかもしれない印) を付ける。印があるポストは、後述の「補う側」が必ず直し、直ったら印を消す。<br>
+      「保存しない」ままにすると、ブックマークの一覧から消えて見える (取りこぼし以上に悪い) ので、保存はして印を付ける。</div>
+    <div class="step new"><span class="tag new">案 1-4</span><b>スクロールの間隔を、そろうまで少しだけ延ばす</b>
+      X の読み込み中の判定 (<code>timelineLoading</code>) に、「画面のポストに、そろっていないものがある」を足す。速さは変えず、そろった時点で次へ進む。</div>
+  </div>
+
+  <h2>5. 改善案 2: 取りこぼしたとき (補う側)</h2>
+  <div class="flow">
+    <div class="step new"><span class="tag new">案 2-1</span><b>「空の項目だけ埋める」の合流 (<code>fillMissing</code>) にそろえる</b>
+      <code>backfillMedia</code> を一般化する。保存側が空 (または無い) で、画面側に値があれば埋める。<b>既にある値は、上書きしない</b> (ユーザーが見ているものを壊さない)。<br>
+      対象: <code>avatar</code>・<code>media</code>・<code>videoPoster</code>/<code>hasVideo</code>・<code>author</code> (@ハンドルのままのとき)・<code>createdAt</code>・<code>hasLink</code>・<code>quote</code> (保存側に無いとき、または引用の画像・アイコンが空のとき)。</div>
+    <div class="step new"><span class="tag new">案 2-2</span><b>画面側も「そろってから」読む</b>
+      補うときも、画面のポストが案 1-1 の「そろった」になってから使う。読み込み途中の空の値で、補えないまま終わらないようにする。</div>
+    <div class="step new"><span class="tag new">案 2-3</span><b>個別ページを開いたときは、主役のポストを確実に補う</b>
+      <code>updateFromStatusPage</code> を、truncated のときだけでなく、保存済みの主役のポストなら必ず <code>fillMissing</code> する (全文の更新とは別にする)。<br>
+      裏のタブの全文の取得 (<code>readFullText</code>) も、読んだ内容全体を返して、本文と一緒に <code>fillMissing</code> する (取りこぼし E の解消。新しい通信や権限は増えない)。</div>
+    <div class="step new"><span class="tag new">案 2-4</span><b>表示側のアイコンの代用 (保存データを変えない)</b>
+      アイコンが空のポストは、同じ @ハンドルの別のポストのアイコンを、表示のときだけ借りる (アカウントの情報にあれば、それも)。<br>
+      元の投稿を開かなくても、見た目はすぐ直る。アイコンの URL は変わることがあるが、表示の代用なので害は小さい。</div>
+    <div class="step new"><span class="tag new">案 2-5</span><b>(要判断) <code>partial</code> のポストの、裏のタブでの自動修復</b>
+      全文の取得と同じ仕組み (裏のタブ・間隔・上限・止める条件) で、<code>partial</code> のポストも開いて補う。ユーザーが元の投稿を開く手間が無くなるが、CLAUDE.md の「裏のタブで開く」例外の範囲を広げることになる。
+      <b>ユーザーの判断が要る</b> (私の推奨: まず 1-1〜2-4 を入れて、足りなければ検討)。</div>
+  </div>
+
+  <h2>6. 提案する順番</h2>
+  <table>
+    <tr><th>段階</th><th>内容</th><th>効果</th><th>リスク</th></tr>
+    <tr><td>1</td><td>2-1 + 2-3 + 2-4 (補う側。アイコンなど全項目)</td><td>いま取りこぼしている分が、開き直せば全部直る。アイコンは、開かなくても直る</td><td>低い (空の項目を埋めるだけ)</td></tr>
+    <tr><td>2</td><td>1-1 + 1-2 + 1-3 (取り込み側のそろう待ちと印)</td><td>取りこぼしの発生そのものを減らす</td><td>中 (取り込みの速さ・保留の管理が変わる)</td></tr>
+    <tr><td>3</td><td>診断: どの項目が空で保存されたかを、設定の診断に出す (件数だけ。本文・名前は出さない)</td><td>A・B の実際の順序を、実機で確かめられる</td><td>低い</td></tr>
+    <tr><td>4</td><td>2-5 (裏のタブでの自動修復)</td><td>手間をなくす</td><td>CLAUDE.md の例外の拡張。判断が要る</td></tr>
+  </table>
+  <p class="muted">サンプルは架空です。実在のポスト・アカウントは使っていません。</p>
+</main>
+</body>
+</html>
