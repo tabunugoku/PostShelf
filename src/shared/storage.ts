@@ -198,6 +198,17 @@ async function readMap(): Promise<BookmarkMap> {
   await ensureMigrated();
   return read<BookmarkMap>(KEY_BOOKMARKS, {});
 }
+/** ポストのループで全アカウントのフォルダを絞り直さず、同じ一覧を使い回す。 */
+function foldersByAccount(folders: Folder[]): Map<string, Folder[]> {
+  const groups = new Map<string, Folder[]>();
+  for (const f of folders) {
+    const accountId = f.accountId ?? UNKNOWN_ACCOUNT_ID;
+    const group = groups.get(accountId);
+    if (group) group.push(f);
+    else groups.set(accountId, [f]);
+  }
+  return groups;
+}
 const mine = (f: Folder) => f.accountId === scope;
 /** scope のフォルダ */
 const readFolders = async () => (await readAllFolders()).filter(mine);
@@ -547,20 +558,21 @@ export function importData(json: unknown): Promise<number> {
     const curFolders = new Map((await readAllFolders()).map((f) => [bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f]));
     for (const f of folders) curFolders.set(bookmarkKey(f.accountId, f.id), f);
     const repairedFolders = sanitizeParents([...curFolders.values()]);
+    const accountFolders = foldersByAccount(repairedFolders);
     curFolders.clear();
     for (const f of repairedFolders) curFolders.set(bookmarkKey(f.accountId ?? UNKNOWN_ACCOUNT_ID, f.id), f);
-    for (const b of bookmarks) b.folderIds = withAncestors(b.folderIds, repairedFolders.filter(f => f.accountId === b.accountId));
+    for (const b of bookmarks) b.folderIds = withAncestors(b.folderIds, accountFolders.get(b.accountId) ?? []);
     // 「未分類」に入るポストがあるアカウントには、受け皿のフォルダを用意する
     for (const b of bookmarks) {
       if (!b.folderIds.includes(INBOX_ID) || curFolders.has(bookmarkKey(b.accountId, INBOX_ID))) continue;
-      const mineF = [...curFolders.values()].filter((f) => (f.accountId ?? UNKNOWN_ACCOUNT_ID) === b.accountId);
+      const mineF = accountFolders.get(b.accountId) ?? [];
       curFolders.set(bookmarkKey(b.accountId, INBOX_ID), { id: INBOX_ID, name: '', icon: 'ti-star', order: mineF.reduce((m, f) => Math.max(m, f.order), -1) + 1, accountId: b.accountId });
     }
     const map = await readMap();
     for (const b of bookmarks) map[bookmarkKey(b.accountId, b.tweetId)] = b;
     const accounts = await read<Record<string, Account>>(KEY_ACCOUNTS, {});
     for (const [k, b] of Object.entries(map)) {
-      map[k] = { ...b, folderIds: withAncestors(b.folderIds, repairedFolders.filter(f => f.accountId === b.accountId)) };
+      map[k] = { ...b, folderIds: withAncestors(b.folderIds, accountFolders.get(b.accountId) ?? []) };
     }
     if (!legacy && Array.isArray(d.accounts)) {
       for (const a of d.accounts.filter(validAccount)) {
@@ -807,9 +819,10 @@ export const deleteBookmarks = (tweetIds: string[]) => mutateBookmarks(tweetIds,
 export function restoreBookmarks(undo: BookmarkUndo): Promise<void> {
   return serial(async () => {
     const folders = await readAllFolders();
+    const accountFolders = foldersByAccount(folders);
     const map = await readMap();
     for (const [k, prev] of Object.entries(undo)) {
-      if (prev) map[k] = { ...prev, folderIds: withAncestors(prev.folderIds, folders.filter(f => f.accountId === prev.accountId)) };
+      if (prev) map[k] = { ...prev, folderIds: withAncestors(prev.folderIds, accountFolders.get(prev.accountId) ?? []) };
       else delete map[k];
     }
     await write(KEY_BOOKMARKS, map);
