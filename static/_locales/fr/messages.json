@@ -1678,5 +1678,7 @@
   "triageKeyEmpty": {"message":"Vide"},
   "triageKeyReplace": {"message":"Choisissez le numéro à remplacer."},
   "triageKeyOrder": {"message":"Ordre des touches"},
-  "triageKeyOrderHint": {"message":"Glissez pour réorganiser."}
+  "triageKeyOrderHint": {"message":"Glissez pour réorganiser."},
+  "showInAncestorsLabel": {"message":"Afficher aussi dans les dossiers parents"},
+  "showInAncestorsDesc": {"message":"Si cette option est désactivée, un post apparaît uniquement dans le dossier le plus bas auquel il appartient. Les données enregistrées ne changent pas."}
 }
