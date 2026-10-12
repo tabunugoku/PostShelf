@@ -1,4 +1,4 @@
-import { ALL_FOLDER_ID, type Bookmark } from './models';
+import { ALL_FOLDER_ID, INBOX_ID, type Bookmark } from './models';
 import { foldText } from './fold';
 
 export type SortKey = 'savedDesc' | 'savedAsc' | 'postedDesc' | 'postedAsc';
@@ -35,10 +35,23 @@ export function matchesFilters(b: Bookmark, f: Filters): boolean {
 
 export const hasActiveFilters = (f: Filters): boolean => !!(f.image || f.video || f.link || f.handle);
 
-export function inView(b: Bookmark, folderId: string, now = Date.now()): boolean {
+/** フォルダごとの子孫 ID。表示用に事前計算し、ポストの所属を Set で照合する */
+export type DescendantsOf = ReadonlyMap<string, ReadonlySet<string>>;
+
+/** ビューの所属判定。子孫表の省略時は祖先にも表示し、指定時は最下位の所属だけにする */
+export function inView(
+  b: Bookmark,
+  folderId: string,
+  now = Date.now(),
+  descendantsOf?: DescendantsOf,
+): boolean {
   if (folderId === ALL_FOLDER_ID) return true;
   if (folderId === RECENT_ID) return b.savedAt >= now - RECENT_MS;
-  return b.folderIds.includes(folderId);
+  if (!b.folderIds.includes(folderId)) return false;
+  if (folderId === INBOX_ID) return true;
+  const descendants = descendantsOf?.get(folderId);
+  // 保存済みの所属は祖先を含むため、親と子の両方を直接選んだ場合も「子だけ」と区別できず、子にだけ表示する。
+  return !descendants || !b.folderIds.some((id) => descendants.has(id));
 }
 
 export { foldText };
@@ -65,11 +78,18 @@ const foldedOf = (b: Bookmark): string => {
 /** ビュー (フォルダ / すべて / 最近の 7 日) で絞り込み → 検索 (本文/投稿者/ハンドル) → 絞り込みチップ (AND) → 並べ替え */
 export function queryBookmarks(
   all: Bookmark[],
-  opts: { folderId: string; search: string; sort: SortKey; filters?: Filters; now?: number },
+  opts: {
+    folderId: string;
+    search: string;
+    sort: SortKey;
+    filters?: Filters;
+    now?: number;
+    descendantsOf?: DescendantsOf;
+  },
 ): Bookmark[] {
   const q = foldText(opts.search.trim());
   const out = all.filter((b) => {
-    if (!inView(b, opts.folderId, opts.now)) return false;
+    if (!inView(b, opts.folderId, opts.now, opts.descendantsOf)) return false;
     if (opts.filters && !matchesFilters(b, opts.filters)) return false;
     if (!q) return true;
     return foldedOf(b).includes(q);
@@ -83,8 +103,14 @@ export function queryBookmarks(
   return out.sort(cmp[opts.sort]);
 }
 
-export function countFolder(all: Bookmark[], folderId: string, now = Date.now()): number {
-  return all.filter((b) => inView(b, folderId, now)).length;
+/** 一覧と同じ所属判定で、検索・フィルターをかける前の件数を数える */
+export function countFolder(
+  all: Bookmark[],
+  folderId: string,
+  now = Date.now(),
+  descendantsOf?: DescendantsOf,
+): number {
+  return all.filter((b) => inView(b, folderId, now, descendantsOf)).length;
 }
 
 /** 保存データにある投稿者のハンドル一覧 (件数の多い順、同数は名前順) */
