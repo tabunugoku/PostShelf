@@ -31,6 +31,24 @@ export function descendants(folders: readonly Folder[], id: string): Folder[] {
   return folders.filter((f) => f.id !== id && ancestors(folders, f.id).some((p) => p.id === id));
 }
 
+/** ancestors と同じ親の規則で、全フォルダの子孫 ID の対応表を作る */
+export function descendantsMap(folders: readonly Folder[]): ReadonlyMap<string, ReadonlySet<string>> {
+  const byId = new Map(folders.map((f) => [f.id, f]));
+  const children = new Map(folders.map((f) => [f.id, new Set<string>()]));
+  for (const folder of folders) {
+    const seen = new Set([folder.id]);
+    let parentId = folder.parentId;
+    while (parentId && !seen.has(parentId)) {
+      const parent = byId.get(parentId);
+      if (!parent || parent.accountId !== folder.accountId || !user(parent.id)) break;
+      seen.add(parentId);
+      children.get(parentId)!.add(folder.id);
+      parentId = parent.parentId;
+    }
+  }
+  return children;
+}
+
 /**
  * id のフォルダを parentId の下に置けるか。parentId が空なら 1 段目 (いつも置ける)。
  * id が無いときは、新しく作るフォルダ (accountId はその所属先)。

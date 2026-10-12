@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
-import { ancestors, canParent, descendants, flattenFolders, folderPath } from '../shared/folderTree';
+import { ancestors, canParent, descendants, descendantsMap, flattenFolders, folderPath } from '../shared/folderTree';
 import { Icon } from '../shared/Icon';
 import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
 import {
@@ -424,17 +424,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const folderOf = useCallback((id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find(f=>f.id===id)), [folders]); // 保存データが変わるまで同じ関数 (Card の memo のため)
   const pickerFolders = [inboxView(storedInbox), ...userFolders];
 
-  // ポストごとのツリー走査を避ける。検索・表示設定の変更では作り直さず、フォルダの変更時だけ計算する。
-  const descendantsOf = useMemo(() => {
-    const children = new Map(folders.map((f) => [f.id, new Set<string>()]));
-    for (const folder of folders) {
-      for (const parent of ancestors(folders, folder.id)) {
-        children.get(parent.id)!.add(folder.id);
-      }
-    }
-    return children;
-  }, [folders]);
-  const viewDescendants = showInAncestors ? undefined : descendantsOf;
+  // オフのときだけ子孫表を作る。検索・並び順の変更では作り直さない。
+  const viewDescendants = useMemo(
+    () => showInAncestors ? undefined : descendantsMap(folders),
+    [folders, showInAncestors],
+  );
   const now = Date.now();
   const shown = useMemo(
     () => queryBookmarks(bookmarks, {
