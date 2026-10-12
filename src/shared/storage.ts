@@ -633,9 +633,11 @@ export function importData(json: unknown): Promise<number> {
         if (!accounts[id] || accounts[id].lastSeenAt < a.lastSeenAt) accounts[id] = { ...a, id };
       }
     }
-    await write(KEY_FOLDERS, [...curFolders.values()]);
-    await write(KEY_BOOKMARKS, map);
-    await write(KEY_ACCOUNTS, accounts);
+    await chrome.storage.local.set({
+      [KEY_FOLDERS]: [...curFolders.values()],
+      [KEY_BOOKMARKS]: map,
+      [KEY_ACCOUNTS]: accounts,
+    });
     return bookmarks.length;
   });
 }
