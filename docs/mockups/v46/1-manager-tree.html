@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>管理画面 フォルダツリー</title>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:"Segoe UI","Yu Gothic UI",system-ui,sans-serif;color:#0f1419}
+.row{display:flex;align-items:center;gap:8px;height:34px;padding-right:10px;border-radius:8px;font-size:14px;white-space:nowrap}
+.row.sel{background:#e8f1fb;color:#0b5cad;font-weight:600}
+.chev{width:6px;height:6px;border-right:2px solid #6b7785;border-bottom:2px solid #6b7785;transform:rotate(45deg);margin:0 5px 3px 3px;flex:none}
+.chev.c{transform:rotate(-45deg);margin:0 3px 0 1px}
+.sp{width:16px;flex:none}
+.dot{width:12px;height:12px;border-radius:3px;flex:none}
+.cnt{margin-left:auto;font-size:12px;color:#6b7785;font-variant-numeric:tabular-nums}
+.sel .cnt{color:#0b5cad}
+.card{border:1px solid #e1e6eb;border-radius:12px;padding:14px 16px;background:#fff}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:#eef2f6;color:#46515c}
+.note{position:absolute;font-size:12px;line-height:1.5;color:#7a3e00;background:#fff4e0;border:1px solid #f0c987;border-radius:8px;padding:6px 10px}
+</style>
+</helmet>
+<div style="position:relative;width:1040px;height:700px;background:#f6f8fa;display:flex;box-sizing:border-box">
+  <div style="width:300px;background:#fff;border-right:1px solid #e1e6eb;padding:16px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:2px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px 10px"><b style="font-size:16px">フォルダ</b><span class="tag">+ 追加</span></div>
+    <div class="row" style="padding-left:8px"><span class="sp"></span><span class="dot" style="background:#6b7785"></span>すべて<span class="cnt">128</span></div>
+    <div class="row" style="padding-left:8px"><span class="sp"></span><span class="dot" style="background:#d9a400"></span>未分類<span class="cnt">12</span></div>
+    <div style="height:1px;background:#e1e6eb;margin:6px 8px"></div>
+    <div class="row" style="padding-left:8px"><span class="chev"></span><span class="dot" style="background:#1d9bf0"></span>仕事<span class="cnt">42</span></div>
+    <div class="row" style="padding-left:26px"><span class="chev"></span><span class="dot" style="background:#1d9bf0"></span>企画<span class="cnt">18</span></div>
+    <div class="row sel" style="padding-left:44px"><span class="sp"></span><span class="dot" style="background:#1d9bf0"></span>会議メモ<span class="cnt">6</span></div>
+    <div class="row" style="padding-left:44px"><span class="sp"></span><span class="dot" style="background:#1d9bf0"></span>参考資料<span class="cnt">5</span></div>
+    <div class="row" style="padding-left:26px"><span class="sp"></span><span class="dot" style="background:#1d9bf0"></span>経理<span class="cnt">7</span></div>
+    <div class="row" style="padding-left:8px"><span class="chev c"></span><span class="dot" style="background:#00ba7c"></span>調査<span class="cnt">31</span></div>
+    <div class="row" style="padding-left:8px"><span class="chev"></span><span class="dot" style="background:#f4212e"></span>趣味<span class="cnt">26</span></div>
+    <div class="row" style="padding-left:26px"><span class="sp"></span><span class="dot" style="background:#f4212e"></span>料理<span class="cnt">14</span></div>
+    <div class="row" style="padding-left:26px"><span class="sp"></span><span class="dot" style="background:#f4212e"></span>旅行<span class="cnt">9</span></div>
+    <div class="row" style="padding-left:8px"><span class="sp"></span><span class="dot" style="background:#7856ff"></span>あとで読む<span class="cnt">17</span></div>
+    <div style="margin-top:auto;font-size:12px;color:#6b7785;line-height:1.6;padding:8px">件数は、子・孫フォルダの投稿を含む。最大 3 段。ドラッグで入れ替え・入れ子にする。</div>
+  </div>
+  <div style="flex:1;padding:20px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7785"><span>仕事</span><span>›</span><span>企画</span><span>›</span><b style="color:#0f1419;font-size:18px">会議メモ</b><span class="tag" style="margin-left:8px">6 件</span></div>
+    <div class="card"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#cfd9de"></div><div><b style="font-size:14px">サンプル太郎</b> <span style="font-size:13px;color:#6b7785">@sample_taro</span></div></div><div style="font-size:14px;line-height:1.6;margin:8px 0">議事録のテンプレートを作った。決定事項と宿題を分けて書くだけで、あとから探しやすくなる。</div><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag">仕事 / 企画 / 会議メモ</span></div></div>
+    <div class="card"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:50%;background:#cfd9de"></div><div><b style="font-size:14px">サンプル花子</b> <span style="font-size:13px;color:#6b7785">@sample_hanako</span></div></div><div style="font-size:14px;line-height:1.6;margin:8px 0">打ち合わせは 25 分にすると、だらだら続かない。最初に終わりの時刻を宣言する。</div><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag">仕事 / 企画 / 会議メモ</span><span class="tag">あとで読む</span></div></div>
+    <div style="margin-top:auto;display:flex;gap:16px">
+      <div class="card" style="flex:1;font-size:13px;line-height:1.7"><b>所属のしかた</b><br>「会議メモ」に入れた投稿は、親の「企画」と「仕事」にも自動で入る。<br>「仕事」を開くと、42 件 (子・孫を含む) が出る。</div>
+      <div class="card" style="width:300px;font-size:13px;line-height:1.7"><b>フォルダの編集</b><div style="margin-top:6px;display:flex;justify-content:space-between"><span style="color:#6b7785">名前</span>会議メモ</div><div style="display:flex;justify-content:space-between"><span style="color:#6b7785">親フォルダ</span><span style="border:1px solid #cfd9de;border-radius:6px;padding:1px 10px">仕事 / 企画 ▾</span></div><div style="font-size:12px;color:#6b7785;margin-top:4px">3 段目の下には作れない (「会議メモ」の下は選べない)。</div></div>
+    </div>
+  </div>
+  <div class="note" style="left:318px;top:132px">矢印でたたむ・開く。「調査」はたたんだ状態 (中に子フォルダあり)</div>
+  <div class="note" style="left:318px;top:236px">1 段目 → 2 段目 → 3 段目 (最大)。字下げで段を表す</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1040,"height":700}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

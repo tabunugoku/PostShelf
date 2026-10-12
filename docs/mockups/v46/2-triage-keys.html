@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>仕分けモード 数字キー</title>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:"Segoe UI","Yu Gothic UI",system-ui,sans-serif;color:#0f1419}
+.slot{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border:1px solid #e1e6eb;border-radius:10px;background:#fff;font-size:14px}
+.slot.on{background:#e8f1fb;border-color:#1d9bf0}
+.slot.empty{border-style:dashed;color:#9aa5b1;background:transparent}
+.key{width:24px;height:24px;border-radius:6px;background:#0f1419;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.empty .key{background:#cfd9de}
+.path{font-size:11px;color:#6b7785;margin-left:auto;white-space:nowrap}
+.dot{width:12px;height:12px;border-radius:3px;flex:none}
+.btn{display:inline-flex;align-items:center;height:36px;padding:0 16px;border-radius:999px;font-size:14px;font-weight:600;border:1px solid #cfd9de;background:#fff}
+.btn.p{background:#0f1419;color:#fff;border-color:#0f1419}
+</style>
+</helmet>
+<div style="width:1040px;height:700px;background:#f6f8fa;padding:24px 28px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;align-items:center;justify-content:space-between"><div><b style="font-size:18px">仕分け</b> <span style="font-size:13px;color:#6b7785;margin-left:8px">未分類 12 件のうち 3 件目</span></div><span class="btn">終了</span></div>
+  <div style="display:flex;gap:20px;flex:1;min-height:0">
+    <div style="flex:1;display:flex;flex-direction:column;gap:14px">
+      <div style="border:1px solid #e1e6eb;border-radius:12px;background:#fff;padding:18px 20px">
+        <div style="display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;border-radius:50%;background:#cfd9de"></div><div><b>サンプル次郎</b> <span style="font-size:13px;color:#6b7785">@sample_jiro</span></div></div>
+        <div style="font-size:15px;line-height:1.7;margin:10px 0">冷蔵庫の残り物で作れる、10 分の夜ごはん。材料は卵と豆腐とねぎだけ。</div>
+        <div style="height:150px;border-radius:12px;background:#e6ebf0"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center"><span class="btn">スキップ</span><span class="btn p">確定 (Enter)</span><span style="font-size:12px;color:#6b7785">数字キーでフォルダに印 → Enter で確定</span></div>
+    </div>
+    <div style="width:380px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:14px">数字キーのフォルダ</b><span class="btn" style="height:30px;font-size:13px">対象を選ぶ</span></div>
+      <div class="slot"><span class="key">1</span><span class="dot" style="background:#f4212e"></span>料理<span class="path">趣味</span></div>
+      <div class="slot on"><span class="key">2</span><span class="dot" style="background:#f4212e"></span>旅行<span class="path">趣味</span></div>
+      <div class="slot"><span class="key">3</span><span class="dot" style="background:#1d9bf0"></span>会議メモ<span class="path">仕事 / 企画</span></div>
+      <div class="slot"><span class="key">4</span><span class="dot" style="background:#1d9bf0"></span>参考資料<span class="path">仕事 / 企画</span></div>
+      <div class="slot"><span class="key">5</span><span class="dot" style="background:#00ba7c"></span>調査<span class="path"></span></div>
+      <div class="slot"><span class="key">6</span><span class="dot" style="background:#7856ff"></span>あとで読む<span class="path"></span></div>
+      <div class="slot empty"><span class="key">7</span>空き</div>
+      <div class="slot empty"><span class="key">8</span>空き</div>
+      <div class="slot empty"><span class="key">9</span>空き</div>
+      <div style="font-size:12px;color:#6b7785;line-height:1.6;margin-top:4px">キーに割り当てていないフォルダは「その他のフォルダ…」からマウスで選べる。子・孫に印をつけると、親にも自動で入る。</div>
+      <div class="slot" style="margin-top:2px;color:#46515c">その他のフォルダ… ▾</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1040,"height":700}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

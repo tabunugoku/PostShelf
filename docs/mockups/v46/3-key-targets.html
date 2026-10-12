@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>数字キーの対象フォルダ</title>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:"Segoe UI","Yu Gothic UI",system-ui,sans-serif;color:#0f1419}
+.row{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border-radius:8px;font-size:14px;white-space:nowrap}
+.row:hover{background:#f6f8fa}
+.chev{width:6px;height:6px;border-right:2px solid #6b7785;border-bottom:2px solid #6b7785;transform:rotate(45deg);margin:0 5px 3px 3px;flex:none}
+.chev.c{transform:rotate(-45deg);margin:0 3px 0 1px}
+.sp{width:16px;flex:none}
+.dot{width:12px;height:12px;border-radius:3px;flex:none}
+.key{margin-left:auto;min-width:26px;height:24px;padding:0 6px;border-radius:6px;background:#0f1419;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.key.none{background:transparent;color:#9aa5b1;border:1px dashed #cfd9de;font-weight:400;font-size:12px}
+.btn{display:inline-flex;align-items:center;height:36px;padding:0 18px;border-radius:999px;font-size:14px;font-weight:600;border:1px solid #cfd9de;background:#fff}
+.btn.p{background:#0f1419;color:#fff;border-color:#0f1419}
+.radio{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.5}
+.r{width:16px;height:16px;border-radius:50%;border:2px solid #9aa5b1;flex:none;margin-top:2px;box-sizing:border-box}
+.r.on{border:5px solid #1d9bf0}
+</style>
+</helmet>
+<div style="width:820px;height:760px;background:#f6f8fa;padding:28px;box-sizing:border-box">
+<div style="background:#fff;border:1px solid #e1e6eb;border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:14px;height:100%;box-sizing:border-box">
+  <b style="font-size:18px">数字キーのフォルダを選ぶ</b>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div class="radio"><span class="r on"></span><div><b>自分で選ぶ</b><br><span style="font-size:12px;color:#6b7785">1〜9 に入れるフォルダを自由に決める (ツリーの位置に関係なく)</span></div></div>
+    <div class="radio"><span class="r"></span><div><b>自動 (一覧の上から 9 つ)</b><br><span style="font-size:12px;color:#6b7785">たたんだ親は 1 つと数える。開閉で番号が変わる</span></div></div>
+  </div>
+  <div style="display:flex;gap:20px;flex:1;min-height:0">
+    <div style="flex:1;border:1px solid #e1e6eb;border-radius:12px;padding:8px;overflow:hidden">
+      <div style="font-size:12px;color:#6b7785;padding:4px 10px">フォルダ (クリックで番号をつける / はずす)</div>
+      <div class="row"><span class="chev"></span><span class="dot" style="background:#1d9bf0"></span>仕事<span class="key none">なし</span></div>
+      <div class="row" style="padding-left:28px"><span class="chev"></span><span class="dot" style="background:#1d9bf0"></span>企画<span class="key none">なし</span></div>
+      <div class="row" style="padding-left:46px"><span class="sp"></span><span class="dot" style="background:#1d9bf0"></span>会議メモ<span class="key">3</span></div>
+      <div class="row" style="padding-left:46px"><span class="sp"></span><span class="dot" style="background:#1d9bf0"></span>参考資料<span class="key">4</span></div>
+      <div class="row" style="padding-left:28px"><span class="sp"></span><span class="dot" style="background:#1d9bf0"></span>経理<span class="key none">なし</span></div>
+      <div class="row"><span class="chev c"></span><span class="dot" style="background:#00ba7c"></span>調査<span class="key">5</span></div>
+      <div class="row"><span class="chev"></span><span class="dot" style="background:#f4212e"></span>趣味<span class="key none">なし</span></div>
+      <div class="row" style="padding-left:28px"><span class="sp"></span><span class="dot" style="background:#f4212e"></span>料理<span class="key">1</span></div>
+      <div class="row" style="padding-left:28px"><span class="sp"></span><span class="dot" style="background:#f4212e"></span>旅行<span class="key">2</span></div>
+      <div class="row"><span class="sp"></span><span class="dot" style="background:#7856ff"></span>あとで読む<span class="key">6</span></div>
+      <div style="font-size:12px;color:#6b7785;line-height:1.6;padding:8px 10px">親にも子にも番号をつけられる。どの段でも可。</div>
+    </div>
+    <div style="width:260px;display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:12px;color:#6b7785;padding:4px 2px">番号の順 (ドラッグで入れ替え)</div>
+      <div class="row" style="border:1px solid #e1e6eb"><b>1</b>料理<span style="margin-left:auto;font-size:11px;color:#6b7785">趣味</span></div>
+      <div class="row" style="border:1px solid #e1e6eb"><b>2</b>旅行<span style="margin-left:auto;font-size:11px;color:#6b7785">趣味</span></div>
+      <div class="row" style="border:1px solid #e1e6eb"><b>3</b>会議メモ<span style="margin-left:auto;font-size:11px;color:#6b7785">仕事 / 企画</span></div>
+      <div class="row" style="border:1px solid #e1e6eb"><b>4</b>参考資料<span style="margin-left:auto;font-size:11px;color:#6b7785">仕事 / 企画</span></div>
+      <div class="row" style="border:1px solid #e1e6eb"><b>5</b>調査</div>
+      <div class="row" style="border:1px solid #e1e6eb"><b>6</b>あとで読む</div>
+      <div class="row" style="border:1px dashed #cfd9de;color:#9aa5b1"><b>7</b>空き</div>
+      <div class="row" style="border:1px dashed #cfd9de;color:#9aa5b1"><b>8</b>空き</div>
+      <div class="row" style="border:1px dashed #cfd9de;color:#9aa5b1"><b>9</b>空き</div>
+      <div style="font-size:12px;color:#6b7785;line-height:1.6;padding:6px 2px">9 つまで。10 個目をつけるときは、はずす番号を選ぶ。フォルダを削除すると、その番号は空きになる。</div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:10px"><span class="btn">キャンセル</span><span class="btn p">保存</span></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":820,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
