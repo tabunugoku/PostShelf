@@ -148,8 +148,14 @@ export function scheduleHealthCheck(now = Date.now()): void {
   }, wait);
 }
 
-export function initHealth(): void {
+/** DOM 診断の監視を始め、購読と予約済みの確認を解除する関数を返す */
+export function initHealth(): () => void {
   scheduleHealthCheck();
-  watchBody(() => scheduleHealthCheck());
+  const unwatch = watchBody(() => scheduleHealthCheck());
+  return () => {
+    unwatch();
+    clearTimeout(timer);
+    timer = undefined;
+  };
 }
 

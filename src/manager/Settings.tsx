@@ -248,6 +248,21 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
         {autoOn && <p class="muted setting-desc"><Sentences text={t('acSettingsNote')} /></p>}
       </fieldset>
       {heading('behavior', 'groupBehavior')}
+      <label class="setting">
+        <input
+          type="checkbox"
+          name="showInAncestors"
+          checked={showInAncestors}
+          onChange={(e) => void saveOf(
+            updateSettings({ showInAncestors: (e.target as HTMLInputElement).checked }),
+            (s) => setShowInAncestors(s.showInAncestors),
+          )}
+        />
+        <span>
+          <strong>{t('showInAncestorsLabel')}</strong>
+          <span class="muted setting-desc">{t('showInAncestorsDesc')}</span>
+        </span>
+      </label>
       <fieldset class="setting-group">
         <legend>{t('triageStart')}</legend>
         <label class="setting">
@@ -256,21 +271,6 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           <span>
             <strong>{t('triageMultiSwitch')}</strong>
             <span class="muted setting-desc"><Sentences text={t('triageMultiDesc')} /></span>
-          </span>
-        </label>
-        <label class="setting">
-          <input
-            type="checkbox"
-            name="showInAncestors"
-            checked={showInAncestors}
-            onChange={(e) => void saveOf(
-              updateSettings({ showInAncestors: (e.target as HTMLInputElement).checked }),
-              (s) => setShowInAncestors(s.showInAncestors),
-            )}
-          />
-          <span>
-            <strong>{t('showInAncestorsLabel')}</strong>
-            <span class="muted setting-desc">{t('showInAncestorsDesc')}</span>
           </span>
         </label>
       <div class="setting"><button data-key-targets-open onClick={()=>void openKeyTargets()}>{t('triageKeyTargets')}</button></div>
@@ -390,6 +390,11 @@ export function filterSettings(root: HTMLElement, raw: string): number {
   const has = (el: Element) => foldText(el.textContent ?? '').includes(q);
   const groups = [...root.querySelectorAll<HTMLElement>('fieldset.setting-group')];
   let count = 0;
+  // 見出し直下の独立した設定も、枠内の行と同じ検索条件で扱う。
+  for (const row of root.querySelectorAll<HTMLElement>(':scope > .setting')) {
+    row.hidden = !!q && !has(row);
+    if (q && !row.hidden) count++;
+  }
   for (const g of groups) {
     const rows = [...g.querySelectorAll<HTMLElement>('.setting')];
     let shown = true;
@@ -408,13 +413,17 @@ export function filterSettings(root: HTMLElement, raw: string): number {
     } else rows.forEach((r) => (r.hidden = false));
     g.hidden = !shown;
   }
-  // 見出しと目次: 次の見出しまでのグループが 1 つでも見えているものだけ残す
+  // 見出しと目次: 次の見出しまでのグループか独立した行が見えているものだけ残す。
   const heads = [...root.querySelectorAll<HTMLElement>('h3.set-h')];
   const chips = new Map([...root.querySelectorAll<HTMLElement>('.settings-nav .nav-chip')].map((c) => [c.dataset.group, c]));
   heads.forEach((h) => {
     let any = false;
     for (let n = h.nextElementSibling; n && !n.matches('h3.set-h'); n = n.nextElementSibling) {
-      if (!(n as HTMLElement).hidden && (n.matches('fieldset.setting-group') || n.querySelector('fieldset.setting-group:not([hidden])'))) any = true;
+      if (!(n as HTMLElement).hidden && (
+        n.matches('fieldset.setting-group, .setting') || n.querySelector('fieldset.setting-group:not([hidden])')
+      )) {
+        any = true;
+      }
     }
     h.hidden = !any;
     const chip = chips.get(h.dataset.group);

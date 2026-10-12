@@ -7,6 +7,7 @@ import { countFolder, inView, queryBookmarks, RECENT_ID, RECENT_MS } from '../sr
 import { updateSettings } from '../src/shared/settings';
 import { createFolder, listBookmarks, setAccountScope, setBookmarkFolders, updateFolder } from '../src/shared/storage';
 import { installChromeMock } from './chrome-mock';
+import * as folderTree from '../src/shared/folderTree';
 
 const NOW = 1000000000;
 const snapshot = {
@@ -157,4 +158,39 @@ it('保存されたオフ設定を読み、フォルダの付け替え後も子�
   await flush();
   expect(rows()).toEqual(['child']);
   expect(count(parent.id)).toBe('1');
+});
+
+it('既定のオンでは子孫表用の全フォルダの ancestors 走査を行わない', async () => {
+  const parent = await createFolder({ name: 'Sample P' });
+  await createFolder({ name: 'Sample C', parentId: parent.id });
+  const ancestry = vi.spyOn(folderTree, 'ancestors');
+  await act(() => void render(<App />, root()));
+  await flush();
+  // 開いている枝の展開は userFolders だけを使う。組み込みを含む配列での呼び出しが子孫表の走査。
+  const tableWalks = ancestry.mock.calls.filter(([folders]) => folders.some((f) => f.id === ALL_FOLDER_ID));
+  expect(tableWalks).toEqual([]);
+});
+
+it('子孫表はオフの間だけ作り、オンでのフォルダ変更では作らない', async () => {
+  const build = vi.spyOn(folderTree, 'descendantsMap');
+  const parent = await createFolder({ name: 'Sample P' });
+  const child = await createFolder({ name: 'Sample C', parentId: parent.id });
+  await act(() => void render(<App />, root()));
+  await flush();
+  expect(build).not.toHaveBeenCalled();
+  await act(async () => { await updateSettings({ showInAncestors: false }); });
+  await flush();
+  expect(build).toHaveBeenCalledOnce();
+  await act(async () => { await updateFolder(child.id, { parentId: null }); });
+  await flush();
+  expect(build).toHaveBeenCalledTimes(2);
+  await act(async () => { await updateSettings({ showInAncestors: true }); });
+  await flush();
+  build.mockClear();
+  await act(async () => { await createFolder({ name: 'Sample New' }); });
+  await flush();
+  expect(build).not.toHaveBeenCalled();
+  await act(async () => { await updateSettings({ showInAncestors: false }); });
+  await flush();
+  expect(build).toHaveBeenCalledOnce();
 });

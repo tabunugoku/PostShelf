@@ -13,7 +13,7 @@ import { watchBody } from './domwatch';
 const STATUS_PATH = /^\/[^/]+\/status\/(\d+)/;
 const checked = new Set<string>();
 const filled = new Set<string>();
-// 個別ページで補完する主役は 1 件。空集合またはアカウント付きの保留 ID を記憶する。
+// 個別ページで補完する主役は 1 件。アカウント付き ID と保留の種類を記憶する。
 let pendingKey: string | null = null;
 
 /** 主役のポストが保存済みなら、欠けた項目 (アイコンなど) を補う。全文の更新とは別に行う。読み込み途中の項目があるうちは、確認済みにしない */
@@ -39,7 +39,9 @@ export async function updateFromStatusPage(): Promise<boolean> {
   }
   const article = findArticle(id);
   const ex = article ? extractTweet(article) : null;
-  const nextPendingKey = ex && hasPending(ex) ? key : null;
+  const nextPendingKey = ex && hasPending(ex)
+    ? `${key}:${!!ex.avatarPending}:${!!ex.mediaPending}:${!!ex.quoteAvatarPending}`
+    : null;
   const unchangedPending = nextPendingKey !== null && nextPendingKey === pendingKey;
   pendingKey = nextPendingKey;
   if (ex && !unchangedPending) await fillFromPage(account.id, ex);
@@ -50,12 +52,17 @@ export async function updateFromStatusPage(): Promise<boolean> {
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined;
-/** ページの変化 (SPA の遷移、ポストの読み込み) のあとに、少し待って確かめる */
-export function installFullTextWatcher(): void {
+/** ページの変化後に少し待って確かめる。購読と予約済みの確認を解除する関数を返す */
+export function installFullTextWatcher(): () => void {
   const schedule = () => {
     clearTimeout(timer);
     timer = setTimeout(() => void updateFromStatusPage(), 1200);
   };
-  watchBody(schedule);
+  const unwatch = watchBody(schedule);
   schedule();
+  return () => {
+    unwatch();
+    clearTimeout(timer);
+    timer = undefined;
+  };
 }

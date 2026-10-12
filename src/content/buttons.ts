@@ -300,28 +300,42 @@ export function applyButtonMode(next: ButtonMode): void {
   injectButtons();
 }
 
-export function initButtons(): void {
+/** ボタンの監視を始め、購読と予約済みの描画を解除する関数を返す */
+export function initButtons(): () => void {
   watchShared();
-  subscribeHealth(() => applyButtonMode(mode)); // broken になったら UI を外し、戻ったら付け直す
+  const unhealth = subscribeHealth(() => applyButtonMode(mode)); // broken になったら UI を外し、戻ったら付け直す
   void getSettings().then((s) => applyButtonMode(s.buttonMode));
-  onSettingsChanged((s) => applyButtonMode(s.buttonMode));
-  onDataChanged(() => {
+  const unsettings = onSettingsChanged((s) => applyButtonMode(s.buttonMode));
+  const undata = onDataChanged(() => {
     dropShared();
     void refreshAll();
   });
-  subscribeAccount(() => {
+  const unaccount = subscribeAccount(() => {
     dropShared();
     void refreshAll();
   }); // アカウントが判定できた / 切り替わったら表示を作り直す
-  watchBody(scheduleInject);
+  const unwatch = watchBody(scheduleInject);
+  return () => {
+    unwatch();
+    unhealth();
+    unsettings();
+    undata();
+    unaccount();
+    if (scheduledFrame !== undefined) cancelAnimationFrame(scheduledFrame);
+    scheduledFrame = undefined;
+    scheduled = false;
+    document.removeEventListener('click', onCaptureClick, true);
+  };
 }
 
 let scheduled = false;
+let scheduledFrame: number | undefined;
 function scheduleInject(): void {
   if (scheduled) return;
   scheduled = true;
-  requestAnimationFrame(() => {
+  scheduledFrame = requestAnimationFrame(() => {
     scheduled = false;
+    scheduledFrame = undefined;
     injectButtons();
   });
 }

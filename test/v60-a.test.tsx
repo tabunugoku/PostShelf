@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SettingsPage } from '../src/manager/Settings';
+import { filterSettings, SettingsPage } from '../src/manager/Settings';
 import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from '../src/shared/settings';
 import { installChromeMock } from './chrome-mock';
 
@@ -46,6 +46,39 @@ describe('親フォルダにも表示する設定', () => {
   });
 
   for (const surface of ['tab', 'sidepanel'] as const) {
+    it(surface + ': 表示の設定は見出し直下で仕分けモードの枠の外に置く', async () => {
+      await act(() => void render(
+        <SettingsPage surface={surface} onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} />,
+        root(),
+      ));
+      await flush();
+      const label = root().querySelector('input[name="showInAncestors"]')!.closest('label')!;
+      expect(label.closest('fieldset')).toBeNull();
+      expect(label.previousElementSibling?.id).toBe('set-group-behavior');
+      expect(label.nextElementSibling?.matches('fieldset.setting-group')).toBe(true);
+      expect(label.nextElementSibling?.querySelector('legend')?.textContent).toBe('仕分けモード');
+    });
+
+    it(surface + ': 枠の外に移した表示設定も検索でき、見出しと件数が一致する', async () => {
+      await act(() => void render(
+        <SettingsPage surface={surface} onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} />,
+        root(),
+      ));
+      await flush();
+      const page = root().querySelector<HTMLElement>('.settings-page')!;
+      const label = page.querySelector<HTMLInputElement>('input[name="showInAncestors"]')!.closest('label')!;
+      const heading = page.querySelector<HTMLElement>('#set-group-behavior')!;
+      expect(filterSettings(page, '親フォルダにも表示する')).toBe(1);
+      expect(label.hidden).toBe(false);
+      expect(heading.hidden).toBe(false);
+      expect(filterSettings(page, '架空の一致しない検索語')).toBe(0);
+      expect(label.hidden).toBe(true);
+      expect(heading.hidden).toBe(true);
+      filterSettings(page, '');
+      expect(label.hidden).toBe(false);
+      expect(heading.hidden).toBe(false);
+    });
+
     it(surface + ': チェックボックスから保存でき、別画面の変更も反映する', async () => {
       await act(() => void render(
         <SettingsPage surface={surface} onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} />,
