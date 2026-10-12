@@ -16,8 +16,10 @@ import { isEmojiImageUrl } from './avatar';
 
 /** 診断用の status リンクの存在確認。リンクが残るのに読めない DOM という原因は実機未確認の推測。 */
 export function hasTweetStatusLink(root: ParentNode, tweetId: string): boolean {
-  for (const link of root.querySelectorAll(CANDIDATES.statusLink[0])) {
-    if (link.getAttribute('href')?.match(/\/status\/([^/?#]+)(?:[/?#]|$)/)?.[1] === tweetId) return true;
+  for (const selector of CANDIDATES.statusLink) {
+    for (const link of root.querySelectorAll(selector)) {
+      if (link.getAttribute('href')?.match(/\/status\/([^/?#]+)(?:[/?#]|$)/)?.[1] === tweetId) return true;
+    }
   }
   return false;
 }
