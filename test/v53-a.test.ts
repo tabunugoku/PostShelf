@@ -53,6 +53,8 @@ it('時間切れの種類・画面内の位置・刻み・実時間・可視状�
   let visibility: DocumentVisibilityState = 'visible';
   vi.spyOn(document, 'visibilityState', 'get').mockImplementation(() => visibility);
   const world = collectorWorld(() => { visibility = 'hidden'; });
+  // 診断の可視状態と予算の依存を分け、元の刻みと実時間の記録を検証する。
+  (world.collector as any).d.isHidden = () => false;
   (world.collector as any).d.now = () => world.clock.now * 3 + 5;
   await world.read();
   await finish(world);
@@ -60,10 +62,10 @@ it('時間切れの種類・画面内の位置・刻み・実時間・可視状�
     counts: { resolved: 0, timedOut: 1, vanished: 0, forced: 0 }, screens: 1,
     unresolved: [{
       tweetId: '1102', pending: ['avatar', 'media'], position: 2, reason: 'timedOut',
-      waitedMs: 2700, elapsedMs: 8100, visibilityStart: 'visible', visibilityEnd: 'hidden',
+      waitedMs: 8100, elapsedMs: 24300, visibilityStart: 'visible', visibilityEnd: 'hidden',
     }],
   });
-  expect(world.clock.sleeps).toEqual(Array(9).fill(300));
+  expect(world.clock.sleeps).toEqual(Array(27).fill(300));
   expect((await getBookmark('1102'))!.snapshot).toMatchObject({ avatar: undefined, media: [], text: '' });
   expect(await order()).toEqual(['1101', '1102']);
 });

@@ -12,7 +12,9 @@
  * 実機未確認 (docs/MANUAL_TEST.md): X の一覧の仮想化への追従、終わりの判定、制限・エラー表示のセレクタ。
  * 判定の条件は定数にして、調整しやすくしてある。
  */
-import { hasTweetStatusLink, isBookmarksPath, queryAllFirst, queryFirst, timelineLoading } from '../shared/selectors';
+import {
+  hasTweetStatusLink, isBookmarksPath, queryAllFirst, queryFirst, timelineLoading,
+} from '../shared/selectors';
 import {
   clearCollectCommand, clearCollectRun, getCollectRun, getSettings, onCollectCommand, onCollectRunChanged, peekCollectCommand, saveCollectRun, setCollectOffer,
   type CollectCap, type CollectCommand, type CollectReason, type CollectRun, type CollectSpeed,
@@ -76,7 +78,7 @@ export interface CollectDeps {
   /** いまのスクロール位置 (動かなくなったことの判定用) */
   scrollY(): number;
   viewportHeight(): number;
-  visible(excluded?: ReadonlySet<string>, only?: ReadonlySet<string>): Extracted[];
+  visible(excluded?: ReadonlySet<string>, only?: ReadonlySet<string>, reread?: ReadonlySet<string>): Extracted[];
   /** 解析を省いた既読も含め、直前の visible での位置を返す (診断用)。 */
   visiblePosition?(tweetId: string): number | undefined;
   /** 画面に、seen にまだ無いポストがあるか (ID だけを軽く読む。スナップショットは作らない)。無ければ、待ちは上限まで */
@@ -113,16 +115,22 @@ export function defaultDeps(): CollectDeps {
     scrollToTop: () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }),
     scrollY: () => window.scrollY,
     viewportHeight: () => window.innerHeight,
-    visible: (excluded, only) => {
+    visible: (excluded, only, reread) => {
       positions.clear();
       const items = new Map<string, Extracted>();
       for (const article of queryAllFirst(document, 'tweet').els) {
         const id = tweetIdOf(article);
         if (id && !positions.has(id)) positions.set(id, positions.size + 1);
-        if (id && excluded?.has(id)) continue;
+        if (id && excluded?.has(id) && !reread?.has(id)) continue;
         if (only && (!id || !only.has(id))) continue;
         const item = extractTweet(article);
-        if (item) items.set(item.tweetId, item);
+        // tweetIdOf と ID が食い違う記事の保険。解析に進んだ記事は解析結果で位置と対象を判定する。
+        const itemId = item?.tweetId ?? id;
+        if (itemId && !positions.has(itemId)) positions.set(itemId, positions.size + 1);
+        if (!item) continue;
+        if (excluded?.has(item.tweetId) && !reread?.has(item.tweetId)) continue;
+        if (only && !only.has(item.tweetId)) continue;
+        items.set(item.tweetId, item);
       }
       return [...items.values()];
     },
@@ -445,17 +453,19 @@ export class AutoCollector {
   /** 画面に出ているポストを読む。X は画面外のポストを DOM から外す (仮想化) ので、スクロールのたびに読む。新しく見つけた件数を返す */
   private async readVisible(token: number): Promise<number> {
     // 時間切れ後の 1 回の補完だけは、既読でも再解析する。
-    const excluded = this.timedOut.size
-      ? new Set([...this.seen].filter((id) => !this.timedOut.has(id)))
-      : this.seen;
-    const items = this.d.visible(excluded);
+    const items = this.d.visible(this.seen, undefined, this.timedOut);
+    // visible の内部位置は次の呼び出しで変わるため、await より前にこの画面の値を取る。
+    const visiblePositions = new Map<string, number>();
+    for (const [index, it] of items.entries()) {
+      visiblePositions.set(it.tweetId, this.d.visiblePosition?.(it.tweetId) ?? index + 1);
+    }
     const saved = (this.saved ??= await this.d.savedIds(this.state!.accountId));
     if (token !== this.token) return 0;
     const s = this.state!;
     await this.rereadTimedOut(items, saved, s.accountId);
     if (token !== this.token) return 0;
     let fresh = 0;
-    for (const [index, it] of items.entries()) {
+    for (const it of items) {
       if (this.seen.has(it.tweetId)) continue; // 同じ取り込みの中で、同じポストを二重に数えない
       if (!this.positions.has(it.tweetId)) this.positions.set(it.tweetId, this.nextPosition++);
       this.vanishedRetry.delete(it.tweetId);
@@ -470,7 +480,7 @@ export class AutoCollector {
         s.recentPostDate = sorted[Math.ceil(sorted.length / 2) - 1];
       }
       if (!saved.has(it.tweetId) && hasPending(it)) {
-        this.diagnosis.begin(it, this.d.visiblePosition?.(it.tweetId) ?? index + 1);
+        this.diagnosis.begin(it, visiblePositions.get(it.tweetId)!);
         this.mediaRetry.set(it.tweetId, it);
         this.insertSeq({ tweetId: it.tweetId }); // 保存前も画面に出た順序を保つ
         s.imported++; // 上限の数え方を変えず、保存だけを読み込みのあとへ回す
@@ -536,14 +546,16 @@ export class AutoCollector {
    * 読み込み中のポストが読み込み終わる (hasPending が偽になる) か、合計 SETTLE_MAX_MS 待つまで、短い間隔で画面を読み直す。
    * DOM に無いポストは最初の検知で次画面へ回す。リンクが残る読めない状態は最後の値で保存する。
    * 次画面への読み直し・2 回目の消失・終了時の保存は v54 の仕組みを使う。
-   * 予算は実時間で数え、タイマーの遅延も含める。診断の waitedMs は従来どおり刻みの合計。
+   * 表のタブでは刻み、裏のタブではその周の実時間を予算に足す。表の固まりは予算に含めない。
+   * 診断の waitedMs は従来どおり刻みの合計。
    * 一時停止・停止 (token の変化) では、待たずに戻る
    */
   private async settle(token: number): Promise<void> {
     this.diagnosis.screen();
-    const startedAt = this.d.now();
     let waited = 0;
+    let budget = 0;
     while (this.mediaRetry.size) {
+      const startedAt = this.d.now();
       const step = SETTLE_POLL_MS + Math.round(this.d.random() * SETTLE_POLL_JITTER_MS);
       await this.d.sleep(step);
       waited += step;
@@ -551,7 +563,7 @@ export class AutoCollector {
       this.diagnosis.step(step);
       const waiting = new Set(this.mediaRetry.keys());
       const visible = new Map(this.d.visible(undefined, waiting).map((it) => [it.tweetId, it]));
-      const elapsed = this.d.now() - startedAt;
+      budget += this.d.isHidden() ? this.d.now() - startedAt : step;
       for (const [id, last] of [...this.mediaRetry]) {
         const current = visible.get(id);
         if (!current) {
@@ -561,7 +573,7 @@ export class AutoCollector {
           else this.acceptMedia(last);
         }
         else {
-          if (!hasPending(current) || elapsed >= SETTLE_MAX_MS) {
+          if (!hasPending(current) || budget >= SETTLE_MAX_MS) {
             this.diagnosis.complete(id, hasPending(current) ? 'timedOut' : 'resolved');
             if (hasPending(current)) this.timedOut.add(id);
             this.acceptMedia(current);
@@ -601,21 +613,22 @@ export class AutoCollector {
         this.diagnosis.complete(it.tweetId, 'forced');
         this.acceptMedia(it);
       }
-      if (!this.pending.length) return;
       // 読み直し待ちより後ろを先に保存すると、戻ったポストの savedAt が逆転する。
       let firstVanished = Infinity;
       for (const id of this.vanishedRetry.keys()) firstVanished = Math.min(firstVanished, this.positions.get(id)!);
+      // 消失待ちが無ければ、一時停止で解放済みの位置は参照しない。
       const deferredAt = this.seq.findIndex((it) =>
-        this.mediaRetry.has(it.tweetId) || this.positions.get(it.tweetId)! > firstVanished,
+        this.mediaRetry.has(it.tweetId)
+          || (firstVanished !== Infinity && this.positions.get(it.tweetId)! > firstVanished),
       );
       const sent = deferredAt < 0 ? this.seq : this.seq.slice(0, deferredAt);
       const ready = new Set(sent.map((it) => it.tweetId));
       const batch = this.pending.filter((it) => ready.has(it.tweetId));
-      if (batch.length === 0) return;
       this.pending = this.pending.filter((it) => !ready.has(it.tweetId));
       this.writing = true;
       try {
-        await this.d.addCollected(sent, this.state.startedAt, this.state.accountId);
+        // pending が空でも基準と位置は整理する。保存対象が無ければ保存層は呼ばない。
+        if (batch.length) await this.d.addCollected(sent, this.state.startedAt, this.state.accountId);
         for (const it of batch) {
           this.saved?.add(it.tweetId);
           if (it.snapshot.truncated) this.truncatedIds.push(it.tweetId); // 全文の要求は、保存できたものだけ
@@ -626,7 +639,11 @@ export class AutoCollector {
         // 並び順の基準・未保存・読み直し待ち以外の位置は今後参照しない。
         const retained = new Set(this.seq.map((it) => it.tweetId));
         for (const id of this.vanishedRetry.keys()) retained.add(id);
-        for (const id of this.positions.keys()) if (!retained.has(id)) this.positions.delete(id);
+        for (const id of this.positions.keys()) {
+          if (!retained.has(id)) {
+            this.positions.delete(id);
+          }
+        }
       } catch {
         if (final) {
           this.state.failed += batch.length;

@@ -12,8 +12,9 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
-it('タイマーが 10 倍遅れても実時間の予算を過ぎた確認で保存へ進む', async () => {
+it('裏のタブでタイマーが 10 倍遅れても実時間の予算を過ぎた確認で保存へ進む', async () => {
   const world = collectorWorld(() => { world.clock.now += 2700; });
+  (world.collector as any).d.isHidden = () => true;
   await world.read();
   await (world.collector as any).finish();
   expect(world.clock.sleeps).toEqual([300, 300, 300]);
@@ -23,17 +24,19 @@ it('タイマーが 10 倍遅れても実時間の予算を過ぎた確認で保
     .toMatchObject({ reason: 'timedOut', waitedMs: 900, elapsedMs: 9000 });
 });
 
-it('最初のタイマーが予算を超えて遅れても追加の sleep をしない', async () => {
+it('裏のタブで最初のタイマーが予算を超えて遅れても追加の sleep をしない', async () => {
   const world = collectorWorld(() => { world.clock.now += SETTLE_MAX_MS; });
+  (world.collector as any).d.isHidden = () => true;
   await world.read();
   await world.flush();
   expect(world.clock.sleeps).toEqual([300]);
   expect(await getBookmark('1202')).toBeDefined();
 });
 
-it('再解析にかかった時間も予算に含め追加の sleep をしない', async () => {
+it('裏のタブでは再解析にかかった時間も予算に含め追加の sleep をしない', async () => {
   const world = collectorWorld();
   const deps = (world.collector as any).d;
+  deps.isHidden = () => true;
   const visible = deps.visible;
   let reads = 0;
   deps.visible = (...args: Parameters<typeof visible>) => {
