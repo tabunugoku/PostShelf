@@ -603,21 +603,22 @@ export class AutoCollector {
         this.diagnosis.complete(it.tweetId, 'forced');
         this.acceptMedia(it);
       }
-      if (!this.pending.length) return;
       // 読み直し待ちより後ろを先に保存すると、戻ったポストの savedAt が逆転する。
       let firstVanished = Infinity;
       for (const id of this.vanishedRetry.keys()) firstVanished = Math.min(firstVanished, this.positions.get(id)!);
+      // 消失待ちが無ければ、一時停止で解放済みの位置は参照しない。
       const deferredAt = this.seq.findIndex((it) =>
-        this.mediaRetry.has(it.tweetId) || this.positions.get(it.tweetId)! > firstVanished,
+        this.mediaRetry.has(it.tweetId)
+          || (firstVanished !== Infinity && this.positions.get(it.tweetId)! > firstVanished),
       );
       const sent = deferredAt < 0 ? this.seq : this.seq.slice(0, deferredAt);
       const ready = new Set(sent.map((it) => it.tweetId));
       const batch = this.pending.filter((it) => ready.has(it.tweetId));
-      if (batch.length === 0) return;
       this.pending = this.pending.filter((it) => !ready.has(it.tweetId));
       this.writing = true;
       try {
-        await this.d.addCollected(sent, this.state.startedAt, this.state.accountId);
+        // pending が空でも基準と位置は整理する。保存対象が無ければ保存層は呼ばない。
+        if (batch.length) await this.d.addCollected(sent, this.state.startedAt, this.state.accountId);
         for (const it of batch) {
           this.saved?.add(it.tweetId);
           if (it.snapshot.truncated) this.truncatedIds.push(it.tweetId); // 全文の要求は、保存できたものだけ
