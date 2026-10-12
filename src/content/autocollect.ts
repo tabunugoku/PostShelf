@@ -536,14 +536,16 @@ export class AutoCollector {
    * 読み込み中のポストが読み込み終わる (hasPending が偽になる) か、合計 SETTLE_MAX_MS 待つまで、短い間隔で画面を読み直す。
    * DOM に無いポストは最初の検知で次画面へ回す。リンクが残る読めない状態は最後の値で保存する。
    * 次画面への読み直し・2 回目の消失・終了時の保存は v54 の仕組みを使う。
-   * 予算は実時間で数え、タイマーの遅延も含める。診断の waitedMs は従来どおり刻みの合計。
+   * 表のタブでは刻み、裏のタブではその周の実時間を予算に足す。表の固まりは予算に含めない。
+   * 診断の waitedMs は従来どおり刻みの合計。
    * 一時停止・停止 (token の変化) では、待たずに戻る
    */
   private async settle(token: number): Promise<void> {
     this.diagnosis.screen();
-    const startedAt = this.d.now();
     let waited = 0;
+    let budget = 0;
     while (this.mediaRetry.size) {
+      const startedAt = this.d.now();
       const step = SETTLE_POLL_MS + Math.round(this.d.random() * SETTLE_POLL_JITTER_MS);
       await this.d.sleep(step);
       waited += step;
@@ -551,7 +553,7 @@ export class AutoCollector {
       this.diagnosis.step(step);
       const waiting = new Set(this.mediaRetry.keys());
       const visible = new Map(this.d.visible(undefined, waiting).map((it) => [it.tweetId, it]));
-      const elapsed = this.d.now() - startedAt;
+      budget += this.d.isHidden() ? this.d.now() - startedAt : step;
       for (const [id, last] of [...this.mediaRetry]) {
         const current = visible.get(id);
         if (!current) {
@@ -561,7 +563,7 @@ export class AutoCollector {
           else this.acceptMedia(last);
         }
         else {
-          if (!hasPending(current) || elapsed >= SETTLE_MAX_MS) {
+          if (!hasPending(current) || budget >= SETTLE_MAX_MS) {
             this.diagnosis.complete(id, hasPending(current) ? 'timedOut' : 'resolved');
             if (hasPending(current)) this.timedOut.add(id);
             this.acceptMedia(current);
