@@ -76,7 +76,7 @@ export interface CollectDeps {
   /** いまのスクロール位置 (動かなくなったことの判定用) */
   scrollY(): number;
   viewportHeight(): number;
-  visible(excluded?: ReadonlySet<string>): Extracted[];
+  visible(excluded?: ReadonlySet<string>, only?: ReadonlySet<string>): Extracted[];
   /** 解析を省いた既読も含め、直前の visible での位置を返す (診断用)。 */
   visiblePosition?(tweetId: string): number | undefined;
   /** 画面に、seen にまだ無いポストがあるか (ID だけを軽く読む。スナップショットは作らない)。無ければ、待ちは上限まで */
@@ -113,13 +113,14 @@ export function defaultDeps(): CollectDeps {
     scrollToTop: () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }),
     scrollY: () => window.scrollY,
     viewportHeight: () => window.innerHeight,
-    visible: (excluded) => {
+    visible: (excluded, only) => {
       positions.clear();
       const items = new Map<string, Extracted>();
       for (const article of queryAllFirst(document, 'tweet').els) {
         const id = tweetIdOf(article);
         if (id && !positions.has(id)) positions.set(id, positions.size + 1);
         if (id && excluded?.has(id)) continue;
+        if (only && (!id || !only.has(id))) continue;
         const item = extractTweet(article);
         if (item) items.set(item.tweetId, item);
       }
@@ -535,7 +536,8 @@ export class AutoCollector {
       waited += step;
       if (token !== this.token) return; // 残りは flush(true) が、最後に読めた値で保存する
       this.diagnosis.step(step);
-      const visible = new Map(this.d.visible().map((it) => [it.tweetId, it]));
+      const waiting = new Set(this.mediaRetry.keys());
+      const visible = new Map(this.d.visible(undefined, waiting).map((it) => [it.tweetId, it]));
       for (const [id, last] of [...this.mediaRetry]) {
         const current = visible.get(id);
         if (!current) {
