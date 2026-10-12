@@ -80,10 +80,10 @@ it('fills createdAt and hasLink only when they are missing', async () => {
   expect(saved().snapshot.createdAt).toBe('2026-01-01');
 });
 
-it('adds the whole quote when the saved post has none', async () => {
+it('保存済みポストに引用が無ければ補完で追加しない', async () => {
   seed(snap());
-  expect(await fill(snap({ quote: quote({ avatar }) }))).toBe(1);
-  expect(saved().snapshot.quote).toEqual(quote({ avatar }));
+  expect(await fill(snap({ quote: quote({ avatar }) }))).toBe(0);
+  expect(saved().snapshot.quote).toBeUndefined();
 });
 
 it('fills only the empty fields of an existing quote', async () => {

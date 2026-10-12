@@ -1,0 +1,17 @@
+<!-- 実機未確認の推測: 画像つきの本体に、引用に見える role=link と User-Name が後から現れる。
+     過去の誤検出の DOM を再現したものではなく、引用候補が読めても補完で新規追加しない前提の fixture。 -->
+<article data-testid="tweet">
+  <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-main-v57.jpg"></div>
+  <div data-testid="User-Name"><span>Sample Main</span><span>@sample_main</span></div>
+  <a href="/sample_main/status/1"><time datetime="2026-01-01"></time></a>
+  <div data-testid="tweetText">架空の画像つき本文。</div>
+  <div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample-main-v57.jpg"></div>
+  <div role="link">
+    <div data-testid="Tweet-User-Avatar"><img src="https://pbs.twimg.com/profile_images/sample-source-v57.jpg"></div>
+    <div data-testid="User-Name"><span>Sample Source</span><span>@sample_source</span></div>
+    <div data-testid="tweetText">架空の引用候補の本文。</div>
+    <a href="/sample_source/status/2/photo/1">
+      <div data-testid="tweetPhoto"><img src="https://pbs.twimg.com/media/sample-source-v57.jpg"></div>
+    </a>
+  </div>
+</article>

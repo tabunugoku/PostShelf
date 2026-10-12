@@ -687,10 +687,11 @@ export function missingFields(saved: FillView, incoming: FillView): Partial<Snap
   if (saved.author === handleName && name && name !== handleName) patch.author = name;
   if (!saved.createdAt && incoming.createdAt) patch.createdAt = incoming.createdAt;
   if (!saved.hasLink && incoming.hasLink) patch.hasLink = true;
-  const quote = cleanQuote(incoming.quote);
+  // quote の有無は新規保存時に決める。後から見えた引用候補の誤検出を補完で固定しない。
+  const quote = saved.quote ? cleanQuote(incoming.quote) : undefined;
   if (quote && isEmojiImageUrl(quote.avatar)) delete quote.avatar;
-  if (quote) {
-    const merged = saved.quote ? fillQuote(saved.quote, quote) : quote;
+  if (quote && saved.quote) {
+    const merged = fillQuote(saved.quote, quote);
     if (merged) patch.quote = merged;
   }
   return Object.keys(patch).length ? patch : null;
