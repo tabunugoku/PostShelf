@@ -96,7 +96,13 @@ export function resetAccount(): void {
   setAccountScope(UNKNOWN_ACCOUNT_ID);
 }
 
-export function initAccount(): void {
+/** アカウントの監視を始め、DOM の購読と予約済みの確認を解除する関数を返す */
+export function initAccount(): () => void {
   scheduleAccountCheck();
-  watchBody(() => scheduleAccountCheck());
+  const unwatch = watchBody(() => scheduleAccountCheck());
+  return () => {
+    unwatch();
+    clearTimeout(timer);
+    timer = undefined;
+  };
 }

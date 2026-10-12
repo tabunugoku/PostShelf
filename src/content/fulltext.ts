@@ -52,12 +52,17 @@ export async function updateFromStatusPage(): Promise<boolean> {
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined;
-/** ページの変化 (SPA の遷移、ポストの読み込み) のあとに、少し待って確かめる */
-export function installFullTextWatcher(): void {
+/** ページの変化後に少し待って確かめる。購読と予約済みの確認を解除する関数を返す */
+export function installFullTextWatcher(): () => void {
   const schedule = () => {
     clearTimeout(timer);
     timer = setTimeout(() => void updateFromStatusPage(), 1200);
   };
-  watchBody(schedule);
+  const unwatch = watchBody(schedule);
   schedule();
+  return () => {
+    unwatch();
+    clearTimeout(timer);
+    timer = undefined;
+  };
 }
