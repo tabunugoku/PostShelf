@@ -68,7 +68,7 @@ import { inboxOf } from '../shared/folderPicker';
 import { SaveCurrent } from './SaveCurrent';
 import { Triage } from './Triage';
 import { SearchContext } from './PostText';
-import { AvatarContext, buildAvatarFallback } from './avatars';
+import { AvatarContext, buildAvatarFallback, type AvatarFallback } from './avatars';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
 import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
@@ -457,7 +457,12 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     return n;
   };
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
-  const avatarFallback = useMemo(() => buildAvatarFallback(bookmarks), [bookmarks]);
+  const previousAvatars = useRef<AvatarFallback>(new Map());
+  const avatarFallback = useMemo(() => {
+    const next = buildAvatarFallback(bookmarks, previousAvatars.current);
+    previousAvatars.current = next;
+    return next;
+  }, [bookmarks]);
   /** 仕分けモードが「削除されたポストを飛ばす」ために見る ID。保存データが変わらない再描画では、同じ Set を渡す */
   const liveIds = useMemo(() => new Set(bookmarks.map((b) => b.tweetId)), [bookmarks]);
   const viewerBookmark = viewer ? bookmarks.find((b) => b.tweetId === viewer.tweetId) : undefined;
