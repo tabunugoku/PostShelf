@@ -646,7 +646,11 @@ export class AutoCollector {
         // 並び順の基準・未保存・読み直し待ち以外の位置は今後参照しない。
         const retained = new Set(this.seq.map((it) => it.tweetId));
         for (const id of this.vanishedRetry.keys()) retained.add(id);
-        for (const id of this.positions.keys()) if (!retained.has(id)) this.positions.delete(id);
+        for (const id of this.positions.keys()) {
+          if (!retained.has(id)) {
+            this.positions.delete(id);
+          }
+        }
       } catch {
         if (final) {
           this.state.failed += batch.length;
