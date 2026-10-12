@@ -3,7 +3,7 @@ import { foldText } from './fold';
 
 export type SortKey = 'savedDesc' | 'savedAsc' | 'postedDesc' | 'postedAsc';
 
-/** スマートビュー「最近の 7 日」。保存データには無い仮想の絞り込み */
+/** スマートビュー「直近 7 日」。保存データには無い仮想の絞り込み */
 export const RECENT_ID = '@recent';
 export const RECENT_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -75,7 +75,7 @@ const foldedOf = (b: Bookmark): string => {
   return folded;
 };
 
-/** ビュー (フォルダ / すべて / 最近の 7 日) で絞り込み → 検索 (本文/投稿者/ハンドル) → 絞り込みチップ (AND) → 並べ替え */
+/** ビュー (フォルダ / すべて / 直近 7 日) で絞り込み → 検索 (本文/投稿者/ハンドル) → 絞り込みチップ (AND) → 並べ替え */
 export function queryBookmarks(
   all: Bookmark[],
   opts: {

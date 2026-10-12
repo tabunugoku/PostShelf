@@ -136,7 +136,7 @@ describe('v19-2: フォルダ一覧と下部の操作', () => {
     const add = [...pop.querySelectorAll('button')].find((b) => b.textContent === 'フォルダを追加')!;
     expect(add.firstElementChild!.tagName).toBe('I');
     const side = pop.querySelector<HTMLButtonElement>('button[aria-label="サイドパネルで開く"]')!;
-    const del = pop.querySelector<HTMLButtonElement>('button[aria-label="PostShelf の保存を削除"]')!;
+    const del = pop.querySelector<HTMLButtonElement>('button[aria-label="PostShelf から削除"]')!;
     for (const b of [side, del]) {
       expect(b.title).toBe(b.getAttribute('aria-label'));
       expect(b.textContent).toBe(''); // アイコンだけ

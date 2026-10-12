@@ -466,7 +466,7 @@
     "message": "フォルダ"
   },
   "recent7": {
-    "message": "最近の 7 日"
+    "message": "直近 7 日"
   },
   "searchPlaceholder": {
     "message": "本文、@ユーザー名で検索"
@@ -642,7 +642,7 @@
     "message": "戻る"
   },
   "triageHint": {
-    "message": "数字キーで入れる · Esc で終了"
+    "message": "数字キーでフォルダに入れる · Esc で終了"
   },
   "triageDone": {
     "message": "仕分けが終わりました"
@@ -690,7 +690,7 @@
     "message": "診断情報"
   },
   "diagNotice": {
-    "message": "この内容がクリップボードにコピーされます。ポストの本文、ユーザー名、URL は含まれません。含まれるのは、拡張機能のバージョン、ブラウザの情報、表示言語、X の画面構造の骨組みです。"
+    "message": "この内容がクリップボードにコピーされます。ポストの本文、ユーザー名、URL は含まれません。含まれるのは、拡張機能のバージョン、ブラウザの情報、表示言語、X の画面構造の概要です。"
   },
   "diagCopy": {
     "message": "コピー"
@@ -1000,7 +1000,7 @@
     "message": "PostShelf の画像キャッシュです。消しても、PostShelf 本体のデータは消えません。\n「images」フォルダの中に、ポスト ID ごとのフォルダがあります。"
   },
   "cacheDirNonEmpty": {
-    "message": "このフォルダは PostShelf が作ったものではなく、すでに別のファイルが入っています。ここに「.postshelf」「README.txt」「images」フォルダを作ってよいですか？ 選んだフォルダにある他のファイルには触れません。"
+    "message": "このフォルダは PostShelf が作ったものではなく、すでに別のファイルが入っています。ここに「.postshelf」と「README.txt」のファイル、「images」フォルダを作ってよいですか？ 選んだフォルダにある他のファイルには触れません。"
   },
   "cacheDirNonEmptyOk": {
     "message": "作成する"
@@ -1161,7 +1161,7 @@
     "message": "長いポストの全文を取得する"
   },
   "fullTextSwitchDesc": {
-    "message": "X で「さらに表示」と省略されたポストを保存すると、そのポストのページを裏のタブで開いて全文を読み、閉じます。ポストごとに間隔をあけ、いま見ているタブには触れません。X の規約上、自動化されたアクセスとみなされる可能性があります（法的な助言ではありません）。オフにすると、省略された分だけを保存します。"
+    "message": "X で「さらに表示」と省略されたポストを保存すると、そのポストのページを裏のタブで開いて全文を読み、閉じます。ポストごとに間隔をあけ、いま見ているタブには触れません。X の規約上、自動化されたアクセスとみなされる可能性があります（法的な助言ではありません）。オフにすると、X が省略した状態の本文をそのまま保存します。"
   },
   "fullTextSpeed": {
     "message": "取得の速さ"
@@ -1225,7 +1225,7 @@
     }
   },
   "fullTextProgressSkipped": {
-    "message": "取得しています: $DONE$ / $TOTAL$ 件（飛ばした: $SKIPPED$ 件）",
+    "message": "取得しています: $DONE$ / $TOTAL$ 件（スキップ: $SKIPPED$ 件）",
     "placeholders": {
       "done": {
         "content": "$1",
@@ -1287,7 +1287,7 @@
     "message": "保存または読み込みに失敗しました。もう一度試してください。続くときは、設定の「データ」から「エクスポート」で保存してから、拡張機能を再読み込みしてください。"
   },
   "removeFromPostShelf": {
-    "message": "PostShelf の保存を削除"
+    "message": "PostShelf から削除"
   },
   "acPanelLabel": {
     "message": "ブックマークの自動取り込み"
@@ -1348,7 +1348,7 @@
     "message": "一時停止しました"
   },
   "acReasonHidden": {
-    "message": "別のタブに切り替えたため、自動で止めました"
+    "message": "別のタブに切り替えたため、自動で一時停止しました"
   },
   "acReasonAccount": {
     "message": "アカウントが変わったため、止めました"
@@ -1669,16 +1669,16 @@
   "sidebarResize": { "message": "サイドバーの幅を変更（左右キー・ドラッグ、ダブルクリックで自動調整）" },
   "treeExpand": {"message":"開く"},
   "treeCollapse": {"message":"たたむ"},
-  "folderDeleteTree": {"message":"$FOLDERS$ 個のフォルダ（子・孫を含む）を削除し、$POSTS$ 件のポストからその所属を外します。ポスト自体は残ります。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
+  "folderDeleteTree": {"message":"$FOLDERS$ 個のフォルダ（子・孫を含む）を削除し、$POSTS$ 件のポストから、これらのフォルダへの所属を外します。ポスト自体は残ります。","placeholders":{"folders":{"content":"$1"},"posts":{"content":"$2"}}},
   "folderAncestorsRemain": {"message":"親フォルダと、親への所属は残ります。"},
   "triageKeyTargets": {"message":"対象を選ぶ"},
   "triageKeyTitle": {"message":"数字キーのフォルダ"},
   "triageKeyAuto": {"message":"自動"},
   "triageKeyManual": {"message":"自分で選ぶ"},
   "triageKeyEmpty": {"message":"空き"},
-  "triageKeyReplace": {"message":"はずす番号を選んでください。"},
+  "triageKeyReplace": {"message":"外す番号を選んでください。"},
   "triageKeyOrder": {"message":"番号の順"},
   "triageKeyOrderHint": {"message":"ドラッグで入れ替えます。"},
   "showInAncestorsLabel": {"message":"親フォルダにも表示する"},
-  "showInAncestorsDesc": {"message":"オフにすると、ポストは所属するいちばん下のフォルダだけに表示されます。保存データは変わりません。"}
+  "showInAncestorsDesc": {"message":"オフにすると、ポストは所属するいちばん下のフォルダだけに表示されます。保存データは変わりません。親と子の両方に直接入れたポストは、子にだけ表示されます。"}
 }

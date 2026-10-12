@@ -48,14 +48,14 @@ describe('v28-A: the x.com save popover', () => {
     (chrome.runtime as any).sendMessage = (m: unknown) => void calls.push(m);
     let pop = await open();
     const side = pop.querySelector<HTMLButtonElement>('button[aria-label="サイドパネルで開く"]')!;
-    const del = pop.querySelector<HTMLButtonElement>('button[aria-label="PostShelf の保存を削除"]')!;
+    const del = pop.querySelector<HTMLButtonElement>('button[aria-label="PostShelf から削除"]')!;
     expect(side.title).toBe('サイドパネルで開く');
-    expect(del.title).toBe('PostShelf の保存を削除');
+    expect(del.title).toBe('PostShelf から削除');
     side.click();
     expect(calls).toEqual([{ type: 'openSidePanel' }]);
     expect($$('.postshelf-popover')).toHaveLength(0);
     pop = await open();
-    pop.querySelector<HTMLButtonElement>('button[aria-label="PostShelf の保存を削除"]')!.click();
+    pop.querySelector<HTMLButtonElement>('button[aria-label="PostShelf から削除"]')!.click();
     await tick();
     expect(await getBookmark('1234567890')).toBeUndefined();
     expect($$('.postshelf-popover')).toHaveLength(0);

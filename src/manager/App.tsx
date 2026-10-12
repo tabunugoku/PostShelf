@@ -460,7 +460,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const tabbableId = focusId && shownSet.has(focusId) && shownIds.indexOf(focusId) < renderCount ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   // 左のメニューと見出しの件数は、保存データ・表示用の子孫表が変わるまで使い回す。
-  // 「最近の 7 日」の境目も、同じキャッシュを使う間は動かない。
+  // 「直近 7 日」の境目も、同じキャッシュを使う間は動かない。
   const countCache = useMemo(() => new Map<string, number>(), [bookmarks, viewDescendants]);
   const count = (id: string) => {
     let n = countCache.get(id);

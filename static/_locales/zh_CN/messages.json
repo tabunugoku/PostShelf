@@ -1680,5 +1680,5 @@
   "triageKeyOrder": {"message":"编号顺序"},
   "triageKeyOrderHint": {"message":"拖动以调整顺序。"},
   "showInAncestorsLabel": {"message":"也在父文件夹中显示"},
-  "showInAncestorsDesc": {"message":"关闭后，帖子只会显示在其所属的最下层文件夹中。保存的数据不会改变。"}
+  "showInAncestorsDesc": {"message":"关闭后，帖子只会显示在其所属的最下层文件夹中。保存的数据不会改变。同时直接放入父文件夹和其子文件夹的帖子，只会显示在子文件夹中。"}
 }

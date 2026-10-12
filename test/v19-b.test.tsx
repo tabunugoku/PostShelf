@@ -62,10 +62,10 @@ describe('v19-3: サイドパネルの上部', () => {
     expect(rows[1].querySelector('.sortbox')).toBeTruthy();
     expect(rows[1].querySelector('.fbtn')).toBeTruthy();
     expect(rows[1].querySelector('.seg')).toBeTruthy();
-    // フォルダの切り替えは、ドロップダウンだけ (「すべて」「未分類」「最近の 7 日」を含む)
+    // フォルダの切り替えは、ドロップダウンだけ (「すべて」「未分類」「直近 7 日」を含む)
     await click($('.folder-btn'));
     const items = $$('.menu .menu-item').map((i) => i.textContent);
-    expect(items.slice(0, 3).join('|')).toMatch(/すべて.*未分類.*最近の 7 日/);
+    expect(items.slice(0, 3).join('|')).toMatch(/すべて.*未分類.*直近 7 日/);
   });
 
   it('the tab layout keeps the always-visible filter chips', async () => {

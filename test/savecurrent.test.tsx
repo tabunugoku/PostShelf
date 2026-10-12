@@ -114,8 +114,8 @@ describe('side panel "save the open post" button', () => {
     await act(() => void ($('.ap-chip') as HTMLElement).click());
     await flush();
     const del = $<HTMLButtonElement>('.ap-del');
-    expect(del.getAttribute('aria-label')).toBe('PostShelf の保存を削除');
-    expect(del.title).toBe('PostShelf の保存を削除');
+    expect(del.getAttribute('aria-label')).toBe('PostShelf から削除');
+    expect(del.title).toBe('PostShelf から削除');
     await act(() => void del.click());
     await flush();
     expect(await getBookmark('1234567890')).toBeUndefined();
