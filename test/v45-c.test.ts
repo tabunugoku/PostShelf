@@ -91,5 +91,6 @@ it('backfills during auto collection without losing the fresh posts being saved'
 it('uses the existing DOM/path watchers, including late src and poster attribute loads', () => {
   const source=readFileSync('src/content/index.ts','utf8');
   expect(source).toContain('installMediaBackfill()'); expect(source).toContain('scheduleMediaBackfill()');
-  expect(source).toMatch(/attributeFilter:\s*\['src',\s*'poster'\]/);
+  const watcher = readFileSync('src/content/domwatch.ts', 'utf8');
+  expect(watcher).toMatch(/attributeFilter:\s*\['src',\s*'poster'\]/);
 });

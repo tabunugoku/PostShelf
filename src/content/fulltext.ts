@@ -8,6 +8,7 @@ import { fillMissing, refreshFullText } from '../shared/storage';
 import { getCurrentAccount } from './account';
 import { findArticle } from './messages';
 import { extractTweet, fillSource, hasPending, type Extracted } from './snapshot';
+import { watchBody } from './domwatch';
 
 const STATUS_PATH = /^\/[^/]+\/status\/(\d+)/;
 const checked = new Set<string>();
@@ -44,6 +45,6 @@ export function installFullTextWatcher(): void {
     clearTimeout(timer);
     timer = setTimeout(() => void updateFromStatusPage(), 1200);
   };
-  new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+  watchBody(schedule);
   schedule();
 }

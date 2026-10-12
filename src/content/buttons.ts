@@ -9,6 +9,7 @@ import { isOwnNativeClick } from './native';
 import { getCurrentAccount, subscribeAccount } from './account';
 import type { Folder } from '../shared/models';
 import { ACCENT, ACCENT_FILL } from '../shared/tokens';
+import { watchBody } from './domwatch';
 
 const BTN_ATTR = 'data-postshelf-btn';
 const BADGE_ATTR = 'data-postshelf-badge';
@@ -312,7 +313,7 @@ export function initButtons(): void {
     dropShared();
     void refreshAll();
   }); // アカウントが判定できた / 切り替わったら表示を作り直す
-  new MutationObserver(scheduleInject).observe(document.body, { childList: true, subtree: true });
+  watchBody(scheduleInject);
 }
 
 let scheduled = false;
