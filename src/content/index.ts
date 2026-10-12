@@ -8,6 +8,7 @@ import { installMessageHandler } from './messages';
 import { installGlobalHandlers } from './popover';
 import { installFullTextWatcher } from './fulltext';
 import { installMediaBackfill, scheduleMediaBackfill } from './media';
+import { watchBody } from './domwatch';
 
 installGlobalHandlers();
 installMessageHandler();
@@ -20,10 +21,10 @@ ensureCollectButton();
 // ブックマーク一覧 (/i/history) への SPA 遷移を拾って収集ボタンを出し入れする
 watchCollectData();
 watchPath();
-new MutationObserver(() => {
+watchBody(() => {
   scheduleCollectRefresh();
   scheduleMediaBackfill();
-}).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'poster'] });
+}, true);
 
 // ブックマークの自動取り込み (v15)。管理画面の確認ダイアログで同意して始めたときだけ動く (src/content/autocollect.ts)
 const autoCollector = installAutoCollect((s) => panel.update(s));

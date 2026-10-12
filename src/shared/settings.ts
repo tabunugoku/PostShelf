@@ -521,7 +521,15 @@ export async function sendCollectCommand(c: Omit<CollectCommand, 'id' | 'at'>): 
 export async function peekCollectCommand(): Promise<CollectCommand | null> {
   const c = (await chrome.storage.local.get(CMD_KEY))[CMD_KEY] as Partial<CollectCommand> | undefined;
   if (!c || typeof c.id !== 'string' || !['start', 'pause', 'resume', 'stop'].includes(c.type as string)) return null;
-  return { id: c.id, type: c.type as CollectCommand['type'], consent: c.consent === true, speed: c.speed === 'normal' ? 'normal' : 'slow', cap: normalizeCap(c.cap), accountId: typeof c.accountId === 'string' ? c.accountId : undefined, at: Number(c.at) || 0 };
+  return {
+    id: c.id,
+    type: c.type as CollectCommand['type'],
+    consent: c.consent === true,
+    speed: c.speed === 'normal' ? 'normal' : 'slow',
+    cap: normalizeCap(c.cap),
+    accountId: typeof c.accountId === 'string' ? c.accountId : undefined,
+    at: Number(c.at) || 0,
+  };
 }
 export const clearCollectCommand = (): Promise<void> => chrome.storage.local.remove(CMD_KEY);
 

@@ -10,6 +10,7 @@
 import { isBookmarksPath, queryAllFirst, queryFirst, type SelKey } from '../shared/selectors';
 import { safePath } from '../shared/diagnostics';
 import { saveHealth, type Health, type HealthState } from '../shared/settings';
+import { watchBody } from './domwatch';
 
 /**
  * 検査する要素。表示中のポストのうち 1 件でも見つかればその要素は「ある」とみなす (集計は全表示ポストで行う)。
@@ -149,6 +150,6 @@ export function scheduleHealthCheck(now = Date.now()): void {
 
 export function initHealth(): void {
   scheduleHealthCheck();
-  new MutationObserver(() => scheduleHealthCheck()).observe(document.body, { childList: true, subtree: true });
+  watchBody(() => scheduleHealthCheck());
 }
 
