@@ -1680,5 +1680,5 @@
   "triageKeyOrder": {"message":"Ordre des touches"},
   "triageKeyOrderHint": {"message":"Glissez pour réorganiser."},
   "showInAncestorsLabel": {"message":"Afficher aussi dans les dossiers parents"},
-  "showInAncestorsDesc": {"message":"Si cette option est désactivée, un post apparaît uniquement dans le dossier le plus bas auquel il appartient. Les données enregistrées ne changent pas."}
+  "showInAncestorsDesc": {"message":"Si cette option est désactivée, un post apparaît uniquement dans le dossier le plus bas auquel il appartient. Les données enregistrées ne changent pas. Un post placé directement dans un dossier parent et dans son dossier enfant s’affiche uniquement dans ce dernier."}
 }

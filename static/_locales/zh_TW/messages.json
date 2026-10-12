@@ -1680,5 +1680,5 @@
   "triageKeyOrder": {"message":"編號順序"},
   "triageKeyOrderHint": {"message":"拖曳以調整順序。"},
   "showInAncestorsLabel": {"message":"也在上層資料夾中顯示"},
-  "showInAncestorsDesc": {"message":"關閉後，貼文只會顯示在所屬的最下層資料夾中。儲存的資料不會改變。"}
+  "showInAncestorsDesc": {"message":"關閉後，貼文只會顯示在所屬的最下層資料夾中。儲存的資料不會改變。同時直接放入上層資料夾和其子資料夾的貼文，只會顯示在子資料夾中。"}
 }

@@ -1680,5 +1680,5 @@
   "triageKeyOrder": {"message":"Key order"},
   "triageKeyOrderHint": {"message":"Drag to reorder."},
   "showInAncestorsLabel": {"message":"Also show in parent folders"},
-  "showInAncestorsDesc": {"message":"When off, a post appears only in its lowest folder. Saved data is not changed."}
+  "showInAncestorsDesc": {"message":"When off, a post appears only in its lowest folder. Saved data is not changed. A post placed directly in both a parent folder and its child appears only in the child."}
 }

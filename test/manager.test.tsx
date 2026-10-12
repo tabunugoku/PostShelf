@@ -240,20 +240,20 @@ describe('v7 manager layout', () => {
     await flush();
   };
 
-  it('sidebar has smart views (すべて / 未分類 with a badge / 最近の 7 日) and the folder list', async () => {
+  it('sidebar has smart views (すべて / 未分類 with a badge / 直近 7 日) and the folder list', async () => {
     const names = $$('.sec').map((x) => x.textContent);
     expect(names).toEqual(['スマートビュー', 'フォルダ']);
-    expect($$('.side .fr .fr-name').map((x) => x.textContent).slice(0, 3)).toEqual(['すべて', '未分類', '最近の 7 日']);
+    expect($$('.side .fr .fr-name').map((x) => x.textContent).slice(0, 3)).toEqual(['すべて', '未分類', '直近 7 日']);
     await click($('.fr [aria-label="名前・アイコン・色を変更: Alpha"]')); // 「…」から編集ポップオーバー
     expect($('.folder-editor-host')).toBeTruthy();
     expect($$('[aria-label=編集]').length).toBe(0); // ヘッダーの編集パネルは廃止
-    expect(folderRow('最近の 7 日').querySelector('.n')!.textContent).toBe('0'); // beforeEach の savedAt (1..4) は 7 日より前
+    expect(folderRow('直近 7 日').querySelector('.n')!.textContent).toBe('0'); // beforeEach の savedAt (1..4) は 7 日より前
     const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
     data['unknown:1'].savedAt = Date.now() - 2 * 86400000;
     await chrome.storage.local.set({ bookmarks: data });
     await flush();
-    expect(folderRow('最近の 7 日').querySelector('.n')!.textContent).toBe('1');
-    await click(folderRow('最近の 7 日'));
+    expect(folderRow('直近 7 日').querySelector('.n')!.textContent).toBe('1');
+    await click(folderRow('直近 7 日'));
     expect(rowIds()).toEqual(['1']);
   });
 

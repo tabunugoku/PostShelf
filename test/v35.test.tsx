@@ -70,7 +70,7 @@ beforeEach(() => {
 });
 
 describe('v35-A: staged rendering grows in every view', () => {
-  for (const name of ['すべて', '未分類', '最近の 7 日']) {
+  for (const name of ['すべて', '未分類', '直近 7 日']) {
     it(`${name}: the sentinel intersecting adds a page`, async () => {
       await seed(200);
       await mountApp();
@@ -96,7 +96,7 @@ describe('v35-A: scroll check without IntersectionObserver', () => {
     (window as any).scrollTo = () => {};
   });
 
-  for (const name of ['すべて', '未分類', '最近の 7 日']) {
+  for (const name of ['すべて', '未分類', '直近 7 日']) {
     it(`${name}: a near sentinel grows the list on scroll; a far one does not`, async () => {
       await seed(200);
       const spy = rectOf(100000);
