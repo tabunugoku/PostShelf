@@ -715,12 +715,13 @@ export type BookmarkUndo = Record<string, Bookmark | null>;
 
 function mutateBookmarks(
   tweetIds: string[],
-  fn: (b: Bookmark, folders: Folder[]) => Bookmark | null,
+  fn: (b: Readonly<Bookmark>, folders: readonly Folder[]) => Bookmark | null,
   atomicInbox = false,
 ): Promise<BookmarkUndo> {
   return serial(async () => {
     // 確定式の一括変更では受け皿も同じ set に含める。map を読む前に準備し、競合する時間を延ばさない。
     const treeFolders = await readAllFolders();
+    const mineFolders = treeFolders.filter(mine);
     const allFolders = atomicInbox ? treeFolders : undefined;
     const apply = (map: BookmarkMap): BookmarkUndo => {
       const undo: BookmarkUndo = {};
@@ -728,9 +729,13 @@ function mutateBookmarks(
         const k = key(tid);
         const prev = map[k];
         if (!prev) continue;
-        let next = fn(structuredClone(prev), treeFolders.filter(mine));
-        if (next) next = { ...next, folderIds: withAncestors(next.folderIds, treeFolders.filter(mine)) }; // 「未分類」は他のフォルダと同時には持たない
-        if (JSON.stringify(next) === JSON.stringify(prev)) continue;
+        // fn は prev とその中身を変更せず、新しい所属を持つオブジェクトを返す。undo は変更前の参照を保つ。
+        let next = fn(prev, mineFolders);
+        if (next) next = { ...next, folderIds: withAncestors(next.folderIds, mineFolders) };
+        // 本文・画像を文字列化しない。所属以外を変える fn も、別の値・snapshot の参照なら変更として扱う。
+        if (next && next.accountId === prev.accountId && next.tweetId === prev.tweetId &&
+          next.savedAt === prev.savedAt && next.snapshot === prev.snapshot &&
+          next.folderIds.length === prev.folderIds.length && next.folderIds.every((id, i) => id === prev.folderIds[i])) continue;
         undo[k] = prev;
         if (next) map[k] = next;
         else delete map[k];
@@ -742,7 +747,6 @@ function mutateBookmarks(
     let undo = apply(map);
     if (Object.keys(undo).length === 0) return undo;
     if (allFolders) {
-      const mineFolders = allFolders.filter(mine);
       const needsInbox = hasInbox(map) && !mineFolders.some(f => f.id === INBOX_ID);
       await chrome.storage.local.set({
         [KEY_BOOKMARKS]: map,
