@@ -275,7 +275,6 @@ export function createFolderMenu(opts: {
         keepCreated(await opts.onCreated?.(folder) === false ? folder : undefined);
       }
     } catch (err) {
-      if (!(err instanceof StorageError) && !lockWhileSaving) throw err;
       showError(err instanceof StorageError ? err.message : t('errorStorage'));
     } finally {
       busy = false;

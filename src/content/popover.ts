@@ -49,9 +49,27 @@ export async function openPopover(article: Element, anchor: HTMLElement): Promis
   opening = true;
   try {
     return await buildPopover(article, anchor);
+  } catch {
+    return openErrorPopover(anchor);
   } finally {
     opening = false;
   }
+}
+
+/** 保存データを読めなかったとき、同じ位置に失敗の表示だけの小さなポップオーバーを出す。閉じ方は通常のものと同じ (installGlobalHandlers) */
+function openErrorPopover(anchor: HTMLElement): HTMLElement {
+  closePopovers();
+  const th = xTheme();
+  const pop = document.createElement('div');
+  pop.className = POP_CLASS;
+  pop.setAttribute('role', 'alert');
+  pop.lang = uiLang();
+  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:#f4212e;border:.5px solid ${th.border};border-radius:12px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;overflow-wrap:anywhere`;
+  pop.textContent = t('errorStorage');
+  pop.addEventListener('click', (e) => e.stopPropagation());
+  document.body.append(pop);
+  position(pop, anchor);
+  return pop;
 }
 
 async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTMLElement | null> {
