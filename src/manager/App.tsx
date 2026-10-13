@@ -1117,9 +1117,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                     const cur = new Set((await getBookmark(b.tweetId))?.folderIds ?? []);
                     const add = [...sel].filter((id) => !cur.has(id));
                     const rem = [...cur].filter((id) => !sel.has(id));
-                    if (add.length) await addToFolders([b.tweetId], add);
-                    if (rem.length) await removeFromFolders([b.tweetId], rem);
-                    await reload();
+                    // 追加と解除は 1 回の書き込みにする (途中で失敗して追加だけ残ることを避ける)
+                    ownWrites.current++;
+                    try {
+                      if (add.length || rem.length) await changeBookmarkFolders([b.tweetId], add, rem);
+                    } catch {
+                      reportStorageError();
+                    } finally {
+                      await reload().catch(() => {});
+                      ownWrites.current--;
+                    }
                   }}
                 />
               </Dropdown>
