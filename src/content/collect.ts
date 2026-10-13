@@ -1,6 +1,7 @@
 import { isBookmarksPath, queryAllFirst } from '../shared/selectors';
 import { t } from '../shared/strings';
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
+import { requestCache, requestFullTextBatch } from '../shared/cacheRequest';
 import { getSettings, onSettingsChanged, recordPending } from '../shared/settings';
 import { xTheme } from './theme';
 import { getCurrentAccount, subscribeAccount } from './account';
@@ -85,10 +86,25 @@ export function ensureCollectButton(): void {
   btn.style.cssText = `position:fixed;right:16px;bottom:16px;z-index:2147483646;min-height:36px;padding:6px 14px;border-radius:18px;border:.5px solid ${th.border};background:${th.bg};color:${th.fg};color-scheme:${th.scheme};font:14px/1.4 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer`;
   btn.addEventListener('click', async () => {
     if (!getCurrentAccount()) return; // アカウント不明のときは何もしない (ボタンも無効)
-    const n = await addCollected(collectVisible()); // 取り込み済みは重複させない
-    dropSavedCache();
+    const account = getCurrentAccount();
+    if (!account) return;
     flashing = true;
-    btn.textContent = t('collectDone', n);
+    let message: string;
+    try {
+      const items = collectVisible();
+      // 今回新しく保存されるものを求めるため、保存の前に保存済みの ID を読む
+      const savedBefore = await getSavedIds(account.id);
+      const n = await addCollected(items); // 取り込み済みは重複させない
+      const fresh = items.filter((x) => !savedBefore.has(x.tweetId));
+      // 押した時点の保存なので、たたまれたポストの全文 (上限 30 件は requestFullTextBatch) と画像のキャッシュも頼む
+      requestFullTextBatch(account.id, fresh.filter((x) => x.snapshot.truncated).map((x) => x.tweetId));
+      fresh.forEach((x) => requestCache(x.tweetId, account.id));
+      message = t('collectDone', n);
+    } catch {
+      message = t('errorStorage');
+    }
+    dropSavedCache();
+    btn.textContent = message;
     setTimeout(() => {
       flashing = false;
       void refreshCollectButton();
