@@ -62,3 +62,15 @@ it('ピッカーは候補にない色を style に入れない', () => {
   expect(iconOf('f_bad').style.background).toBe('');
   expect(iconOf('f_good').style.color).toBe('rgb(226, 75, 74)');
 });
+
+it('不正な色のフォルダを編集で開いても、プレビューの style に入らない', async () => {
+  const { createFolderMenu } = await import('../src/shared/folderCreateMenu');
+  const bad: Folder = { id: 'f_bad', name: 'Sample bad', icon: 'ti-folder', color: BAD_COLOR, order: 0, accountId: 'me' };
+  const menu = createFolderMenu({ theme, existing: () => [], folder: bad, onClose: () => {} });
+  document.body.append(menu.el);
+  // プレビューは、アイコンと名前が並んだ行 (名前の文字で探す)
+  const row = [...menu.el.querySelectorAll<HTMLElement>('div')].find((d) => d.lastElementChild?.textContent === 'Sample bad')!;
+  const preview = row.querySelector<HTMLElement>('i')!;
+  expect(preview.getAttribute('style')).not.toContain('example.invalid');
+  expect(preview.style.background).toBe('');
+});
