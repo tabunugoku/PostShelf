@@ -147,17 +147,18 @@ for (const surface of ['tab', 'sidepanel'] as const) {
 
 it('保存されたオフ設定を読み、フォルダの付け替え後も子孫表を作り直す', async () => {
   const parent = await createFolder({ name: 'Sample P' });
-  const child = await createFolder({ name: 'Sample C', parentId: parent.id });
-  await setBookmarkFolders('child', [child.id], snapshot);
+  const other = await createFolder({ name: 'Sample O' });
+  await setBookmarkFolders('child', [parent.id, other.id], snapshot);
   await updateSettings({ lastFolderId: parent.id, showInAncestors: false });
   await act(() => void render(<App />, root()));
   await flush();
-  expect(rows()).toEqual([]);
-  expect(count(parent.id)).toBe('0');
-  await act(async () => { await updateFolder(child.id, { parentId: null }); });
-  await flush();
   expect(rows()).toEqual(['child']);
   expect(count(parent.id)).toBe('1');
+  // other が parent の子になると、parent の一覧では子孫側の所属として隠れる
+  await act(async () => { await updateFolder(other.id, { parentId: parent.id }); });
+  await flush();
+  expect(rows()).toEqual([]);
+  expect(count(parent.id)).toBe('0');
 });
 
 it('既定のオンでは子孫表用の全フォルダの ancestors 走査を行わない', async () => {

@@ -37,7 +37,7 @@ import {
 } from './models';
 import { t } from './strings';
 import { getSettings, updateSettings } from './settings';
-import { canParent, descendants, flattenFolders, sanitizeParents, withAncestors, withoutDescendants } from './folderTree';
+import { ancestors, canParent, descendants, flattenFolders, sanitizeParents, withAncestors, withoutDescendants } from './folderTree';
 import { assignOrder } from './ordering';
 import { sanitizeSegments, type Segment } from './segments';
 
@@ -340,6 +340,8 @@ export function updateFolder(
         next.color = patch.color;
       }
     }
+    // 付け替えの前の祖先。付け替えたあとの木からは求められない
+    const oldAncestorIds = ancestors(folders, id).map(f => f.id);
     if (patch.parentId !== undefined) {
       if (!canParent(folders, id, patch.parentId, scope)) throw new StorageError(t('errInvalidImport'));
       if (patch.parentId) next.parentId = patch.parentId; else delete next.parentId;
@@ -349,7 +351,7 @@ export function updateFolder(
       }
     }
     folders[idx] = next;
-    if (patch.parentId !== undefined) await writeReparented(folders);
+    if (patch.parentId !== undefined) await writeReparented(folders, id, oldAncestorIds);
     else await writeFolders(folders);
     return next;
   });
@@ -363,12 +365,20 @@ export async function folderDeletionImpact(id: string): Promise<{ folders: numbe
   return { folders: folders.filter(f => ids.has(f.id)).length, posts };
 }
 
-/** 親を付け替えたときの保存。既存の所属は保ち、新しい祖先への所属を足す。フォルダとポストを 1 回の書き込みで保存する */
-async function writeReparented(folders: Folder[]): Promise<void> {
+/**
+ * 親を付け替えたときの保存。動かしたフォルダ (子孫を含む) に入っているポストだけ、新しい木で祖先に入れ直す。
+ * 古い祖先のうち新しい祖先に含まれないものは外す。祖先への所属は、直接選んだものと区別できないため。
+ * 他のフォルダの祖先として必要な ID は、withAncestors で戻る。フォルダとポストを 1 回の書き込みで保存する
+ */
+async function writeReparented(folders: Folder[], movedId: string, oldAncestorIds: string[]): Promise<void> {
   const all = await readAllFolders();
   const map = await readMap();
+  const newAncestorIds = new Set(ancestors(folders, movedId).map(f => f.id));
+  const stale = new Set(oldAncestorIds.filter(id => !newAncestorIds.has(id)));
+  const subtree = new Set([movedId, ...descendants(folders, movedId).map(f => f.id)]);
   for (const [k, b] of Object.entries(map)) {
-    if (inScope(b)) map[k] = { ...b, folderIds: withAncestors(b.folderIds, folders) };
+    if (!inScope(b) || !b.folderIds.some(id => subtree.has(id))) continue;
+    map[k] = { ...b, folderIds: withAncestors(b.folderIds.filter(id => !stale.has(id)), folders) };
   }
   await chrome.storage.local.set({ [KEY_FOLDERS]: [...all.filter(f => !mine(f)), ...folders], [KEY_BOOKMARKS]: map });
 }
@@ -892,9 +902,11 @@ export function restoreBookmarks(undo: BookmarkUndo): Promise<void> {
 export function reorderFolders(orderedIds: string[], move?: { id:string; parentId:string | null }): Promise<void> {
   return serial(async () => {
     const folders = await readFolders();
+    let oldAncestorIds: string[] = []; // 付け替えの前の祖先 (parentId を書き換える前に求める)
     if (move) {
       if (!canParent(folders, move.id, move.parentId, scope)) throw new StorageError(t('errInvalidImport'));
       const f = folders.find(f => f.id === move.id)!;
+      oldAncestorIds = ancestors(folders, move.id).map(a => a.id);
       if (move.parentId) f.parentId = move.parentId; else delete f.parentId;
     }
     const rank = new Map(realIds(orderedIds).map((id, i) => [id, i]));
@@ -907,7 +919,7 @@ export function reorderFolders(orderedIds: string[], move?: { id:string; parentI
       counts.set(parent, order + 1);
       return { ...f, order };
     });
-    if (move) await writeReparented(next); else await writeFolders(next);
+    if (move) await writeReparented(next, move.id, oldAncestorIds); else await writeFolders(next);
   });
 }
 
