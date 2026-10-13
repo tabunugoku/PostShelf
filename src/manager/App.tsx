@@ -1235,12 +1235,23 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               void afterPostsRemoved(); // 対応する画像も消す (失敗してもポストの削除は成功。設定画面に整理が必要と出る)
               setSelected((s) => new Set([...s].filter((id) => !c.ids.includes(id))));
             } else if (c.kind === 'account') {
-              await deleteAccountDataAndCache(c.id);
+              try {
+                await deleteAccountDataAndCache(c.id);
+              } catch {
+                // 失敗したら通知を出し、画面は読み直して実際の状態に合わせる
+                reportStorageError();
+                await reload().catch(() => {});
+                return;
+              }
               await afterAccountChange(c.id);
             } else {
-              await deleteFolder(c.id);
-              if (current === c.id || descendants(userFolders,c.id).some(f=>f.id===current)) chooseView(ALL_FOLDER_ID);
-              await reload();
+              try {
+                await deleteFolder(c.id);
+                if (current === c.id || descendants(userFolders,c.id).some(f=>f.id===current)) chooseView(ALL_FOLDER_ID);
+              } catch {
+                reportStorageError();
+              }
+              await reload().catch(() => {});
             }
           }}
         />
@@ -1254,8 +1265,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           onConfirm={async (to) => {
             const from = assignFrom;
             setAssignFrom(null);
-            const r = await assignAccount(from, to);
-            setToast({ key: Date.now(), message: t('accountAssignDone', r.moved + r.merged) });
+            try {
+              const r = await assignAccount(from, to);
+              setToast({ key: Date.now(), message: t('accountAssignDone', r.moved + r.merged) });
+            } catch {
+              reportStorageError();
+              await reload().catch(() => {});
+              return;
+            }
             await afterAccountChange(from, to);
           }}
         />
