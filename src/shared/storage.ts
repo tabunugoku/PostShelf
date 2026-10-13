@@ -580,7 +580,8 @@ function cleanQuote(raw: unknown): Bookmark['snapshot']['quote'] {
 
 /** 取り込んだ JSON の snapshot の、省略できる項目 (v24) を検証する。不正なら、その項目だけ捨てる (text で表示する) */
 function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
-  const { segments, truncated, avatar, media, quote, translated, ...rest } = s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown };
+  const { segments, truncated, avatar, media, quote, translated, videoPoster, hasVideo, hasLink, createdAt, ...rest } =
+    s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown; videoPoster?: unknown; hasVideo?: unknown; hasLink?: unknown; createdAt?: unknown };
   const seg = segments === undefined ? undefined : sanitizeSegments(segments);
   const clean = cleanQuote(quote);
   // 画像・アバターは https の URL だけ (x.com 以外への勝手な要求や javascript: を通さない)。満たさない要素だけ捨てる
@@ -589,6 +590,10 @@ function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
     ...rest,
     media: (media as unknown[]).filter(httpsOnly),
     ...(httpsOnly(avatar) ? { avatar } : {}),
+    ...(httpsOnly(videoPoster) ? { videoPoster } : {}),
+    ...(typeof hasVideo === 'boolean' ? { hasVideo } : {}),
+    ...(typeof hasLink === 'boolean' ? { hasLink } : {}),
+    ...(isStr(createdAt) ? { createdAt } : {}),
     ...(seg ? { segments: seg } : {}),
     ...(typeof truncated === 'boolean' ? { truncated } : {}),
     ...(clean ? { quote: clean } : {}),

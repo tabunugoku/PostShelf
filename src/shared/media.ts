@@ -4,9 +4,14 @@
  */
 const NAME_PARAM = /([?&]name=)[^&#]*/;
 
+const TWIMG_URL = /^https:\/\/pbs\.twimg\.com\//;
+
+/** X の画像の置き場 (https://pbs.twimg.com/) の URL か。画像キャッシュが取りに行ってよい URL の条件 */
+export const isTwimgUrl = (url: string): boolean => TWIMG_URL.test(url);
+
 /** `name=` パラメータを size に差し替える。pbs.twimg.com 以外、`name=` が無い URL (想定外の形) はそのまま返す */
 export function withImageSize(url: string, size: string): string {
-  if (!/^https:\/\/pbs\.twimg\.com\//.test(url) || !NAME_PARAM.test(url)) return url;
+  if (!isTwimgUrl(url) || !NAME_PARAM.test(url)) return url;
   return url.replace(NAME_PARAM, `$1${size}`);
 }
 
