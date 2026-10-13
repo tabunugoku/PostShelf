@@ -612,6 +612,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   // ドラッグ&ドロップ: ポスト → フォルダ行 (追加 / Alt で移動)、フォルダ → フォルダ行 (並べ替え)
   const virtual = (id: string) => id === ALL_FOLDER_ID || id === RECENT_ID;
+  /** ドラッグ元から渡された値を、ポスト ID の配列として読む。文字列の配列でなければ null */
+  const parsePostIds = (raw: string): string[] | null => {
+    try {
+      const value: unknown = JSON.parse(raw);
+      return Array.isArray(value) && value.every((v) => typeof v === 'string') ? value : null;
+    } catch {
+      return null;
+    }
+  };
   const onFolderDrop = async (target: Folder, e: DragEvent) => {
     e.preventDefault();
     const inside = dragOver?.id === target.id ? dragOver.inside : folderInside(target, e);
@@ -619,7 +628,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const posts = e.dataTransfer?.getData(MIME_POSTS);
     const dragged = e.dataTransfer?.getData(MIME_FOLDER);
     if (posts && !virtual(target.id)) {
-      const ids = JSON.parse(posts) as string[];
+      const ids = parsePostIds(posts);
+      if (!ids) return; // 他のアプリや壊れたデータのドロップは無視する
       if (e.altKey) await run(moveToFolder(ids, virtual(current) ? null : current, target.id), 'toastMoved');
       else await run(addToFolders(ids, [target.id]), 'toastAdded');
     } else if (dragged && !virtual(target.id) && target.id !== INBOX_ID) {
