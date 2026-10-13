@@ -85,9 +85,8 @@ export function ensureCollectButton(): void {
   const th = xTheme();
   btn.style.cssText = `position:fixed;right:16px;bottom:16px;z-index:2147483646;min-height:36px;padding:6px 14px;border-radius:18px;border:.5px solid ${th.border};background:${th.bg};color:${th.fg};color-scheme:${th.scheme};font:14px/1.4 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer`;
   btn.addEventListener('click', async () => {
-    if (!getCurrentAccount()) return; // アカウント不明のときは何もしない (ボタンも無効)
     const account = getCurrentAccount();
-    if (!account) return;
+    if (!account) return; // アカウント不明のときは何もしない (ボタンも無効)
     flashing = true;
     let message: string;
     try {
