@@ -230,8 +230,13 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setViewId(id);
   };
   const ownWrites = useRef(0);
+  const reloadSeq = useRef(0);
   const reload = async () => {
+    // 読み込み中に別の読み直しやアカウントの切替があったら、古い結果で画面を上書きしない
+    const seq = ++reloadSeq.current;
+    const startedView = viewRef.current;
     const [f, { bookmarks: b, accounts: accs }] = await Promise.all([listFolders(), listBookmarksWithAccounts()]);
+    if (seq !== reloadSeq.current || startedView !== viewRef.current) return;
     setFolders(f);
     setBookmarks(b);
     setAccounts(accs);
