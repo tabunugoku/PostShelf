@@ -585,12 +585,18 @@ export function onFullTextRunChanged(cb: () => void): () => void {
   return () => chrome.storage.onChanged?.removeListener(listener as never);
 }
 
-/** 取得のために開いた裏のタブの記録 (閉じ忘れを、起動時に閉じるため) */
+/**
+ * 取得のために開いた裏のタブの記録 (閉じ忘れを、service worker の再起動時に閉じるため)。
+ * タブ ID は 1 回のブラウザの起動の中でだけ一意なので、終了で消える storage.session に置く。
+ */
 export async function getFullTextTab(): Promise<number[]> {
-  const v = (await chrome.storage.local.get(FT_TAB_KEY))[FT_TAB_KEY];
-  // 旧形式の数値 1 つ・null も読める。次の追加・削除で配列として保存する。
-  const ids = Array.isArray(v) ? v : typeof v === 'number' ? [v] : [];
+  const v = (await chrome.storage.session.get(FT_TAB_KEY))[FT_TAB_KEY];
+  const ids = Array.isArray(v) ? v : [];
   return [...new Set(ids.filter((id): id is number => typeof id === 'number' && Number.isInteger(id) && id >= 0))];
+}
+/** 旧版が storage.local に残した記録を消す (ブラウザの再起動をまたいだ ID は別のタブを指しうるので、閉じずに捨てる) */
+export async function clearLegacyFullTextTab(): Promise<void> {
+  await chrome.storage.local.remove(FT_TAB_KEY);
 }
 let tabQueue: Promise<unknown> = Promise.resolve();
 /** ID 1 つの追加 / 削除を直列化。他のワーカーの記録を消さない。 */
@@ -598,7 +604,7 @@ export function setFullTextTab(id: number, present = true): Promise<void> {
   const run = tabQueue.then(async () => {
     const ids = await getFullTextTab();
     const next = present ? [...new Set([...ids, id])] : ids.filter(x => x !== id);
-    await chrome.storage.local.set({ [FT_TAB_KEY]: next });
+    await chrome.storage.session.set({ [FT_TAB_KEY]: next });
   });
   tabQueue = run.catch(() => {});
   return run;
