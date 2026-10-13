@@ -543,6 +543,15 @@ const isStr = (v: unknown): v is string => typeof v === 'string';
 function validFolder(f: any): f is Folder {
   return f && isStr(f.id) && isStr(f.name) && isStr(f.icon) && typeof f.order === 'number' && !isBuiltinFolder(f.id);
 }
+/** 取り込んだフォルダの icon / color が候補に無ければ、icon は既定に、color は外す (CSS に入る値なので。フォルダ自体は残す) */
+function cleanFolderLook<T extends Folder>(f: T): T {
+  const { color, ...rest } = f;
+  return {
+    ...rest,
+    icon: (ICONS as readonly string[]).includes(f.icon) ? f.icon : FOLDER_ICON,
+    ...(isStr(color) && (COLORS as readonly string[]).includes(color) ? { color } : {}),
+  } as T;
+}
 /** ポストの URL は x.com / twitter.com のものだけ (取り込んだ JSON が <a href> にそのまま使われるため) */
 const X_URL = /^https:\/\/(x|twitter)\.com\//i;
 const HTTPS_URL = /^https:\/\//i;
@@ -602,7 +611,7 @@ export function importData(json: unknown): Promise<number> {
     }
     const legacy = d.version === undefined || d.version < 2;
     const acc = (v: unknown) => (!legacy && isStr(v) && v ? (v === UNKNOWN_ACCOUNT_ID ? v : accountIdOf(v)) : UNKNOWN_ACCOUNT_ID);
-    const folders = d.folders.filter(validFolder).map((f) => ({ ...f, accountId: acc(f.accountId) }));
+    const folders = d.folders.filter(validFolder).map((f) => cleanFolderLook({ ...f, accountId: acc(f.accountId) }));
     // 保存時と同じ規則で所属を整える ([] / 'all' は「未分類」に)。件数と中身は変えない
     const bookmarks = d.bookmarks
       .filter(validBookmark)

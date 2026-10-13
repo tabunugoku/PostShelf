@@ -166,6 +166,10 @@ export const COLORS = [
   '#888780',
 ] as const;
 
+/** CSS の color に入れてよい色 (COLORS にあるものだけ)。保存済みのデータに不正な値が残っていても、CSS を埋め込ませない */
+export const safeColor = (color: unknown): string | undefined =>
+  typeof color === 'string' && (COLORS as readonly string[]).includes(color) ? color : undefined;
+
 const ICON_KEYS: Record<string, string> = {
   'ti-folder': 'iconFolder', 'ti-star': 'iconStar', 'ti-code': 'iconCode', 'ti-book': 'iconBook', 'ti-bulb': 'iconBulb',
   'ti-heart': 'iconHeart', 'ti-photo': 'iconPhoto', 'ti-briefcase': 'iconBriefcase', 'ti-music': 'iconMusic', 'ti-movie': 'iconMovie',
