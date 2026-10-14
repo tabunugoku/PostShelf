@@ -42,6 +42,22 @@ it('keeps going when tabs.get fails', async () => {
   expect('fullTextTab' in data).toBe(false);
 });
 
+it('reads a single number left by versions before v1.1.6', async () => {
+  data.fullTextTab = 7;
+  const { api, closed } = fakeTabs({ 7: { url: 'https://x.com/sample_a/status/100', active: false } });
+  await cleanupLegacyTabs(api);
+  expect(closed).toEqual([7]);
+  expect('fullTextTab' in data).toBe(false);
+});
+
+it.each([null, 'abc', { id: 1 }, -1, 1.5])('closes nothing and clears the record for %j', async (value) => {
+  data.fullTextTab = value;
+  const { api, closed } = fakeTabs({ 1: { url: 'https://x.com/sample_a/status/100', active: false } });
+  await cleanupLegacyTabs(api);
+  expect(closed).toEqual([]);
+  expect('fullTextTab' in data).toBe(false);
+});
+
 /** background/index.ts を読み込み、onInstalled の登録を取り出す */
 async function loadBackground() {
   vi.resetModules();
