@@ -127,19 +127,18 @@ describe('manager: the offer banner (it never starts anything by itself)', () =>
     }
   });
 
-  it('the feature off: no offer, no dialog even with #autocollect', async () => {
+  it('the feature off: no offer and no dialog', async () => {
     await updateAutoCollect({ enabled: false });
-    history.replaceState(null, '', '/#autocollect');
     await mount();
     expect($$('.ac-offer').length).toBe(0);
     expect($$('.ac-dialog').length).toBe(0);
   });
 
-  it('#autocollect (from the button on x.com) opens the confirmation', async () => {
+  it('#autocollect no longer opens the confirmation (the button on x.com shows it on x.com)', async () => {
     history.replaceState(null, '', '/#autocollect');
     await mount();
-    expect($('.ac-dialog')).toBeTruthy();
-    expect(await peekCollectCommand()).toBeNull();
+    expect($$('.ac-dialog').length).toBe(0);
+    history.replaceState(null, '', '/');
   });
 });
 

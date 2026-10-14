@@ -150,9 +150,9 @@ describe('v25: 設定を開く入口は、いまのまま', () => {
     expect(legendsOf('情報')).toContain('X の画面構造');
     expect($('[role=dialog]')).toBeTruthy();
   });
-  it('#autocollect still opens the auto-collect confirmation', async () => {
+  it('#autocollect no longer opens the auto-collect confirmation (it is shown on x.com now)', async () => {
     await mount('tab', 1200, '#autocollect');
-    expect($('[role=dialog].ac-dialog')).toBeTruthy();
+    expect($('.ac-dialog')).toBeNull();
   });
 });
 

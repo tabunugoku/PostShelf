@@ -50,8 +50,7 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     void startupCleanup.then(() => requestFullText(msg.accountId, msg));
   }
   if (msg?.type === 'stopFullText') void startupCleanup.then(() => fullText.stop('user')).catch(() => {});
-  // x.com の「自動で取り込む…」/ 進捗パネルの「管理画面を開く」: 管理画面を開く (開いていればそれを前面に出す)
-  if (msg?.type === 'openAutoCollect') void openManagerTab('#autocollect', true);
+  // x.com の進捗パネルの「管理画面を開く」: 管理画面を開く (開いていればそれを前面に出す)
   if (msg?.type === 'openManager') void openManagerTab(msg.hash === '#triage' ? '#triage' : '', true); // 開く先は、決まったものだけ (仕分けモード)
   if (msg?.type === 'openSidePanel' && sender.tab?.id !== undefined && chrome.sidePanel?.open) {
     void chrome.sidePanel.open({ tabId: sender.tab.id }).catch(() => {});
