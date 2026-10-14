@@ -3,6 +3,7 @@ import { t } from '../shared/strings';
 import { addCollected, getSavedIds, onDataChanged } from '../shared/storage';
 import { requestCache, requestFullTextBatch } from '../shared/cacheRequest';
 import { getSettings, onSettingsChanged, recordPending } from '../shared/settings';
+import { closeAutoCollectDialog, openAutoCollectDialog } from './autocollectDialog';
 import { xTheme } from './theme';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { extractTweet, type Extracted } from './snapshot';
@@ -75,6 +76,7 @@ export function ensureCollectButton(): void {
   const existing = document.querySelector('.postshelf-collect');
   if (!isBookmarksPage()) {
     document.querySelector('.postshelf-autocollect')?.remove();
+    closeAutoCollectDialog(); // ブックマーク以外のページに移ったら、開いたままの確認ダイアログも閉じる
     return existing?.remove();
   }
   if (existing) return;
@@ -111,7 +113,7 @@ export function ensureCollectButton(): void {
     }, 3000);
   });
   document.body.append(btn);
-  // 「いま見えている分だけ取り込む」(上のボタン) と「自動で取り込む…」の 2 つの選択。後者は、管理画面の確認ダイアログで同意したときだけ動く
+  // 「いま見えている分だけ取り込む」(上のボタン) と「自動で取り込む…」の 2 つの選択。後者は、x.com の上の確認ダイアログで同意したときだけ動く
   document.querySelector('.postshelf-autocollect')?.remove();
   const auto = document.createElement('button');
   auto.className = 'postshelf-autocollect';
@@ -119,7 +121,7 @@ export function ensureCollectButton(): void {
   auto.textContent = t('acBtnAuto');
   auto.title = t('acBtnAutoTitle');
   auto.style.cssText = `position:fixed;right:16px;bottom:60px;z-index:2147483646;min-height:36px;padding:6px 14px;border-radius:18px;border:.5px solid ${th.border};background:${th.bg};color:${th.fg};color-scheme:${th.scheme};font:14px/1.4 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;display:none`;
-  auto.addEventListener('click', () => void chrome.runtime?.sendMessage?.({ type: 'openAutoCollect' }));
+  auto.addEventListener('click', () => void openAutoCollectDialog().catch(() => {}));
   document.body.append(auto);
   void refreshCollectButton();
   void refreshAutoButton();

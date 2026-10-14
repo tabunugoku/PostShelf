@@ -317,8 +317,9 @@ describe('page panel', () => {
 });
 
 describe('page buttons: 2 choices on /i/history', () => {
-  it('「自動で取り込む…」 is next to the manual button; it only asks the manager to open the confirmation; it is hidden when the feature is off', async () => {
+  it('「自動で取り込む…」 is next to the manual button; it opens the confirmation on x.com without messaging the background; it is hidden when the feature is off', async () => {
     const { ensureCollectButton, refreshAutoButton } = await import('../src/content/collect');
+    const { closeAutoCollectDialog } = await import('../src/content/autocollectDialog');
     const { resetAccount, setCurrentAccount } = await import('../src/content/account');
     resetAccount();
     setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
@@ -333,8 +334,11 @@ describe('page buttons: 2 choices on /i/history', () => {
     expect(auto.textContent).toBe('自動で取り込む…');
     expect(auto.style.display).not.toBe('none');
     auto.click();
-    expect(sent).toEqual([{ type: 'openAutoCollect' }]); // ここでは始まらない。管理画面の確認ダイアログが開く
-    expect(await peekCollectCommand()).toBeNull();
+    await flush();
+    expect(document.querySelector('.postshelf-autocollect-dialog')).toBeTruthy(); // x.com の上にダイアログが出る
+    expect(sent).toEqual([]); // 管理画面は開かない
+    expect(await peekCollectCommand()).toBeNull(); // ここでは始まらない
+    closeAutoCollectDialog();
     await updateAutoCollect({ enabled: false });
     await refreshAutoButton();
     expect(auto.style.display).toBe('none');
