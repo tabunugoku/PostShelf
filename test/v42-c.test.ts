@@ -7,7 +7,7 @@ import { FullTextQueue, defaultDeps, type AskResult } from '../src/background/fu
 import { handleMessage } from '../src/content/messages';
 import { updateFromStatusPage } from '../src/content/fulltext';
 import { resetAccount, setCurrentAccount } from '../src/content/account';
-const quote: QuoteSnapshot = { text: 'Sample quote', author: 'Sample Quote', handle: '@sample_quote', media: ['https://example.invalid/q.jpg'], avatar: 'https://example.invalid/avatar.jpg', url: 'https://x.com/sample_quote/status/333', createdAt: '2026-10-10T00:00:00Z', segments: [{ t: 'link', v: 'link', href: 'https://example.invalid/link' }], translated: true };
+const quote: QuoteSnapshot = { text: 'Sample quote', author: 'Sample Quote', handle: '@sample_quote', media: ['https://pbs.twimg.com/media/sample_q.jpg'], avatar: 'https://pbs.twimg.com/profile_images/sample_quote.jpg', url: 'https://x.com/sample_quote/status/333', createdAt: '2026-10-10T00:00:00Z', segments: [{ t: 'link', v: 'link', href: 'https://example.invalid/link' }], translated: true };
 const snap = (over: Partial<Snapshot> = {}): Snapshot => ({ text: 'Sample main', author: 'Sample Main', handle: '@sample_main', media: [], url: 'https://x.com/sample_main/status/111', ...over });
 beforeEach(() => { installChromeMock(); resetAccount(); setAccountScope('me'); history.pushState(null, '', '/home'); });
 describe('v42-C: resaving and import compatibility', () => {

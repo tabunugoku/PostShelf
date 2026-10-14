@@ -9,6 +9,14 @@ const TWIMG_URL = /^https:\/\/pbs\.twimg\.com\//;
 /** X の画像の置き場 (https://pbs.twimg.com/) の URL か。画像キャッシュが取りに行ってよい URL の条件 */
 export const isTwimgUrl = (url: string): boolean => TWIMG_URL.test(url);
 
+const X_IMAGE_URL = /^https:\/\/(?:pbs|abs)\.twimg\.com\//;
+
+/**
+ * X の画像の置き場 (pbs.twimg.com: 投稿の画像・アイコン・動画のサムネイル / abs.twimg.com: 絵文字・初期アイコン) の URL か。
+ * 取り込む JSON の画像 URL の条件。先頭の一致だけで見るので、pbs.twimg.com.example.invalid のような偽のホストは通らない
+ */
+export const isXImageUrl = (url: unknown): url is string => typeof url === 'string' && X_IMAGE_URL.test(url);
+
 /** `name=` パラメータを size に差し替える。pbs.twimg.com 以外、`name=` が無い URL (想定外の形) はそのまま返す */
 export function withImageSize(url: string, size: string): string {
   if (!isTwimgUrl(url) || !NAME_PARAM.test(url)) return url;

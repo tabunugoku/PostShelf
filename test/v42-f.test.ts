@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { getBookmark, importData, setAccountScope } from '../src/shared/storage';
-const quote = { author: 'Sample Quote', handle: '@sample_quote', text: 'Sample quote body', media: ['https://example.invalid/valid.jpg'], avatar: 'https://example.invalid/avatar.jpg', url: 'https://x.com/sample_quote/status/333' };
+const quote = { author: 'Sample Quote', handle: '@sample_quote', text: 'Sample quote body', media: ['https://pbs.twimg.com/media/sample_valid.jpg'], avatar: 'https://pbs.twimg.com/profile_images/sample_quote.jpg', url: 'https://x.com/sample_quote/status/333' };
 const load = async (patch: object) => {
   expect(await importData({ app: 'PostShelf', version: 2, folders: [], bookmarks: [{ accountId: 'me', tweetId: '111', savedAt: 1, folderIds: [], snapshot: { author: 'Sample Main', handle: '@sample_main', text: 'Sample main body', media: [], url: 'https://x.com/sample_main/status/111', quote: { ...quote, ...patch } } }] })).toBe(1);
   return (await getBookmark('111'))!.snapshot;

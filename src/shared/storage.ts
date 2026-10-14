@@ -38,6 +38,7 @@ import {
 import { t } from './strings';
 import { getSettings, updateSettings } from './settings';
 import { ancestors, canParent, descendants, flattenFolders, sanitizeParents, withAncestors, withoutDescendants } from './folderTree';
+import { isXImageUrl } from './media';
 import { assignOrder } from './ordering';
 import { sanitizeSegments, type Segment } from './segments';
 
@@ -576,14 +577,13 @@ function validBookmark(b: any): b is Bookmark {
 function cleanQuote(raw: unknown): Bookmark['snapshot']['quote'] {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
   const q = raw as Record<string, unknown>;
-  const httpsOnly = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
   if (!isStr(q.author) || !isStr(q.handle) || !isStr(q.text) || !Array.isArray(q.media) || (q.createdAt !== undefined && !isStr(q.createdAt)) ||
       (q.url !== undefined && (!isStr(q.url) || !X_URL.test(q.url)))) return undefined;
   const segments = sanitizeSegments(q.segments);
   return {
-    author: q.author, handle: q.handle, text: q.text, media: q.media.filter(httpsOnly),
-    ...(q.hasVideo === true ? { hasVideo: true, ...(httpsOnly(q.videoPoster) ? { videoPoster: q.videoPoster } : {}) } : {}),
-    ...(httpsOnly(q.avatar) ? { avatar: q.avatar } : {}), ...(isStr(q.createdAt) ? { createdAt: q.createdAt } : {}),
+    author: q.author, handle: q.handle, text: q.text, media: q.media.filter(isXImageUrl),
+    ...(q.hasVideo === true ? { hasVideo: true, ...(isXImageUrl(q.videoPoster) ? { videoPoster: q.videoPoster } : {}) } : {}),
+    ...(isXImageUrl(q.avatar) ? { avatar: q.avatar } : {}), ...(isStr(q.createdAt) ? { createdAt: q.createdAt } : {}),
     ...(isStr(q.url) ? { url: q.url } : {}), ...(segments ? { segments } : {}), ...(q.translated === true ? { translated: true } : {}),
   };
 }
@@ -594,13 +594,12 @@ function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
     s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown; videoPoster?: unknown; hasVideo?: unknown; hasLink?: unknown; createdAt?: unknown };
   const seg = segments === undefined ? undefined : sanitizeSegments(segments);
   const clean = cleanQuote(quote);
-  // 画像・アバターは https の URL だけ (x.com 以外への勝手な要求や javascript: を通さない)。満たさない要素だけ捨てる
-  const httpsOnly = (v: unknown): v is string => isStr(v) && HTTPS_URL.test(v);
+  // 画像・アバターは X の画像の置き場の URL だけ (知らないサーバーへの勝手な要求や javascript: を通さない)。満たさない要素だけ捨てる
   return {
     ...rest,
-    media: (media as unknown[]).filter(httpsOnly),
-    ...(httpsOnly(avatar) ? { avatar } : {}),
-    ...(httpsOnly(videoPoster) ? { videoPoster } : {}),
+    media: (media as unknown[]).filter(isXImageUrl),
+    ...(isXImageUrl(avatar) ? { avatar } : {}),
+    ...(isXImageUrl(videoPoster) ? { videoPoster } : {}),
     ...(typeof hasVideo === 'boolean' ? { hasVideo } : {}),
     ...(typeof hasLink === 'boolean' ? { hasLink } : {}),
     ...(isStr(createdAt) ? { createdAt } : {}),
@@ -654,7 +653,11 @@ export function importData(json: unknown): Promise<number> {
       for (const a of d.accounts.filter(validAccount)) {
         const id = accountIdOf(a.id);
         if (id === UNKNOWN_ACCOUNT_ID) continue;
-        if (!accounts[id] || accounts[id].lastSeenAt < a.lastSeenAt) accounts[id] = { ...a, id };
+        const { avatar, ...rest } = a;
+        // アイコンは X の画像の置き場の URL だけ残す。満たさなければ項目ごと捨てる
+        if (!accounts[id] || accounts[id].lastSeenAt < a.lastSeenAt) {
+          accounts[id] = { ...rest, ...(isXImageUrl(avatar) ? { avatar } : {}), id };
+        }
       }
     }
     await chrome.storage.local.set({
