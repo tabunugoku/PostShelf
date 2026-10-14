@@ -14,7 +14,7 @@ import {
   type ImageStore,
   type PostInfo,
 } from './imagecache';
-import { withImageSize } from './media';
+import { isTwimgUrl, withImageSize } from './media';
 import type { Bookmark, Snapshot } from './models';
 import {
   MAX_FETCH_FAILURES,
@@ -50,11 +50,11 @@ export interface Target {
   url: string;
 }
 
-/** ポストのキャッシュ対象: 画像は画質の設定に合わせた URL、動画はサムネイルだけ */
+/** ポストのキャッシュ対象: 画像は画質の設定に合わせた URL、動画はサムネイルだけ。pbs.twimg.com 以外は対象にしない (表示は URL のまま) */
 export function targetsOf(snapshot: Snapshot, quality: ImageCacheSettings['quality']): Target[] {
   const out: Target[] = snapshot.media.map((u, i) => ({ name: String(i + 1), url: withImageSize(u, quality) }));
   if (snapshot.videoPoster) out.push({ name: 'video-thumb', url: snapshot.videoPoster });
-  return out;
+  return out.filter((t) => isTwimgUrl(t.url));
 }
 
 export const postInfoOf = (b: Bookmark): PostInfo => ({ tweetId: b.tweetId, handle: b.snapshot.handle, displayName: b.snapshot.author, url: b.snapshot.url, savedAt: b.savedAt });

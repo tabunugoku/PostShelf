@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { installChromeMock } from './chrome-mock';
+import { installChromeMock, sessionDataOf } from './chrome-mock';
 import { FullTextQueue, defaultDeps, cleanupAtStartup, AUTO_CAP, MANUAL_CAP, TAB_TIMEOUT_MS, RETRY_MS, type AskResult } from '../src/background/fulltext';
 import { getFullTextTab, setFullTextTab, recordFullTextTry, getFullTextTries, type FullTextRun } from '../src/shared/settings';
 import type { Bookmark } from '../src/shared/models';
@@ -83,12 +83,12 @@ it('skipped items require no worker gaps or tabs',async()=>{
  const q=new FullTextQueue(f.d); await finish(q.enqueue(items(8),'save'));
  expect(f.opened).toHaveLength(0); expect(q.state).toMatchObject({skipped:8,done:0,total:8});
 });
-it.each([[42],[[42,43,44]],[null]])('startup cleans legacy or array tab records %j',async(raw)=>{
- data.fullTextTab=raw; const f=fake(); await cleanupAtStartup(f.d);
- expect(f.closed).toEqual(raw===null?[]:Array.isArray(raw)?raw:[raw]); expect(await getFullTextTab()).toEqual([]);
+it.each([[[42]],[[42,43,44]],[null]])('startup cleans session tab records %j',async(raw)=>{
+ sessionDataOf().fullTextTab=raw; const f=fake(); await cleanupAtStartup(f.d);
+ expect(f.closed).toEqual(raw===null?[]:raw); expect(await getFullTextTab()).toEqual([]);
 });
 it('serialized tab and retry records never lose concurrent additions',async()=>{
- data.fullTextTab=42;
+ sessionDataOf().fullTextTab=[42];
  await Promise.all([setFullTextTab(43),setFullTextTab(44),setFullTextTab(42,false)]);
  expect(await getFullTextTab()).toEqual([43,44]);
  await Promise.all([recordFullTextTry('me:1',Date.now(),RETRY_MS),recordFullTextTry('me:2',Date.now(),RETRY_MS)]);
