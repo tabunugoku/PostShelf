@@ -211,21 +211,27 @@ h1 em{font-style:normal;color:var(--fill)}
 h2{font-size:clamp(26px,3.4vw,34px);line-height:1.3;margin:6px 0 8px}
 .sub{color:var(--mu);font-size:16px;max-width:42em;margin-bottom:32px}
 .grid{display:flex;flex-wrap:wrap;gap:16px}
-.fc{flex:1 1 300px;background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:22px;transition:transform .25s,box-shadow .25s}
-.fc:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.ic{width:42px;height:42px;border-radius:10px;background:var(--bgacc);display:grid;place-items:center;margin-bottom:12px}
-.ic svg{width:22px;height:22px;fill:none;stroke:var(--at);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* 機能は重要度で 3 段に分ける (大 1・中 2・小 6)。小は枠なしの一覧 */
+.feat{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px}
 .fc h3{font-size:17px;margin-bottom:4px}.fc p{font-size:14.5px;line-height:1.7;color:var(--mu)}
+.fc.big{grid-column:span 6;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:center;background:var(--bgacc);border-radius:24px;padding:44px}
+.fc.big h3{font-size:clamp(26px,3vw,36px);line-height:1.25;letter-spacing:-.02em;margin-bottom:12px}
+.fc.big p{font-size:16.5px;color:var(--fg);max-width:30em}
+.lock{display:grid;place-items:center;aspect-ratio:16/10;border-radius:18px;background:var(--bg)}
+.lock svg{width:44%;max-width:180px;fill:none;stroke:var(--at);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.fc.mid{grid-column:span 3;background:var(--bg);border-radius:20px;padding:32px}
+.fc.mid h3{font-size:22px;letter-spacing:-.01em;margin-bottom:8px}
+.fc.mid p{font-size:15.5px}
+.more{grid-column:span 6;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px 40px;margin-top:40px}
+.more h3{font-size:16px}
 .sw{margin-top:36px;border:1px solid var(--bd);background:var(--bg);border-radius:16px;padding:22px;display:flex;flex-wrap:wrap;gap:24px;align-items:center}
 .sw .t{flex:1 1 280px}.sw .t b{font-size:17px}.sw .t p{font-size:14px;color:var(--mu);margin-top:4px}
 .dots{display:flex;gap:10px;flex-wrap:wrap}.dots i{width:30px;height:30px;border-radius:50%;display:block}
 .dots .none{display:none}
 @media(max-width:600px){
-  #features .grid{gap:8px}
-  .fc{display:grid;grid-template-columns:36px minmax(0,1fr);gap:4px 10px;padding:14px;border-radius:12px}
-  .fc .ic{width:36px;height:36px;margin:0;grid-column:1;grid-row:1}
-  .fc h3{grid-column:2;grid-row:1;align-self:center;margin:0;font-size:16px}
-  .fc p{grid-column:1 / -1;font-size:14px}
+  .fc.big{grid-template-columns:minmax(0,1fr);padding:28px;gap:24px}
+  .fc.mid{grid-column:span 6;padding:24px}
+  .more{grid-template-columns:minmax(0,1fr);gap:24px;margin-top:24px}
   .sw{padding:14px;gap:14px;margin-top:20px}.sw .t{flex-basis:100%}
   .dots{gap:8px;flex-wrap:nowrap}.dots i{width:24px;height:24px;flex:none}
   .dots .none{display:block;border:2px dashed var(--mu)}
@@ -389,16 +395,24 @@ footer p{max-width:46em}
   <div class="kick">FEATURES</div>
   <h2><span class="ja">整理に必要な機能</span><span class="en">Everything you need to sort</span></h2>
   <p class="sub"><span class="ja">見た目は X に近く、操作に迷いません。</span><span class="en">It looks like X, so there is little to learn.</span></p>
-  <div class="grid">
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg></div><h3><span class="ja">自由なフォルダ</span><span class="en">Folders your way</span></h3><p><span class="ja">名前・アイコン・色を自由に選べます。1 つのポストを、複数のフォルダに入れることもできます。</span><span class="en">Choose any name, icon and color. One post can go into several folders.</span></p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2"/></svg></div><h3><span class="ja">x.com でそのまま保存</span><span class="en">Save right on x.com</span></h3><p><span class="ja">ブックマークボタンの横に、フォルダを選ぶ小さなメニューが出ます。画面を離れずに分類できます。</span><span class="en">A small folder menu appears next to the bookmark button, so you can sort without leaving the page.</span></p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></div><h3><span class="ja">3 つの表示</span><span class="en">Three views</span></h3><p><span class="ja">X 風のカード、リスト、グリッドを切り替えられます。サイドパネルでも使えます。</span><span class="en">Switch between X-style cards, a list and a grid. It also works in the side panel.</span></p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6"/></svg></div><h3><span class="ja">探しやすい</span><span class="en">Easy to search</span></h3><p><span class="ja">本文と投稿者の検索、並べ替え、「画像あり」「動画あり」「リンクあり」の絞り込み、直近 7 日のスマートビュー。</span><span class="en">Search text and authors, sort, filter by images, videos or links, and use the smart view for the last 7 days.</span></p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg></div><h3><span class="ja">動画と画像を見分けられる</span><span class="en">Videos and images at a glance</span></h3><p><span class="ja">動画には再生ボタンと「動画」の札、複数枚の画像には枚数の札が付きます。</span><span class="en">Videos get a play button and a label, and multi-image posts show how many images they have.</span></p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h3><span class="ja">長いポストも全文で</span><span class="en">Long posts in full</span></h3><p><span class="ja">たたまれたポストは、保存するときに裏のタブを短く開いて全文を読み取ります (設定でオフにできます)。PostShelf では、たたむ・広げるを切り替えられ、本文中のリンクも開けます。</span><span class="en">When you save a collapsed post, PostShelf briefly opens it in a background tab to read the full text (you can turn this off in Settings). You can collapse or expand posts, and links in the text open normally.</span></p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 7a4 4 0 1 0 8 0 4 4 0 1 0-8 0M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.85"/></svg></div><h3><span class="ja">複数アカウント</span><span class="en">Multiple accounts</span></h3><p><span class="ja">X のアカウントごとに、フォルダとポストを分けて管理します。</span><span class="en">Folders and posts are kept separately for each X account.</span></p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"/></svg></div><h3><span class="ja">取り込みと書き出し</span><span class="en">Import and export</span></h3><p><span class="ja">既存のブックマークは、確認のうえで自動取り込みできます (任意)。JSON でのエクスポート / インポートにも対応しています。</span><span class="en">Import your existing bookmarks automatically after a confirmation (optional), and export or import your data as JSON.</span></p></div>
-    <div class="fc"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM11 16a1 1 0 1 0 2 0 1 1 0 1 0-2 0M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3><span class="ja">データは端末の中だけ</span><span class="en">Your data stays with you</span></h3><p><span class="ja">保存先は端末の中だけ。外部への送信も、解析も、アカウント登録もありません。</span><span class="en">Everything is stored on your device. No uploads, no analytics, no sign-up.</span></p></div>
+  <div class="feat">
+    <div class="fc big">
+      <div>
+        <h3><span class="ja">データは端末の中だけ</span><span class="en">Your data stays with you</span></h3>
+        <p><span class="ja">保存先は端末の中だけ。外部への送信も、解析も、アカウント登録もありません。</span><span class="en">Everything is stored on your device. No uploads, no analytics, no sign-up.</span></p>
+      </div>
+      <div class="lock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM11 16a1 1 0 1 0 2 0 1 1 0 1 0-2 0M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+    </div>
+    <div class="fc mid"><h3><span class="ja">x.com でそのまま保存</span><span class="en">Save right on x.com</span></h3><p><span class="ja">ブックマークボタンの横に、フォルダを選ぶ小さなメニューが出ます。画面を離れずに分類できます。</span><span class="en">A small folder menu appears next to the bookmark button, so you can sort without leaving the page.</span></p></div>
+    <div class="fc mid"><h3><span class="ja">自由なフォルダ</span><span class="en">Folders your way</span></h3><p><span class="ja">名前・アイコン・色を自由に選べます。1 つのポストを、複数のフォルダに入れることもできます。</span><span class="en">Choose any name, icon and color. One post can go into several folders.</span></p></div>
+    <div class="more">
+      <div class="fc"><h3><span class="ja">3 つの表示</span><span class="en">Three views</span></h3><p><span class="ja">X 風のカード、リスト、グリッドを切り替えられます。サイドパネルでも使えます。</span><span class="en">Switch between X-style cards, a list and a grid. It also works in the side panel.</span></p></div>
+      <div class="fc"><h3><span class="ja">探しやすい</span><span class="en">Easy to search</span></h3><p><span class="ja">本文と投稿者の検索、並べ替え、「画像あり」「動画あり」「リンクあり」の絞り込み、直近 7 日のスマートビュー。</span><span class="en">Search text and authors, sort, filter by images, videos or links, and use the smart view for the last 7 days.</span></p></div>
+      <div class="fc"><h3><span class="ja">動画と画像を見分けられる</span><span class="en">Videos and images at a glance</span></h3><p><span class="ja">動画には再生ボタンと「動画」の札、複数枚の画像には枚数の札が付きます。</span><span class="en">Videos get a play button and a label, and multi-image posts show how many images they have.</span></p></div>
+      <div class="fc"><h3><span class="ja">長いポストも全文で</span><span class="en">Long posts in full</span></h3><p><span class="ja">たたまれたポストは、保存するときに裏のタブを短く開いて全文を読み取ります (設定でオフにできます)。PostShelf では、たたむ・広げるを切り替えられ、本文中のリンクも開けます。</span><span class="en">When you save a collapsed post, PostShelf briefly opens it in a background tab to read the full text (you can turn this off in Settings). You can collapse or expand posts, and links in the text open normally.</span></p></div>
+      <div class="fc"><h3><span class="ja">複数アカウント</span><span class="en">Multiple accounts</span></h3><p><span class="ja">X のアカウントごとに、フォルダとポストを分けて管理します。</span><span class="en">Folders and posts are kept separately for each X account.</span></p></div>
+      <div class="fc"><h3><span class="ja">取り込みと書き出し</span><span class="en">Import and export</span></h3><p><span class="ja">既存のブックマークは、確認のうえで自動取り込みできます (任意)。JSON でのエクスポート / インポートにも対応しています。</span><span class="en">Import your existing bookmarks automatically after a confirmation (optional), and export or import your data as JSON.</span></p></div>
+    </div>
   </div>
   <div class="sw">
     <div class="t"><b><span class="ja">フォルダの色は 8 色 (と色なし)</span><span class="en">8 folder colors (or none)</span></b><p><span class="ja">アイコンも、どの色でも選べます。</span><span class="en">Any icon can use any color.</span></p></div>
