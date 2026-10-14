@@ -1,3 +1,4 @@
+import { managerCss } from './css-helpers';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { readFileSync } from 'node:fs';
@@ -8,7 +9,7 @@ import { mediaKindOf } from '../src/manager/Cards';
 import { noteAccount, setAccountScope, setBookmarkFolders } from '../src/shared/storage';
 import { updateSettings } from '../src/shared/settings';
 
-const css = readFileSync('static/manager.css', 'utf8');
+const css = managerCss();
 const flush = () => act(() => new Promise<void>((r) => setTimeout(r, 20)));
 const $ = <T extends Element>(sel: string) => document.querySelector<T>(sel)!;
 const $$ = <T extends Element>(sel: string) => [...document.querySelectorAll<T>(sel)];

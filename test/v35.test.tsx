@@ -1,3 +1,4 @@
+import { managerCss } from './css-helpers';
 import type { Bookmark } from '../src/shared/models';
 import { queryBookmarks } from '../src/shared/query';
 import { sizeSeparateButton } from '../src/content/buttons';
@@ -143,7 +144,7 @@ describe('v35-A: scroll check without IntersectionObserver', () => {
 
 describe('v35-B: settings description width and ja wording', () => {
   it('.setting-desc has no width cap (v36: widened from 52em to none)', () => {
-    const css = readFileSync('static/manager.css', 'utf8');
+    const css = managerCss();
     expect(css).toMatch(/\.setting-desc\{[^}]*max-width:none/);
     expect(css).not.toMatch(/max-width:40em/);
   });
@@ -186,9 +187,11 @@ describe('v35-C: the folder button follows the size of the bookmark button', () 
 
 describe('v35-F: button nowrap is split', () => {
   it('buttons in dialogs, settings groups and menu items wrap; toolbar buttons keep nowrap', () => {
-    const css = readFileSync('static/manager.css', 'utf8');
+    const css = managerCss();
     expect(css).toMatch(/button,\.chip,\.tab,\.badge\{white-space:nowrap\}/);
-    expect(css).toMatch(/\.dialog button,\.setting-group button,\.menu-item\{white-space:normal;min-width:0;overflow-wrap:anywhere\}/);
+    // ダイアログのボタンの規則は、x.com 側の確認ダイアログと共有するため static/autocollect-dialog.css にある
+    expect(css).toMatch(/\.dialog button\{white-space:normal;min-width:0;overflow-wrap:anywhere\}/);
+    expect(css).toMatch(/\.setting-group button,\.menu-item\{white-space:normal;min-width:0;overflow-wrap:anywhere\}/);
   });
 });
 

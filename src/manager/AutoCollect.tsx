@@ -1,17 +1,16 @@
 /**
  * ブックマークの自動取り込みの、管理画面側の部品 (v15-B-3。見た目の基準は docs/mockups/auto-collect.html)。
  *  - OfferBanner: 「X のブックマークを取り込みますか？」(自動では始まらない)
- *  - AutoCollectDialog: 開始前の確認 (同意のチェックを入れるまで「始める」は押せない)
  *  - ProgressBanner: x.com のタブで動いている取り込みの状況と、一時停止・停止
  * 取り込みは x.com のタブの中の拡張機能 (content script) が行う。ここからは chrome.storage.local のコマンドで指示するだけで、
  * 新しい権限は使わない。
  */
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { isBookmarksPath } from '../shared/selectors';
 import { t } from '../shared/strings';
 import {
-  CAP_MAX, clearCollectCommand, getCollectRun, normalizeCap, onCollectRunChanged, peekCollectCommand, sendCollectCommand,
+  clearCollectCommand, getCollectRun, onCollectRunChanged, peekCollectCommand, sendCollectCommand,
   updateAutoCollect,
   type CollectCap, type CollectRun, type CollectSpeed,
 } from '../shared/settings';
@@ -71,7 +70,7 @@ export function watchStart(id: string, onMissed: () => void, ms = START_CHECK_MS
   }, ms);
 }
 
-/** 確認ダイアログで同意して「始める」を押したときだけ呼ぶ。consent: true のコマンドを書き、x.com のタブを開く */
+/** 管理画面の確認ダイアログ (shared/AutoCollectDialog) で同意して「始める」を押したときだけ呼ぶ。consent: true のコマンドを書き、x.com のタブを開く */
 export async function startAutoCollect(opts: { accountId: string; speed: CollectSpeed; cap: CollectCap }): Promise<string> {
   await updateAutoCollect({ speed: opts.speed, cap: opts.cap });
   const id = await sendCollectCommand({ type: 'start', consent: true, speed: opts.speed, cap: opts.cap, accountId: opts.accountId });
@@ -89,140 +88,6 @@ export function OfferBanner(props: { accountName: string; onStart: () => void; o
           <button class="primary" onClick={props.onStart}>{t('acOfferStart')}</button>
           <button onClick={props.onLater}>{t('acOfferLater')}</button>
           <button onClick={props.onNever}>{t('acOfferNever')}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** 開発者用の裏モードに入る / 出る文字キーの並び。画面には案内を出さない (利用者向けの機能ではない) */
-const DEV_KEYS = 'devcap';
-
-/** 文字を打つ入力欄か。ラジオ・チェックボックス・ボタンは、打った文字を受けないので、数えてよい */
-function isTextEntry(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  if (target instanceof HTMLInputElement) return !['radio', 'checkbox', 'button', 'submit'].includes(target.type);
-  return target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement;
-}
-
-/** 件数の入力が、上限として使える値か (0 = 止めない、または 1〜CAP_MAX の整数) */
-const validCapText = (text: string): boolean => text.trim() !== '' && normalizeCap(Number(text)) === Number(text);
-
-export function AutoCollectDialog(props: {
-  /** 表示するアカウント名。null = 判定できていない (始められない) */
-  accountName: string | null;
-  speed: CollectSpeed;
-  cap: CollectCap;
-  onCancel: () => void;
-  onStart: (speed: CollectSpeed, cap: CollectCap) => void;
-}) {
-  const [speed, setSpeed] = useState<CollectSpeed>(props.speed);
-  /** 最後に有効だった上限 (開始のときに使う) */
-  const [cap, setCap] = useState<CollectCap>(props.cap);
-  /** 裏モードの数字の入力。ダイアログの state だけに持ち、保存しない (閉じると切れる) */
-  const [devMode, setDevMode] = useState(false);
-  const [capText, setCapText] = useState(String(props.cap));
-  const [agreed, setAgreed] = useState(false);
-  const devProgress = useRef(0);
-  const first = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    const prev = document.activeElement as HTMLElement | null;
-    first.current?.focus();
-    const key = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') props.onCancel();
-      if (e.key === 'Shift' || e.ctrlKey || e.metaKey || e.altKey) return; // 修飾キーだけでは、並びを途切れさせない
-      if (isTextEntry(e.target)) {
-        devProgress.current = 0;
-        return;
-      }
-      // 途中で別のキーが入ったら、最初から数え直す (先頭の文字なら、そこから 1 文字目)
-      const at = devProgress.current;
-      devProgress.current = e.key === DEV_KEYS[at] ? at + 1 : e.key === DEV_KEYS[0] ? 1 : 0;
-      if (devProgress.current === DEV_KEYS.length) {
-        devProgress.current = 0;
-        setDevMode((on) => !on);
-      }
-    };
-    document.addEventListener('keydown', key);
-    return () => {
-      document.removeEventListener('keydown', key);
-      prev?.focus?.();
-    };
-  }, []);
-  const capOk = !devMode || validCapText(capText);
-  const ok = agreed && props.accountName !== null && capOk;
-  return (
-    <div class="overlay" onClick={props.onCancel}>
-      <div class="dialog dialog-wide ac-dialog" role="dialog" aria-modal="true" aria-labelledby="ac-title" onClick={(e) => e.stopPropagation()}>
-        <h2 id="ac-title" class="dialog-title">{t('acDlgTitle')}</h2>
-        {props.accountName === null ? (
-          <p class="error" role="alert">{t('acNoAccount')}</p>
-        ) : (
-          <p class="muted">{t('acDlgIntro', props.accountName)}</p>
-        )}
-        {/* 順: 説明 → 規約の注意 (黄色い枠) → 速度と 1 回の上限 → 並び順の図 → 同意 → 始める */}
-        <div class="ac-alert" role="note">{t('acRisk')}</div>
-        <fieldset class="ac-field">
-          <legend>{t('acSpeedLabel')}</legend>
-          <label class="setting">
-            <input ref={first} type="radio" name="ac-speed" checked={speed === 'slow'} onChange={() => setSpeed('slow')} />
-            <span>{t('acSpeedSlowOpt')} <span class="muted">{t('acSpeedSlowHint')}</span></span>
-          </label>
-          <label class="setting">
-            <input type="radio" name="ac-speed" checked={speed === 'normal'} onChange={() => setSpeed('normal')} />
-            <span>{t('acSpeedNormal')} <span class="muted">{t('acSpeedNormalHint')}</span></span>
-          </label>
-        </fieldset>
-        <label class="ac-field ac-cap">
-          <strong>{t('acCapLabel')}</strong>
-          {devMode ? (
-            <input
-              type="number"
-              min={0}
-              max={CAP_MAX}
-              step={1}
-              aria-label={t('acCapLabel')}
-              value={capText}
-              onInput={(e) => {
-                const text = (e.target as HTMLInputElement).value;
-                setCapText(text);
-                if (validCapText(text)) setCap(Number(text));
-              }}
-            />
-          ) : (
-            <select
-              value={String(cap)}
-              onChange={(e) => {
-                const next = Number((e.target as HTMLSelectElement).value);
-                setCap(next);
-                setCapText(String(next));
-              }}
-            >
-              <option value="300">{t('acCap300')}</option>
-              <option value="100">{t('acCap100')}</option>
-              <option value="0">{t('acCap0')}</option>
-              {![300, 100, 0].includes(cap) && <option value={String(cap)}>{cap}</option>}
-            </select>
-          )}
-        </label>
-        <div class="ac-order">
-          <div>
-            <b>{t('acOrderX')}</b>
-            <ol><li>{t('acOrderNewest')}</li><li>{t('acOrderPrev')}</li><li>{t('acOrderOld')}</li></ol>
-          </div>
-          <div>
-            <b>{t('acOrderShelf')}</b>
-            <ol><li>{t('acOrderNewest')}</li><li>{t('acOrderPrev')}</li><li>{t('acOrderOld')}</li></ol>
-            <span class="ac-ok">{t('acOrderSame')}</span>
-          </div>
-        </div>
-        <label class="setting">
-          <input type="checkbox" checked={agreed} onChange={(e) => setAgreed((e.target as HTMLInputElement).checked)} />
-          <span>{t('acConsent')}</span>
-        </label>
-        <div class="dialog-actions">
-          <button onClick={props.onCancel}>{t('cancel')}</button>
-          <button class="primary" disabled={!ok} onClick={() => ok && props.onStart(speed, devMode ? Number(capText) : cap)}>{t('acDlgStart')}</button>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
-import { AutoCollectDialog } from '../src/manager/AutoCollect';
+import { AutoCollectDialog } from '../src/shared/AutoCollectDialog';
 import { AutoCollectPanel, viewOf } from '../src/content/autocollectPanel';
 import type { AutoCollector, CollectState } from '../src/content/autocollect';
 

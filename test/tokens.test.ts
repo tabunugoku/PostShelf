@@ -2,13 +2,14 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ACCENT, ACCENT_FILL } from '../src/shared/tokens';
+import { managerCss } from './css-helpers';
 
-const css = readFileSync(resolve(process.cwd(), 'static/manager.css'), 'utf8');
+const css = managerCss();
 
 /** :root の変数を、ライト (最初の :root) とダーク (prefers-color-scheme:dark の :root で上書き) で取り出す */
 function themes() {
   const vars = (block: string) => Object.fromEntries([...block.matchAll(/--([\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
-  const light = vars(css.slice(css.indexOf(':root{'), css.indexOf('@media (prefers-color-scheme:dark)')));
+  const light = vars(css.slice(css.indexOf(':root,:host{'), css.indexOf('@media (prefers-color-scheme:dark)')));
   const darkBlock = css.slice(css.indexOf('@media (prefers-color-scheme:dark)'));
   const dark = { ...light, ...vars(darkBlock.slice(0, darkBlock.indexOf('}}')) ) };
   return { light, dark };

@@ -2,7 +2,7 @@ import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
-import { AutoCollectDialog } from '../src/manager/AutoCollect';
+import { AutoCollectDialog } from '../src/shared/AutoCollectDialog';
 
 const $ = <T extends Element>(sel: string) => document.querySelector<T>(sel)!;
 const press = (key: string, target: Element = document.body) =>
