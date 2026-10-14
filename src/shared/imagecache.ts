@@ -140,6 +140,13 @@ export function openDb(factory: IDBFactory = indexedDB): Promise<IDBDatabase> {
   return req(r);
 }
 
+/** openDb の結果を使い回す。失敗したら reset で使い回しの値を空に戻し、次の呼び出しで開き直せるようにする */
+function openOnce(factory: IDBFactory | undefined, reset: () => void): Promise<IDBDatabase> {
+  const opened = openDb(factory);
+  opened.catch(reset);
+  return opened;
+}
+
 /** Blob を ArrayBuffer にする (Blob.arrayBuffer が無い環境では FileReader)。IndexedDB には {buf, type} で入れる = どの環境でも同じ動き */
 function blobToBuffer(blob: Blob): Promise<ArrayBuffer> {
   if (typeof blob.arrayBuffer === 'function') return blob.arrayBuffer();
@@ -156,7 +163,7 @@ export class IdbStore implements ImageStore {
   private db?: Promise<IDBDatabase>;
   constructor(private factory?: IDBFactory) {}
   private open() {
-    return (this.db ??= openDb(this.factory));
+    return (this.db ??= openOnce(this.factory, () => (this.db = undefined)));
   }
   async put(tweetId: string, name: string, blob: Blob, meta: PutMeta = {}): Promise<void> {
     check(tweetId, name);
@@ -204,7 +211,12 @@ export interface FileHandleLike {
   kind: 'file';
   name: string;
   getFile(): Promise<File>;
-  createWritable(): Promise<{ write(data: Blob | string): Promise<void>; close(): Promise<void> }>;
+  createWritable(): Promise<{
+    write(data: Blob | string): Promise<void>;
+    close(): Promise<void>;
+    /** 書きかけの一時ファイルを捨てる (FileSystemWritableFileStream.abort)。無い環境では呼ばない */
+    abort?(): Promise<void>;
+  }>;
 }
 export interface DirHandleLike {
   kind: 'directory';
@@ -249,7 +261,7 @@ export class IdbIndex implements MetaIndex {
   private db?: Promise<IDBDatabase>;
   constructor(private factory?: IDBFactory) {}
   private open() {
-    return (this.db ??= openDb(this.factory));
+    return (this.db ??= openOnce(this.factory, () => (this.db = undefined)));
   }
   async all() {
     return (await req((await this.open()).transaction(S_DIRMETA).objectStore(S_DIRMETA).getAll())) as CacheMeta[];
@@ -321,8 +333,13 @@ async function tryGetFile(parent: DirHandleLike, name: string): Promise<FileHand
 }
 async function writeFile(dir: DirHandleLike, name: string, data: Blob | string): Promise<void> {
   const w = await (await dir.getFileHandle(name, { create: true })).createWritable();
-  await w.write(data);
-  await w.close();
+  try {
+    await w.write(data);
+    await w.close();
+  } catch (e) {
+    await w.abort?.().catch(() => {}); // 書きかけの一時ファイルを残さない
+    throw e;
+  }
 }
 const baseName = (file: string) => file.replace(/\.[^.]+$/, '');
 
@@ -360,10 +377,13 @@ export class DirStore implements ImageStore {
     await this.ready();
     const images = await this.root.getDirectoryHandle('images', { create: true });
     const post = await images.getDirectoryHandle(tweetId, { create: true });
-    // 同じ名前で拡張子が違う古いファイル (画質を切り替えたときなど) は消してから書く = 1 枚につき 1 ファイル
+    // 同じ名前で拡張子が違う古いファイル (画質を切り替えたときなど) は、新しいファイルを書き終えてから消す = 1 枚につき 1 ファイル。
+    // 先に消すと、書き込みに失敗したとき古い画像だけが無くなり、index のメタは古いまま残る
     const file = `${name}.${extFor(blob.type)}`;
-    for await (const [n, h] of post.entries()) if (h.kind === 'file' && n !== file && baseName(n) === name) await post.removeEntry(n);
+    const stale: string[] = [];
+    for await (const [n, h] of post.entries()) if (h.kind === 'file' && n !== file && baseName(n) === name) stale.push(n);
     await writeFile(post, file, blob);
+    for (const n of stale) await post.removeEntry(n);
     if (meta.post) await writeFile(post, 'post.json', JSON.stringify(postJson(meta.post), null, 2));
     await this.index.set({ tweetId, name, size: blob.size, type: blob.type, savedAt: Date.now(), postSavedAt: meta.postSavedAt ?? meta.post?.savedAt ?? Date.now() });
   }
