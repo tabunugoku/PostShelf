@@ -1,7 +1,7 @@
 /* 自動取り込みの確認ダイアログ (AutoCollectDialog) の見た目の元。1 か所だけに置く。
    管理画面は manager.css の @import で読み、x.com 側は content script が文字列として読んで、閉じた Shadow DOM の中に入れる。
    管理画面の配色は OS の設定 (prefers-color-scheme) に追従し、x.com 側はホスト要素の data-theme (X のテーマ) で決める。
-   ダークの値は 2 か所 (media と :host) に同じものを書く。変えるときは両方そろえる (test/autocollect-dialog-css.test.ts が検査する) */
+   ダークの値は 2 か所 (media と :host) に同じものを書く。変えるときは両方そろえる (test/autocollect-dialog-on-x.test.tsx が検査する) */
 :root,:host{
   /* ---- デザイントークン (X の画面に揃えた配色。manager / サイドパネル / popup で共有) ---- */
   --text-primary:#0f1419;--text-secondary:#536471;--text-muted:#536471;

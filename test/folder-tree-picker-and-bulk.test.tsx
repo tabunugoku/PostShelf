@@ -1,0 +1,34 @@
+// 版: v46-c
+import { readFileSync } from 'node:fs';
+import { openPopover } from '../src/content/popover';
+import { resetAccount, setCurrentAccount } from '../src/content/account';
+import { render } from 'preact';
+import { act } from 'preact/test-utils';
+import { afterEach,beforeEach,expect,it,vi } from 'vitest';
+import { createFolderPicker } from '../src/shared/folderPicker';
+import { FolderPickerHost } from '../src/manager/ui';
+import { BulkMenu } from '../src/manager/BulkMenu';
+import * as storage from '../src/shared/storage';
+import { t } from '../src/shared/strings';
+import { installChromeMock } from './chrome-mock';
+import type { Folder } from '../src/shared/models';
+let folders:Folder[],p:Folder,c:Folder,g:Folder;
+const theme={fg:'#000',border:'#ccc',hover:'#eee',accent:'#06c'};
+const flush=()=>act(()=>new Promise<void>(r=>setTimeout(r,30)));
+const box=(id:string)=>document.querySelector<HTMLInputElement>('[data-picker-folder="'+id+'"] input')!;
+const toggle=async(id:string,on:boolean)=>{await act(()=>{box(id).checked=on;box(id).dispatchEvent(new Event('change',{bubbles:true}));});await flush();};
+beforeEach(async()=>{const data=installChromeMock();data.schemaVersion=2;data.folderIdsRepaired=true;storage.setAccountScope('me');p=await storage.createFolder({name:'Sample A'});c=await storage.createFolder({name:'Sample B',parentId:p.id});g=await storage.createFolder({name:'Sample C',parentId:c.id});for(let i=0;i<5;i++)await storage.createFolder({name:'Sample other '+i});folders=(await storage.listFolders()).filter(f=>f.id!=='all');document.body.innerHTML='<div id="app"></div>';});
+afterEach(async()=>{await act(()=>void render(null,document.querySelector('#app')!));vi.restoreAllMocks();});
+it.each(['DOM','manager'])('propagates checks in %s without losing ancestors on child removal',async(mode)=>{const selected=new Set<string>();let ids:string[]=[];if(mode==='DOM'){const picker=createFolderPicker({folders,selected,theme,onChange:sel=>{ids=[...sel];}});document.body.append(picker.el);}else{await act(()=>void render(<FolderPickerHost folders={folders} selected={[]} onChange={sel=>{ids=[...sel];}}/>,document.querySelector('#app')!));await flush();}await toggle(g.id,true);expect(new Set(ids)).toEqual(new Set([p.id,c.id,g.id]));expect(box(p.id).checked).toBe(true);expect(box(c.id).checked).toBe(true);await toggle(c.id,false);expect(ids).toEqual([p.id]);expect(box(g.id).checked).toBe(false);await toggle(p.id,false);expect(ids).toEqual(['inbox']);});
+it('collapses, filters with ancestors and shows recent names',async()=>{const picker=createFolderPicker({folders,selected:new Set(),theme,onChange:()=>{},extras:{recentIds:[g.id]}});document.body.append(picker.el);await flush();expect(document.querySelector('[data-recent-path]')).toBeNull();expect(document.querySelector('[data-picker-folder="'+g.id+'"] label')!.textContent).toBe(g.name);const arrow=document.querySelector<HTMLButtonElement>('[data-picker-folder="'+p.id+'"] [data-tree-toggle]')!;arrow.click();expect(box(c.id)).toBeNull();const input=picker.el.querySelector<HTMLInputElement>('input[type=text]')!;input.value='Sample C';input.dispatchEvent(new Event('input'));expect([...picker.el.querySelectorAll<HTMLElement>('[data-picker-folder]')].map(e=>e.dataset.pickerFolder)).toEqual([p.id,c.id,g.id]);});
+it('creates a root from the shared picker without parent controls',async()=>{const selected=new Set<string>();const picker=createFolderPicker({folders,selected,theme,onChange:()=>{}});document.body.append(picker.el);[...picker.el.querySelectorAll<HTMLButtonElement>('button')].find(b=>b.textContent===t('addFolder'))!.click();const form=picker.el.querySelector('form')!;const input=form.querySelector('input')!;input.value='Sample created';input.dispatchEvent(new Event('input'));expect(form.querySelector('[data-parent-folder]')).toBeNull();form.dispatchEvent(new Event('submit',{cancelable:true}));await flush();const f=(await storage.listFolders()).find(f=>f.name==='Sample created')!;expect(f.parentId).toBeUndefined();expect([...selected]).toEqual([f.id]);});
+it('bulk drafts propagate ancestors and partial removal, then commit once',async()=>{const snap={text:'架空の本文',author:'Sample',handle:'@sample_user',media:[],url:'https://x.com/sample_user/status/1'};await storage.setBookmarkFolders('1',[g.id],snap);await storage.setBookmarkFolders('2',[p.id],snap);const saved=await storage.listBookmarks();const confirm=vi.fn(async(add:string[],remove:string[])=>{await storage.changeBookmarkFolders(['1','2'],add,remove);return true;});await act(()=>void render(<BulkMenu count={2} folders={folders} bookmarks={saved} onConfirm={confirm} onDelete={()=>{}} onSelectAll={()=>{}} allSelected onClear={()=>{}}/>,document.querySelector('#app')!));await flush();await act(()=>void document.querySelector<HTMLButtonElement>('.bulk-btn')!.click());await act(()=>void [...document.querySelectorAll<HTMLButtonElement>('.menu-item')].find(b=>b.textContent!.trim()===t('changeFolder'))!.click());await flush();expect(box(g.id).getAttribute('aria-checked')).toBe('mixed');const set=vi.spyOn(chrome.storage.local,'set');await toggle(p.id,false);expect(box(c.id).indeterminate).toBe(false);expect(box(g.id).indeterminate).toBe(false);expect(set).not.toHaveBeenCalled();await act(()=>void document.querySelector<HTMLButtonElement>('.triage-confirm')!.click());await flush();expect(set).toHaveBeenCalledOnce();expect((await storage.listBookmarks()).every(b=>b.folderIds.join()==='inbox')).toBe(true);});
+
+it('uses the same tree propagation in the x.com popover',async()=>{
+ resetAccount();setCurrentAccount({id:'me',handle:'me',lastSeenAt:0});
+ document.body.insertAdjacentHTML('beforeend',readFileSync('test/fixtures/v46-tweet.html','utf8'));
+ const pop=await openPopover(document.querySelector('article')!,document.querySelector<HTMLElement>('[data-postshelf-btn]')!);
+ expect(pop).not.toBeNull();await flush();await toggle(g.id,true);
+ expect(new Set((await storage.getBookmark('900'))!.folderIds)).toEqual(new Set([p.id,c.id,g.id]));
+ await toggle(p.id,false);expect((await storage.getBookmark('900'))!.folderIds).toEqual(['inbox']);pop?.remove();resetAccount();
+});

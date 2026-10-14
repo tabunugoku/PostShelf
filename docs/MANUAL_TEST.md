@@ -656,7 +656,7 @@
 
 判断: 未分類は保存データの既存形式 `folderIds: ['inbox']` (ユーザーフォルダなし) を維持する。未分類の受け皿が必要な場合も、所属変更と同じ1回の書き込みに含める。表示外の選択を外す shownSet の処理、Bookmark / Snapshot、権限、外部通信、ロケールの文言は変更しない。
 
-既知の確認事項: `test/v29.test.tsx` の後に `src/manager/Triage.tsx` の useEffect から `document is not defined` が出ることがある。この不具合は v44 では修正せず、発生した場合は検査結果で報告する。
+既知の確認事項: `test/triage-and-count.test.tsx` の後に `src/manager/Triage.tsx` の useEffect から `document is not defined` が出ることがある。この不具合は v44 では修正せず、発生した場合は検査結果で報告する。
 
 
 ## v45: 画像・動画サムネイルの読み取りと保存済みメディアの補完 (実機確認済)

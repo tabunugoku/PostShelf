@@ -1,0 +1,25 @@
+// 版: v46-review-3
+import { render } from 'preact';
+import { act } from 'preact/test-utils';
+import { beforeEach,afterEach,expect,it,vi } from 'vitest';
+import { leafMemberFolders, memberFoldersInTreeOrder } from '../src/shared/folderTree';
+import { App } from '../src/manager/App';
+import * as storage from '../src/shared/storage';
+import { updateSettings } from '../src/shared/settings';
+import { installChromeMock,installPanelMock } from './chrome-mock';
+import type { Folder } from '../src/shared/models';
+let p:Folder,c:Folder,g:Folder,q:Folder,d:Folder,h:Folder;
+const flush=()=>act(()=>new Promise<void>(r=>setTimeout(r,35)));
+const app=()=>document.querySelector('#app')!;
+const snap={text:'架空の本文',author:'Sample',handle:'@sample_user',media:[],url:'https://x.com/sample_user/status/1'};
+const names=()=>[...document.querySelectorAll('[data-row="1"] .tag')].map(e=>(e.querySelector('.folder-chip-label')??e).textContent!.replace('×','').trim());
+const mount=async(surface:'tab'|'sidepanel'='tab')=>{await act(()=>void render(<App surface={surface}/>,app()));await flush();};
+const click=async(e:HTMLElement)=>{await act(()=>void e.click());await flush();};
+beforeEach(async()=>{installChromeMock();installPanelMock();storage.setAccountScope('unknown');history.replaceState(null,'','/');vi.spyOn(window,'scrollTo').mockImplementation(()=>{});p=await storage.createFolder({name:'Sample A'});c=await storage.createFolder({name:'Sample B',parentId:p.id});g=await storage.createFolder({name:'Sample C',parentId:c.id});q=await storage.createFolder({name:'Sample D'});d=await storage.createFolder({name:'Sample E',parentId:q.id});h=await storage.createFolder({name:'Sample F',parentId:d.id});document.body.innerHTML='<div id="app"></div>';});
+afterEach(async()=>{await act(()=>void render(null,app()));vi.restoreAllMocks();vi.unstubAllGlobals();});
+it.each(['post','list','sidepanel'] as const)('shows only deepest members in tree order in %s regardless of saved order or collapse',async(view)=>{await storage.setBookmarkFolders('1',[h.id,g.id],snap);await updateSettings({viewMode:view==='sidepanel'?'post':view,folderTreeCollapsed:[p.id,q.id]});if(view==='sidepanel')vi.stubGlobal('innerWidth',390);await mount(view==='sidepanel'?'sidepanel':'tab');expect(names()).toEqual([g.name,h.name]);expect(document.querySelectorAll('[data-row="1"] .tag')).toHaveLength(2);const icon=document.querySelector<HTMLButtonElement>('.folder-path-toggle')!;await click(icon);expect(names()[0]).toBe('Sample A › Sample B › Sample C');await click(icon);expect(names()[0]).toBe(g.name);});
+it('shows a child when membership stops there and opens and closes its path with the icon only',async()=>{await storage.setBookmarkFolders('1',[c.id],snap);await mount();expect(names()).toEqual([c.name]);const button=document.querySelector<HTMLButtonElement>('.folder-path-toggle')!;expect(button.tagName).toBe('BUTTON');expect(button.getAttribute('aria-expanded')).toBe('false');await click(button);expect(names()).toEqual(['Sample A › Sample B']);expect(button.getAttribute('aria-expanded')).toBe('true');expect((await storage.getBookmark('1'))!.folderIds).toEqual([c.id,p.id]);expect(document.querySelector('.post.selected')).toBeNull();await click(button);expect(names()).toEqual([c.name]);});
+it('does not make a root icon a path button',async()=>{await storage.setBookmarkFolders('1',[p.id],snap);await mount();expect(names()).toEqual([p.name]);expect(document.querySelector('.folder-path-toggle')).toBeNull();});
+it('clicking the folder name does not remove the membership; only the x button does',async()=>{await storage.setBookmarkFolders('1',[g.id],snap);await mount();await click(document.querySelector<HTMLElement>('[data-row="1"] .folder-chip-label')!);await click(document.querySelector<HTMLElement>('[data-row="1"] .folder-membership')!);expect(new Set((await storage.getBookmark('1'))!.folderIds)).toEqual(new Set([p.id,c.id,g.id]));await click(document.querySelector<HTMLButtonElement>('[data-row="1"] .chip')!);expect(new Set((await storage.getBookmark('1'))!.folderIds)).toEqual(new Set([p.id,c.id]));});
+it('removing a grandchild retains its ancestors and reveals the parent chip',async()=>{await storage.setBookmarkFolders('1',[g.id],snap);await mount();await click(document.querySelector<HTMLButtonElement>('[data-row="1"] .chip')!);expect(new Set((await storage.getBookmark('1'))!.folderIds)).toEqual(new Set([p.id,c.id]));expect(names()).toEqual([c.name]);});
+it('orders deepest memberships identically for either saved order and deduplicates ancestors',async()=>{const folders=await storage.listFolders();expect(memberFoldersInTreeOrder(folders,[h.id,d.id,q.id,g.id,c.id,p.id,p.id]).map(f=>f.id)).toEqual([p.id,c.id,g.id,q.id,d.id,h.id]);for(const ids of [[h.id,d.id,q.id,g.id,c.id,p.id],[p.id,c.id,g.id,q.id,d.id,h.id]])expect(leafMemberFolders(folders,ids).map(f=>f.id)).toEqual([g.id,h.id]);expect(leafMemberFolders(folders,[p.id,c.id]).map(f=>f.id)).toEqual([c.id]);expect(leafMemberFolders(folders,[p.id]).map(f=>f.id)).toEqual([p.id]);});

@@ -44,7 +44,7 @@ v36 の `sizeSeparateButton` (`src/content/buttons.ts`) は、丸の要素を **
 2. 「すべて表示」で増やしているあいだ (`expanding`) は、センチネルの効果 (IntersectionObserver と scroll / resize の監視) を付け直さない (1 フレームごとに作り直し、測り直すのは無駄)。`expanding` が終わったら、元どおり付ける。
 3. 「すべて表示」の効果は、`growTo` が使う `shown` も依存に入れる (途中で保存データが変わったとき、古い件数を使わない)。
 4. `static/manager.css`: v36 で `.muted` の `text-wrap: pretty` を全体で外した。指示書の範囲は設定ページだけなので、`.muted` の `pretty` は戻し、設定ページの中 (`.setting-group .muted`、`.setting-desc`) だけ `text-wrap: wrap` にする。
-5. `test/v36.test.tsx`:
+5. `test/staged-rendering-late-sentinel.test.tsx`:
    - B のテストの `cancelAnimationFrame` の差し替えは、`frames` の位置ではなく、ID と関数の対応 (`Map`) で消す (`runFrame` で配列を空にすると、古い ID が新しい関数を消すため)。
    - リスナーの漏れのテストは、`addEventListener` を差し替えて止めず、本物を呼んだうえで数える (`mockImplementation` ではなく、`spyOn` の記録)。数えるのは、段階表示の効果が付ける `scroll` / `resize` だけ (付けた関数を記録し、同じ関数が外されたか)。`<= 0` ではなく、付けた数と外した数が等しいことを確かめる。
 
