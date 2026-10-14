@@ -26,7 +26,16 @@ v2〜v71 は実装済みで、バージョン 1.1.7 を公開済み (`docs/relea
 - テスト: vitest + jsdom。x.com の DOM は `test/fixtures/*.html` に固定して検証
 - 権限は最小: `storage`, `unlimitedStorage`, `sidePanel`、host `https://x.com/*` `https://twitter.com/*`。画像キャッシュ用の `https://pbs.twimg.com/*` は、利用者が許可したときだけ使う任意の権限。`tabs` の権限は使わない。リモートコード/外部通信は禁止 (`npm run release:check` が検査する)
 
-## データモデル (`src/shared/models.ts`、`docs/DATA_MODEL.md`)
+## データモデル (`src/shared/models.ts`)
+```ts
+Folder   { id: string; name: string; icon: string; color?: string; order: number; accountId?: string; parentId?: string }  // accountId: 保存済みのフォルダには必ず入る
+Account  { id: string; handle: string; displayName?: string; avatar?: string; lastSeenAt: number }  // v9: id = 小文字のハンドル
+Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: number;  // v9: 保存キーは accountId:tweetId
+           snapshot: { text: string; author: string; handle: string; avatar?: string;
+                       media: string[]; createdAt?: string; url: string } }
+```
+`snapshot` の省略できる項目に `quote` (表示されていた引用元)、`translated` (翻訳済みの印、true のみ)、`hasVideo` / `hasLink` / `videoPoster`、`truncated` (X がたたんでいた印)、`segments` (リンクを含む本文の部品) がある。全項目は `src/shared/models.ts` と `docs/DATA_MODEL.md`。
+
 保存は、役割ごとに 1 か所に集約する。他のコードは直接 `chrome.storage` を触らない。
 - フォルダ・ブックマーク・アカウント: `src/shared/storage.ts` (`chrome.storage.local`)
 - 設定 (端末ごと。ツリーの開閉、サイドバーの幅、数字キーの対象を含む): `src/shared/settings.ts`
