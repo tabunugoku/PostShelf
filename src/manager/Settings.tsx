@@ -48,14 +48,16 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [flash, setFlash] = useState(false);
   const root = useRef<HTMLElement>(null);
   const load = () =>
-    void getSettings().then((s) => {
-      setSync(s.syncNative);
-      setBmode(s.buttonMode);
-      setAmode(s.actionMode);
-      setAutoOn(s.autoCollect.enabled);
-      setTriageMulti(s.triageMulti === true);
-      setShowInAncestors(s.showInAncestors);
-    });
+    void getSettings()
+      .then((s) => {
+        setSync(s.syncNative);
+        setBmode(s.buttonMode);
+        setAmode(s.actionMode);
+        setAutoOn(s.autoCollect.enabled);
+        setTriageMulti(s.triageMulti === true);
+        setShowInAncestors(s.showInAncestors);
+      })
+      .catch(() => reportStorageError());
   useEffect(load, []);
   /** 「変更を保存しました」を 2 秒出す。この画面で設定を書く処理が成功したときだけ呼ぶ (別タブの書き込みの通知では出さない) */
   const flashTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -104,14 +106,25 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
 
   const doReset = async () => {
     setDialog(null);
-    const backup = await resetSettings();
+    let backup;
+    try {
+      backup = await resetSettings();
+    } catch {
+      reportStorageError();
+      return;
+    }
     load();
     setCacheKey((n) => n + 1);
     void refreshCacheView();
     onApplied();
     // 直後の 5 秒間は、初期化前の設定に戻せる
     onNotice(t('settingsResetDone'), async () => {
-      await restoreSettings(backup);
+      try {
+        await restoreSettings(backup);
+      } catch {
+        reportStorageError();
+        return;
+      }
       load();
       setCacheKey((n) => n + 1);
       void refreshCacheView();
@@ -119,12 +132,27 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     });
   };
   const openDeleteAll = async () => {
-    setCounts(await countAllData());
+    try {
+      setCounts(await countAllData());
+    } catch {
+      reportStorageError();
+      return;
+    }
     setDialog('deleteAll');
   };
   const doDeleteAll = async () => {
     setDialog(null);
-    const cacheCleared = await deleteAllDataAndCache(); // キャッシュした画像も消す。消せなくてもデータの削除は成功
+    let cacheCleared;
+    try {
+      cacheCleared = await deleteAllDataAndCache(); // キャッシュした画像も消す。消せなくてもデータの削除は成功
+    } catch {
+      // 途中まで消えているかもしれないので、画面は実際の状態に合わせ直す
+      reportStorageError();
+      void refreshCacheView();
+      setCacheKey((n) => n + 1);
+      onApplied();
+      return;
+    }
     void refreshCacheView();
     setCacheKey((n) => n + 1);
     onApplied();
@@ -431,8 +459,16 @@ export function filterSettings(root: HTMLElement, raw: string): number {
   return count;
 }
 
+/** 書き出しに失敗したときはファイルを保存せず、保存のエラーを出す (全削除の前のバックアップとして押されることがある) */
 async function downloadJson(make: typeof exportData): Promise<void> {
-  const blob = new Blob([JSON.stringify(await make(), null, 2)], { type: 'application/json' });
+  let data;
+  try {
+    data = await make();
+  } catch {
+    reportStorageError();
+    return;
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `postshelf-${new Date().toISOString().slice(0, 10)}.json`;
