@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../shared/Icon';
 import { requestNativeSync, requestSnapshot, watchActivePost, type ActivePost } from '../shared/activeTab';
 import { INBOX_ID, displayName, type Folder, type Snapshot } from '../shared/models';
+import { leafMemberFolders, withAncestors, withoutDescendants } from '../shared/folderTree';
 import { getAccountScope, getBookmark, removeBookmark, setBookmarkFolders } from '../shared/storage';
 import { getSettings, onSettingsChanged, updateRecentFolders } from '../shared/settings';
 import { requestCache, requestFullText, requestPrune } from '../shared/cacheRequest';
@@ -123,7 +124,11 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
     await requestNativeSync(c.tabId, c.tweetId, true);
     const added = sel.filter((id) => !st.saved.includes(id));
     if (added.length) void updateRecentFolders(added).catch(() => {}); // 「最近使った」(失敗しても保存は成功)
-    const names = sel.length ? sel.map((id) => props.folders.find((f) => f.id === id)).filter((f): f is Folder => !!f).map(displayName) : [displayName(props.folders.find((f) => f.id === INBOX_ID) ?? { id: INBOX_ID, name: '', icon: '', order: 0 })];
+    // 保存した名前は、いちばん下のフォルダだけ (所属は祖先にも保存している)
+    const leaves = leafMemberFolders(props.folders, sel);
+    const names = leaves.length
+      ? leaves.map(displayName)
+      : [displayName(props.folders.find((f) => f.id === INBOX_ID) ?? { id: INBOX_ID, name: '', icon: '', order: 0 })];
     if (stRef.current === st) {
       setDone(t('activeSaved', joinNames(names)));
       setError('');
@@ -163,8 +168,12 @@ export function SaveCurrent(props: { folders: Folder[]; onSaved: () => void; /**
     void flushSave(c);
   };
   const toggle = (c: Current, id: string) => {
-    const now = c.st.sel;
-    select(c, now.includes(id) ? now.filter((x) => x !== id && x !== INBOX_ID) : [...now.filter((x) => x !== INBOX_ID), id]);
+    const now = c.st.sel.filter((x) => x !== INBOX_ID);
+    // 外すときは子孫も外し、つけるときは祖先にも印をつける (所属は祖先にも保存するため。仕分けモードと同じ)
+    const next = now.includes(id)
+      ? withoutDescendants(now, [id], props.folders)
+      : withAncestors([...now, id], props.folders);
+    select(c, next.filter((x) => x !== INBOX_ID));
   };
   const remove = async (c: Current) => {
     const st = c.st;
