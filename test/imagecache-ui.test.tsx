@@ -31,6 +31,11 @@ const img = (n: string) => `https://pbs.twimg.com/media/${n}?format=jpg&name=sma
 const snap = (id: number, media: string[]) => ({ text: `post ${id}`, author: 'A', handle: `@u${id}`, media, url: `https://x.com/u${id}/status/${id}` });
 const btn = (text: string) => $$<HTMLButtonElement>('button').find((b) => b.textContent?.includes(text))!;
 const dlgBtn = (text: string) => $$<HTMLButtonElement>('[role=alertdialog] button').find((b) => b.textContent?.trim() === text)!;
+/** 確認の画面のボタンを押す。画面は、前の操作のあとに非同期で開くので、ボタンが出るまで待ってから押す */
+const clickDialog = async (text: string) => {
+  await until(() => !!dlgBtn(text));
+  await click(dlgBtn(text));
+};
 const section = () => $('.image-cache');
 
 let perm: { granted: boolean; request: ReturnType<typeof vi.fn> };
@@ -258,11 +263,11 @@ describe('settings UI: usage, capacity, quality', () => {
     };
     await change(String(500 * MB)); // 600 MB 使用中 → 500 MB: 古い 1 件が消える
     expect($('[role=alertdialog] p').textContent).toContain('1 件のポスト');
-    await click(dlgBtn('キャンセル'));
+    await clickDialog('キャンセル');
     expect((await getSettings()).imageCache.maxBytes).toBe(1024 * MB);
     expect(removed).toEqual([]);
     await change(String(500 * MB));
-    await click(dlgBtn('下げて整理する'));
+    await clickDialog('下げて整理する');
     expect((await getSettings()).imageCache.maxBytes).toBe(500 * MB);
     expect(removed).toEqual(['1']); // 保存日が古いポストから
     vi.restoreAllMocks();
@@ -292,7 +297,7 @@ describe('folder back end in the UI', () => {
     await openSettings();
     await click($$('.image-cache input[name=cacheBackend]')[1]);
     expect($('[role=alertdialog]').textContent).toContain('PostShelf が作ったものではなく');
-    await click(dlgBtn('キャンセル'));
+    await clickDialog('キャンセル');
     expect(root.paths()).toEqual(['a.txt']);
     expect((await getSettings()).imageCache.backend).toBe('idb');
   });
@@ -353,10 +358,10 @@ describe('folder back end in the UI', () => {
     await click($$('.image-cache input[name=cacheBackend]')[1]);
     expect($('[role=alertdialog]').textContent).toContain('2 枚');
     expect($$('[role=alertdialog] button').map((b) => b.textContent)).toEqual(['キャンセル', '移さない', '移す']);
-    await click(dlgBtn('キャンセル'));
+    await clickDialog('キャンセル');
     expect((await getSettings()).imageCache.backend).toBe('idb');
     await click($$('.image-cache input[name=cacheBackend]')[1]);
-    await click(dlgBtn('移す'));
+    await clickDialog('移す');
     await until(async () => (await getSettings()).imageCache.backend === 'dir' && (await idb.list()).length === 0);
     expect((await getSettings()).imageCache.backend).toBe('dir');
     expect(root.paths().filter((p) => p.startsWith('images/')).length).toBeGreaterThanOrEqual(2);
@@ -373,7 +378,7 @@ describe('folder back end in the UI', () => {
     await mount();
     await openSettings();
     await click($$('.image-cache input[name=cacheBackend]')[1]);
-    await click(dlgBtn('移さない'));
+    await clickDialog('移さない');
     await until(async () => (await getSettings()).imageCache.backend === 'dir');
     expect((await getSettings()).imageCache.backend).toBe('dir');
     expect((await idb.list()).length).toBe(1);
@@ -407,7 +412,7 @@ describe('a failed settings save does not lose images', () => {
     });
     await flush();
     failSaves();
-    await click(dlgBtn('下げて整理する'));
+    await clickDialog('下げて整理する');
     await flush(50);
     expect(removed).toEqual([]);
     expect((await getSettings()).imageCache.maxBytes).toBe(1024 * MB);
@@ -425,7 +430,7 @@ describe('a failed settings save does not lose images', () => {
     await openSettings();
     await click($$('.image-cache input[name=cacheBackend]')[1]);
     failSaves();
-    await click(dlgBtn('移す'));
+    await clickDialog('移す');
     await flush(50);
     expect((await idb.list()).length).toBe(1);
     expect((await getSettings()).imageCache.backend).toBe('idb');
@@ -484,10 +489,10 @@ describe('bulk caching and deleting the cache in the UI', () => {
     await openSettings();
     await click(btn('キャッシュを削除'));
     expect($('[role=alertdialog] p').textContent).toContain('1 枚');
-    await click(dlgBtn('キャンセル'));
+    await clickDialog('キャンセル');
     expect((await new IdbStore().list()).length).toBe(1);
     await click(btn('キャッシュを削除'));
-    await click(dlgBtn('削除'));
+    await clickDialog('削除');
     await until(async () => (await new IdbStore().list()).length === 0 && !!section().textContent?.includes('キャッシュを削除しました'));
     expect(await new IdbStore().list()).toEqual([]);
     expect(section().textContent).toContain('キャッシュを削除しました');
@@ -501,7 +506,7 @@ describe('reset and delete-all in the UI include the cache', () => {
     await mount();
     await openSettings();
     await click(btn('設定を初期の値に戻す'));
-    await click(dlgBtn('初期の値に戻す'));
+    await clickDialog('初期の値に戻す');
     await until(async () => (await getSettings()).imageCache.enabled === false);
     expect((await getSettings()).imageCache).toMatchObject({ enabled: false, quality: 'large' });
     expect(enableSwitch().checked).toBe(false);
@@ -520,7 +525,7 @@ describe('reset and delete-all in the UI include the cache', () => {
       input.dispatchEvent(new Event('input', { bubbles: true }));
     });
     await flush();
-    await click(dlgBtn('削除'));
+    await clickDialog('削除');
     await until(async () => (await new IdbStore().list()).length === 0);
     expect(await new IdbStore().list()).toEqual([]);
   });
