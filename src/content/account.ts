@@ -4,7 +4,7 @@
  * 判定できないときは保存・取り込みをしない (popover / collect が current === null を見て無効にする)。
  */
 import { UNKNOWN_ACCOUNT_ID, accountIdOf, type Account } from '../shared/models';
-import { queryEveryCandidate, queryFirst } from '../shared/selectors';
+import { closestFirst, queryAllFirst, queryEveryCandidate, queryFirst, selfOrDescendant } from '../shared/selectors';
 import { noteAccount, setAccountScope } from '../shared/storage';
 import { watchBody } from './domwatch';
 
@@ -21,10 +21,11 @@ const validHandle = (h: string | undefined | null): h is string => !!h && HANDLE
 function handleFrom(el: Element): string | null {
   const text = el.textContent?.match(/@([A-Za-z0-9_]{1,15})(?![A-Za-z0-9_])/)?.[1];
   if (validHandle(text)) return text;
-  const avatar = el.matches('[data-testid^="UserAvatar-Container-"]') ? el : el.querySelector('[data-testid^="UserAvatar-Container-"]');
+  const avatar = selfOrDescendant(el, 'quoteAvatarHandle');
   const fromTestId = avatar?.getAttribute('data-testid')?.slice('UserAvatar-Container-'.length);
   if (validHandle(fromTestId)) return fromTestId;
-  const href = (el.closest('a') ?? el.querySelector('a') ?? el).getAttribute('href')?.match(/^\/([A-Za-z0-9_]{1,15})\/?$/)?.[1];
+  const link = closestFirst(el, 'anyLink')?.el ?? queryFirst(el, 'anyLink')?.el ?? el;
+  const href = link.getAttribute('href')?.match(/^\/([A-Za-z0-9_]{1,15})\/?$/)?.[1];
   return validHandle(href) ? href : null;
 }
 
@@ -34,7 +35,7 @@ export function detectAccount(root: ParentNode = document): DetectedAccount | nu
     const handle = handleFrom(el);
     if (!handle) continue;
     // 表示名: ボタン内の、@ で始まらない最初のテキスト (表示名とハンドルが別の要素に入っている想定。実機未確認)
-    const displayName = [...el.querySelectorAll('span,div')]
+    const displayName = queryAllFirst(el, 'accountLabel').els
       .filter((n) => n.children.length === 0)
       .map((n) => n.textContent?.trim() ?? '')
       .find((x) => x !== '' && !x.startsWith('@'));

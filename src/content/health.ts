@@ -45,7 +45,7 @@ export const EMPTY_BOOKMARKS_KEY = 'bookmarkPosts';
 export function inspect(root: ParentNode = document, path: string = location.pathname): HealthResult | null {
   const tweets = queryAllFirst(root, 'tweet');
   if (tweets.els.length === 0) {
-    const looksLikePosts = root.querySelector('a[href*="/status/"] time') !== null;
+    const looksLikePosts = queryFirst(root, 'statusLinkTime') !== null;
     if (looksLikePosts) return { state: 'broken', missing: ['tweet'], fallback: [], articles: 0 };
     return isBookmarksPath(path) ? { state: 'degraded', missing: [], fallback: [EMPTY_BOOKMARKS_KEY], articles: 0, emptyBookmarks: true } : null;
   }

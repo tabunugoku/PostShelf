@@ -43,9 +43,9 @@ X のブックマークフォルダは Premium 限定で、名前/アイコン/�
 - 新規タブ: manager ページ
 
 ## 設計
-- Manifest V3、権限 `storage`, `unlimitedStorage`、host `https://x.com/*` `https://twitter.com/*`
+- Manifest V3、権限 `storage`, `unlimitedStorage`, `sidePanel`、host `https://x.com/*` `https://twitter.com/*`。任意の権限は、画像キャッシュ用の `https://pbs.twimg.com/*` (`optional_host_permissions`) だけ
 - 構成: `src/content`, `src/manager`, `src/popup`, `src/background`, `src/shared`
-- background: メッセージ中継、JSON エクスポート/インポート
+- background: 依頼の中継 (画像のキャッシュ、サイドパネルを開く、管理画面を開く)、長いポストの全文の取得 (下)、ツールバーアイコンの動作の反映。JSON のエクスポート/インポートは管理画面 (設定の「データ」) が `src/shared/storage.ts` で行う
 - 全文取得 (v43): 既定は 4〜8 秒・1 タブ。「標準」は 2〜5 秒・1〜3 タブ。各ワーカーが閉じてから次を開く間隔に加え、全ワーカーで起動を 1 秒以上あける。上限と止める条件は、速さの設定にかかわらず同じ。上限は自動 30 件 / 手動 50 件、1 件の待ちは 15 秒、同じポストの自動再試行は 1 時間に 1 回。X の制限は全タブを停止。連続 3 件の失敗を全タブで合算し、成功で 0 に戻す。自動取り込み中は、開く直前に 5 秒おきに最大 360 回 (30 分) 待つ。
 
 ## マイルストーン

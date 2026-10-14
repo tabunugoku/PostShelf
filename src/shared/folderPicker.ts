@@ -8,7 +8,7 @@ import { ALL_FOLDER_ID, INBOX_ID, safeColor, displayName, type Folder } from './
 import { t } from './strings';
 import { createFolderMenu } from './folderCreateMenu';
 import { foldText } from './fold';
-import { ancestors, flattenFolders, withAncestors, withoutDescendants } from './folderTree';
+import { ancestors, flattenFolders, leafMemberFolders, withAncestors, withoutDescendants } from './folderTree';
 import { getCollapsedFolders, setCollapsedFolders } from './storage';
 
 export interface PickerTheme {
@@ -108,10 +108,18 @@ export function createFolderPicker(opts: {
   /** 行ごとの見た目の更新 (チェックの塗り / 選択中の行の薄い背景 / 印の data-checked) */
   const paints = new Map<string, () => void>();
   const sync = () => {
-    if (selected.size) { const ids=withAncestors([...selected], folders);selected.clear();ids.forEach(id=>selected.add(id)); }
+    if (selected.size) {
+      const ids = withAncestors([...selected], folders);
+      selected.clear();
+      ids.forEach((id) => selected.add(id));
+    }
     if (opts.partial) {
-      for(const id of [...opts.partial])for(const f of ancestors(folders,id))if(!selected.has(f.id))opts.partial.add(f.id);
-      selected.forEach(id=>opts.partial?.delete(id));
+      for (const id of [...opts.partial]) {
+        for (const f of ancestors(folders, id)) {
+          if (!selected.has(f.id)) opts.partial.add(f.id);
+        }
+      }
+      selected.forEach((id) => opts.partial?.delete(id));
     }
     boxes.forEach((cb, id) => {
       cb.checked = selected.has(id);
@@ -123,8 +131,13 @@ export function createFolderPicker(opts: {
   };
   const normalize = (changed: string, on: boolean) => {
     if (on && changed === INBOX_ID) selected.clear();
-    if (on) withAncestors([changed],folders).forEach(id=>selected.add(id));
-    else { const ids=withoutDescendants([...selected],[changed],folders);selected.clear();ids.forEach(id=>selected.add(id)); }
+    if (on) {
+      withAncestors([changed], folders).forEach((id) => selected.add(id));
+    } else {
+      const ids = withoutDescendants([...selected], [changed], folders);
+      selected.clear();
+      ids.forEach((id) => selected.add(id));
+    }
     if (on && changed !== INBOX_ID) selected.delete(INBOX_ID);
     if (selected.size === 0) selected.add(INBOX_ID);
     sync();
@@ -134,8 +147,13 @@ export function createFolderPicker(opts: {
   const extras = opts.extras;
   const userFolderCount = () => folders.filter((f) => f.id !== INBOX_ID).length;
   let query = '';
-  let collapsed=new Set<string>();
-  void getCollapsedFolders().then(ids=>{collapsed=new Set(ids);render();}).catch(()=>{});
+  let collapsed = new Set<string>();
+  void getCollapsedFolders()
+    .then((ids) => {
+      collapsed = new Set(ids);
+      render();
+    })
+    .catch(() => {});
 
   // 見出し (保存状態) と絞り込み欄。一覧の再描画で消えないよう、一覧とは別の要素に置く
   const headEl = document.createElement('div');
@@ -145,7 +163,8 @@ export function createFolderPicker(opts: {
   const paintStatus = () => {
     if (!extras) return;
     const ids = [...selected];
-    const n = ids.filter((id) => id !== INBOX_ID).length;
+    // 件数は、祖先を除いたいちばん下のフォルダだけ (チェックの印は祖先にも付く)
+    const n = leafMemberFolders(folders, ids.filter((id) => id !== INBOX_ID)).length;
     statusEl.textContent = ids.length === 0 ? '' : n === 0 ? `✓ ${t('savedInInbox')}` : `✓ ${t('savedInFolders', n)}`;
     statusEl.style.display = ids.length === 0 ? 'none' : 'block';
   };
@@ -318,8 +337,11 @@ export function createFolderPicker(opts: {
       paintRow();
     });
     boxes.set(f.id, cb);
-    const previousPaint=paints.get(f.id);
-    paints.set(f.id,()=>{previousPaint?.();paintRow();});
+    const previousPaint = paints.get(f.id);
+    paints.set(f.id, () => {
+      previousPaint?.();
+      paintRow();
+    });
     cb.addEventListener('change', () => {
       if (opts.onToggle) return void opts.onToggle(f.id, cb.checked);
       normalize(f.id, cb.checked);

@@ -36,8 +36,14 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [autoOn, setAutoOn] = useState(true);
   const [showInAncestors, setShowInAncestors] = useState(true);
   const [triageMulti, setTriageMulti] = useState(false);
-  const [keyFolders,setKeyFolders] = useState<Folder[]|null>(null);
-  const openKeyTargets = async()=>{try{setKeyFolders(await listFolders());}catch{reportStorageError();}};
+  const [keyFolders, setKeyFolders] = useState<Folder[] | null>(null);
+  const openKeyTargets = async () => {
+    try {
+      setKeyFolders(await listFolders());
+    } catch {
+      reportStorageError();
+    }
+  };
   const [diag, setDiag] = useState(location.hash === '#diagnostics');
   const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
   const [counts, setCounts] = useState<DataCounts | null>(null);
@@ -48,14 +54,16 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [flash, setFlash] = useState(false);
   const root = useRef<HTMLElement>(null);
   const load = () =>
-    void getSettings().then((s) => {
-      setSync(s.syncNative);
-      setBmode(s.buttonMode);
-      setAmode(s.actionMode);
-      setAutoOn(s.autoCollect.enabled);
-      setTriageMulti(s.triageMulti === true);
-      setShowInAncestors(s.showInAncestors);
-    });
+    void getSettings()
+      .then((s) => {
+        setSync(s.syncNative);
+        setBmode(s.buttonMode);
+        setAmode(s.actionMode);
+        setAutoOn(s.autoCollect.enabled);
+        setTriageMulti(s.triageMulti === true);
+        setShowInAncestors(s.showInAncestors);
+      })
+      .catch(() => reportStorageError());
   useEffect(load, []);
   /** 「変更を保存しました」を 2 秒出す。この画面で設定を書く処理が成功したときだけ呼ぶ (別タブの書き込みの通知では出さない) */
   const flashTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -104,14 +112,25 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
 
   const doReset = async () => {
     setDialog(null);
-    const backup = await resetSettings();
+    let backup;
+    try {
+      backup = await resetSettings();
+    } catch {
+      reportStorageError();
+      return;
+    }
     load();
     setCacheKey((n) => n + 1);
     void refreshCacheView();
     onApplied();
     // 直後の 5 秒間は、初期化前の設定に戻せる
     onNotice(t('settingsResetDone'), async () => {
-      await restoreSettings(backup);
+      try {
+        await restoreSettings(backup);
+      } catch {
+        reportStorageError();
+        return;
+      }
       load();
       setCacheKey((n) => n + 1);
       void refreshCacheView();
@@ -119,12 +138,27 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     });
   };
   const openDeleteAll = async () => {
-    setCounts(await countAllData());
+    try {
+      setCounts(await countAllData());
+    } catch {
+      reportStorageError();
+      return;
+    }
     setDialog('deleteAll');
   };
   const doDeleteAll = async () => {
     setDialog(null);
-    const cacheCleared = await deleteAllDataAndCache(); // キャッシュした画像も消す。消せなくてもデータの削除は成功
+    let cacheCleared;
+    try {
+      cacheCleared = await deleteAllDataAndCache(); // キャッシュした画像も消す。消せなくてもデータの削除は成功
+    } catch {
+      // 途中まで消えているかもしれないので、画面は実際の状態に合わせ直す
+      reportStorageError();
+      void refreshCacheView();
+      setCacheKey((n) => n + 1);
+      onApplied();
+      return;
+    }
     void refreshCacheView();
     setCacheKey((n) => n + 1);
     onApplied();
@@ -270,14 +304,28 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       <fieldset class="setting-group">
         <legend>{t('triageStart')}</legend>
         <label class="setting">
-          <input type="checkbox" role="switch" checked={triageMulti}
-            onChange={(e) => void saveOf(updateSettings({ triageMulti: (e.target as HTMLInputElement).checked }), (s) => setTriageMulti(s.triageMulti === true))} />
+          <input
+            type="checkbox"
+            role="switch"
+            checked={triageMulti}
+            onChange={(e) => void saveOf(
+              updateSettings({ triageMulti: (e.target as HTMLInputElement).checked }),
+              (s) => setTriageMulti(s.triageMulti === true),
+            )}
+          />
           <span>
             <strong>{t('triageMultiSwitch')}</strong>
             <span class="muted setting-desc"><Sentences text={t('triageMultiDesc')} /></span>
           </span>
         </label>
-      <div class="setting"><button data-key-targets-open onClick={()=>void openKeyTargets()}>{t('triageKeyTargets')}</button></div>
+      <div class="setting">
+        <button
+          data-key-targets-open
+          onClick={() => void openKeyTargets()}
+        >
+          {t('triageKeyTargets')}
+        </button>
+      </div>
       </fieldset>
       <fieldset class="setting-group">
         <legend>{t('actionModeHeading')}</legend>
@@ -364,7 +412,13 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           </button>
         </div>
       </fieldset>
-      {keyFolders && <TriageKeyTargets folders={keyFolders} onClose={()=>setKeyFolders(null)} onSaved={flashSaved}/>}
+      {keyFolders && (
+        <TriageKeyTargets
+          folders={keyFolders}
+          onClose={() => setKeyFolders(null)}
+          onSaved={flashSaved}
+        />
+      )}
       {diag && <DiagnosticsDialog onClose={() => setDiag(false)} />}
       {dialog === 'reset' && (
         <Confirm message={t('settingsResetConfirm')} confirmLabel={t('settingsResetConfirmBtn')} onCancel={() => setDialog(null)} onConfirm={() => void doReset()} />
@@ -431,8 +485,16 @@ export function filterSettings(root: HTMLElement, raw: string): number {
   return count;
 }
 
+/** 書き出しに失敗したときはファイルを保存せず、保存のエラーを出す (全削除の前のバックアップとして押されることがある) */
 async function downloadJson(make: typeof exportData): Promise<void> {
-  const blob = new Blob([JSON.stringify(await make(), null, 2)], { type: 'application/json' });
+  let data;
+  try {
+    data = await make();
+  } catch {
+    reportStorageError();
+    return;
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `postshelf-${new Date().toISOString().slice(0, 10)}.json`;

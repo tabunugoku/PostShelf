@@ -11,6 +11,15 @@ import { addCollected, createFolder, noteAccount, setAccountScope, setBookmarkFo
 import { defaultDeps } from '../src/shared/cacheops';
 
 const flush = (ms = 20) => act(() => new Promise<void>((r) => setTimeout(r, ms)));
+/** 条件が満たされるまで待つ。待つ回数ではなく条件で決めるので、遅い環境でも足りなくならない */
+const until = (check: () => boolean | Promise<boolean>) =>
+  vi.waitFor(
+    async () => {
+      await flush(10);
+      expect(await check()).toBe(true);
+    },
+    { timeout: 5000, interval: 10 },
+  );
 const $ = <T extends Element>(sel: string) => document.querySelector<T>(sel)!;
 const $$ = <T extends Element>(sel: string) => [...document.querySelectorAll<T>(sel)];
 const click = async (el: Element) => {
@@ -348,7 +357,7 @@ describe('folder back end in the UI', () => {
     expect((await getSettings()).imageCache.backend).toBe('idb');
     await click($$('.image-cache input[name=cacheBackend]')[1]);
     await click(dlgBtn('移す'));
-    await flush(60);
+    await until(async () => (await getSettings()).imageCache.backend === 'dir' && (await idb.list()).length === 0);
     expect((await getSettings()).imageCache.backend).toBe('dir');
     expect(root.paths().filter((p) => p.startsWith('images/')).length).toBeGreaterThanOrEqual(2);
     expect(await idb.list()).toEqual([]);
@@ -365,7 +374,7 @@ describe('folder back end in the UI', () => {
     await openSettings();
     await click($$('.image-cache input[name=cacheBackend]')[1]);
     await click(dlgBtn('移さない'));
-    await flush(40);
+    await until(async () => (await getSettings()).imageCache.backend === 'dir');
     expect((await getSettings()).imageCache.backend).toBe('dir');
     expect((await idb.list()).length).toBe(1);
     expect(root.paths().some((p) => p.startsWith('images/'))).toBe(false);
@@ -382,11 +391,11 @@ describe('bulk caching and deleting the cache in the UI', () => {
     await mount();
     await openSettings();
     await click(btn('保存済みのポストの画像をまとめてキャッシュ'));
-    await flush(60);
+    await until(() => !!section().textContent?.includes('2 枚をキャッシュしました（失敗 0 枚）'));
     expect(section().textContent).toContain('2 枚をキャッシュしました（失敗 0 枚）');
     expect((await new IdbStore().list()).map((m) => m.tweetId).sort()).toEqual(['1', '2']);
     await click(btn('保存済みのポストの画像をまとめてキャッシュ'));
-    await flush(40);
+    await until(() => !!section().textContent?.includes('キャッシュする画像はありません'));
     expect(section().textContent).toContain('キャッシュする画像はありません');
     spy.mockRestore();
     vi.restoreAllMocks();
@@ -407,7 +416,11 @@ describe('bulk caching and deleting the cache in the UI', () => {
     expect($('.image-cache [role=status]').textContent).toMatch(/取得しています/);
     await click(btn('中止'));
     await act(() => void release());
-    await flush(60);
+    // 2 枚目の保存が済み、進捗の表示が消えるまで待つ
+    await until(async () => {
+      const done = (await new IdbStore().list()).length >= 2;
+      return done && !$('.image-cache [role=status]')?.textContent?.match(/取得しています/);
+    });
     expect((await new IdbStore().list()).length).toBe(2); // 2 枚目の取得中に中止 → その 1 枚は完了、次へは進まない
     vi.restoreAllMocks();
   });
@@ -422,7 +435,7 @@ describe('bulk caching and deleting the cache in the UI', () => {
     expect((await new IdbStore().list()).length).toBe(1);
     await click(btn('キャッシュを削除'));
     await click(dlgBtn('削除'));
-    await flush(40);
+    await until(async () => (await new IdbStore().list()).length === 0 && !!section().textContent?.includes('キャッシュを削除しました'));
     expect(await new IdbStore().list()).toEqual([]);
     expect(section().textContent).toContain('キャッシュを削除しました');
   });
@@ -436,7 +449,7 @@ describe('reset and delete-all in the UI include the cache', () => {
     await openSettings();
     await click(btn('設定を初期の値に戻す'));
     await click(dlgBtn('初期の値に戻す'));
-    await flush(40);
+    await until(async () => (await getSettings()).imageCache.enabled === false);
     expect((await getSettings()).imageCache).toMatchObject({ enabled: false, quality: 'large' });
     expect(enableSwitch().checked).toBe(false);
     expect((await new IdbStore().list()).length).toBe(1);
@@ -455,7 +468,7 @@ describe('reset and delete-all in the UI include the cache', () => {
     });
     await flush();
     await click(dlgBtn('削除'));
-    await flush(60);
+    await until(async () => (await new IdbStore().list()).length === 0);
     expect(await new IdbStore().list()).toEqual([]);
   });
 });

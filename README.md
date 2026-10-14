@@ -63,7 +63,7 @@ For frequently asked questions (importing bookmarks saved on your phone, moving 
 
 ## Full text of long posts (note on X's terms)
 
-X collapses long posts behind "Show more". If a post was saved while collapsed, its full text is missing, so **when you save it, PostShelf opens that post's page in a background tab, reads the full text, and closes the tab** (the tab you are looking at is left alone). It waits 4 to 8 seconds between posts, and stops if X shows a limit or a warning. If you turn off "Fetch the full text of long posts" in Settings, only the collapsed text is saved. Nothing is sent outside, and X's private API is not used. Even so, this behavior may be regarded as "automated access" under X's terms (this is not legal advice, and the author cannot take responsibility). See [docs/FAQ.md](docs/FAQ.md) for details.
+X collapses long posts behind "Show more". If a post was saved while collapsed, its full text is missing, so **when you save it, PostShelf opens that post's page in a background tab, reads the full text, and closes the tab** (the tab you are looking at is left alone). By default it uses one background tab and waits 4 to 8 seconds between posts (choosing "Standard" in Settings shortens this to 2 to 5 seconds and allows 1 to 3 tabs at once), and it stops if X shows a limit or a warning. If you turn off "Fetch the full text of long posts" in Settings, only the collapsed text is saved. Nothing is sent outside, and X's private API is not used. Even so, this behavior may be regarded as "automated access" under X's terms (this is not legal advice, and the author cannot take responsibility). See [docs/FAQ.md](docs/FAQ.md) for details.
 
 ## Importing bookmarks automatically (note on X's terms)
 
@@ -146,7 +146,7 @@ DOM セレクタは `src/shared/selectors.ts` に集約。X の仕様変更で�
 
 ## 長いポストの全文の取得 (規約上の注意)
 
-X は、長いポストを「さらに表示」でたたみます。たたまれた状態で保存すると、全文が取れないので、**保存した時点で、そのポストのページを、裏のタブで開いて全文を読み、閉じます** (いま見ているタブは、そのままです)。1 件ごとに 4〜8 秒の間隔をあけ、X が制限や警告を出したら止まります。設定の「長いポストの全文を取得する」をオフにすると、たたまれた分だけを保存します。外部への送信や X の非公開 API の利用はありません。この動作も、X の規約上の「自動化されたアクセス」とみなされる可能性があります (法的な助言ではありません。作者は責任を負えません)。詳しくは [docs/FAQ.md](docs/FAQ.md)。
+X は、長いポストを「さらに表示」でたたみます。たたまれた状態で保存すると、全文が取れないので、**保存した時点で、そのポストのページを、裏のタブで開いて全文を読み、閉じます** (いま見ているタブは、そのままです)。既定では裏のタブを 1 つだけ使い、1 件ごとに 4〜8 秒の間隔をあけます (設定で「標準」にすると、間隔は 2〜5 秒、同時に開くタブは 1〜3 個になります)。X が制限や警告を出したら止まります。設定の「長いポストの全文を取得する」をオフにすると、たたまれた分だけを保存します。外部への送信や X の非公開 API の利用はありません。この動作も、X の規約上の「自動化されたアクセス」とみなされる可能性があります (法的な助言ではありません。作者は責任を負えません)。詳しくは [docs/FAQ.md](docs/FAQ.md)。
 
 ## ブックマークの自動取り込み (規約上の注意)
 
