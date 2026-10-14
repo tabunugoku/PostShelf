@@ -30,6 +30,19 @@ export function checkVersion(manifest, pkg) {
   return manifest.version === pkg.version ? [] : [`manifest の version (${manifest.version}) が package.json (${pkg.version}) と違います`];
 }
 
+/** リリースノートの節。英語が先で、日本語の原文は折りたたむ (CLAUDE.md の「リリース」) */
+export const RELEASE_NOTES_HEADINGS = ['## Added', '## Fixed', '<summary>日本語 (Japanese)</summary>', '## 追加', '## 修正'];
+
+export function checkReleaseNotes(notes) {
+  if (!notes) return ['リリースノートがありません'];
+  const errors = RELEASE_NOTES_HEADINGS.filter((h) => !notes.includes(h)).map((h) => `「${h}」がありません`);
+  // 英語の節を、折りたたんだ日本語より前に置く
+  const english = notes.indexOf('## Added');
+  const folded = notes.indexOf('<details>');
+  if (english >= 0 && folded >= 0 && english > folded) errors.push('英語の節が、日本語の折りたたみより後ろにあります');
+  return errors;
+}
+
 export function checkPermissions(manifest) {
   const errors = [];
   if (!same(manifest.permissions, REQUIRED_PERMISSIONS)) errors.push(`permissions が現在の一覧と違います: ${JSON.stringify(manifest.permissions)}`);

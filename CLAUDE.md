@@ -5,7 +5,7 @@ Chrome 拡張 (Manifest V3)。x.com (旧 Twitter) のブックマークを独自
 詳細な計画は `docs/PLAN.md`。最初に読むこと。
 
 ## 現在のタスク
-v2〜v46 は実装済みで、バージョン 1.1.6 を公開済み (`docs/releases/`)。それ以降の作業は、進行中のブランチ (`codex/*`) と PR を見る。実機での確認は `docs/MANUAL_TEST.md` のチェックリストを使う (各節の見出しに、実機で確かめたかどうかを書く)。
+v2〜v71 は実装済みで、バージョン 1.1.7 を公開済み (`docs/releases/`)。それ以降の作業は、進行中のブランチ (`codex/*`) と PR を見る。実機での確認は `docs/MANUAL_TEST.md` のチェックリストを使う (各節の見出しに、実機で確かめたかどうかを書く)。
 
 ## 機能要件
 1. ポスト (tweet) のブックマーク先をフォルダ分けできる (1 ポストが複数フォルダ可)
@@ -75,7 +75,7 @@ Codex・クラウドのセッション・Claude Code のどれが書いても、
 - 補助ツール (`.claude/`): スキル `ci` (CI の確認と成果物のダウンロード)、`codex-prompt` (Codex に渡すプロンプトの作成)。フック `locales-guard.sh` が、`_locales` の編集の前に確認を求める
 
 ## リリース
-バージョンは次の場所を同時に変える (manifest と package.json の食い違いは `npm run release:check` が、サイトの表示と zip の名前は `test/release.test.ts` が検出する): `package.json`、`package-lock.json` (2 か所)、`static/manifest.json`、`site/index.html` (バージョンの表示と zip の名前 2 か所)、`test/release.test.ts`、この文書の「現在のタスク」。リリースノートは `docs/releases/vX.Y.Z.md`。main へマージしたあと、注釈つきタグ `vX.Y.Z` を打つと `.github/workflows/release.yml` が動く。拡張 ID は `static/manifest.json` の `key` で固定しているので、変えない。
+バージョンは次の場所を同時に変える (manifest と package.json の食い違いは `npm run release:check` が、サイトの表示と zip の名前は `test/release.test.ts` が検出する): `package.json`、`package-lock.json` (2 か所)、`static/manifest.json`、`site/index.html` (バージョンの表示と zip の名前 2 か所)、`test/release.test.ts`、この文書の「現在のタスク」。リリースノートは `docs/releases/vX.Y.Z.md`。README.md と同じく、英語を先に置き、日本語は末尾の `<details><summary>日本語 (Japanese)</summary>` に折りたたむ。原文は日本語で書き、英語はその訳にする (英語だけを書き換えない。直すときは日本語を直してから訳し直す)。節は、英語が `## Added`・`## Fixed`・`## Install / update`、日本語が `## 追加`・`## 修正`・`## インストール・更新`。画面の名前は、英語では `static/_locales/en` の文言、日本語では `ja` の文言に合わせる。main へマージしたあと、注釈つきタグ `vX.Y.Z` を打つと `.github/workflows/release.yml` が動く。拡張 ID は `static/manifest.json` の `key` で固定しているので、変えない。
 
 ## コマンド
 - `npm install`
