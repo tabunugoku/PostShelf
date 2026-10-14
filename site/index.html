@@ -114,9 +114,10 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--fill);outline-offse
 .nav .wrap{height:60px;display:flex;align-items:center;gap:20px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:18px}
 .links{margin-left:auto;display:flex;gap:20px;font-size:14px;color:var(--mu)}
-.links a{text-decoration:none}.links a:hover{color:var(--fg)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 22px;border-radius:999px;border:1px solid var(--bds);font-weight:700;font-size:15px;text-decoration:none;transition:transform .2s;background:transparent;color:inherit;font-family:inherit;cursor:pointer}
+.links a{text-decoration:none;transition:color .2s}.links a:hover{color:var(--fg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 22px;border-radius:999px;border:1px solid var(--bds);font-weight:700;font-size:15px;text-decoration:none;transition:transform .2s,background .2s;background:transparent;color:inherit;font-family:inherit;cursor:pointer}
 .btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(1px) scale(.98)}
 .btn.pri{background:var(--fill);border-color:var(--fill);color:#fff}
 .btn.dark{background:var(--fg);border-color:var(--fg);color:var(--bg)}
 .btn.sm{font-size:13px;padding:6px 14px}
@@ -143,8 +144,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--fill);outline-offse
 .hero .wrap{display:flex;flex-wrap:wrap;gap:48px;align-items:center}
 .hero .tx{flex:1 1 440px;min-width:0}
 .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--bds);border-radius:999px;padding:3px 14px;font-size:13px;color:var(--mu)}
-.pill i{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite}
-@keyframes pulse{50%{opacity:.35}}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 h1{font-size:clamp(36px,5.8vw,68px);line-height:1.14;margin:20px 0 18px;letter-spacing:-.035em;text-wrap:balance}
 h1 em{font-style:normal;color:var(--fill)}
 .lead{font-size:18px;line-height:1.8;color:var(--mu);max-width:30em;text-wrap:pretty}
