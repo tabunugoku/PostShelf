@@ -316,7 +316,7 @@ export async function cachePostById(tweetId: string, accountId: string, deps: Ca
 
 // ---- 保存先の切り替え ----
 
-/** from の画像を to へコピーし、終わったら from を空にする (移す)。進捗を通知する */
+/** from の画像を to へコピーする。進捗を通知する。from は消さない (設定を切り替えられたあとに、呼び出し側が消す) */
 export async function migrateStore(from: ImageStore, to: ImageStore, onProgress?: (p: Progress) => void): Promise<void> {
   const list = await from.list();
   const info = new Map((await listAllBookmarks()).map((b) => [b.tweetId, postInfoOf(b)]));
@@ -327,5 +327,4 @@ export async function migrateStore(from: ImageStore, to: ImageStore, onProgress?
     if (blob) await to.put(m.tweetId, m.name, blob, { postSavedAt: m.postSavedAt, post: info.get(m.tweetId) });
     onProgress?.({ done: ++done, total: list.length });
   }
-  await from.clear();
 }

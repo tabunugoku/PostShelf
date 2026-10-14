@@ -78,15 +78,18 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
   };
   useEffect(() => void load(), [props.reloadKey]);
 
-  const save = async (patch: Partial<ImageCacheSettings>) => {
+  /** 保存できたかを返す。失敗したときは、画面の値を保存できている状態に戻して false */
+  const save = async (patch: Partial<ImageCacheSettings>): Promise<boolean> => {
     try {
       await updateImageCache(patch);
     } catch {
-      reportStorageError(); // 「変更を保存しました」は出さない。画面の値は、保存できている状態に戻す
-      return void (await load());
+      reportStorageError(); // 「変更を保存しました」は出さない
+      await load();
+      return false;
     }
     saved(); // 「変更を保存しました」
     await load();
+    return true;
   };
   const note = (text: string, error = false) => setMessage({ text, error });
 
@@ -163,22 +166,35 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
     const d = dlg;
     if (d?.kind !== 'switch') return;
     setDlg(null);
-    if (move) {
-      const from = (await openStore(cfg.backend)).store;
-      const to = (await openStore(d.to)).store;
-      // 移せなかったときは保存先を切り替えない。移し先にコピーできた分は消さない (次に切り替えたとき、取得済みとして使われる)
-      if (!from || !to) return note(t('cacheMoveFail'), true);
-      setDlg({ kind: 'moving', done: 0, total: d.count });
-      try {
-        await migrateStore(from, to, (p) => setDlg({ kind: 'moving', ...p }));
-      } catch {
-        setDlg(null);
-        return note(t('cacheMoveFail'), true);
+    try {
+      let source: ImageStore | null = null;
+      if (move) {
+        const from = (await openStore(cfg.backend)).store;
+        const to = (await openStore(d.to)).store;
+        // 移せなかったときは保存先を切り替えない。移し先にコピーできた分は消さない (次に切り替えたとき、取得済みとして使われる)
+        if (!from || !to) return note(t('cacheMoveFail'), true);
+        setDlg({ kind: 'moving', done: 0, total: d.count });
+        try {
+          await migrateStore(from, to, (p) => setDlg({ kind: 'moving', ...p }));
+        } catch {
+          return note(t('cacheMoveFail'), true);
+        }
+        source = from;
       }
+      // 設定を切り替えられたあとで移し元を消す。先に消すと、保存に失敗したとき空の保存先を指したままになる
+      if (!(await save({ backend: d.to }))) return;
+      if (source) {
+        try {
+          await source.clear();
+        } catch {
+          // 切り替えは成功している。移し元に残った画像は、使っていない保存先の孤児として次の掃除で消える
+          note(t('errorStorage'), true);
+        }
+      }
+      notifyCacheChanged();
+    } finally {
       setDlg(null);
     }
-    await save({ backend: d.to });
-    notifyCacheChanged();
   };
 
   // ---- 最大容量 ----
@@ -194,11 +210,13 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
     const d = dlg;
     if (d?.kind !== 'lower') return;
     setDlg(null);
-    await save({ maxBytes: d.max });
-    try {
-      if (opened.store) await evictToFit(opened.store, d.max);
-    } catch {
-      note(t('errorStorage'), true);
+    // 上限を保存できたときだけ画像を消す。保存に失敗したのに消すと、上限は元のまま画像だけが減る
+    if (await save({ maxBytes: d.max })) {
+      try {
+        if (opened.store) await evictToFit(opened.store, d.max);
+      } catch {
+        note(t('errorStorage'), true);
+      }
     }
     await load();
     notifyCacheChanged();

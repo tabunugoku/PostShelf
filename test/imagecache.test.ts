@@ -522,7 +522,7 @@ describe('save-time caching (background)', () => {
 });
 
 describe('switching the back end', () => {
-  it('migrateStore copies everything (with progress) and empties the source', async () => {
+  it('migrateStore copies everything (with progress) and leaves the source for the caller to clear', async () => {
     const from = new IdbStore();
     await from.put('1', '1', blob(10), { postSavedAt: 5 });
     await from.put('2', '1', blob(20), { postSavedAt: 6 });
@@ -534,7 +534,7 @@ describe('switching the back end', () => {
     expect(steps).toEqual(['0/2', '1/2', '2/2']);
     expect((await to.usage()).bytes).toBe(30);
     expect((await to.list()).find((m) => m.tweetId === '2')!.postSavedAt).toBe(6);
-    expect(await from.list()).toEqual([]);
+    expect((await from.list()).length).toBe(2);
   });
 
   it('openStore reports why a folder cannot be used (no folder / needs permission / ok)', async () => {
