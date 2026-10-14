@@ -23,7 +23,6 @@ import {
   COLORS,
   FOLDER_ICON,
   ICONS,
-  ALL_FOLDER_ID,
   INBOX_ID,
   UNKNOWN_ACCOUNT_ID,
   accountIdOf,
@@ -37,7 +36,12 @@ import {
 } from './models';
 import { t } from './strings';
 import { getSettings, updateSettings } from './settings';
-import { ancestors, canParent, descendants, flattenFolders, sanitizeParents, withAncestors, withoutDescendants } from './folderTree';
+import {
+  ancestors, canParent, descendants, flattenFolders, normalizeFolderIds, reparentedFolderIds, sanitizeParents, withAncestors,
+  withoutDeletedFolders, withoutDescendants,
+} from './folderTree';
+
+export { normalizeFolderIds };
 import { isXImageUrl } from './media';
 import { assignOrder } from './ordering';
 import { sanitizeSegments, type Segment } from './segments';
@@ -69,16 +73,6 @@ function serial<T>(fn: () => Promise<T>): Promise<T> {
   const run = chain.then(fn, fn);
   chain = run.catch(() => undefined);
   return run;
-}
-
-/**
- * ポストの所属フォルダ ID の並びを整える。
- * 重複と「すべて」を除く / 実際のフォルダが 1 つでもあれば「未分類」を外す / 何も残らなければ [「未分類」]。
- */
-export function normalizeFolderIds(ids: readonly string[]): string[] {
-  const list = [...new Set(ids.filter((id) => id !== ALL_FOLDER_ID))];
-  const real = list.filter((id) => id !== INBOX_ID);
-  return real.length ? real : [INBOX_ID];
 }
 
 // ---- アカウントの範囲 ----
@@ -374,12 +368,8 @@ export async function folderDeletionImpact(id: string): Promise<{ folders: numbe
 async function writeReparented(folders: Folder[], movedId: string, oldAncestorIds: string[]): Promise<void> {
   const all = await readAllFolders();
   const map = await readMap();
-  const newAncestorIds = new Set(ancestors(folders, movedId).map(f => f.id));
-  const stale = new Set(oldAncestorIds.filter(id => !newAncestorIds.has(id)));
-  const subtree = new Set([movedId, ...descendants(folders, movedId).map(f => f.id)]);
   for (const [k, b] of Object.entries(map)) {
-    if (!inScope(b) || !b.folderIds.some(id => subtree.has(id))) continue;
-    map[k] = { ...b, folderIds: withAncestors(b.folderIds.filter(id => !stale.has(id)), folders) };
+    if (inScope(b)) map[k] = { ...b, folderIds: reparentedFolderIds(b.folderIds, folders, movedId, oldAncestorIds) };
   }
   await chrome.storage.local.set({ [KEY_FOLDERS]: [...all.filter(f => !mine(f)), ...folders], [KEY_BOOKMARKS]: map });
 }
@@ -395,7 +385,7 @@ export function deleteFolder(id: string): Promise<void> {
     const next = all.filter(f => !mine(f) || !removed.has(f.id));
     const map = await readMap();
     for (const [k, b] of Object.entries(map)) {
-      if (inScope(b)) map[k] = { ...b, folderIds: normalizeFolderIds(b.folderIds.filter(fid => !removed.has(fid))) };
+      if (inScope(b)) map[k] = { ...b, folderIds: normalizeFolderIds(withoutDeletedFolders(b.folderIds, removed)) };
     }
     const needsInbox = Object.values(map).some(b => inScope(b) && b.folderIds.includes(INBOX_ID));
     if (needsInbox && !next.some(f => mine(f) && f.id === INBOX_ID)) {

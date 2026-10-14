@@ -155,3 +155,35 @@ export function leafMemberFolders(folders: readonly Folder[], ids: readonly stri
   const parents = new Set(ordered.flatMap((f) => ancestors(folders, f.id).map((p) => p.id)));
   return ordered.filter((f) => !parents.has(f.id));
 }
+
+/**
+ * ポストの所属フォルダ ID の並びを整える。
+ * 重複と「すべて」を除く / 実際のフォルダが 1 つでもあれば「未分類」を外す / 何も残らなければ [「未分類」]。
+ */
+export function normalizeFolderIds(ids: readonly string[]): string[] {
+  const list = [...new Set(ids.filter((id) => id !== ALL_FOLDER_ID))];
+  const real = list.filter((id) => id !== INBOX_ID);
+  return real.length ? real : [INBOX_ID];
+}
+
+/**
+ * 親を付け替えたときの、1 件のポストの所属先。動かしたフォルダ (子孫を含む) に入っていないポストは、そのまま返す。
+ * 古い祖先のうち新しい祖先に含まれないものは外し、新しい木で祖先を入れ直す。祖先への所属は、直接選んだものと区別できないため。
+ * folders は付け替えたあとの木、oldAncestorIds は付け替える前の祖先 (付け替えたあとの木からは求められない)
+ */
+export function reparentedFolderIds(
+  ids: readonly string[],
+  folders: readonly Folder[],
+  movedId: string,
+  oldAncestorIds: readonly string[],
+): string[] {
+  const subtree = new Set([movedId, ...descendants(folders, movedId).map((f) => f.id)]);
+  if (!ids.some((id) => subtree.has(id))) return [...ids];
+  const newAncestorIds = new Set(ancestors(folders, movedId).map((f) => f.id));
+  const stale = new Set(oldAncestorIds.filter((id) => !newAncestorIds.has(id)));
+  return withAncestors(ids.filter((id) => !stale.has(id)), folders);
+}
+
+/** 所属先から、削除したフォルダ (子孫を含む) を外す。空になったときの未分類への切り替えは normalizeFolderIds */
+export const withoutDeletedFolders = (ids: readonly string[], removedIds: ReadonlySet<string>): string[] =>
+  ids.filter((id) => !removedIds.has(id));
