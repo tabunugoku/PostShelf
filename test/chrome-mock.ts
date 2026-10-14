@@ -40,8 +40,12 @@ export function installPanelMock() {
   return calls as typeof calls & { onMessage?: (m: any, s: any) => void };
 }
 
+/** installChromeMock が作った storage.session の中身 (ブラウザの終了で消える領域) */
+export const sessionDataOf = (): Record<string, unknown> => (globalThis as any).chrome.storage.session.data;
+
 export function installChromeMock(lang = 'ja'): Record<string, unknown> {
   const data: Record<string, unknown> = {};
+  const sessionData: Record<string, unknown> = {};
   const listeners = new Set<(c: Record<string, unknown>, area: string) => void>();
   (globalThis as any).chrome = {
     i18n: { getMessage: makeGetMessage(loadMessages(lang)), getUILanguage: () => lang },
@@ -67,6 +71,19 @@ export function installChromeMock(lang = 'ja'): Record<string, unknown> {
           const changes = Object.fromEntries(Object.keys(data).map((k) => [k, { oldValue: data[k] }]));
           for (const k of Object.keys(data)) delete data[k];
           for (const l of listeners) l(changes, 'local');
+        },
+      },
+      session: {
+        data: sessionData,
+        async get(key: string | string[] | null) {
+          const keys = key === null ? Object.keys(sessionData) : Array.isArray(key) ? key : [key];
+          return Object.fromEntries(keys.filter((k) => k in sessionData).map((k) => [k, structuredClone(sessionData[k])]));
+        },
+        async set(items: Record<string, unknown>) {
+          for (const [k, v] of Object.entries(items)) sessionData[k] = structuredClone(v);
+        },
+        async remove(key: string | string[]) {
+          for (const k of Array.isArray(key) ? key : [key]) delete sessionData[k];
         },
       },
       onChanged: { addListener: (l: any) => listeners.add(l), removeListener: (l: any) => listeners.delete(l) },

@@ -4,7 +4,7 @@
  * x.com のポップオーバーと manager の「フォルダを変更」で共通に使う。
  * 配色は theme で受け取る (x.com では X のテーマ、manager では CSS 変数の文字列を渡す)。
  */
-import { ALL_FOLDER_ID, INBOX_ID, displayName, type Folder } from './models';
+import { ALL_FOLDER_ID, INBOX_ID, safeColor, displayName, type Folder } from './models';
 import { t } from './strings';
 import { createFolderMenu } from './folderCreateMenu';
 import { foldText } from './fold';
@@ -280,7 +280,8 @@ export function createFolderPicker(opts: {
     let hovered = false;
     const ico = document.createElement('i');
     ico.className = `ti ${f.icon}`;
-    ico.style.cssText = `display:block;position:static;margin:0;padding:0;font-size:18px;line-height:1;font-style:normal;color:${f.color ?? th.fg}`;
+    ico.style.cssText = 'display:block;position:static;margin:0;padding:0;font-size:18px;line-height:1;font-style:normal';
+    ico.style.color = safeColor(f.color) ?? th.fg;
     // 自前のチェック (角の丸い四角。選択中はアクセント色で塗り、白いチェック)。実際の入力は input type=checkbox のまま
     // (キーボードとスクリーンリーダーの操作はそのまま)。appearance:none で見た目だけを変える
     const box = document.createElement('span');
@@ -350,7 +351,9 @@ export function createFolderPicker(opts: {
         else collapsed.add(f.id);
         void setCollapsedFolders([...collapsed]).catch(() => {});
         render();
-        listEl.querySelector<HTMLElement>('[data-picker-folder="' + f.id + '"] [data-tree-toggle]')?.focus();
+        // id をセレクタに埋め込まない (引用符などを含む id でも壊れない。jsdom には CSS.escape も無い)
+        const rows = [...listEl.querySelectorAll<HTMLElement>('[data-picker-folder]')];
+        rows.find((r) => r.dataset.pickerFolder === f.id)?.querySelector<HTMLElement>('[data-tree-toggle]')?.focus();
       });
       row.append(arrow);
     } else if (!recent) {

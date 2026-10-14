@@ -14,7 +14,7 @@
 import type { Bookmark } from '../shared/models';
 import type { Segment } from '../shared/segments';
 import {
-  fullTextPlan, getCollectRun, getFullTextTab, getFullTextTries, getFullTextRun, getSettings, recordFullTextTry, saveFullTextRun, setFullTextTab,
+  clearLegacyFullTextTab, fullTextPlan, getCollectRun, getFullTextTab, getFullTextTries, getFullTextRun, getSettings, recordFullTextTry, saveFullTextRun, setFullTextTab,
   type FullTextKind, type FullTextRun, type FullTextStop, type FullTextPlan,
 } from '../shared/settings';
 import { fillMissing, getBookmarkOf, listAllTruncated, refreshFullText, type FillView } from '../shared/storage';
@@ -378,6 +378,8 @@ export class FullTextQueue {
 
 /** 起動時: 前回、閉じ忘れた裏のタブがあれば閉じる。動いていた記録 (running) が残っていれば止まった扱いにする */
 export async function cleanupAtStartup(d: FullTextDeps = defaultDeps()): Promise<void> {
+  // 旧版の記録 (storage.local) は、再起動をまたぐとタブ ID が別のタブを指しうるので、閉じずに消すだけ
+  await clearLegacyFullTextTab().catch(() => {});
   const ids = await getFullTextTab().catch(() => []);
   await Promise.all(ids.map(async id => {
     await d.closeTab(id);

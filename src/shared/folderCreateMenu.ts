@@ -3,7 +3,7 @@
  * フォルダ選択 (folderPicker.ts) の中に、一覧と切り替えて開く。名前・アイコン・色を決めて「作成」を押すとフォルダを作る。
  * 編集では同じ下書きを「保存」で確定する。アイコンと色の選択肢は models.ts のもの。
  */
-import { COLORS, FOLDER_ICON, MAIN_ICONS, MORE_ICONS, colorLabel, displayName, iconLabel, type Folder } from './models';
+import { COLORS, FOLDER_ICON, MAIN_ICONS, MORE_ICONS, colorLabel, displayName, iconLabel, safeColor, type Folder } from './models';
 import { createFolder, StorageError, updateFolder } from './storage';
 import { t } from './strings';
 import { ACCENT_FILL } from './tokens';
@@ -215,7 +215,8 @@ export function createFolderMenu(opts: {
     });
     const name = input.value.trim();
     prevIcon.className = `ti ${icon}`;
-    prevIcon.style.cssText = `display:block;position:static;margin:0;padding:0;width:18px;height:18px;font-size:18px;line-height:1;font-style:normal;color:${color ?? th.fg}`;
+    prevIcon.style.cssText = `display:block;position:static;margin:0;padding:0;width:18px;height:18px;font-size:18px;line-height:1;font-style:normal`;
+    prevIcon.style.color = safeColor(color) ?? th.fg;
     prevName.textContent = name || t('newFolderPlaceholder');
     prevName.style.opacity = name ? '1' : '.5';
     const empty = input.value.trim() === '';
