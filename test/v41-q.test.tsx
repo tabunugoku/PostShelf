@@ -9,11 +9,14 @@ import { ALL_FOLDER_ID, INBOX_ID, type Bookmark, type Folder } from '../src/shar
 import { installChromeMock, installPanelMock } from './chrome-mock';
 
 const flush = () => act(() => new Promise<void>(r => setTimeout(r, 30)));
+// 片付けのあとに changed が再描画すると、jsdom が消えたあとで effect が走る
+let alive = true;
 let folders: Folder[], queue: Bookmark[], multi: boolean;
 let changed: ReturnType<typeof vi.fn>, closed: ReturnType<typeof vi.fn>;
 const renderCurrent = () => render(<Triage multi={multi} queue={queue} live={new Set(queue.map(b => b.tweetId))}
   folders={folders} pickerFolders={folders} onChanged={changed} onClose={closed} />, document.querySelector('#app')!);
 beforeEach(async () => {
+  alive = true;
   installChromeMock(); installPanelMock(); storage.setAccountScope('unknown');
   folders = [];
   for (let i = 1; i <= 3; i++) folders.push(await storage.createFolder({ name: 'Sample folder ' + i }));
@@ -22,10 +25,10 @@ beforeEach(async () => {
   });
   queue = (await storage.listBookmarks()).sort((a, b) => a.tweetId.localeCompare(b.tweetId));
   // App と同じく作成後にフォルダ一覧を読み直す。未確定の印は Triage 内に保持される。
-  changed = vi.fn(async () => { folders = (await storage.listFolders()).filter(f => f.id !== INBOX_ID && f.id !== ALL_FOLDER_ID); renderCurrent(); });
+  changed = vi.fn(async () => { folders = (await storage.listFolders()).filter(f => f.id !== INBOX_ID && f.id !== ALL_FOLDER_ID); if (alive) await act(() => void renderCurrent()); });
   closed = vi.fn(); document.body.innerHTML = '<div id="app"></div>';
 });
-afterEach(async () => { await act(() => void render(null, document.querySelector('#app')!)); vi.restoreAllMocks(); });
+afterEach(async () => { alive = false; await act(() => void render(null, document.querySelector('#app')!)); vi.restoreAllMocks(); });
 const mount = async (mode = true) => { multi = mode; await act(() => void renderCurrent()); await flush(); };
 const root = () => document.querySelector<HTMLElement>('.triage')!;
 const key = async (key: string, target: Element = root()) => {
