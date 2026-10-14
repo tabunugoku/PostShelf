@@ -1,8 +1,9 @@
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { installChromeMock, installPanelMock } from './chrome-mock';
+import { unmountApp } from './dom-helpers';
 import { SettingsPage } from '../src/manager/Settings';
 import { App } from '../src/manager/App';
 import { AutoCollectPanel, resetCollapsed } from '../src/content/autocollectPanel';
@@ -37,6 +38,7 @@ beforeEach(() => {
   installPanelMock();
   history.replaceState(null, '', '/');
 });
+afterEach(unmountApp);
 
 describe('v30-A: settings search', () => {
   it('keeps only matching rows; hides groups, headings and nav chips with no match; restores everything when cleared; values do not change', async () => {

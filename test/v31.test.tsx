@@ -1,8 +1,9 @@
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { installChromeMock, installPanelMock } from './chrome-mock';
+import { unmountApp } from './dom-helpers';
 import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { injectButtons } from '../src/content/buttons';
 import { openPopover } from '../src/content/popover';
@@ -50,6 +51,7 @@ beforeEach(async () => {
   await noteAccount({ handle: 'me' });
   setAccountScope('me');
 });
+afterEach(unmountApp);
 
 describe('v31-1/11/12: triage mode', () => {
   const start = async () => {
