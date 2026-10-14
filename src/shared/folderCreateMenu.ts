@@ -3,7 +3,17 @@
  * フォルダ選択 (folderPicker.ts) の中に、一覧と切り替えて開く。名前・アイコン・色を決めて「作成」を押すとフォルダを作る。
  * 編集では同じ下書きを「保存」で確定する。アイコンと色の選択肢は models.ts のもの。
  */
-import { COLORS, FOLDER_ICON, MAIN_ICONS, MORE_ICONS, colorLabel, displayName, iconLabel, safeColor, type Folder } from './models';
+import {
+  COLORS,
+  FOLDER_ICON,
+  MAIN_ICONS,
+  MORE_ICONS,
+  colorLabel,
+  displayName,
+  iconLabel,
+  safeColor,
+  type Folder,
+} from './models';
 import { createFolder, StorageError, updateFolder } from './storage';
 import { t } from './strings';
 import { ACCENT_FILL } from './tokens';

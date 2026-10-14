@@ -1,7 +1,18 @@
 import type { QuoteSnapshot, Snapshot } from '../shared/models';
 import type { FillView } from '../shared/storage';
 import { mergeSegments, safeHref, type Segment } from '../shared/segments';
-import { handleFromAvatarTestId, isTranslatedQuoteText, findQuote, ownPostLink, queryAllFirst, queryAllInQuote, queryAllOwn, queryFirst, queryFirstInQuote, queryOwn } from '../shared/selectors';
+import {
+  handleFromAvatarTestId,
+  isTranslatedQuoteText,
+  findQuote,
+  ownPostLink,
+  queryAllFirst,
+  queryAllInQuote,
+  queryAllOwn,
+  queryFirst,
+  queryFirstInQuote,
+  queryOwn,
+} from '../shared/selectors';
 
 /**
  * 本文の要素から、リンクを含む部品の並びを作る (v24)。リンクは URL / @メンション / #ハッシュタグ (本文中の <a>)。
@@ -80,7 +91,8 @@ export function tweetIdOf(article: Element): string | null {
 }
 
 /** 動画のサムネイル (poster) は https の URL だけ使う (blob: などは保存しても開けない) */
-const httpsPoster = (poster: string | null | undefined): string | undefined => (poster && /^https:\/\//i.test(poster) ? poster : undefined);
+const httpsPoster = (poster: string | null | undefined): string | undefined =>
+  poster && /^https:\/\//i.test(poster) ? poster : undefined;
 
 /** 引用は表示されていた本文・画像と動画のサムネイルだけ。再生や原文の取得はしない。 */
 function extractQuote(article: Element): QuoteSnapshot | undefined {

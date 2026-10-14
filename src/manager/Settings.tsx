@@ -151,7 +151,8 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     setDialog(null);
     let cacheCleared;
     try {
-      cacheCleared = await deleteAllDataAndCache(); // キャッシュした画像も消す。消せなくてもデータの削除は成功
+      // キャッシュした画像も消す。消せなくてもデータの削除は成功
+      cacheCleared = await deleteAllDataAndCache();
     } catch {
       reportStorageError();
       return;

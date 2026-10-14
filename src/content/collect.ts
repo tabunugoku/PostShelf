@@ -60,7 +60,8 @@ export async function refreshCollectButton(): Promise<void> {
   }
   const n = unsavedItems(collectVisible(), await cachedSavedIds(account.id)).length;
   if (account.id !== getCurrentAccount()?.id) return;
-  void recordPending(account.id, n).catch(() => {}); // manager の取り込み案内バナー用に最後に観測した件数を残す (アカウントごと)
+  // manager の取り込み案内バナー用に、最後に観測した件数を残す (アカウントごと)
+  void recordPending(account.id, n).catch(() => {});
   btn.textContent = n > 0 ? t('collectPending', n) : t('collectAllDone');
   btn.dataset.pending = String(n);
   btn.disabled = n === 0;

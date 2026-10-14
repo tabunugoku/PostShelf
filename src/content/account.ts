@@ -4,7 +4,14 @@
  * 判定できないときは保存・取り込みをしない (popover / collect が current === null を見て無効にする)。
  */
 import { UNKNOWN_ACCOUNT_ID, accountIdOf, type Account } from '../shared/models';
-import { closestFirst, handleFromAvatarTestId, queryAllFirst, queryEveryCandidate, queryFirst, selfOrDescendant } from '../shared/selectors';
+import {
+  closestFirst,
+  handleFromAvatarTestId,
+  queryAllFirst,
+  queryEveryCandidate,
+  queryFirst,
+  selfOrDescendant,
+} from '../shared/selectors';
 import { noteAccount, setAccountScope } from '../shared/storage';
 import { watchBody } from './domwatch';
 

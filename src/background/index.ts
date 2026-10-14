@@ -21,14 +21,21 @@ chrome.runtime.onStartup?.addListener(apply);
 onSettingsChanged((s) => void applyActionMode(s.actionMode));
 
 /** 全文の取得の依頼 (設定がオフなら、キューが何もしない)。save: 保存した 1 件 / auto: 自動取り込みで取り込んだ分 (最大 30 件) / manual: 設定の「いま取得する」(最大 50 件) */
-function requestFullText(accountId: string, msg: { tweetId?: unknown; kind?: unknown; ids?: unknown; scan?: unknown }): void {
+function requestFullText(
+  accountId: string,
+  msg: { tweetId?: unknown; kind?: unknown; ids?: unknown; scan?: unknown },
+): void {
   if (typeof msg.tweetId === 'string') {
     void fullText.enqueue([{ accountId, tweetId: msg.tweetId }], 'save').catch(() => {});
   } else if (msg.kind === 'auto' && Array.isArray(msg.ids)) {
     const ids = (msg.ids as unknown[]).filter((x): x is string => typeof x === 'string');
     // scan: 引き継いだ取り込み。ID が足りないので、保存してある truncated のポスト (手動と同じ関数) から作り足す
-    const build = msg.scan === true ? manualItems(accountId, AUTO_CAP).then((stored) => [...new Set([...ids, ...stored.map((i) => i.tweetId)])]) : Promise.resolve(ids);
-    void build.then((all) => fullText.enqueue(all.slice(0, AUTO_CAP).map((tweetId) => ({ accountId, tweetId })), 'auto')).catch(() => {});
+    const build = msg.scan === true
+      ? manualItems(accountId, AUTO_CAP).then((stored) => [...new Set([...ids, ...stored.map((i) => i.tweetId)])])
+      : Promise.resolve(ids);
+    void build
+      .then((all) => fullText.enqueue(all.slice(0, AUTO_CAP).map((tweetId) => ({ accountId, tweetId })), 'auto'))
+      .catch(() => {});
   } else if (msg.kind === 'manual') {
     void manualItems(accountId, MANUAL_CAP).then((items) => fullText.enqueue(items, 'manual')).catch(() => {});
   }

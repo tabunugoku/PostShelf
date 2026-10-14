@@ -381,7 +381,9 @@ export class DirStore implements ImageStore {
     // 先に消すと、書き込みに失敗したとき古い画像だけが無くなり、index のメタは古いまま残る
     const file = `${name}.${extFor(blob.type)}`;
     const stale: string[] = [];
-    for await (const [n, h] of post.entries()) if (h.kind === 'file' && n !== file && baseName(n) === name) stale.push(n);
+    for await (const [n, h] of post.entries()) {
+      if (h.kind === 'file' && n !== file && baseName(n) === name) stale.push(n);
+    }
     await writeFile(post, file, blob);
     // 書いた画像と記録は正しいので、古いファイルを消せなくても put は失敗にしない。記録を先に確定させる
     await this.index.set({

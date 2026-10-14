@@ -37,14 +37,22 @@ import {
 import { t } from './strings';
 import { getSettings, updateSettings } from './settings';
 import {
-  ancestors, canParent, descendants, flattenFolders, normalizeFolderIds, reparentedFolderIds, sanitizeParents, withAncestors,
-  withoutDeletedFolders, withoutDescendants,
+  ancestors,
+  canParent,
+  descendants,
+  flattenFolders,
+  normalizeFolderIds,
+  reparentedFolderIds,
+  sanitizeParents,
+  withAncestors,
+  withoutDeletedFolders,
+  withoutDescendants,
 } from './folderTree';
-
-export { normalizeFolderIds };
 import { isXImageUrl } from './media';
 import { assignOrder } from './ordering';
 import { sanitizeSegments, type Segment } from './segments';
+
+export { normalizeFolderIds };
 
 const KEY_FOLDERS = 'folders';
 const KEY_BOOKMARKS = 'bookmarks';
@@ -572,7 +580,9 @@ function cleanQuote(raw: unknown): Bookmark['snapshot']['quote'] {
   const segments = sanitizeSegments(q.segments);
   return {
     author: q.author, handle: q.handle, text: q.text, media: q.media.filter(isXImageUrl),
-    ...(q.hasVideo === true ? { hasVideo: true, ...(isXImageUrl(q.videoPoster) ? { videoPoster: q.videoPoster } : {}) } : {}),
+    ...(q.hasVideo === true
+      ? { hasVideo: true, ...(isXImageUrl(q.videoPoster) ? { videoPoster: q.videoPoster } : {}) }
+      : {}),
     ...(isXImageUrl(q.avatar) ? { avatar: q.avatar } : {}), ...(isStr(q.createdAt) ? { createdAt: q.createdAt } : {}),
     ...(isStr(q.url) ? { url: q.url } : {}), ...(segments ? { segments } : {}), ...(q.translated === true ? { translated: true } : {}),
   };
@@ -580,8 +590,27 @@ function cleanQuote(raw: unknown): Bookmark['snapshot']['quote'] {
 
 /** 取り込んだ JSON の snapshot の、省略できる項目 (v24) を検証する。不正なら、その項目だけ捨てる (text で表示する) */
 function cleanSnapshot(s: Bookmark['snapshot']): Bookmark['snapshot'] {
-  const { segments, truncated, avatar, media, quote, translated, videoPoster, hasVideo, hasLink, createdAt, ...rest } =
-    s as Bookmark['snapshot'] & { segments?: unknown; truncated?: unknown; videoPoster?: unknown; hasVideo?: unknown; hasLink?: unknown; createdAt?: unknown };
+  type RawSnapshot = Bookmark['snapshot'] & {
+    segments?: unknown;
+    truncated?: unknown;
+    videoPoster?: unknown;
+    hasVideo?: unknown;
+    hasLink?: unknown;
+    createdAt?: unknown;
+  };
+  const {
+    segments,
+    truncated,
+    avatar,
+    media,
+    quote,
+    translated,
+    videoPoster,
+    hasVideo,
+    hasLink,
+    createdAt,
+    ...rest
+  } = s as RawSnapshot;
   const seg = segments === undefined ? undefined : sanitizeSegments(segments);
   const clean = cleanQuote(quote);
   // 画像・アバターは X の画像の置き場の URL だけ (知らないサーバーへの勝手な要求や javascript: を通さない)。満たさない要素だけ捨てる

@@ -14,7 +14,17 @@
 import type { Bookmark } from '../shared/models';
 import type { Segment } from '../shared/segments';
 import {
-  clearLegacyFullTextTab, fullTextPlan, getLegacyFullTextTab, getCollectRun, getFullTextTab, getFullTextTries, getFullTextRun, getSettings, recordFullTextTry, saveFullTextRun, setFullTextTab,
+  clearLegacyFullTextTab,
+  fullTextPlan,
+  getLegacyFullTextTab,
+  getCollectRun,
+  getFullTextTab,
+  getFullTextTries,
+  getFullTextRun,
+  getSettings,
+  recordFullTextTry,
+  saveFullTextRun,
+  setFullTextTab,
   type FullTextKind, type FullTextRun, type FullTextStop, type FullTextPlan,
 } from '../shared/settings';
 import { fillMissing, getBookmarkOf, listAllTruncated, refreshFullText, type FillView } from '../shared/storage';

@@ -71,7 +71,11 @@ const NETWORK_RULES = [
   [new RegExp(String.raw`\bfetch\s*\(\s*${URL_ARG}`, 'g'), 'fetch'],
   [new RegExp(String.raw`\bsendBeacon\s*\(\s*${URL_ARG}`, 'g'), 'sendBeacon'],
   [new RegExp(String.raw`\bnew\s+WebSocket\s*\(\s*${URL_ARG}`, 'g'), 'WebSocket'],
-  [new RegExp(String.raw`\.open\s*\(\s*["'\x60][A-Za-z]+["'\x60]\s*,\s*${URL_ARG}`, 'g'), 'XMLHttpRequest', /\bnew\s+XMLHttpRequest\b/],
+  [
+    new RegExp(String.raw`\.open\s*\(\s*["'\x60][A-Za-z]+["'\x60]\s*,\s*${URL_ARG}`, 'g'),
+    'XMLHttpRequest',
+    /\bnew\s+XMLHttpRequest\b/,
+  ],
 ];
 
 function disallowedHost(url) {

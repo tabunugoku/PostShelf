@@ -80,9 +80,17 @@ function applyOperation(s: DemoState, op: string): DemoState {
     case 'add':
       return { ...s, folderIds: withAncestors([...s.folderIds, 'B'], live), result: 'demoResAdd' };
     case 'uncheckChild':
-      return { ...s, folderIds: normalizeFolderIds(withoutDescendants(s.folderIds, ['C'], live)), result: 'demoResUncheckChild' };
+      return {
+        ...s,
+        folderIds: normalizeFolderIds(withoutDescendants(s.folderIds, ['C'], live)),
+        result: 'demoResUncheckChild',
+      };
     case 'uncheckParent':
-      return { ...s, folderIds: normalizeFolderIds(withoutDescendants(s.folderIds, ['A'], live)), result: 'demoResUncheckParent' };
+      return {
+        ...s,
+        folderIds: normalizeFolderIds(withoutDescendants(s.folderIds, ['A'], live)),
+        result: 'demoResUncheckParent',
+      };
     case 'move': {
       if (!canParent(live, 'C', 'B')) return s;
       // 付け替えの前の祖先。付け替えたあとの木からは求められない
@@ -205,12 +213,22 @@ function FolderDemoBody({ initialAncestors }: { initialAncestors: boolean }) {
       <div class="folder-demo-chips" data-demo-shown>{chips(shown)}</div>
       <div class="folder-demo-ops">
         {operations.map(([op, key, disabled]) => (
-          <button key={op} type="button" disabled={disabled} onClick={() => run(op)}>{t(key)}</button>
+          <button
+            key={op}
+            type="button"
+            disabled={disabled}
+            onClick={() => run(op)}
+          >
+            {t(key)}
+          </button>
         ))}
-        <button type="button" onClick={() => {
-          setState(initialState());
-          setAncestorsOn(initialAncestors);
-        }}>
+        <button
+          type="button"
+          onClick={() => {
+            setState(initialState());
+            setAncestorsOn(initialAncestors);
+          }}
+        >
           {t('demoOpReset')}
         </button>
       </div>

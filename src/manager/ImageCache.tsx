@@ -273,7 +273,8 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
     try {
       note(t('cacheDirRescanDone', await opened.store.rescan()));
     } catch {
-      note(t('errorStorage'), true); // フォルダの許可が外れたときなど。load で実際の状態 (許可の案内) に戻す
+      // フォルダの許可が外れたときなど。load で実際の状態 (許可の案内) に戻す
+      note(t('errorStorage'), true);
     }
     await load();
   };

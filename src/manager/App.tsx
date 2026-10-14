@@ -1265,7 +1265,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
             } else {
               try {
                 await deleteFolder(c.id);
-                if (current === c.id || descendants(userFolders,c.id).some(f=>f.id===current)) chooseView(ALL_FOLDER_ID);
+                if (current === c.id || descendants(userFolders, c.id).some((f) => f.id === current)) {
+                  chooseView(ALL_FOLDER_ID);
+                }
               } catch {
                 reportStorageError();
               }
