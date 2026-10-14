@@ -56,16 +56,13 @@ Codex・クラウドのセッション・Claude Code のどれが書いても、
 - **テスト**: テストの名前 (`it('...')`) は、何を確かめるかが分かる短い文にする。1 つの `it` に、確かめることを詰め込みすぎない。テストの中の説明のコメントも日本語。テストデータは架空のもの (上の「守ること」を参照)
 - **確認**: push の前に、`npm run typecheck`・`npm test`・`npm run build` を通す (ローカルに Node がなければ、CI の結果で確かめる)
 
-## 紹介サイト (GitHub Pages)
-`site/index.html` (静的な 1 ページ。日本語と英語の併用で、ブラウザの言語が日本語なら日本語、それ以外は英語を表示し、ヘッダーの切替で変えられる (各文言は `<span class="ja">` / `<span class="en">` の対。新しい文言は両方に書く)。ビルド不要、外部の JS・CSS・フォントは使わない)。`.github/workflows/pages.yml` が、`main` への push で `site/` を公開する (リポジトリの Settings → Pages → Source を「GitHub Actions」にしてから動く)。スクリーンショットは載せず、画面のイメージはマークアップで描く。サンプルは架空のアカウントだけ。比較表は日付つきで、公開ページの記載に基づく (変わったら更新する)。
-
 ## 進め方
 - 1 項目 1 コミット。各コミットで `npm run typecheck`・`npm test`・`npm run build` が通る状態を保つ。main へのマージは、ユーザーが指示したときだけ
 - 実機で確かめられないことは、`docs/MANUAL_TEST.md` に「実機未確認」のチェック項目として残す。実機で確かめたら、ユーザーが印をつける
 - 補助ツール (`.claude/`): スキル `ci` (CI の確認と成果物のダウンロード)、`codex-prompt` (Codex に渡すプロンプトの作成)。フック `locales-guard.sh` が、`_locales` の編集の前に確認を求める
 
 ## リリース
-バージョンは次の場所を同時に変える (manifest と package.json の食い違いは `npm run release:check` が、サイトの表示と zip の名前は `test/release.test.ts` が検出する): `package.json`、`package-lock.json` (2 か所)、`static/manifest.json`、`site/index.html` (バージョンの表示と zip の名前 2 か所)、`test/release.test.ts`、この文書の「現在のタスク」。リリースノートは `docs/releases/vX.Y.Z.md`。README.md と同じく、英語を先に置き、日本語は末尾の `<details><summary>日本語 (Japanese)</summary>` に折りたたむ。原文は日本語で書き、英語はその訳にする (英語だけを書き換えない。直すときは日本語を直してから訳し直す)。節は、英語が `## Added`・`## Fixed`・`## Install / update`、日本語が `## 追加`・`## 修正`・`## インストール・更新`。画面の名前は、英語では `static/_locales/en` の文言、日本語では `ja` の文言に合わせる。main へマージしたあと、注釈つきタグ `vX.Y.Z` を打つと `.github/workflows/release.yml` が動く。拡張 ID は `static/manifest.json` の `key` で固定しているので、変えない。
+手順とリリースノートの書き方は `.claude/rules/release.md` (リリースノートや版のファイルを触るときに読み込まれる)。紹介サイトの決まりは `.claude/rules/site.md`。拡張 ID は `static/manifest.json` の `key` で固定しているので、変えない。
 
 ## クラウド環境での注意
 実ブラウザでの x.com 動作確認はできない。ローカルに Node が無いこともある。fixture テストとビルド成功 (CI の結果) で担保し、実機確認項目は `docs/MANUAL_TEST.md` にチェックリストとして残す (ユーザーが後で実施)。
