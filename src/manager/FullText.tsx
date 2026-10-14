@@ -19,6 +19,7 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
   const [changing, setChanging] = useState(false);
   const changingRef = useRef(false);
   const [radioKey, setRadioKey] = useState(0);
+  const [switchKey, setSwitchKey] = useState(0);
   const change = async (patch: Partial<Settings>) => {
     if (changingRef.current) return;
     changingRef.current = true;
@@ -62,6 +63,7 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
       <legend>{t('fullTextTitle')}</legend>
       <label class="setting">
         <input
+          key={switchKey}
           type="checkbox"
           role="switch"
           checked={on}
@@ -71,6 +73,8 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
               saved(); // 保存に成功したときだけ
             } catch {
               reportStorageError();
+              // 保存値からスイッチを作り直し、ブラウザが先に変えたチェックを戻す (速さのラジオと同じ)
+              setSwitchKey(key => key + 1);
             }
           }}
         />

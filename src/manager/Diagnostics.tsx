@@ -6,15 +6,17 @@ import { getHealth } from '../shared/settings';
 import { t } from '../shared/strings';
 import { Icon } from '../shared/Icon';
 
-/** x.com のタブから診断情報を作る。タブが無ければ、拡張側で分かる範囲 (バージョン等と health) だけ */
+/** x.com のタブから診断情報を作る。タブが無ければ、拡張側で分かる範囲 (バージョン等と、読めたときの health) だけ */
 export async function makeReport(): Promise<string> {
   const fromTab = await requestDiagnostics();
   if (fromTab) return fromTab;
+  // health を読めなくても、分かる範囲 (バージョン等) の報告は作る
+  const health = await getHealth().catch(() => null);
   return buildReport({
     version: chrome.runtime.getManifest().version,
     userAgent: navigator.userAgent,
     uiLanguage: chrome.i18n.getUILanguage(),
-    health: await getHealth(),
+    health,
     skeleton: null,
   });
 }
@@ -25,11 +27,12 @@ export async function makeReport(): Promise<string> {
  */
 export function DiagnosticsDialog(props: { onClose: () => void }) {
   const [report, setReport] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const close = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
-    void makeReport().then(setReport);
+    void makeReport().then(setReport).catch(() => setFailed(true));
     close.current?.focus();
     const key = (e: KeyboardEvent) => {
       if (e.key === 'Escape') props.onClose();
@@ -55,7 +58,7 @@ export function DiagnosticsDialog(props: { onClose: () => void }) {
       <div class="dialog dialog-wide" role="dialog" aria-modal="true" aria-labelledby="diag-title" onClick={(e) => e.stopPropagation()}>
         <h2 id="diag-title" class="dialog-title">{t('diagTitle')}</h2>
         <p class="diag-notice">{t('diagNotice')}</p>
-        <pre class="diag-pre" tabIndex={0} aria-label={t('diagTitle')}>{report ?? t('diagPreparing')}</pre>
+        <pre class="diag-pre" tabIndex={0} aria-label={t('diagTitle')}>{report ?? t(failed ? 'errorStorage' : 'diagPreparing')}</pre>
         {state === 'copied' && <p class="muted" role="status">{t('diagCopied')}</p>}
         {state === 'failed' && <p class="error" role="alert">{t('diagCopyFail')}</p>}
         <div class="dialog-actions">
