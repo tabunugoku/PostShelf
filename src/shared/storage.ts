@@ -336,7 +336,7 @@ export function updateFolder(
       }
     }
     // 付け替えの前の祖先。付け替えたあとの木からは求められない
-    const oldAncestorIds = ancestors(folders, id).map(f => f.id);
+    const oldAncestorIds = patch.parentId !== undefined ? ancestors(folders, id).map(f => f.id) : [];
     if (patch.parentId !== undefined) {
       if (!canParent(folders, id, patch.parentId, scope)) throw new StorageError(t('errInvalidImport'));
       if (patch.parentId) next.parentId = patch.parentId; else delete next.parentId;

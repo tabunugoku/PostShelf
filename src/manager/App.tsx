@@ -121,6 +121,16 @@ const KEY_LOOKAHEAD = 5;
 /** 「すべて表示」で、描画 1 回ごとに増やす件数 */
 const SHOW_ALL_STEP = 100;
 
+/** ドラッグ元から渡された値を、ポスト ID の配列として読む。文字列の配列でなければ null */
+function parsePostIds(raw: string): string[] | null {
+  try {
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(value) && value.every((v) => typeof v === 'string') ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const compact = useCompact();
   const sidebarRef = useRef<HTMLElement>(null);
@@ -612,15 +622,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   // ドラッグ&ドロップ: ポスト → フォルダ行 (追加 / Alt で移動)、フォルダ → フォルダ行 (並べ替え)
   const virtual = (id: string) => id === ALL_FOLDER_ID || id === RECENT_ID;
-  /** ドラッグ元から渡された値を、ポスト ID の配列として読む。文字列の配列でなければ null */
-  const parsePostIds = (raw: string): string[] | null => {
-    try {
-      const value: unknown = JSON.parse(raw);
-      return Array.isArray(value) && value.every((v) => typeof v === 'string') ? value : null;
-    } catch {
-      return null;
-    }
-  };
   const onFolderDrop = async (target: Folder, e: DragEvent) => {
     e.preventDefault();
     const inside = dragOver?.id === target.id ? dragOver.inside : folderInside(target, e);

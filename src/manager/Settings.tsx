@@ -153,16 +153,14 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
     try {
       cacheCleared = await deleteAllDataAndCache(); // キャッシュした画像も消す。消せなくてもデータの削除は成功
     } catch {
-      // 途中まで消えているかもしれないので、画面は実際の状態に合わせ直す
       reportStorageError();
+      return;
+    } finally {
+      // 失敗したときは途中まで消えているかもしれないので、成功・失敗のどちらでも画面は実際の状態に合わせ直す
       void refreshCacheView();
       setCacheKey((n) => n + 1);
       onApplied();
-      return;
     }
-    void refreshCacheView();
-    setCacheKey((n) => n + 1);
-    onApplied();
     onNotice(cacheCleared ? t('deleteAllDone') : `${t('deleteAllDone')} ${t('cacheCleanupNeeded')}`);
   };
   const groups = [
