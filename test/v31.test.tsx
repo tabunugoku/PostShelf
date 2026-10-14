@@ -1,6 +1,6 @@
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { installChromeMock, installPanelMock } from './chrome-mock';
 import { resetAccount, setCurrentAccount } from '../src/content/account';
@@ -31,6 +31,11 @@ async function seed(inbox: number, folderNames: string[] = ['Dev', 'Fun']) {
   await chrome.storage.local.set({ bookmarks: data });
   return fs;
 }
+// 片付けずに次へ進むと、残った App の Triage の effect が jsdom の消えた後に走る
+async function unmount() {
+  const app = document.querySelector('#app');
+  if (app) await act(() => void render(null, app));
+}
 async function mountApp(surface: 'tab' | 'sidepanel' = 'tab') {
   document.body.innerHTML = '<div id="app"></div>';
   await act(() => void render(<App surface={surface} />, $('#app')));
@@ -50,6 +55,7 @@ beforeEach(async () => {
   await noteAccount({ handle: 'me' });
   setAccountScope('me');
 });
+afterEach(unmount);
 
 describe('v31-1/11/12: triage mode', () => {
   const start = async () => {
