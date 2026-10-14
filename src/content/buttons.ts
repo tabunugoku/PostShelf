@@ -10,6 +10,7 @@ import { getCurrentAccount, subscribeAccount } from './account';
 import type { Folder } from '../shared/models';
 import { ACCENT, ACCENT_FILL } from '../shared/tokens';
 import { watchBody } from './domwatch';
+import { leafMemberFolders } from '../shared/folderTree';
 
 const BTN_ATTR = 'data-postshelf-btn';
 const BADGE_ATTR = 'data-postshelf-badge';
@@ -33,7 +34,7 @@ function ensureStyle(): void {
   document.head.append(s);
 }
 
-/** 保存済みポストの表示色: 最初のフォルダがフォルダアイコン+色ならその色、なければアクセント色 */
+/** 保存済みポストの表示色: 最初のフォルダ (いちばん下のフォルダ) に色があればその色、なければアクセント色 */
 function savedColor(folders: Folder[]): string {
   return folders[0]?.color ?? ACCENT;
 }
@@ -193,7 +194,8 @@ function refreshArticle(article: Element, data: Shared): void {
   if (!host || !id) return;
   if (!getCurrentAccount()) return void setSaved(host, []); // アカウント不明: どのアカウントの保存か分からないので「未保存」表示
   const bm = data.bookmarks.get(id);
-  setSaved(host, (bm?.folderIds ?? []).map((id) => data.folders.find((f) => f.id === id)).filter((f): f is Folder => !!f));
+  // 件数と色は、祖先を除いたいちばん下のフォルダだけで決める (機能要件 5)
+  setSaved(host, leafMemberFolders(data.folders, bm?.folderIds ?? []));
 }
 
 /** 指定の記事の表示を更新する。保存データの読み込みは、全体で 1 回 */

@@ -8,7 +8,7 @@ import { ALL_FOLDER_ID, INBOX_ID, safeColor, displayName, type Folder } from './
 import { t } from './strings';
 import { createFolderMenu } from './folderCreateMenu';
 import { foldText } from './fold';
-import { ancestors, flattenFolders, withAncestors, withoutDescendants } from './folderTree';
+import { ancestors, flattenFolders, leafMemberFolders, withAncestors, withoutDescendants } from './folderTree';
 import { getCollapsedFolders, setCollapsedFolders } from './storage';
 
 export interface PickerTheme {
@@ -145,7 +145,8 @@ export function createFolderPicker(opts: {
   const paintStatus = () => {
     if (!extras) return;
     const ids = [...selected];
-    const n = ids.filter((id) => id !== INBOX_ID).length;
+    // 件数は、祖先を除いたいちばん下のフォルダだけ (チェックの印は祖先にも付く)
+    const n = leafMemberFolders(folders, ids.filter((id) => id !== INBOX_ID)).length;
     statusEl.textContent = ids.length === 0 ? '' : n === 0 ? `✓ ${t('savedInInbox')}` : `✓ ${t('savedInFolders', n)}`;
     statusEl.style.display = ids.length === 0 ? 'none' : 'block';
   };
