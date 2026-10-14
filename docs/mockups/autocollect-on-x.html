@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>x.com の上の自動取り込みの確認ダイアログ v72 (モック)</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:#888;font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif}
+.note{background:#fff;color:#0f1419;padding:10px 16px;border-radius:8px;font-size:13px;margin:0 0 16px}
+.frames{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px}
+/* x.com の画面 (明るい配色 / 暗い配色)。架空のアカウント @me と、架空の本文だけを使う */
+.x{--bg:#fff;--fg:#0f1419;--mu:#536471;--bd:#eff3f4;--sf:#fff;--bds:#cfd9de;--s1:#f7f9f9;--ac:#0f6fb3;--wb:#fff4d6;--wf:#8a5a00;--ok:#00805a;
+   position:relative;height:640px;overflow:hidden;border-radius:12px;background:var(--bg);color:var(--fg)}
+.x.dark{--bg:#000;--fg:#e7e9ea;--mu:#9aa4ad;--bd:#2f3336;--sf:#16181c;--bds:#536471;--s1:#16181c;--wb:#3a2d0a;--wf:#ffd277;--ok:#4cd8a6}
+.tl .hd{padding:12px 16px;font-weight:700;border-bottom:1px solid var(--bd)}
+.tl .tw{padding:12px 16px;border-bottom:1px solid var(--bd)}
+.tl .tw b{font-weight:700}.tl .tw span{color:var(--mu)}
+.fab{position:absolute;right:16px;bottom:16px;border:.5px solid var(--bds);background:var(--sf);color:var(--fg);border-radius:18px;padding:6px 14px;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.fab.a{bottom:60px}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
+.dialog{width:min(560px,calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;padding:16px;background:var(--sf);border:1px solid var(--bds);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);display:grid;gap:10px;font-size:14px}
+.dialog h2{font-size:16px;margin:0}.dialog p{margin:0;color:var(--mu)}
+.alert{background:var(--wb);color:var(--wf);border-radius:10px;padding:8px 10px}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:2px}legend{font-weight:700;padding:0 0 2px}
+.row{display:flex;gap:10px;align-items:flex-start;padding:4px 0}.row i{flex:none;width:18px;height:18px;margin-top:3px;border-radius:50%;border:2px solid var(--bds)}
+.row i.on{border-color:var(--ac);background:radial-gradient(var(--ac) 40%,transparent 45%)}
+.row i.box{border-radius:4px}.row .mu{color:var(--mu)}
+.cap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.cap span.sel{border:1px solid var(--bds);border-radius:8px;padding:2px 10px;background:var(--s1)}
+.order{display:grid;grid-template-columns:1fr 1fr;gap:10px}.order>div{border:1px solid var(--bd);border-radius:10px;padding:8px 10px;background:var(--s1)}
+.order ol{margin:4px 0 0;padding-left:20px}.ok{color:var(--ok);font-weight:700}
+.acts{display:flex;gap:8px;justify-content:flex-end}.acts span{border:1px solid var(--bds);border-radius:8px;padding:4px 12px}
+.acts .p{background:var(--ac);color:#fff;border-color:transparent;opacity:.45}
+</style></head><body>
+<p class="note">v72: x.com のブックマーク一覧の「自動で取り込む…」を押すと、管理画面を開かず、x.com のタブの上に確認ダイアログが出ます (左: 明るい配色 / 右: 暗い配色)。実際は閉じた Shadow DOM の中に描きます。アカウントとポストは架空のものです。同意のチェックを入れるまで「取り込みを始める」は押せません (図は、まだ入れていない状態)。</p>
+<div class="frames">
+<div class="x"><div class="tl"><div class="hd">ブックマーク</div>
+ <div class="tw"><b>サンプルさん</b> <span>@sample_user · 2h</span><br>架空のポストの本文です。ここには実在のポストは載せません。</div>
+ <div class="tw"><b>サンプル太郎</b> <span>@sample_taro · 5h</span><br>これも架空の本文です。フォルダ分けの例。</div></div>
+ <div class="fab a">自動で取り込む…</div><div class="fab">このページのポストを PostShelf に取り込む</div>
+ <div class="overlay"><div class="dialog" role="dialog" aria-label="自動で取り込みます">
+  <h2>自動で取り込みます</h2>
+  <p>アカウント: @me。x.com のブックマークのタブを、自動でスクロールして読み込みます。</p>
+  <div class="alert">自動スクロールは、X の規約が禁じる「自動化されたアクセス」とみなされる可能性があります。アカウントの制限などが起きても、PostShelf の作者は責任を負えません。取り込みは、あなた自身の判断で、あなたのアカウントに対してだけ行ってください。</div>
+  <fieldset><legend>速度</legend>
+   <div class="row"><i class="on"></i><span>ゆっくり（おすすめ） <span class="mu">目安: 1 分に約 20〜40 件</span></span></div>
+   <div class="row"><i></i><span>標準 <span class="mu">目安: 1 分に約 40〜80 件</span></span></div></fieldset>
+  <div class="cap"><b>1 回の上限</b><span class="sel">300 件ごとに一度止める（おすすめ）</span></div>
+  <div class="order"><div><b>x.com のブックマーク</b><ol><li>最新のポスト</li><li>その前のポスト</li><li>…古いポスト</li></ol></div>
+   <div><b>PostShelf（取り込み後）</b><ol><li>最新のポスト</li><li>その前のポスト</li><li>…古いポスト</li></ol><span class="ok">同じ順で並びます</span></div></div>
+  <div class="row"><i class="box"></i><span>上の内容を理解したうえで、自分の判断で実行します</span></div>
+  <div class="acts"><span>キャンセル</span><span class="p">取り込みを始める</span></div>
+ </div></div></div>
+<div class="x dark"><div class="tl"><div class="hd">ブックマーク</div>
+ <div class="tw"><b>サンプルさん</b> <span>@sample_user · 2h</span><br>架空のポストの本文です。ここには実在のポストは載せません。</div>
+ <div class="tw"><b>サンプル太郎</b> <span>@sample_taro · 5h</span><br>これも架空の本文です。フォルダ分けの例。</div></div>
+ <div class="fab a">自動で取り込む…</div><div class="fab">このページのポストを PostShelf に取り込む</div>
+ <div class="overlay"><div class="dialog" role="dialog" aria-label="自動で取り込みます">
+  <h2>自動で取り込みます</h2>
+  <p>アカウント: @me。x.com のブックマークのタブを、自動でスクロールして読み込みます。</p>
+  <div class="alert">自動スクロールは、X の規約が禁じる「自動化されたアクセス」とみなされる可能性があります。アカウントの制限などが起きても、PostShelf の作者は責任を負えません。取り込みは、あなた自身の判断で、あなたのアカウントに対してだけ行ってください。</div>
+  <fieldset><legend>速度</legend>
+   <div class="row"><i class="on"></i><span>ゆっくり（おすすめ） <span class="mu">目安: 1 分に約 20〜40 件</span></span></div>
+   <div class="row"><i></i><span>標準 <span class="mu">目安: 1 分に約 40〜80 件</span></span></div></fieldset>
+  <div class="cap"><b>1 回の上限</b><span class="sel">300 件ごとに一度止める（おすすめ）</span></div>
+  <div class="order"><div><b>x.com のブックマーク</b><ol><li>最新のポスト</li><li>その前のポスト</li><li>…古いポスト</li></ol></div>
+   <div><b>PostShelf（取り込み後）</b><ol><li>最新のポスト</li><li>その前のポスト</li><li>…古いポスト</li></ol><span class="ok">同じ順で並びます</span></div></div>
+  <div class="row"><i class="box"></i><span>上の内容を理解したうえで、自分の判断で実行します</span></div>
+  <div class="acts"><span>キャンセル</span><span class="p">取り込みを始める</span></div>
+ </div></div></div>
+</div></body></html>
