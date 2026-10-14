@@ -29,11 +29,14 @@ export function handleMessage(msg: { type?: string; tweetId?: string; want?: boo
   }
   if (msg?.type === 'syncNative' && msg.tweetId) {
     // サイドパネルでの保存 (ユーザーの 1 操作) に対し、連動モードがオンのときだけ標準ブックマークを 1 回切り替える
-    void getSettings().then((s) => {
-      const a = findArticle(msg.tweetId!);
-      if (s.syncNative && a) setNativeBookmark(a, !!msg.want);
-      sendResponse({ ok: true });
-    });
+    // 設定を読めなくても必ず応答する (応答のチャンネルを開いたままにしない)
+    void getSettings()
+      .then((s) => {
+        const a = findArticle(msg.tweetId!);
+        if (s.syncNative && a) setNativeBookmark(a, !!msg.want);
+        sendResponse({ ok: true });
+      })
+      .catch(() => sendResponse({ ok: false }));
     return true;
   }
   if (msg?.type === 'readFullText' && msg.tweetId) {
@@ -54,7 +57,9 @@ export function handleMessage(msg: { type?: string; tweetId?: string; want?: boo
     return false;
   }
   if (msg?.type === 'getDiagnostics') {
-    void buildLocalReport().then((report) => sendResponse({ ok: true, report }));
+    void buildLocalReport()
+      .then((report) => sendResponse({ ok: true, report }))
+      .catch(() => sendResponse({ ok: false }));
     return true;
   }
   return false;
@@ -63,7 +68,8 @@ export function handleMessage(msg: { type?: string; tweetId?: string; want?: boo
 /** 診断情報のテキスト。最初に見つかった article の骨格を含む (テキスト・URL・ユーザー名は含まない) */
 export async function buildLocalReport(): Promise<string> {
   const article = queryAllFirst(document, 'tweet').els[0] ?? document.querySelector('article');
-  const health = getLocalHealth() ?? (await getHealth());
+  // health を読めなくても、分かる範囲 (バージョン等) の報告は作る (Diagnostics.tsx の makeReport と同じ)
+  const health = getLocalHealth() ?? (await getHealth().catch(() => null));
   return buildReport({
     version: chrome.runtime.getManifest().version,
     userAgent: navigator.userAgent,
