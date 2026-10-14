@@ -151,7 +151,19 @@ export function AutoCollectDialog(props: {
           </div>
         </div>
         <label class="setting">
-          <input type="checkbox" checked={agreed} onChange={(e) => setAgreed((e.target as HTMLInputElement).checked)} />
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => {
+              const box = e.target as HTMLInputElement;
+              // クリックを止めても、偽の change だけを送られることがあるので、ここでも確かめる。表示は同意の状態に戻す
+              if (props.isTrusted && !props.isTrusted(e)) {
+                box.checked = agreed;
+                return;
+              }
+              setAgreed(box.checked);
+            }}
+          />
           <span>{t('acConsent')}</span>
         </label>
         <div class="dialog-actions">

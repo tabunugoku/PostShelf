@@ -115,6 +115,17 @@ describe('v72: 確認ダイアログは x.com の上に出る', () => {
     expect(host()).toBeTruthy();
   });
 
+  it('本人の操作でない change だけを送っても、同意は入らない', async () => {
+    dialogTrust.isTrusted = (e) => e.isTrusted;
+    await openAutoCollectDialog();
+    const box = consentBox();
+    box.checked = true;
+    box.dispatchEvent(new Event('change', { bubbles: true }));
+    await flush();
+    expect(box.checked).toBe(false);
+    expect(startButton().disabled).toBe(true);
+  });
+
   it('ラベルへの偽のクリックでも、チェックは入らない', async () => {
     dialogTrust.isTrusted = (e) => e.isTrusted;
     await openAutoCollectDialog();
