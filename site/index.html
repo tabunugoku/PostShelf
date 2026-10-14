@@ -264,16 +264,29 @@ footer p{max-width:46em}
 .js .rv.in{opacity:1;transform:none;filter:none}
 .js .rv.d1{transition-delay:.08s}.js .rv.d2{transition-delay:.16s}.js .rv.d3{transition-delay:.24s}
 
+/* 画面が狭いときにページが縦に長くなりすぎないよう、間隔を詰め、小さな機能は畳む */
+.more{display:none;margin-top:20px}
 @media (max-width:900px){
+  .more:not([hidden]){display:inline-flex}
+  .sec{padding:clamp(48px,8vw,72px) 0}
+  .sub{margin-bottom:28px}
+  .bento.fold .b4,.bento.fold .b5,.bento.fold .b6,.bento.fold .b7,.bento.fold .b8,.bento.fold .b9{display:none}
+  .steps .core{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:16px;align-items:start}
+  .steps .n{grid-row:span 6;margin-bottom:0}
+  .steps .core>:not(.n){grid-column:2}
   .hero .wrap,.priv{grid-template-columns:minmax(0,1fr)}
   .bento{grid-template-columns:minmax(0,1fr)}
   .bento>*{grid-column:auto!important;grid-row:auto!important}
-  .steps,.faq{grid-template-columns:minmax(0,1fr)}
+  .steps{grid-template-columns:minmax(0,1fr)}
   .pill a.l{display:none}
   .bezel>.core{padding:24px}
   .band{border-radius:2rem;margin:0 8px}
 }
 @media (max-width:560px){
+  .faq{grid-template-columns:minmax(0,1fr)}
+  .bezel>.core{padding:20px}
+  .bento p,.faq p{font-size:15px}
+  .dots{display:none}
   .pill{gap:10px;padding-left:12px}
   .mark span{display:none}
   .pill .btn.sm{display:none}
@@ -366,7 +379,7 @@ footer p{max-width:46em}
   <span class="tag rv">FEATURES</span>
   <h2 class="rv d1"><span class="ja"><span class="ph">仕分けは、</span><span class="ph">ポストを見たその場で</span><span class="ph">済みます。</span></span><span class="en">Sort a post right where you read it.</span></h2>
   <p class="sub rv d2"><span class="ja">見た目は X に近いので、使い方を覚え直す必要はありません。</span><span class="en">It looks like X, so there is nothing new to learn.</span></p>
-  <div class="bento">
+  <div class="bento" id="featmore">
     <div class="bezel b1 rv"><div class="core">
       <h3><span class="ja"><span class="ph">名前・アイコン・色を</span><span class="ph">選べるフォルダ</span></span><span class="en">Folders with your own name, icon and color</span></h3>
       <p><span class="ja">フォルダは自由に作れます。1 つのポストを複数のフォルダに入れることもできます。フォルダは 3 段まで重ねられます。</span><span class="en">Make as many folders as you like. One post can go into several. Folders can be nested up to three levels.</span></p>
@@ -386,6 +399,7 @@ footer p{max-width:46em}
     <div class="bezel b8 rv d1"><div class="core"><h3><span class="ja">ブックマークの取り込み</span><span class="en">Import your bookmarks</span></h3><p><span class="ja">確認の画面で同意すると、自動で取り込めます (任意)。JSON の書き出しと取り込みにも対応しています。</span><span class="en">Import them automatically after a confirmation (optional). JSON export and import are supported too.</span></p></div></div>
     <div class="bezel b9 rv d2"><div class="core"><h3><span class="ja">8 言語に対応</span><span class="en">8 languages</span></h3><p><span class="ja">日本語、英語、中国語 (簡体・繁体)、韓国語、スペイン語、ポルトガル語 (ブラジル)、フランス語。</span><span class="en">Japanese, English, Chinese (Simplified and Traditional), Korean, Spanish, Portuguese (Brazil) and French.</span></p></div></div>
   </div>
+  <button type="button" class="btn ghost more" id="morefeat" aria-expanded="false" aria-controls="featmore" hidden><span class="ja">ほかの機能を見る</span><span class="en">Show more features</span></button>
 </div></section>
 
 <section class="sec" style="padding-top:0"><div class="wrap priv">
@@ -447,7 +461,7 @@ footer p{max-width:46em}
   <h2 class="rv d1"><span class="ja"><span class="ph">入れる前に</span><span class="ph">気になること。</span></span><span class="en">Before you install.</span></h2>
   <div class="faq" style="margin-top:36px">
     <div class="bezel rv"><div class="core"><h3><span class="ja"><span class="ph">保存したポストは、</span><span class="ph">どこに置かれますか。</span></span><span class="en">Where are my saved posts stored?</span></h3><p><span class="ja">あなたのパソコンの中だけです。外部のサーバーには送りません。拡張機能を削除すると、保存したデータも消えます。設定のエクスポートで、先に書き出しておけます。</span><span class="en">Only on your computer. Nothing is sent to an outside server. Removing the extension also removes the saved data, so export it from Settings first if you want a copy.</span></p></div></div>
-    <div class="bezel rv d1"><div class="core"><h3><span class="ja"><span class="ph">なぜ Chrome ウェブストアに</span><span class="ph">ないのですか。</span></span><span class="en">Why isn't it on the Chrome Web Store?</span></h3><p><span class="ja">現在は、GitHub から ZIP を配布しています。インストールの手順は、上に 4 ステップで書いてあります。</span><span class="en">For now, the ZIP is distributed from GitHub. The four install steps are above.</span></p></div></div>
+    <div class="bezel rv d1"><div class="core"><h3><span class="ja"><span class="ph">なぜ Chrome ウェブストアに</span><span class="ph">ないのですか。</span></span><span class="en">Why isn't it on the Chrome Web Store?</span></h3><p><span class="ja">いまは、GitHub で ZIP を配布しています。ソースコードと変更履歴をそのまま読めるので、使う権限の中身も自分で確かめられます。ストアへの公開はまだ行っていません。インストールの手順は、上に 4 ステップで書いてあります。</span><span class="en">For now, the ZIP is distributed on GitHub. You can read the source code and the change history as they are, so you can check for yourself what permissions it uses. It is not published on the Chrome Web Store yet. The four install steps are above.</span></p></div></div>
     <div class="bezel rv"><div class="core"><h3><span class="ja">スマホでも使えますか。</span><span class="en">Does it work on a phone?</span></h3><p><span class="ja">使えません。パソコンの Chrome で動く拡張機能です。</span><span class="en">No. It is a Chrome extension for computers.</span></p></div></div>
     <div class="bezel rv d1"><div class="core"><h3><span class="ja"><span class="ph">自動取り込みを使うとき、</span><span class="ph">気をつけることはありますか。</span></span><span class="en">Is there anything to watch out for with automatic import?</span></h3><p><span class="ja">取り込みは任意で、確認の画面で同意してから始まります。速度は抑えてあり、一時停止や停止はいつでもでき、X が制限を出したときは自動で止まります。ただ、自動スクロールは X の規約上の「自動化されたアクセス」とみなされる可能性があるので、使うかどうかはご自身で決めてください。</span><span class="en">It is optional and starts only after you agree on a confirmation screen. It runs at a gentle pace, can be paused or stopped at any time, and stops by itself if X shows a limit. Automatic scrolling may still be treated as "automated access" under X's terms, so it is your call whether to use it.</span></p></div></div>
   </div>
@@ -576,6 +590,18 @@ footer p{max-width:46em}
   if(navigator.clipboard&&navigator.clipboard.writeText){
     cp.addEventListener('click',function(){navigator.clipboard.writeText('chrome://extensions').catch(function(){})});
   }else{cp.hidden=true}
+
+  /* 狭い画面では小さな機能を畳み、ボタンで開く。広い画面ではボタンごと隠れて全部見える */
+  var feat=document.getElementById('featmore'),more=document.getElementById('morefeat');
+  if(feat&&more){
+    feat.classList.add('fold');
+    more.hidden=false;
+    more.addEventListener('click',function(){
+      var open=feat.classList.toggle('fold')===false;
+      more.setAttribute('aria-expanded',String(open));
+      more.hidden=true;
+    });
+  }
 
   /* スクロールで現れる */
   var items=document.querySelectorAll('.rv');
