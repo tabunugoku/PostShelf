@@ -10,7 +10,7 @@ const fullText = new FullTextQueue();
 const startupCleanup = cleanupAtStartup().catch(() => {});
 
 // ツールバーアイコンの動作 (popup / サイドパネル) は再起動で失われるので、service worker の起動ごとに反映する
-const apply = () => void getSettings().then((s) => applyActionMode(s.actionMode));
+const apply = () => void getSettings().then((s) => applyActionMode(s.actionMode)).catch(() => {});
 apply();
 chrome.runtime.onInstalled.addListener(apply);
 chrome.runtime.onStartup?.addListener(apply);
@@ -34,7 +34,7 @@ function requestFullText(accountId: string, msg: { tweetId?: unknown; kind?: unk
 chrome.runtime.onMessage.addListener((msg, sender) => {
   // 画像のキャッシュ (オフなら何もしない) と、保存から外したポストの画像の掃除
   if (msg?.type === 'cacheImages' && typeof msg.tweetId === 'string' && typeof msg.accountId === 'string') void cachePostById(msg.tweetId, msg.accountId).catch(() => {});
-  if (msg?.type === 'pruneCache') void afterPostsRemoved();
+  if (msg?.type === 'pruneCache') void afterPostsRemoved().catch(() => {});
   if (msg?.type === 'fetchFullText' && typeof msg.accountId === 'string') {
     void startupCleanup.then(() => requestFullText(msg.accountId, msg));
   }

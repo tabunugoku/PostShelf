@@ -79,6 +79,9 @@ export function tweetIdOf(article: Element): string | null {
   return link?.getAttribute('href')?.match(/^\/[^/]+\/status\/(\d+)/)?.[1] ?? null;
 }
 
+/** 動画のサムネイル (poster) は https の URL だけ使う (blob: などは保存しても開けない) */
+const httpsPoster = (poster: string | null | undefined): string | undefined => (poster && /^https:\/\//i.test(poster) ? poster : undefined);
+
 /** 引用は表示されていた本文・画像と動画のサムネイルだけ。再生や原文の取得はしない。 */
 function extractQuote(article: Element): QuoteSnapshot | undefined {
   const el = findQuote(article);
@@ -93,7 +96,7 @@ function extractQuote(article: Element): QuoteSnapshot | undefined {
   const media = queryAllInQuote<HTMLImageElement>(el, 'quoteMedia').els.map((i) => i.src).filter(Boolean);
   const hasVideo = !!queryFirstInQuote(el, 'quoteVideo');
   const poster = hasVideo ? queryFirstInQuote(el, 'quoteVideoPoster')?.el.getAttribute('poster') : undefined;
-  const videoPoster = poster && /^https:\/\//i.test(poster) ? poster : undefined;
+  const videoPoster = httpsPoster(poster);
   if (!author && !handle && !text && !media.length && !hasVideo) return undefined;
   const avatar = queryFirstInQuote<HTMLImageElement>(el, 'avatar')?.el.src;
   const createdAt = queryFirstInQuote(el, 'time')?.el.getAttribute('datetime');
@@ -130,7 +133,7 @@ export function extractTweet(article: Element): Extracted | null {
   const bodyLinks = (textEl ? queryAllFirst(textEl, 'bodyLink').els : []).some((a) => /^https?:\/\//i.test(a.getAttribute('href') ?? ''));
   const hasLink = !!queryOwn(article, 'linkCard') || bodyLinks;
   const hasVideo = !!queryOwn(article, 'video');
-  const videoPoster = hasVideo ? queryOwn(article, 'videoPoster')?.el.getAttribute('poster') || undefined : undefined;
+  const videoPoster = hasVideo ? httpsPoster(queryOwn(article, 'videoPoster')?.el.getAttribute('poster')) : undefined;
 
   // 自動翻訳後に出る「この翻訳を評価」のボタンを、翻訳済みの目印にする。実機で確認した範囲の推測。
   const translated = !!queryOwn(article, 'translationVote');
