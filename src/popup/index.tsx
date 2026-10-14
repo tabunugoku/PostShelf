@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { leafMemberFolders } from '../shared/folderTree';
 import { inboxOf } from '../shared/folderPicker';
 import { Icon } from '../shared/Icon';
 import { HealthNotice } from '../manager/HealthNotice';
@@ -10,6 +11,15 @@ import { countFolder } from '../shared/query';
 import { getLastSeenAccount, listBookmarks, listFolders, onDataChanged, onLastSeenAccountChanged, setAccountScope } from '../shared/storage';
 
 const openManager = (hash = '') => void openManagerTab(hash);
+
+/** 「最近の保存」の色の点。所属は祖先にも保存しているので、いちばん下のフォルダだけ出す (最大 3 つ) */
+function recentDots(b: Bookmark, folders: Folder[]) {
+  // 「未分類」は中空の点、色のないフォルダは灰色の塗りの点、色のあるフォルダはその色の点
+  if (b.folderIds.includes(INBOX_ID)) return <i class="rec-dot hollow" />;
+  return leafMemberFolders(folders, b.folderIds)
+    .slice(0, 3)
+    .map((f) => <i class="rec-dot" title={displayName(f)} style={f.color ? { background: f.color } : undefined} />);
+}
 
 function Popup() {
   const [counts, setCounts] = useState({ posts: 0, inbox: 0 });
@@ -87,12 +97,7 @@ function Popup() {
         {recent.map((b) => (
           <div class="rec-row" title={b.snapshot.text}>
             <span class="rec-dots" aria-hidden="true">
-              {b.folderIds.slice(0, 3).map((id) => {
-                const f = folders.find((x) => x.id === id);
-                // 「未分類」は中空の点、色のないフォルダは灰色の塗りの点、色のあるフォルダはその色の点
-                if (id === INBOX_ID) return <i class="rec-dot hollow" />;
-                return f?.color ? <i class="rec-dot" title={f ? displayName(f) : ''} style={{ background: f.color }} /> : <i class="rec-dot" title={f ? displayName(f) : ''} />;
-              })}
+              {recentDots(b, folders)}
             </span>
             <span class="rec-handle">{b.snapshot.handle}</span> {b.snapshot.text}
           </div>

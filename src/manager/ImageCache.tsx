@@ -166,15 +166,16 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
     if (move) {
       const from = (await openStore(cfg.backend)).store;
       const to = (await openStore(d.to)).store;
-      if (from && to) {
-        setDlg({ kind: 'moving', done: 0, total: d.count });
-        try {
-          await migrateStore(from, to, (p) => setDlg({ kind: 'moving', ...p }));
-        } catch {
-          note(t('cacheMoveFail'), true);
-        }
+      // 移せなかったときは保存先を切り替えない。移し先にコピーできた分は消さない (次に切り替えたとき、取得済みとして使われる)
+      if (!from || !to) return note(t('cacheMoveFail'), true);
+      setDlg({ kind: 'moving', done: 0, total: d.count });
+      try {
+        await migrateStore(from, to, (p) => setDlg({ kind: 'moving', ...p }));
+      } catch {
         setDlg(null);
-      } else note(t('cacheMoveFail'), true);
+        return note(t('cacheMoveFail'), true);
+      }
+      setDlg(null);
     }
     await save({ backend: d.to });
     notifyCacheChanged();
@@ -194,7 +195,11 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
     if (d?.kind !== 'lower') return;
     setDlg(null);
     await save({ maxBytes: d.max });
-    if (opened.store) await evictToFit(opened.store, d.max);
+    try {
+      if (opened.store) await evictToFit(opened.store, d.max);
+    } catch {
+      note(t('errorStorage'), true);
+    }
     await load();
     notifyCacheChanged();
   };
@@ -222,13 +227,18 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
     setMessage(null);
     abort.current = { aborted: false };
     setProgress({ done: 0, total: 0 });
-    const posts = uniquePosts(await listAllBookmarks());
-    const r = await cacheMissing(opened.store, cfg, posts, { signal: abort.current, onProgress: setProgress });
-    setProgress(null);
-    if (r.total === 0) note(t('cacheBulkNothing'));
-    else if (r.blocked) note(t('cacheBulkBlocked'), true);
-    else if (r.full) note(t('cacheBulkFull'), true);
-    else note(t('cacheBulkDone', r.cached, r.failed));
+    try {
+      const posts = uniquePosts(await listAllBookmarks());
+      const r = await cacheMissing(opened.store, cfg, posts, { signal: abort.current, onProgress: setProgress });
+      if (r.total === 0) note(t('cacheBulkNothing'));
+      else if (r.blocked) note(t('cacheBulkBlocked'), true);
+      else if (r.full) note(t('cacheBulkFull'), true);
+      else note(t('cacheBulkDone', r.cached, r.failed));
+    } catch {
+      note(t('errorStorage'), true);
+    } finally {
+      setProgress(null);
+    }
     await load();
     notifyCacheChanged();
   };
@@ -242,8 +252,11 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
   };
   const rescan = async () => {
     if (!(opened.store instanceof DirStore)) return;
-    const n = await opened.store.rescan();
-    note(t('cacheDirRescanDone', n));
+    try {
+      note(t('cacheDirRescanDone', await opened.store.rescan()));
+    } catch {
+      note(t('errorStorage'), true); // フォルダの許可が外れたときなど。load で実際の状態 (許可の案内) に戻す
+    }
     await load();
   };
   const cleanNow = async () => {

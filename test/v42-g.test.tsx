@@ -13,7 +13,7 @@ import type { Bookmark, QuoteSnapshot } from '../src/shared/models';
 import { t } from '../src/shared/strings';
 import { installChromeMock } from './chrome-mock';
 const load = (kind = 'detail') => { document.body.innerHTML = readFileSync('test/fixtures/v42-quote-video-' + kind + '.html', 'utf8'); return document.querySelector('article')!; };
-const quote: QuoteSnapshot = { author: 'Sample Quote', handle: '@sample_quote', text: 'Sample quote body', media: [], hasVideo: true, videoPoster: 'https://example.invalid/amplify_video_thumb/sample.jpg' };
+const quote: QuoteSnapshot = { author: 'Sample Quote', handle: '@sample_quote', text: 'Sample quote body', media: [], hasVideo: true, videoPoster: 'https://pbs.twimg.com/amplify_video_thumb/sample.jpg' };
 const bookmark = (): Bookmark => ({ accountId: 'me', tweetId: '111', folderIds: [], savedAt: 1, snapshot: { author: 'Sample Main', handle: '@sample_main', text: 'Sample main body', media: [], url: 'https://x.com/sample_main/status/111', quote } });
 beforeEach(() => { installChromeMock(); setAccountScope('me'); });
 describe('v42-G: quote video DOM extraction', () => {
