@@ -27,10 +27,10 @@ it('rejects cycles, excess depth, builtins and other accounts',async()=>{
  await expect(s.updateFolder('inbox',{parentId:p.id})).rejects.toBeInstanceOf(s.StorageError);
  s.setAccountScope('sample_other'); await expect(s.createFolder({name:'Sample D',parentId:p.id})).rejects.toBeInstanceOf(s.StorageError);
 });
-it('reparents a subtree atomically and keeps old ancestors',async()=>{
+it('reparents a subtree atomically and drops old ancestors',async()=>{
  const {p,c,g}=await tree();const q=await s.createFolder({name:'Sample D'});
  await s.setBookmarkFolders('1',[g.id],snapshot); await s.updateFolder(c.id,{parentId:q.id});
- expect((await s.getBookmark('1'))!.folderIds).toEqual(expect.arrayContaining([p.id,q.id,c.id,g.id]));
+ expect(new Set((await s.getBookmark('1'))!.folderIds)).toEqual(new Set([q.id,c.id,g.id]));
  await s.reorderFolders([c.id],{id:c.id,parentId:null});expect((await s.listFolders()).find(f=>f.id===c.id)!.parentId).toBeUndefined();
 });
 it.each(['child','grandchild','root'])('deletes only the %s subtree in one write, preserving ancestors',async(which)=>{
