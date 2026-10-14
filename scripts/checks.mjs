@@ -6,6 +6,10 @@ import { extensionIdFromKey, idFromDoc, listZip } from './lib.mjs';
 /** 必須の権限。増やすときは、利用者への影響を確認してから、ここと test を一緒に直す */
 export const REQUIRED_PERMISSIONS = ['storage', 'unlimitedStorage', 'sidePanel'];
 export const REQUIRED_HOST_PERMISSIONS = ['https://x.com/*', 'https://twitter.com/*'];
+/** 任意の権限 (利用者が許可したときだけ使う。画像のキャッシュ用)。permissions の optional は使わない */
+export const OPTIONAL_HOST_PERMISSIONS = ['https://pbs.twimg.com/*'];
+/** コードの中の fetch などで、絶対 URL の文字列を直接渡してよいホスト */
+export const ALLOWED_NETWORK_HOSTS = ['x.com', 'twitter.com', 'pbs.twimg.com'];
 export const LOCALES = ['ja', 'en', 'zh_CN', 'zh_TW', 'ko', 'es', 'pt_BR', 'fr'];
 
 export const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
@@ -30,6 +34,12 @@ export function checkPermissions(manifest) {
   const errors = [];
   if (!same(manifest.permissions, REQUIRED_PERMISSIONS)) errors.push(`permissions が現在の一覧と違います: ${JSON.stringify(manifest.permissions)}`);
   if (!same(manifest.host_permissions, REQUIRED_HOST_PERMISSIONS)) errors.push(`host_permissions が現在の一覧と違います: ${JSON.stringify(manifest.host_permissions)}`);
+  if (!same(manifest.optional_host_permissions, OPTIONAL_HOST_PERMISSIONS)) {
+    errors.push(`optional_host_permissions が現在の一覧と違います: ${JSON.stringify(manifest.optional_host_permissions)}`);
+  }
+  if (manifest.optional_permissions && manifest.optional_permissions.length > 0) {
+    errors.push(`optional_permissions は使いません: ${JSON.stringify(manifest.optional_permissions)}`);
+  }
   return errors;
 }
 
@@ -51,7 +61,30 @@ export function checkLocales(localeMessages) {
   return errors;
 }
 
-/** 外部のスクリプト URL、eval、new Function、リモートコードの読み込み */
+const URL_ARG = String.raw`["'\x60]((?:https?|wss?):\/\/[^"'\x60\s]+)["'\x60]`;
+/**
+ * 通信の呼び出しで、引数が許可していないホストの文字列リテラルになっているもの。単純な形だけを見る:
+ * fetch("https://...") / sendBeacon("https://...") / new WebSocket("wss://...") / XMLHttpRequest を使うファイルの .open("GET", "https://...")。
+ * 変数・連結・テンプレートの式で URL を組み立てる書き方や、new Request(...) 経由は見つけられない。
+ */
+const NETWORK_RULES = [
+  [new RegExp(String.raw`\bfetch\s*\(\s*${URL_ARG}`, 'g'), 'fetch'],
+  [new RegExp(String.raw`\bsendBeacon\s*\(\s*${URL_ARG}`, 'g'), 'sendBeacon'],
+  [new RegExp(String.raw`\bnew\s+WebSocket\s*\(\s*${URL_ARG}`, 'g'), 'WebSocket'],
+  [new RegExp(String.raw`\.open\s*\(\s*["'\x60][A-Za-z]+["'\x60]\s*,\s*${URL_ARG}`, 'g'), 'XMLHttpRequest', /\bnew\s+XMLHttpRequest\b/],
+];
+
+function disallowedHost(url) {
+  if (url.includes('${')) return null; // テンプレートの式を含むものは、ホストを決められない
+  try {
+    const host = new URL(url).hostname;
+    return ALLOWED_NETWORK_HOSTS.includes(host) ? null : host;
+  } catch {
+    return null;
+  }
+}
+
+/** 外部のスクリプト URL、eval、new Function、リモートコードの読み込み、許可していないホストへの通信 */
 export function checkNoRemoteCode(distDir) {
   const errors = [];
   const rules = [
@@ -67,6 +100,14 @@ export function checkNoRemoteCode(distDir) {
     if (!/\.(js|mjs|html)$/.test(f)) continue;
     const text = readFileSync(f, 'utf8');
     for (const [re, label] of rules) if (re.test(text)) errors.push(`${relative(distDir, f)}: ${label} が含まれています`);
+    if (!f.endsWith('.js') && !f.endsWith('.mjs')) continue;
+    for (const [re, label, guard] of NETWORK_RULES) {
+      if (guard && !guard.test(text)) continue;
+      for (const m of text.matchAll(re)) {
+        const host = disallowedHost(m[1]);
+        if (host) errors.push(`${relative(distDir, f)}: ${label} が許可していないホスト (${host}) を指しています`);
+      }
+    }
   }
   return errors;
 }

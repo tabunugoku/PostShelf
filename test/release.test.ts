@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { crc32, extensionIdFromKey, idFromDoc, listZip, makeZip } from '../scripts/lib.mjs';
 import {
-  LOCALES, REQUIRED_HOST_PERMISSIONS, REQUIRED_PERMISSIONS, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions,
+  LOCALES, OPTIONAL_HOST_PERMISSIONS, REQUIRED_HOST_PERMISSIONS, REQUIRED_PERMISSIONS, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions,
   checkVersion, manifestFiles,
 } from '../scripts/checks.mjs';
 
@@ -55,6 +55,15 @@ describe('v13-C-3: release checks', () => {
     expect(checkPermissions({ ...manifest, permissions: [...manifest.permissions, 'tabs'] })).toHaveLength(1);
     expect(checkPermissions({ ...manifest, host_permissions: [...manifest.host_permissions, 'https://pbs.twimg.com/*'] })).toHaveLength(1);
   });
+  it('optional permissions are compared too: an added host or optional_permissions fails', () => {
+    expect(manifest.optional_host_permissions).toEqual(OPTIONAL_HOST_PERMISSIONS);
+    expect(checkPermissions(manifest)).toEqual([]);
+    const withHost = { ...manifest, optional_host_permissions: [...manifest.optional_host_permissions, 'https://example.invalid/*'] };
+    expect(checkPermissions(withHost)).toHaveLength(1);
+    expect(checkPermissions({ ...manifest, optional_host_permissions: undefined })).toHaveLength(1);
+    expect(checkPermissions({ ...manifest, optional_permissions: ['tabs'] })).toHaveLength(1);
+    expect(checkPermissions({ ...manifest, optional_permissions: [] })).toEqual([]);
+  });
   it('all 8 locales have the same keys and placeholders (and a broken one is reported)', () => {
     const all = Object.fromEntries(LOCALES.map((l: string) => [l, JSON.parse(read(`static/_locales/${l}/messages.json`))]));
     expect(LOCALES).toHaveLength(8);
@@ -83,6 +92,40 @@ describe('v13-C-3: release checks', () => {
     expect(errors.some((e: string) => e.startsWith('bad.js') && e.includes('new Function'))).toBe(true);
     expect(errors.some((e: string) => e.startsWith('bad.html'))).toBe(true);
     expect(errors.some((e: string) => e.startsWith('ok.js'))).toBe(false);
+  });
+  describe('network calls to hosts that are not allowed', () => {
+    const check = async (code: string) => {
+      const { mkdtempSync, writeFileSync } = await import('node:fs');
+      const { tmpdir } = await import('node:os');
+      const { join } = await import('node:path');
+      const dir = mkdtempSync(join(tmpdir(), 'ps-net-'));
+      writeFileSync(join(dir, 'a.js'), code);
+      return checkNoRemoteCode(dir) as string[];
+    };
+    it.each([
+      ["fetch('https://example.invalid/x')", 'fetch'],
+      ['fetch("https://example.invalid/x", { method: "POST" })', 'fetch'],
+      ['navigator.sendBeacon("https://example.invalid/log", d)', 'sendBeacon'],
+      ['new WebSocket("wss://example.invalid/ws")', 'WebSocket'],
+      ['const x = new XMLHttpRequest(); x.open("GET", "https://example.invalid/x");', 'XMLHttpRequest'],
+    ])('fails: %s', async (code, label) => {
+      const errors = await check(code);
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toContain(label);
+      expect(errors[0]).toContain('example.invalid');
+    });
+    it.each([
+      'fetch(url)',
+      'fetch(`https://${host}/x`)',
+      "fetch('https://x.com/i')",
+      "fetch('https://twitter.com/i')",
+      'fetch("https://pbs.twimg.com/media/a.jpg")',
+      'x.open("GET", url)',
+      'window.open("https://example.invalid/", "_blank")',
+      'const link = "https://example.invalid/issues/new";',
+    ])('passes: %s', async (code) => {
+      expect(await check(code)).toEqual([]);
+    });
   });
   it('manifest files are checked against the zip entries', () => {
     const files = manifestFiles(manifest);
