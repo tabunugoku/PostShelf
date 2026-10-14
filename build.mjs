@@ -17,6 +17,8 @@ await build({
   target: 'chrome110',
   jsx: 'automatic',
   jsxImportSource: 'preact',
+  // content script は、確認ダイアログの CSS を文字列で読み、閉じた Shadow DOM の中に入れる
+  loader: { '.css': 'text' },
   minify: false,
   logLevel: 'info',
 });

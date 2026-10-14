@@ -1,0 +1,22 @@
+// 版: v46-review-1
+import { render } from 'preact';
+import { act } from 'preact/test-utils';
+import { beforeEach,afterEach,expect,it,vi } from 'vitest';
+import { App } from '../src/manager/App';
+import { FolderEdit } from '../src/manager/FolderEdit';
+import { Triage } from '../src/manager/Triage';
+import { createFolderPicker } from '../src/shared/folderPicker';
+import * as storage from '../src/shared/storage';
+import { installChromeMock,installPanelMock } from './chrome-mock';
+import type { Folder } from '../src/shared/models';
+import { t } from '../src/shared/strings';
+let p:Folder,c:Folder,folders:Folder[];
+const flush=()=>act(()=>new Promise<void>(r=>setTimeout(r,35)));
+const app=()=>document.querySelector('#app')!;
+const click=async(el:HTMLElement)=>{await act(()=>void el.click());await flush();};
+const submit=async(form:HTMLFormElement,name:string)=>{await act(()=>{const input=form.querySelector<HTMLInputElement>('input')!;input.value=name;input.dispatchEvent(new Event('input',{bubbles:true}));form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});await flush();};
+beforeEach(async()=>{installChromeMock();installPanelMock();storage.setAccountScope('unknown');history.replaceState(null,'','/');vi.spyOn(window,'scrollTo').mockImplementation(()=>{});p=await storage.createFolder({name:'Sample A'});c=await storage.createFolder({name:'Sample B',parentId:p.id});folders=await storage.listFolders();document.body.innerHTML='<div id="app"></div>';});
+afterEach(async()=>{await act(()=>void render(null,app()));vi.restoreAllMocks();});
+it('manager creation has no parent selector and always creates a root even in a child view',async()=>{await act(()=>void render(<App/>,app()));await flush();await click(document.querySelector<HTMLElement>('[data-folder-id="'+c.id+'"]')!);await click(document.querySelector<HTMLElement>('.fr.add')!);const form=document.querySelector<HTMLFormElement>('.folder-editor-host form')!;expect(form.querySelector('select')).toBeNull();await submit(form,'Sample C');expect((await storage.listFolders()).find(f=>f.name==='Sample C')!.parentId).toBeUndefined();});
+it('editing changes draft fields without offering or changing the stored parent',async()=>{await act(()=>void render(<FolderEdit folder={c} existing={folders} onSaved={()=>{}}/>,app()));await flush();const form=document.querySelector<HTMLFormElement>('form')!;expect(form.querySelector('select')).toBeNull();const update=vi.spyOn(storage,'updateFolder');await submit(form,'Sample renamed');expect(update).toHaveBeenCalledWith(c.id,{name:'Sample renamed'});expect((await storage.listFolders()).find(f=>f.id===c.id)!.parentId).toBe(p.id);});
+it('shared picker and triage creation both omit parent choices and create roots',async()=>{const picker=createFolderPicker({folders,selected:new Set(),theme:{fg:'#000',border:'#888',hover:'#eee',accent:'#00f'},onChange:()=>{}});app().append(picker.el);await click([...picker.el.querySelectorAll<HTMLButtonElement>('button')].find(b=>b.textContent===t('addFolder'))!);let form=picker.el.querySelector<HTMLFormElement>('form')!;expect(form.querySelector('select')).toBeNull();await submit(form,'Sample picker');expect((await storage.listFolders()).find(f=>f.name==='Sample picker')!.parentId).toBeUndefined();app().replaceChildren();await storage.setBookmarkFolders('1',[],{text:'架空の本文',author:'Sample',handle:'@sample_user',media:[],url:'https://x.com/sample_user/status/1'});const queue=await storage.listBookmarks();await act(()=>void render(<Triage multi queue={queue} live={new Set(['1'])} folders={folders.filter(f=>!['all','inbox'].includes(f.id))} pickerFolders={folders} onChanged={()=>{}} onClose={()=>{}}/>,app()));await flush();await click(document.querySelector<HTMLButtonElement>('[aria-keyshortcuts=N]')!);form=document.querySelector<HTMLFormElement>('.triage-new form')!;expect(form.querySelector('select')).toBeNull();await submit(form,'Sample triage');expect((await storage.listFolders()).find(f=>f.name==='Sample triage')!.parentId).toBeUndefined();});

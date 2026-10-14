@@ -1,53 +1,26 @@
 @import url("icons/tabler-icons.min.css");
+@import url("autocollect-dialog.css");
 :root{
-  /* ---- デザイントークン (X の画面に揃えた配色。manager / サイドパネル / popup で共有) ---- */
-  --text-primary:#0f1419;--text-secondary:#536471;--text-muted:#536471;
-  --surface-1:#f7f9f9;--surface-2:#ffffff;--surface-3:#ffffff;
-  --border:#eff3f4;--border-strong:#cfd9de;--border-stronger:#8b98a5;
-  --fill-ghost-hover:rgba(15,20,25,.06);--fill-ghost-selected:rgba(15,20,25,.12);--fill-control:#cfd9de;
-  /* アクセント: アイコン・リンク・選択の強調は --fill-accent、文字の載る塗りは白文字で 4.5:1 以上の --accent-strong */
-  --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0f6fb3;--mark-bg:#fff0a0;
-  --accent-strong:#0f6fb3;--danger:#c0302f;--danger-solid:#c0302f;
-  --warn-fg:#8a5a00;--warn-bg:#fff4d6;--ok:#00805a;
-  --shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);--radius:8px;
   /* ポスト表示 (X 風カード) の列の上限幅。広い画面で横に伸びすぎて読みづらくならないよう、ここ 1 か所で調整する */
   --post-col-max:720px;
 }
-@media (prefers-color-scheme:dark){:root{
-  --text-primary:#e7e9ea;--text-secondary:#9aa4ad;--text-muted:#9aa4ad;
-  --surface-1:#16181c;--surface-2:#000000;--surface-3:#16181c;
-  --border:#2f3336;--border-strong:#536471;--border-stronger:#71767b;
-  --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
-  --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;--mark-bg:#5c4b00;
-  --warn-fg:#ffd277;--warn-bg:#3a2d0a;--ok:#4cd8a6;
-  --shadow-popover:0 8px 24px rgba(0,0,0,.5);
-}}
 /* OS のダーク/ライトにフォーム部品 (input, button, スクロールバー等) を追従させる */
 :root{color-scheme:light dark}
 html{scroll-behavior:auto}
 option,optgroup{background:var(--surface-2);color:var(--text-primary)}
-*{box-sizing:border-box}
 body{margin:0;background:var(--surface-2);color:var(--text-primary);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif}
 /* 日本語の折り返しは文節の区切りに (Chrome 119 未満では無効 = 通常の折り返し。許容)。<html lang> は起動時に UI の言語を入れる。他の言語には足さない */
 :lang(ja) body{word-break:auto-phrase;line-break:strict}
 button,.chip,.tab,.badge{white-space:nowrap}
 /* 文言が長くなりうるボタン (ダイアログ・設定・メニューの項目) は折り返す。他言語の長い文言がはみ出さないように (v35)。短い文言のボタン (ツールバー・チップ・タブ) は nowrap のまま */
-.dialog button,.setting-group button,.menu-item{white-space:normal;min-width:0;overflow-wrap:anywhere}
+.setting-group button,.menu-item{white-space:normal;min-width:0;overflow-wrap:anywhere}
 .muted,.toast,.text,.empty-state p,.pre{text-wrap:pretty}
 .setting-group .muted,.setting-desc{text-wrap:wrap}
 h1,h2,h3,label,.sec{text-wrap:balance}
 h1{font-size:16px;font-weight:500;margin:0 0 4px}
-button,input{min-height:32px;font:inherit;color:inherit;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius);padding:4px 10px;cursor:pointer}
-input{cursor:text;background:var(--surface-2)}
-input[type=checkbox],input[type=radio]{min-height:0}
-button:hover{background:var(--fill-ghost-hover)}
-button:disabled{cursor:not-allowed}
 ::placeholder{color:var(--text-muted);opacity:1}
-:focus-visible{outline:2px solid var(--fill-accent);outline-offset:2px}
-.muted{color:var(--text-secondary)}
 .grow{flex:1}
 .pre{white-space:pre-line}
-.error{color:var(--danger);margin:0 0 8px}
 .danger{color:var(--danger)}
 .danger-text{color:var(--danger)}
 .badge{background:var(--accent-strong);color:#fff;border-radius:10px;font-size:14px;line-height:20px;padding:0 8px;margin-left:auto}
@@ -219,21 +192,13 @@ button:disabled{cursor:not-allowed}
 .folder-create-anchor{display:block}
 
 /* ---- 確認ダイアログ / トースト ---- */
-.overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
-.dialog{width:min(460px,calc(100vw - 32px));padding:16px;background:var(--surface-3);border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-popover)}
-.dialog p{margin:0 0 16px;text-wrap:balance}
 /* 確認の画面 (削除の確認など): 本文が 2 行に収まる幅にし、1 文字だけ次の行に折り返さないよう、行の長さを均す */
 .dialog[role=alertdialog]{width:min(520px,calc(100vw - 32px))}
-.dialog-title{font-size:16px;margin:0 0 8px}
-.dialog-actions{display:flex;gap:8px;justify-content:flex-end}
-.primary{background:var(--accent-strong);color:#fff;border-color:transparent}.primary:hover{background:var(--accent-strong);opacity:.9}
 .danger-solid{background:var(--danger-solid);color:#fff;border-color:transparent}.danger-solid:hover{background:var(--danger-solid);opacity:.9}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;display:flex;gap:12px;align-items:center;max-width:calc(100vw - 24px);padding:10px 14px;background:var(--text-primary);color:var(--surface-2);border-radius:12px;box-shadow:var(--shadow-popover)}
 .toast button{color:inherit;border-color:currentColor}
 
 /* ---- 設定 ---- */
-.setting{display:flex;gap:10px;align-items:flex-start;padding:10px 0;cursor:pointer}
-.setting input{min-height:0;width:20px;height:20px;margin-top:4px;accent-color:var(--accent-strong);flex:none}
 .setting-desc{display:block;font-size:14px;margin-top:2px;max-width:none;overflow-wrap:anywhere}
 .desc-line{display:block}
 /* 見出し (歯車のアイコンと文字の間に余白を空ける) */
@@ -314,7 +279,6 @@ button:disabled{cursor:not-allowed}
 .health-broken{border-color:var(--danger)}
 .health-broken i{color:var(--danger)}
 .health-btn{margin-left:auto;flex:none}
-.dialog-wide{width:min(640px,calc(100vw - 32px))}
 .diag-notice{font-weight:700;margin:0 0 8px}
 .diag-pre{margin:0 0 12px;max-height:280px;overflow:auto;padding:10px;background:var(--surface-1);border:1px solid var(--border);border-radius:8px;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre;color:var(--text-primary)}
 .dialog-actions .btn-link{display:inline-flex;gap:6px;align-items:center;min-height:32px;color:var(--text-accent)}
@@ -341,8 +305,7 @@ button:disabled{cursor:not-allowed}
 .danger-zone{border-color:var(--danger)}
 .type-confirm{display:flex;flex-direction:column;gap:4px;margin:0 0 16px}
 .type-confirm input{width:100%}
-.dialog .error{margin:0 0 16px}
-.danger-solid:disabled,.primary:disabled,.danger-solid:disabled:hover,.primary:disabled:hover{opacity:.45}
+.danger-solid:disabled,.danger-solid:disabled:hover{opacity:.45}
 
 /* ---- 画像ビューア / 動画の案内 (v11) ---- */
 .viewer{position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.96);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -376,8 +339,6 @@ button:disabled{cursor:not-allowed}
 .warn{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px}
 .meter{height:10px;margin-top:8px;border-radius:999px;background:var(--border);overflow:hidden;border:1px solid var(--border-strong)}
 .meter i{display:block;height:100%;background:var(--accent-strong)}
-select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--radius);min-height:32px;padding:2px 8px}
-input[type=number]{width:110px}
 .banner-error{background:transparent;border-color:var(--danger)}
 .banner-error>i{color:var(--danger)}
 .version-info{margin-top:12px}
@@ -400,18 +361,6 @@ input[type=number]{width:110px}
 .ac-bar i{display:block;height:100%;width:35%;background:var(--accent-strong)}
 .ac-bar.ind i{animation:ac-slide 1.6s infinite linear}
 @keyframes ac-slide{0%{margin-left:-35%}100%{margin-left:100%}}
-.ac-alert{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:8px 10px;font-size:14px}
-.ac-dialog{display:grid;gap:10px;max-height:calc(100vh - 32px);overflow:auto}
-.ac-dialog p,.ac-dialog .dialog-title{margin:0}
-.ac-field{border:0;margin:0;padding:0;display:grid;gap:2px}
-.ac-field legend{font-weight:700;padding:0 0 2px}
-.ac-cap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.ac-cap select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;min-height:32px;padding:2px 8px}
-.ac-order{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px}
-.ac-order>div{border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--surface-1)}
-.ac-order ol{margin:4px 0 0;padding-left:20px}
-.ac-ok{color:var(--ok);font-weight:700}
-@media (max-width:480px){.ac-order{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.ac-dot.run,.ac-bar.ind i{animation:none}}
 
 /* 左のメニューの「設定」の下の GitHub のボタン (v25) */

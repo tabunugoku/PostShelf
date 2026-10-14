@@ -71,7 +71,8 @@ import { SearchContext } from './PostText';
 import { AvatarContext, buildAvatarFallback, type AvatarFallback } from './avatars';
 import { SettingsPage } from './Settings';
 import { clearStorageError, reportStorageError, useStorageError } from './errorBus';
-import { AutoCollectDialog, OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
+import { AutoCollectDialog } from '../shared/AutoCollectDialog';
+import { OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
 import { currentVersion } from '../shared/version';
 import { REPO_URL } from '../shared/links';
 import { SidebarResize } from './SidebarResize';
@@ -189,7 +190,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const storageError = useStorageError();
   /** ブックマークの自動取り込み (v15): 設定、確認ダイアログ、「あとで」(この画面を開いている間だけ案内を隠す)、取り込みの状態 */
   const [autoCfg, setAutoCfg] = useState<AutoCollectSettings>(DEFAULT_AUTO_COLLECT);
-  const [autoOpen, setAutoOpen] = useState(location.hash === '#autocollect');
+  const [autoOpen, setAutoOpen] = useState(false);
   const [offerLater, setOfferLater] = useState(false);
   const collectRun = useCollectRun();
   const [runClosed, setRunClosed] = useState(0);
@@ -295,7 +296,6 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         setSearch(e.q);
         setSearchOpen(true);
       }
-      if (location.hash === '#autocollect') setAutoOpen(true); // x.com の「自動で取り込む…」から開かれた
     };
     window.addEventListener('hashchange', onHash);
     // 別タブ (x.com) での保存・取り込み・アカウント切替も反映
@@ -1318,11 +1318,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           cap={autoCfg.cap}
           onCancel={() => {
             setAutoOpen(false);
-            if (location.hash === '#autocollect') history.replaceState(null, '', location.pathname + location.search);
           }}
           onStart={(speed, cap) => {
             setAutoOpen(false);
-            if (location.hash === '#autocollect') history.replaceState(null, '', location.pathname + location.search);
             if (lastSeen) void startAutoCollect({ accountId: lastSeen.id, speed, cap }).then((id) => void watchStart(id, () => setStartMissed(true))).catch(() => {});
           }}
         />
