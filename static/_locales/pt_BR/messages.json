@@ -1680,5 +1680,37 @@
   "triageKeyOrder": {"message":"Ordem das teclas"},
   "triageKeyOrderHint": {"message":"Arraste para reordenar."},
   "showInAncestorsLabel": {"message":"Mostrar também nas pastas superiores"},
-  "showInAncestorsDesc": {"message":"Quando desativado, cada post aparece apenas na pasta de nível mais baixo à qual pertence. Os dados salvos não mudam. Posts colocados diretamente tanto em uma pasta superior quanto em sua subpasta aparecem apenas na subpasta."}
+  "showInAncestorsDesc": {"message":"Quando desativado, cada post aparece apenas na pasta de nível mais baixo à qual pertence. Os dados salvos não mudam. Posts colocados diretamente tanto em uma pasta superior quanto em sua subpasta aparecem apenas na subpasta."},
+  "demoSummary": {"message":"Experimente como funcionam as pastas aninhadas"},
+  "demoNote": {"message":"Teste ações de pastas com um post de exemplo e veja como mudam as pastas às quais ele pertence e onde ele aparece. Seus dados salvos não mudam."},
+  "demoAncestorsToggle": {"message":"Mostrar também nas pastas superiores (só neste exemplo)"},
+  "demoTreeHeading": {"message":"Pastas (à direita: o post aparece nesta pasta?)"},
+  "demoStoredHeading": {"message":"Pastas salvas (incluindo as superiores)"},
+  "demoShownHeading": {"message":"Pastas mostradas no post"},
+  "demoListed": {"message":"Aparece"},
+  "demoMemberHidden": {"message":"Na pasta, não aparece"},
+  "demoDeleted": {
+    "message": "$NAME$ (excluída)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "C"
+      }
+    }
+  },
+  "demoOpSave": {"message":"Salvar em G (neta)"},
+  "demoOpAdd": {"message":"Adicionar também a B"},
+  "demoOpUncheckChild": {"message":"Desmarcar C (filha)"},
+  "demoOpUncheckParent": {"message":"Desmarcar A (superior)"},
+  "demoOpMove": {"message":"Mover C para dentro de B"},
+  "demoOpDelete": {"message":"Excluir a pasta C"},
+  "demoOpReset": {"message":"Recomeçar"},
+  "demoStart": {"message":"Comece por \"Salvar em G (neta)\"."},
+  "demoResSave": {"message":"Ao escolher G, o post também é salvo nas pastas superiores C e A. No post, só aparece G, a de nível mais baixo."},
+  "demoResAdd": {"message":"Ao adicionar B, G, C e A continuam. O post mostra G e B."},
+  "demoResUncheckChild": {"message":"Ao desmarcar C, G, que está dentro dela, também sai. A, a superior, continua."},
+  "demoResUncheckParent": {"message":"Ao desmarcar A, C e G, que estão dentro dela, também saem. Se não sobrar nenhuma, o post vai para \"Sem categoria\" (não é excluído)."},
+  "demoResMove": {"message":"Ao mover C (com G) para dentro de B, os posts de C e G saem de A e entram em B. Os que também estão em outra pasta dentro de A continuam em A."},
+  "demoResDelete": {"message":"Ao excluir C, G, que está dentro dela, também é excluída (G não sobe de nível). O post continua em A."},
+  "demoNoFolder": {"message":"C já foi excluída. Clique em \"Recomeçar\" para trazê-la de volta."}
 }

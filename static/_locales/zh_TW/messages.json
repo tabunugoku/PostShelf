@@ -1680,5 +1680,37 @@
   "triageKeyOrder": {"message":"編號順序"},
   "triageKeyOrderHint": {"message":"拖曳以調整順序。"},
   "showInAncestorsLabel": {"message":"也在上層資料夾中顯示"},
-  "showInAncestorsDesc": {"message":"關閉後，貼文只會顯示在所屬的最下層資料夾中。儲存的資料不會改變。同時直接放入上層資料夾和其子資料夾的貼文，只會顯示在子資料夾中。"}
+  "showInAncestorsDesc": {"message":"關閉後，貼文只會顯示在所屬的最下層資料夾中。儲存的資料不會改變。同時直接放入上層資料夾和其子資料夾的貼文，只會顯示在子資料夾中。"},
+  "demoSummary": {"message":"試試多層資料夾的運作方式"},
+  "demoNote": {"message":"用一則範例貼文試試：操作資料夾後，貼文所屬的資料夾和顯示位置會如何變化。儲存的資料不會改變。"},
+  "demoAncestorsToggle": {"message":"也在上層資料夾中顯示（僅限此範例）"},
+  "demoTreeHeading": {"message":"資料夾（右側：該資料夾的列表中是否顯示這則貼文）"},
+  "demoStoredHeading": {"message":"儲存的所屬資料夾（含上層）"},
+  "demoShownHeading": {"message":"貼文上顯示的所屬資料夾"},
+  "demoListed": {"message":"顯示"},
+  "demoMemberHidden": {"message":"屬於此資料夾但不顯示"},
+  "demoDeleted": {
+    "message": "$NAME$（已刪除）",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "C"
+      }
+    }
+  },
+  "demoOpSave": {"message":"儲存到孫資料夾 G"},
+  "demoOpAdd": {"message":"也放入 B"},
+  "demoOpUncheckChild": {"message":"取消勾選子資料夾 C"},
+  "demoOpUncheckParent": {"message":"取消勾選上層資料夾 A"},
+  "demoOpMove": {"message":"將 C 移到 B 底下"},
+  "demoOpDelete": {"message":"刪除資料夾 C"},
+  "demoOpReset": {"message":"重新開始"},
+  "demoStart": {"message":"請先試試「儲存到孫資料夾 G」。"},
+  "demoResSave": {"message":"選擇 G 後，也會儲存到它的上層 C 和 A。貼文上只顯示最下層的 G。"},
+  "demoResAdd": {"message":"放入 B 後，G、C、A 的所屬維持不變。貼文上顯示的是 G 和 B。"},
+  "demoResUncheckChild": {"message":"取消勾選 C 後，它底下的 G 也會被移除。上層資料夾 A 保留。"},
+  "demoResUncheckParent": {"message":"取消勾選 A 後，它底下的 C 和 G 也會被移除。如果沒有剩下任何資料夾，貼文會進入「未分類」（不會被刪除）。"},
+  "demoResMove": {"message":"將 C（連同 G）移到 B 底下後，原本在 C 和 G 中的貼文會從 A 移除，並放入 B。同時也在 A 底下其他資料夾中的貼文，會保留在 A。"},
+  "demoResDelete": {"message":"刪除 C 後，它底下的 G 也會被刪除（G 不會移到上一層）。貼文在 A 中的所屬會保留。"},
+  "demoNoFolder": {"message":"C 已被刪除。按「重新開始」即可復原。"}
 }

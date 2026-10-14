@@ -1680,5 +1680,37 @@
   "triageKeyOrder": {"message":"Ordre des touches"},
   "triageKeyOrderHint": {"message":"Glissez pour réorganiser."},
   "showInAncestorsLabel": {"message":"Afficher aussi dans les dossiers parents"},
-  "showInAncestorsDesc": {"message":"Si cette option est désactivée, un post apparaît uniquement dans le dossier le plus bas auquel il appartient. Les données enregistrées ne changent pas. Un post placé directement dans un dossier parent et dans son dossier enfant s’affiche uniquement dans ce dernier."}
+  "showInAncestorsDesc": {"message":"Si cette option est désactivée, un post apparaît uniquement dans le dossier le plus bas auquel il appartient. Les données enregistrées ne changent pas. Un post placé directement dans un dossier parent et dans son dossier enfant s’affiche uniquement dans ce dernier."},
+  "demoSummary": {"message":"Essayer le fonctionnement des dossiers imbriqués"},
+  "demoNote": {"message":"Testez les actions sur les dossiers avec un post d’exemple et voyez comment changent ses dossiers et les endroits où il s’affiche. Vos données enregistrées ne changent pas."},
+  "demoAncestorsToggle": {"message":"Afficher aussi dans les dossiers parents (dans cet exemple uniquement)"},
+  "demoTreeHeading": {"message":"Dossiers (à droite : le post est-il listé ici ?)"},
+  "demoStoredHeading": {"message":"Dossiers enregistrés (parents inclus)"},
+  "demoShownHeading": {"message":"Dossiers affichés sur le post"},
+  "demoListed": {"message":"Listé"},
+  "demoMemberHidden": {"message":"Dans le dossier, non listé"},
+  "demoDeleted": {
+    "message": "$NAME$ (supprimé)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "C"
+      }
+    }
+  },
+  "demoOpSave": {"message":"Enregistrer dans G (petit-enfant)"},
+  "demoOpAdd": {"message":"Ajouter aussi à B"},
+  "demoOpUncheckChild": {"message":"Décocher C (enfant)"},
+  "demoOpUncheckParent": {"message":"Décocher A (parent)"},
+  "demoOpMove": {"message":"Déplacer C sous B"},
+  "demoOpDelete": {"message":"Supprimer le dossier C"},
+  "demoOpReset": {"message":"Recommencer"},
+  "demoStart": {"message":"Commencez par « Enregistrer dans G (petit-enfant) »."},
+  "demoResSave": {"message":"Choisir G enregistre aussi le post dans ses dossiers parents C et A. Seul G, le plus bas, s’affiche sur le post."},
+  "demoResAdd": {"message":"Ajouter B conserve G, C et A. Le post affiche G et B."},
+  "demoResUncheckChild": {"message":"Décocher C retire aussi G, qui est dessous. Le parent A reste."},
+  "demoResUncheckParent": {"message":"Décocher A retire aussi C et G, qui sont dessous. S’il ne reste aucun dossier, le post passe dans « Non classés » (il n’est pas supprimé)."},
+  "demoResMove": {"message":"Déplacer C (avec G) sous B retire ses posts de A et les place dans B. Ceux qui sont aussi dans un autre dossier sous A restent dans A."},
+  "demoResDelete": {"message":"Supprimer C supprime aussi G, qui est dessous (G ne remonte pas d’un niveau). Le post reste dans A."},
+  "demoNoFolder": {"message":"C est déjà supprimé. Cliquez sur « Recommencer » pour le rétablir."}
 }

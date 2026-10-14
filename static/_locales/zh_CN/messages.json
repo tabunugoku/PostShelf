@@ -1680,5 +1680,37 @@
   "triageKeyOrder": {"message":"编号顺序"},
   "triageKeyOrderHint": {"message":"拖动以调整顺序。"},
   "showInAncestorsLabel": {"message":"也在父文件夹中显示"},
-  "showInAncestorsDesc": {"message":"关闭后，帖子只会显示在其所属的最下层文件夹中。保存的数据不会改变。同时直接放入父文件夹和其子文件夹的帖子，只会显示在子文件夹中。"}
+  "showInAncestorsDesc": {"message":"关闭后，帖子只会显示在其所属的最下层文件夹中。保存的数据不会改变。同时直接放入父文件夹和其子文件夹的帖子，只会显示在子文件夹中。"},
+  "demoSummary": {"message":"试试多层文件夹的运作方式"},
+  "demoNote": {"message":"用一条示例帖子试试：操作文件夹后，帖子的所属文件夹和显示位置会如何变化。保存的数据不会改变。"},
+  "demoAncestorsToggle": {"message":"也在父文件夹中显示（仅限此示例）"},
+  "demoTreeHeading": {"message":"文件夹（右侧：该文件夹的列表中是否显示这条帖子）"},
+  "demoStoredHeading": {"message":"保存的所属文件夹（含上层）"},
+  "demoShownHeading": {"message":"帖子上显示的所属文件夹"},
+  "demoListed": {"message":"显示"},
+  "demoMemberHidden": {"message":"属于此文件夹但不显示"},
+  "demoDeleted": {
+    "message": "$NAME$（已删除）",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "C"
+      }
+    }
+  },
+  "demoOpSave": {"message":"保存到孙文件夹 G"},
+  "demoOpAdd": {"message":"也放入 B"},
+  "demoOpUncheckChild": {"message":"取消勾选子文件夹 C"},
+  "demoOpUncheckParent": {"message":"取消勾选父文件夹 A"},
+  "demoOpMove": {"message":"将 C 移到 B 下"},
+  "demoOpDelete": {"message":"删除文件夹 C"},
+  "demoOpReset": {"message":"重新开始"},
+  "demoStart": {"message":"请先试试“保存到孙文件夹 G”。"},
+  "demoResSave": {"message":"选择 G 后，也会保存到它的上层 C 和 A。帖子上只显示最下层的 G。"},
+  "demoResAdd": {"message":"放入 B 后，G、C、A 的所属保持不变。帖子上显示的是 G 和 B。"},
+  "demoResUncheckChild": {"message":"取消勾选 C 后，它下面的 G 也会被移除。父文件夹 A 保留。"},
+  "demoResUncheckParent": {"message":"取消勾选 A 后，它下面的 C 和 G 也会被移除。如果没有剩下任何文件夹，帖子会进入“未分类”（不会被删除）。"},
+  "demoResMove": {"message":"将 C（连同 G）移到 B 下后，原本在 C 和 G 中的帖子会从 A 移除，并放入 B。同时也在 A 下其他文件夹中的帖子，会保留在 A。"},
+  "demoResDelete": {"message":"删除 C 后，它下面的 G 也会被删除（G 不会移到上一层）。帖子在 A 中的所属会保留。"},
+  "demoNoFolder": {"message":"C 已被删除。点击“重新开始”即可恢复。"}
 }

@@ -17,13 +17,13 @@
 |---|---|---|
 | demoSummary | 親子のフォルダの動きを試す | Try how nested folders work |
 | demoNote | フォルダを操作すると、ポストの所属先と表示がどう変わるかを、架空のポスト 1 件で試せます。保存データは変わりません。 | Try folder actions on one sample post and see how they change where it belongs and where it shows. Your saved data doesn't change. |
-| demoAncestorsToggle | 親フォルダにも表示する (この図の中だけ) | Also show in parent folders (this sample only) |
-| demoTreeHeading | フォルダ (右: その一覧にこのポストが出るか) | Folders (right: is the post listed here?) |
-| demoStoredHeading | 保存される所属先 (祖先も入る) | Saved folders (ancestors included) |
+| demoAncestorsToggle | 親フォルダにも表示する（この図の中だけ） | Also show in parent folders (this sample only) |
+| demoTreeHeading | フォルダ（右: その一覧にこのポストが出るか） | Folders (right: is the post listed here?) |
+| demoStoredHeading | 保存される所属先（祖先も入る） | Saved folders (ancestors included) |
 | demoShownHeading | ポストに表示される所属先 | Folders shown on the post |
 | demoListed | 出る | Listed |
 | demoMemberHidden | 所属しているが出ない | In folder, not listed |
-| demoDeleted | $NAME$ (削除済み) | $NAME$ (deleted) |
+| demoDeleted | $NAME$（削除済み） | $NAME$ (deleted) |
 | demoOpSave | 孫 G に保存 | Save to grandchild G |
 | demoOpAdd | B にも入れる | Also add to B |
 | demoOpUncheckChild | 子 C を外す | Uncheck child C |
@@ -35,9 +35,9 @@
 | demoResSave | G を選ぶと、祖先の C と A にも保存されます。ポストに表示されるのは、いちばん下の G だけです。 | Choosing G also saves the post to its ancestors C and A. Only G, the lowest folder, is shown on the post. |
 | demoResAdd | B に入れても、G・C・A への所属はそのままです。ポストに表示されるのは G と B です。 | Adding B keeps G, C and A. The post shows G and B. |
 | demoResUncheckChild | C を外すと、その下の G も外れます。親の A は残ります。 | Unchecking C also removes G under it. Parent A stays. |
-| demoResUncheckParent | A を外すと、その下の C と G も外れます。何も残らなければ「未分類」に入ります (保存は消えません)。 | Unchecking A also removes C and G under it. If nothing is left, the post goes to Unsorted (it isn't deleted). |
-| demoResMove | C を (G ごと) B の下へ移すと、C と G に入っていたポストは A から外れ、B に入ります。A の下のほかのフォルダにも入っているポストは、A に残ります。 | Moving C (with G) under B takes its posts out of A and puts them in B. Posts that are also in another folder under A stay in A. |
-| demoResDelete | C を削除すると、その下の G も消えます (G を上の段へ移すことはしません)。ポストの A への所属は残ります。 | Deleting C also deletes G under it (G isn't moved up). The post stays in A. |
+| demoResUncheckParent | A を外すと、その下の C と G も外れます。何も残らなければ「未分類」に入ります（保存は消えません）。 | Unchecking A also removes C and G under it. If nothing is left, the post goes to Unsorted (it isn't deleted). |
+| demoResMove | C を（G ごと）B の下へ移すと、C と G に入っていたポストは A から外れ、B に入ります。A の下のほかのフォルダにも入っているポストは、A に残ります。 | Moving C (with G) under B takes its posts out of A and puts them in B. Posts that are also in another folder under A stay in A. |
+| demoResDelete | C を削除すると、その下の G も消えます（G を上の段へ移すことはしません）。ポストの A への所属は残ります。 | Deleting C also deletes G under it (G isn't moved up). The post stays in A. |
 | demoNoFolder | C はすでに削除されています。「最初に戻す」で元に戻せます。 | C is already deleted. Press "Start over" to bring it back. |
 
 ## zh_CN / zh_TW

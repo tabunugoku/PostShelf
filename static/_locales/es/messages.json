@@ -1680,5 +1680,37 @@
   "triageKeyOrder": {"message":"Orden de teclas"},
   "triageKeyOrderHint": {"message":"Arrastra para reordenar."},
   "showInAncestorsLabel": {"message":"Mostrar también en las carpetas superiores"},
-  "showInAncestorsDesc": {"message":"Si se desactiva, cada publicación aparece solo en la carpeta de nivel más bajo a la que pertenece. Los datos guardados no cambian. Las publicaciones guardadas directamente tanto en una carpeta superior como en su subcarpeta aparecen solo en la subcarpeta."}
+  "showInAncestorsDesc": {"message":"Si se desactiva, cada publicación aparece solo en la carpeta de nivel más bajo a la que pertenece. Los datos guardados no cambian. Las publicaciones guardadas directamente tanto en una carpeta superior como en su subcarpeta aparecen solo en la subcarpeta."},
+  "demoSummary": {"message":"Prueba cómo funcionan las carpetas anidadas"},
+  "demoNote": {"message":"Prueba acciones de carpetas con una publicación de ejemplo y mira cómo cambian las carpetas a las que pertenece y dónde aparece. Tus datos guardados no cambian."},
+  "demoAncestorsToggle": {"message":"Mostrar también en las carpetas superiores (solo en este ejemplo)"},
+  "demoTreeHeading": {"message":"Carpetas (derecha: ¿aparece la publicación en esta carpeta?)"},
+  "demoStoredHeading": {"message":"Carpetas guardadas (incluidas las superiores)"},
+  "demoShownHeading": {"message":"Carpetas que se muestran en la publicación"},
+  "demoListed": {"message":"Aparece"},
+  "demoMemberHidden": {"message":"En la carpeta, no aparece"},
+  "demoDeleted": {
+    "message": "$NAME$ (eliminada)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "C"
+      }
+    }
+  },
+  "demoOpSave": {"message":"Guardar en G (nieta)"},
+  "demoOpAdd": {"message":"Añadir también a B"},
+  "demoOpUncheckChild": {"message":"Desmarcar C (hija)"},
+  "demoOpUncheckParent": {"message":"Desmarcar A (superior)"},
+  "demoOpMove": {"message":"Mover C dentro de B"},
+  "demoOpDelete": {"message":"Eliminar la carpeta C"},
+  "demoOpReset": {"message":"Empezar de nuevo"},
+  "demoStart": {"message":"Empieza por «Guardar en G (nieta)»."},
+  "demoResSave": {"message":"Al elegir G, la publicación también se guarda en sus carpetas superiores C y A. En la publicación solo se muestra G, la de nivel más bajo."},
+  "demoResAdd": {"message":"Al añadir B, se mantienen G, C y A. La publicación muestra G y B."},
+  "demoResUncheckChild": {"message":"Al desmarcar C, también se quita G, que está dentro. A, la superior, se mantiene."},
+  "demoResUncheckParent": {"message":"Al desmarcar A, también se quitan C y G, que están dentro. Si no queda ninguna, la publicación pasa a «Sin clasificar» (no se elimina)."},
+  "demoResMove": {"message":"Al mover C (con G) dentro de B, las publicaciones de C y G salen de A y entran en B. Las que también están en otra carpeta dentro de A se quedan en A."},
+  "demoResDelete": {"message":"Al eliminar C, también se elimina G, que está dentro (G no sube de nivel). La publicación sigue en A."},
+  "demoNoFolder": {"message":"C ya está eliminada. Pulsa «Empezar de nuevo» para recuperarla."}
 }
