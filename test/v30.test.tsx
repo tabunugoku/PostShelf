@@ -3,6 +3,7 @@ import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { installChromeMock, installPanelMock } from './chrome-mock';
+import { unmountApp } from './dom-helpers';
 import { SettingsPage } from '../src/manager/Settings';
 import { App } from '../src/manager/App';
 import { AutoCollectPanel, resetCollapsed } from '../src/content/autocollectPanel';
@@ -17,11 +18,6 @@ const flush = (ms = 30) => act(() => new Promise<void>((r) => setTimeout(r, ms))
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 const $$ = <T extends HTMLElement>(sel: string) => [...document.querySelectorAll<T>(sel)];
 
-// 片付けずに次へ進むと、残った App の Triage の effect が jsdom の消えた後に走る
-async function unmount() {
-  const app = document.querySelector('#app');
-  if (app) await act(() => void render(null, app));
-}
 async function mountSettings() {
   document.body.innerHTML = '<div id="app"></div>';
   await act(() => void render(<SettingsPage onChanged={() => {}} onApplied={() => {}} onNotice={() => {}} onAutoCollect={() => {}} />, $('#app')));
@@ -42,7 +38,7 @@ beforeEach(() => {
   installPanelMock();
   history.replaceState(null, '', '/');
 });
-afterEach(unmount);
+afterEach(unmountApp);
 
 describe('v30-A: settings search', () => {
   it('keeps only matching rows; hides groups, headings and nav chips with no match; restores everything when cleared; values do not change', async () => {

@@ -3,6 +3,7 @@ import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { installChromeMock, installPanelMock } from './chrome-mock';
+import { unmountApp } from './dom-helpers';
 import { App } from '../src/manager/App';
 import { createFolder, deleteBookmarks, getBookmark, listBookmarks, noteAccount, setAccountScope, setBookmarkFolders } from '../src/shared/storage';
 import { updateSettings } from '../src/shared/settings';
@@ -22,13 +23,8 @@ async function seed(inbox: number, folderNames: string[] = ['Dev', 'Fun']) {
   await chrome.storage.local.set({ bookmarks: data });
   return fs;
 }
-// 片付けずに次へ進むと、残った App の Triage の effect が jsdom の消えた後に走る
-async function unmount() {
-  const app = document.querySelector('#app');
-  if (app) await act(() => void render(null, app));
-}
 async function mount(surface: 'tab' | 'sidepanel' = 'tab') {
-  await unmount();
+  await unmountApp();
   document.body.innerHTML = '<div id="app"></div>';
   await act(() => void render(<App surface={surface} />, $('#app')));
   await flush(60);
@@ -51,7 +47,7 @@ beforeEach(async () => {
   await noteAccount({ handle: 'me' });
   setAccountScope('me');
 });
-afterEach(unmount);
+afterEach(unmountApp);
 
 describe('v29-B: the count in the top bar', () => {
   it('「N 件」 normally; 「N 件中 M 件」 and 「絞り込みを外す」 while searching; the button clears the search', async () => {
@@ -79,7 +75,7 @@ describe('v29-C: triage mode', () => {
     await seed(0);
     await openInbox();
     expect($$('.triage-start')).toHaveLength(0);
-    await unmount();
+    await unmountApp();
     await seed(2, []);
     await openInbox();
     expect($$('.triage-start')).toHaveLength(1);
@@ -186,7 +182,7 @@ describe('v29-C: triage mode', () => {
     expect($$('[role=dialog].triage')).toHaveLength(1);
     expect(location.hash).toBe('');
     expect($('.fr.on').textContent).toContain('未分類');
-    await unmount();
+    await unmountApp();
     installChromeMock();
     installPanelMock();
     await noteAccount({ handle: 'me' });
