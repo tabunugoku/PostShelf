@@ -2,7 +2,8 @@
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import {
-  LOCALES, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions, checkVersion, listZip, readJson,
+  LOCALES, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions, checkReleaseNotes, checkVersion,
+  listZip, readJson,
 } from './checks.mjs';
 
 const run = (cmd) => {
@@ -19,9 +20,7 @@ const zipPath = `release/postshelf-${pkg.version}.zip`;
 
 const notesPath = `docs/releases/v${pkg.version}.md`;
 const notes = existsSync(notesPath) ? readFileSync(notesPath, 'utf8') : '';
-const notesErrors = [];
-if (!notes) notesErrors.push(`${notesPath} がありません`);
-else for (const h of ['## 追加', '## 修正']) if (!notes.includes(h)) notesErrors.push(`${notesPath} に「${h}」の節がありません`);
+const notesErrors = checkReleaseNotes(notes).map((e) => `${notesPath}: ${e}`);
 
 const site = readFileSync('site/index.html', 'utf8');
 const siteErrors = [];
@@ -30,7 +29,7 @@ if (!site.includes(`postshelf-${pkg.version}.zip`)) siteErrors.push(`site/index.
 
 const results = [
   ['紹介サイト (site/index.html) の版と zip の名前が現在の version と同じ', siteErrors],
-  ['リリースノート (docs/releases/v<version>.md) に「追加」と「修正」の節がある', notesErrors],
+  ['リリースノート (docs/releases/v<version>.md) に英語の「Added」「Fixed」と、折りたたんだ日本語の「追加」「修正」の節がある', notesErrors],
   ['version が package.json と一致', checkVersion(manifest, pkg)],
   [
     'permissions / host_permissions / 任意の権限が現在の一覧と同じ',

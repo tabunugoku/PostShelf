@@ -1,12 +1,12 @@
 import { createHash, createPublicKey, generateKeyPairSync } from 'node:crypto';
 import { inflateRawSync } from 'node:zlib';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { crc32, extensionIdFromKey, idFromDoc, listZip, makeZip } from '../scripts/lib.mjs';
 import {
   LOCALES, OPTIONAL_HOST_PERMISSIONS, REQUIRED_HOST_PERMISSIONS, REQUIRED_PERMISSIONS, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions,
-  checkVersion, manifestFiles,
+  checkReleaseNotes, checkVersion, manifestFiles,
 } from '../scripts/checks.mjs';
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), 'utf8');
@@ -163,6 +163,17 @@ describe('v13-C-3: release checks', () => {
     expect(n).toContain(JSON.parse(read('node_modules/@tabler/icons-webfont/package.json')).version);
     expect(n.match(/Permission is hereby granted/g)).toHaveLength(2);
     expect(read('build.mjs')).toContain('THIRD_PARTY_NOTICES.md');
+  });
+  it('every release note puts English first and folds the Japanese original', () => {
+    const files = readdirSync(resolve(process.cwd(), 'docs/releases')).filter((f) => f.endsWith('.md'));
+    expect(files.length).toBeGreaterThan(0);
+    for (const f of files) expect([f, checkReleaseNotes(read(`docs/releases/${f}`))]).toEqual([f, []]);
+  });
+  it('a release note without the English sections or the folded Japanese is reported', () => {
+    expect(checkReleaseNotes('## 追加\n## 修正\n')).toHaveLength(3);
+    expect(checkReleaseNotes('')).toHaveLength(1);
+    const reversed = '<details>\n<summary>日本語 (Japanese)</summary>\n## 追加\n## 修正\n</details>\n## Added\n## Fixed\n';
+    expect(checkReleaseNotes(reversed)).toHaveLength(1);
   });
   it('release/ is ignored and the tag workflow runs release:check and attaches the zip', () => {
     expect(read('.gitignore')).toMatch(/^release\/$/m);

@@ -20,7 +20,7 @@
    - `dist` の JavaScript に、外部のスクリプトの URL・`eval`・`new Function`・リモートコードの読み込みが無い。`fetch("https://...")`・`XMLHttpRequest`・`WebSocket`・`sendBeacon` の引数が、x.com / twitter.com / pbs.twimg.com 以外のホストの文字列リテラルになっているものも失敗にする (URL を変数や連結で組み立てる書き方は見つけられない)
    - manifest が指すファイル (アイコンなど) がすべて zip に入っている
    - `key` から求めた拡張機能 ID が `docs/INSTALL.md` の ID と同じ
-3. **リリースノートを書く**: `docs/releases/v<version>.md` に、「## 追加」と「## 修正」の節を書く (どちらも必須。無ければ `release:check` と Release のワークフローが失敗する)。過去のリリースにも同じ形で書く。
+3. **リリースノートを書く**: `docs/releases/v<version>.md` に、日本語で「## 追加」と「## 修正」の節を書き、それを英語に訳して「## Added」と「## Fixed」の節にする。英語を先に置き、日本語の原文は末尾の `<details><summary>日本語 (Japanese)</summary>` に折りたたむ (README.md と同じ形。4 つの節と折りたたみは必須で、無ければ `release:check` と Release のワークフローが失敗する)。過去のリリースも同じ形にしてある。
 4. **タグを打つ**: `git tag v1.0.0 && git push origin v1.0.0` (タグは `v` + manifest の version)。
 5. **ワークフローが zip を作る**: `.github/workflows/release.yml` が、タグと manifest の version の一致を確かめ、`release:check` を通してから、`postshelf-<version>.zip` を、`docs/releases/v<version>.md` を本文にして GitHub Release に添付します。
 6. **zip を取得して、固定のフォルダに上書き**: Release から zip を保存し、`docs/INSTALL.md` の「2. 更新するとき」の手順で、同じフォルダに上書きして「再読み込み」を押す。更新の前に、設定の「データ」から必ずエクスポートします。
