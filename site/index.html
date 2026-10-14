@@ -312,7 +312,9 @@ tbody th{font-weight:400;color:var(--mu)}
   .au .l .btn:first-child{grid-column:1 / -1}
 }
 
-footer{border-top:1px solid var(--bd);padding:32px 0;font-size:13px;color:var(--mu)}
+/* フッターは、名前を全幅で戻して締める */
+footer{padding:72px 0 32px;font-size:13px;color:var(--mu);overflow:hidden}
+.wm{width:100%;margin-bottom:32px;font-size:clamp(52px,16.5vw,210px);line-height:.9;letter-spacing:-.05em;font-weight:800;color:var(--at);white-space:nowrap}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
 footer p{max-width:46em}
 
@@ -508,7 +510,7 @@ footer p{max-width:46em}
 </div></section>
 </main>
 
-<footer><div class="wrap"><span>© 2026 tabunugoku · MIT License</span><p><span class="ja">PostShelf は X (旧 Twitter) の公式のものではなく、X との提携もありません。利用者は、X の規約を守る責任を負います。</span><span class="en">PostShelf is not an official X (formerly Twitter) product and is not affiliated with X. You are responsible for following X's terms.</span></p></div></footer>
+<footer><div class="wrap"><div class="wm" aria-hidden="true">PostShelf</div></div><div class="wrap"><span>© 2026 tabunugoku · MIT License</span><p><span class="ja">PostShelf は X (旧 Twitter) の公式のものではなく、X との提携もありません。利用者は、X の規約を守る責任を負います。</span><span class="en">PostShelf is not an official X (formerly Twitter) product and is not affiliated with X. You are responsible for following X's terms.</span></p></div></footer>
 <script>
 (function(){
   var en=document.getElementById('l-en'),ja=document.getElementById('l-ja');
