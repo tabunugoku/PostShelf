@@ -7,10 +7,10 @@ import { extractTweet, tweetIdOf } from './snapshot';
 import { ensureIconCss, openPopover, setPopoverMode } from './popover';
 import { isOwnNativeClick } from './native';
 import { getCurrentAccount, subscribeAccount } from './account';
-import type { Folder } from '../shared/models';
+import { safeColor, type Folder } from '../shared/models';
 import { ACCENT, ACCENT_FILL } from '../shared/tokens';
 import { watchBody } from './domwatch';
-import { leafMemberFolders } from '../shared/folderTree';
+import { leafMemberResolver } from '../shared/folderTree';
 
 const BTN_ATTR = 'data-postshelf-btn';
 const BADGE_ATTR = 'data-postshelf-badge';
@@ -36,7 +36,7 @@ function ensureStyle(): void {
 
 /** 保存済みポストの表示色: 最初のフォルダ (いちばん下のフォルダ) に色があればその色、なければアクセント色 */
 function savedColor(folders: Folder[]): string {
-  return folders[0]?.color ?? ACCENT;
+  return safeColor(folders[0]?.color) ?? ACCENT;
 }
 
 function makeBadge(): HTMLElement {
@@ -156,6 +156,8 @@ function setSaved(host: HTMLElement, folders: Folder[]): void {
 interface Shared {
   bookmarks: Map<string, { folderIds: string[] }>;
   folders: Folder[];
+  /** 所属先から、いちばん下のフォルダだけを返す (leafMemberFolders と同じ結果。木の順番と祖先は読み込みのときに 1 回だけ求める) */
+  leafOf: (ids: readonly string[]) => Folder[];
 }
 let sharedCache: { account: string; promise: Promise<Shared> } | null = null;
 let sharedEvents: typeof chrome.storage.onChanged | undefined;
@@ -179,7 +181,9 @@ async function loadShared(): Promise<Shared> {
   const entry = {
     account,
     promise: Promise.all([listBookmarks(), listFolders()]).then(([list, folders]) => ({
-      bookmarks: new Map(list.map((b) => [b.tweetId, { folderIds: b.folderIds }])), folders,
+      bookmarks: new Map(list.map((b) => [b.tweetId, { folderIds: b.folderIds }])),
+      folders,
+      leafOf: leafMemberResolver(folders),
     })),
   };
   sharedCache = entry;
@@ -195,7 +199,7 @@ function refreshArticle(article: Element, data: Shared): void {
   if (!getCurrentAccount()) return void setSaved(host, []); // アカウント不明: どのアカウントの保存か分からないので「未保存」表示
   const bm = data.bookmarks.get(id);
   // 件数と色は、祖先を除いたいちばん下のフォルダだけで決める (機能要件 5)
-  setSaved(host, leafMemberFolders(data.folders, bm?.folderIds ?? []));
+  setSaved(host, data.leafOf(bm?.folderIds ?? []));
 }
 
 /** 指定の記事の表示を更新する。保存データの読み込みは、全体で 1 回 */
@@ -204,7 +208,7 @@ async function refreshArticles(articles: Element[]): Promise<void> {
   watchShared();
   const version = sharedVersion;
   const account = getCurrentAccount()?.id;
-  const data = getCurrentAccount() ? await loadShared() : { bookmarks: new Map(), folders: [] };
+  const data = getCurrentAccount() ? await loadShared() : { bookmarks: new Map(), folders: [], leafOf: () => [] };
   if (version !== sharedVersion || account !== getCurrentAccount()?.id) return;
   for (const a of articles) refreshArticle(a, data);
 }

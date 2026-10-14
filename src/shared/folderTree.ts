@@ -187,3 +187,18 @@ export function reparentedFolderIds(
 /** 所属先から、削除したフォルダ (子孫を含む) を外す。空になったときの未分類への切り替えは normalizeFolderIds */
 export const withoutDeletedFolders = (ids: readonly string[], removedIds: ReadonlySet<string>): string[] =>
   ids.filter((id) => !removedIds.has(id));
+
+/**
+ * leafMemberFolders と同じ結果を返す関数を作る。木の順番と祖先は 1 回だけ求めるので、ポストが多いとき (タイムラインの記事ごと) に使う。
+ * folders が変わったら作り直す
+ */
+export function leafMemberResolver(folders: readonly Folder[]): (ids: readonly string[]) => Folder[] {
+  const treeOrder = flattenFolders(folders).map((row) => row.folder);
+  const ancestorIds = new Map(folders.map((f) => [f.id, ancestors(folders, f.id).map((p) => p.id)]));
+  return (ids) => {
+    const members = new Set(ids);
+    const ordered = treeOrder.filter((f) => members.has(f.id));
+    const parents = new Set(ordered.flatMap((f) => ancestorIds.get(f.id) ?? []));
+    return ordered.filter((f) => !parents.has(f.id));
+  };
+}

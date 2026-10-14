@@ -62,6 +62,17 @@ describe('separate mode button', () => {
     expect(btn.querySelector('i.ti-folder-check')).not.toBeNull();
   });
 
+  it('uses the accent color when the folder color is not one of the choices', async () => {
+    const f = await createFolder({ name: 'a' });
+    await setBookmarkFolders('1234567890', [f.id], snap);
+    const stored = (await chrome.storage.local.get('folders')).folders as Array<Record<string, unknown>>;
+    await chrome.storage.local.set({ folders: stored.map((x) => ({ ...x, color: 'red; background:url(x)' })) });
+    injectButtons();
+    await refreshAll();
+    const btn = document.querySelector<HTMLElement>('[data-postshelf-btn]')!;
+    expect(btn.style.color).toMatch(/29, 155, 240|#1d9bf0/i);
+  });
+
   it('refreshAll reflects changes made later', async () => {
     injectButtons();
     const f = await createFolder({ name: 'a' });
