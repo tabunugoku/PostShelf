@@ -230,8 +230,13 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setViewId(id);
   };
   const ownWrites = useRef(0);
+  const reloadSeq = useRef(0);
   const reload = async () => {
+    // 読み込み中に別の読み直しやアカウントの切替があったら、古い結果で画面を上書きしない
+    const seq = ++reloadSeq.current;
+    const startedView = viewRef.current;
     const [f, { bookmarks: b, accounts: accs }] = await Promise.all([listFolders(), listBookmarksWithAccounts()]);
+    if (seq !== reloadSeq.current || startedView !== viewRef.current) return;
     setFolders(f);
     setBookmarks(b);
     setAccounts(accs);
@@ -607,6 +612,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
 
   // ドラッグ&ドロップ: ポスト → フォルダ行 (追加 / Alt で移動)、フォルダ → フォルダ行 (並べ替え)
   const virtual = (id: string) => id === ALL_FOLDER_ID || id === RECENT_ID;
+  /** ドラッグ元から渡された値を、ポスト ID の配列として読む。文字列の配列でなければ null */
+  const parsePostIds = (raw: string): string[] | null => {
+    try {
+      const value: unknown = JSON.parse(raw);
+      return Array.isArray(value) && value.every((v) => typeof v === 'string') ? value : null;
+    } catch {
+      return null;
+    }
+  };
   const onFolderDrop = async (target: Folder, e: DragEvent) => {
     e.preventDefault();
     const inside = dragOver?.id === target.id ? dragOver.inside : folderInside(target, e);
@@ -614,7 +628,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const posts = e.dataTransfer?.getData(MIME_POSTS);
     const dragged = e.dataTransfer?.getData(MIME_FOLDER);
     if (posts && !virtual(target.id)) {
-      const ids = JSON.parse(posts) as string[];
+      const ids = parsePostIds(posts);
+      if (!ids) return; // 他のアプリや壊れたデータのドロップは無視する
       if (e.altKey) await run(moveToFolder(ids, virtual(current) ? null : current, target.id), 'toastMoved');
       else await run(addToFolders(ids, [target.id]), 'toastAdded');
     } else if (dragged && !virtual(target.id) && target.id !== INBOX_ID) {
@@ -1112,9 +1127,16 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                     const cur = new Set((await getBookmark(b.tweetId))?.folderIds ?? []);
                     const add = [...sel].filter((id) => !cur.has(id));
                     const rem = [...cur].filter((id) => !sel.has(id));
-                    if (add.length) await addToFolders([b.tweetId], add);
-                    if (rem.length) await removeFromFolders([b.tweetId], rem);
-                    await reload();
+                    // 追加と解除は 1 回の書き込みにする (途中で失敗して追加だけ残ることを避ける)
+                    ownWrites.current++;
+                    try {
+                      if (add.length || rem.length) await changeBookmarkFolders([b.tweetId], add, rem);
+                    } catch {
+                      reportStorageError();
+                    } finally {
+                      await reload().catch(() => {});
+                      ownWrites.current--;
+                    }
                   }}
                 />
               </Dropdown>
@@ -1230,12 +1252,23 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
               void afterPostsRemoved(); // 対応する画像も消す (失敗してもポストの削除は成功。設定画面に整理が必要と出る)
               setSelected((s) => new Set([...s].filter((id) => !c.ids.includes(id))));
             } else if (c.kind === 'account') {
-              await deleteAccountDataAndCache(c.id);
+              try {
+                await deleteAccountDataAndCache(c.id);
+              } catch {
+                // 失敗したら通知を出し、画面は読み直して実際の状態に合わせる
+                reportStorageError();
+                await reload().catch(() => {});
+                return;
+              }
               await afterAccountChange(c.id);
             } else {
-              await deleteFolder(c.id);
-              if (current === c.id || descendants(userFolders,c.id).some(f=>f.id===current)) chooseView(ALL_FOLDER_ID);
-              await reload();
+              try {
+                await deleteFolder(c.id);
+                if (current === c.id || descendants(userFolders,c.id).some(f=>f.id===current)) chooseView(ALL_FOLDER_ID);
+              } catch {
+                reportStorageError();
+              }
+              await reload().catch(() => {});
             }
           }}
         />
@@ -1249,8 +1282,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           onConfirm={async (to) => {
             const from = assignFrom;
             setAssignFrom(null);
-            const r = await assignAccount(from, to);
-            setToast({ key: Date.now(), message: t('accountAssignDone', r.moved + r.merged) });
+            try {
+              const r = await assignAccount(from, to);
+              setToast({ key: Date.now(), message: t('accountAssignDone', r.moved + r.merged) });
+            } catch {
+              reportStorageError();
+              await reload().catch(() => {});
+              return;
+            }
             await afterAccountChange(from, to);
           }}
         />
