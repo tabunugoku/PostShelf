@@ -36,8 +36,14 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [autoOn, setAutoOn] = useState(true);
   const [showInAncestors, setShowInAncestors] = useState(true);
   const [triageMulti, setTriageMulti] = useState(false);
-  const [keyFolders,setKeyFolders] = useState<Folder[]|null>(null);
-  const openKeyTargets = async()=>{try{setKeyFolders(await listFolders());}catch{reportStorageError();}};
+  const [keyFolders, setKeyFolders] = useState<Folder[] | null>(null);
+  const openKeyTargets = async () => {
+    try {
+      setKeyFolders(await listFolders());
+    } catch {
+      reportStorageError();
+    }
+  };
   const [diag, setDiag] = useState(location.hash === '#diagnostics');
   const [dialog, setDialog] = useState<'reset' | 'deleteAll' | null>(null);
   const [counts, setCounts] = useState<DataCounts | null>(null);
@@ -298,14 +304,28 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
       <fieldset class="setting-group">
         <legend>{t('triageStart')}</legend>
         <label class="setting">
-          <input type="checkbox" role="switch" checked={triageMulti}
-            onChange={(e) => void saveOf(updateSettings({ triageMulti: (e.target as HTMLInputElement).checked }), (s) => setTriageMulti(s.triageMulti === true))} />
+          <input
+            type="checkbox"
+            role="switch"
+            checked={triageMulti}
+            onChange={(e) => void saveOf(
+              updateSettings({ triageMulti: (e.target as HTMLInputElement).checked }),
+              (s) => setTriageMulti(s.triageMulti === true),
+            )}
+          />
           <span>
             <strong>{t('triageMultiSwitch')}</strong>
             <span class="muted setting-desc"><Sentences text={t('triageMultiDesc')} /></span>
           </span>
         </label>
-      <div class="setting"><button data-key-targets-open onClick={()=>void openKeyTargets()}>{t('triageKeyTargets')}</button></div>
+      <div class="setting">
+        <button
+          data-key-targets-open
+          onClick={() => void openKeyTargets()}
+        >
+          {t('triageKeyTargets')}
+        </button>
+      </div>
       </fieldset>
       <fieldset class="setting-group">
         <legend>{t('actionModeHeading')}</legend>
@@ -392,7 +412,13 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
           </button>
         </div>
       </fieldset>
-      {keyFolders && <TriageKeyTargets folders={keyFolders} onClose={()=>setKeyFolders(null)} onSaved={flashSaved}/>}
+      {keyFolders && (
+        <TriageKeyTargets
+          folders={keyFolders}
+          onClose={() => setKeyFolders(null)}
+          onSaved={flashSaved}
+        />
+      )}
       {diag && <DiagnosticsDialog onClose={() => setDiag(false)} />}
       {dialog === 'reset' && (
         <Confirm message={t('settingsResetConfirm')} confirmLabel={t('settingsResetConfirmBtn')} onCancel={() => setDialog(null)} onConfirm={() => void doReset()} />
