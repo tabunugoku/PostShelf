@@ -25,7 +25,10 @@ beforeEach(async () => {
   });
   queue = (await storage.listBookmarks()).sort((a, b) => a.tweetId.localeCompare(b.tweetId));
   // App と同じく作成後にフォルダ一覧を読み直す。未確定の印は Triage 内に保持される。
-  changed = vi.fn(async () => { folders = (await storage.listFolders()).filter(f => f.id !== INBOX_ID && f.id !== ALL_FOLDER_ID); if (alive) await act(() => void renderCurrent()); });
+  changed = vi.fn(async () => {
+    folders = (await storage.listFolders()).filter(f => f.id !== INBOX_ID && f.id !== ALL_FOLDER_ID);
+    if (alive) await act(() => void renderCurrent());
+  });
   closed = vi.fn(); document.body.innerHTML = '<div id="app"></div>';
 });
 afterEach(async () => { alive = false; await act(() => void render(null, document.querySelector('#app')!)); vi.restoreAllMocks(); });

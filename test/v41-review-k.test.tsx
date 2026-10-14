@@ -23,7 +23,10 @@ beforeEach(async () => {
     text: 'Sample post ' + id, author: 'Sample', handle: '@sample_user', media: [], url: 'https://x.com/sample_user/status/' + id,
   });
   queue = (await storage.listBookmarks()).sort((a, b) => a.tweetId.localeCompare(b.tweetId));
-  changed = vi.fn(async () => { folders = (await storage.listFolders()).filter(f => f.id !== ALL_FOLDER_ID && f.id !== INBOX_ID); if (alive) await act(() => void renderCurrent()); });
+  changed = vi.fn(async () => {
+    folders = (await storage.listFolders()).filter(f => f.id !== ALL_FOLDER_ID && f.id !== INBOX_ID);
+    if (alive) await act(() => void renderCurrent());
+  });
   document.body.innerHTML = '<div id="app"></div>';
 });
 afterEach(async () => { alive = false; await act(() => void render(null, document.querySelector('#app')!)); vi.restoreAllMocks(); });
