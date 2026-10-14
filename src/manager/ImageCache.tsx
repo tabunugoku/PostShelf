@@ -187,7 +187,8 @@ export function ImageCacheSection(props: { surface: 'tab' | 'sidepanel'; /** 設
         try {
           await source.clear();
         } catch {
-          // 切り替えは成功している。移し元に残った画像は、使っていない保存先の孤児として次の掃除で消える
+          // 切り替えは成功している。移し元に残った画像は害が無い (容量の計算・追い出しは使っている保存先だけが対象)。
+          // 消えるのは「すべて削除」か、そのポストを保存から外したとき。同じ保存先へ戻せば取得済みとして使われる
           note(t('errorStorage'), true);
         }
       }
