@@ -1,7 +1,7 @@
 import { applyActionMode, openManagerTab } from '../shared/panel';
 import { getSettings, onSettingsChanged } from '../shared/settings';
 import { afterPostsRemoved, cachePostById } from '../shared/cacheops';
-import { AUTO_CAP, FullTextQueue, MANUAL_CAP, cleanupAtStartup, manualItems } from './fulltext';
+import { AUTO_CAP, FullTextQueue, MANUAL_CAP, cleanupAtStartup, cleanupLegacyTabs, manualItems } from './fulltext';
 
 // 長いポストの全文の取得 (v24)。保存した時点で、たたまれたポストのページを裏のタブで開いて読む (src/background/fulltext.ts)
 const fullText = new FullTextQueue();
@@ -13,6 +13,10 @@ const startupCleanup = cleanupAtStartup().catch(() => {});
 const apply = () => void getSettings().then((s) => applyActionMode(s.actionMode)).catch(() => {});
 apply();
 chrome.runtime.onInstalled.addListener(apply);
+// 旧版の裏のタブの記録は、更新のときだけ片付ける (service worker が起きるたびには書き込まない)
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'update') void cleanupLegacyTabs().catch(() => {});
+});
 chrome.runtime.onStartup?.addListener(apply);
 onSettingsChanged((s) => void applyActionMode(s.actionMode));
 

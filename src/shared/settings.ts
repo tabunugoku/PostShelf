@@ -594,7 +594,13 @@ export async function getFullTextTab(): Promise<number[]> {
   const ids = Array.isArray(v) ? v : [];
   return [...new Set(ids.filter((id): id is number => typeof id === 'number' && Number.isInteger(id) && id >= 0))];
 }
-/** 旧版が storage.local に残した記録を消す (ブラウザの再起動をまたいだ ID は別のタブを指しうるので、閉じずに捨てる) */
+/** 旧版 (v1.1.6) が storage.local に残した、裏のタブの記録。更新のときだけ読む */
+export async function getLegacyFullTextTab(): Promise<number[]> {
+  const v = (await chrome.storage.local.get(FT_TAB_KEY))[FT_TAB_KEY];
+  const ids = Array.isArray(v) ? v : [];
+  return [...new Set(ids.filter((id): id is number => typeof id === 'number' && Number.isInteger(id) && id >= 0))];
+}
+/** 旧版の記録を消す */
 export async function clearLegacyFullTextTab(): Promise<void> {
   await chrome.storage.local.remove(FT_TAB_KEY);
 }
