@@ -4,7 +4,7 @@
  * 判定できないときは保存・取り込みをしない (popover / collect が current === null を見て無効にする)。
  */
 import { UNKNOWN_ACCOUNT_ID, accountIdOf, type Account } from '../shared/models';
-import { closestFirst, queryAllFirst, queryEveryCandidate, queryFirst, selfOrDescendant } from '../shared/selectors';
+import { closestFirst, handleFromAvatarTestId, queryAllFirst, queryEveryCandidate, queryFirst, selfOrDescendant } from '../shared/selectors';
 import { noteAccount, setAccountScope } from '../shared/storage';
 import { watchBody } from './domwatch';
 
@@ -21,8 +21,8 @@ const validHandle = (h: string | undefined | null): h is string => !!h && HANDLE
 function handleFrom(el: Element): string | null {
   const text = el.textContent?.match(/@([A-Za-z0-9_]{1,15})(?![A-Za-z0-9_])/)?.[1];
   if (validHandle(text)) return text;
-  const avatar = selfOrDescendant(el, 'quoteAvatarHandle');
-  const fromTestId = avatar?.getAttribute('data-testid')?.slice('UserAvatar-Container-'.length);
+  const avatar = selfOrDescendant(el, 'accountAvatarHandle');
+  const fromTestId = avatar ? handleFromAvatarTestId(avatar) : undefined;
   if (validHandle(fromTestId)) return fromTestId;
   const link = closestFirst(el, 'anyLink')?.el ?? queryFirst(el, 'anyLink')?.el ?? el;
   const href = link.getAttribute('href')?.match(/^\/([A-Za-z0-9_]{1,15})\/?$/)?.[1];

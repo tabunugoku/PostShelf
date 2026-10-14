@@ -47,8 +47,12 @@ export const CANDIDATES = {
   nestedQuote: ['[data-testid="nestedQuotePreview"]'],
   // 引用内の写真リンクからだけ、引用元の ID を読む (time は a に包まれない)。
   quotePhotoLink: ['a[href*="/status/"][href*="/photo/"]'],
-  // 引用内のアバターの入れ物。アカウント判定 (account.ts) でも同じ値を使う (data-testid にハンドルが入る)
+  // 引用内のアバターの入れ物 (data-testid にハンドルが入る)。ハンドルは handleFromAvatarTestId で読む
   quoteAvatarHandle: ['[data-testid^="UserAvatar-Container-"]'],
+  // アカウント判定 (account.ts) 用。引用用と値は同じだが、X の変更で別々に直せるよう、キーを分けている
+  accountAvatarHandle: ['[data-testid^="UserAvatar-Container-"]'],
+  // data-testid=tweet が見つからないときの代わり (診断情報の骨格を取るため)
+  articleFallback: ['article'],
   quoteMedia: ['[data-testid="tweetPhoto"] img'],
   quoteVideo: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
   quoteVideoPoster: ['video[poster]'],
@@ -136,6 +140,11 @@ export function selfOrDescendant<T extends Element = Element>(el: Element, key: 
     if (hit) return hit;
   }
   return null;
+}
+
+/** アバターの入れ物の data-testid (UserAvatar-Container-<ハンドル>) から、ハンドルを取り出す。読めなければ undefined */
+export function handleFromAvatarTestId(el: Element): string | undefined {
+  return el.getAttribute('data-testid')?.match(/^UserAvatar-Container-([A-Za-z0-9_]+)$/)?.[1];
 }
 
 /** 1 件以上見つかった最初の候補の全要素 */

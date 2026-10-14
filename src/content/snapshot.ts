@@ -1,7 +1,7 @@
 import type { QuoteSnapshot, Snapshot } from '../shared/models';
 import type { FillView } from '../shared/storage';
 import { mergeSegments, safeHref, type Segment } from '../shared/segments';
-import { isTranslatedQuoteText, findQuote, ownPostLink, queryAllFirst, queryAllInQuote, queryAllOwn, queryFirst, queryFirstInQuote, queryOwn } from '../shared/selectors';
+import { handleFromAvatarTestId, isTranslatedQuoteText, findQuote, ownPostLink, queryAllFirst, queryAllInQuote, queryAllOwn, queryFirst, queryFirstInQuote, queryOwn } from '../shared/selectors';
 
 /**
  * 本文の要素から、リンクを含む部品の並びを作る (v24)。リンクは URL / @メンション / #ハッシュタグ (本文中の <a>)。
@@ -88,7 +88,8 @@ function extractQuote(article: Element): QuoteSnapshot | undefined {
   if (!el) return undefined;
   const name = queryFirstInQuote(el, 'userName')?.el;
   const author = (name ? queryFirstInQuote(name, 'nameText')?.el.textContent?.trim() : '') ?? '';
-  const avatarHandle = queryFirstInQuote(el, 'quoteAvatarHandle')?.el.getAttribute('data-testid')?.match(/^UserAvatar-Container-([A-Za-z0-9_]+)$/)?.[1];
+  const avatarContainer = queryFirstInQuote(el, 'quoteAvatarHandle')?.el;
+  const avatarHandle = avatarContainer ? handleFromAvatarTestId(avatarContainer) : undefined;
   const visibleHandle = name?.textContent?.match(/@([A-Za-z0-9_]+)/)?.[1];
   const handle = avatarHandle || visibleHandle;
   const textEl = queryFirstInQuote(el, 'tweetText')?.el;
