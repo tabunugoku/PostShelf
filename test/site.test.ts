@@ -12,6 +12,15 @@ function page(beforeParse?: (window: Window & typeof globalThis) => void) {
   return new JSDOM(html, { url: 'https://tabunugoku.github.io/PostShelf/', runScripts: 'dangerously', beforeParse });
 }
 
+/** ボタンの押された状態を、data 属性の値ごとに返す */
+function pressed(d: Document, selector: string, attribute: string) {
+  const buttons = [...d.querySelectorAll(selector)];
+  return Object.fromEntries(buttons.map(b => [b.getAttribute(attribute), b.getAttribute('aria-pressed')]));
+}
+
+/** 約束の後始末 (then / catch) を走らせる */
+const settle = () => new Promise(resolve => setTimeout(resolve, 0));
+
 describe('紹介サイト', () => {
   it('pairs Japanese copy with English copy', () => {
     const dom = page();
@@ -21,42 +30,130 @@ describe('紹介サイト', () => {
     dom.window.close();
   });
 
-  it('has no external scripts or stylesheets', () => {
+  it('loads no external scripts, and only Google Fonts as an external stylesheet', () => {
     const dom = page();
-    expect(dom.window.document.querySelectorAll('script[src],link[rel="stylesheet"]')).toHaveLength(0);
+    const d = dom.window.document;
+    expect(d.querySelectorAll('script[src]')).toHaveLength(0);
+    const sheets = [...d.querySelectorAll('link[rel="stylesheet"]')].map(l => new URL(l.getAttribute('href')!).host);
+    expect(sheets).toEqual(['fonts.googleapis.com']);
     dom.window.close();
   });
 
-  it('has two language buttons and updates their pressed state and aria labels', () => {
+  it('links each header item to an existing section', () => {
     const dom = page();
     const d = dom.window.document;
-    expect(d.querySelectorAll('.lang button[aria-pressed]')).toHaveLength(2);
-    (d.getElementById('l-ja') as HTMLButtonElement).click();
+    const links = d.querySelectorAll('header a[href^="#"]');
+    expect(links.length).toBeGreaterThanOrEqual(5);
+    for (const link of links) {
+      const target = link.getAttribute('href')!;
+      expect(d.querySelector(target), target).not.toBeNull();
+    }
+    dom.window.close();
+  });
+
+  it('follows the browser language when nothing is saved', () => {
+    const en = page();
+    expect(en.window.document.documentElement.lang).toBe('en');
+    expect(pressed(en.window.document, '#langseg button', 'data-l')).toEqual({ en: 'true', ja: 'false' });
+    en.window.close();
+    const ja = page(w => Object.defineProperty(w.navigator, 'language', { value: 'ja-JP' }));
+    expect(ja.window.document.documentElement.lang).toBe('ja');
+    expect(ja.window.document.title).toContain('フォルダに整理する');
+    ja.window.close();
+  });
+
+  it('switches the language, saves it and updates the title and pressed state', () => {
+    const dom = page();
+    const d = dom.window.document;
+    d.querySelector<HTMLButtonElement>('#langseg button[data-l="ja"]')!.click();
     expect(d.documentElement.lang).toBe('ja');
-    expect(d.getElementById('l-ja')?.getAttribute('aria-pressed')).toBe('true');
-    expect(d.querySelector('.github')?.getAttribute('aria-label')).toContain('GitHub で');
-    (d.getElementById('l-en') as HTMLButtonElement).click();
-    expect(d.getElementById('l-en')?.getAttribute('aria-pressed')).toBe('true');
-    expect(d.getElementById('l-ja')?.getAttribute('aria-pressed')).toBe('false');
+    expect(pressed(d, '#langseg button', 'data-l')).toEqual({ en: 'false', ja: 'true' });
+    expect(dom.window.localStorage.getItem('ps-lang')).toBe('ja');
+    expect(d.querySelector('meta[property="og:locale"]')?.getAttribute('content')).toBe('ja_JP');
+    d.querySelector<HTMLButtonElement>('#langseg button[data-l="en"]')!.click();
+    expect(d.documentElement.lang).toBe('en');
+    expect(d.title).toContain('Sort your X bookmarks');
     dom.window.close();
   });
 
-  it('offers compact header controls and five reachable section tabs', () => {
+  it('prefers the saved language over the browser language', () => {
+    const dom = page(w => w.localStorage.setItem('ps-lang', 'ja'));
+    expect(dom.window.document.documentElement.lang).toBe('ja');
+    dom.window.close();
+  });
+
+  it('starts with the automatic theme and switches between light, auto and dark', () => {
     const dom = page();
+    const d = dom.window.document, root = d.documentElement;
+    expect(root.hasAttribute('data-theme')).toBe(false);
+    expect(pressed(d, '#theme button', 'data-t')).toEqual({ light: 'false', auto: 'true', dark: 'false' });
+    d.querySelector<HTMLButtonElement>('#theme button[data-t="dark"]')!.click();
+    expect(root.getAttribute('data-theme')).toBe('dark');
+    expect(dom.window.localStorage.getItem('ps-theme')).toBe('dark');
+    expect(pressed(d, '#theme button', 'data-t')).toEqual({ light: 'false', auto: 'false', dark: 'true' });
+    // 自動に戻すと、属性も保存も外して OS の設定に従う
+    d.querySelector<HTMLButtonElement>('#theme button[data-t="auto"]')!.click();
+    expect(root.hasAttribute('data-theme')).toBe(false);
+    expect(dom.window.localStorage.getItem('ps-theme')).toBeNull();
+    dom.window.close();
+  });
+
+  it('applies the saved theme on load', () => {
+    const dom = page(w => w.localStorage.setItem('ps-theme', 'light'));
     const d = dom.window.document;
-    expect(d.querySelector('#l-en .lang-short')?.textContent).toBe('EN');
-    expect(d.querySelector('.github')?.getAttribute('data-aria-en')).toBeTruthy();
-    const tabs = d.querySelectorAll('.mobile-tabs a');
-    expect(tabs).toHaveLength(5);
-    for (const tab of tabs) expect(d.querySelector(tab.getAttribute('href')!)).not.toBeNull();
+    expect(d.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(pressed(d, '#theme button', 'data-t')).toEqual({ light: 'true', auto: 'false', dark: 'false' });
+    dom.window.close();
+  });
+
+  it('still works when storage throws', () => {
+    const dom = page(w => {
+      Object.defineProperty(w, 'localStorage', { get() { throw new Error('blocked'); } });
+    });
+    const d = dom.window.document;
+    expect(d.documentElement.lang).toBe('en');
+    d.querySelector<HTMLButtonElement>('#theme button[data-t="dark"]')!.click();
+    expect(d.documentElement.getAttribute('data-theme')).toBe('dark');
     dom.window.close();
   });
 
   it('uses only sample account handles in the demo', () => {
     const dom = page();
     const handles = dom.window.document.querySelector('.demo')!.textContent!.match(/@[a-zA-Z0-9_]+/g)!;
-    expect(handles).toHaveLength(3);
+    expect(handles.length).toBeGreaterThan(0);
     for (const handle of handles) expect(handle).toMatch(/^@sample_/);
+    dom.window.close();
+  });
+
+  it('opens the folder menu in the demo and closes it with Escape', () => {
+    const dom = page();
+    const d = dom.window.document;
+    const button = d.getElementById('bm') as HTMLButtonElement, menu = d.getElementById('pop')!;
+    button.click();
+    expect(menu.classList.contains('open')).toBe(true);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    d.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(menu.classList.contains('open')).toBe(false);
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    dom.window.close();
+  });
+
+  it('reflects a chosen folder in the demo chips and count, in the selected language', () => {
+    const dom = page();
+    const d = dom.window.document;
+    const box = d.querySelector<HTMLInputElement>('#pop input[data-f="read"]')!;
+    const count = () => d.querySelector('#mgr li[data-f="read"] b')!.textContent;
+    expect(count()).toBe('2');
+    box.click();
+    expect(count()).toBe('3');
+    expect(d.getElementById('chips')!.textContent).toBe('Read later');
+    expect(d.getElementById('bm')!.classList.contains('on')).toBe(true);
+    d.querySelector<HTMLButtonElement>('#langseg button[data-l="ja"]')!.click();
+    expect(d.getElementById('chips')!.textContent).toBe('あとで読む');
+    box.click();
+    expect(count()).toBe('2');
+    expect(d.getElementById('chips')!.textContent).toBe('');
+    expect(d.getElementById('bm')!.classList.contains('on')).toBe(false);
     dom.window.close();
   });
 
@@ -67,47 +164,37 @@ describe('紹介サイト', () => {
     dom.window.close();
   });
 
-  it('labels all 30 comparison values, using the selected language from the column headings', () => {
-    const dom = page(), d = dom.window.document;
-    const cells = d.querySelectorAll('#compare td');
-    expect(cells).toHaveLength(30);
-    for (const lang of ['ja', 'en']) {
-      d.querySelector<HTMLButtonElement>(`#l-${lang}`)!.click();
-      const headings = d.querySelectorAll('#compare thead th');
-      for (const row of d.querySelectorAll('#compare tbody tr')) {
-        [...row.querySelectorAll('td')].forEach((cell, i) => {
-          expect(cell.hasAttribute('data-label')).toBe(true);
-          const heading = headings[i + 1];
-          expect(cell.getAttribute('data-label')).toBe((heading.querySelector(`.${lang}`) ?? heading).textContent!.trim());
-        });
-      }
+  it('compares three kinds of tools in every row, with PostShelf first', () => {
+    const dom = page();
+    const d = dom.window.document;
+    expect(d.querySelectorAll('#compare thead th')).toHaveLength(4);
+    const rows = d.querySelectorAll('#compare tbody tr');
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      const cells = row.querySelectorAll('td');
+      expect(cells).toHaveLength(3);
+      expect(cells[0].classList.contains('me')).toBe(true);
+      expect(row.querySelector('th[scope="row"]')).not.toBeNull();
     }
     dom.window.close();
   });
 
-  it('expands and collapses six comparison items without duplicating any values', () => {
-    const dom = page(), d = dom.window.document;
-    const section = d.getElementById('compare')!, button = d.querySelector<HTMLButtonElement>('.compare-toggle')!;
-    expect(button.getAttribute('aria-expanded')).toBe('false');
-    expect(section.hasAttribute('data-collapsible')).toBe(true);
-    expect(section.hasAttribute('data-expanded')).toBe(false);
-    expect(button.getAttribute('aria-controls')).toBe(d.querySelector('tbody')?.id);
-    const values = [...section.querySelectorAll('td')].map(c => c.textContent);
+  it('folds the smaller features behind a button that opens them', () => {
+    const dom = page();
+    const d = dom.window.document;
+    const features = d.getElementById('featmore')!, button = d.getElementById('morefeat') as HTMLButtonElement;
+    expect(features.classList.contains('fold')).toBe(true);
+    expect(button.hidden).toBe(false);
     button.click();
+    expect(features.classList.contains('fold')).toBe(false);
     expect(button.getAttribute('aria-expanded')).toBe('true');
-    expect(section.hasAttribute('data-expanded')).toBe(true);
-    expect(button.querySelector<HTMLElement>('.less-label')?.hidden).toBe(false);
-    button.click();
-    expect(button.getAttribute('aria-expanded')).toBe('false');
-    expect(section.hasAttribute('data-expanded')).toBe(false);
-    expect(button.querySelector<HTMLElement>('.more-label')?.hidden).toBe(false);
-    expect([...section.querySelectorAll('td')].map(c => c.textContent)).toEqual(values);
+    expect(button.hidden).toBe(true);
     dom.window.close();
   });
 
   it('hides sharing when neither browser API is available', () => {
     const dom = page();
-    expect(dom.window.document.querySelector<HTMLButtonElement>('#share-link')?.hidden).toBe(true);
+    expect(dom.window.document.querySelector<HTMLButtonElement>('#share')?.hidden).toBe(true);
     dom.window.close();
   });
 
@@ -117,13 +204,12 @@ describe('紹介サイト', () => {
       Object.defineProperty(w.navigator, 'share', { value: share });
       Object.defineProperty(w.navigator, 'clipboard', { value: { writeText } });
     });
-    const button = dom.window.document.querySelector<HTMLButtonElement>('#share-link')!;
+    const button = dom.window.document.querySelector<HTMLButtonElement>('#share')!;
     expect(button.hidden).toBe(false);
     button.click();
-    await vi.waitFor(() => expect(button.disabled).toBe(false));
+    await settle();
     expect(share).toHaveBeenCalledWith({ url: dom.window.location.href });
     expect(writeText).not.toHaveBeenCalled();
-    expect(button.disabled).toBe(false);
     dom.window.close();
   });
 
@@ -132,19 +218,22 @@ describe('紹介サイト', () => {
     let restore: (() => void) | undefined;
     const dom = page(w => {
       Object.defineProperty(w.navigator, 'clipboard', { value: { writeText } });
-      w.setTimeout = ((callback: () => void) => { restore = callback; return 1; }) as typeof w.setTimeout;
+      w.setTimeout = ((callback: () => void) => {
+        restore = callback;
+        return 1;
+      }) as typeof w.setTimeout;
     });
     const d = dom.window.document;
-    d.querySelector<HTMLButtonElement>('#share-link')!.click();
-    await vi.waitFor(() => expect(d.querySelector<HTMLElement>('.share-copied')?.hidden).toBe(false));
+    const ready = d.querySelector<HTMLElement>('#share .s1')!, copied = d.querySelector<HTMLElement>('#share .s2')!;
+    d.querySelector<HTMLButtonElement>('#share')!.click();
+    await vi.waitFor(() => expect(copied.hidden).toBe(false));
     expect(writeText).toHaveBeenCalledWith(dom.window.location.href);
-    expect(d.querySelector<HTMLElement>('.share-copied')?.hidden).toBe(false);
-    expect(d.querySelector<HTMLElement>('.share-ready')?.hidden).toBe(true);
-    expect(d.querySelector('.share-copied .ja')?.textContent).toBe('コピーしました');
-    expect(d.querySelector('.share-copied .en')?.textContent).toBe('Copied');
+    expect(ready.hidden).toBe(true);
+    expect(copied.querySelector('.ja')?.textContent).toBe('コピーしました');
+    expect(copied.querySelector('.en')?.textContent).toBe('Copied');
     restore!();
-    expect(d.querySelector<HTMLElement>('.share-copied')?.hidden).toBe(true);
-    expect(d.querySelector<HTMLElement>('.share-ready')?.hidden).toBe(false);
+    expect(copied.hidden).toBe(true);
+    expect(ready.hidden).toBe(false);
     dom.window.close();
   });
 
@@ -153,11 +242,22 @@ describe('紹介サイト', () => {
     const dom = page(w => {
       Object.defineProperty(w.navigator, api, { value: api === 'share' ? reject : { writeText: reject } });
     });
-    const d = dom.window.document, button = d.querySelector<HTMLButtonElement>('#share-link')!;
-    button.click();
-    await vi.waitFor(() => expect(button.disabled).toBe(false));
-    expect(button.disabled).toBe(false);
-    expect(d.querySelector<HTMLElement>('.share-copied')?.hidden).toBe(true);
+    const d = dom.window.document;
+    d.querySelector<HTMLButtonElement>('#share')!.click();
+    await settle();
+    expect(reject).toHaveBeenCalled();
+    expect(d.querySelector<HTMLElement>('#share .s2')?.hidden).toBe(true);
     dom.window.close();
+  });
+
+  it('copies chrome://extensions with the copy button, and hides it without a clipboard', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const dom = page(w => Object.defineProperty(w.navigator, 'clipboard', { value: { writeText } }));
+    dom.window.document.querySelector<HTMLButtonElement>('#copy')!.click();
+    expect(writeText).toHaveBeenCalledWith('chrome://extensions');
+    dom.window.close();
+    const without = page();
+    expect(without.window.document.querySelector<HTMLButtonElement>('#copy')?.hidden).toBe(true);
+    without.window.close();
   });
 });
