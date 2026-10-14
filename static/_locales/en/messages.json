@@ -1680,5 +1680,37 @@
   "triageKeyOrder": {"message":"Key order"},
   "triageKeyOrderHint": {"message":"Drag to reorder."},
   "showInAncestorsLabel": {"message":"Also show in parent folders"},
-  "showInAncestorsDesc": {"message":"When off, a post appears only in its lowest folder. Saved data is not changed. A post placed directly in both a parent folder and its child appears only in the child."}
+  "showInAncestorsDesc": {"message":"When off, a post appears only in its lowest folder. Saved data is not changed. A post placed directly in both a parent folder and its child appears only in the child."},
+  "demoSummary": {"message":"Try how nested folders work"},
+  "demoNote": {"message":"Try folder actions on one sample post and see how they change where it belongs and where it shows. Your saved data doesn't change."},
+  "demoAncestorsToggle": {"message":"Also show in parent folders (this sample only)"},
+  "demoTreeHeading": {"message":"Folders (right: is the post listed here?)"},
+  "demoStoredHeading": {"message":"Saved folders (ancestors included)"},
+  "demoShownHeading": {"message":"Folders shown on the post"},
+  "demoListed": {"message":"Listed"},
+  "demoMemberHidden": {"message":"In folder, not listed"},
+  "demoDeleted": {
+    "message": "$NAME$ (deleted)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "C"
+      }
+    }
+  },
+  "demoOpSave": {"message":"Save to grandchild G"},
+  "demoOpAdd": {"message":"Also add to B"},
+  "demoOpUncheckChild": {"message":"Uncheck child C"},
+  "demoOpUncheckParent": {"message":"Uncheck parent A"},
+  "demoOpMove": {"message":"Move C under B"},
+  "demoOpDelete": {"message":"Delete folder C"},
+  "demoOpReset": {"message":"Start over"},
+  "demoStart": {"message":"Start with \"Save to grandchild G\"."},
+  "demoResSave": {"message":"Choosing G also saves the post to its ancestors C and A. Only G, the lowest folder, is shown on the post."},
+  "demoResAdd": {"message":"Adding B keeps G, C and A. The post shows G and B."},
+  "demoResUncheckChild": {"message":"Unchecking C also removes G under it. Parent A stays."},
+  "demoResUncheckParent": {"message":"Unchecking A also removes C and G under it. If nothing is left, the post goes to Unsorted (it isn't deleted)."},
+  "demoResMove": {"message":"Moving C (with G) under B takes its posts out of A and puts them in B. Posts that are also in another folder under A stay in A."},
+  "demoResDelete": {"message":"Deleting C also deletes G under it (G isn't moved up). The post stays in A."},
+  "demoNoFolder": {"message":"C is already deleted. Press \"Start over\" to bring it back."}
 }

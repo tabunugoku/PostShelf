@@ -1680,5 +1680,37 @@
   "triageKeyOrder": {"message":"番号の順"},
   "triageKeyOrderHint": {"message":"ドラッグで入れ替えます。"},
   "showInAncestorsLabel": {"message":"親フォルダにも表示する"},
-  "showInAncestorsDesc": {"message":"オフにすると、ポストは所属するいちばん下のフォルダだけに表示されます。保存データは変わりません。親と子の両方に直接入れたポストは、子にだけ表示されます。"}
+  "showInAncestorsDesc": {"message":"オフにすると、ポストは所属するいちばん下のフォルダだけに表示されます。保存データは変わりません。親と子の両方に直接入れたポストは、子にだけ表示されます。"},
+  "demoSummary": {"message":"親子のフォルダの動きを試す"},
+  "demoNote": {"message":"フォルダを操作すると、ポストの所属先と表示がどう変わるかを、架空のポスト 1 件で試せます。保存データは変わりません。"},
+  "demoAncestorsToggle": {"message":"親フォルダにも表示する（この図の中だけ）"},
+  "demoTreeHeading": {"message":"フォルダ（右: その一覧にこのポストが出るか）"},
+  "demoStoredHeading": {"message":"保存される所属先（祖先も入る）"},
+  "demoShownHeading": {"message":"ポストに表示される所属先"},
+  "demoListed": {"message":"出る"},
+  "demoMemberHidden": {"message":"所属しているが出ない"},
+  "demoDeleted": {
+    "message": "$NAME$（削除済み）",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "C"
+      }
+    }
+  },
+  "demoOpSave": {"message":"孫 G に保存"},
+  "demoOpAdd": {"message":"B にも入れる"},
+  "demoOpUncheckChild": {"message":"子 C を外す"},
+  "demoOpUncheckParent": {"message":"親 A を外す"},
+  "demoOpMove": {"message":"C を B の下へ移す"},
+  "demoOpDelete": {"message":"フォルダ C を削除"},
+  "demoOpReset": {"message":"最初に戻す"},
+  "demoStart": {"message":"「孫 G に保存」から試してください。"},
+  "demoResSave": {"message":"G を選ぶと、祖先の C と A にも保存されます。ポストに表示されるのは、いちばん下の G だけです。"},
+  "demoResAdd": {"message":"B に入れても、G・C・A への所属はそのままです。ポストに表示されるのは G と B です。"},
+  "demoResUncheckChild": {"message":"C を外すと、その下の G も外れます。親の A は残ります。"},
+  "demoResUncheckParent": {"message":"A を外すと、その下の C と G も外れます。何も残らなければ「未分類」に入ります（保存は消えません）。"},
+  "demoResMove": {"message":"C を（G ごと）B の下へ移すと、C と G に入っていたポストは A から外れ、B に入ります。A の下のほかのフォルダにも入っているポストは、A に残ります。"},
+  "demoResDelete": {"message":"C を削除すると、その下の G も消えます（G を上の段へ移すことはしません）。ポストの A への所属は残ります。"},
+  "demoNoFolder": {"message":"C はすでに削除されています。「最初に戻す」で元に戻せます。"}
 }

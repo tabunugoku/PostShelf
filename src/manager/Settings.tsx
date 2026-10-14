@@ -14,6 +14,7 @@ import { refreshCacheView } from './cacheView';
 import { DiagnosticsDialog } from './Diagnostics';
 import { HealthNotice } from './HealthNotice';
 import { TriageKeyTargets } from './TriageKeyTargets';
+import { FolderDemo } from './FolderDemo';
 import type { Folder } from '../shared/models';
 import { INSTALL_URL } from '../shared/links';
 import { currentVersion } from '../shared/version';
@@ -300,6 +301,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
             <span class="muted setting-desc">{t('showInAncestorsDesc')}</span>
           </span>
         </label>
+        {surface === 'tab' && <FolderDemo showInAncestors={showInAncestors} />}
       </fieldset>
       <fieldset class="setting-group">
         <legend>{t('triageStart')}</legend>

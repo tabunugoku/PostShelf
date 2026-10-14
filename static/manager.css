@@ -251,6 +251,18 @@ button:disabled{cursor:not-allowed}
 .cache-perm-note{margin:-4px 0 4px}
 .setting-group{border:1px solid var(--border);border-radius:12px;margin:12px 0;padding:4px 12px 8px}
 .setting-group legend{padding:0 6px;font-weight:700}
+.folder-demo{margin:4px 0 8px}
+.folder-demo summary{cursor:pointer;font-weight:700;padding:6px 0}
+.folder-demo-heading{margin:12px 0 4px;font-size:14px}
+.folder-demo-tree{list-style:none;margin:0;padding:0;border:1px solid var(--border);border-radius:8px}
+.folder-demo-tree li{display:flex;gap:8px;justify-content:space-between;align-items:baseline;padding:4px 10px;border-bottom:1px solid var(--border)}
+.folder-demo-tree li:last-child{border-bottom:0}
+.folder-demo-tree li.gone{color:var(--text-secondary)}
+.folder-demo-name{display:inline-flex;gap:6px;align-items:center;min-width:0;overflow-wrap:anywhere}
+.folder-demo-status{color:var(--text-secondary);text-align:right;overflow-wrap:anywhere}
+.folder-demo-chips,.folder-demo-ops{display:flex;gap:6px;flex-wrap:wrap}
+.folder-demo-chip{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:14px;background:var(--surface-2)}
+.folder-demo-ops{margin:12px 0 8px}
 .io{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 .file-btn{display:inline-flex;align-items:center;min-height:32px;padding:2px 12px;border:1px solid var(--border-strong);border-radius:var(--radius);cursor:pointer}
 .file-btn:hover{background:var(--fill-ghost-hover)}
