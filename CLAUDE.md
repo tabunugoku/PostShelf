@@ -22,21 +22,11 @@ v2〜v71 は実装済みで、バージョン 1.1.7 を公開済み (`docs/relea
 - サイドパネル: manager と同じコード (`src/manager`) の、狭い画面向けの表示。サイドバーの幅は変えられない
 
 ## 技術スタック
-- TypeScript + esbuild (バンドル) + Preact (manager/popup)
 - アイコンは Tabler Icons (outline) をローカル同梱 (CDN 禁止: MV3 の CSP とプライバシーのため)
 - テスト: vitest + jsdom。x.com の DOM は `test/fixtures/*.html` に固定して検証
 - 権限は最小: `storage`, `unlimitedStorage`, `sidePanel`、host `https://x.com/*` `https://twitter.com/*`。画像キャッシュ用の `https://pbs.twimg.com/*` は、利用者が許可したときだけ使う任意の権限。`tabs` の権限は使わない。リモートコード/外部通信は禁止 (`npm run release:check` が検査する)
 
-## データモデル (`src/shared/models.ts`)
-```ts
-Folder   { id: string; name: string; icon: string; color?: string; order: number; accountId?: string; parentId?: string }  // accountId: 保存済みのフォルダには必ず入る
-Account  { id: string; handle: string; displayName?: string; avatar?: string; lastSeenAt: number }  // v9: id = 小文字のハンドル
-Bookmark { accountId: string; tweetId: string; folderIds: string[]; savedAt: number;  // v9: 保存キーは accountId:tweetId
-           snapshot: { text: string; author: string; handle: string; avatar?: string;
-                       media: string[]; createdAt?: string; url: string } }
-```
-`snapshot` の省略できる項目に `quote` (表示されていた引用元)、`translated` (翻訳済みの印、true のみ)、`hasVideo` / `hasLink` / `videoPoster`、`truncated` (X がたたんでいた印)、`segments` (リンクを含む本文の部品) がある。全項目は `src/shared/models.ts` と `docs/DATA_MODEL.md`。
-
+## データモデル (`src/shared/models.ts`、`docs/DATA_MODEL.md`)
 保存は、役割ごとに 1 か所に集約する。他のコードは直接 `chrome.storage` を触らない。
 - フォルダ・ブックマーク・アカウント: `src/shared/storage.ts` (`chrome.storage.local`)
 - 設定 (端末ごと。ツリーの開閉、サイドバーの幅、数字キーの対象を含む): `src/shared/settings.ts`
@@ -76,13 +66,6 @@ Codex・クラウドのセッション・Claude Code のどれが書いても、
 
 ## リリース
 バージョンは次の場所を同時に変える (manifest と package.json の食い違いは `npm run release:check` が、サイトの表示と zip の名前は `test/release.test.ts` が検出する): `package.json`、`package-lock.json` (2 か所)、`static/manifest.json`、`site/index.html` (バージョンの表示と zip の名前 2 か所)、`test/release.test.ts`、この文書の「現在のタスク」。リリースノートは `docs/releases/vX.Y.Z.md`。README.md と同じく、英語を先に置き、日本語は末尾の `<details><summary>日本語 (Japanese)</summary>` に折りたたむ。原文は日本語で書き、英語はその訳にする (英語だけを書き換えない。直すときは日本語を直してから訳し直す)。節は、英語が `## Added`・`## Fixed`・`## Install / update`、日本語が `## 追加`・`## 修正`・`## インストール・更新`。画面の名前は、英語では `static/_locales/en` の文言、日本語では `ja` の文言に合わせる。main へマージしたあと、注釈つきタグ `vX.Y.Z` を打つと `.github/workflows/release.yml` が動く。拡張 ID は `static/manifest.json` の `key` で固定しているので、変えない。
-
-## コマンド
-- `npm install`
-- `npm run build` → `dist/` に出力 (`chrome://extensions` で「パッケージ化されていない拡張機能を読み込む」)
-- `npm test`
-- `npm run typecheck`
-- `npm run package` (配布用の zip)、`npm run release:check` (権限・ロケール・バージョン・リモートコードの検査)
 
 ## クラウド環境での注意
 実ブラウザでの x.com 動作確認はできない。ローカルに Node が無いこともある。fixture テストとビルド成功 (CI の結果) で担保し、実機確認項目は `docs/MANUAL_TEST.md` にチェックリストとして残す (ユーザーが後で実施)。
