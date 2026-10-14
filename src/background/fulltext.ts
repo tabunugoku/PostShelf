@@ -14,7 +14,17 @@
 import type { Bookmark } from '../shared/models';
 import type { Segment } from '../shared/segments';
 import {
-  clearLegacyFullTextTab, fullTextPlan, getCollectRun, getFullTextTab, getFullTextTries, getFullTextRun, getSettings, recordFullTextTry, saveFullTextRun, setFullTextTab,
+  clearLegacyFullTextTab,
+  fullTextPlan,
+  getLegacyFullTextTab,
+  getCollectRun,
+  getFullTextTab,
+  getFullTextTries,
+  getFullTextRun,
+  getSettings,
+  recordFullTextTry,
+  saveFullTextRun,
+  setFullTextTab,
   type FullTextKind, type FullTextRun, type FullTextStop, type FullTextPlan,
 } from '../shared/settings';
 import { fillMissing, getBookmarkOf, listAllTruncated, refreshFullText, type FillView } from '../shared/storage';
@@ -378,8 +388,6 @@ export class FullTextQueue {
 
 /** 起動時: 前回、閉じ忘れた裏のタブがあれば閉じる。動いていた記録 (running) が残っていれば止まった扱いにする */
 export async function cleanupAtStartup(d: FullTextDeps = defaultDeps()): Promise<void> {
-  // 旧版の記録 (storage.local) は、再起動をまたぐとタブ ID が別のタブを指しうるので、閉じずに消すだけ
-  await clearLegacyFullTextTab().catch(() => {});
   const ids = await getFullTextTab().catch(() => []);
   await Promise.all(ids.map(async id => {
     await d.closeTab(id);
@@ -387,6 +395,38 @@ export async function cleanupAtStartup(d: FullTextDeps = defaultDeps()): Promise
   }));
   const run = await getFullTextRun().catch(() => null);
   if (run?.running) await d.saveRun({ ...run, running: false, updatedAt: d.now() }).catch(() => {});
+}
+
+/** 全文の取得で開くポストのページ (/<ハンドル>/status/<数字>) */
+const POST_PAGE = /^https:\/\/(?:x|twitter)\.com\/[^/?#]+\/status\/\d+(?:[/?#]|$)/;
+
+/** 旧版の記録のタブを読み、閉じる。テストで差し替える */
+export interface LegacyTabs {
+  get(id: number): Promise<{ url?: string; active?: boolean }>;
+  close(id: number): Promise<void>;
+}
+const chromeTabs: LegacyTabs = {
+  get: (id) => chrome.tabs.get(id),
+  close: (id) => chrome.tabs.remove(id),
+};
+
+/**
+ * 拡張の更新のとき: 旧版 (storage.local に記録を残していた版) が開いたまま残した裏のタブを閉じ、記録を消す。
+ * 更新ではブラウザが再起動しないので、記録のタブ ID はまだ同じタブを指している可能性が高いが、別のタブを指している場合もある。
+ * そのため、ポストのページで、いま見ていない (active でない) タブだけ閉じる。読めない・合わないタブは閉じない (tabs の権限は使わない。
+ * url は host 権限の範囲で読める想定で、実機未確認。読めなければ閉じない側に倒れる)
+ */
+export async function cleanupLegacyTabs(tabs: LegacyTabs = chromeTabs): Promise<void> {
+  const ids = await getLegacyFullTextTab().catch(() => []);
+  for (const id of ids) {
+    try {
+      const tab = await tabs.get(id);
+      if (!tab.active && typeof tab.url === 'string' && POST_PAGE.test(tab.url)) await tabs.close(id);
+    } catch {
+      // タブがもう無い・読めない
+    }
+  }
+  await clearLegacyFullTextTab().catch(() => {});
 }
 
 /** 手動 (「いま取得する」): 現在のアカウントの、全文を取れていないポストを最大 50 件 */

@@ -585,16 +585,24 @@ export function onFullTextRunChanged(cb: () => void): () => void {
   return () => chrome.storage.onChanged?.removeListener(listener as never);
 }
 
+/** 記録の値から、タブ ID (0 以上の整数) だけを重複なしで取り出す。数値 1 つ (旧形式) も受ける。それ以外は空 */
+function tabIdsOf(value: unknown): number[] {
+  const ids = Array.isArray(value) ? value : [value];
+  return [...new Set(ids.filter((id): id is number => typeof id === 'number' && Number.isInteger(id) && id >= 0))];
+}
+
 /**
  * 取得のために開いた裏のタブの記録 (閉じ忘れを、service worker の再起動時に閉じるため)。
  * タブ ID は 1 回のブラウザの起動の中でだけ一意なので、終了で消える storage.session に置く。
  */
 export async function getFullTextTab(): Promise<number[]> {
-  const v = (await chrome.storage.session.get(FT_TAB_KEY))[FT_TAB_KEY];
-  const ids = Array.isArray(v) ? v : [];
-  return [...new Set(ids.filter((id): id is number => typeof id === 'number' && Number.isInteger(id) && id >= 0))];
+  return tabIdsOf((await chrome.storage.session.get(FT_TAB_KEY))[FT_TAB_KEY]);
 }
-/** 旧版が storage.local に残した記録を消す (ブラウザの再起動をまたいだ ID は別のタブを指しうるので、閉じずに捨てる) */
+/** 旧版が storage.local に残した、裏のタブの記録。更新のときだけ読む。v1.1.6 より前の版は数値 1 つで残した */
+export async function getLegacyFullTextTab(): Promise<number[]> {
+  return tabIdsOf((await chrome.storage.local.get(FT_TAB_KEY))[FT_TAB_KEY]);
+}
+/** 旧版の記録を消す */
 export async function clearLegacyFullTextTab(): Promise<void> {
   await chrome.storage.local.remove(FT_TAB_KEY);
 }

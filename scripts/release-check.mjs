@@ -32,7 +32,10 @@ const results = [
   ['紹介サイト (site/index.html) の版と zip の名前が現在の version と同じ', siteErrors],
   ['リリースノート (docs/releases/v<version>.md) に「追加」と「修正」の節がある', notesErrors],
   ['version が package.json と一致', checkVersion(manifest, pkg)],
-  ['permissions / host_permissions / 任意の権限が現在の一覧と同じ', [...checkPermissions(manifest), ...checkPermissions(distManifest)]],
+  [
+    'permissions / host_permissions / 任意の権限が現在の一覧と同じ',
+    [...checkPermissions(manifest), ...checkPermissions(distManifest)],
+  ],
   ['8 言語の messages.json のキーとプレースホルダーが一致', checkLocales(locales)],
   ['dist に外部スクリプト URL / eval / new Function / 許可外ホストへの通信が無い', checkNoRemoteCode('dist')],
   ['manifest が指すファイルがすべて zip に入っている', checkManifestFilesInZip(manifest, listZip(readFileSync(zipPath)))],

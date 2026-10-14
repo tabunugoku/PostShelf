@@ -381,6 +381,59 @@ describe('folder back end in the UI', () => {
   });
 });
 
+describe('a failed settings save does not lose images', () => {
+  /** 設定の保存 (chrome.storage.local.set) だけを失敗させる */
+  const failSaves = () => {
+    vi.spyOn((globalThis as any).chrome.storage.local, 'set').mockRejectedValue(new Error('quota'));
+  };
+
+  it('a failed save of the lowered maximum evicts nothing', async () => {
+    await updateImageCache({ enabled: true, maxBytes: 1024 * MB });
+    const real = IdbStore.prototype.list;
+    vi.spyOn(IdbStore.prototype, 'list').mockImplementation(async function (this: IdbStore) {
+      return (await real.call(this)).map((m) => ({ ...m, size: 300 * MB }));
+    });
+    const removed: string[] = [];
+    vi.spyOn(IdbStore.prototype, 'removePost').mockImplementation(async (id: string) => void removed.push(id));
+    const s = new IdbStore();
+    await s.put('1', '1', blob(10), { postSavedAt: 1 });
+    await s.put('2', '1', blob(10), { postSavedAt: 2 });
+    await mount();
+    await openSettings();
+    const sel = $<HTMLSelectElement>('.image-cache select');
+    await act(() => {
+      sel.value = String(500 * MB);
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await flush();
+    failSaves();
+    await click(dlgBtn('下げて整理する'));
+    await flush(50);
+    expect(removed).toEqual([]);
+    expect((await getSettings()).imageCache.maxBytes).toBe(1024 * MB);
+    vi.restoreAllMocks();
+  });
+
+  it('a failed save of the back end keeps the source images and the old setting', async () => {
+    const root = new FakeDir('chosen');
+    await prepareDirectory(root, 'r', async () => true);
+    await saveDirHandle(root);
+    await updateImageCache({ enabled: true });
+    const idb = new IdbStore();
+    await idb.put('1', '1', blob(10), { postSavedAt: 1 });
+    await mount();
+    await openSettings();
+    await click($$('.image-cache input[name=cacheBackend]')[1]);
+    failSaves();
+    await click(dlgBtn('移す'));
+    await flush(50);
+    expect((await idb.list()).length).toBe(1);
+    expect((await getSettings()).imageCache.backend).toBe('idb');
+    expect($$('[role=alertdialog]').length).toBe(0);
+    vi.restoreAllMocks();
+  });
+});
+
 describe('bulk caching and deleting the cache in the UI', () => {
   beforeEach(async () => {
     await updateImageCache({ enabled: true });

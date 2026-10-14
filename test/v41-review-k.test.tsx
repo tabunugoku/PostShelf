@@ -10,20 +10,26 @@ import { t } from '../src/shared/strings';
 import { installChromeMock, installPanelMock } from './chrome-mock';
 
 const flush = () => act(() => new Promise<void>(r => setTimeout(r, 30)));
+// 片付けのあとに changed が再描画すると、jsdom が消えたあとで effect が走る
+let alive = true;
 let folders: Folder[], queue: Bookmark[], changed: ReturnType<typeof vi.fn>;
 const renderCurrent = () => render(<Triage queue={queue} live={new Set(queue.map(b => b.tweetId))}
   folders={folders} pickerFolders={folders} onChanged={changed} onClose={() => {}} />, document.querySelector('#app')!);
 beforeEach(async () => {
+  alive = true;
   installChromeMock(); installPanelMock(); storage.setAccountScope('unknown'); folders = [];
   for (let i = 1; i <= 10; i++) folders.push(await storage.createFolder({ name: 'Sample folder ' + i }));
   for (const id of ['111', '222']) await storage.setBookmarkFolders(id, [], {
     text: 'Sample post ' + id, author: 'Sample', handle: '@sample_user', media: [], url: 'https://x.com/sample_user/status/' + id,
   });
   queue = (await storage.listBookmarks()).sort((a, b) => a.tweetId.localeCompare(b.tweetId));
-  changed = vi.fn(async () => { folders = (await storage.listFolders()).filter(f => f.id !== ALL_FOLDER_ID && f.id !== INBOX_ID); renderCurrent(); });
+  changed = vi.fn(async () => {
+    folders = (await storage.listFolders()).filter(f => f.id !== ALL_FOLDER_ID && f.id !== INBOX_ID);
+    if (alive) await act(() => void renderCurrent());
+  });
   document.body.innerHTML = '<div id="app"></div>';
 });
-afterEach(async () => { await act(() => void render(null, document.querySelector('#app')!)); vi.restoreAllMocks(); });
+afterEach(async () => { alive = false; await act(() => void render(null, document.querySelector('#app')!)); vi.restoreAllMocks(); });
 const mount = async () => { await act(() => void renderCurrent()); await flush(); };
 const click = async (el: HTMLElement) => { await act(() => void el.click()); await flush(); };
 const key = async (key: string) => {

@@ -15,6 +15,7 @@ async function loadBackground(cleanup: () => Promise<void>) {
     AUTO_CAP: 30,
     MANUAL_CAP: 50,
     cleanupAtStartup: cleanup,
+    cleanupLegacyTabs: async () => {},
     manualItems: async () => [{ accountId: 'me', tweetId: '1' }],
     FullTextQueue: class { enqueue = enqueue; stop = stop; },
   }));

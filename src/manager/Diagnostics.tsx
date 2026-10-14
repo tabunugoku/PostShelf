@@ -55,10 +55,18 @@ export function DiagnosticsDialog(props: { onClose: () => void }) {
 
   return (
     <div class="overlay" onClick={props.onClose}>
-      <div class="dialog dialog-wide" role="dialog" aria-modal="true" aria-labelledby="diag-title" onClick={(e) => e.stopPropagation()}>
+      <div
+        class="dialog dialog-wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="diag-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 id="diag-title" class="dialog-title">{t('diagTitle')}</h2>
         <p class="diag-notice">{t('diagNotice')}</p>
-        <pre class="diag-pre" tabIndex={0} aria-label={t('diagTitle')}>{report ?? t(failed ? 'errorStorage' : 'diagPreparing')}</pre>
+        <pre class="diag-pre" tabIndex={0} aria-label={t('diagTitle')}>
+          {report ?? t(failed ? 'errorStorage' : 'diagPreparing')}
+        </pre>
         {state === 'copied' && <p class="muted" role="status">{t('diagCopied')}</p>}
         {state === 'failed' && <p class="error" role="alert">{t('diagCopyFail')}</p>}
         <div class="dialog-actions">

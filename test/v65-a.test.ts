@@ -20,12 +20,12 @@ it('storage.session に残った ID のタブは閉じる', async () => {
   expect(await getFullTextTab()).toEqual([]);
 });
 
-it('storage.local にだけ残った旧い ID は、閉じずに記録を消す', async () => {
+it('起動時の掃除は、storage.local の旧い記録に触れない', async () => {
   data.fullTextTab = [57];
   const { d, closed } = deps();
   await cleanupAtStartup(d);
   expect(closed).toEqual([]);
-  expect('fullTextTab' in data).toBe(false);
+  expect(data.fullTextTab).toEqual([57]);
 });
 
 it('setFullTextTab は storage.local に書かない', async () => {

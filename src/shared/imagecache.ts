@@ -381,11 +381,27 @@ export class DirStore implements ImageStore {
     // 先に消すと、書き込みに失敗したとき古い画像だけが無くなり、index のメタは古いまま残る
     const file = `${name}.${extFor(blob.type)}`;
     const stale: string[] = [];
-    for await (const [n, h] of post.entries()) if (h.kind === 'file' && n !== file && baseName(n) === name) stale.push(n);
+    for await (const [n, h] of post.entries()) {
+      if (h.kind === 'file' && n !== file && baseName(n) === name) stale.push(n);
+    }
     await writeFile(post, file, blob);
-    for (const n of stale) await post.removeEntry(n);
+    // 書いた画像と記録は正しいので、古いファイルを消せなくても put は失敗にしない。記録を先に確定させる
+    await this.index.set({
+      tweetId,
+      name,
+      size: blob.size,
+      type: blob.type,
+      savedAt: Date.now(),
+      postSavedAt: meta.postSavedAt ?? meta.post?.savedAt ?? Date.now(),
+    });
+    for (const n of stale) {
+      try {
+        await post.removeEntry(n);
+      } catch {
+        // 消せなかった古いファイルは残る。get は index の type の拡張子のファイルを優先する
+      }
+    }
     if (meta.post) await writeFile(post, 'post.json', JSON.stringify(postJson(meta.post), null, 2));
-    await this.index.set({ tweetId, name, size: blob.size, type: blob.type, savedAt: Date.now(), postSavedAt: meta.postSavedAt ?? meta.post?.savedAt ?? Date.now() });
   }
 
   async get(tweetId: string, name: string): Promise<Blob | null> {
@@ -394,8 +410,19 @@ export class DirStore implements ImageStore {
     const images = await tryGetDir(this.root, 'images');
     const post = images && (await tryGetDir(images, tweetId));
     if (!post) return null;
-    for await (const [n, h] of post.entries()) if (h.kind === 'file' && n !== 'post.json' && baseName(n) === name) return (h as FileHandleLike).getFile();
-    return null;
+    const found: [string, FileHandleLike][] = [];
+    for await (const [n, h] of post.entries()) {
+      if (h.kind === 'file' && n !== 'post.json' && baseName(n) === name) found.push([n, h as FileHandleLike]);
+    }
+    if (found.length > 1) {
+      // 古い拡張子のファイルが残っているとき (削除に失敗したときなど) は、index の type の拡張子のファイルを優先する。
+      // index が読めなければ、最初の 1 つ
+      const all = await this.index.all().catch(() => []);
+      const type = all.find((m) => m.tweetId === tweetId && m.name === name)?.type;
+      const wanted = type === undefined ? undefined : found.find(([n]) => n === `${name}.${extFor(type)}`);
+      if (wanted) return wanted[1].getFile();
+    }
+    return found.length ? found[0][1].getFile() : null;
   }
 
   async removePost(tweetId: string): Promise<void> {

@@ -171,6 +171,19 @@ describe('folder layout (docs: images/<ポストID>/N.ext, post.json, .postshelf
     expect(await readText(root.read(MARKER))).toBe('1');
   });
 
+  it('put succeeds, records the new type and get returns the new file even when the old extension cannot be removed', async () => {
+    const root = new FakeDir();
+    await prepareDirectory(root, 'r', async () => true);
+    const store = new DirStore(root, new MemoryIndex());
+    await store.put('7', '1', blob(10, 'image/jpeg'));
+    const post = await (await root.getDirectoryHandle('images')).getDirectoryHandle('7');
+    vi.spyOn(post, 'removeEntry').mockRejectedValue(new Error('locked'));
+    await store.put('7', '1', blob(20, 'image/png'));
+    expect(root.paths().filter((p) => p.startsWith('images/7/'))).toEqual(['images/7/1.jpg', 'images/7/1.png']);
+    expect((await store.list())[0]).toMatchObject({ type: 'image/png', size: 20 });
+    expect((await store.get('7', '1'))!.size).toBe(20);
+  });
+
   it('refuses to write into a folder without .postshelf', async () => {
     const root = new FakeDir('foreign');
     root.put('mine/doc.txt');
@@ -522,7 +535,7 @@ describe('save-time caching (background)', () => {
 });
 
 describe('switching the back end', () => {
-  it('migrateStore copies everything (with progress) and empties the source', async () => {
+  it('migrateStore copies everything (with progress) and leaves the source for the caller to clear', async () => {
     const from = new IdbStore();
     await from.put('1', '1', blob(10), { postSavedAt: 5 });
     await from.put('2', '1', blob(20), { postSavedAt: 6 });
@@ -534,7 +547,7 @@ describe('switching the back end', () => {
     expect(steps).toEqual(['0/2', '1/2', '2/2']);
     expect((await to.usage()).bytes).toBe(30);
     expect((await to.list()).find((m) => m.tweetId === '2')!.postSavedAt).toBe(6);
-    expect(await from.list()).toEqual([]);
+    expect((await from.list()).length).toBe(2);
   });
 
   it('openStore reports why a folder cannot be used (no folder / needs permission / ok)', async () => {

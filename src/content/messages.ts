@@ -67,7 +67,7 @@ export function handleMessage(msg: { type?: string; tweetId?: string; want?: boo
 
 /** 診断情報のテキスト。最初に見つかった article の骨格を含む (テキスト・URL・ユーザー名は含まない) */
 export async function buildLocalReport(): Promise<string> {
-  const article = queryAllFirst(document, 'tweet').els[0] ?? document.querySelector('article');
+  const article = queryAllFirst(document, 'tweet').els[0] ?? queryFirst(document, 'articleFallback')?.el;
   // health を読めなくても、分かる範囲 (バージョン等) の報告は作る (Diagnostics.tsx の makeReport と同じ)
   const health = getLocalHealth() ?? (await getHealth().catch(() => null));
   return buildReport({
