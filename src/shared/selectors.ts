@@ -47,6 +47,7 @@ export const CANDIDATES = {
   nestedQuote: ['[data-testid="nestedQuotePreview"]'],
   // 引用内の写真リンクからだけ、引用元の ID を読む (time は a に包まれない)。
   quotePhotoLink: ['a[href*="/status/"][href*="/photo/"]'],
+  // 引用内のアバターの入れ物。アカウント判定 (account.ts) でも同じ値を使う (data-testid にハンドルが入る)
   quoteAvatarHandle: ['[data-testid^="UserAvatar-Container-"]'],
   quoteMedia: ['[data-testid="tweetPhoto"] img'],
   quoteVideo: ['[data-testid="videoPlayer"], [data-testid="videoComponent"]', 'video'],
@@ -56,6 +57,11 @@ export const CANDIDATES = {
   bodyLink: ['a[href]'],
   avatar: ['[data-testid="Tweet-User-Avatar"] img', 'a[role="link"][href^="/"]:not([href*="/status/"]) img'],
   accountAvatar: ['img'],
+  // アカウント判定 (account.ts) 用。リンク全般 (href の有無は問わない) と、表示名を探すための span / div
+  anyLink: ['a'],
+  accountLabel: ['span,div'],
+  // 診断 (health.ts) 用: ポストへのリンクに包まれた time。tweet の容器が読めないときに、ポストらしい DOM かを見る
+  statusLinkTime: ['a[href*="/status/"] time'],
   media: ['[data-testid="tweetPhoto"] img', 'a[href*="/photo/"] img'],
   // 写真のリンクが先に出て img/src が後から入る場合の印 (実機未確認の推測)。
   photoLink: ['a[href*="/photo/"]'],
@@ -120,6 +126,16 @@ export function queryEveryCandidate<T extends Element = Element>(root: ParentNod
     if (el) out.push({ el, index });
   });
   return out;
+}
+
+/** el 自身、またはその子孫で、最初に見つかった候補の要素 (自身が一致すれば自身) */
+export function selfOrDescendant<T extends Element = Element>(el: Element, key: SelKey): T | null {
+  for (const selector of CANDIDATES[key]) {
+    if (el.matches(selector)) return el as unknown as T;
+    const hit = el.querySelector<T>(selector);
+    if (hit) return hit;
+  }
+  return null;
 }
 
 /** 1 件以上見つかった最初の候補の全要素 */
