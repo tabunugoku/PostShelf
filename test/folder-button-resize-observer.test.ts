@@ -3,10 +3,12 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 
 const observers: FakeResizeObserver[] = [];
+let notifyOnObserve = true;
 class FakeResizeObserver {
   targets = new Set<Element>();
   observe = vi.fn((el: Element) => {
     this.targets.add(el);
+    if (!notifyOnObserve) return;
     // 初回の通知も observe の呼び出し中には送らない。
     queueMicrotask(() => {
       if (this.targets.has(el)) this.fire(el);
@@ -16,11 +18,11 @@ class FakeResizeObserver {
   constructor(public cb: ResizeObserverCallback) { observers.push(this); }
   fire(el: Element) { this.cb([{ target: el } as ResizeObserverEntry], this as unknown as ResizeObserver); }
 }
-function article() {
+function article(bookmarkTag: 'button' | 'span' = 'button') {
   // 大きさ用の最小 fixture。丸の構造の想定は v35〜v37 の fixtures と同じ。
   const el = document.createElement('article');
   el.dataset.testid = 'tweet';
-  el.innerHTML = '<button data-testid="bookmark"><div><svg></svg></div></button>';
+  el.innerHTML = `<${bookmarkTag} data-testid="bookmark"><div><svg></svg></div></${bookmarkTag}>`;
   document.body.append(el);
   return el;
 }
@@ -28,6 +30,7 @@ beforeEach(() => {
   vi.resetModules();
   installChromeMock();
   observers.length = 0;
+  notifyOnObserve = true;
   vi.stubGlobal('ResizeObserver', FakeResizeObserver);
   document.body.innerHTML = '';
 });
@@ -111,32 +114,55 @@ it('reads X button geometry through shared selectors', async () => {
   expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['52px', '52px', '26px']);
 });
 
-it('挿入中は同期測定せず、最初の通知で 42px にする', async () => {
+it('最初の通知が無いインライン要素でも挿入直後に 42px・26px にする', async () => {
+  notifyOnObserve = false;
   const selectors = await import('../src/shared/selectors');
-  const read = vi.spyOn(selectors, 'bookmarkButtonGeometry')
-    .mockReturnValue({ iconHeight: 26, circleDiameter: 0 });
+  const read = vi.spyOn(selectors, 'bookmarkButtonGeometry');
   const { injectButtons } = await import('../src/content/buttons');
-  const el = article();
+  // 初回通知を受けないインライン要素を、最小 fixture で再現する。
+  const el = article('span');
+  vi.spyOn(el.querySelector('svg')!, 'getBoundingClientRect')
+    .mockReturnValue({ height: 26, width: 26 } as DOMRect);
   injectButtons();
+  const bm = el.querySelector<HTMLElement>('[data-testid="bookmark"]')!;
   const btn = el.querySelector<HTMLElement>('[data-postshelf-btn]')!;
-  expect(read).not.toHaveBeenCalled();
-  expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['34px', '34px', '19px']);
+  expect(observers[0].targets.has(bm)).toBe(true);
+  expect(read).toHaveBeenCalledExactlyOnceWith(bm);
+  expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['42px', '42px', '26px']);
   await Promise.resolve();
-  expect(read).toHaveBeenCalledExactlyOnceWith(el.querySelector('button'));
+  injectButtons();
+  expect(read).toHaveBeenCalledTimes(1);
   expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['42px', '42px', '26px']);
 });
 
-it('ResizeObserver が無いときは挿入中に同期で測る', async () => {
-  vi.stubGlobal('ResizeObserver', undefined);
-  const selectors = await import('../src/shared/selectors');
-  const read = vi.spyOn(selectors, 'bookmarkButtonGeometry')
-    .mockReturnValue({ iconHeight: 26, circleDiameter: 0 });
+it.each([true, false])('全件挿入して測定してから寸法を反映する (ResizeObserver: %s)', async (hasObserver) => {
+  notifyOnObserve = false;
+  if (!hasObserver) vi.stubGlobal('ResizeObserver', undefined);
   const { injectButtons } = await import('../src/content/buttons');
-  const el = article();
+  const articles = [article(), article()];
+  const events: string[] = [];
+  const insert = HTMLElement.prototype.insertAdjacentElement;
+  vi.spyOn(HTMLElement.prototype, 'insertAdjacentElement')
+    .mockImplementation(function (this: HTMLElement, position, element) {
+      const result = insert.call(this, position, element);
+      events.push('insert');
+      return result;
+    });
+  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+    events.push('read');
+    const buttons = document.querySelectorAll<HTMLElement>('[data-postshelf-btn]');
+    expect(buttons).toHaveLength(2);
+    // 最後の測定まで、新規ボタンの寸法を書き換えない。
+    expect([...buttons].map((btn) => [btn.style.height, btn.style.fontSize]))
+      .toEqual([['34px', '19px'], ['34px', '19px']]);
+    const size = this.tagName === 'svg' ? 26 : 0;
+    return { height: size, width: size } as DOMRect;
+  });
   injectButtons();
-  const btn = el.querySelector<HTMLElement>('[data-postshelf-btn]')!;
-  expect(read).toHaveBeenCalledExactlyOnceWith(el.querySelector('button'));
-  expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['42px', '42px', '26px']);
+  expect(events).toEqual(['insert', 'insert', 'read', 'read', 'read', 'read']);
+  const buttons = articles.map((el) => el.querySelector<HTMLElement>('[data-postshelf-btn]')!);
+  expect(buttons.map((btn) => [btn.style.width, btn.style.height, btn.style.fontSize]))
+    .toEqual([['42px', '42px', '26px'], ['42px', '42px', '26px']]);
 });
 
 it('通知内の全記事を測ってから寸法をまとめて反映する', async () => {
