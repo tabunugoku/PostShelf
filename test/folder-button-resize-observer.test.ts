@@ -1,11 +1,17 @@
-// 版: v38-c
+// 版: v38-c, v75
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 
 const observers: FakeResizeObserver[] = [];
 class FakeResizeObserver {
   targets = new Set<Element>();
-  observe = vi.fn((el: Element) => { this.targets.add(el); });
+  observe = vi.fn((el: Element) => {
+    this.targets.add(el);
+    // 初回の通知も observe の呼び出し中には送らない。
+    queueMicrotask(() => {
+      if (this.targets.has(el)) this.fire(el);
+    });
+  });
   unobserve = vi.fn((el: Element) => { this.targets.delete(el); });
   constructor(public cb: ResizeObserverCallback) { observers.push(this); }
   fire(el: Element) { this.cb([{ target: el } as ResizeObserverEntry], this as unknown as ResizeObserver); }
@@ -83,6 +89,7 @@ it('resizes the mapped button, unobserves immediately on mode changes, and handl
   applyButtonMode('separate');
   expect(observers).toHaveLength(1);
   expect(ro.targets.size).toBe(1);
+  await Promise.resolve();
   const replacementBtn = el.querySelector<HTMLElement>('[data-postshelf-btn]')!;
   replacementBtn.remove();
   height = 30;
@@ -102,4 +109,56 @@ it('reads X button geometry through shared selectors', async () => {
   sizeSeparateButton(bm, btn);
   expect(read).toHaveBeenCalledWith(bm);
   expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['52px', '52px', '26px']);
+});
+
+it('挿入中は同期測定せず、最初の通知で 42px にする', async () => {
+  const selectors = await import('../src/shared/selectors');
+  const read = vi.spyOn(selectors, 'bookmarkButtonGeometry')
+    .mockReturnValue({ iconHeight: 26, circleDiameter: 0 });
+  const { injectButtons } = await import('../src/content/buttons');
+  const el = article();
+  injectButtons();
+  const btn = el.querySelector<HTMLElement>('[data-postshelf-btn]')!;
+  expect(read).not.toHaveBeenCalled();
+  expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['34px', '34px', '19px']);
+  await Promise.resolve();
+  expect(read).toHaveBeenCalledExactlyOnceWith(el.querySelector('button'));
+  expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['42px', '42px', '26px']);
+});
+
+it('ResizeObserver が無いときは挿入中に同期で測る', async () => {
+  vi.stubGlobal('ResizeObserver', undefined);
+  const selectors = await import('../src/shared/selectors');
+  const read = vi.spyOn(selectors, 'bookmarkButtonGeometry')
+    .mockReturnValue({ iconHeight: 26, circleDiameter: 0 });
+  const { injectButtons } = await import('../src/content/buttons');
+  const el = article();
+  injectButtons();
+  const btn = el.querySelector<HTMLElement>('[data-postshelf-btn]')!;
+  expect(read).toHaveBeenCalledExactlyOnceWith(el.querySelector('button'));
+  expect([btn.style.width, btn.style.height, btn.style.fontSize]).toEqual(['42px', '42px', '26px']);
+});
+
+it('通知内の全記事を測ってから寸法をまとめて反映する', async () => {
+  const selectors = await import('../src/shared/selectors');
+  const read = vi.spyOn(selectors, 'bookmarkButtonGeometry')
+    .mockReturnValue({ iconHeight: 26, circleDiameter: 0 });
+  const { injectButtons } = await import('../src/content/buttons');
+  const articles = [article(), article()];
+  injectButtons();
+  await Promise.resolve();
+  const buttons = articles.map((el) => el.querySelector<HTMLElement>('[data-postshelf-btn]')!);
+  read.mockClear();
+  read.mockImplementation(() => {
+    expect(buttons.map((btn) => btn.style.height)).toEqual(['42px', '42px']);
+    return { iconHeight: 30, circleDiameter: 0 };
+  });
+  const ro = observers[0];
+  const entries = articles.map((el) => ({
+    target: el.querySelector('button')!,
+  } as unknown as ResizeObserverEntry));
+  ro.cb(entries, ro as unknown as ResizeObserver);
+  expect(read).toHaveBeenCalledTimes(2);
+  expect(buttons.map((btn) => [btn.style.width, btn.style.height, btn.style.fontSize]))
+    .toEqual([['46px', '46px', '30px'], ['46px', '46px', '30px']]);
 });
