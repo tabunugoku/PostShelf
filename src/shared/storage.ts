@@ -42,11 +42,12 @@ import {
   descendants,
   flattenFolders,
   normalizeFolderIds,
-  reparentedFolderIds,
+  reparentedFolderResolver,
   sanitizeParents,
   withAncestors,
+  withAncestorResolver,
   withoutDeletedFolders,
-  withoutDescendants,
+  withoutDescendantsResolver,
 } from './folderTree';
 import { isXImageUrl } from './media';
 import { assignOrder } from './ordering';
@@ -375,9 +376,10 @@ export async function folderDeletionImpact(id: string): Promise<{ folders: numbe
  */
 async function writeReparented(folders: Folder[], movedId: string, oldAncestorIds: string[]): Promise<void> {
   const all = await readAllFolders();
+  const resolveMemberships = reparentedFolderResolver(folders, movedId, oldAncestorIds);
   const map = await readMap();
   for (const [k, b] of Object.entries(map)) {
-    if (inScope(b)) map[k] = { ...b, folderIds: reparentedFolderIds(b.folderIds, folders, movedId, oldAncestorIds) };
+    if (inScope(b)) map[k] = { ...b, folderIds: resolveMemberships(b.folderIds) };
   }
   await chrome.storage.local.set({ [KEY_FOLDERS]: [...all.filter(f => !mine(f)), ...folders], [KEY_BOOKMARKS]: map });
 }
@@ -832,7 +834,8 @@ export type BookmarkUndo = Record<string, Bookmark | null>;
 
 function mutateBookmarks(
   tweetIds: string[],
-  fn: (b: Readonly<Bookmark>, folders: readonly Folder[]) => Bookmark | null,
+  fn: (b: Readonly<Bookmark>, withoutRemoved: (ids: readonly string[]) => string[]) => Bookmark | null,
+  removeIds: readonly string[] = [],
   atomicInbox = false,
 ): Promise<BookmarkUndo> {
   return serial(async () => {
@@ -840,6 +843,8 @@ function mutateBookmarks(
     const treeFolders = await readAllFolders();
     const mineFolders = treeFolders.filter(mine);
     const allFolders = atomicInbox ? treeFolders : undefined;
+    const includeAncestors = withAncestorResolver(mineFolders);
+    const withoutRemoved = withoutDescendantsResolver(removeIds, mineFolders);
     const apply = (map: BookmarkMap): BookmarkUndo => {
       const undo: BookmarkUndo = {};
       for (const tid of new Set(tweetIds)) {
@@ -847,8 +852,8 @@ function mutateBookmarks(
         const prev = map[k];
         if (!prev) continue;
         // fn は prev とその中身を変更せず、新しい所属を持つオブジェクトを返す。undo は変更前の参照を保つ。
-        let next = fn(prev, mineFolders);
-        if (next) next = { ...next, folderIds: withAncestors(next.folderIds, mineFolders) };
+        let next = fn(prev, withoutRemoved);
+        if (next) next = { ...next, folderIds: includeAncestors(next.folderIds) };
         // 本文・画像を文字列化しない。所属以外を変える fn も、別の値・snapshot の参照なら変更として扱う。
         if (next && next.accountId === prev.accountId && next.tweetId === prev.tweetId &&
           next.savedAt === prev.savedAt && next.snapshot === prev.snapshot &&
@@ -890,11 +895,11 @@ const realIds = (ids: string[]) => ids.filter((id) => !isBuiltinFolder(id));
 
 /** 一括メニューの確定。追加と解除を同じ書き込み・同じ取り消しにまとめる。 */
 export const changeBookmarkFolders = (tweetIds: string[], addIds: string[], removeIds: string[]) =>
-  mutateBookmarks(tweetIds, (b, folders) => ({
+  mutateBookmarks(tweetIds, (b, withoutRemoved) => ({
     ...b,
     folderIds: addIds.includes(INBOX_ID) ? [INBOX_ID]
-      : uniq([...withoutDescendants(b.folderIds, removeIds, folders), ...realIds(addIds)]),
-  }), true);
+      : uniq([...withoutRemoved(b.folderIds), ...realIds(addIds)]),
+  }), removeIds, true);
 
 export const addToFolders = (tweetIds: string[], folderIds: string[]) =>
   mutateBookmarks(tweetIds, (b) => ({ ...b, folderIds: uniq([...b.folderIds, ...realIds(folderIds)]) }));
@@ -904,18 +909,18 @@ export const addToFolders = (tweetIds: string[], folderIds: string[]) =>
  * (ポストを消すのは明示的な deleteBookmarks だけ)。
  */
 export const removeFromFolders = (tweetIds: string[], folderIds: string[]) =>
-  mutateBookmarks(tweetIds, (b, folders) => {
-    const rest = withoutDescendants(b.folderIds, folderIds, folders);
+  mutateBookmarks(tweetIds, (b, withoutRemoved) => {
+    const rest = withoutRemoved(b.folderIds);
     return { ...b, folderIds: rest.length ? rest : [INBOX_ID] };
-  });
+  }, folderIds);
 
 /** from から外して to に入れる。from が「すべて」(または未指定) なら追加のみ */
 export const moveToFolder = (tweetIds: string[], fromId: string | null, toId: string) =>
-  mutateBookmarks(tweetIds, (b, folders) => {
-    const rest = fromId && !isBuiltinFolder(fromId) && fromId !== toId ? withoutDescendants(b.folderIds, [fromId], folders) : b.folderIds;
+  mutateBookmarks(tweetIds, (b, withoutRemoved) => {
+    const rest = withoutRemoved(b.folderIds);
     if (toId === INBOX_ID) return { ...b, folderIds: [INBOX_ID] }; // 行き先が「未分類」なら、ほかのフォルダは外す
     return { ...b, folderIds: uniq([...rest, ...realIds([toId])]) };
-  });
+  }, fromId && !isBuiltinFolder(fromId) && fromId !== toId ? [fromId] : []);
 
 /** PostShelf から削除する (X 側のブックマークには触らない) */
 export const deleteBookmarks = (tweetIds: string[]) => mutateBookmarks(tweetIds, () => null);

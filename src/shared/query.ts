@@ -59,19 +59,18 @@ export { foldText };
 /**
  * ポストごとの、正規化済みの検索対象 (本文・投稿者・ハンドル)。キーは accountId:tweetId。
  * 読み込みのたびに snapshot のオブジェクトは作り直される (自動取り込み中は 20 件ごと) ので、オブジェクトではなく ID で持ち、
- * sig (本文・投稿者・ハンドルそのもの) が同じなら再計算しない。本文が変わったポストだけ作り直す (v35)。
+ * 本文・投稿者・ハンドルを個別に照合し、同じなら再計算しない。変わったポストだけ作り直す。
  */
 const FOLD_CACHE_MAX = 20000;
-const foldedPost = new Map<string, { sig: string; folded: string }>();
+const foldedPost = new Map<string, { text: string; author: string; handle: string; folded: string }>();
 const foldedOf = (b: Bookmark): string => {
   const s = b.snapshot;
-  const sig = [s.text, s.author, s.handle].join('\u0000');
   const key = `${b.accountId}:${b.tweetId}`;
   const hit = foldedPost.get(key);
-  if (hit && hit.sig === sig) return hit.folded;
+  if (hit && hit.text === s.text && hit.author === s.author && hit.handle === s.handle) return hit.folded;
   const folded = [s.text, s.author, s.handle].map(foldText).join('\u0000'); // 欄をまたぐ一致を避ける区切り
   if (foldedPost.size >= FOLD_CACHE_MAX && !hit) foldedPost.clear(); // メモリが増えすぎないよう、上限を超えたら全体を捨てて作り直す
-  foldedPost.set(key, { sig, folded });
+  foldedPost.set(key, { text: s.text, author: s.author, handle: s.handle, folded });
   return folded;
 };
 
@@ -94,11 +93,16 @@ export function queryBookmarks(
     if (!q) return true;
     return foldedOf(b).includes(q);
   });
-  const cmp: Record<SortKey, (a: Bookmark, b: Bookmark) => number> = {
-    savedDesc: (a, b) => b.savedAt - a.savedAt,
-    savedAsc: (a, b) => a.savedAt - b.savedAt,
-    postedDesc: (a, b) => posted(b) - posted(a),
-    postedAsc: (a, b) => posted(a) - posted(b),
+  if (opts.sort === 'postedDesc' || opts.sort === 'postedAsc') {
+    const direction = opts.sort === 'postedDesc' ? -1 : 1;
+    return out
+      .map((bookmark) => ({ bookmark, postedAt: posted(bookmark) }))
+      .sort((a, b) => direction * (a.postedAt - b.postedAt))
+      .map(({ bookmark }) => bookmark);
+  }
+  const cmp = {
+    savedDesc: (a: Bookmark, b: Bookmark) => b.savedAt - a.savedAt,
+    savedAsc: (a: Bookmark, b: Bookmark) => a.savedAt - b.savedAt,
   };
   return out.sort(cmp[opts.sort]);
 }
@@ -111,6 +115,22 @@ export function countFolder(
   descendantsOf?: DescendantsOf,
 ): number {
   return all.filter((b) => inView(b, folderId, now, descendantsOf)).length;
+}
+
+/** 全ポストを一度走査し、「直近 7 日」以外の各ビューの件数を一覧と同じ所属判定で数える */
+export function countFolders(
+  all: Bookmark[],
+  descendantsOf?: DescendantsOf,
+): Map<string, number> {
+  const counts = new Map<string, number>([[ALL_FOLDER_ID, all.length]]);
+  for (const bookmark of all) {
+    for (const id of new Set(bookmark.folderIds)) {
+      if (id === ALL_FOLDER_ID || id === RECENT_ID) continue;
+      // 時刻に依存する「直近 7 日」は除外済みなので、所属判定の時刻は固定する。
+      if (inView(bookmark, id, 0, descendantsOf)) counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+  }
+  return counts;
 }
 
 /** 保存データにある投稿者のハンドル一覧 (件数の多い順、同数は名前順) */

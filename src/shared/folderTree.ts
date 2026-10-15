@@ -104,10 +104,28 @@ export function withAncestors(ids: readonly string[], folders: readonly Folder[]
   return [...new Set([...real, ...real.flatMap((id) => ancestors(folders, id).map((f) => f.id))])];
 }
 
+/** 所属先に祖先を補う関数を作る。一括操作中は同じ木の祖先表を使い回す */
+export function withAncestorResolver(folders: readonly Folder[]): (ids: readonly string[]) => string[] {
+  const ancestorIds = new Map(folders.map((f) => [f.id, ancestors(folders, f.id).map((p) => p.id)]));
+  return (ids) => {
+    const real = [...new Set(ids.filter((id) => user(id)))];
+    if (!real.length) return [INBOX_ID];
+    return [...new Set([...real, ...real.flatMap((id) => ancestorIds.get(id) ?? [])])];
+  };
+}
+
+/** 解除するフォルダとその子孫を一度求め、所属先から外す関数を作る */
+export function withoutDescendantsResolver(
+  removed: readonly string[],
+  folders: readonly Folder[],
+): (ids: readonly string[]) => string[] {
+  const exclude = new Set(removed.flatMap((id) => [id, ...descendants(folders, id).map((f) => f.id)]));
+  return (ids) => ids.filter((id) => !exclude.has(id));
+}
+
 /** 所属先から、removed とその子孫を外す */
 export function withoutDescendants(ids: readonly string[], removed: readonly string[], folders: readonly Folder[]): string[] {
-  const exclude = new Set(removed.flatMap((id) => [id, ...descendants(folders, id).map((f) => f.id)]));
-  return ids.filter((id) => !exclude.has(id));
+  return withoutDescendantsResolver(removed, folders)(ids);
 }
 
 /** 祖先から自分までの名前を、separator でつないだもの。パンくずなど、経路を見せる所だけに使う */
@@ -177,11 +195,23 @@ export function reparentedFolderIds(
   movedId: string,
   oldAncestorIds: readonly string[],
 ): string[] {
+  return reparentedFolderResolver(folders, movedId, oldAncestorIds)(ids);
+}
+
+/** 付け替え後の木で所属先を直す関数を作る。子孫・新旧の祖先は一括操作中に使い回す */
+export function reparentedFolderResolver(
+  folders: readonly Folder[],
+  movedId: string,
+  oldAncestorIds: readonly string[],
+): (ids: readonly string[]) => string[] {
   const subtree = new Set([movedId, ...descendants(folders, movedId).map((f) => f.id)]);
-  if (!ids.some((id) => subtree.has(id))) return [...ids];
   const newAncestorIds = new Set(ancestors(folders, movedId).map((f) => f.id));
   const stale = new Set(oldAncestorIds.filter((id) => !newAncestorIds.has(id)));
-  return withAncestors(ids.filter((id) => !stale.has(id)), folders);
+  const includeAncestors = withAncestorResolver(folders);
+  return (ids) => {
+    if (!ids.some((id) => subtree.has(id))) return [...ids];
+    return includeAncestors(ids.filter((id) => !stale.has(id)));
+  };
 }
 
 /** 所属先から、削除したフォルダ (子孫を含む) を外す。空になったときの未分類への切り替えは normalizeFolderIds */

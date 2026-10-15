@@ -1,12 +1,21 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
-import { ancestors, canParent, descendants, descendantsMap, flattenFolders, folderPath } from '../shared/folderTree';
+import {
+  ancestors,
+  canParent,
+  descendants,
+  descendantsMap,
+  flattenFolders,
+  folderPath,
+  leafMemberResolver,
+} from '../shared/folderTree';
 import { Icon } from '../shared/Icon';
 import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
 import {
   RECENT_ID,
   authorHandles,
   countFolder,
+  countFolders,
   hasActiveFilters,
   queryBookmarks,
   type Filters,
@@ -439,6 +448,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   /** バッジ・チップ・ピッカー用。「未分類」の見た目を統一する */
   const folderOf = useCallback((id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find(f=>f.id===id)), [folders]); // 保存データが変わるまで同じ関数 (Card の memo のため)
   const pickerFolders = [inboxView(storedInbox), ...userFolders];
+  const leafMembers = useMemo(() => leafMemberResolver(folders), [folders]);
 
   // オフのときだけ子孫表を作る。検索・並び順の変更では作り直さない。
   const viewDescendants = useMemo(
@@ -476,12 +486,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const tabbableId = focusId && shownSet.has(focusId) && shownIds.indexOf(focusId) < renderCount ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   // 左のメニューと見出しの件数は、保存データ・表示用の子孫表が変わるまで使い回す。
-  // 「直近 7 日」の境目も、同じキャッシュを使う間は動かない。
-  const countCache = useMemo(() => new Map<string, number>(), [bookmarks, viewDescendants]);
+  // 「直近 7 日」は初めて件数を表示する描画の時刻で数え、同じキャッシュを使う間は境目を動かさない。
+  const countCache = useMemo(() => countFolders(bookmarks, viewDescendants), [bookmarks, viewDescendants]);
   const count = (id: string) => {
-    let n = countCache.get(id);
-    if (n === undefined) countCache.set(id, (n = countFolder(bookmarks, id, now, viewDescendants)));
-    return n;
+    if (id === RECENT_ID && !countCache.has(id)) countCache.set(id, countFolder(bookmarks, id, now));
+    return countCache.get(id) ?? 0;
   };
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
   const previousAvatars = useRef<AvatarFallback>(new Map());
@@ -1117,6 +1126,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           tabbable={b.tweetId === tabbableId}
           folderOf={folderOf}
           folders={folders}
+          leafMembers={leafMembers}
           pickerOpen={picker === b.tweetId}
           h={rowHandlers}
           pickerNode={
