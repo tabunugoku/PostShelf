@@ -154,9 +154,9 @@ export function fullTextPlan(s: Pick<Settings, 'fullTextSpeed' | 'fullTextTabs'>
 
 const KEY = 'settings';
 
-export async function getSettings(): Promise<Settings> {
-  const res = await chrome.storage.local.get(KEY);
-  const stored = (res[KEY] ?? {}) as Partial<Settings>;
+/** 保存値を既定値と合わせ、不正な項目を補正する。読み出しと通知で共通に使う。 */
+function normalizeSettings(raw: unknown): Settings {
+  const stored = (raw ?? {}) as Partial<Settings>;
   const merged = { ...DEFAULT_SETTINGS, ...stored };
   if (merged.buttonMode !== 'replace') merged.buttonMode = 'separate'; // 不正値は既定に戻す
   if (merged.actionMode !== 'sidepanel') merged.actionMode = 'popup';
@@ -185,10 +185,16 @@ export async function getSettings(): Promise<Settings> {
   return merged;
 }
 
+/** 保存済みの設定を読み、欠けた項目と不正値を補正する。 */
+export async function getSettings(): Promise<Settings> {
+  const res = await chrome.storage.local.get(KEY);
+  return normalizeSettings(res[KEY]);
+}
+
 /** 設定が変わったら呼ばれる (別タブ・manager からの変更も拾う)。解除関数を返す */
 export function onSettingsChanged(cb: (s: Settings) => void): () => void {
-  const listener = (changes: Record<string, unknown>, area: string) => {
-    if (area === 'local' && KEY in changes) void getSettings().then(cb);
+  const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
+    if (area === 'local' && KEY in changes) cb(normalizeSettings(changes[KEY].newValue));
   };
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);
