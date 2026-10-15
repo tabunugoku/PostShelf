@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { resetAccount, setCurrentAccount } from '../src/content/account';
-import { openPopover } from '../src/content/popover';
+import { openPopover, setPopoverMode } from '../src/content/popover';
 import { createFolderPicker } from '../src/shared/folderPicker';
 import * as storage from '../src/shared/storage';
 
@@ -25,7 +25,10 @@ beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(280);
 });
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  setPopoverMode('separate');
+  vi.restoreAllMocks();
+});
 
 async function open() {
   const article = document.querySelector('article')!;
@@ -57,6 +60,24 @@ it('下部の先頭の区切り線の直後に追加ボタンを置く', async (
   expect(separator.style.borderTopStyle).toBe('solid');
   expect(separator.style.borderTopWidth).toBe('0.5px');
   expect(footer.children[1].textContent).toBe('フォルダを追加');
+});
+
+it('置き換えモードの下部を追加・失敗・X の解除・操作行の順に並べる', async () => {
+  setPopoverMode('replace');
+  // 架空の fixture の標準ボタンを、X 側で保存済みの状態にする。
+  document.querySelector<HTMLButtonElement>('article button')!.dataset.testid = 'removeBookmark';
+  const pop = await open();
+  const footer = pop.querySelector<HTMLElement>('[data-popover-footer]')!;
+  const children = [...footer.children] as HTMLElement[];
+  expect(children).toHaveLength(6);
+  expect(children[0].style.borderTopStyle).toBe('solid');
+  expect(children[1].textContent).toBe('フォルダを追加');
+  expect(children[2]).toBe(pop.querySelector('.postshelf-save-error'));
+  expect(children[2].getAttribute('role')).toBe('alert');
+  expect(children[3].textContent).toBe(chrome.i18n.getMessage('releaseNative'));
+  expect(children[4].style.borderTopStyle).toBe('solid');
+  expect([...children[5].querySelectorAll('button')].map(button => button.getAttribute('aria-label')))
+    .toEqual([chrome.i18n.getMessage('openSidePanel'), chrome.i18n.getMessage('removeFromPostShelf')]);
 });
 
 it('作成フォームの入力だけをスクロールさせ、確定行を固定する', async () => {

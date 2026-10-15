@@ -189,6 +189,10 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   const footer = document.createElement('div');
   footer.dataset.popoverFooter = '';
   footer.style.flexShrink = '0';
+  // 区切り、追加、失敗表示、置き換えモードの解除、区切り、操作行の順で固定する。
+  footer.append(divider(th));
+  if (account && picker.addButton) footer.append(picker.addButton);
+  footer.append(errorEl);
   // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
   if (account && mode === 'replace' && queryFirst(article, 'removeBookmark')) {
     const rel = document.createElement('button');
@@ -211,12 +215,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   bottom.style.cssText = 'box-sizing:border-box;display:flex;align-items:center;justify-content:space-between';
   bottom.append(side);
   if (account) bottom.append(unsave);
-  footer.prepend(bottom);
-  bottom.before(divider(th));
-  // 区切り、追加、区切り、操作行、置き換えモードの解除、失敗表示の順で固定する。
-  if (account && picker.addButton) footer.prepend(picker.addButton);
-  footer.prepend(divider(th));
-  footer.append(errorEl);
+  footer.append(divider(th), bottom);
   pop.append(footer);
   document.body.append(pop);
   trackPopover(pop, article, anchor, tweetId);
