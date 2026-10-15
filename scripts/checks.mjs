@@ -10,6 +10,8 @@ export const REQUIRED_HOST_PERMISSIONS = ['https://x.com/*', 'https://twitter.co
 export const OPTIONAL_HOST_PERMISSIONS = ['https://pbs.twimg.com/*'];
 /** コードの中の fetch などで、絶対 URL の文字列を直接渡してよいホスト */
 export const ALLOWED_NETWORK_HOSTS = ['x.com', 'twitter.com', 'pbs.twimg.com'];
+/** ホストごとではなく、この URL だけを許す通信 (更新の確認 v73。`src/shared/links.ts` の RELEASES_API_URL と同じ) */
+export const ALLOWED_NETWORK_URLS = ['https://api.github.com/repos/tabunugoku/PostShelf/releases/latest'];
 export const LOCALES = ['ja', 'en', 'zh_CN', 'zh_TW', 'ko', 'es', 'pt_BR', 'fr'];
 
 export const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
@@ -93,6 +95,7 @@ const NETWORK_RULES = [
 
 function disallowedHost(url) {
   if (url.includes('${')) return null; // テンプレートの式を含むものは、ホストを決められない
+  if (ALLOWED_NETWORK_URLS.includes(url)) return null;
   try {
     const host = new URL(url).hostname;
     return ALLOWED_NETWORK_HOSTS.includes(host) ? null : host;
