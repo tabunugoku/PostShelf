@@ -17,6 +17,7 @@ vi.mock('../src/content/autocollect', async (original) => ({
 
 const flush = (ms = 25) => act(() => new Promise<void>((r) => setTimeout(r, ms)));
 const roots: ShadowRoot[] = [];
+const keyListeners = new Map<Element, ReturnType<typeof vi.spyOn>>();
 const dialog = () => roots[roots.length - 1];
 const host = () => document.querySelector('.postshelf-autocollect-dialog');
 const inner = <T extends Element>(sel: string) => dialog().querySelector<T>(sel)!;
@@ -24,7 +25,16 @@ const innerAll = <T extends Element>(sel: string) => [...dialog().querySelectorA
 const startButton = () => inner<HTMLButtonElement>('.dialog-actions .primary');
 const consentBox = () => inner<HTMLInputElement>('input[type=checkbox]');
 const press = async (key: string) => {
-  await flush(); // キーのリスナーは、描画のあとの effect で付く
+  const target = host()!;
+  const listeners = keyListeners.get(target)!;
+  const deadline = Date.now() + 2000;
+  // ホストの伝播を止めるリスナーに加え、effect のキー処理が付くまで待つ。
+  while (listeners.mock.calls.filter(([type]) => type === 'keydown').length < 2) {
+    if (Date.now() >= deadline) {
+      throw new Error('ダイアログの keydown リスナーが 2 秒以内に取り付けられなかった');
+    }
+    await flush();
+  }
   await act(() => void inner('.ac-dialog').dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, composed: true })));
 };
 
@@ -37,9 +47,11 @@ beforeEach(async () => {
   (globalThis as any).chrome.runtime.sendMessage = sendMessage;
   collector.start.mockClear();
   roots.length = 0;
+  keyListeners.clear();
   // 閉じた shadow root は外から読めないので、テストの間だけ、作られた root を控える (開発側のコードは closed のまま)
   vi.spyOn(Element.prototype, 'attachShadow').mockImplementation(function (this: Element, init: ShadowRootInit) {
     expect(init.mode).toBe('closed');
+    keyListeners.set(this, vi.spyOn(this, 'addEventListener'));
     const root = original.call(this, { ...init, mode: 'open' });
     roots.push(root);
     return root;
