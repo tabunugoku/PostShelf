@@ -92,7 +92,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   const th = xTheme();
   pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;text-wrap:pretty`;
   pop.lang = uiLang(); // X のページの lang ではなく UI の言語で折り返す
-  pop.style.cssText += ';box-sizing:border-box;display:flex;flex-direction:column;max-height:calc(100vh - 16px)';
+  pop.style.cssText += ';box-sizing:border-box;display:flex;flex-direction:column';
   pop.addEventListener('click', (e) => e.stopPropagation());
 
   // 保存先の表示 (アバター小 + @ハンドル)。判定できないときは警告だけを出して保存させない
@@ -218,18 +218,58 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   return pop;
 }
 
-/** ボタンの真下に出し、画面端ではみ出さないよう補正する (下に収まらなければ上に出す) */
-function position(pop: HTMLElement, anchor: HTMLElement): void {
+/** 開いたときに決めた表示側と高さの上限 */
+interface Placement {
+  side: 'below' | 'above' | 'center';
+  maxHeight: number;
+}
+
+/** 上部・下部の実寸と余白を測り、一覧 4 行を含む最低限の高さを求める */
+function minimumHeight(pop: HTMLElement): number {
+  const style = getComputedStyle(pop);
+  const frame = ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth'] as const;
+  let height = frame.reduce((sum, key) => sum + (Number.parseFloat(style[key]) || 0), 0);
+  for (const element of pop.querySelectorAll<HTMLElement>(
+    '.postshelf-account, [data-picker-header], [data-popover-footer]',
+  )) {
+    const style = getComputedStyle(element);
+    height += element.offsetHeight + (Number.parseFloat(style.marginTop) || 0)
+      + (Number.parseFloat(style.marginBottom) || 0);
+  }
+  return height + 4 * 32;
+}
+
+/** 初回だけ表示側を決め、以後はその側を保ったまま画面の余白内に位置を収める */
+function position(pop: HTMLElement, anchor: HTMLElement, placement?: Placement): Placement {
   const r = anchor.getBoundingClientRect();
-  const w = pop.offsetWidth;
-  const h = pop.offsetHeight;
   const vw = document.documentElement.clientWidth || window.innerWidth;
   const vh = document.documentElement.clientHeight || window.innerHeight;
-  const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), Math.max(8, vw - w - 8));
-  let top = r.bottom + 4;
-  if (h && top + h > vh - 8 && r.top - 4 - h >= 8) top = r.top - 4 - h;
+  if (!placement) {
+    // 制約前の高さを使う。一覧が長くても、選んだ側は開いている間に入れ替えない。
+    pop.style.maxHeight = 'none';
+    const naturalHeight = pop.offsetHeight;
+    const below = vh - r.bottom - 4 - 8;
+    const above = r.top - 4 - 8;
+    let side: Placement['side'];
+    if (naturalHeight <= below) side = 'below';
+    else if (naturalHeight <= above) side = 'above';
+    else if (Math.max(below, above) < minimumHeight(pop)) side = 'center';
+    else side = below >= above ? 'below' : 'above';
+    const available = side === 'center' ? vh - 16 : side === 'below' ? below : above;
+    placement = { side, maxHeight: Math.max(0, available) };
+  }
+  pop.style.boxSizing = 'border-box';
+  pop.style.maxHeight = `${Math.max(0, Math.min(placement.maxHeight, vh - 16))}px`;
+  const w = pop.offsetWidth;
+  const h = pop.offsetHeight;
+  const centered = placement.side === 'center';
+  const desiredLeft = centered ? (vw - w) / 2 : r.left + r.width / 2 - w / 2;
+  const left = Math.min(Math.max(8, desiredLeft), Math.max(8, vw - w - 8));
+  const desiredTop = centered ? (vh - h) / 2 : placement.side === 'above' ? r.top - 4 - h : r.bottom + 4;
+  const top = Math.min(Math.max(8, desiredTop), Math.max(8, vh - h - 8));
   pop.style.left = `${left}px`;
   pop.style.top = `${top}px`;
+  return placement;
 }
 
 export function installGlobalHandlers(): void {

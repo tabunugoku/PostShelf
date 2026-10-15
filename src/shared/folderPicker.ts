@@ -160,7 +160,10 @@ export function createFolderPicker(opts: {
 
   // 見出し (保存状態) と絞り込み欄。一覧の再描画で消えないよう、一覧とは別の要素に置く
   const headEl = document.createElement('div');
-  if (extras) headEl.style.flexShrink = '0';
+  if (extras) {
+    headEl.dataset.pickerHeader = '';
+    headEl.style.flexShrink = '0';
+  }
   const statusEl = document.createElement('div');
   statusEl.style.cssText = `box-sizing:border-box;padding:2px 8px 6px;font-size:13px;opacity:.8;white-space:nowrap;color:${th.fg}`;
   const filterEl = document.createElement('input');
