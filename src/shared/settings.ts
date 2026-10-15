@@ -39,6 +39,8 @@ export interface Settings {
   sidebarWidth?: number;
   /** x.com の保存ポップオーバーの「最近使った」フォルダ (v28)。最大 RECENT_FOLDERS 件、新しい順。無い・不正な値は空として扱う */
   recentFolderIds?: string[];
+  /** 新しい版を確かめる (v73)。既定はオフ。オンのときだけ GitHub の決まった URL を読む (CLAUDE.md の「守ること」の例外) */
+  updateCheck: boolean;
 }
 
 /** 不正・重複・組み込みの ID は空き ("") にする。後ろの番号は詰めない。最大 9 枠 */
@@ -140,7 +142,7 @@ export type ButtonMode = 'separate' | 'replace';
 
 export const DEFAULT_SIDEBAR_WIDTH = 240;
 
-export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, triageKeyMode: 'auto', triageKeyFolders: [], folderTreeCollapsed: [], showInAncestors: true, sidebarWidth: DEFAULT_SIDEBAR_WIDTH, recentFolderIds: [] };
+export const DEFAULT_SETTINGS: Settings = { syncNative: false, buttonMode: 'separate', actionMode: 'popup', lastFolderId: 'all', viewMode: 'post', sortKey: 'savedDesc', viewAccount: '', imageCache: DEFAULT_IMAGE_CACHE, autoCollect: DEFAULT_AUTO_COLLECT, fullText: true, fullTextSpeed: 'slow', fullTextTabs: 1, triageMulti: false, triageKeyMode: 'auto', triageKeyFolders: [], folderTreeCollapsed: [], showInAncestors: true, sidebarWidth: DEFAULT_SIDEBAR_WIDTH, recentFolderIds: [], updateCheck: false };
 
 export interface FullTextPlan { gapMinMs: number; gapMaxMs: number; tabs: 1 | 2 | 3 }
 /** 「ゆっくり」は、保存されたタブ数にかかわらず従来の間隔・1 タブを使う。 */
@@ -179,6 +181,7 @@ export async function getSettings(): Promise<Settings> {
   merged.recentFolderIds = Array.isArray(stored.recentFolderIds)
     ? [...new Set(stored.recentFolderIds.filter((x): x is string => typeof x === 'string'))].slice(0, RECENT_FOLDERS)
     : [];
+  merged.updateCheck = stored.updateCheck === true;
   return merged;
 }
 
@@ -421,7 +424,7 @@ export async function setCacheCleanupNeeded(v: boolean): Promise<void> {
 
 // ---- 更新の検出 (v13) ----
 // 前回起動したときのバージョンを保存しておき、変わっていたら「更新しました」を 1 回だけ出す。
-// 新しい版が出ているかを外部に問い合わせることはしない (外部通信なし)。設定の初期化 / 全削除の対象にはしない。
+// 新しい版が出ているかの問い合わせは、ここではしない (設定でオンにしたときだけ、下の更新の確認 v73 が行う)。設定の初期化 / 全削除の対象にはしない。
 const VERSION_KEY = 'lastRunVersion';
 
 /** 現在のバージョンを記録し、前回から変わっていれば前回のバージョンを返す。初回インストール (記録なし) と同じバージョンは null */
@@ -431,6 +434,27 @@ export async function noteRunVersion(current: string): Promise<string | null> {
   const prev = typeof res[VERSION_KEY] === 'string' ? (res[VERSION_KEY] as string) : null;
   if (prev !== current) await chrome.storage.local.set({ [VERSION_KEY]: current });
   return prev && prev !== current ? prev : null;
+}
+
+// ---- 更新の確認の記録 (v73) ----
+// 最後に確かめた時刻と、そのとき見つけた最新の版。設定の初期化の対象にはしない (初期化で設定はオフに戻るので、確かめなくなる)。
+const UPDATE_CHECK_KEY = 'updateCheckState';
+
+export interface UpdateCheckState {
+  /** 最後に確かめに行った時刻 (ms)。失敗しても記録し、24 時間は再び問い合わせない */
+  checkedAt: number;
+  /** 最後に読めた最新の版の番号 (tag_name のまま。例: 'v1.1.8') */
+  latest?: string;
+}
+
+export async function getUpdateCheckState(): Promise<UpdateCheckState> {
+  const raw = (await chrome.storage.local.get(UPDATE_CHECK_KEY))[UPDATE_CHECK_KEY] as Partial<UpdateCheckState> | undefined;
+  const checkedAt = typeof raw?.checkedAt === 'number' && Number.isFinite(raw.checkedAt) ? raw.checkedAt : 0;
+  return typeof raw?.latest === 'string' ? { checkedAt, latest: raw.latest } : { checkedAt };
+}
+
+export async function saveUpdateCheckState(state: UpdateCheckState): Promise<void> {
+  await chrome.storage.local.set({ [UPDATE_CHECK_KEY]: state });
 }
 
 
