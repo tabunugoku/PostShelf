@@ -80,6 +80,7 @@ Codex もこのファイルを読む (`~/.codex/config.toml` の `project_doc_fa
 - **並行**: 互いに触るファイルが重ならない作業だけを並べる。最大 2 つから始める
   - 作業ごとに `git worktree add` で別のフォルダとブランチを作る。Codex には、その作業のファイル以外を触らせない
   - 渡し方は `/codex:rescue --background` と同じ。worktree で動かすときは、プラグインのスクリプトを直接呼ぶ (`node <プラグイン>/scripts/codex-companion.mjs task --background --write --cwd <worktree> --prompt-file <ファイル>`。`/codex:rescue` には作業フォルダを渡す引数が無いため)
+  - worktree では、Codex はコミットも push もできない (worktree の Git のデータは元のリポジトリの `.git/worktrees/` にあり、サンドボックスの書き込める範囲の外。push はネットワークも止められている)。Codex には実装とテストまでを頼み、コミットしないよう書く。レビューのあと Opus が、項目ごとにコミットを分けて push する。サンドボックスは緩めない
   - 完了を確かめてから次へ進む (`codex-companion.mjs status --cwd <worktree>` と `result`)。終わっていない作業を前提に、統合も次の依頼もしない
   - 統合の前に `/codex:adversarial-review` で見る。採るかどうかの最後の判断は Opus が行う
   - Windows では、裏の Codex のプロセスが残ることや、`/codex:cancel` が効かないことがある (プラグインの未解決の不具合)。止まらないときは、タスクマネージャーで止める
