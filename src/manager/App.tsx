@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
-import { ancestors, canParent, descendants, descendantsMap, flattenFolders, folderPath } from '../shared/folderTree';
+import {
+  ancestors,
+  canParent,
+  descendants,
+  descendantsMap,
+  flattenFolders,
+  folderPath,
+  leafMemberResolver,
+} from '../shared/folderTree';
 import { Icon } from '../shared/Icon';
 import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, isBuiltinFolder, userFoldersOf, type Account, type Bookmark, type Folder } from '../shared/models';
 import {
@@ -439,6 +447,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   /** バッジ・チップ・ピッカー用。「未分類」の見た目を統一する */
   const folderOf = useCallback((id: string) => (id === INBOX_ID ? inboxView(storedInbox) : folders.find(f=>f.id===id)), [folders]); // 保存データが変わるまで同じ関数 (Card の memo のため)
   const pickerFolders = [inboxView(storedInbox), ...userFolders];
+  const leafMembers = useMemo(() => leafMemberResolver(folders), [folders]);
 
   // オフのときだけ子孫表を作る。検索・並び順の変更では作り直さない。
   const viewDescendants = useMemo(
@@ -1113,6 +1122,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           tabbable={b.tweetId === tabbableId}
           folderOf={folderOf}
           folders={folders}
+          leafMembers={leafMembers}
           pickerOpen={picker === b.tweetId}
           h={rowHandlers}
           pickerNode={

@@ -52,6 +52,8 @@ export interface CardProps {
   tabbable: boolean;
   folderOf: (id: string) => Folder | undefined;
   folders?: readonly Folder[];
+  /** フォルダが変わるまで使い回す、最下位の所属先の計算 */
+  leafMembers?: (ids: readonly string[]) => Folder[];
   pickerOpen: boolean;
   pickerNode: ComponentChildren;
   onSelect: (shift: boolean) => void;
@@ -233,11 +235,21 @@ function MembershipChip(props: { b: Bookmark; f: Folder; folders: readonly Folde
 }
 
 /** 投稿の所属先。いちばん下のフォルダだけを、管理画面のツリーの順に出す */
-function FolderChips(props: { b: Bookmark; folderOf: CardProps['folderOf']; folders?: readonly Folder[]; removable: boolean; onRemove: (id: string) => void }) {
+function FolderChips(props: {
+  b: Bookmark;
+  folderOf: CardProps['folderOf'];
+  folders?: readonly Folder[];
+  leafMembers?: CardProps['leafMembers'];
+  removable: boolean;
+  onRemove: (id: string) => void;
+}) {
   const folders = props.folders ?? props.b.folderIds.map(props.folderOf).filter((f): f is Folder => !!f);
+  const members = props.leafMembers
+    ? props.leafMembers(props.b.folderIds)
+    : leafMemberFolders(folders, props.b.folderIds);
   return (
     <div class="act">
-      {leafMemberFolders(folders, props.b.folderIds).map((f) => (
+      {members.map((f) => (
         <MembershipChip key={f.id} b={props.b} f={f} folders={folders} removable={props.removable} onRemove={props.onRemove} />
       ))}
     </div>
@@ -321,7 +333,14 @@ function CardView(outer: CardOuterProps) {
     return (
       <div {...(common as unknown as JSX.HTMLAttributes<HTMLDivElement>)}>
         {check}
-        <FolderChips b={b} folderOf={props.folderOf} folders={props.folders} removable onRemove={props.onRemoveFromFolder} />
+        <FolderChips
+          b={b}
+          folderOf={props.folderOf}
+          folders={props.folders}
+          leafMembers={props.leafMembers}
+          removable
+          onRemove={props.onRemoveFromFolder}
+        />
         <span class="handle">{s.handle}</span>
         <span class="t">{s.text}</span>
         <MediaMark s={s} />
@@ -347,7 +366,14 @@ function CardView(outer: CardOuterProps) {
         </div>
         <div class="gc-text">{s.text}</div>
         <div class="gc-foot">
-          <FolderChips b={b} folderOf={props.folderOf} folders={props.folders} removable onRemove={props.onRemoveFromFolder} />
+          <FolderChips
+            b={b}
+            folderOf={props.folderOf}
+            folders={props.folders}
+            leafMembers={props.leafMembers}
+            removable
+            onRemove={props.onRemoveFromFolder}
+          />
           <Actions {...props} />
         </div>
       </article>
@@ -375,7 +401,14 @@ function CardView(outer: CardOuterProps) {
             ))}
           </MediaGrid>
         ) : null}
-        <FolderChips b={b} folderOf={props.folderOf} folders={props.folders} removable onRemove={props.onRemoveFromFolder} />
+        <FolderChips
+          b={b}
+          folderOf={props.folderOf}
+          folders={props.folders}
+          leafMembers={props.leafMembers}
+          removable
+          onRemove={props.onRemoveFromFolder}
+        />
       </div>
       <Actions {...props} />
     </article>
