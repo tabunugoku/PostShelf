@@ -36,6 +36,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
   const [amode, setAmode] = useState<ActionMode>('popup');
   const [autoOn, setAutoOn] = useState(true);
   const [showInAncestors, setShowInAncestors] = useState(true);
+  const [updateCheck, setUpdateCheck] = useState(false);
   const [triageMulti, setTriageMulti] = useState(false);
   const [keyFolders, setKeyFolders] = useState<Folder[] | null>(null);
   const openKeyTargets = async () => {
@@ -63,6 +64,7 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
         setAutoOn(s.autoCollect.enabled);
         setTriageMulti(s.triageMulti === true);
         setShowInAncestors(s.showInAncestors);
+        setUpdateCheck(s.updateCheck);
       })
       .catch(() => reportStorageError());
   useEffect(load, []);
@@ -386,6 +388,22 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
         <p class="muted setting-desc version-info">
           <strong>{t('versionLabel', currentVersion())}</strong>
         </p>
+        <label class="setting">
+          <input
+            type="checkbox"
+            role="switch"
+            name="updateCheck"
+            checked={updateCheck}
+            onChange={(e) => void saveOf(
+              updateSettings({ updateCheck: (e.target as HTMLInputElement).checked }),
+              (s) => setUpdateCheck(s.updateCheck),
+            )}
+          />
+          <span>
+            <strong>{t('updateCheck')}</strong>
+            <span class="muted setting-desc">{t('updateCheckDesc')}</span>
+          </span>
+        </label>
         <p class="muted setting-desc">
           <Sentences text={t('updateGuide')}>
             <a href={INSTALL_URL} target="_blank" rel="noopener noreferrer">

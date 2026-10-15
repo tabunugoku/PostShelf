@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { crc32, extensionIdFromKey, idFromDoc, listZip, makeZip } from '../scripts/lib.mjs';
 import {
-  LOCALES, OPTIONAL_HOST_PERMISSIONS, REQUIRED_HOST_PERMISSIONS, REQUIRED_PERMISSIONS, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions,
+  ALLOWED_NETWORK_URLS, LOCALES, OPTIONAL_HOST_PERMISSIONS, REQUIRED_HOST_PERMISSIONS, REQUIRED_PERMISSIONS, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions,
   checkReleaseNotes, checkVersion, manifestFiles,
 } from '../scripts/checks.mjs';
 
@@ -125,6 +125,30 @@ describe('v13-C-3: release checks', () => {
       'const link = "https://example.invalid/issues/new";',
     ])('passes: %s', async (code) => {
       expect(await check(code)).toEqual([]);
+    });
+    // 更新の確認 (v73) は、決めた 1 つの URL だけを許す。同じホストのほかのパスは許さない
+    it('allows only the exact update-check URL on api.github.com', async () => {
+      expect(await check('fetch("https://api.github.com/repos/tabunugoku/PostShelf/releases/latest")')).toEqual([]);
+      for (const url of [
+        'https://api.github.com/repos/tabunugoku/PostShelf/releases',
+        'https://api.github.com/repos/someone/else/releases/latest',
+        'https://api.github.com/user',
+      ]) {
+        const errors = await check(`fetch("${url}")`);
+        expect(errors, url).toHaveLength(1);
+        expect(errors[0]).toContain('api.github.com');
+      }
+    });
+    it('defines the update-check URL in src/shared/links.ts only, the same as the allowed URL', async () => {
+      const { RELEASES_API_URL } = await import('../src/shared/links');
+      expect(ALLOWED_NETWORK_URLS).toEqual([RELEASES_API_URL]);
+      const { readdirSync: list, statSync } = await import('node:fs');
+      const files = (dir: string): string[] => list(dir).flatMap((name) => {
+        const p = `${dir}/${name}`;
+        return statSync(p).isDirectory() ? files(p) : [p];
+      });
+      const found = files('src').filter((f) => read(f).includes('api.github.com'));
+      expect(found).toEqual(['src/shared/links.ts']);
     });
   });
   it('manifest files are checked against the zip entries', () => {

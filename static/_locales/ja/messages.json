@@ -1280,6 +1280,27 @@
   "githubLink": {
     "message": "GitHub で見る"
   },
+  "updateCheck": {
+    "message": "新しいバージョンを確かめる"
+  },
+  "updateCheckDesc": {
+    "message": "オンにすると、画面を開いたときに 1 日 1 回まで、GitHub に最新のバージョン番号を問い合わせます。送るデータはありませんが、GitHub には、確かめた時刻・IP アドレス・ブラウザの種類と、PostShelf からの問い合わせであることが伝わります。更新は自動では行いません。"
+  },
+  "updateAvailable": {
+    "message": "新しいバージョン $VERSION$ が出ています",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "1.1.8"
+      }
+    }
+  },
+  "updateAvailableLink": {
+    "message": "リリースのページを開く"
+  },
+  "updateAvailableLinkAria": {
+    "message": "リリースのページを開く（新しいタブで開きます）"
+  },
   "githubLinkAria": {
     "message": "GitHub で見る（新しいタブで開きます）"
   },

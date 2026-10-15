@@ -1280,6 +1280,27 @@
   "githubLink": {
     "message": "在 GitHub 上查看"
   },
+  "updateCheck": {
+    "message": "檢查新版本"
+  },
+  "updateCheckDesc": {
+    "message": "開啟後，開啟畫面時最多每天一次向 GitHub 查詢最新的版本號碼。不會傳送任何資料，但 GitHub 會知道查詢的時間、你的 IP 位址、瀏覽器類型，以及這是來自 PostShelf 的查詢。不會自動更新。"
+  },
+  "updateAvailable": {
+    "message": "新版本 $VERSION$ 已發布",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "1.1.8"
+      }
+    }
+  },
+  "updateAvailableLink": {
+    "message": "開啟發布頁面"
+  },
+  "updateAvailableLinkAria": {
+    "message": "開啟發布頁面（在新分頁中開啟）"
+  },
   "githubLinkAria": {
     "message": "在 GitHub 上查看（在新分頁中開啟）"
   },
