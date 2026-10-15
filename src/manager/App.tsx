@@ -254,6 +254,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setViewId(id);
   };
   const ownWrites = useRef(0);
+  const dataChangedDuringOwnWrite = useRef(false);
   const reloadSeq = useRef(0);
   const reload = async () => {
     // 読み込み中に別の読み直しやアカウントの切替があったら、古い結果で画面を上書きしない
@@ -266,6 +267,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setAccounts(accs);
     const existing = new Set(b.map((x) => x.tweetId));
     setSelected((s) => pruneSelection(s, existing));
+  };
+  /** 操作中の読み直しで拾えなかった変更通知を、最後の操作が終わったときに回収する。 */
+  const endOwnWrite = async () => {
+    ownWrites.current--;
+    if (ownWrites.current === 0 && dataChangedDuringOwnWrite.current) {
+      dataChangedDuringOwnWrite.current = false;
+      await reload().catch(() => {});
+    }
   };
   const loadHint = async () => {
     const h = await getImportHint(viewRef.current);
@@ -334,7 +343,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         setShowInAncestors(c.showInAncestors);
         setCollapsed(new Set(c.folderTreeCollapsed));
       }),
-      onDataChanged(() => { if (!ownWrites.current) void reload(); }),
+      onDataChanged(() => {
+        if (ownWrites.current > 0) dataChangedDuringOwnWrite.current = true;
+        else void reload();
+      }),
       onImportHintChanged(() => void loadHint()),
       // 同じ投稿・フォルダの取り込みでも、accounts の時刻だけの変更で七日の境目を進める。
       onAccountsTouched(() => setRecentVersion((version) => version + 1)),
@@ -562,6 +574,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     ownWrites.current++;
     try {
       const undo = await op;
+      // ここまでの通知は今回の読み直しで拾い、読み出し後の通知だけを回収する。
+      dataChangedDuringOwnWrite.current = false;
       await reload();
       const n = Object.keys(undo).length;
       if (n > 0) setToast({ key: Date.now(), message: t(typeof msgKey === 'string' ? msgKey : msgKey(undo), n), undo });
@@ -569,10 +583,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     } catch {
       // 保存の失敗 (容量・保存のエラー): 通知を出し、画面は読み直して実際の状態に合わせる
       setToast({ key: Date.now(), message: t('errorStorage') });
+      dataChangedDuringOwnWrite.current = false;
       await reload().catch(() => {});
       return false;
     } finally {
-      ownWrites.current--;
+      await endOwnWrite();
     }
   };
   const doUndo = async () => {
@@ -587,9 +602,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     try {
       await restoreBookmarks(toast.undo);
       setToast(null);
+      dataChangedDuringOwnWrite.current = false;
       await reload();
     } finally {
-      ownWrites.current--;
+      await endOwnWrite();
     }
   };
 
@@ -1175,8 +1191,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                     } catch {
                       reportStorageError();
                     } finally {
+                      dataChangedDuringOwnWrite.current = false;
                       await reload().catch(() => {});
-                      ownWrites.current--;
+                      await endOwnWrite();
                     }
                   }}
                 />
