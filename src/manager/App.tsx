@@ -209,6 +209,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [accounts, setAccounts] = useState<AccountSummary[]>([]);
   const [viewId, setViewId] = useState(UNKNOWN_ACCOUNT_ID);
   const [lastSeen, setLastSeen] = useState<Account | null>(null);
+  const [recentVersion, setRecentVersion] = useState(0);
   const [assignFrom, setAssignFrom] = useState<string | null>(null);
   /** 画像ビューア / 動画の案内 (どのポストの何枚目か)。閉じたときのフォーカスは Viewer が元のボタンへ戻す */
   const [viewer, setViewer] = useState<{ kind: 'image'; tweetId: string; index: number } | { kind: 'video'; tweetId: string } | null>(null);
@@ -334,7 +335,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       }),
       onDataChanged(() => { if (!ownWrites.current) void reload(); }),
       onImportHintChanged(() => void loadHint()),
-      onLastSeenAccountChanged(() => void onLastSeen()),
+      onLastSeenAccountChanged(() => {
+        // 同じアカウントの定期通知でも、従来の全件読み直しと同じく七日の境目を進める。
+        setRecentVersion((version) => version + 1);
+        void onLastSeen();
+      }),
     ];
     return () => offs.forEach((o) => o());
   }, []);
@@ -476,7 +481,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     () => queryBookmarks(bookmarks, {
       folderId: curFolder.id, search, sort, filters, now, descendantsOf: viewDescendants,
     }),
-    [bookmarks, curFolder.id, search, sort, filters, viewDescendants],
+    [bookmarks, curFolder.id, search, sort, filters, viewDescendants, curFolder.id === RECENT_ID ? recentVersion : 0],
   );
   // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
   const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
@@ -502,8 +507,13 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const tabbableId = focusId && shownSet.has(focusId) && shownIds.indexOf(focusId) < renderCount ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   // 左のメニューと見出しの件数は、保存データ・表示用の子孫表が変わるまで使い回す。
-  // 「直近 7 日」は初めて件数を表示する描画の時刻で数え、同じキャッシュを使う間は境目を動かさない。
+  // 「直近 7 日」だけはアカウントの通知でも破棄し、次に表示する時刻で数える。
   const countCache = useMemo(() => countFolders(bookmarks, viewDescendants), [bookmarks, viewDescendants]);
+  const countRecentVersion = useRef(recentVersion);
+  if (countRecentVersion.current !== recentVersion) {
+    countCache.delete(RECENT_ID);
+    countRecentVersion.current = recentVersion;
+  }
   const count = (id: string) => {
     if (id === RECENT_ID && !countCache.has(id)) countCache.set(id, countFolder(bookmarks, id, now));
     return countCache.get(id) ?? 0;
