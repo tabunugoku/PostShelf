@@ -857,8 +857,12 @@ function sameAccountData(change: chrome.storage.StorageChange): boolean {
 export function onDataChanged(cb: () => void): () => void {
   const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
     if (area !== 'local') return;
+    // 最後に読み取ったアカウントは、保存 0 件でも切替メニューの候補になる。
+    const lastAccount = changes[KEY_LAST_ACCOUNT];
+    const lastAccountChanged = KEY_LAST_ACCOUNT in changes && lastAccount.oldValue?.id !== lastAccount.newValue?.id;
     if (KEY_FOLDERS in changes || KEY_BOOKMARKS in changes
-      || (KEY_ACCOUNTS in changes && !sameAccountData(changes[KEY_ACCOUNTS]))) cb();
+      || (KEY_ACCOUNTS in changes && !sameAccountData(changes[KEY_ACCOUNTS]))
+      || lastAccountChanged) cb();
   };
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);

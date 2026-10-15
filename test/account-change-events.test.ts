@@ -1,7 +1,11 @@
 // 版: v77
-import { beforeEach, expect, it, vi } from 'vitest';
+import { h, render } from 'preact';
+import { act } from 'preact/test-utils';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { noteAccount, onDataChanged, onLastSeenAccountChanged } from '../src/shared/storage';
+import { App } from '../src/manager/App';
+import { DEFAULT_SETTINGS, getSettings } from '../src/shared/settings';
 import type { Account } from '../src/shared/models';
 
 const account = (id = 'me', lastSeenAt = 10): Account => ({ id, handle: id, lastSeenAt });
@@ -20,10 +24,11 @@ it('同じアカウントの定期記録は保存を続け、データ変更だ�
   const unlast = onLastSeenAccountChanged(lastSeen);
   const set = vi.spyOn(chrome.storage.local, 'set');
   await noteAccount({ handle: '@me' }, 60_010);
-  expect(set).toHaveBeenCalledTimes(1);
+  await noteAccount({ handle: '@me' }, 120_010);
+  expect(set).toHaveBeenCalledTimes(2);
   expect(changed).not.toHaveBeenCalled();
-  expect(lastSeen).toHaveBeenCalledTimes(1);
-  expect(data.lastSeenAccount).toMatchObject({ id: 'me', lastSeenAt: 60_010 });
+  expect(lastSeen).toHaveBeenCalledTimes(2);
+  expect(data.lastSeenAccount).toMatchObject({ id: 'me', lastSeenAt: 120_010 });
   unwatch();
   unlast();
 });
@@ -84,4 +89,57 @@ it.each(['folders', 'bookmarks'])('%s があれば時刻だけの変化と同時
   await chrome.storage.local.set({ [key]: key === 'folders' ? [] : {} });
   expect(changed).toHaveBeenCalledTimes(2);
   unwatch();
+});
+
+it('最後のアカウントが未記録でも、順位が変わらない既存アカウントの読み取りを通知する', async () => {
+  data.accounts = { me: account(), sample_other: account('sample_other', 20) };
+  const changed = vi.fn();
+  const unwatch = onDataChanged(changed);
+  await noteAccount({ handle: '@sample_other' }, 30);
+  expect(changed).toHaveBeenCalledTimes(1);
+  unwatch();
+});
+
+it.each([
+  [account(), account('sample_other')],
+  [account(), undefined],
+  [undefined, account()],
+])('最後のアカウントの ID の変更・削除・追加を通知する: %j → %j', async (before, after) => {
+  data.lastSeenAccount = before;
+  const changed = vi.fn();
+  const unwatch = onDataChanged(changed);
+  if (after) await chrome.storage.local.set({ lastSeenAccount: after });
+  else await chrome.storage.local.remove('lastSeenAccount');
+  expect(changed).toHaveBeenCalledTimes(1);
+  unwatch();
+});
+
+it('手動で選んだアカウントを保ち、初めて読み取った保存 0 件のアカウントもメニューに出す', async () => {
+  data.accounts = { me: account(), sample_other: account('sample_other', 20) };
+  data.folders = [{ accountId: 'me', id: 'sample_folder', name: 'サンプルの棚', icon: 'ti-folder', order: 0 }];
+  data.settings = { ...DEFAULT_SETTINGS, viewAccount: 'me' };
+  document.body.innerHTML = '<div id="app"></div>';
+  history.replaceState({}, '', '/');
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+  const flush = () => act(() => new Promise<void>((resolve) => setTimeout(resolve, 15)));
+  await act(() => void render(h(App, { surface: 'tab' }), document.getElementById('app')!));
+  await flush();
+  await flush();
+  await act(() => void document.querySelector<HTMLButtonElement>('.acct-btn')!.click());
+  const names = () => [...document.querySelectorAll('.acct-row .fr-name')].map((row) => row.textContent);
+  expect(names()).toEqual(['@me']);
+  await act(async () => {
+    await noteAccount({ handle: '@sample_other' }, 30);
+  });
+  await flush();
+  expect(names()).toEqual(['@sample_other', '@me']);
+  expect(document.querySelector('.acct-main[aria-checked=true] .fr-name')!.textContent).toBe('@me');
+  expect(document.querySelector('.acct-row .n')!.textContent).toBe('0');
+  expect((await getSettings()).viewAccount).toBe('me');
+});
+
+afterEach(() => {
+  const host = document.getElementById('app');
+  if (host) render(null, host);
+  vi.restoreAllMocks();
 });
