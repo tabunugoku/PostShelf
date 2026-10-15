@@ -1,5 +1,5 @@
 // 版: v26-f
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { AutoCollector, type CollectDeps, type SeqEntry } from '../src/content/autocollect';
 import { addCollected, getSavedIds, listBookmarks, setAccountScope, setBookmarkFolders } from '../src/shared/storage';
@@ -14,7 +14,9 @@ const post = (n: number): Extracted => ({
   tweetId: `p${n}`,
   snapshot: { text: `post ${n}`, author: 'A', handle: '@a', media: [], createdAt: new Date(Date.UTC(2026, 9, 30) - n * 86400e3).toISOString(), url: `https://x.com/a/status/${n}` },
 });
-const tick = () => new Promise((r) => setTimeout(r, 0));
+// Windows のタイマーの粒度に左右されず、取り込みの非同期処理に順番を譲る。
+const tick = () => new Promise<void>((resolve) => setImmediate(resolve));
+const collectors: AutoCollector[] = [];
 
 function makeDeps(total: number, sizes: number[], overrides: Partial<CollectDeps> = {}) {
   let start = 0;
@@ -53,6 +55,7 @@ async function seedAnchors() {
   await chrome.storage.local.set({ bookmarks: raw });
 }
 async function runAll(c: AutoCollector) {
+  collectors.push(c);
   await c.start({ consent: true, speed: 'slow', cap: 0, accountId: 'me' });
   for (let i = 0; i < 2000 && c.state?.status !== 'done'; i++) await tick();
   expect(c.state!.status).toBe('done');
@@ -61,6 +64,12 @@ async function runAll(c: AutoCollector) {
 beforeEach(() => {
   installChromeMock();
   setAccountScope('me');
+});
+
+afterEach(async () => {
+  // 時間切れでも取り込みを止め、次のテストの保存データへの書き込みを防ぐ。
+  for (const collector of collectors) await collector.stop();
+  collectors.length = 0;
 });
 
 describe('v26-F: the import saves only the difference, in the same order', () => {
