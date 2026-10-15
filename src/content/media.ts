@@ -2,7 +2,7 @@
 import { fillMissing, getFillViews, missingFields, onDataChanged, type FillView } from '../shared/storage';
 import { getCurrentAccount, subscribeAccount } from './account';
 import { collectVisible, pathListeners, SAVED_TTL_MS } from './collect';
-import { fillSource, hasPending, tweetIdOf, type Extracted } from './snapshot';
+import { extractTweet, fillSource, hasPending, tweetIdOf, type Extracted } from './snapshot';
 import { queryAllFirst } from '../shared/selectors';
 
 interface MediaDeps {
@@ -11,8 +11,25 @@ interface MediaDeps {
   path(): string;
   visible(): Extracted[];
   visibleIds?(): string[];
+  visibleForIds?(ids: ReadonlySet<string>): Extracted[];
   fillViews(accountId: string): Promise<Map<string, FillView>>;
   backfill(items: { tweetId: string; snapshot: FillView }[], accountId: string): Promise<number>;
+}
+
+/** 対象 ID の最後の記事だけを読む。重複の順番と採用する記事は collectVisible と同じ。 */
+function readVisibleForIds(ids: ReadonlySet<string>): Extracted[] {
+  if (!ids.size) return [];
+  const articles = new Map<string, Element>();
+  for (const article of queryAllFirst(document, 'tweet').els) {
+    const id = tweetIdOf(article);
+    if (id && ids.has(id)) articles.set(id, article);
+  }
+  const visible: Extracted[] = [];
+  for (const article of articles.values()) {
+    const extracted = extractTweet(article);
+    if (extracted) visible.push(extracted);
+  }
+  return visible;
 }
 
 export class VisibleMediaBackfill {
@@ -25,6 +42,7 @@ export class VisibleMediaBackfill {
     now: () => Date.now(), accountId: () => getCurrentAccount()?.id ?? null,
     path: () => location.pathname, visible: () => collectVisible(),
     visibleIds: () => queryAllFirst(document, 'tweet').els.map(tweetIdOf).filter((id): id is string => !!id),
+    visibleForIds: readVisibleForIds,
     fillViews: getFillViews, backfill: fillMissing,
   }) {}
 
@@ -55,9 +73,12 @@ export class VisibleMediaBackfill {
       this.cache = { account, at: this.d.now(), views };
     }
     // 読み込みを待つ間に仮想化・移動されていても、いまの DOM だけを対象にする。
-    const visible = this.d.visible();
-    const present = new Set(visible.map(it => it.tweetId));
+    const fallbackVisible = this.d.visibleIds ? undefined : this.d.visible();
+    const present = new Set(this.d.visibleIds?.() ?? fallbackVisible!.map((it) => it.tweetId));
     for (const id of this.checked) if (!present.has(id)) this.checked.delete(id);
+    const views = this.cache.views;
+    const targetIds = new Set([...present].filter((id) => views.has(id) && !this.checked.has(id)));
+    const visible = this.d.visibleForIds?.(targetIds) ?? fallbackVisible ?? this.d.visible();
     // 補える項目があるものだけ送る。読み込み途中 (アイコン・メディア) のものは、読み込まれてから補えるよう、確認済みにしない
     const sources: { tweetId: string; snapshot: FillView }[] = [];
     for (const it of visible) {

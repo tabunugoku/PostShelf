@@ -74,7 +74,12 @@ const RING = 8;
  * margin-left は GAP のまま (丸が大きくなっても、詳細ページの数字に重ならないよう、差の半分を減らさない)。
  */
 export function sizeSeparateButton(bm: HTMLElement, btn: HTMLElement): void {
-  const { iconHeight: sh, circleDiameter } = bookmarkButtonGeometry(bm);
+  applySeparateButtonSize(btn, bookmarkButtonGeometry(bm));
+}
+
+/** 測定済みの寸法を反映する。挿入時も ResizeObserver の通知時も、全件の測定後にまとめて呼ぶ。 */
+function applySeparateButtonSize(btn: HTMLElement, geometry: ReturnType<typeof bookmarkButtonGeometry>): void {
+  const { iconHeight: sh, circleDiameter } = geometry;
   const clamp = (v: number) => Math.min(MAX_HIT, Math.max(HIT, Math.round(v)));
   const d = circleDiameter > 0 ? circleDiameter : sh > 0 ? sh + RING * 2 : 0;
   const size = d > 0 ? clamp(d) : HIT;
@@ -94,18 +99,19 @@ function unwatchSize(bm: Element): void {
   if (btn) sizeBookmarks.delete(btn);
 }
 
-/** 共有の ResizeObserver で、挿入時と寸法の変化時だけ測る。監視対象を強参照する一覧は持たない。 */
+/** 共有の ResizeObserver で寸法の変化を監視する。監視対象を強参照する一覧は持たない。 */
 function watchSize(bm: HTMLElement, btn: HTMLElement): void {
-  sizeSeparateButton(bm, btn);
   if (typeof ResizeObserver === 'undefined') return;
   if (!sizeObserver) {
     sizeObserver = new ResizeObserver((entries) => {
+      const measurements: { button: HTMLElement; geometry: ReturnType<typeof bookmarkButtonGeometry> }[] = [];
       for (const { target } of entries) {
         const button = sizeButtons.get(target);
         if (!button) continue;
         if (!target.isConnected || !button.isConnected) unwatchSize(target);
-        else sizeSeparateButton(target as HTMLElement, button);
+        else measurements.push({ button, geometry: bookmarkButtonGeometry(target as HTMLElement) });
       }
+      for (const { button, geometry } of measurements) applySeparateButtonSize(button, geometry);
     });
   }
   if (sizeButtons.has(bm)) unwatchSize(bm);
@@ -223,6 +229,7 @@ export function injectButtons(root: ParentNode = document): void {
   ensureStyle();
   if (isBroken()) return; // X の画面構造が変わっているときはボタンを挿入しない
   const fresh: Element[] = [];
+  const inserted: { bookmark: HTMLElement; button: HTMLElement }[] = [];
   for (const article of queryAllFirst(root, 'tweet').els) {
     const bm = queryFirst<HTMLElement>(article, 'bookmarkButton')?.el;
     if (!bm) continue;
@@ -232,6 +239,7 @@ export function injectButtons(root: ParentNode = document): void {
       const btn = createSeparateButton(article);
       placeSeparateButton(bm, btn);
       watchSize(bm, btn);
+      inserted.push({ bookmark: bm, button: btn });
       fresh.push(article);
     } else {
       if (bm.querySelector(`[${BADGE_ATTR}]`)) continue;
@@ -244,6 +252,12 @@ export function injectButtons(root: ParentNode = document): void {
       fresh.push(article);
     }
   }
+  // インライン要素には初回の通知が来ないため、全件を挿入してから測定と反映を分けて行う。
+  const measurements = inserted.map(({ bookmark, button }) => ({
+    button,
+    geometry: bookmarkButtonGeometry(bookmark),
+  }));
+  for (const { button, geometry } of measurements) applySeparateButtonSize(button, geometry);
   void refreshArticles(fresh); // 新しく付けた分は、まとめて 1 回の読み込みで表示する
 }
 

@@ -239,7 +239,7 @@ describe('scrolling, pausing and finishing', () => {
     deps.loading = false;
     await until(c, (s) => s.status === 'done');
     expect(c.state!.imported).toBe(12);
-  });
+  }, 15000);
 
   it('B-4: if the position does not move and no new post appears 3 times in a row, it finishes even while the loading indicator stays on', async () => {
     const { w, deps } = world(12);

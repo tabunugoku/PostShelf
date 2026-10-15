@@ -1,0 +1,29 @@
+<!-- 版: v75。重複 ID と、引用の ID しか読めない記事を再現する。本文・アカウントは架空。 -->
+<article data-testid="tweet" id="first-duplicate">
+  <div role="link">
+    <div data-testid="User-Name"><span>Sample Quote</span><span>@sample_quote</span></div>
+    <a href="/sample_quote/status/7599"><time datetime="2026-01-01"></time></a>
+    <div data-testid="tweetText">架空の引用元の本文。</div>
+  </div>
+  <div data-testid="User-Name"><span>Sample First</span><span>@sample_first</span></div>
+  <a href="/sample_first/status/7501"><time datetime="2026-01-02"></time></a>
+  <div data-testid="tweetText">架空の先頭の本文。</div>
+</article>
+<article data-testid="tweet" id="last-duplicate">
+  <div data-testid="User-Name"><span>Sample Last</span><span>@sample_last</span></div>
+  <a href="/sample_last/status/7501"><time datetime="2026-01-03"></time></a>
+  <div data-testid="tweetText">架空の後の記事の本文。</div>
+</article>
+<article data-testid="tweet" id="saved-post">
+  <div data-testid="User-Name"><span>Sample Saved</span><span>@sample_saved</span></div>
+  <a href="/sample_saved/status/7502"><time datetime="2026-01-04"></time></a>
+  <div data-testid="tweetText">架空の保存済みの本文。</div>
+</article>
+<article data-testid="tweet" id="unreadable-post">
+  <div role="link">
+    <div data-testid="User-Name"><span>Sample Quote</span><span>@sample_quote</span></div>
+    <a href="/sample_quote/status/7503"><time datetime="2026-01-05"></time></a>
+  </div>
+  <a href="/sample_missing/status/unreadable"><time></time></a>
+  <div data-testid="tweetText">架空の ID が読めない本文。</div>
+</article>

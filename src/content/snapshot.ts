@@ -95,8 +95,7 @@ const httpsPoster = (poster: string | null | undefined): string | undefined =>
   poster && /^https:\/\//i.test(poster) ? poster : undefined;
 
 /** 引用は表示されていた本文・画像と動画のサムネイルだけ。再生や原文の取得はしない。 */
-function extractQuote(article: Element): QuoteSnapshot | undefined {
-  const el = findQuote(article);
+function extractQuote(el: Element | null): QuoteSnapshot | undefined {
   if (!el) return undefined;
   const name = queryFirstInQuote(el, 'userName')?.el;
   const author = (name ? queryFirstInQuote(name, 'nameText')?.el.textContent?.trim() : '') ?? '';
@@ -154,11 +153,11 @@ export function extractTweet(article: Element): Extracted | null {
   // リンクと画像の数が X の DOM で常に合うかは実機未確認の推測 (自分の部分だけを数える。合わなければ待ちが 1 ポストあたり最大 8 秒になるだけで、保存は止まらない)
   const photoLinks = queryAllOwn(article, 'photoLink').els.length;
   const photoPending = photoLinks > 0 && media.length < photoLinks;
-  const quote = extractQuote(article);
+  const quoteEl = findQuote(article);
+  const quote = extractQuote(quoteEl);
   // 写真リンク自体が後から DOM に入る画像だけのポストを想定 (原因・DOM 構造は実機未確認の推測)。
   // 投票だけや削除済みなど、本当に本文も添付内容も無い表示でも、最大 8 秒で打ち切り保存は止まらない。
   const emptyPending = !text && !media.length && !hasVideo && !hasLink && !quote;
-  const quoteEl = findQuote(article);
   const quoteAvatarEl = quoteEl ? queryFirstInQuote<HTMLImageElement>(quoteEl, 'avatar')?.el : undefined;
   // img 自体が後から DOM に入る可能性も待つ (原因・DOM 構造は実機未確認の推測)。
   // 広告や削除・非表示など、元からアイコンが無い表示も、1 ポストあたり最大 8 秒で打ち切り保存は止まらない。

@@ -6,7 +6,7 @@ import { getSettings, onSettingsChanged, recordPending } from '../shared/setting
 import { closeAutoCollectDialog, openAutoCollectDialog } from './autocollectDialog';
 import { xTheme } from './theme';
 import { getCurrentAccount, subscribeAccount } from './account';
-import { extractTweet, type Extracted } from './snapshot';
+import { extractTweet, tweetIdOf, type Extracted } from './snapshot';
 
 export const isBookmarksPage = (path = location.pathname) => isBookmarksPath(path);
 
@@ -59,7 +59,10 @@ export async function refreshCollectButton(): Promise<void> {
     btn.title = t('accountUnknown');
     return;
   }
-  const n = unsavedItems(collectVisible(), await cachedSavedIds(account.id)).length;
+  const visibleIds = new Set(queryAllFirst(document, 'tweet').els
+    .map(tweetIdOf).filter((id): id is string => id !== null));
+  const savedIds = await cachedSavedIds(account.id);
+  const n = [...visibleIds].filter((id) => !savedIds.has(id)).length;
   if (account.id !== getCurrentAccount()?.id) return;
   // manager の取り込み案内バナー用に、最後に観測した件数を残す (アカウントごと)
   void recordPending(account.id, n).catch(() => {});

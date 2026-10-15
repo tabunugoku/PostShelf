@@ -1,0 +1,82 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`引用の探索と結果を保つ: v42-nested-quote > 項目順 1`] = `"{"tweetId":"111","avatarPending":true,"quoteAvatarPending":true,"snapshot":{"quote":{"hasVideo":true,"videoPoster":"https://example.invalid/amplify_video_thumb/sample.jpg","author":"Sample Quote","handle":"@sample_quote","text":"Sample translated quote body","media":[],"avatar":"https://example.invalid/quote-avatar.jpg","createdAt":"2026-10-09T19:17:26.000Z","translated":true},"text":"Sample main body","author":"Sample Main","handle":"@sample_main","avatar":"https://example.invalid/main-avatar.jpg","media":[],"createdAt":"2026-10-10T09:52:19.000Z","url":"https://x.com/sample_main/status/111","hasVideo":false,"hasLink":false}}"`;
+
+exports[`引用の探索と結果を保つ: v42-nested-quote 1`] = `
+{
+  "avatarPending": true,
+  "quoteAvatarPending": true,
+  "snapshot": {
+    "author": "Sample Main",
+    "avatar": "https://example.invalid/main-avatar.jpg",
+    "createdAt": "2026-10-10T09:52:19.000Z",
+    "handle": "@sample_main",
+    "hasLink": false,
+    "hasVideo": false,
+    "media": [],
+    "quote": {
+      "author": "Sample Quote",
+      "avatar": "https://example.invalid/quote-avatar.jpg",
+      "createdAt": "2026-10-09T19:17:26.000Z",
+      "handle": "@sample_quote",
+      "hasVideo": true,
+      "media": [],
+      "text": "Sample translated quote body",
+      "translated": true,
+      "videoPoster": "https://example.invalid/amplify_video_thumb/sample.jpg",
+    },
+    "text": "Sample main body",
+    "url": "https://x.com/sample_main/status/111",
+  },
+  "tweetId": "111",
+}
+`;
+
+exports[`引用の探索と結果を保つ: v42-quote-detail > 項目順 1`] = `"{"tweetId":"111","avatarPending":true,"quoteAvatarPending":true,"snapshot":{"quote":{"author":"Sample Quote","handle":"@sample_quote","text":"Quote body","media":[],"avatar":"https://example.invalid/a2_normal.jpg","createdAt":"2026-10-09T19:17:26.000Z"},"text":"Main body","author":"Sample Main","handle":"@sample_main","avatar":"https://example.invalid/a1.jpg","media":[],"createdAt":"2026-10-10T09:52:19.000Z","url":"https://x.com/sample_main/status/111","hasVideo":false,"hasLink":false}}"`;
+
+exports[`引用の探索と結果を保つ: v42-quote-detail 1`] = `
+{
+  "avatarPending": true,
+  "quoteAvatarPending": true,
+  "snapshot": {
+    "author": "Sample Main",
+    "avatar": "https://example.invalid/a1.jpg",
+    "createdAt": "2026-10-10T09:52:19.000Z",
+    "handle": "@sample_main",
+    "hasLink": false,
+    "hasVideo": false,
+    "media": [],
+    "quote": {
+      "author": "Sample Quote",
+      "avatar": "https://example.invalid/a2_normal.jpg",
+      "createdAt": "2026-10-09T19:17:26.000Z",
+      "handle": "@sample_quote",
+      "media": [],
+      "text": "Quote body",
+    },
+    "text": "Main body",
+    "url": "https://x.com/sample_main/status/111",
+  },
+  "tweetId": "111",
+}
+`;
+
+exports[`引用の探索と結果を保つ: v46-tweet > 項目順 1`] = `"{"tweetId":"900","avatarPending":true,"snapshot":{"text":"架空の本文","author":"Sample User","handle":"@sample_user","media":[],"createdAt":"2026-10-01T00:00:00Z","url":"https://x.com/sample_user/status/900","hasVideo":false,"hasLink":false}}"`;
+
+exports[`引用の探索と結果を保つ: v46-tweet 1`] = `
+{
+  "avatarPending": true,
+  "snapshot": {
+    "author": "Sample User",
+    "avatar": undefined,
+    "createdAt": "2026-10-01T00:00:00Z",
+    "handle": "@sample_user",
+    "hasLink": false,
+    "hasVideo": false,
+    "media": [],
+    "text": "架空の本文",
+    "url": "https://x.com/sample_user/status/900",
+  },
+  "tweetId": "900",
+}
+`;
