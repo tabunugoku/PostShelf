@@ -92,6 +92,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   const th = xTheme();
   pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;text-wrap:pretty`;
   pop.lang = uiLang(); // X のページの lang ではなく UI の言語で折り返す
+  pop.style.cssText += ';box-sizing:border-box;display:flex;flex-direction:column;max-height:calc(100vh - 16px)';
   pop.addEventListener('click', (e) => e.stopPropagation());
 
   // 保存先の表示 (アバター小 + @ハンドル)。判定できないときは警告だけを出して保存させない
@@ -113,6 +114,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     head.setAttribute('role', 'alert');
     head.textContent = t('accountUnknown');
   }
+  head.style.flexShrink = '0';
   pop.append(head);
 
   // 保存に失敗したときは、ポップオーバーの中に理由を出す (console だけで終わらせない)
@@ -179,7 +181,9 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     extras: { recentIds },
   });
   if (account) pop.append(picker.el);
-  pop.append(errorEl);
+  const footer = document.createElement('div');
+  footer.dataset.popoverFooter = '';
+  footer.style.flexShrink = '0';
   // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
   if (account && mode === 'replace' && queryFirst(article, 'removeBookmark')) {
     const rel = document.createElement('button');
@@ -190,7 +194,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
       setNativeBookmark(article, false);
       rel.remove();
     });
-    pop.append(rel);
+    footer.append(rel);
   }
   // 下部の 1 行: 左端にサイドパネル、右端に削除 (どちらもアイコンだけ)。content script からは直接開けないので、background へ依頼する
   const side = iconButton(th, t('openSidePanel'), 'ti-layout-sidebar-right');
@@ -202,7 +206,12 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   bottom.style.cssText = 'box-sizing:border-box;display:flex;align-items:center;justify-content:space-between';
   bottom.append(side);
   if (account) bottom.append(unsave);
-  pop.append(divider(th), bottom);
+  footer.prepend(bottom);
+  bottom.before(divider(th));
+  // 追加、区切り、操作行、置き換えモードの解除、失敗表示の順で固定する。
+  if (account && picker.addButton) footer.prepend(picker.addButton);
+  footer.append(errorEl);
+  pop.append(footer);
   document.body.append(pop);
   position(pop, anchor);
   picker.focusFilter();
