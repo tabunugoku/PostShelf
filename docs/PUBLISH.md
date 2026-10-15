@@ -17,7 +17,7 @@
    - 必須の `permissions` / `host_permissions` が現在の一覧と完全に同じ (増えていたら失敗)
    - 任意の権限が現在の一覧と完全に同じ: `optional_host_permissions` は `https://pbs.twimg.com/*` だけ、`optional_permissions` は無し (増えていたら失敗)
    - 全 8 言語の `messages.json` のキーとプレースホルダーが一致している
-   - `dist` の JavaScript に、外部のスクリプトの URL・`eval`・`new Function`・リモートコードの読み込みが無い。`fetch("https://...")`・`XMLHttpRequest`・`WebSocket`・`sendBeacon` の引数が、x.com / twitter.com / pbs.twimg.com 以外のホストの文字列リテラルになっているものも失敗にする (URL を変数や連結で組み立てる書き方は見つけられない)
+   - `dist` の JavaScript に、外部のスクリプトの URL・`eval`・`new Function`・リモートコードの読み込みが無い。`fetch("https://...")`・`XMLHttpRequest`・`WebSocket`・`sendBeacon` の引数が、x.com / twitter.com / pbs.twimg.com 以外のホストの文字列リテラルになっているものも失敗にする。例外は、更新の確認 (v73) の URL `https://api.github.com/repos/tabunugoku/PostShelf/releases/latest` の 1 つだけ (ホストごとではなく、この URL だけを許す。`scripts/checks.mjs` の `ALLOWED_NETWORK_URLS`)。URL を変数や連結で組み立てる書き方は見つけられない
    - manifest が指すファイル (アイコンなど) がすべて zip に入っている
    - `key` から求めた拡張機能 ID が `docs/INSTALL.md` の ID と同じ
 3. **リリースノートを書く**: `docs/releases/v<version>.md` に、日本語で「## 追加」と「## 修正」の節を書き、それを英語に訳して「## Added」と「## Fixed」の節にする。英語を先に置き、日本語の原文は末尾の `<details><summary>日本語 (Japanese)</summary>` に折りたたむ (README.md と同じ形。4 つの節と折りたたみは必須で、無ければ `release:check` と Release のワークフローが失敗する)。過去のリリースも同じ形にしてある。
@@ -51,7 +51,7 @@ MIT に決定済みです。`LICENSE` に全文があり、`README.md` の「ラ
 - [ ] Chrome Web Store で「PostShelf」の同名拡張がないか再確認
 - [x] 拡張機能アイコン: `manifest.json` の `icons` (16/32/48/128) と `action.default_icon` (16/32/48) に設定済み
 - [ ] ストア掲載用のアイコン画像: 128px = `static/brand/icon-128.png`、512px = `docs/brand/icon-512.png` (ソース SVG は `docs/brand/icon.svg`、確認用 `docs/brand/preview.png`)。青 (#1D9BF0) の吹き出しと白い栞だけ (背景なし。ライト・ダークのどちらでも見える)。X のロゴは使っていない
-- [ ] ストア掲載文・スクリーンショット・プライバシーポリシー (外部送信なし、保存は端末内のみ)
+- [ ] ストア掲載文・スクリーンショット・プライバシーポリシー (外部送信なし、保存は端末内のみ。更新の確認 (v73) をオンにしたときだけ、GitHub に版の番号を問い合わせ、GitHub に時刻と IP アドレスが伝わることを書く。ストアで配るなら、ストアが自動で更新するので、この機能は外すか、オフのまま隠すかを決める)
 - [ ] 権限の説明: `storage`/`unlimitedStorage` (ブックマーク保存), `sidePanel` (サイドパネル), host `x.com`/`twitter.com` (ボタン挿入と DOM 読み取り。取り込みは、ユーザーが開いた「履歴」→「ブックマーク」タブ `/i/history` の表示中のポストだけを、ボタンを押したとき、または確認ダイアログで同意して始めた自動取り込みのときに読む。自動スクロールの規約上のリスクは、上の「ブックマークの自動取り込み」を参照)
   - **画像のキャッシュ (任意の権限)**: `pbs.twimg.com` (X の画像サーバー) へのアクセスは、manifest の `optional_host_permissions` に宣言している。必須の `permissions` / `host_permissions` は増やしていない (テストで manifest を確認)。そのため、拡張機能の更新だけで Chrome が権限の再承認を求めることはない。設定「画像のキャッシュ」をオンにするクリックの中で `chrome.permissions.request` を呼び、拒否されたらオフに戻す。通信は画像の取得 (GET) だけで、X の非公開 API は呼ばない。取得した画像はこの PC の中にだけ置き、外部へ送らない
   - プライバシーポリシーには、キャッシュをオンにした場合の通信先 (`pbs.twimg.com`) と、画像が端末内にだけ保存されることを書く (初期値はオフ)
