@@ -1,6 +1,6 @@
 import { queryFirst } from '../shared/selectors';
 import { jaWrapRule, t, uiLang } from '../shared/strings';
-import { extractTweet } from './snapshot';
+import { extractTweet, tweetIdOf } from './snapshot';
 import { getBookmark, listFolders, removeBookmark, setBookmarkFolders } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
@@ -37,7 +37,11 @@ export function ensureIconCss(): void {
   if (link.href) document.head.append(link);
 }
 
+let stopTracking: (() => void) | undefined;
+
 function closePopovers(): void {
+  stopTracking?.();
+  stopTracking = undefined;
   document.querySelectorAll(`.${POP_CLASS}`).forEach((p) => p.remove());
 }
 
@@ -47,17 +51,18 @@ let opening = false;
 export async function openPopover(article: Element, anchor: HTMLElement): Promise<HTMLElement | null> {
   if (opening) return null;
   opening = true;
+  const tweetId = tweetIdOf(article);
   try {
     return await buildPopover(article, anchor);
   } catch {
-    return openErrorPopover(anchor);
+    return openErrorPopover(article, anchor, tweetId);
   } finally {
     opening = false;
   }
 }
 
 /** 保存データを読めなかったとき、同じ位置に失敗の表示だけの小さなポップオーバーを出す。閉じ方は通常のものと同じ (installGlobalHandlers) */
-function openErrorPopover(anchor: HTMLElement): HTMLElement {
+function openErrorPopover(article: Element, anchor: HTMLElement, tweetId: string | null): HTMLElement {
   closePopovers();
   const th = xTheme();
   const pop = document.createElement('div');
@@ -68,7 +73,7 @@ function openErrorPopover(anchor: HTMLElement): HTMLElement {
   pop.textContent = t('errorStorage');
   pop.addEventListener('click', (e) => e.stopPropagation());
   document.body.append(pop);
-  position(pop, anchor);
+  trackPopover(pop, article, anchor, tweetId);
   return pop;
 }
 
@@ -213,7 +218,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   footer.append(errorEl);
   pop.append(footer);
   document.body.append(pop);
-  position(pop, anchor);
+  trackPopover(pop, article, anchor, tweetId);
   picker.focusFilter();
   return pop;
 }
@@ -240,8 +245,7 @@ function minimumHeight(pop: HTMLElement): number {
 }
 
 /** 初回だけ表示側を決め、以後はその側を保ったまま画面の余白内に位置を収める */
-function position(pop: HTMLElement, anchor: HTMLElement, placement?: Placement): Placement {
-  const r = anchor.getBoundingClientRect();
+function position(pop: HTMLElement, r: DOMRect, placement?: Placement): Placement {
   const vw = document.documentElement.clientWidth || window.innerWidth;
   const vh = document.documentElement.clientHeight || window.innerHeight;
   if (!placement) {
@@ -255,7 +259,9 @@ function position(pop: HTMLElement, anchor: HTMLElement, placement?: Placement):
     else if (naturalHeight <= above) side = 'above';
     else if (Math.max(below, above) < minimumHeight(pop)) side = 'center';
     else side = below >= above ? 'below' : 'above';
-    const available = side === 'center' ? vh - 16 : side === 'below' ? below : above;
+    let available = vh - 16;
+    if (side === 'below') available = below;
+    else if (side === 'above') available = above;
     placement = { side, maxHeight: Math.max(0, available) };
   }
   pop.style.boxSizing = 'border-box';
@@ -265,11 +271,46 @@ function position(pop: HTMLElement, anchor: HTMLElement, placement?: Placement):
   const centered = placement.side === 'center';
   const desiredLeft = centered ? (vw - w) / 2 : r.left + r.width / 2 - w / 2;
   const left = Math.min(Math.max(8, desiredLeft), Math.max(8, vw - w - 8));
-  const desiredTop = centered ? (vh - h) / 2 : placement.side === 'above' ? r.top - 4 - h : r.bottom + 4;
+  let desiredTop = r.bottom + 4;
+  if (centered) desiredTop = (vh - h) / 2;
+  else if (placement.side === 'above') desiredTop = r.top - 4 - h;
   const top = Math.min(Math.max(8, desiredTop), Math.max(8, vh - h - 8));
   pop.style.left = `${left}px`;
   pop.style.top = `${top}px`;
   return placement;
+}
+
+/** 開いている間だけ位置を追従し、元の投稿を追えなくなったら共通の処理で閉じる */
+function trackPopover(pop: HTMLElement, article: Element, anchor: HTMLElement, tweetId: string | null): void {
+  const placement = position(pop, anchor.getBoundingClientRect());
+  let pendingFrame: number | null = null;
+  const update = () => {
+    pendingFrame = null;
+    const r = anchor.getBoundingClientRect();
+    const vh = document.documentElement.clientHeight || window.innerHeight;
+    // X が投稿の要素を別の投稿に再利用する可能性は、実機未確認の推測。
+    if (
+      !anchor.isConnected
+      || !article.contains(anchor)
+      || tweetIdOf(article) !== tweetId
+      || r.bottom < 0
+      || r.top > vh
+    ) {
+      closePopovers();
+      return;
+    }
+    if (placement.side !== 'center') position(pop, r, placement);
+  };
+  const schedule = () => {
+    if (pendingFrame === null) pendingFrame = window.requestAnimationFrame(update);
+  };
+  window.addEventListener('scroll', schedule, { capture: true, passive: true });
+  window.addEventListener('resize', schedule);
+  stopTracking = () => {
+    window.removeEventListener('scroll', schedule, true);
+    window.removeEventListener('resize', schedule);
+    if (pendingFrame !== null) window.cancelAnimationFrame(pendingFrame);
+  };
 }
 
 export function installGlobalHandlers(): void {
