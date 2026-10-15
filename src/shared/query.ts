@@ -59,19 +59,18 @@ export { foldText };
 /**
  * ポストごとの、正規化済みの検索対象 (本文・投稿者・ハンドル)。キーは accountId:tweetId。
  * 読み込みのたびに snapshot のオブジェクトは作り直される (自動取り込み中は 20 件ごと) ので、オブジェクトではなく ID で持ち、
- * sig (本文・投稿者・ハンドルそのもの) が同じなら再計算しない。本文が変わったポストだけ作り直す (v35)。
+ * 本文・投稿者・ハンドルを個別に照合し、同じなら再計算しない。変わったポストだけ作り直す。
  */
 const FOLD_CACHE_MAX = 20000;
-const foldedPost = new Map<string, { sig: string; folded: string }>();
+const foldedPost = new Map<string, { text: string; author: string; handle: string; folded: string }>();
 const foldedOf = (b: Bookmark): string => {
   const s = b.snapshot;
-  const sig = [s.text, s.author, s.handle].join('\u0000');
   const key = `${b.accountId}:${b.tweetId}`;
   const hit = foldedPost.get(key);
-  if (hit && hit.sig === sig) return hit.folded;
+  if (hit && hit.text === s.text && hit.author === s.author && hit.handle === s.handle) return hit.folded;
   const folded = [s.text, s.author, s.handle].map(foldText).join('\u0000'); // 欄をまたぐ一致を避ける区切り
   if (foldedPost.size >= FOLD_CACHE_MAX && !hit) foldedPost.clear(); // メモリが増えすぎないよう、上限を超えたら全体を捨てて作り直す
-  foldedPost.set(key, { sig, folded });
+  foldedPost.set(key, { text: s.text, author: s.author, handle: s.handle, folded });
   return folded;
 };
 
