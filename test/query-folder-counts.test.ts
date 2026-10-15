@@ -26,16 +26,18 @@ const bookmarks: Bookmark[] = memberships.map((folderIds, index) => ({
 describe('全フォルダの件数', () => {
   it.each([true, false])('祖先にも表示する = %s で変更前の countFolder と一致する', (showInAncestors) => {
     const descendantsOf = showInAncestors ? undefined : descendantsMap(folders);
-    const counts = countFolders(bookmarks, now, descendantsOf);
-    for (const id of ['all', 'inbox', RECENT_ID, 'missing', ...folders.map((f) => f.id)]) {
+    const counts = countFolders(bookmarks, descendantsOf);
+    expect(counts.has(RECENT_ID)).toBe(false);
+    for (const id of ['all', 'inbox', 'missing', ...folders.map((f) => f.id)]) {
       expect(counts.get(id) ?? 0, id).toBe(countFolder(bookmarks, id, now, descendantsOf));
     }
   });
 
   it('空の一覧と子孫表でも変更前と一致する', () => {
     for (const all of [[], bookmarks]) {
-      const counts = countFolders(all, now, new Map());
-      for (const id of ['all', 'inbox', RECENT_ID, ...folders.map((f) => f.id)]) {
+      const counts = countFolders(all, new Map());
+      expect(counts.has(RECENT_ID)).toBe(false);
+      for (const id of ['all', 'inbox', ...folders.map((f) => f.id)]) {
         expect(counts.get(id) ?? 0).toBe(countFolder(all, id, now, new Map()));
       }
     }
@@ -51,7 +53,7 @@ describe('全フォルダの件数', () => {
       }
       return undefined;
     };
-    countFolders(all, now, descendantsMap(folders));
+    countFolders(all, descendantsMap(folders));
     expect(iterations).toBe(bookmarks.length);
   });
 });

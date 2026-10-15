@@ -117,18 +117,17 @@ export function countFolder(
   return all.filter((b) => inView(b, folderId, now, descendantsOf)).length;
 }
 
-/** 全ポストを一度走査し、一覧と同じ所属判定で各ビューの件数を数える */
+/** 全ポストを一度走査し、「直近 7 日」以外の各ビューの件数を一覧と同じ所属判定で数える */
 export function countFolders(
   all: Bookmark[],
-  now = Date.now(),
   descendantsOf?: DescendantsOf,
-): ReadonlyMap<string, number> {
-  const counts = new Map<string, number>([[ALL_FOLDER_ID, all.length], [RECENT_ID, 0]]);
+): Map<string, number> {
+  const counts = new Map<string, number>([[ALL_FOLDER_ID, all.length]]);
   for (const bookmark of all) {
-    if (inView(bookmark, RECENT_ID, now)) counts.set(RECENT_ID, counts.get(RECENT_ID)! + 1);
     for (const id of new Set(bookmark.folderIds)) {
       if (id === ALL_FOLDER_ID || id === RECENT_ID) continue;
-      if (inView(bookmark, id, now, descendantsOf)) counts.set(id, (counts.get(id) ?? 0) + 1);
+      // 時刻に依存する「直近 7 日」は除外済みなので、所属判定の時刻は固定する。
+      if (inView(bookmark, id, 0, descendantsOf)) counts.set(id, (counts.get(id) ?? 0) + 1);
     }
   }
   return counts;
