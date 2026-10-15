@@ -117,6 +117,23 @@ export function countFolder(
   return all.filter((b) => inView(b, folderId, now, descendantsOf)).length;
 }
 
+/** 全ポストを一度走査し、一覧と同じ所属判定で各ビューの件数を数える */
+export function countFolders(
+  all: Bookmark[],
+  now = Date.now(),
+  descendantsOf?: DescendantsOf,
+): ReadonlyMap<string, number> {
+  const counts = new Map<string, number>([[ALL_FOLDER_ID, all.length], [RECENT_ID, 0]]);
+  for (const bookmark of all) {
+    if (inView(bookmark, RECENT_ID, now)) counts.set(RECENT_ID, counts.get(RECENT_ID)! + 1);
+    for (const id of new Set(bookmark.folderIds)) {
+      if (id === ALL_FOLDER_ID || id === RECENT_ID) continue;
+      if (inView(bookmark, id, now, descendantsOf)) counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
+
 /** 保存データにある投稿者のハンドル一覧 (件数の多い順、同数は名前順) */
 export function authorHandles(all: Bookmark[]): { handle: string; author: string; count: number }[] {
   const m = new Map<string, { handle: string; author: string; count: number }>();

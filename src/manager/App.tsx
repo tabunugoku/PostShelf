@@ -6,7 +6,7 @@ import { ALL_FOLDER_ID, INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName,
 import {
   RECENT_ID,
   authorHandles,
-  countFolder,
+  countFolders,
   hasActiveFilters,
   queryBookmarks,
   type Filters,
@@ -477,12 +477,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   // 左のメニューと見出しの件数は、保存データ・表示用の子孫表が変わるまで使い回す。
   // 「直近 7 日」の境目も、同じキャッシュを使う間は動かない。
-  const countCache = useMemo(() => new Map<string, number>(), [bookmarks, viewDescendants]);
-  const count = (id: string) => {
-    let n = countCache.get(id);
-    if (n === undefined) countCache.set(id, (n = countFolder(bookmarks, id, now, viewDescendants)));
-    return n;
-  };
+  const countCache = useMemo(() => countFolders(bookmarks, now, viewDescendants), [bookmarks, viewDescendants]);
+  const count = (id: string) => countCache.get(id) ?? 0;
   const authors = useMemo(() => authorHandles(bookmarks), [bookmarks]);
   const previousAvatars = useRef<AvatarFallback>(new Map());
   const avatarFallback = useMemo(() => {
