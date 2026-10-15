@@ -325,7 +325,9 @@ export function initButtons(): () => void {
   watchShared();
   const unhealth = subscribeHealth(() => applyButtonMode(mode)); // broken になったら UI を外し、戻ったら付け直す
   void getSettings().then((s) => applyButtonMode(s.buttonMode));
-  const unsettings = onSettingsChanged((s) => applyButtonMode(s.buttonMode));
+  const unsettings = onSettingsChanged((s) => {
+    if (s.buttonMode !== mode) applyButtonMode(s.buttonMode);
+  });
   const undata = onDataChanged(() => {
     dropShared();
     void refreshAll();
