@@ -111,8 +111,7 @@ export interface FoundAll<T extends Element = Element> {
 /** 最初に見つかった候補の要素 */
 export function queryFirst<T extends Element = Element>(root: ParentNode, key: SelKey): Found<T> | null {
   if (key === 'avatar' || key === 'accountAvatar') {
-    const { els, index } = queryAllFirst<T>(root, key);
-    return els.length ? { el: els[0], index } : null;
+    return queryFirstMatching<T>(root, key, (el) => avatarCandidate(el, key));
   }
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
@@ -163,6 +162,33 @@ function avatarCandidate(el: Element, key: SelKey): boolean {
   return !el.closest(CANDIDATES.userName[0]) && !isEmojiImageUrl((el as HTMLImageElement).src);
 }
 
+/** 候補の優先順に調べ、条件を満たした最初の要素で探索を止める。 */
+function queryFirstMatching<T extends Element>(
+  root: ParentNode,
+  key: SelKey,
+  accepts: (el: T) => boolean,
+): Found<T> | null {
+  const list = CANDIDATES[key];
+  for (let index = 0; index < list.length; index++) {
+    for (const el of root.querySelectorAll<T>(list[index])) {
+      if (accepts(el)) return { el, index };
+    }
+  }
+  return null;
+}
+
+/** 引用の引用を除く条件を、全件取得と最初の 1 件の取得で共有する。 */
+function quoteCandidate(el: Element, key: SelKey): boolean {
+  return !closestFirst(el, 'nestedQuote') && avatarCandidate(el, key);
+}
+
+/** 本体に属する条件を、全件取得と最初の 1 件の取得で共有する。 */
+function ownCandidate(article: Element, el: Element, key: SelKey): boolean {
+  if (!avatarCandidate(el, key)) return false;
+  const quote = closestFirst(el, 'quoteContainer')?.el;
+  return !quote || !article.contains(quote);
+}
+
 /** 引用の帯には data-testid もボタンも無いので構造で見分ける。壊れやすい (実機の観測のみ)。 */
 export function isTranslatedQuoteText(text: Element): boolean {
   const band = text.previousElementSibling;
@@ -180,7 +206,7 @@ export function queryAllInQuote<T extends Element = Element>(root: Element, key:
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
     const els = [...root.querySelectorAll<T>(list[i])]
-      .filter((el) => !closestFirst(el, 'nestedQuote') && avatarCandidate(el, key));
+      .filter((el) => quoteCandidate(el, key));
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
@@ -188,19 +214,14 @@ export function queryAllInQuote<T extends Element = Element>(root: Element, key:
 
 /** 外側の引用に属する最初の要素。 */
 export function queryFirstInQuote<T extends Element = Element>(root: Element, key: SelKey): Found<T> | null {
-  const { els, index } = queryAllInQuote<T>(root, key);
-  return els.length ? { el: els[0], index } : null;
+  return queryFirstMatching<T>(root, key, (el) => quoteCandidate(el, key));
 }
 
 /** 引用の中の候補を除いてから優先順を判定する。本体の候補が無ければ次の構造的な候補を試す。 */
 export function queryAllOwn<T extends Element = Element>(article: Element, key: SelKey): FoundAll<T> {
   const list = CANDIDATES[key];
   for (let i = 0; i < list.length; i++) {
-    const els = [...article.querySelectorAll<T>(list[i])].filter((el) => {
-      if (!avatarCandidate(el, key)) return false;
-      const quote = closestFirst(el, 'quoteContainer')?.el;
-      return !quote || !article.contains(quote);
-    });
+    const els = [...article.querySelectorAll<T>(list[i])].filter((el) => ownCandidate(article, el, key));
     if (els.length) return { els, index: i };
   }
   return { els: [], index: -1 };
@@ -208,8 +229,7 @@ export function queryAllOwn<T extends Element = Element>(article: Element, key: 
 
 /** 本体の最初の要素。article の外側の role=link は引用扱いにしない。 */
 export function queryOwn<T extends Element = Element>(article: Element, key: SelKey): Found<T> | null {
-  const { els, index } = queryAllOwn<T>(article, key);
-  return els.length ? { el: els[0], index } : null;
+  return queryFirstMatching<T>(article, key, (el) => ownCandidate(article, el, key));
 }
 
 /** 本体の time を囲むポストへのリンク。無ければ本体の最初の statusLink を使う。 */

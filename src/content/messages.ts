@@ -1,6 +1,6 @@
 import { queryAllFirst, queryFirst } from '../shared/selectors';
 import { getHealth, getSettings } from '../shared/settings';
-import { extractTweet, fillSource } from './snapshot';
+import { extractTweet, fillSource, tweetIdOf } from './snapshot';
 import { setNativeBookmark } from './native';
 import { getLocalHealth } from './health';
 import { blockedWords, buildReport, safePath, skeleton } from '../shared/diagnostics';
@@ -8,7 +8,7 @@ import { blockedWords, buildReport, safePath, skeleton } from '../shared/diagnos
 /** 表示中のポストのうち tweetId が一致する article (個別ページでは本体のポスト) */
 export function findArticle(tweetId: string, root: ParentNode = document): Element | null {
   for (const a of queryAllFirst(root, 'tweet').els) {
-    if (extractTweet(a)?.tweetId === tweetId) return a;
+    if (tweetIdOf(a) === tweetId) return a;
   }
   return null;
 }
