@@ -2,7 +2,7 @@ import { RELEASES_API_URL } from './links';
 import { getSettings, getUpdateCheckState, saveUpdateCheckState } from './settings';
 
 /**
- * 更新の確認 (v73)。設定「新しい版を確かめる」がオンのときだけ、GitHub の最新のリリースの版の番号を読む。
+ * 更新の確認 (v73)。設定「新しいバージョンを確かめる」がオンのときだけ、GitHub の最新のリリースのバージョン番号を読む。
  * 外部通信なしの方針の唯一の例外 (CLAUDE.md の「守ること」)。読むだけで、ダウンロードと適用はしない。
  * 背景で定期的には動かさない (alarms の権限を増やさない)。画面を開いたときに呼ぶ
  */
@@ -16,7 +16,7 @@ export function parseVersion(text: string): number[] | null {
   return m ? m[1].split('.').map(Number) : null;
 }
 
-/** latest が current より新しい版か。どちらかが読めない形なら false (案内を出さない側に倒す) */
+/** latest が current より新しいバージョンか。どちらかが読めない形なら false (案内を出さない側に倒す) */
 export function isNewerVersion(latest: string, current: string): boolean {
   const a = parseVersion(latest);
   const b = parseVersion(current);
@@ -31,7 +31,7 @@ export function isNewerVersion(latest: string, current: string): boolean {
 export interface UpdateCheckDeps {
   fetch: typeof fetch;
   now: () => number;
-  /** いま動いている版 (manifest の version) */
+  /** いま動いているバージョン (manifest の version) */
   current: () => string;
 }
 
@@ -60,7 +60,7 @@ async function readLatestTag(deps: UpdateCheckDeps): Promise<string | null> {
 }
 
 /**
- * 新しい版があれば、その版の番号 (tag_name) を返す。無い・オフ・確かめられないときは null。
+ * 新しいバージョンがあれば、そのバージョン番号 (tag_name) を返す。無い・オフ・確かめられないときは null。
  * 前回から 24 時間たっていなければ問い合わせず、前回読めた結果だけで判断する (画面を開くたびに案内は出し続ける)。
  * 問い合わせる前に時刻を記録する (失敗が続いても、何度も問い合わせない)。
  * 管理画面とポップアップを同時に開くと、記録の前に両方が読むことがあり、まれに 2 回問い合わせ得る

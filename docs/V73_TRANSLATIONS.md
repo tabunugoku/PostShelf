@@ -1,9 +1,9 @@
-# v73 の文言の提案: 新しい版を確かめる (更新の確認)
+# v73 の文言の提案: 新しいバージョンを確かめる (更新の確認)
 
-設定の「PostShelf について」の欄 (版の番号の下) に、オンとオフを切り替える項目を置く。既定はオフ。オンにしていて新しい版があれば、管理画面・サイドパネル・ポップアップの上部に案内を出す (既存の「PostShelf を更新しました」の案内と同じ場所)。案内のリンクは、GitHub の最新のリリースのページ (`https://github.com/tabunugoku/PostShelf/releases/latest`) を新しいタブで開く。
+設定の「PostShelf について」の欄 (バージョン番号の下) に、オンとオフを切り替える項目を置く。既定はオフ。オンにしていて新しいバージョンがあれば、管理画面・サイドパネル・ポップアップの上部に案内を出す (既存の「PostShelf を更新しました」の案内と同じ場所)。案内のリンクは、GitHub の最新のリリースのページ (`https://github.com/tabunugoku/PostShelf/releases/latest`) を新しいタブで開く。
 
 - 新しいキーは 5 件。
-- プレースホルダーは `updateAvailable` の `$VERSION$` だけ (`content: "$1"`、例: `1.1.8`)。既存の `updateNotice` と同じ名前と定義にする。版の番号は、先頭の `v` を外して入れる (既存の `versionLabel` の表示にそろえる)。
+- プレースホルダーは `updateAvailable` の `$VERSION$` だけ (`content: "$1"`、例: `1.1.8`)。既存の `updateNotice` と同じ名前と定義にする。バージョン番号は、先頭の `v` を外して入れる (既存の `versionLabel` の表示にそろえる)。
 - 説明 (`updateCheckDesc`) には、GitHub に伝わること (確かめた時刻・IP アドレス・ブラウザの種類 (User-Agent)・PostShelf からの問い合わせであること (Origin)) を必ず書く。
 - 「新しいタブで開きます」の言い方は、各言語の既存の `githubLinkAria` にそろえる。
 - 「GitHub」「PostShelf」は、どの言語でもそのまま。
@@ -14,9 +14,9 @@
 
 | キー | ja | en |
 |---|---|---|
-| updateCheck | 新しい版を確かめる | Check for new versions |
-| updateCheckDesc | オンにすると、画面を開いたときに 1 日 1 回まで、GitHub に最新の版の番号を問い合わせます。送るデータはありませんが、GitHub には、確かめた時刻・IP アドレス・ブラウザの種類と、PostShelf からの問い合わせであることが伝わります。更新は自動では行いません。 | When this is on, PostShelf asks GitHub for the latest version number when you open it, at most once a day. No data is sent, but GitHub sees the time of the check, your IP address, your browser type, and that the request comes from PostShelf. Updates are never installed automatically. |
-| updateAvailable | 新しい版 $VERSION$ が出ています | A new version, $VERSION$, is available |
+| updateCheck | 新しいバージョンを確かめる | Check for new versions |
+| updateCheckDesc | オンにすると、画面を開いたときに 1 日 1 回まで、GitHub に最新のバージョン番号を問い合わせます。送るデータはありませんが、GitHub には、確かめた時刻・IP アドレス・ブラウザの種類と、PostShelf からの問い合わせであることが伝わります。更新は自動では行いません。 | When this is on, PostShelf asks GitHub for the latest version number when you open it, at most once a day. No data is sent, but GitHub sees the time of the check, your IP address, your browser type, and that the request comes from PostShelf. Updates are never installed automatically. |
+| updateAvailable | 新しいバージョン $VERSION$ が出ています | A new version, $VERSION$, is available |
 | updateAvailableLink | リリースのページを開く | Open the release page |
 | updateAvailableLinkAria | リリースのページを開く（新しいタブで開きます） | Open the release page (opens in a new tab) |
 
