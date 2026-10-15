@@ -1,6 +1,6 @@
 import { queryFirst } from '../shared/selectors';
 import { jaWrapRule, t, uiLang } from '../shared/strings';
-import { extractTweet } from './snapshot';
+import { extractTweet, tweetIdOf } from './snapshot';
 import { getBookmark, listFolders, removeBookmark, setBookmarkFolders } from '../shared/storage';
 import { displayName, isBuiltinFolder } from '../shared/models';
 import { xTheme } from './theme';
@@ -37,7 +37,11 @@ export function ensureIconCss(): void {
   if (link.href) document.head.append(link);
 }
 
+let stopTracking: (() => void) | undefined;
+
 function closePopovers(): void {
+  stopTracking?.();
+  stopTracking = undefined;
   document.querySelectorAll(`.${POP_CLASS}`).forEach((p) => p.remove());
 }
 
@@ -47,17 +51,18 @@ let opening = false;
 export async function openPopover(article: Element, anchor: HTMLElement): Promise<HTMLElement | null> {
   if (opening) return null;
   opening = true;
+  const tweetId = tweetIdOf(article);
   try {
     return await buildPopover(article, anchor);
   } catch {
-    return openErrorPopover(anchor);
+    return openErrorPopover(article, anchor, tweetId);
   } finally {
     opening = false;
   }
 }
 
 /** 保存データを読めなかったとき、同じ位置に失敗の表示だけの小さなポップオーバーを出す。閉じ方は通常のものと同じ (installGlobalHandlers) */
-function openErrorPopover(anchor: HTMLElement): HTMLElement {
+function openErrorPopover(article: Element, anchor: HTMLElement, tweetId: string | null): HTMLElement {
   closePopovers();
   const th = xTheme();
   const pop = document.createElement('div');
@@ -68,7 +73,7 @@ function openErrorPopover(anchor: HTMLElement): HTMLElement {
   pop.textContent = t('errorStorage');
   pop.addEventListener('click', (e) => e.stopPropagation());
   document.body.append(pop);
-  position(pop, anchor);
+  trackPopover(pop, article, anchor, tweetId);
   return pop;
 }
 
@@ -92,6 +97,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   const th = xTheme();
   pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;text-wrap:pretty`;
   pop.lang = uiLang(); // X のページの lang ではなく UI の言語で折り返す
+  pop.style.cssText += ';box-sizing:border-box;display:flex;flex-direction:column';
   pop.addEventListener('click', (e) => e.stopPropagation());
 
   // 保存先の表示 (アバター小 + @ハンドル)。判定できないときは警告だけを出して保存させない
@@ -113,6 +119,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     head.setAttribute('role', 'alert');
     head.textContent = t('accountUnknown');
   }
+  head.style.flexShrink = '0';
   pop.append(head);
 
   // 保存に失敗したときは、ポップオーバーの中に理由を出す (console だけで終わらせない)
@@ -179,7 +186,13 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     extras: { recentIds },
   });
   if (account) pop.append(picker.el);
-  pop.append(errorEl);
+  const footer = document.createElement('div');
+  footer.dataset.popoverFooter = '';
+  footer.style.flexShrink = '0';
+  // 区切り、追加、失敗表示、置き換えモードの解除、区切り、操作行の順で固定する。
+  footer.append(divider(th));
+  if (account && picker.addButton) footer.append(picker.addButton);
+  footer.append(errorEl);
   // 置き換えモードで X 側がブックマーク済みのとき: X のブックマークだけを解除する手段 (Shift+クリックでも可)
   if (account && mode === 'replace' && queryFirst(article, 'removeBookmark')) {
     const rel = document.createElement('button');
@@ -190,7 +203,7 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
       setNativeBookmark(article, false);
       rel.remove();
     });
-    pop.append(rel);
+    footer.append(rel);
   }
   // 下部の 1 行: 左端にサイドパネル、右端に削除 (どちらもアイコンだけ)。content script からは直接開けないので、background へ依頼する
   const side = iconButton(th, t('openSidePanel'), 'ti-layout-sidebar-right');
@@ -202,25 +215,126 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   bottom.style.cssText = 'box-sizing:border-box;display:flex;align-items:center;justify-content:space-between';
   bottom.append(side);
   if (account) bottom.append(unsave);
-  pop.append(divider(th), bottom);
+  footer.append(divider(th), bottom);
+  pop.append(footer);
   document.body.append(pop);
-  position(pop, anchor);
+  trackPopover(pop, article, anchor, tweetId);
   picker.focusFilter();
   return pop;
 }
 
-/** ボタンの真下に出し、画面端ではみ出さないよう補正する (下に収まらなければ上に出す) */
-function position(pop: HTMLElement, anchor: HTMLElement): void {
-  const r = anchor.getBoundingClientRect();
-  const w = pop.offsetWidth;
-  const h = pop.offsetHeight;
+/** 開いたときに決めた表示側と高さの上限 */
+interface Placement {
+  side: 'below' | 'above' | 'center';
+  maxHeight: number;
+  naturalHeight: number;
+}
+
+/** ボタンと画面の余白の間で、その表示側に使える高さ */
+function availableHeight(side: Placement['side'], r: DOMRect, viewportHeight: number): number {
+  if (side === 'below') return viewportHeight - r.bottom - 4 - 8;
+  if (side === 'above') return r.top - 4 - 8;
+  return viewportHeight - 16;
+}
+
+/** 上部・下部の実寸と余白を測り、一覧 4 行を含む最低限の高さを求める */
+function minimumHeight(pop: HTMLElement): number {
+  const style = getComputedStyle(pop);
+  const frame = ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth'] as const;
+  let height = frame.reduce((sum, key) => sum + (Number.parseFloat(style[key]) || 0), 0);
+  for (const element of pop.querySelectorAll<HTMLElement>(
+    '.postshelf-account, [data-picker-header], [data-popover-footer]',
+  )) {
+    const style = getComputedStyle(element);
+    height += element.offsetHeight + (Number.parseFloat(style.marginTop) || 0)
+      + (Number.parseFloat(style.marginBottom) || 0);
+  }
+  return height + 4 * 32;
+}
+
+/** 初回の表示側を保ち、ボタンから 4px の位置で空きに合わせて高さを変える */
+function position(pop: HTMLElement, r: DOMRect, placement?: Placement): Placement {
   const vw = document.documentElement.clientWidth || window.innerWidth;
   const vh = document.documentElement.clientHeight || window.innerHeight;
-  const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), Math.max(8, vw - w - 8));
-  let top = r.bottom + 4;
-  if (h && top + h > vh - 8 && r.top - 4 - h >= 8) top = r.top - 4 - h;
+  if (!placement) {
+    // 制約前の高さを使う。一覧が長くても、選んだ側は開いている間に入れ替えない。
+    pop.style.maxHeight = 'none';
+    const naturalHeight = pop.offsetHeight;
+    const below = availableHeight('below', r, vh);
+    const above = availableHeight('above', r, vh);
+    let side: Placement['side'];
+    if (naturalHeight <= below) side = 'below';
+    else if (naturalHeight <= above) side = 'above';
+    else if (Math.max(below, above) < minimumHeight(pop)) side = 'center';
+    else side = below >= above ? 'below' : 'above';
+    let available = vh - 16;
+    if (side === 'below') available = below;
+    else if (side === 'above') available = above;
+    placement = { side, maxHeight: Math.max(0, available), naturalHeight };
+  }
+  pop.style.boxSizing = 'border-box';
+  const available = availableHeight(placement.side, r, vh);
+  const maxHeight = placement.side === 'center' ? available : Math.min(placement.maxHeight, available);
+  pop.style.maxHeight = `${Math.max(0, maxHeight)}px`;
+  const w = pop.offsetWidth;
+  const h = pop.offsetHeight;
+  const centered = placement.side === 'center';
+  const desiredLeft = centered ? (vw - w) / 2 : r.left + r.width / 2 - w / 2;
+  const left = Math.min(Math.max(8, desiredLeft), Math.max(8, vw - w - 8));
+  let desiredTop = r.bottom + 4;
+  if (centered) desiredTop = (vh - h) / 2;
+  else if (placement.side === 'above') desiredTop = r.top - 4 - h;
   pop.style.left = `${left}px`;
-  pop.style.top = `${top}px`;
+  pop.style.top = `${desiredTop}px`;
+  return placement;
+}
+
+/** 開いている間だけ位置を追従し、元の投稿を追えなくなったら共通の処理で閉じる */
+function trackPopover(pop: HTMLElement, article: Element, anchor: HTMLElement, tweetId: string | null): void {
+  const placement = position(pop, anchor.getBoundingClientRect());
+  let pendingFrame: number | null = null;
+  let resizePending = false;
+  const update = () => {
+    pendingFrame = null;
+    const recenter = resizePending;
+    resizePending = false;
+    const r = anchor.getBoundingClientRect();
+    const vh = document.documentElement.clientHeight || window.innerHeight;
+    // X が投稿の要素を別の投稿に再利用する可能性は、実機未確認の推測。
+    if (
+      !anchor.isConnected
+      || !article.contains(anchor)
+      || tweetIdOf(article) !== tweetId
+      || r.bottom < 0
+      || r.top > vh
+    ) {
+      closePopovers();
+      return;
+    }
+    if (placement.side !== 'center') {
+      const threshold = Math.min(minimumHeight(pop), placement.naturalHeight);
+      if (availableHeight(placement.side, r, vh) < threshold) {
+        closePopovers();
+        return;
+      }
+    }
+    if (placement.side !== 'center' || recenter) position(pop, r, placement);
+  };
+  const schedule = () => {
+    if (pendingFrame === null) pendingFrame = window.requestAnimationFrame(update);
+  };
+  const onResize = () => {
+    // 同じフレームに scroll も来ても、中央メニューの再配置を取りこぼさない。
+    resizePending = true;
+    schedule();
+  };
+  window.addEventListener('scroll', schedule, { capture: true, passive: true });
+  window.addEventListener('resize', onResize);
+  stopTracking = () => {
+    window.removeEventListener('scroll', schedule, true);
+    window.removeEventListener('resize', onResize);
+    if (pendingFrame !== null) window.cancelAnimationFrame(pendingFrame);
+  };
 }
 
 export function installGlobalHandlers(): void {

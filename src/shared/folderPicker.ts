@@ -25,6 +25,8 @@ export const RECENT_MIN_FOLDERS = 6;
 
 export interface FolderPicker {
   el: HTMLElement;
+  /** x.com 用。呼び出し元の下部に置く追加ボタン */
+  addButton?: HTMLButtonElement;
   /** selected を外から書き換えたあと、チェックの表示を合わせる */
   sync: () => void;
   /** 絞り込み欄があればフォーカスを当てる (あれば true) */
@@ -145,6 +147,7 @@ export function createFolderPicker(opts: {
 
   const folders = [...opts.folders];
   const extras = opts.extras;
+  if (extras) el.style.cssText = 'display:flex;flex-direction:column;flex:1 1 auto;min-height:0';
   const userFolderCount = () => folders.filter((f) => f.id !== INBOX_ID).length;
   let query = '';
   let collapsed = new Set<string>();
@@ -157,6 +160,10 @@ export function createFolderPicker(opts: {
 
   // 見出し (保存状態) と絞り込み欄。一覧の再描画で消えないよう、一覧とは別の要素に置く
   const headEl = document.createElement('div');
+  if (extras) {
+    headEl.dataset.pickerHeader = '';
+    headEl.style.flexShrink = '0';
+  }
   const statusEl = document.createElement('div');
   statusEl.style.cssText = `box-sizing:border-box;padding:2px 8px 6px;font-size:13px;opacity:.8;white-space:nowrap;color:${th.fg}`;
   const filterEl = document.createElement('input');
@@ -183,6 +190,10 @@ export function createFolderPicker(opts: {
   }
   const showFilter = () => !!extras && userFolderCount() >= FILTER_MIN_FOLDERS;
   const listEl = document.createElement('div');
+  if (extras) {
+    listEl.dataset.pickerList = '';
+    listEl.style.cssText = 'min-height:0;overflow-y:auto;overscroll-behavior:contain';
+  }
   el.append(headEl, listEl);
 
   // ↑↓ で行を移動 (絞り込み欄から ↓ で最初の行へ)。Space の切り替えはチェックボックスの既存の動作
@@ -201,6 +212,7 @@ export function createFolderPicker(opts: {
 
   const menu = createFolderMenu({
     theme: th,
+    bounded: !!extras,
     existing: () => [inboxOf(folders), ...folders], // 「未分類」(まだ保存されていないときの仮想の行) も同名の判定に含める
     onCreated: async (f) => {
       // 作ったフォルダを、このポストの保存先として選んで一覧に戻る (「未分類」との排他は normalize)
@@ -231,7 +243,8 @@ export function createFolderPicker(opts: {
     headEl.style.display = 'none';
     listEl.style.display = 'none';
     menu.el.hidden = false;
-    menu.el.style.display = 'grid';
+    menu.el.style.display = extras ? 'flex' : 'grid';
+    if (extras) addBtn.style.display = 'none';
     menu.focus();
   };
   const closeMenu = () => {
@@ -239,6 +252,7 @@ export function createFolderPicker(opts: {
     menu.el.style.display = 'none';
     headEl.style.display = '';
     listEl.style.display = '';
+    if (extras) addBtn.style.display = 'flex';
     render();
     addBtn.focus();
   };
@@ -287,7 +301,7 @@ export function createFolderPicker(opts: {
         for (const r of flattenFolders(users, collapsed)) addRow(r.folder, r.depth, r.hasChildren);
       }
     }
-    listEl.append(divider(th), addBtn);
+    if (!extras) listEl.append(divider(th), addBtn);
   };
   const addRow = (f: Folder, depth = 1, hasChildren = false, recent = false) => {
     const row = document.createElement('div');
@@ -393,6 +407,7 @@ export function createFolderPicker(opts: {
   sync();
   return {
     el,
+    addButton: extras ? addBtn : undefined,
     sync,
     setFolders: next => {
       folders.splice(0, folders.length, ...next);
