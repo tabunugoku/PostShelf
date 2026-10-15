@@ -116,6 +116,39 @@ it('中央のメニューはスクロールしても動かない', async () => {
   expect(pop.isConnected).toBe(true);
 });
 
+it.each(['scroll-first', 'resize-first'])('中央のメニューは resize で高さ 400 の中央に収まる (%s)', async order => {
+  naturalHeight = 500;
+  move(334);
+  const pop = (await openPopover(article, anchor))!;
+  expect(pop.style.top).toBe('100px');
+  viewportHeight = 400;
+  if (order === 'scroll-first') scroll();
+  window.dispatchEvent(new Event('resize'));
+  if (order === 'resize-first') scroll();
+  expect(frames.size).toBe(1);
+  frame();
+  expect(pop.style.maxHeight).toBe('384px');
+  expect(pop.style.top).toBe('8px');
+  expect(pop.style.left).toBe('360px');
+  expect(pop.offsetHeight).toBe(384);
+  expect(pop.isConnected).toBe(true);
+  move(100);
+  scroll();
+  frame();
+  expect(pop.style.top).toBe('8px');
+});
+
+it('中央のメニューの上限は resize 後の画面に合わせて広がる', async () => {
+  naturalHeight = 500;
+  move(334);
+  const pop = (await openPopover(article, anchor))!;
+  viewportHeight = 900;
+  window.dispatchEvent(new Event('resize'));
+  frame();
+  expect(pop.style.maxHeight).toBe('884px');
+  expect(pop.style.top).toBe('200px');
+});
+
 it('resize だけでもボタンに追従し、下の空きに合わせて高さを縮める', async () => {
   manyFolders();
   const pop = (await openPopover(article, anchor))!;

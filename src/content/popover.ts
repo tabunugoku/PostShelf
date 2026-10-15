@@ -274,7 +274,8 @@ function position(pop: HTMLElement, r: DOMRect, placement?: Placement): Placemen
   }
   pop.style.boxSizing = 'border-box';
   const available = availableHeight(placement.side, r, vh);
-  pop.style.maxHeight = `${Math.max(0, Math.min(placement.maxHeight, available))}px`;
+  const maxHeight = placement.side === 'center' ? available : Math.min(placement.maxHeight, available);
+  pop.style.maxHeight = `${Math.max(0, maxHeight)}px`;
   const w = pop.offsetWidth;
   const h = pop.offsetHeight;
   const centered = placement.side === 'center';
@@ -292,8 +293,11 @@ function position(pop: HTMLElement, r: DOMRect, placement?: Placement): Placemen
 function trackPopover(pop: HTMLElement, article: Element, anchor: HTMLElement, tweetId: string | null): void {
   const placement = position(pop, anchor.getBoundingClientRect());
   let pendingFrame: number | null = null;
+  let resizePending = false;
   const update = () => {
     pendingFrame = null;
+    const recenter = resizePending;
+    resizePending = false;
     const r = anchor.getBoundingClientRect();
     const vh = document.documentElement.clientHeight || window.innerHeight;
     // X が投稿の要素を別の投稿に再利用する可能性は、実機未確認の推測。
@@ -313,17 +317,22 @@ function trackPopover(pop: HTMLElement, article: Element, anchor: HTMLElement, t
         closePopovers();
         return;
       }
-      position(pop, r, placement);
     }
+    if (placement.side !== 'center' || recenter) position(pop, r, placement);
   };
   const schedule = () => {
     if (pendingFrame === null) pendingFrame = window.requestAnimationFrame(update);
   };
+  const onResize = () => {
+    // 同じフレームに scroll も来ても、中央メニューの再配置を取りこぼさない。
+    resizePending = true;
+    schedule();
+  };
   window.addEventListener('scroll', schedule, { capture: true, passive: true });
-  window.addEventListener('resize', schedule);
+  window.addEventListener('resize', onResize);
   stopTracking = () => {
     window.removeEventListener('scroll', schedule, true);
-    window.removeEventListener('resize', schedule);
+    window.removeEventListener('resize', onResize);
     if (pendingFrame !== null) window.cancelAnimationFrame(pendingFrame);
   };
 }
