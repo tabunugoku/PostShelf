@@ -4,6 +4,7 @@ import { leafMemberFolders } from '../shared/folderTree';
 import { inboxOf } from '../shared/folderPicker';
 import { Icon } from '../shared/Icon';
 import { HealthNotice } from '../manager/HealthNotice';
+import { UpdateAvailable } from '../manager/UpdateAvailable';
 import { hasSidePanel, openManagerTab, openSidePanel } from '../shared/panel';
 import { INBOX_ID, UNKNOWN_ACCOUNT_ID, accountLabel, displayName, type Account, type Bookmark, type Folder } from '../shared/models';
 import { setDocumentLang, t } from '../shared/strings';
@@ -92,6 +93,8 @@ function Popup() {
         </div>
       )}
       <HealthNotice onDiagnose={() => openManager('#diagnostics')} />
+      {/* ポップアップは問い合わせない (すぐ閉じられると、途中で止まったまま 24 時間確かめなくなる)。前回の結果だけを出す */}
+      <UpdateAvailable ask={false} />
       <div class="rec">
         <div class="rec-head">{t('recent')}</div>
         {recent.map((b) => (

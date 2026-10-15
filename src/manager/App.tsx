@@ -74,6 +74,7 @@ import { clearStorageError, reportStorageError, useStorageError } from './errorB
 import { AutoCollectDialog } from '../shared/AutoCollectDialog';
 import { OfferBanner, ProgressBanner, startAutoCollect, useCollectRun, watchStart } from './AutoCollect';
 import { currentVersion } from '../shared/version';
+import { UpdateAvailable } from './UpdateAvailable';
 import { REPO_URL } from '../shared/links';
 import { SidebarResize } from './SidebarResize';
 import { useCompact } from './useCompact';
@@ -1215,6 +1216,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
           </button>
         </div>
       )}
+      <UpdateAvailable ask />
     </>
   );
 
