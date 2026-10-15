@@ -92,7 +92,7 @@ it('要素内のスクロールも capture で受け取る', async () => {
   expect(pop.style.top).toBe('236px');
 });
 
-it('開いたときの表示側と高さの上限を保つ', async () => {
+it('開いたときの表示側を保ち、上の空きに合わせて上限を縮める', async () => {
   naturalHeight = 180;
   move(550);
   const pop = (await openPopover(article, anchor))!;
@@ -101,7 +101,7 @@ it('開いたときの表示側と高さの上限を保つ', async () => {
   scroll();
   frame();
   expect(pop.style.top).toBe('16px');
-  expect(pop.style.maxHeight).toBe('538px');
+  expect(pop.style.maxHeight).toBe('188px');
 });
 
 it('中央のメニューはスクロールしても動かない', async () => {
@@ -116,15 +116,99 @@ it('中央のメニューはスクロールしても動かない', async () => {
   expect(pop.isConnected).toBe(true);
 });
 
-it('resize だけでも位置と画面内の高さを補正する', async () => {
+it('resize だけでもボタンに追従し、下の空きに合わせて高さを縮める', async () => {
+  manyFolders();
   const pop = (await openPopover(article, anchor))!;
-  viewportHeight = 300;
-  move(200);
+  viewportHeight = 600;
   window.dispatchEvent(new Event('resize'));
   frame();
-  expect(pop.style.top).toBe('52px');
-  expect(pop.style.maxHeight).toBe('284px');
-  expect(Number.parseFloat(pop.style.top) + pop.offsetHeight).toBe(292);
+  expect(pop.style.top).toBe('136px');
+  expect(pop.style.maxHeight).toBe('456px');
+  expect(Number.parseFloat(pop.style.top) + pop.offsetHeight).toBe(592);
+});
+
+function manyFolders() {
+  naturalHeight = 1400;
+  vi.spyOn(storage, 'listFolders').mockResolvedValue(Array.from({ length: 40 }, (_, i) => ({
+    id: `folder-${i}`, name: `Folder ${i}`, icon: 'ti-folder', order: i,
+  })));
+}
+
+it('40 個の一覧が下の空きいっぱいでも、ボタンの移動に合わせて高さを縮める', async () => {
+  manyFolders();
+  const pop = (await openPopover(article, anchor))!;
+  expect(pop.querySelectorAll('label')).toHaveLength(41);
+  expect(pop.style.maxHeight).toBe('556px');
+  move(150);
+  scroll();
+  frame();
+  expect(pop.style.top).toBe('186px');
+  expect(pop.style.maxHeight).toBe('506px');
+  expect(Number.parseFloat(pop.style.top) + pop.offsetHeight).toBe(692);
+});
+
+it('下の空きが上部・下部・一覧 4 行の高さを下回ったら閉じる', async () => {
+  manyFolders();
+  const pop = (await openPopover(article, anchor))!;
+  move(400);
+  scroll();
+  frame();
+  expect(pop.isConnected).toBe(false);
+});
+
+it('下の空きが戻れば初回の上限まで高さを戻し、それ以上には広げない', async () => {
+  manyFolders();
+  const pop = (await openPopover(article, anchor))!;
+  for (const [top, expectedLimit] of [[150, '506px'], [100, '556px'], [50, '556px']] as const) {
+    move(top);
+    scroll();
+    frame();
+    expect(pop.style.top).toBe(`${top + 36}px`);
+    expect(pop.style.maxHeight).toBe(expectedLimit);
+  }
+});
+
+it('上の空きいっぱいの一覧も高さを縮め、下端をボタンの 4px 上にそろえる', async () => {
+  manyFolders();
+  move(560);
+  const pop = (await openPopover(article, anchor))!;
+  expect(pop.style.maxHeight).toBe('548px');
+  move(510);
+  scroll();
+  frame();
+  expect(pop.style.maxHeight).toBe('498px');
+  expect(Number.parseFloat(pop.style.top) + pop.offsetHeight).toBe(506);
+  move(600);
+  scroll();
+  frame();
+  expect(pop.style.maxHeight).toBe('548px');
+  expect(Number.parseFloat(pop.style.top) + pop.offsetHeight).toBe(596);
+});
+
+it('上の空きが一覧 4 行を含む高さを下回ったら閉じる', async () => {
+  manyFolders();
+  move(560);
+  const pop = (await openPopover(article, anchor))!;
+  move(300);
+  scroll();
+  frame();
+  expect(pop.isConnected).toBe(false);
+});
+
+it('小さな失敗メニューの閉じるしきい値は初回の本来の高さに抑える', async () => {
+  naturalHeight = 60;
+  vi.spyOn(storage, 'listFolders').mockRejectedValue(new Error('read failed'));
+  move(580);
+  const pop = (await openPopover(article, anchor))!;
+  scroll();
+  frame();
+  expect(pop.getAttribute('role')).toBe('alert');
+  expect(pop.isConnected).toBe(true);
+  expect(pop.style.top).toBe('616px');
+  move(600);
+  scroll();
+  frame();
+  expect(pop.isConnected).toBe(false);
 });
 
 it('開き直すと古い予約を取り消し、新しいメニューだけを追従させる', async () => {

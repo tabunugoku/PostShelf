@@ -227,6 +227,14 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
 interface Placement {
   side: 'below' | 'above' | 'center';
   maxHeight: number;
+  naturalHeight: number;
+}
+
+/** ボタンと画面の余白の間で、その表示側に使える高さ */
+function availableHeight(side: Placement['side'], r: DOMRect, viewportHeight: number): number {
+  if (side === 'below') return viewportHeight - r.bottom - 4 - 8;
+  if (side === 'above') return r.top - 4 - 8;
+  return viewportHeight - 16;
 }
 
 /** 上部・下部の実寸と余白を測り、一覧 4 行を含む最低限の高さを求める */
@@ -244,7 +252,7 @@ function minimumHeight(pop: HTMLElement): number {
   return height + 4 * 32;
 }
 
-/** 初回だけ表示側を決め、以後はその側を保ったまま画面の余白内に位置を収める */
+/** 初回の表示側を保ち、ボタンから 4px の位置で空きに合わせて高さを変える */
 function position(pop: HTMLElement, r: DOMRect, placement?: Placement): Placement {
   const vw = document.documentElement.clientWidth || window.innerWidth;
   const vh = document.documentElement.clientHeight || window.innerHeight;
@@ -252,8 +260,8 @@ function position(pop: HTMLElement, r: DOMRect, placement?: Placement): Placemen
     // 制約前の高さを使う。一覧が長くても、選んだ側は開いている間に入れ替えない。
     pop.style.maxHeight = 'none';
     const naturalHeight = pop.offsetHeight;
-    const below = vh - r.bottom - 4 - 8;
-    const above = r.top - 4 - 8;
+    const below = availableHeight('below', r, vh);
+    const above = availableHeight('above', r, vh);
     let side: Placement['side'];
     if (naturalHeight <= below) side = 'below';
     else if (naturalHeight <= above) side = 'above';
@@ -262,10 +270,11 @@ function position(pop: HTMLElement, r: DOMRect, placement?: Placement): Placemen
     let available = vh - 16;
     if (side === 'below') available = below;
     else if (side === 'above') available = above;
-    placement = { side, maxHeight: Math.max(0, available) };
+    placement = { side, maxHeight: Math.max(0, available), naturalHeight };
   }
   pop.style.boxSizing = 'border-box';
-  pop.style.maxHeight = `${Math.max(0, Math.min(placement.maxHeight, vh - 16))}px`;
+  const available = availableHeight(placement.side, r, vh);
+  pop.style.maxHeight = `${Math.max(0, Math.min(placement.maxHeight, available))}px`;
   const w = pop.offsetWidth;
   const h = pop.offsetHeight;
   const centered = placement.side === 'center';
@@ -274,9 +283,8 @@ function position(pop: HTMLElement, r: DOMRect, placement?: Placement): Placemen
   let desiredTop = r.bottom + 4;
   if (centered) desiredTop = (vh - h) / 2;
   else if (placement.side === 'above') desiredTop = r.top - 4 - h;
-  const top = Math.min(Math.max(8, desiredTop), Math.max(8, vh - h - 8));
   pop.style.left = `${left}px`;
-  pop.style.top = `${top}px`;
+  pop.style.top = `${desiredTop}px`;
   return placement;
 }
 
@@ -299,7 +307,14 @@ function trackPopover(pop: HTMLElement, article: Element, anchor: HTMLElement, t
       closePopovers();
       return;
     }
-    if (placement.side !== 'center') position(pop, r, placement);
+    if (placement.side !== 'center') {
+      const threshold = Math.min(minimumHeight(pop), placement.naturalHeight);
+      if (availableHeight(placement.side, r, vh) < threshold) {
+        closePopovers();
+        return;
+      }
+      position(pop, r, placement);
+    }
   };
   const schedule = () => {
     if (pendingFrame === null) pendingFrame = window.requestAnimationFrame(update);
