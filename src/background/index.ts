@@ -1,5 +1,5 @@
 import { applyActionMode, openManagerTab } from '../shared/panel';
-import { getSettings, onSettingsChanged } from '../shared/settings';
+import { getSettings, onSettingsChanged, type ActionMode } from '../shared/settings';
 import { afterPostsRemoved, cachePostById } from '../shared/cacheops';
 import { AUTO_CAP, FullTextQueue, MANUAL_CAP, cleanupAtStartup, cleanupLegacyTabs, manualItems } from './fulltext';
 
@@ -10,7 +10,16 @@ const fullText = new FullTextQueue();
 const startupCleanup = cleanupAtStartup().catch(() => {});
 
 // ツールバーアイコンの動作 (popup / サイドパネル) は再起動で失われるので、service worker の起動ごとに反映する
-const apply = () => void getSettings().then((s) => applyActionMode(s.actionMode)).catch(() => {});
+let lastActionMode: ActionMode | undefined;
+/** 反映を依頼した値を記録する。API の完了待ちの間も、同じ設定通知では呼び直さない。 */
+const applyMode = (mode: ActionMode): Promise<void> => {
+  lastActionMode = mode;
+  return applyActionMode(mode).catch((error) => {
+    if (lastActionMode === mode) lastActionMode = undefined;
+    throw error;
+  });
+};
+const apply = () => void getSettings().then((s) => applyMode(s.actionMode)).catch(() => {});
 apply();
 chrome.runtime.onInstalled.addListener(apply);
 // 旧版の裏のタブの記録は、更新のときだけ片付ける (service worker が起きるたびには書き込まない)
@@ -18,7 +27,9 @@ chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'update') void cleanupLegacyTabs().catch(() => {});
 });
 chrome.runtime.onStartup?.addListener(apply);
-onSettingsChanged((s) => void applyActionMode(s.actionMode));
+onSettingsChanged((s) => {
+  if (s.actionMode !== lastActionMode) void applyMode(s.actionMode);
+});
 
 /** 全文の取得の依頼 (設定がオフなら、キューが何もしない)。save: 保存した 1 件 / auto: 自動取り込みで取り込んだ分 (最大 30 件) / manual: 設定の「いま取得する」(最大 50 件) */
 function requestFullText(
