@@ -3,7 +3,7 @@ import { h, render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
-import { noteAccount, onDataChanged, onLastSeenAccountChanged } from '../src/shared/storage';
+import { noteAccount, onAccountsTouched, onDataChanged, onLastSeenAccountChanged } from '../src/shared/storage';
 import { App } from '../src/manager/App';
 import { DEFAULT_SETTINGS, getSettings } from '../src/shared/settings';
 import type { Account } from '../src/shared/models';
@@ -31,6 +31,49 @@ it('同じアカウントの定期記録は保存を続け、データ変更だ�
   expect(data.lastSeenAccount).toMatchObject({ id: 'me', lastSeenAt: 120_010 });
   unwatch();
   unlast();
+});
+
+it('accounts の時刻だけの変更も読み出しなしで通知し、解除できる', async () => {
+  data.accounts = { me: account() };
+  const touched = vi.fn();
+  const changed = vi.fn();
+  const lastSeen = vi.fn();
+  const untouch = onAccountsTouched(touched);
+  const unwatch = onDataChanged(changed);
+  const unlast = onLastSeenAccountChanged(lastSeen);
+  const get = vi.spyOn(chrome.storage.local, 'get');
+  try {
+    await chrome.storage.local.set({ accounts: { me: account('me', 20) } });
+    expect(touched).toHaveBeenCalledTimes(1);
+    expect(changed).not.toHaveBeenCalled();
+    expect(lastSeen).not.toHaveBeenCalled();
+    expect(get).not.toHaveBeenCalled();
+    untouch();
+    await chrome.storage.local.set({ accounts: { me: account('me', 30) } });
+    expect(touched).toHaveBeenCalledTimes(1);
+  } finally {
+    untouch();
+    unwatch();
+    unlast();
+  }
+});
+
+it('accounts の追加・情報変更・削除を通知し、別のキーと保存領域は無視する', async () => {
+  const touched = vi.fn();
+  const add = vi.spyOn(chrome.storage.onChanged, 'addListener');
+  const untouch = onAccountsTouched(touched);
+  const listener = add.mock.calls[0][0];
+  try {
+    listener({ accounts: { newValue: { me: account() } } }, 'sync');
+    await chrome.storage.local.set({ lastSeenAccount: account() });
+    expect(touched).not.toHaveBeenCalled();
+    await chrome.storage.local.set({ accounts: { me: account() } });
+    await chrome.storage.local.set({ accounts: { me: { ...account(), displayName: 'サンプル名' } } });
+    await chrome.storage.local.remove('accounts');
+    expect(touched).toHaveBeenCalledTimes(3);
+  } finally {
+    untouch();
+  }
 });
 
 it('集合と順位が同じなら時刻だけの変化を通知しない', async () => {

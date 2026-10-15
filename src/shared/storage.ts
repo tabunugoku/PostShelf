@@ -1045,6 +1045,15 @@ export async function getLastSeenAccount(): Promise<Account | null> {
   return a && validAccount(a) ? a : null;
 }
 
+/** accounts の変更を時刻だけの場合も通知する。保存データは読み直さず、解除関数を返す。 */
+export function onAccountsTouched(cb: () => void): () => void {
+  const listener = (changes: Record<string, unknown>, area: string) => {
+    if (area === 'local' && KEY_ACCOUNTS in changes) cb();
+  };
+  chrome.storage.onChanged?.addListener(listener as never);
+  return () => chrome.storage.onChanged?.removeListener(listener as never);
+}
+
 /** lastSeenAccount が変わったら呼ばれる (x.com でアカウントを切り替えた、など)。解除関数を返す */
 export function onLastSeenAccountChanged(cb: () => void): () => void {
   const listener = (changes: Record<string, unknown>, area: string) => {

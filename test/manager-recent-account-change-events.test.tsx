@@ -49,11 +49,15 @@ afterEach(() => {
 });
 
 it.each([
-  ['tab', query.RECENT_ID],
-  ['tab', 'sample_folder'],
-  ['sidepanel', query.RECENT_ID],
-  ['sidepanel', 'sample_folder'],
-] as const)('同じアカウントの通知で七日の一覧と件数だけを数え直す: %s / %s', async (surface, folderId) => {
+  ['tab', query.RECENT_ID, 'noteAccount'],
+  ['tab', 'sample_folder', 'noteAccount'],
+  ['sidepanel', query.RECENT_ID, 'noteAccount'],
+  ['sidepanel', 'sample_folder', 'noteAccount'],
+  ['tab', query.RECENT_ID, 'accounts'],
+  ['tab', 'sample_folder', 'accounts'],
+  ['sidepanel', query.RECENT_ID, 'accounts'],
+  ['sidepanel', 'sample_folder', 'accounts'],
+] as const)('同じアカウントの通知で七日の一覧と件数だけを数え直す: %s / %s / %s', async (surface, folderId, source) => {
   data.settings = { ...DEFAULT_SETTINGS, lastFolderId: folderId };
   const get = vi.spyOn(chrome.storage.local, 'get');
   const lists = vi.spyOn(storage, 'listBookmarks');
@@ -81,7 +85,16 @@ it.each([
   shown.mockClear();
 
   now += 61_000;
-  await act(async () => { await storage.noteAccount({ handle: '@me' }); });
+  await act(async () => {
+    if (source === 'accounts') {
+      // 同じ投稿・フォルダの取り込みで、accounts の時刻だけが変わる場合。
+      await chrome.storage.local.set({
+        accounts: { me: { id: 'me', handle: 'me', lastSeenAt: now } },
+      });
+    } else {
+      await storage.noteAccount({ handle: '@me' });
+    }
+  });
   await flush();
   expect(recentCount()).toBe('0');
   expect(document.querySelector('[data-row="1"]') === null).toBe(folderId === query.RECENT_ID);

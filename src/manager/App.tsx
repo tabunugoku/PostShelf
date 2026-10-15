@@ -47,6 +47,7 @@ import {
   getLastSeenAccount,
   listAccounts,
   loadManagerData,
+  onAccountsTouched,
   onLastSeenAccountChanged,
   setAccountScope,
   type AccountSummary,
@@ -335,6 +336,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       }),
       onDataChanged(() => { if (!ownWrites.current) void reload(); }),
       onImportHintChanged(() => void loadHint()),
+      // 同じ投稿・フォルダの取り込みでも、accounts の時刻だけの変更で七日の境目を進める。
+      onAccountsTouched(() => setRecentVersion((version) => version + 1)),
       onLastSeenAccountChanged(() => {
         // 同じアカウントの定期通知でも、従来の全件読み直しと同じく七日の境目を進める。
         setRecentVersion((version) => version + 1);
