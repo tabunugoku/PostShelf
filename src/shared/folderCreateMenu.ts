@@ -46,6 +46,8 @@ export function createFolderMenu(opts: {
   onDelete?: () => void;
   /** 管理画面の作成も保存中は全操作を無効にする。既存の作成呼び出しは従来どおり */
   lockWhileSaving?: boolean;
+  /** x.com の高さ制限内で、入力部分だけをスクロールする */
+  bounded?: boolean;
   /** 「キャンセル」と「← 戻る」 */
   onClose: () => void;
 }): FolderCreateMenu {
@@ -305,6 +307,15 @@ export function createFolderMenu(opts: {
   el.append(iconGroup, colorGroup);
   if (opts.preview !== false) el.append(preview);
   el.append(error, actions);
+  if (opts.bounded) {
+    const fields = document.createElement('div');
+    fields.dataset.folderFields = '';
+    fields.style.cssText = 'display:grid;gap:12px;min-height:0;overflow-y:auto;overscroll-behavior:contain';
+    fields.append(...Array.from(el.children).filter(child => child !== actions));
+    actions.style.flexShrink = '0';
+    el.prepend(fields);
+    el.style.cssText += ';display:flex;flex-direction:column;flex:1 1 auto;min-height:0';
+  }
   const reset = () => {
     keepCreated();
     expanded = false;
