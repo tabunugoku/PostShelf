@@ -94,11 +94,16 @@ export function queryBookmarks(
     if (!q) return true;
     return foldedOf(b).includes(q);
   });
-  const cmp: Record<SortKey, (a: Bookmark, b: Bookmark) => number> = {
-    savedDesc: (a, b) => b.savedAt - a.savedAt,
-    savedAsc: (a, b) => a.savedAt - b.savedAt,
-    postedDesc: (a, b) => posted(b) - posted(a),
-    postedAsc: (a, b) => posted(a) - posted(b),
+  if (opts.sort === 'postedDesc' || opts.sort === 'postedAsc') {
+    const direction = opts.sort === 'postedDesc' ? -1 : 1;
+    return out
+      .map((bookmark) => ({ bookmark, postedAt: posted(bookmark) }))
+      .sort((a, b) => direction * (a.postedAt - b.postedAt))
+      .map(({ bookmark }) => bookmark);
+  }
+  const cmp = {
+    savedDesc: (a: Bookmark, b: Bookmark) => b.savedAt - a.savedAt,
+    savedAsc: (a: Bookmark, b: Bookmark) => a.savedAt - b.savedAt,
   };
   return out.sort(cmp[opts.sort]);
 }
