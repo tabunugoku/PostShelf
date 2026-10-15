@@ -67,21 +67,29 @@ it.each([
   ['replace', 'separate'],
 ] as const)('初期読み込みを待つ間の通知を古い値で上書きしない: %s → %s', async (initialMode, notifiedMode) => {
   applyButtonMode(initialMode);
-  let finish!: (value: settings.Settings) => void;
-  const initialRead = new Promise<settings.Settings>((resolve) => {
-    finish = resolve;
+  const get = chrome.storage.local.get.bind(chrome.storage.local);
+  const responses: (() => void)[] = [];
+  vi.spyOn(chrome.storage.local, 'get').mockImplementation((keys: unknown) => {
+    const snapshot = get(keys as string);
+    if (keys !== 'settings') return snapshot;
+    return new Promise((resolve) => {
+      responses.push(async () => resolve(await snapshot));
+    });
   });
-  vi.spyOn(settings, 'getSettings').mockReturnValueOnce(initialRead);
+  await chrome.storage.local.set({ settings: { ...settings.DEFAULT_SETTINGS, buttonMode: initialMode } });
   const apply = vi.spyOn(popover, 'setPopoverMode');
   stop = initButtons();
   await chrome.storage.local.set({ settings: { ...settings.DEFAULT_SETTINGS, buttonMode: notifiedMode } });
-  expect(apply).toHaveBeenLastCalledWith(notifiedMode);
-  finish({ ...settings.DEFAULT_SETTINGS, buttonMode: initialMode });
-  await initialRead;
-  expect(apply).toHaveBeenCalledTimes(1);
-  expect(apply).toHaveBeenLastCalledWith(notifiedMode);
+  expect(responses).toHaveLength(2);
+  expect(apply).not.toHaveBeenCalled();
+  responses[0]();
+  await vi.waitFor(() => expect(apply).toHaveBeenLastCalledWith(initialMode));
+  responses[1]();
+  await vi.waitFor(() => expect(apply).toHaveBeenLastCalledWith(notifiedMode));
+  expect(apply).toHaveBeenCalledTimes(2);
   expect(document.querySelector('[data-postshelf-btn]') !== null).toBe(notifiedMode === 'separate');
-  expect(document.querySelector('[data-testid=bookmark] [data-postshelf-badge]') !== null).toBe(notifiedMode === 'replace');
+  expect(document.querySelector('[data-testid=bookmark] [data-postshelf-badge]') !== null)
+    .toBe(notifiedMode === 'replace');
 });
 
 it.each(['separate', 'replace'] as const)('通知が無ければ遅れた初期読み込みを反映する: %s', async (buttonMode) => {

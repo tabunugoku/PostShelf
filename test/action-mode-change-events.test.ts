@@ -64,17 +64,25 @@ it.each(['onInstalled', 'onStartup'] as const)('%sは同じ値も再適用して
   expect(popup).toHaveBeenCalledTimes(2);
 });
 
-it('先に同じモードの通知が来ても起動時の読み込みを再適用しない', async () => {
+it('同じモードの通知は起動時の読み出し後に読み直しても再適用しない', async () => {
   installPanelMock();
-  const settings = await import('../src/shared/settings');
-  let finish!: (value: typeof settings.DEFAULT_SETTINGS) => void;
-  vi.spyOn(settings, 'getSettings').mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+  const get = chrome.storage.local.get.bind(chrome.storage.local);
+  const responses: (() => void)[] = [];
+  vi.spyOn(chrome.storage.local, 'get').mockImplementation((keys: unknown) => {
+    const snapshot = get(keys as string);
+    if (keys !== 'settings') return snapshot;
+    return new Promise((resolve) => {
+      responses.push(async () => resolve(await snapshot));
+    });
+  });
   const popup = vi.spyOn(chrome.action, 'setPopup');
   await import('../src/background/index');
   await chrome.storage.local.set({ settings: { actionMode: 'popup' } });
+  expect(responses).toHaveLength(2);
+  responses[0]();
   await flush();
   expect(popup).toHaveBeenCalledTimes(1);
-  finish(settings.DEFAULT_SETTINGS);
+  responses[1]();
   await flush();
   expect(popup).toHaveBeenCalledTimes(1);
 });
@@ -107,33 +115,39 @@ it.each([
   const add = event === 'load' ? undefined : vi.spyOn(chrome.runtime[event], 'addListener');
   await updateSettings({ actionMode: initialMode });
   const settings = await import('../src/shared/settings');
-  let finish!: (value: typeof settings.DEFAULT_SETTINGS) => void;
-  const pendingRead = new Promise<typeof settings.DEFAULT_SETTINGS>((resolve) => {
-    finish = resolve;
-  });
-  const get = vi.spyOn(settings, 'getSettings');
+  const get = chrome.storage.local.get.bind(chrome.storage.local);
+  const responses: (() => void)[] = [];
   const popup = vi.spyOn(chrome.action, 'setPopup');
   const behavior = vi.spyOn(chrome.sidePanel, 'setPanelBehavior');
-  if (event === 'load') get.mockReturnValueOnce(pendingRead);
+  // 起動イベントの場合は通常の初期反映を終えてから、応答の順序を固定する。
+  const deferReads = () => vi.spyOn(chrome.storage.local, 'get').mockImplementation((keys: unknown) => {
+    const snapshot = get(keys as string);
+    if (keys !== 'settings') return snapshot;
+    return new Promise((resolve) => {
+      responses.push(async () => resolve(await snapshot));
+    });
+  });
+  if (event === 'load') deferReads();
   await import('../src/background/index');
   if (add) {
     await flush();
     popup.mockClear();
     behavior.mockClear();
-    get.mockReturnValueOnce(pendingRead);
+    deferReads();
     const apply = add.mock.calls[0][0] as () => void;
     apply();
   }
   await chrome.storage.local.set({ settings: { ...settings.DEFAULT_SETTINGS, actionMode: notifiedMode } });
+  expect(responses).toHaveLength(2);
+  expect(popup).not.toHaveBeenCalled();
+  responses[0]();
   await flush();
-  const expectedPopup = { popup: notifiedMode === 'popup' ? 'popup.html' : '' };
-  expect(popup).toHaveBeenLastCalledWith(expectedPopup);
-  finish({ ...settings.DEFAULT_SETTINGS, actionMode: initialMode });
-  await pendingRead;
+  expect(popup).toHaveBeenLastCalledWith({ popup: initialMode === 'popup' ? 'popup.html' : '' });
+  responses[1]();
   await flush();
-  expect(popup).toHaveBeenCalledTimes(1);
-  expect(popup).toHaveBeenLastCalledWith(expectedPopup);
-  expect(behavior).toHaveBeenCalledTimes(1);
+  expect(popup).toHaveBeenCalledTimes(2);
+  expect(popup).toHaveBeenLastCalledWith({ popup: notifiedMode === 'popup' ? 'popup.html' : '' });
+  expect(behavior).toHaveBeenCalledTimes(initialMode === notifiedMode ? 1 : 2);
   expect(behavior).toHaveBeenLastCalledWith({ openPanelOnActionClick: notifiedMode === 'sidepanel' });
 });
 

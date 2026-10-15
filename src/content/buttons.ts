@@ -324,13 +324,8 @@ export function applyButtonMode(next: ButtonMode): void {
 export function initButtons(): () => void {
   watchShared();
   const unhealth = subscribeHealth(() => applyButtonMode(mode)); // broken になったら UI を外し、戻ったら付け直す
-  let settingsChanged = false;
-  void getSettings().then((s) => {
-    // 通知で新しい設定を受け取っていれば、遅れて返った初期値では戻さない。
-    if (!settingsChanged) applyButtonMode(s.buttonMode);
-  });
+  void getSettings().then((s) => applyButtonMode(s.buttonMode));
   const unsettings = onSettingsChanged((s) => {
-    settingsChanged = true;
     if (s.buttonMode !== mode) applyButtonMode(s.buttonMode);
   });
   const undata = onDataChanged(() => {

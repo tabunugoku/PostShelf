@@ -154,7 +154,7 @@ export function fullTextPlan(s: Pick<Settings, 'fullTextSpeed' | 'fullTextTabs'>
 
 const KEY = 'settings';
 
-/** 保存値を既定値と合わせ、不正な項目を補正する。読み出しと通知で共通に使う。 */
+/** 保存値を既定値と合わせ、不正な項目を補正する。 */
 function normalizeSettings(raw: unknown): Settings {
   const stored = (raw ?? {}) as Partial<Settings>;
   const merged = { ...DEFAULT_SETTINGS, ...stored };
@@ -193,8 +193,8 @@ export async function getSettings(): Promise<Settings> {
 
 /** 設定が変わったら呼ばれる (別タブ・manager からの変更も拾う)。解除関数を返す */
 export function onSettingsChanged(cb: (s: Settings) => void): () => void {
-  const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
-    if (area === 'local' && KEY in changes) cb(normalizeSettings(changes[KEY].newValue));
+  const listener = (changes: Record<string, unknown>, area: string) => {
+    if (area === 'local' && KEY in changes) void getSettings().then(cb);
   };
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);
