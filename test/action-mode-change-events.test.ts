@@ -64,7 +64,7 @@ it.each(['onInstalled', 'onStartup'] as const)('%sは同じ値も再適用して
   expect(popup).toHaveBeenCalledTimes(2);
 });
 
-it('起動時の読み込みより先の通知は未反映として適用する', async () => {
+it('先に同じモードの通知が来ても起動時の読み込みを再適用しない', async () => {
   installPanelMock();
   const settings = await import('../src/shared/settings');
   let finish!: (value: typeof settings.DEFAULT_SETTINGS) => void;
@@ -76,7 +76,7 @@ it('起動時の読み込みより先の通知は未反映として適用する'
   expect(popup).toHaveBeenCalledTimes(1);
   finish(settings.DEFAULT_SETTINGS);
   await flush();
-  expect(popup).toHaveBeenCalledTimes(2);
+  expect(popup).toHaveBeenCalledTimes(1);
 });
 
 it('起動時のAPI失敗後は次の通知で同じモードも再試行する', async () => {
@@ -92,4 +92,65 @@ it('起動時のAPI失敗後は次の通知で同じモードも再試行する'
   await flush();
   expect(behavior).toHaveBeenCalledTimes(2);
   expect(popup).toHaveBeenCalledWith({ popup: 'popup.html' });
+});
+
+it.each([
+  ['load', 'popup', 'sidepanel'],
+  ['load', 'sidepanel', 'popup'],
+  ['onInstalled', 'popup', 'sidepanel'],
+  ['onStartup', 'popup', 'sidepanel'],
+] as const)('%s の読み込みを待つ間の通知を古い値で上書きしない: %s → %s', async (
+  event, initialMode, notifiedMode,
+) => {
+  installPanelMock();
+  Object.assign(chrome.runtime, { onStartup: { addListener: vi.fn() } });
+  const add = event === 'load' ? undefined : vi.spyOn(chrome.runtime[event], 'addListener');
+  await updateSettings({ actionMode: initialMode });
+  const settings = await import('../src/shared/settings');
+  let finish!: (value: typeof settings.DEFAULT_SETTINGS) => void;
+  const pendingRead = new Promise<typeof settings.DEFAULT_SETTINGS>((resolve) => {
+    finish = resolve;
+  });
+  const get = vi.spyOn(settings, 'getSettings');
+  const popup = vi.spyOn(chrome.action, 'setPopup');
+  const behavior = vi.spyOn(chrome.sidePanel, 'setPanelBehavior');
+  if (event === 'load') get.mockReturnValueOnce(pendingRead);
+  await import('../src/background/index');
+  if (add) {
+    await flush();
+    popup.mockClear();
+    behavior.mockClear();
+    get.mockReturnValueOnce(pendingRead);
+    const apply = add.mock.calls[0][0] as () => void;
+    apply();
+  }
+  await chrome.storage.local.set({ settings: { ...settings.DEFAULT_SETTINGS, actionMode: notifiedMode } });
+  await flush();
+  const expectedPopup = { popup: notifiedMode === 'popup' ? 'popup.html' : '' };
+  expect(popup).toHaveBeenLastCalledWith(expectedPopup);
+  finish({ ...settings.DEFAULT_SETTINGS, actionMode: initialMode });
+  await pendingRead;
+  await flush();
+  expect(popup).toHaveBeenCalledTimes(1);
+  expect(popup).toHaveBeenLastCalledWith(expectedPopup);
+  expect(behavior).toHaveBeenCalledTimes(1);
+  expect(behavior).toHaveBeenLastCalledWith({ openPanelOnActionClick: notifiedMode === 'sidepanel' });
+});
+
+it.each(['popup', 'sidepanel'] as const)('通知が無ければ遅れた起動時の読み込みを反映する: %s', async (actionMode) => {
+  installPanelMock();
+  const settings = await import('../src/shared/settings');
+  let finish!: (value: typeof settings.DEFAULT_SETTINGS) => void;
+  const pendingRead = new Promise<typeof settings.DEFAULT_SETTINGS>((resolve) => {
+    finish = resolve;
+  });
+  vi.spyOn(settings, 'getSettings').mockReturnValueOnce(pendingRead);
+  const popup = vi.spyOn(chrome.action, 'setPopup');
+  await import('../src/background/index');
+  expect(popup).not.toHaveBeenCalled();
+  finish({ ...settings.DEFAULT_SETTINGS, actionMode });
+  await pendingRead;
+  await flush();
+  expect(popup).toHaveBeenCalledTimes(1);
+  expect(popup).toHaveBeenLastCalledWith({ popup: actionMode === 'popup' ? 'popup.html' : '' });
 });

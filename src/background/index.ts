@@ -11,6 +11,7 @@ const startupCleanup = cleanupAtStartup().catch(() => {});
 
 // ツールバーアイコンの動作 (popup / サイドパネル) は再起動で失われるので、service worker の起動ごとに反映する
 let lastActionMode: ActionMode | undefined;
+let settingsVersion = 0;
 /** 反映を依頼した値を記録する。API の完了待ちの間も、同じ設定通知では呼び直さない。 */
 const applyMode = (mode: ActionMode): Promise<void> => {
   lastActionMode = mode;
@@ -19,7 +20,13 @@ const applyMode = (mode: ActionMode): Promise<void> => {
     throw error;
   });
 };
-const apply = () => void getSettings().then((s) => applyMode(s.actionMode)).catch(() => {});
+const apply = () => {
+  const version = settingsVersion;
+  void getSettings().then((s) => {
+    // 起動イベントの読み込み中に通知が来た場合は、通知側の反映を優先する。
+    if (version === settingsVersion) return applyMode(s.actionMode);
+  }).catch(() => {});
+};
 apply();
 chrome.runtime.onInstalled.addListener(apply);
 // 旧版の裏のタブの記録は、更新のときだけ片付ける (service worker が起きるたびには書き込まない)
@@ -28,6 +35,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 chrome.runtime.onStartup?.addListener(apply);
 onSettingsChanged((s) => {
+  settingsVersion++;
   if (s.actionMode !== lastActionMode) void applyMode(s.actionMode);
 });
 

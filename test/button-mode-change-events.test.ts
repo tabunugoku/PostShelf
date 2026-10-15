@@ -1,8 +1,9 @@
 // 版: v77
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
-import { initButtons } from '../src/content/buttons';
+import { applyButtonMode, initButtons } from '../src/content/buttons';
 import { updateSettings } from '../src/shared/settings';
+import * as settings from '../src/shared/settings';
 import * as selectors from '../src/shared/selectors';
 import * as popover from '../src/content/popover';
 
@@ -59,4 +60,41 @@ it('起動時と診断からの復帰は同じモードでも反映する', asyn
   health.notify();
   expect(apply).toHaveBeenCalledTimes(3);
   expect(document.querySelector('[data-postshelf-btn]')).not.toBeNull();
+});
+
+it.each([
+  ['separate', 'replace'],
+  ['replace', 'separate'],
+] as const)('初期読み込みを待つ間の通知を古い値で上書きしない: %s → %s', async (initialMode, notifiedMode) => {
+  applyButtonMode(initialMode);
+  let finish!: (value: settings.Settings) => void;
+  const initialRead = new Promise<settings.Settings>((resolve) => {
+    finish = resolve;
+  });
+  vi.spyOn(settings, 'getSettings').mockReturnValueOnce(initialRead);
+  const apply = vi.spyOn(popover, 'setPopoverMode');
+  stop = initButtons();
+  await chrome.storage.local.set({ settings: { ...settings.DEFAULT_SETTINGS, buttonMode: notifiedMode } });
+  expect(apply).toHaveBeenLastCalledWith(notifiedMode);
+  finish({ ...settings.DEFAULT_SETTINGS, buttonMode: initialMode });
+  await initialRead;
+  expect(apply).toHaveBeenCalledTimes(1);
+  expect(apply).toHaveBeenLastCalledWith(notifiedMode);
+  expect(document.querySelector('[data-postshelf-btn]') !== null).toBe(notifiedMode === 'separate');
+  expect(document.querySelector('[data-testid=bookmark] [data-postshelf-badge]') !== null).toBe(notifiedMode === 'replace');
+});
+
+it.each(['separate', 'replace'] as const)('通知が無ければ遅れた初期読み込みを反映する: %s', async (buttonMode) => {
+  let finish!: (value: settings.Settings) => void;
+  const initialRead = new Promise<settings.Settings>((resolve) => {
+    finish = resolve;
+  });
+  vi.spyOn(settings, 'getSettings').mockReturnValueOnce(initialRead);
+  const apply = vi.spyOn(popover, 'setPopoverMode');
+  stop = initButtons();
+  expect(apply).not.toHaveBeenCalled();
+  finish({ ...settings.DEFAULT_SETTINGS, buttonMode });
+  await initialRead;
+  expect(apply).toHaveBeenCalledTimes(1);
+  expect(apply).toHaveBeenLastCalledWith(buttonMode);
 });
