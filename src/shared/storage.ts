@@ -817,10 +817,44 @@ export function addCollected(items: { tweetId: string; snapshot?: Bookmark['snap
   });
 }
 
+/** 時刻以外のアカウント情報と、同順位を含む新しい順が同じかを比べる。 */
+function sameAccountData(change: chrome.storage.StorageChange): boolean {
+  const { oldValue, newValue } = change;
+  if (!oldValue || !newValue || typeof oldValue !== 'object' || typeof newValue !== 'object') return false;
+  const before = oldValue as Record<string, Account>;
+  const after = newValue as Record<string, Account>;
+  const ids = Object.keys(before);
+  if (ids.length !== Object.keys(after).length) return false;
+  for (const id of ids) {
+    const prev = before[id];
+    const next = after[id];
+    if (!validAccount(prev) || !validAccount(next)) return false;
+    if (prev.id !== next.id || prev.handle !== next.handle
+      || prev.displayName !== next.displayName || prev.avatar !== next.avatar) return false;
+  }
+  // accountSummaries と同じく未設定は最後。同順位の変化も通知し、表示対象が絞られていても順を保つ。
+  const rank = (a: Account) => a.id === UNKNOWN_ACCOUNT_ID ? -Infinity : a.lastSeenAt;
+  const sorted = (accounts: Record<string, Account>) => Object.keys(accounts)
+    .sort((a, b) => rank(accounts[b]) - rank(accounts[a]));
+  const oldOrder = sorted(before);
+  const newOrder = sorted(after);
+  for (let i = 0; i < oldOrder.length; i++) {
+    const id = oldOrder[i];
+    if (id !== newOrder[i]) return false;
+    if (i === 0) continue;
+    const wasTied = rank(before[id]) === rank(before[oldOrder[i - 1]]);
+    const isTied = rank(after[id]) === rank(after[newOrder[i - 1]]);
+    if (wasTied !== isTied) return false;
+  }
+  return true;
+}
+
 /** フォルダ/ブックマーク/アカウントが変わったら呼ばれる (別タブ・manager からの変更も拾う)。解除関数を返す */
 export function onDataChanged(cb: () => void): () => void {
-  const listener = (changes: Record<string, unknown>, area: string) => {
-    if (area === 'local' && (KEY_FOLDERS in changes || KEY_BOOKMARKS in changes || KEY_ACCOUNTS in changes)) cb();
+  const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
+    if (area !== 'local') return;
+    if (KEY_FOLDERS in changes || KEY_BOOKMARKS in changes
+      || (KEY_ACCOUNTS in changes && !sameAccountData(changes[KEY_ACCOUNTS]))) cb();
   };
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);
