@@ -4,7 +4,11 @@ import { describe, expect, it } from 'vitest';
 import { loadMessages } from './chrome-mock';
 describe('v42-E: documented snapshot contract', () => {
   it('documents the optional fields and forbids operating translation buttons', () => {
-    const doc = readFileSync('CLAUDE.md', 'utf8'); expect(doc.slice(doc.indexOf('## データモデル'), doc.indexOf('## 守ること'))).toMatch(/省略.*quote.*translated/);
+    // 省略できる項目は DATA_MODEL.md に書く (CLAUDE.md には型の写しを置かない)
+    const model = readFileSync('docs/DATA_MODEL.md', 'utf8');
+    expect(model).toMatch(/translated\?, quote\? \}/);
+    expect(model).toContain('- `translated?: true`');
+    const doc = readFileSync('CLAUDE.md', 'utf8');
     expect(doc).toContain('翻訳のボタン (「翻訳を表示」「原文を表示」) は押さない。原文は取らず、翻訳済みの印だけを保存する');
   });
   it('records manual verification and the limited quote scope', () => {

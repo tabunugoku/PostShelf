@@ -4,8 +4,10 @@ import { expect,it } from 'vitest';
 const keys=['sidebarResize','treeExpand','treeCollapse','folderDeleteTree','folderAncestorsRemain','triageKeyTargets','triageKeyTitle','triageKeyAuto','triageKeyManual','triageKeyEmpty','triageKeyReplace','triageKeyOrder','triageKeyOrderHint'];
 it('documents all new locale labels without changing their text',()=>{expect(existsSync('docs/V46_TRANSLATIONS.md')).toBe(true);const table=readFileSync('docs/V46_TRANSLATIONS.md','utf8');const rows=table.split('\n\n').find(block=>block.startsWith('| キー'))!;for(const key of keys)expect(rows).toContain('| '+key+' |');for(const language of ['ja','en','zh_CN','zh_TW','ko','es','pt_BR','fr']){const locale=JSON.parse(readFileSync('static/_locales/'+language+'/messages.json','utf8'));for(const key of keys){expect(table).toContain(key);expect(table).toContain(locale[key].message);}}});
 it('documents the optional parent model and the three-level feature', () => {
+  // 型の詳細は DATA_MODEL.md に書く (CLAUDE.md には型の写しを置かない)
+  const model = readFileSync('docs/DATA_MODEL.md', 'utf8');
+  expect(model.split('\n').find((line) => line.startsWith('- `parentId`'))).toContain('最大 3 段');
   const rules = readFileSync('CLAUDE.md', 'utf8');
-  expect(rules.split('\n').find((line) => line.startsWith('Folder '))).toContain('parentId?: string');
   expect(rules).toContain('最大 3 段');
 });
 it('leaves a v46 manual checklist for tree, key targets and compatibility',()=>{const manual=readFileSync('docs/MANUAL_TEST.md','utf8').split('## v46')[1];expect(manual).toBeDefined();for(const term of ['実機未確認','たたまれた孫','空き','エクスポート','インポート','サイドパネル','未分類','ドラッグ'])expect(manual).toContain(term);});
