@@ -71,6 +71,19 @@ Codex・クラウドのセッション・Claude Code のどれが書いても、
 - 実機で確かめられないことは、`docs/MANUAL_TEST.md` に「実機未確認」のチェック項目として残す。実機で確かめたら、ユーザーが印をつける
 - 補助ツール (`.claude/`): スキル `ci` (CI の確認と成果物のダウンロード)、`codex-prompt` (Codex に渡すプロンプトの作成)。フック `locales-guard.sh` が、`_locales` の編集の前に確認を求める
 
+## Codex との分担
+Codex もこのファイルを読む (`~/.codex/config.toml` の `project_doc_fallback_filenames`)。
+
+- **役割**: Claude Code (Opus) は統括する。設計、モックアップ、Codex へのプロンプト、レビュー、品質の確認、リリースを受け持つ。Codex (`gpt-6.1-sol`) は実装を受け持ち、渡されたプロンプトの範囲だけを変える
+- **料金**: Claude と ChatGPT のサブスクの範囲で動かす。`ANTHROPIC_API_KEY`・`OPENAI_API_KEY` は使わない。Codex は ChatGPT のログイン (`codex login`) で動かす
+- **流れ**: 要件の確認 (`docs/PLAN.md`、必要ならモックアップ) → `/codex-prompt` でプロンプト (1 項目 1 コミット) → Codex が `codex/<名前>` のブランチで実装して push → `/ci` で差分と CI を確かめる → 指摘があれば直すプロンプト → main へのマージ (ユーザーが指示したときだけ) → リリース
+- **並行**: 互いに触るファイルが重ならない作業だけを並べる。最大 2 つから始める
+  - 作業ごとに `git worktree add` で別のフォルダとブランチを作る。Codex には、その作業のファイル以外を触らせない
+  - 渡し方は `/codex:rescue --background` と同じ。worktree で動かすときは、プラグインのスクリプトを直接呼ぶ (`node <プラグイン>/scripts/codex-companion.mjs task --background --write --cwd <worktree> --prompt-file <ファイル>`。`/codex:rescue` には作業フォルダを渡す引数が無いため)
+  - 完了を確かめてから次へ進む (`codex-companion.mjs status --cwd <worktree>` と `result`)。終わっていない作業を前提に、統合も次の依頼もしない
+  - 統合の前に `/codex:adversarial-review` で見る。採るかどうかの最後の判断は Opus が行う
+  - Windows では、裏の Codex のプロセスが残ることや、`/codex:cancel` が効かないことがある (プラグインの未解決の不具合)。止まらないときは、タスクマネージャーで止める
+
 ## リリース
 手順とリリースノートの書き方は `.claude/rules/release.md` (リリースノートや版のファイルを触るときに読み込まれる)。紹介サイトの決まりは `.claude/rules/site.md`。拡張 ID は `static/manifest.json` の `key` で固定しているので、変えない。
 
