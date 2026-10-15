@@ -1280,6 +1280,27 @@
   "githubLink": {
     "message": "Voir sur GitHub"
   },
+  "updateCheck": {
+    "message": "Vérifier les nouvelles versions"
+  },
+  "updateCheckDesc": {
+    "message": "Si cette option est activée, PostShelf demande à GitHub le numéro de la dernière version quand vous l’ouvrez, au plus une fois par jour. Aucune donnée n’est envoyée, mais GitHub voit l’heure de la vérification, votre adresse IP, votre type de navigateur et le fait que la demande vient de PostShelf. Les mises à jour ne sont jamais installées automatiquement."
+  },
+  "updateAvailable": {
+    "message": "Une nouvelle version est disponible : $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "1.1.8"
+      }
+    }
+  },
+  "updateAvailableLink": {
+    "message": "Ouvrir la page de la version"
+  },
+  "updateAvailableLinkAria": {
+    "message": "Ouvrir la page de la version (s’ouvre dans un nouvel onglet)"
+  },
   "githubLinkAria": {
     "message": "Voir sur GitHub (s’ouvre dans un nouvel onglet)"
   },

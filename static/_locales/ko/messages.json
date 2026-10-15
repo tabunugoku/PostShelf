@@ -1280,6 +1280,27 @@
   "githubLink": {
     "message": "GitHub에서 보기"
   },
+  "updateCheck": {
+    "message": "새 버전 확인하기"
+  },
+  "updateCheckDesc": {
+    "message": "켜면 화면을 열 때 하루에 한 번까지 GitHub에 최신 버전 번호를 묻습니다. 보내는 데이터는 없지만, GitHub에는 확인한 시각, IP 주소, 브라우저 종류와 PostShelf에서 보낸 요청이라는 사실이 전달됩니다. 업데이트는 자동으로 하지 않습니다."
+  },
+  "updateAvailable": {
+    "message": "새 버전($VERSION$)이 나왔습니다",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "1.1.8"
+      }
+    }
+  },
+  "updateAvailableLink": {
+    "message": "릴리스 페이지 열기"
+  },
+  "updateAvailableLinkAria": {
+    "message": "릴리스 페이지 열기(새 탭에서 열림)"
+  },
   "githubLinkAria": {
     "message": "GitHub에서 보기(새 탭에서 열림)"
   },
