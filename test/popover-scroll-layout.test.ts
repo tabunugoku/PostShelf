@@ -50,6 +50,15 @@ it('40 個の一覧だけをスクロールさせ、追加ボタンを下部に�
   expect(add.closest('[data-popover-footer]')).not.toBeNull();
 });
 
+it('下部の先頭の区切り線の直後に追加ボタンを置く', async () => {
+  const pop = await open();
+  const footer = pop.querySelector<HTMLElement>('[data-popover-footer]')!;
+  const separator = footer.children[0] as HTMLElement;
+  expect(separator.style.borderTopStyle).toBe('solid');
+  expect(separator.style.borderTopWidth).toBe('0.5px');
+  expect(footer.children[1].textContent).toBe('フォルダを追加');
+});
+
 it('作成フォームの入力だけをスクロールさせ、確定行を固定する', async () => {
   const pop = await open();
   [...pop.querySelectorAll('button')].find(b => b.textContent === 'フォルダを追加')!.click();
@@ -72,6 +81,7 @@ it('管理画面用は追加ボタンが一覧の末尾にあり、作成のレ�
   const list = picker.el.children[1] as HTMLElement;
   const add = list.lastElementChild as HTMLButtonElement;
   expect(add.textContent).toBe('フォルダを追加');
+  expect((add.previousElementSibling as HTMLElement).style.borderTopStyle).toBe('solid');
   expect(list.style.overflowY).toBe('');
   add.click();
   expect(picker.el.querySelector('form')!.style.display).toBe('grid');

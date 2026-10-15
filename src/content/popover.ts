@@ -213,8 +213,9 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   if (account) bottom.append(unsave);
   footer.prepend(bottom);
   bottom.before(divider(th));
-  // 追加、区切り、操作行、置き換えモードの解除、失敗表示の順で固定する。
+  // 区切り、追加、区切り、操作行、置き換えモードの解除、失敗表示の順で固定する。
   if (account && picker.addButton) footer.prepend(picker.addButton);
+  footer.prepend(divider(th));
   footer.append(errorEl);
   pop.append(footer);
   document.body.append(pop);
