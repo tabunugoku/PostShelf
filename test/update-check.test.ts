@@ -70,11 +70,15 @@ describe('checking for a new version', () => {
     await updateSettings({ updateCheck: true });
   });
 
-  it('reads only the fixed URL, without cookies or extra headers', async () => {
+  it('reads only the fixed URL, without cookies, a referrer or extra headers', async () => {
     const { d, fetchMock } = deps('v1.1.8');
     expect(await checkForUpdate(d)).toBe('v1.1.8');
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(RELEASES_API_URL, { credentials: 'omit', cache: 'no-store' });
+    expect(fetchMock).toHaveBeenCalledWith(RELEASES_API_URL, {
+      credentials: 'omit',
+      cache: 'no-store',
+      referrerPolicy: 'no-referrer',
+    });
     expect(await getUpdateCheckState()).toEqual({ checkedAt: 1_000 * HOUR, latest: 'v1.1.8' });
   });
 

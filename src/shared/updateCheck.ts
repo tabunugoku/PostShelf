@@ -44,8 +44,13 @@ export const defaultUpdateCheckDeps: UpdateCheckDeps = {
 /** 最新のリリースの tag_name を読む。読めなければ null (通信の失敗・制限 (403)・リリースなし (404) を含む) */
 async function readLatestTag(deps: UpdateCheckDeps): Promise<string | null> {
   try {
-    // Cookie を送らない。独自のヘッダーは付けない (付けると CORS の事前確認が増える)
-    const res = await deps.fetch(RELEASES_API_URL, { credentials: 'omit', cache: 'no-store' });
+    // Cookie と Referer を送らない。独自のヘッダーは付けない (付けると CORS の事前確認が増える)。
+    // ブラウザが付ける User-Agent と Origin (chrome-extension://…) は止められないので、設定の説明に書く
+    const res = await deps.fetch(RELEASES_API_URL, {
+      credentials: 'omit',
+      cache: 'no-store',
+      referrerPolicy: 'no-referrer',
+    });
     if (!res.ok) return null;
     const body = (await res.json()) as { tag_name?: unknown };
     return typeof body.tag_name === 'string' ? body.tag_name : null;

@@ -22,7 +22,7 @@ A Chrome extension (Manifest V3) that lets you sort your X (formerly Twitter) bo
   - Downloaded images are stored only on your computer and are never sent to any server. A JSON export contains only image URLs, not the images.
 - The interface is available in 8 languages
 - Data is stored in `chrome.storage.local` only. No data is sent out. No analytics. No tracking.
-- Check for new versions (in Settings, **off by default**): when on, PostShelf asks GitHub for the latest version number when you open it, at most once a day, and shows a link to the release page if a newer one exists. No data is sent, but GitHub sees the time of the check and your IP address. Updates are never installed automatically.
+- Check for new versions (in Settings, **off by default**): when on, PostShelf asks GitHub for the latest version number when you open it, at most once a day, and shows a link to the release page if a newer one exists. No data is sent, but GitHub sees the time of the check, your IP address, your browser type, and that the request comes from PostShelf. Updates are never installed automatically.
 
 ## Install
 
@@ -106,7 +106,7 @@ x.com (旧 Twitter) のブックマークを、無料アカウントでも独自
   - 取得した画像は、この PC の中にだけ置きます。外部のサーバーへは送りません。JSON のエクスポートに画像は入りません (URL のみ)
 - 画面は 8 言語に対応
 - データは `chrome.storage.local` のみ。外部送信・解析・トラッキングなし
-- 新しい版を確かめる (設定、**初期値はオフ**): オンにすると、画面を開いたときに 1 日 1 回まで、GitHub に最新の版の番号を問い合わせ、新しい版があればリリースのページへのリンクを出します。送るデータはありませんが、GitHub には確かめた時刻と IP アドレスが伝わります。更新は自動では行いません
+- 新しい版を確かめる (設定、**初期値はオフ**): オンにすると、画面を開いたときに 1 日 1 回まで、GitHub に最新の版の番号を問い合わせ、新しい版があればリリースのページへのリンクを出します。送るデータはありませんが、GitHub には、確かめた時刻・IP アドレス・ブラウザの種類と、PostShelf からの問い合わせであることが伝わります。更新は自動では行いません
 
 ## インストール
 
