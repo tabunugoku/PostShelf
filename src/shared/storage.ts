@@ -287,7 +287,11 @@ function checkColor(color: string): void {
 
 /** 「すべて」+ 保存済みフォルダ (order 昇順) */
 export async function listFolders(): Promise<Folder[]> {
-  const folders = await readFolders();
+  return folderList(await readFolders());
+}
+
+/** 読み込み済みのフォルダを、組み込み・未分類・ツリーの表示順に並べる。 */
+function folderList(folders: Folder[]): Folder[] {
   // 「未分類」は常に「すべて」の次。残りは、ツリーの表示順 (親 → 子 → 孫。同じ親の中は order 昇順)
   const userFolders = folders.filter(f => f.id !== INBOX_ID);
   return [ALL_FOLDER, ...folders.filter(f => f.id === INBOX_ID), ...flattenFolders(userFolders).map(r => r.folder)];
@@ -1069,10 +1073,26 @@ export async function listBookmarksWithAccounts(): Promise<{ bookmarks: Bookmark
   return { bookmarks: Object.values(map).filter(inScope), accounts: await accountSummaries(map) };
 }
 
-async function accountSummaries(map: BookmarkMap): Promise<AccountSummary[]> {
+/** 初期表示のアカウント選択と一覧で、全件とフォルダの読み込みを共有する。 */
+export async function loadManagerData(): Promise<{
+  accounts: AccountSummary[];
+  forAccount: (accountId: string) => { bookmarks: Bookmark[]; folders: Folder[] };
+}> {
+  const [map, folders] = await Promise.all([readMap(), readAllFolders()]);
+  const bookmarks = Object.values(map);
+  return {
+    accounts: await accountSummaries(map, folders),
+    forAccount: (accountId) => ({
+      bookmarks: bookmarks.filter((b) => b.accountId === accountId),
+      folders: folderList(folders.filter((f) => f.accountId === accountId)),
+    }),
+  };
+}
+
+async function accountSummaries(map: BookmarkMap, loadedFolders?: Folder[]): Promise<AccountSummary[]> {
   const [accounts, folders, last] = await Promise.all([
     read<Record<string, Account>>(KEY_ACCOUNTS, {}),
-    readAllFolders(),
+    loadedFolders ?? readAllFolders(),
     getLastSeenAccount(),
   ]);
   const counts = new Map<string, number>();

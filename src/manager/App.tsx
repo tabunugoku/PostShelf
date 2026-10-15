@@ -46,6 +46,7 @@ import {
   deleteAccountData,
   getLastSeenAccount,
   listAccounts,
+  loadManagerData,
   onLastSeenAccountChanged,
   setAccountScope,
   type AccountSummary,
@@ -272,14 +273,29 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   useEffect(() => {
     const entry = takeEntryHash(); // ポップアップからの入口 (#inbox / #q=…)。読んだらハッシュを消す。lastFolderId より優先する
     void (async () => {
-      const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts(), refreshCacheView()]).then((r) => [r[0], r[1], r[2]] as const);
+      const seq = reloadSeq.current;
+      const [s, last, initial] = await Promise.all([
+        getSettings(),
+        getLastSeenAccount(),
+        loadManagerData(),
+        refreshCacheView(),
+      ]);
       lastRef.current = last;
       setLastSeen(last);
       setAutoCfg(s.autoCollect);
       setShowInAncestors(s.showInAncestors);
       setCollapsed(new Set(s.folderTreeCollapsed));
-      applyView(resolveViewAccount(s.viewAccount, last, accs));
-      await Promise.all([reload(), loadHint()]);
+      applyView(resolveViewAccount(s.viewAccount, last, initial.accounts));
+      if (seq === reloadSeq.current) {
+        const data = initial.forAccount(viewRef.current);
+        setFolders(data.folders);
+        setBookmarks(data.bookmarks);
+        setAccounts(initial.accounts);
+      } else {
+        // 初期読み込み中に保存の変更通知があれば、古い一覧を使わず通常どおり読み直す。
+        await reload();
+      }
+      await loadHint();
       const ver = currentVersion();
       if (await noteRunVersion(ver)) setUpdated(ver);
       if (entry?.triage) setTriageWanted(true);
