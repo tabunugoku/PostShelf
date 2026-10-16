@@ -170,6 +170,7 @@ let sharedCache: { account: string; promise: Promise<Shared> } | null = null;
 let sharedEvents: typeof chrome.storage.onChanged | undefined;
 let unwatchShared: (() => void) | undefined;
 let sharedVersion = 0;
+const sharedSubscribers = new Set<() => void>();
 const dropShared = () => {
   sharedCache = null;
   sharedVersion++;
@@ -179,7 +180,10 @@ function watchShared(): void {
   unwatchShared?.();
   sharedEvents = chrome.storage.onChanged;
   dropShared();
-  unwatchShared = onDataChanged(dropShared);
+  unwatchShared = onDataChanged(() => {
+    dropShared();
+    for (const subscriber of sharedSubscribers) subscriber();
+  });
 }
 async function loadShared(): Promise<Shared> {
   const account = getCurrentAccount()!.id;
@@ -340,10 +344,22 @@ export function initButtons(): () => void {
   const unsettings = onSettingsChanged((s) => {
     if (s.buttonMode !== mode) applyButtonMode(s.buttonMode);
   });
-  const undata = onDataChanged(() => {
-    dropShared();
+  let refreshWhenVisible = false;
+  const onSharedChange = () => {
+    if (document.visibilityState === 'hidden') {
+      refreshWhenVisible = true;
+      return;
+    }
+    refreshWhenVisible = false;
     void refreshAll();
-  });
+  };
+  sharedSubscribers.add(onSharedChange);
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'hidden' || !refreshWhenVisible) return;
+    refreshWhenVisible = false;
+    void refreshAll();
+  };
+  document.addEventListener('visibilitychange', onVisibilityChange);
   const unaccount = subscribeAccount(() => {
     dropShared();
     void refreshAll();
@@ -353,7 +369,8 @@ export function initButtons(): () => void {
     unwatch();
     unhealth();
     unsettings();
-    undata();
+    sharedSubscribers.delete(onSharedChange);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
     unaccount();
     if (scheduledFrame !== undefined) cancelAnimationFrame(scheduledFrame);
     scheduledFrame = undefined;
