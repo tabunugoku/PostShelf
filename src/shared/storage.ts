@@ -245,6 +245,15 @@ async function readMap(): Promise<BookmarkMap> {
   await ensureMigrated();
   return read<BookmarkMap>(KEY_BOOKMARKS, {});
 }
+/** フォルダとポストをまとめて読み、保存までの間に別の読み出しを挟まないようにする。 */
+async function readFoldersAndMap(): Promise<{ folders: Folder[]; map: BookmarkMap }> {
+  await ensureMigrated();
+  const data = await chrome.storage.local.get([KEY_FOLDERS, KEY_BOOKMARKS]);
+  return {
+    folders: (data[KEY_FOLDERS] as Folder[] | undefined) ?? [],
+    map: (data[KEY_BOOKMARKS] as BookmarkMap | undefined) ?? {},
+  };
+}
 /** ポストのループで全アカウントのフォルダを絞り直さず、同じ一覧を使い回す。 */
 function foldersByAccount(folders: Folder[]): Map<string, Folder[]> {
   const groups = new Map<string, Folder[]>();
@@ -475,10 +484,9 @@ export function setBookmarkFolders(
   snapshot: Bookmark['snapshot'],
 ): Promise<Bookmark> {
   return serial(async () => {
-    const all = await readAllFolders();
+    const { folders: all, map } = await readFoldersAndMap();
     const ids = withAncestors(folderIds, all.filter(mine)); // 「未分類」は他のフォルダと同時には持たない
     const nextFolders = ids.includes(INBOX_ID) ? withInboxFolder(all, scope) : all;
-    const map = await readMap();
     const prev = map[key(tweetId)];
     const b: Bookmark = { accountId: scope, tweetId, folderIds: ids, savedAt: prev?.savedAt ?? Date.now(), snapshot: keepFullText(prev?.snapshot, snapshot) };
     map[key(tweetId)] = b;

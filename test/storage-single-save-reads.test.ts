@@ -40,7 +40,7 @@ it.each([false, true])('未分類の保存は受け皿あり = %s でも以前�
   expect(result).toEqual(expected);
   expect(data.bookmarks).toEqual({ 'sample_other:1': foreign, 'me:1': expected });
   expect(data.folders).toEqual(hasInbox ? original : [other, mine, inbox]);
-  expect(get.mock.calls.filter(([keys]) => String(keys) === 'folders')).toHaveLength(1);
+  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bookmarks']);
   expect(set).toHaveBeenCalledOnce();
   expect(Object.keys(set.mock.calls[0][0]).sort()).toEqual(hasInbox ? ['bookmarks'] : ['bookmarks', 'folders']);
 });
@@ -60,8 +60,74 @@ it('孫を選ぶ保存は祖先・他アカウント・全文・savedAt を保�
   expect(result).toEqual(expected);
   expect(data.bookmarks).toEqual({ 'me:1': expected });
   expect(data.folders).toEqual(folders);
-  expect(get.mock.calls.filter(([keys]) => String(keys) === 'folders')).toHaveLength(1);
+  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bookmarks']);
   expect(set).toHaveBeenCalledExactlyOnceWith({ bookmarks: { 'me:1': expected } });
+});
+
+it.each([
+  ['me', 'edit'],
+  ['me', 'create'],
+  ['sample_other', 'edit'],
+  ['sample_other', 'create'],
+])('別画面の %s のフォルダの %s を未分類の保存で消さない', async (accountId, operation) => {
+  const mine = folder('parent', 4);
+  const other = folder('other', 8, 'sample_other');
+  data.folders = [mine, other];
+  const edited = { ...(accountId === 'me' ? mine : other), name: '架空の編集後フォルダ' };
+  const created = folder('sample_created', 9, accountId);
+  const read = chrome.storage.local.get.bind(chrome.storage.local);
+  let scheduleExternalWrite: () => void;
+  const externalWrite = new Promise<void>((resolve, reject) => {
+    scheduleExternalWrite = () => {
+      setTimeout(() => {
+        const current = data.folders as Folder[];
+        const folders = operation === 'edit'
+          ? current.map((f) => f.id === edited.id && f.accountId === accountId ? edited : f)
+          : [...current, created];
+        void chrome.storage.local.set({ folders }).then(resolve, reject);
+      }, 0);
+    };
+  });
+  let reads = 0;
+  vi.spyOn(chrome.storage.local, 'get').mockImplementation(async (keys) => {
+    const result = await read(keys);
+    reads++;
+    if (reads === 1) {
+      // 旧実装では、フォルダを読んだあとポストの読み出しを待つ間に別画面が書き込む。
+      scheduleExternalWrite();
+    } else {
+      await externalWrite;
+    }
+    return result;
+  });
+
+  const result = await setBookmarkFolders('1', [], snapshot);
+  await externalWrite;
+
+  const expected = operation === 'edit'
+    ? [mine, other].map((f) => f.accountId === accountId ? edited : f)
+    : [mine, other, created];
+  expect(data.folders).toHaveLength(expected.length + 1);
+  expect(data.folders).toEqual(expect.arrayContaining([
+    ...expected,
+    { id: 'inbox', name: '', icon: 'ti-star', order: 5, accountId: 'me' },
+  ]));
+  expect(data.bookmarks).toEqual({ 'me:1': result });
+});
+
+it.each([undefined, null])('保存データが %s なら空のフォルダとポストとして読む', async (missing) => {
+  Object.assign(data, { folders: missing, bookmarks: missing });
+  vi.spyOn(Date, 'now').mockReturnValue(100);
+  const get = vi.spyOn(chrome.storage.local, 'get');
+  const set = vi.spyOn(chrome.storage.local, 'set');
+
+  const result = await setBookmarkFolders('1', [], snapshot);
+
+  expect(result).toEqual({ accountId: 'me', tweetId: '1', folderIds: ['inbox'], savedAt: 100, snapshot });
+  expect(data.folders).toEqual([{ id: 'inbox', name: '', icon: 'ti-star', order: 0, accountId: 'me' }]);
+  expect(data.bookmarks).toEqual({ 'me:1': result });
+  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bookmarks']);
+  expect(set).toHaveBeenCalledOnce();
 });
 
 it('フォルダ作成は他アカウントを先に保存し、フォルダを 1 回だけ読む', async () => {
