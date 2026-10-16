@@ -62,21 +62,28 @@ Codex・クラウドのセッション・Claude Code のどれが書いても、
 ## 進め方
 - 1 項目 1 コミット。各コミットで `npm run typecheck`・`npm test`・`npm run build` が通る状態を保つ。main へのマージは、ユーザーが指示したときだけ
 - 実機で確かめられないことは、`docs/MANUAL_TEST.md` に「実機未確認」のチェック項目として残す。実機で確かめたら、ユーザーが印をつける
-- 補助ツール (`.claude/`): スキル `ci` (CI の確認と成果物のダウンロード)、`codex-prompt` (Codex に渡すプロンプトの作成)。フック `locales-guard.sh` が、`_locales` の編集の前に確認を求める
+- 補助ツール (`.claude/`): スキル `ci` (CI の確認と成果物のダウンロード)、`codex-prompt` (Codex に渡すプロンプトの作成)。`codex/` に Codex の起動とコミット計画の適用のスクリプト。フック `locales-guard.sh` が、`_locales` の編集の前に確認を求める
 
 ## Codex との分担
 Codex もこのファイルを読む (`~/.codex/config.toml` の `project_doc_fallback_filenames`)。
 
 - **役割**: Claude Code (Opus) は統括する。設計、モックアップ、Codex へのプロンプト、レビュー、品質の確認、リリースを受け持つ。Codex (`gpt-6.1-sol`) は実装を受け持ち、渡されたプロンプトの範囲だけを変える
 - **料金**: Claude と ChatGPT のサブスクの範囲で動かす。`ANTHROPIC_API_KEY`・`OPENAI_API_KEY` は使わない。Codex は ChatGPT のログイン (`codex login`) で動かす
-- **流れ**: 要件の確認 (`docs/PLAN.md`、必要ならモックアップ) → `/codex-prompt` でプロンプト (1 項目 1 コミット) → Codex が `codex/<名前>` のブランチで実装して push → `/ci` で差分と CI を確かめる → 指摘があれば直すプロンプト → main へのマージ (ユーザーが指示したときだけ) → リリース
-- **並行**: 互いに触るファイルが重ならない作業だけを並べる。最大 2 つから始める
-  - 作業ごとに `git worktree add` で別のフォルダとブランチを作る。Codex には、その作業のファイル以外を触らせない
-  - 渡し方は `/codex:rescue --background` と同じ。worktree で動かすときは、プラグインのスクリプトを直接呼ぶ (`node <プラグイン>/scripts/codex-companion.mjs task --background --write --cwd <worktree> --prompt-file <ファイル>`。`/codex:rescue` には作業フォルダを渡す引数が無いため)
-  - worktree では、Codex はコミットも push もできない (worktree の Git のデータは元のリポジトリの `.git/worktrees/` にあり、サンドボックスの書き込める範囲の外。push はネットワークも止められている)。Codex には実装とテストまでを頼み、コミットしないよう書く。レビューのあと Opus が、項目ごとにコミットを分けて push する。サンドボックスは緩めない
-  - 完了を確かめてから次へ進む (`codex-companion.mjs status --cwd <worktree>` と `result`)。終わっていない作業を前提に、統合も次の依頼もしない
-  - 統合の前に `/codex:adversarial-review` で見る。採るかどうかの最後の判断は Opus が行う
-  - Windows では、裏の Codex のプロセスが残ることや、`/codex:cancel` が効かないことがある (プラグインの未解決の不具合)。止まらないときは、タスクマネージャーで止める
+- **流れ** (作業 5 で確かめた形):
+  1. 要件の確認 (`docs/PLAN.md`、必要ならモックアップ)
+  2. `git worktree add ../PostShelf-wt/<名前> -b codex/<名前> origin/main` で作業のフォルダを作り、そこで `npm ci`
+  3. `/codex-prompt` でプロンプトを書く。項目ごとに触ってよいファイルを決め、項目の間でファイルを重ねない。各項目に「受け入れ条件 (テストで確かめる)」と「競合・境界の観点」を書き、最後の応答をコミット計画の JSON にさせる
+  4. `.claude/codex/run-codex-exec.sh <worktree> <プロンプト> <出力フォルダ>` を、Bash の `run_in_background` で起動する。終わると通知が 1 回届くので、待つ間に状態を見に行かない (ポーリングしない)
+  5. 出力フォルダの `last.json` (コミット計画・チェックの結果・notes・manual_test) と差分を読み、ローカルで typecheck・test・build を通す
+  6. `node .claude/codex/apply-commit-plan.mjs <worktree> <出力フォルダ>/last.json` で、項目ごとにコミットする (先に `--dry-run` で確かめる)。複数の項目が触ったファイルや、計画に無い変更があれば止まるので、そのときは手で分ける。push して PR を作る
+  7. `/codex:adversarial-review` で見る。フォーカスの文に「指摘ごとに、マージを止めるものか後回しでよいものかを書く」「遅れても最後に正しくなるもの、origin/main と同じふるまいのもの、ごくまれな推測だけのものは指摘しない」を入れる。このレビューは読み取り専用のサンドボックスで動き、テストを実行できないので、テストはローカルと CI で確かめる
+  8. マージを止める指摘だけを直す (やり取りは 2 往復まで)。後回しの指摘は `docs/MANUAL_TEST.md` か、次の作業の候補に回す。採るかどうかの最後の判断は Opus が行う
+  9. main へのマージ (ユーザーが指示したときだけ) → worktree とブランチを消す → リリース
+- **codex exec の設定** (`run-codex-exec.sh`): `--ignore-user-config` で `~/.codex/config.toml` を読まず、モデル・推論の強さ・`project_doc_fallback_filenames`・サンドボックスを `-c` で渡す (ログインはそのまま使う)。サンドボックスは `workspace-write` と `windows.sandbox=mxc`。MXC では esbuild と vitest が動き、外部への通信と worktree の外への書き込みは止められる。以前の `elevated` では esbuild が親フォルダを読めず、build が通らなかった。最後の応答は `--output-schema` (`commit-plan.schema.json`) の形にそろえる
+- **コミットと push は Opus が行う**: Codex のサンドボックスでは `.git` が書けない (worktree に限らない Codex の仕様。push はネットワークも止められている)。プロンプトには「コミットと push はしない」と書く。サンドボックスは緩めない
+- **並行**: 互いに触るファイルが重ならない作業だけを並べる。最大 2 つから始める。作業ごとに別の worktree とブランチにし、Codex には、その作業のファイル以外を触らせない。完了の通知を受けてから次へ進む。終わっていない作業を前提に、統合も次の依頼もしない
+- **後片付け**: `run-codex-exec.sh` は、終わったあとに worktree を参照するプロセスの数 (`leftover=`) を出す。0 でなければ、その worktree を参照するプロセスだけを止める。adversarial-review のあとは、プラグインが worktree ごとに残す常駐のプロセスを、プラグインの `session-lifecycle-hook.mjs SessionEnd` に `{"cwd":"<worktree>"}` を渡して止める (`CLAUDE_PLUGIN_DATA` にプラグインのデータのフォルダを指定する)。これをしないと worktree を消せない
+- **Windows の注意**: Git Bash から `cmd.exe /d /c` などを渡すと、MSYS が `/d` をパスに変える。`codex sandbox` で試すときは PowerShell から呼ぶ。`codex-companion.mjs task --background` で渡す方法は、プロセスが残りやすく `/codex:cancel` も効かないことがあるので使わない
 
 ## リリース
 手順とリリースノートの書き方は `.claude/rules/release.md` (リリースノートや版のファイルを触るときに読み込まれる)。紹介サイトの決まりは `.claude/rules/site.md`。拡張 ID は `static/manifest.json` の `key` で固定しているので、変えない。
