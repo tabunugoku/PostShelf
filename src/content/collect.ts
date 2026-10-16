@@ -143,6 +143,10 @@ let timer: ReturnType<typeof setTimeout> | undefined;
 export function scheduleCollectRefresh(): void {
   ensureCollectButton();
   clearTimeout(timer);
+  if (!document.querySelector('.postshelf-collect')) {
+    timer = undefined;
+    return;
+  }
   timer = setTimeout(() => void refreshCollectButton(), 300);
 }
 

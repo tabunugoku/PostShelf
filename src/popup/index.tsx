@@ -39,7 +39,18 @@ function Popup() {
       const [b, f] = await Promise.all([listBookmarks(), listFolders()]);
       setCounts({ posts: b.length, inbox: countFolder(b, INBOX_ID, Date.now()) }); // 管理画面の左のメニューの「未分類」と同じ関数で数える
       setFolders(f);
-      setRecent([...b].sort((x, y) => y.savedAt - x.savedAt).slice(0, 3));
+      const newest: Bookmark[] = [];
+      for (const bookmark of b) {
+        // 同時刻は先に読んだものを優先し、安定な並べ替えと同じ順番にする。
+        const index = newest.findIndex((item) => bookmark.savedAt > item.savedAt);
+        if (index < 0) {
+          if (newest.length < 3) newest.push(bookmark);
+        } else {
+          newest.splice(index, 0, bookmark);
+          if (newest.length > 3) newest.pop();
+        }
+      }
+      setRecent(newest);
       setFailed(false);
       } catch {
         setFailed(true); // 読み込めなかったことを画面に出す

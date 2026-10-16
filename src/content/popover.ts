@@ -84,11 +84,11 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   if (!ex) return null;
   const { tweetId, snapshot } = ex;
   const account = getCurrentAccount(); // 保存先は、判定できた現在のアカウントだけ
-  const folders = (await listFolders()).filter((f) => !isBuiltinFolder(f.id));
-  const existing = await getBookmark(tweetId);
+  const [allFolders, existing, settings] = await Promise.all([listFolders(), getBookmark(tweetId), getSettings()]);
+  const folders = allFolders.filter((f) => !isBuiltinFolder(f.id));
   const selected = new Set(existing?.folderIds ?? []);
   let chosen = new Set(selected); // 直前の保存時の選択。新しく入れたフォルダを「最近使った」へ入れるために比べる
-  const recentIds = (await getSettings()).recentFolderIds ?? [];
+  const recentIds = settings.recentFolderIds ?? [];
   let isSaved = !!existing; // 「PostShelf から外す」を出すかどうか
 
   const pop = document.createElement('div');
