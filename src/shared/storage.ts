@@ -260,8 +260,8 @@ const mine = (f: Folder) => f.accountId === scope;
 /** scope のフォルダ */
 const readFolders = async () => (await readAllFolders()).filter(mine);
 /** scope のフォルダを差し替えて保存する (他のアカウントのフォルダは触らない) */
-async function writeFolders(list: Folder[]): Promise<void> {
-  const others = (await readAllFolders()).filter((f) => !mine(f));
+async function writeFolders(all: Folder[], list: Folder[]): Promise<void> {
+  const others = all.filter((f) => !mine(f));
   await write(KEY_FOLDERS, [...others, ...list.map((f) => ({ ...f, accountId: scope }))]);
 }
 const key = (tweetId: string) => bookmarkKey(scope, tweetId);
@@ -307,7 +307,8 @@ export function createFolder(input: {
     const name = normalizeName(input.name);
     const icon = input.icon ?? FOLDER_ICON;
     checkIcon(icon);
-    const folders = await readFolders();
+    const all = await readAllFolders();
+    const folders = all.filter(mine);
     if (!canParent(folders, undefined, input.parentId, scope)) throw new StorageError(t('errInvalidImport'));
     const folder: Folder = {
       id: newId(),
@@ -321,7 +322,7 @@ export function createFolder(input: {
       checkColor(input.color);
       folder.color = input.color;
     }
-    await writeFolders([...folders, folder]);
+    await writeFolders(all, [...folders, folder]);
     return folder;
   });
 }
@@ -332,7 +333,8 @@ export function updateFolder(
 ): Promise<Folder> {
   return serial(async () => {
     if (isBuiltinFolder(id)) throw new StorageError(t('errBuiltinImmutable'));
-    const folders = await readFolders();
+    const all = await readAllFolders();
+    const folders = all.filter(mine);
     const idx = folders.findIndex((f) => f.id === id);
     if (idx < 0) throw new StorageError(t('errNotFound'));
     const next: Folder = { ...folders[idx] };
@@ -359,8 +361,8 @@ export function updateFolder(
       }
     }
     folders[idx] = next;
-    if (patch.parentId !== undefined) await writeReparented(folders, id, oldAncestorIds);
-    else await writeFolders(folders);
+    if (patch.parentId !== undefined) await writeReparented(all, folders, id, oldAncestorIds);
+    else await writeFolders(all, folders);
     return next;
   });
 }
@@ -378,8 +380,12 @@ export async function folderDeletionImpact(id: string): Promise<{ folders: numbe
  * 古い祖先のうち新しい祖先に含まれないものは外す。祖先への所属は、直接選んだものと区別できないため。
  * 他のフォルダの祖先として必要な ID は、withAncestors で戻る。フォルダとポストを 1 回の書き込みで保存する
  */
-async function writeReparented(folders: Folder[], movedId: string, oldAncestorIds: string[]): Promise<void> {
-  const all = await readAllFolders();
+async function writeReparented(
+  all: Folder[],
+  folders: Folder[],
+  movedId: string,
+  oldAncestorIds: string[],
+): Promise<void> {
   const resolveMemberships = reparentedFolderResolver(folders, movedId, oldAncestorIds);
   const map = await readMap();
   for (const [k, b] of Object.entries(map)) {
@@ -469,13 +475,17 @@ export function setBookmarkFolders(
   snapshot: Bookmark['snapshot'],
 ): Promise<Bookmark> {
   return serial(async () => {
-    const ids = withAncestors(folderIds, await readFolders()); // 「未分類」は他のフォルダと同時には持たない
-    if (ids.includes(INBOX_ID)) await ensureInboxFolder(); // 読んだあと書くまでの間に await を挟まない
+    const all = await readAllFolders();
+    const ids = withAncestors(folderIds, all.filter(mine)); // 「未分類」は他のフォルダと同時には持たない
+    const nextFolders = ids.includes(INBOX_ID) ? withInboxFolder(all, scope) : all;
     const map = await readMap();
     const prev = map[key(tweetId)];
     const b: Bookmark = { accountId: scope, tweetId, folderIds: ids, savedAt: prev?.savedAt ?? Date.now(), snapshot: keepFullText(prev?.snapshot, snapshot) };
     map[key(tweetId)] = b;
-    await write(KEY_BOOKMARKS, map);
+    await chrome.storage.local.set({
+      [KEY_BOOKMARKS]: map,
+      ...(nextFolders !== all ? { [KEY_FOLDERS]: nextFolders } : {}),
+    });
     return b;
   });
 }
@@ -984,7 +994,8 @@ export function restoreBookmarks(undo: BookmarkUndo): Promise<void> {
 /** フォルダの並び順を更新する。orderedIds に無いフォルダは末尾に残す。「すべて」は無視、「未分類」は表示側で常に先頭 */
 export function reorderFolders(orderedIds: string[], move?: { id:string; parentId:string | null }): Promise<void> {
   return serial(async () => {
-    const folders = await readFolders();
+    const all = await readAllFolders();
+    const folders = all.filter(mine);
     let oldAncestorIds: string[] = []; // 付け替えの前の祖先 (parentId を書き換える前に求める)
     if (move) {
       if (!canParent(folders, move.id, move.parentId, scope)) throw new StorageError(t('errInvalidImport'));
@@ -1002,7 +1013,8 @@ export function reorderFolders(orderedIds: string[], move?: { id:string; parentI
       counts.set(parent, order + 1);
       return { ...f, order };
     });
-    if (move) await writeReparented(next, move.id, oldAncestorIds); else await writeFolders(next);
+    if (move) await writeReparented(all, next, move.id, oldAncestorIds);
+    else await writeFolders(all, next);
   });
 }
 
