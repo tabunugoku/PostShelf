@@ -1,8 +1,8 @@
 // 版: v75
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { VisibleMediaBackfill } from '../src/content/media';
-import { collectVisible, SAVED_TTL_MS } from '../src/content/collect';
+import { MEDIA_VIEWS_MAX_AGE_MS, VisibleMediaBackfill } from '../src/content/media';
+import { collectVisible } from '../src/content/collect';
 import { resetAccount, setCurrentAccount } from '../src/content/account';
 import { fillSource } from '../src/content/snapshot';
 import * as snapshot from '../src/content/snapshot';
@@ -87,7 +87,7 @@ it('TTL と invalidate の読み直し条件を保つ', async () => {
     await context.watcher.update();
     await context.watcher.update();
     expect(context.fillViews).toHaveBeenCalledTimes(1);
-    await vi.advanceTimersByTimeAsync(SAVED_TTL_MS);
+    await vi.advanceTimersByTimeAsync(MEDIA_VIEWS_MAX_AGE_MS);
     await context.watcher.update();
     expect(context.fillViews).toHaveBeenCalledTimes(2);
     context.watcher.invalidate();

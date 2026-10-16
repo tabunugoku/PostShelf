@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { collectVisible } from '../src/content/collect';
-import { VisibleMediaBackfill } from '../src/content/media';
+import { MEDIA_VIEWS_MAX_AGE_MS, VisibleMediaBackfill } from '../src/content/media';
 import { addCollected, fillMissing, getFillViews, getSavedIds, setAccountScope } from '../src/shared/storage';
 import { AutoCollector, defaultDeps } from '../src/content/autocollect';
 import { queryOwn } from '../src/shared/selectors';
@@ -47,13 +47,18 @@ it('fills a saved video poster without changing anything else', async () => {
   expect((data.bookmarks as any)['me:104']).toEqual({ ...old, snapshot: { ...old.snapshot, videoPoster:'https://pbs.twimg.com/media/sample-video.jpg' } });
 });
 
-it('checks a saved post once per display, reuses IDs briefly and resets on disappearance', async () => {
+it('checks a saved post once per display, reuses IDs for 30 seconds and resets on disappearance', async () => {
   seed('102'); const r=watcher();
   await Promise.all([r.w.update(),r.w.update()]); await r.w.update();
   expect(r.fill).toHaveBeenCalledTimes(1); expect(r.savedIds).toHaveBeenCalledTimes(1);
   const article=document.getElementById('image-ready')!; article.remove(); await r.w.update();
   document.body.append(article); await r.w.update(); expect(r.fill).toHaveBeenCalledTimes(2);
-  r.time(301); await r.w.update(); expect(r.savedIds).toHaveBeenCalledTimes(2);
+  r.time(MEDIA_VIEWS_MAX_AGE_MS - 1);
+  await r.w.update();
+  expect(r.savedIds).toHaveBeenCalledTimes(1);
+  r.time(MEDIA_VIEWS_MAX_AGE_MS);
+  await r.w.update();
+  expect(r.savedIds).toHaveBeenCalledTimes(2);
 });
 
 it('does nothing while media is unreadable; a later DOM load can fill it', async () => {

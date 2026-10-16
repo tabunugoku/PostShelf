@@ -26,9 +26,10 @@ export function unsavedItems(visible: Extracted[], savedIds: Set<string>): Extra
 }
 
 let flashing = false; // 取り込み完了メッセージの表示中は件数表示で上書きしない
+let refreshSequence = 0;
 
-/** 保存済みの ID は、短い時間 (SAVED_TTL_MS) だけ使い回す。スクロールのたびに全ポストを読み直さない。データの変更・アカウントの切り替えで捨てる */
-export const SAVED_TTL_MS = 300;
+/** 保存済み ID は 30 秒まで使い回し、データの変更・アカウントの切り替えで捨てる。 */
+export const SAVED_TTL_MS = 30_000;
 let savedCache: { account: string; at: number; ids: Promise<Set<string>> } | null = null;
 export const dropSavedCache = (): void => void (savedCache = null);
 async function cachedSavedIds(account: string): Promise<Set<string>> {
@@ -46,6 +47,7 @@ async function cachedSavedIds(account: string): Promise<Set<string>> {
 
 /** ボタンの表示を「未取り込み N 件」/「すべて取り込み済み」に更新する */
 export async function refreshCollectButton(): Promise<void> {
+  const sequence = ++refreshSequence;
   const btn = document.querySelector<HTMLButtonElement>('.postshelf-collect');
   if (!btn || flashing) return;
   const account = getCurrentAccount();
@@ -61,7 +63,11 @@ export async function refreshCollectButton(): Promise<void> {
   }
   const visibleIds = new Set(queryAllFirst(document, 'tweet').els
     .map(tweetIdOf).filter((id): id is string => id !== null));
-  const savedIds = await cachedSavedIds(account.id);
+  const reading = cachedSavedIds(account.id);
+  const entry = savedCache;
+  const savedIds = await reading;
+  // より後の更新と、待機中のキャッシュ破棄・取り込み完了表示を優先する。
+  if (sequence !== refreshSequence || savedCache !== entry || flashing) return;
   const n = [...visibleIds].filter((id) => !savedIds.has(id)).length;
   if (account.id !== getCurrentAccount()?.id) return;
   // manager の取り込み案内バナー用に、最後に観測した件数を残す (アカウントごと)
