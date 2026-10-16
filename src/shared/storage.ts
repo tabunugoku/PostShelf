@@ -287,7 +287,11 @@ function checkColor(color: string): void {
 
 /** 「すべて」+ 保存済みフォルダ (order 昇順) */
 export async function listFolders(): Promise<Folder[]> {
-  const folders = await readFolders();
+  return folderList(await readFolders());
+}
+
+/** 読み込み済みのフォルダを、組み込み・未分類・ツリーの表示順に並べる。 */
+function folderList(folders: Folder[]): Folder[] {
   // 「未分類」は常に「すべて」の次。残りは、ツリーの表示順 (親 → 子 → 孫。同じ親の中は order 昇順)
   const userFolders = folders.filter(f => f.id !== INBOX_ID);
   return [ALL_FOLDER, ...folders.filter(f => f.id === INBOX_ID), ...flattenFolders(userFolders).map(r => r.folder)];
@@ -817,10 +821,48 @@ export function addCollected(items: { tweetId: string; snapshot?: Bookmark['snap
   });
 }
 
+/** 時刻以外のアカウント情報と、同順位を含む新しい順が同じかを比べる。 */
+function sameAccountData(change: chrome.storage.StorageChange): boolean {
+  const { oldValue, newValue } = change;
+  if (!oldValue || !newValue || typeof oldValue !== 'object' || typeof newValue !== 'object') return false;
+  const before = oldValue as Record<string, Account>;
+  const after = newValue as Record<string, Account>;
+  const ids = Object.keys(before);
+  if (ids.length !== Object.keys(after).length) return false;
+  for (const id of ids) {
+    const prev = before[id];
+    const next = after[id];
+    if (!validAccount(prev) || !validAccount(next)) return false;
+    if (prev.id !== next.id || prev.handle !== next.handle
+      || prev.displayName !== next.displayName || prev.avatar !== next.avatar) return false;
+  }
+  // accountSummaries と同じく未設定は最後。同順位の変化も通知し、表示対象が絞られていても順を保つ。
+  const rank = (a: Account) => a.id === UNKNOWN_ACCOUNT_ID ? -Infinity : a.lastSeenAt;
+  const sorted = (accounts: Record<string, Account>) => Object.keys(accounts)
+    .sort((a, b) => rank(accounts[b]) - rank(accounts[a]));
+  const oldOrder = sorted(before);
+  const newOrder = sorted(after);
+  for (let i = 0; i < oldOrder.length; i++) {
+    const id = oldOrder[i];
+    if (id !== newOrder[i]) return false;
+    if (i === 0) continue;
+    const wasTied = rank(before[id]) === rank(before[oldOrder[i - 1]]);
+    const isTied = rank(after[id]) === rank(after[newOrder[i - 1]]);
+    if (wasTied !== isTied) return false;
+  }
+  return true;
+}
+
 /** フォルダ/ブックマーク/アカウントが変わったら呼ばれる (別タブ・manager からの変更も拾う)。解除関数を返す */
 export function onDataChanged(cb: () => void): () => void {
-  const listener = (changes: Record<string, unknown>, area: string) => {
-    if (area === 'local' && (KEY_FOLDERS in changes || KEY_BOOKMARKS in changes || KEY_ACCOUNTS in changes)) cb();
+  const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
+    if (area !== 'local') return;
+    // 最後に読み取ったアカウントは、保存 0 件でも切替メニューの候補になる。
+    const lastAccount = changes[KEY_LAST_ACCOUNT];
+    const lastAccountChanged = KEY_LAST_ACCOUNT in changes && lastAccount.oldValue?.id !== lastAccount.newValue?.id;
+    if (KEY_FOLDERS in changes || KEY_BOOKMARKS in changes
+      || (KEY_ACCOUNTS in changes && !sameAccountData(changes[KEY_ACCOUNTS]))
+      || lastAccountChanged) cb();
   };
   chrome.storage.onChanged?.addListener(listener as never);
   return () => chrome.storage.onChanged?.removeListener(listener as never);
@@ -1003,6 +1045,15 @@ export async function getLastSeenAccount(): Promise<Account | null> {
   return a && validAccount(a) ? a : null;
 }
 
+/** accounts の変更を時刻だけの場合も通知する。保存データは読み直さず、解除関数を返す。 */
+export function onAccountsTouched(cb: () => void): () => void {
+  const listener = (changes: Record<string, unknown>, area: string) => {
+    if (area === 'local' && KEY_ACCOUNTS in changes) cb();
+  };
+  chrome.storage.onChanged?.addListener(listener as never);
+  return () => chrome.storage.onChanged?.removeListener(listener as never);
+}
+
 /** lastSeenAccount が変わったら呼ばれる (x.com でアカウントを切り替えた、など)。解除関数を返す */
 export function onLastSeenAccountChanged(cb: () => void): () => void {
   const listener = (changes: Record<string, unknown>, area: string) => {
@@ -1035,10 +1086,26 @@ export async function listBookmarksWithAccounts(): Promise<{ bookmarks: Bookmark
   return { bookmarks: Object.values(map).filter(inScope), accounts: await accountSummaries(map) };
 }
 
-async function accountSummaries(map: BookmarkMap): Promise<AccountSummary[]> {
+/** 初期表示のアカウント選択と一覧で、全件とフォルダの読み込みを共有する。 */
+export async function loadManagerData(): Promise<{
+  accounts: AccountSummary[];
+  forAccount: (accountId: string) => { bookmarks: Bookmark[]; folders: Folder[] };
+}> {
+  const [map, folders] = await Promise.all([readMap(), readAllFolders()]);
+  const bookmarks = Object.values(map);
+  return {
+    accounts: await accountSummaries(map, folders),
+    forAccount: (accountId) => ({
+      bookmarks: bookmarks.filter((b) => b.accountId === accountId),
+      folders: folderList(folders.filter((f) => f.accountId === accountId)),
+    }),
+  };
+}
+
+async function accountSummaries(map: BookmarkMap, loadedFolders?: Folder[]): Promise<AccountSummary[]> {
   const [accounts, folders, last] = await Promise.all([
     read<Record<string, Account>>(KEY_ACCOUNTS, {}),
-    readAllFolders(),
+    loadedFolders ?? readAllFolders(),
     getLastSeenAccount(),
   ]);
   const counts = new Map<string, number>();

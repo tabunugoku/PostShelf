@@ -14,6 +14,7 @@ import { leafMemberResolver } from '../shared/folderTree';
 
 const BTN_ATTR = 'data-postshelf-btn';
 const BADGE_ATTR = 'data-postshelf-badge';
+const TWEET_ATTR = 'data-postshelf-tweet';
 const STYLE_ID = 'postshelf-style';
 /** X の操作アイコンに合わせたクリック判定 (34px 以上) と、標準ボタンとの余白 (4px 以上) */
 const HIT = 34;
@@ -201,7 +202,8 @@ function refreshArticle(article: Element, data: Shared): void {
   const marker = article.querySelector<HTMLElement>(`[${BTN_ATTR}], [${BADGE_ATTR}]`);
   const host = marker?.closest<HTMLElement>(`[${BTN_ATTR}]`) ?? (marker ? closestFirst<HTMLElement>(marker, 'bookmarkButton')?.el : undefined);
   const id = tweetIdOf(article);
-  if (!host || !id) return;
+  if (!marker || !host || !id) return;
+  marker.setAttribute(TWEET_ATTR, id);
   if (!getCurrentAccount()) return void setSaved(host, []); // アカウント不明: どのアカウントの保存か分からないので「未保存」表示
   const bm = data.bookmarks.get(id);
   // 件数と色は、祖先を除いたいちばん下のフォルダだけで決める (機能要件 5)
@@ -234,7 +236,11 @@ export function injectButtons(root: ParentNode = document): void {
     const bm = queryFirst<HTMLElement>(article, 'bookmarkButton')?.el;
     if (!bm) continue;
     if (mode === 'separate') {
-      if (article.querySelector(`[${BTN_ATTR}]`)) continue;
+      const existingButton = article.querySelector(`[${BTN_ATTR}]`);
+      if (existingButton) {
+        if (existingButton.getAttribute(TWEET_ATTR) !== tweetIdOf(article)) fresh.push(article);
+        continue;
+      }
       if (!bm.parentElement) continue;
       const btn = createSeparateButton(article);
       placeSeparateButton(bm, btn);
@@ -242,7 +248,11 @@ export function injectButtons(root: ParentNode = document): void {
       inserted.push({ bookmark: bm, button: btn });
       fresh.push(article);
     } else {
-      if (bm.querySelector(`[${BADGE_ATTR}]`)) continue;
+      const badge = bm.querySelector(`[${BADGE_ATTR}]`);
+      if (badge) {
+        if (badge.getAttribute(TWEET_ATTR) !== tweetIdOf(article)) fresh.push(article);
+        continue;
+      }
       // バッジは標準ボタンの上に重ねるだけ (アイコンの形は変えず、クリックは透過)
       if (getComputedStyle(bm).position === 'static') {
         bm.style.position = 'relative';
@@ -258,7 +268,7 @@ export function injectButtons(root: ParentNode = document): void {
     geometry: bookmarkButtonGeometry(bookmark),
   }));
   for (const { button, geometry } of measurements) applySeparateButtonSize(button, geometry);
-  void refreshArticles(fresh); // 新しく付けた分は、まとめて 1 回の読み込みで表示する
+  void refreshArticles(fresh); // 新しく付けた記事と、ポストの ID が変わった記事をまとめて更新する
 }
 
 /** 置き換えモード: 標準ブックマークボタンのクリックを capture で横取りして PostShelf のフォルダ選択を開く */
@@ -325,7 +335,9 @@ export function initButtons(): () => void {
   watchShared();
   const unhealth = subscribeHealth(() => applyButtonMode(mode)); // broken になったら UI を外し、戻ったら付け直す
   void getSettings().then((s) => applyButtonMode(s.buttonMode));
-  const unsettings = onSettingsChanged((s) => applyButtonMode(s.buttonMode));
+  const unsettings = onSettingsChanged((s) => {
+    if (s.buttonMode !== mode) applyButtonMode(s.buttonMode);
+  });
   const undata = onDataChanged(() => {
     dropShared();
     void refreshAll();
@@ -334,7 +346,7 @@ export function initButtons(): () => void {
     dropShared();
     void refreshAll();
   }); // アカウントが判定できた / 切り替わったら表示を作り直す
-  const unwatch = watchBody(scheduleInject);
+  const unwatch = watchBody(scheduleInject, ['href']);
   return () => {
     unwatch();
     unhealth();

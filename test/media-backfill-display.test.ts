@@ -96,5 +96,5 @@ it('uses the existing DOM/path watchers, including late src and poster attribute
   const source=readFileSync('src/content/index.ts','utf8');
   expect(source).toContain('installMediaBackfill()'); expect(source).toContain('scheduleMediaBackfill()');
   const watcher = readFileSync('src/content/domwatch.ts', 'utf8');
-  expect(watcher).toMatch(/attributeFilter:\s*\['src',\s*'poster'\]/);
+  expect(watcher).toMatch(/attributeFilter:\s*\['src',\s*'poster',\s*'href'\]/);
 });

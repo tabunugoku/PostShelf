@@ -26,7 +26,6 @@ export function collectorWorld(onSleep: (now: number) => void = () => {}) {
       clock.now += ms;
       onSleep(clock.now);
     },
-    savedIds: async () => new Set(),
     saveRun: async () => {},
   });
   collector.state = {

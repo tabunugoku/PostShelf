@@ -46,6 +46,8 @@ import {
   deleteAccountData,
   getLastSeenAccount,
   listAccounts,
+  loadManagerData,
+  onAccountsTouched,
   onLastSeenAccountChanged,
   setAccountScope,
   type AccountSummary,
@@ -208,6 +210,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [accounts, setAccounts] = useState<AccountSummary[]>([]);
   const [viewId, setViewId] = useState(UNKNOWN_ACCOUNT_ID);
   const [lastSeen, setLastSeen] = useState<Account | null>(null);
+  const [recentVersion, setRecentVersion] = useState(0);
   const [assignFrom, setAssignFrom] = useState<string | null>(null);
   /** 画像ビューア / 動画の案内 (どのポストの何枚目か)。閉じたときのフォーカスは Viewer が元のボタンへ戻す */
   const [viewer, setViewer] = useState<{ kind: 'image'; tweetId: string; index: number } | { kind: 'video'; tweetId: string } | null>(null);
@@ -251,6 +254,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     setViewId(id);
   };
   const ownWrites = useRef(0);
+  const dataChangedDuringOwnWrite = useRef(false);
   const reloadSeq = useRef(0);
   const reload = async () => {
     // 読み込み中に別の読み直しやアカウントの切替があったら、古い結果で画面を上書きしない
@@ -264,6 +268,14 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const existing = new Set(b.map((x) => x.tweetId));
     setSelected((s) => pruneSelection(s, existing));
   };
+  /** 操作中の読み直しで拾えなかった変更通知を、最後の操作が終わったときに回収する。 */
+  const endOwnWrite = async () => {
+    ownWrites.current--;
+    if (ownWrites.current === 0 && dataChangedDuringOwnWrite.current) {
+      dataChangedDuringOwnWrite.current = false;
+      await reload().catch(() => {});
+    }
+  };
   const loadHint = async () => {
     const h = await getImportHint(viewRef.current);
     setPending(h.pending);
@@ -272,14 +284,29 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   useEffect(() => {
     const entry = takeEntryHash(); // ポップアップからの入口 (#inbox / #q=…)。読んだらハッシュを消す。lastFolderId より優先する
     void (async () => {
-      const [s, last, accs] = await Promise.all([getSettings(), getLastSeenAccount(), listAccounts(), refreshCacheView()]).then((r) => [r[0], r[1], r[2]] as const);
+      const seq = reloadSeq.current;
+      const [s, last, initial] = await Promise.all([
+        getSettings(),
+        getLastSeenAccount(),
+        loadManagerData(),
+        refreshCacheView(),
+      ]);
       lastRef.current = last;
       setLastSeen(last);
       setAutoCfg(s.autoCollect);
       setShowInAncestors(s.showInAncestors);
       setCollapsed(new Set(s.folderTreeCollapsed));
-      applyView(resolveViewAccount(s.viewAccount, last, accs));
-      await Promise.all([reload(), loadHint()]);
+      applyView(resolveViewAccount(s.viewAccount, last, initial.accounts));
+      if (seq === reloadSeq.current) {
+        const data = initial.forAccount(viewRef.current);
+        setFolders(data.folders);
+        setBookmarks(data.bookmarks);
+        setAccounts(initial.accounts);
+      } else {
+        // 初期読み込み中に保存の変更通知があれば、古い一覧を使わず通常どおり読み直す。
+        await reload();
+      }
+      await loadHint();
       const ver = currentVersion();
       if (await noteRunVersion(ver)) setUpdated(ver);
       if (entry?.triage) setTriageWanted(true);
@@ -316,9 +343,18 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
         setShowInAncestors(c.showInAncestors);
         setCollapsed(new Set(c.folderTreeCollapsed));
       }),
-      onDataChanged(() => { if (!ownWrites.current) void reload(); }),
+      onDataChanged(() => {
+        if (ownWrites.current > 0) dataChangedDuringOwnWrite.current = true;
+        else void reload();
+      }),
       onImportHintChanged(() => void loadHint()),
-      onLastSeenAccountChanged(() => void onLastSeen()),
+      // 同じ投稿・フォルダの取り込みでも、accounts の時刻だけの変更で七日の境目を進める。
+      onAccountsTouched(() => setRecentVersion((version) => version + 1)),
+      onLastSeenAccountChanged(() => {
+        // 同じアカウントの定期通知でも、従来の全件読み直しと同じく七日の境目を進める。
+        setRecentVersion((version) => version + 1);
+        void onLastSeen();
+      }),
     ];
     return () => offs.forEach((o) => o());
   }, []);
@@ -460,7 +496,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     () => queryBookmarks(bookmarks, {
       folderId: curFolder.id, search, sort, filters, now, descendantsOf: viewDescendants,
     }),
-    [bookmarks, curFolder.id, search, sort, filters, viewDescendants],
+    [bookmarks, curFolder.id, search, sort, filters, viewDescendants, curFolder.id === RECENT_ID ? recentVersion : 0],
   );
   // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
   const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
@@ -486,8 +522,13 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const tabbableId = focusId && shownSet.has(focusId) && shownIds.indexOf(focusId) < renderCount ? focusId : shownIds[0];
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   // 左のメニューと見出しの件数は、保存データ・表示用の子孫表が変わるまで使い回す。
-  // 「直近 7 日」は初めて件数を表示する描画の時刻で数え、同じキャッシュを使う間は境目を動かさない。
+  // 「直近 7 日」だけはアカウントの通知でも破棄し、次に表示する時刻で数える。
   const countCache = useMemo(() => countFolders(bookmarks, viewDescendants), [bookmarks, viewDescendants]);
+  const countRecentVersion = useRef(recentVersion);
+  if (countRecentVersion.current !== recentVersion) {
+    countCache.delete(RECENT_ID);
+    countRecentVersion.current = recentVersion;
+  }
   const count = (id: string) => {
     if (id === RECENT_ID && !countCache.has(id)) countCache.set(id, countFolder(bookmarks, id, now));
     return countCache.get(id) ?? 0;
@@ -533,6 +574,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     ownWrites.current++;
     try {
       const undo = await op;
+      // ここまでの通知は今回の読み直しで拾い、読み出し後の通知だけを回収する。
+      dataChangedDuringOwnWrite.current = false;
       await reload();
       const n = Object.keys(undo).length;
       if (n > 0) setToast({ key: Date.now(), message: t(typeof msgKey === 'string' ? msgKey : msgKey(undo), n), undo });
@@ -540,10 +583,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     } catch {
       // 保存の失敗 (容量・保存のエラー): 通知を出し、画面は読み直して実際の状態に合わせる
       setToast({ key: Date.now(), message: t('errorStorage') });
+      dataChangedDuringOwnWrite.current = false;
       await reload().catch(() => {});
       return false;
     } finally {
-      ownWrites.current--;
+      await endOwnWrite();
     }
   };
   const doUndo = async () => {
@@ -558,9 +602,10 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     try {
       await restoreBookmarks(toast.undo);
       setToast(null);
+      dataChangedDuringOwnWrite.current = false;
       await reload();
     } finally {
-      ownWrites.current--;
+      await endOwnWrite();
     }
   };
 
@@ -1146,8 +1191,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
                     } catch {
                       reportStorageError();
                     } finally {
+                      dataChangedDuringOwnWrite.current = false;
                       await reload().catch(() => {});
-                      ownWrites.current--;
+                      await endOwnWrite();
                     }
                   }}
                 />

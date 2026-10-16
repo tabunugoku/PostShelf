@@ -7,7 +7,15 @@ import { Icon } from '../shared/Icon';
 import { t } from '../shared/strings';
 import { SavedContext } from './settingsSaved';
 import { reportStorageError } from './errorBus';
-import { getFullTextRun, getSettings, onFullTextRunChanged, updateSettings, type FullTextRun, type Settings } from '../shared/settings';
+import {
+  getFullTextRun,
+  getSettings,
+  onFullTextRunChanged,
+  onSettingsChanged,
+  updateSettings,
+  type FullTextRun,
+  type Settings,
+} from '../shared/settings';
 import { getAccountScope, listTruncated, onDataChanged } from '../shared/storage';
 import { Confirm, Sentences } from './ui';
 
@@ -51,7 +59,16 @@ export function FullTextSection({ reloadKey = 0 }: { reloadKey?: number }) {
   };
   useEffect(() => {
     void load();
-    const offs = [onFullTextRunChanged(() => void load()), onDataChanged(() => void load())];
+    const offs = [
+      onFullTextRunChanged(() => void load()),
+      onDataChanged(() => void load()),
+      onSettingsChanged((settings) => {
+        // 設定だけの変更では、未取得のポストを全件読み直さない。
+        setOn(settings.fullText);
+        setSpeed(settings.fullTextSpeed);
+        setTabs(settings.fullTextTabs);
+      }),
+    ];
     return () => offs.forEach((o) => o());
   }, [reloadKey]);
 

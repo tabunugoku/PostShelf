@@ -82,7 +82,7 @@ it('body の監視を 1 つだけ作る', () => {
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ['src', 'poster'],
+    attributeFilter: ['src', 'poster', 'href'],
   });
 });
 
@@ -96,6 +96,11 @@ it.each(['src', 'poster'])('%s の属性変更は取り込みと画像補完だ�
   expect(events).toEqual(['collect', 'media']);
 });
 
+it('href の属性変更はボタンだけへ通知する', () => {
+  deliver([{ type: 'attributes', attributeName: 'href' } as MutationRecord]);
+  expect(events).toEqual(['buttons']);
+});
+
 it('子要素と属性が同じバッチで変わっても各購読者を 1 回だけ呼ぶ', () => {
   deliver([
     { type: 'childList' } as MutationRecord,
@@ -104,7 +109,7 @@ it('子要素と属性が同じバッチで変わっても各購読者を 1 回�
   expect(events).toEqual(['timer:2000', 'timer:10000', 'buttons', 'timer:1200', 'collect', 'media']);
 });
 
-it('src と poster 以外の属性変更は通知しない', () => {
+it('監視対象以外の属性変更は通知しない', () => {
   deliver([{ type: 'attributes', attributeName: 'class' } as MutationRecord]);
   expect(events).toEqual([]);
 });

@@ -154,9 +154,9 @@ export function fullTextPlan(s: Pick<Settings, 'fullTextSpeed' | 'fullTextTabs'>
 
 const KEY = 'settings';
 
-export async function getSettings(): Promise<Settings> {
-  const res = await chrome.storage.local.get(KEY);
-  const stored = (res[KEY] ?? {}) as Partial<Settings>;
+/** 保存値を既定値と合わせ、不正な項目を補正する。 */
+function normalizeSettings(raw: unknown): Settings {
+  const stored = (raw ?? {}) as Partial<Settings>;
   const merged = { ...DEFAULT_SETTINGS, ...stored };
   if (merged.buttonMode !== 'replace') merged.buttonMode = 'separate'; // 不正値は既定に戻す
   if (merged.actionMode !== 'sidepanel') merged.actionMode = 'popup';
@@ -183,6 +183,12 @@ export async function getSettings(): Promise<Settings> {
     : [];
   merged.updateCheck = stored.updateCheck === true;
   return merged;
+}
+
+/** 保存済みの設定を読み、欠けた項目と不正値を補正する。 */
+export async function getSettings(): Promise<Settings> {
+  const res = await chrome.storage.local.get(KEY);
+  return normalizeSettings(res[KEY]);
 }
 
 /** 設定が変わったら呼ばれる (別タブ・manager からの変更も拾う)。解除関数を返す */
