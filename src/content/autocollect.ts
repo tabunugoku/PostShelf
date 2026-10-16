@@ -196,8 +196,10 @@ export class AutoCollector {
   readonly owner = `t_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
   /** 保存済みのポストの ID。開始のときに 1 回だけ読み、あとは自分が保存した分を足す。他の場所で変更があったら読み直す (null = 未読み込み) */
   private saved: Set<string> | null = null;
-  /** 自分の保存の最中か (その間の変更の通知では、読み直さない) */
+  /** 自分の保存の最中か (その間の変更の通知は、保存が終わってから回収する) */
   private writing = false;
+  /** 書き込み中の通知には別画面の変更も含まれるため、終了後に保存済み ID を捨てる */
+  private dataChangedWhileWriting = false;
   /** 動かない (scrollY が増えない) うえに新しいポストも出ない回数 */
   private stalled = 0;
   private moved = true;
@@ -249,7 +251,8 @@ export class AutoCollector {
 
   constructor(private d: CollectDeps) {
     d.onDataChanged?.(() => {
-      if (!this.writing) this.saved = null;
+      if (this.writing) this.dataChangedWhileWriting = true;
+      else this.saved = null;
     });
   }
 
@@ -651,6 +654,10 @@ export class AutoCollector {
         } else this.pending = [...batch, ...this.pending];
       } finally {
         this.writing = false;
+        if (this.dataChangedWhileWriting) {
+          this.dataChangedWhileWriting = false;
+          this.saved = null;
+        }
       }
     });
     return this.flushing;
