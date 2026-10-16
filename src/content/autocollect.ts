@@ -196,6 +196,8 @@ export class AutoCollector {
   readonly owner = `t_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
   /** 保存済みのポストの ID。開始のときに 1 回だけ読み、あとは自分が保存した分を足す。他の場所で変更があったら読み直す (null = 未読み込み) */
   private saved: Set<string> | null = null;
+  /** 読み出し中の変更通知で、古い保存済み ID をキャッシュへ戻さないための世代 */
+  private dataGeneration = 0;
   /** 自分の保存の最中か (その間の変更の通知は、保存が終わってから回収する) */
   private writing = false;
   /** 書き込み中の通知には別画面の変更も含まれるため、終了後に保存済み ID を捨てる */
@@ -251,6 +253,7 @@ export class AutoCollector {
 
   constructor(private d: CollectDeps) {
     d.onDataChanged?.(() => {
+      this.dataGeneration++;
       if (this.writing) this.dataChangedWhileWriting = true;
       else this.saved = null;
     });
@@ -453,6 +456,21 @@ export class AutoCollector {
     }
   }
 
+  /** 読み出し中に変更があれば最大 3 回まで読み直し、世代が揃う結果だけをキャッシュする。 */
+  private async savedIdsFresh(accountId: string): Promise<Set<string>> {
+    if (this.saved) return this.saved;
+    for (let attempt = 1; ; attempt++) {
+      const generation = this.dataGeneration;
+      const saved = await this.d.savedIds(accountId);
+      if (generation === this.dataGeneration) {
+        this.saved = saved;
+        return saved;
+      }
+      // 通知が続いても判定を進める。次に必要になったときは再び読み直す。
+      if (attempt === 3) return saved;
+    }
+  }
+
   /** 画面に出ているポストを読む。X は画面外のポストを DOM から外す (仮想化) ので、スクロールのたびに読む。新しく見つけた件数を返す */
   private async readVisible(token: number): Promise<number> {
     // 時間切れ後の 1 回の補完だけは、既読でも再解析する。
@@ -462,7 +480,8 @@ export class AutoCollector {
     for (const [index, it] of items.entries()) {
       visiblePositions.set(it.tweetId, this.d.visiblePosition?.(it.tweetId) ?? index + 1);
     }
-    const saved = (this.saved ??= await this.d.savedIds(this.state!.accountId));
+    // キャッシュがあれば待機せず、従来どおり同じ処理内で判定する。
+    const saved = this.saved ?? await this.savedIdsFresh(this.state!.accountId);
     if (token !== this.token) return 0;
     const s = this.state!;
     await this.rereadTimedOut(items, saved, s.accountId);
