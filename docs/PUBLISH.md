@@ -25,8 +25,6 @@
 5. **ワークフローが zip を作る**: `.github/workflows/release.yml` が、タグと manifest の version の一致を確かめ、`release:check` を通してから、`postshelf-<version>.zip` を、`docs/releases/v<version>.md` を本文にして GitHub Release に添付します。
 6. **zip を取得して、固定のフォルダに上書き**: Release から zip を保存し、`docs/INSTALL.md` の「2. 更新するとき」の手順で、同じフォルダに上書きして「再読み込み」を押す。更新の前に、設定の「データ」から必ずエクスポートします。
 
-**v1.1.8 で行うこと (更新の確認 v73)**: README と `docs/FAQ.md` に、更新の確認の説明を足す (書いた文はコミット `2131350` にある)。紹介サイト (`site/index.html`) の「外部サーバーへの送信」の説明にも、この例外を書き足す。どちらも、出す前に main に入れると、まだ無い機能が公開のページに載るので、リリースのときに行う。
-
 手元で zip だけ作るときは `npm run build && npm run package` (`release/postshelf-<version>.zip`。`release/` は `.gitignore`)。
 
 ## ブックマークの自動取り込み (v15) の方針とリスク

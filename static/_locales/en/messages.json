@@ -1284,7 +1284,7 @@
     "message": "Check for new versions"
   },
   "updateCheckDesc": {
-    "message": "When this is on, PostShelf asks GitHub for the latest version number when you open it, at most once a day. No data is sent, but GitHub sees the time of the check, your IP address, your browser type, and that the request comes from PostShelf. Updates are never installed automatically."
+    "message": "When this is on, PostShelf asks GitHub for the latest version number when you open the manager or the side panel, at most once a day. No data is sent, but GitHub sees the time of the check, your IP address, your browser type, and that the request comes from PostShelf. Updates are never installed automatically."
   },
   "updateAvailable": {
     "message": "A new version, $VERSION$, is available",

@@ -1284,7 +1284,7 @@
     "message": "Buscar versiones nuevas"
   },
   "updateCheckDesc": {
-    "message": "Si está activado, al abrir PostShelf se consulta a GitHub el número de la última versión, como máximo una vez al día. No se envía ningún dato, pero GitHub ve la hora de la consulta, tu dirección IP, tu tipo de navegador y que la consulta viene de PostShelf. Las actualizaciones nunca se instalan automáticamente."
+    "message": "Si está activado, al abrir el administrador o el panel lateral se consulta a GitHub el número de la última versión, como máximo una vez al día. No se envía ningún dato, pero GitHub ve la hora de la consulta, tu dirección IP, tu tipo de navegador y que la consulta viene de PostShelf. Las actualizaciones nunca se instalan automáticamente."
   },
   "updateAvailable": {
     "message": "Hay una versión nueva: $VERSION$",
