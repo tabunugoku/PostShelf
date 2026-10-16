@@ -416,9 +416,15 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const prev = lastRef.current;
     lastRef.current = next;
     setLastSeen(next);
-    if (!next || next.id === prev?.id) return;
-    const s = await getSettings();
-    if (prev === null && s.viewAccount) return; // 初めて読み取れた: 手動で選んだ表示があればそのまま
+    if (next?.id === prev?.id) return;
+    const s = next ? await getSettings() : null;
+    if (!next || (prev === null && s?.viewAccount)) {
+      // 表示を替えない場合も、保存 0 件の候補の追加・削除を切替メニューに反映する。
+      // 操作中の古い読み出しが後で一覧を戻す場合は、操作終了時にも回収する。
+      if (ownWrites.current > 0) dataChangedDuringOwnWrite.current = true;
+      setAccounts(await listAccounts());
+      return;
+    }
     if (prev !== null) void updateSettings({ viewAccount: '' }).catch(() => {}); // 別のアカウントに切り替えた: 手動の選択は解く
     switchTo(next.id);
     if (prev !== null) setToast({ key: Date.now(), message: t('accountSwitched', accountLabel(next)) });

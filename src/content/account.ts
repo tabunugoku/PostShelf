@@ -73,12 +73,15 @@ export function setCurrentAccount(a: Account | null): void {
   if (changed) listeners.forEach((l) => l(a));
 }
 
-/** 画面から読み直す。読めたら記録する (lastSeenAccount)。読めなければ直前の判定をそのまま使う */
+/** 画面から読み直し、見えていてフォーカスのあるタブだけ記録する。読めなければ直前の判定を使う */
 export function refreshAccount(root: ParentNode = document): void {
   const d = detectAccount(root);
   if (!d) return;
   setCurrentAccount({ id: accountIdOf(d.handle), handle: d.handle, displayName: d.displayName, avatar: d.avatar, lastSeenAt: Date.now() });
-  void noteAccount(d).catch(() => {});
+  // 裏のタブでも保存先の判定は進めるが、最後に見たアカウントは上書きしない。
+  if (document.visibilityState === 'visible' && document.hasFocus()) {
+    void noteAccount(d).catch(() => {});
+  }
 }
 
 const CHECK_EVERY_MS = 2000;
@@ -104,12 +107,21 @@ export function resetAccount(): void {
   setAccountScope(UNKNOWN_ACCOUNT_ID);
 }
 
-/** アカウントの監視を始め、DOM の購読と予約済みの確認を解除する関数を返す */
+/** アカウントの監視を始め、DOM・表示・フォーカスの購読と予約済みの確認を解除する関数を返す */
 export function initAccount(): () => void {
   scheduleAccountCheck();
   const unwatch = watchBody(() => scheduleAccountCheck());
+  // 復帰時は DOM が変わらなくても即座に読む。ブラウザのイベント順は実機未確認。
+  const onVisibility = () => {
+    if (document.visibilityState === 'visible') refreshAccount();
+  };
+  const onFocus = () => refreshAccount();
+  document.addEventListener('visibilitychange', onVisibility);
+  window.addEventListener('focus', onFocus);
   return () => {
     unwatch();
+    document.removeEventListener('visibilitychange', onVisibility);
+    window.removeEventListener('focus', onFocus);
     clearTimeout(timer);
     timer = undefined;
   };

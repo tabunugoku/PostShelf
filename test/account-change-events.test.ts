@@ -1,3 +1,4 @@
+// 版: v81
 // 版: v77
 import { h, render } from 'preact';
 import { act } from 'preact/test-utils';
@@ -134,27 +135,47 @@ it.each(['folders', 'bookmarks'])('%s があれば時刻だけの変化と同時
   unwatch();
 });
 
-it('最後のアカウントが未記録でも、順位が変わらない既存アカウントの読み取りを通知する', async () => {
+it('最後のアカウントが未記録でも、順位が同じ既存アカウントの読み取りは専用の通知だけを出す', async () => {
   data.accounts = { me: account(), sample_other: account('sample_other', 20) };
   const changed = vi.fn();
+  const lastSeen = vi.fn();
   const unwatch = onDataChanged(changed);
+  const unlast = onLastSeenAccountChanged(lastSeen);
   await noteAccount({ handle: '@sample_other' }, 30);
-  expect(changed).toHaveBeenCalledTimes(1);
+  expect(changed).not.toHaveBeenCalled();
+  expect(lastSeen).toHaveBeenCalledTimes(1);
   unwatch();
+  unlast();
 });
 
 it.each([
   [account(), account('sample_other')],
   [account(), undefined],
   [undefined, account()],
-])('最後のアカウントの ID の変更・削除・追加を通知する: %j → %j', async (before, after) => {
+])('最後のアカウントの ID の変更・削除・追加は専用の通知だけを出す: %j → %j', async (before, after) => {
   data.lastSeenAccount = before;
   const changed = vi.fn();
+  const lastSeen = vi.fn();
   const unwatch = onDataChanged(changed);
+  const unlast = onLastSeenAccountChanged(lastSeen);
   if (after) await chrome.storage.local.set({ lastSeenAccount: after });
   else await chrome.storage.local.remove('lastSeenAccount');
-  expect(changed).toHaveBeenCalledTimes(1);
+  expect(changed).not.toHaveBeenCalled();
+  expect(lastSeen).toHaveBeenCalledTimes(1);
   unwatch();
+  unlast();
+});
+
+it('新しいアカウントと最後のアカウントの同時記録はデータ変更を 1 回だけ通知する', async () => {
+  const changed = vi.fn();
+  const lastSeen = vi.fn();
+  const unwatch = onDataChanged(changed);
+  const unlast = onLastSeenAccountChanged(lastSeen);
+  await noteAccount({ handle: '@sample_new' }, 30);
+  expect(changed).toHaveBeenCalledTimes(1);
+  expect(lastSeen).toHaveBeenCalledTimes(1);
+  unwatch();
+  unlast();
 });
 
 it('手動で選んだアカウントを保ち、初めて読み取った保存 0 件のアカウントもメニューに出す', async () => {
