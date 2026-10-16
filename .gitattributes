@@ -1,1 +1,3 @@
-*.sh text eol=lf
+# 取り出しは OS にかかわらず LF にそろえる (Windows の core.autocrlf=true で CRLF になり、文書を読むテストと .snap が食い違うため)
+* text=auto eol=lf
+*.png binary
