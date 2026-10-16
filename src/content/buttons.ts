@@ -233,14 +233,16 @@ export function injectButtons(root: ParentNode = document): void {
   const fresh: Element[] = [];
   const inserted: { bookmark: HTMLElement; button: HTMLElement }[] = [];
   for (const article of queryAllFirst(root, 'tweet').els) {
-    const bm = queryFirst<HTMLElement>(article, 'bookmarkButton')?.el;
-    if (!bm) continue;
     if (mode === 'separate') {
       const existingButton = article.querySelector(`[${BTN_ATTR}]`);
       if (existingButton) {
         if (existingButton.getAttribute(TWEET_ATTR) !== tweetIdOf(article)) fresh.push(article);
         continue;
       }
+    }
+    const bm = queryFirst<HTMLElement>(article, 'bookmarkButton')?.el;
+    if (!bm) continue;
+    if (mode === 'separate') {
       if (!bm.parentElement) continue;
       const btn = createSeparateButton(article);
       placeSeparateButton(bm, btn);
