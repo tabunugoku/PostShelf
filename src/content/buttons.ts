@@ -346,7 +346,7 @@ export function initButtons(): () => void {
     dropShared();
     void refreshAll();
   }); // アカウントが判定できた / 切り替わったら表示を作り直す
-  const unwatch = watchBody(scheduleInject);
+  const unwatch = watchBody(scheduleInject, ['href']);
   return () => {
     unwatch();
     unhealth();

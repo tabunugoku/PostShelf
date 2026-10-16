@@ -3,14 +3,34 @@ import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { resetAccount, setCurrentAccount } from '../src/content/account';
-import { applyButtonMode, injectButtons, refreshAll } from '../src/content/buttons';
+import { applyButtonMode, initButtons, injectButtons, refreshAll } from '../src/content/buttons';
+import * as settings from '../src/shared/settings';
+import * as selectors from '../src/shared/selectors';
 import * as snapshot from '../src/content/snapshot';
-import { ownPostLink, queryAllFirst } from '../src/shared/selectors';
+import { ownPostLink, queryAllFirst, queryFirst } from '../src/shared/selectors';
 import { setAccountScope } from '../src/shared/storage';
 
 const html = readFileSync('test/fixtures/v56-visible.html', 'utf8');
+let stop: (() => void) | undefined;
+const frames = new Map<number, FrameRequestCallback>();
+let frameId = 0;
+
+async function nextFrame(): Promise<void> {
+  await Promise.resolve();
+  const pending = [...frames.values()];
+  frames.clear();
+  for (const callback of pending) callback(0);
+  await Promise.resolve();
+}
 
 beforeEach(() => {
+  frames.clear();
+  frameId = 0;
+  vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+    frames.set(++frameId, callback);
+    return frameId;
+  }));
+  vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => frames.delete(id)));
   const data = installChromeMock();
   Object.assign(data, {
     schemaVersion: 2,
@@ -36,10 +56,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  stop?.();
+  stop = undefined;
   document.body.innerHTML = '';
   applyButtonMode('separate');
   resetAccount();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe.each(['separate', 'replace'] as const)('記事の使い回し: %s', (buttonMode) => {
@@ -52,12 +75,16 @@ describe.each(['separate', 'replace'] as const)('記事の使い回し: %s', (bu
   it.each([
     ['1', '2'],
     ['2', '1'],
-  ])('保存変更の通知なしで表示を更新する: %s → %s', async (initialId, nextId) => {
+  ])('href だけの変更を次フレームで反映する: %s → %s', async (initialId, nextId) => {
     const article = queryAllFirst(document, 'tweet').els[0];
     const link = ownPostLink(article).link!;
     link.setAttribute('href', '/sample_user/status/' + initialId);
-    applyButtonMode(buttonMode);
-    await refreshAll();
+    vi.spyOn(settings, 'getSettings').mockResolvedValue({ ...settings.DEFAULT_SETTINGS, buttonMode });
+    stop = initButtons();
+    await vi.waitFor(() => expect(hostOf()?.getAttribute('data-postshelf-tweet')).toBe(initialId));
+    // 初回のボタン挿入で発生する childList の通知を消化してから、href だけを変える。
+    await nextFrame();
+    expect(frames.size).toBe(0);
     const marker = hostOf();
     const host = savedHostOf();
     const badge = article.querySelector<HTMLElement>('[data-postshelf-badge]')!;
@@ -66,8 +93,13 @@ describe.each(['separate', 'replace'] as const)('記事の使い回し: %s', (bu
     const set = vi.spyOn(chrome.storage.local, 'set');
     const extract = vi.spyOn(snapshot, 'extractTweet');
 
+    vi.mocked(requestAnimationFrame).mockClear();
     link.setAttribute('href', '/sample_user/status/' + nextId);
-    injectButtons();
+    await Promise.resolve();
+    expect(requestAnimationFrame).toHaveBeenCalledOnce();
+    expect(frames.size).toBe(1);
+    expect(host.hasAttribute('data-saved')).toBe(initialId === '1');
+    await nextFrame();
     await vi.waitFor(() => {
       expect(host.hasAttribute('data-saved')).toBe(nextId === '1');
       expect(badge.textContent).toBe(nextId === '1' ? '1' : '');
@@ -85,6 +117,39 @@ describe.each(['separate', 'replace'] as const)('記事の使い回し: %s', (bu
     expect(get).not.toHaveBeenCalled();
     expect(set).not.toHaveBeenCalled();
     expect(extract).not.toHaveBeenCalled();
+  });
+
+  it('画像の src 変更ではボタンの処理を予約しない', async () => {
+    vi.spyOn(settings, 'getSettings').mockResolvedValue({ ...settings.DEFAULT_SETTINGS, buttonMode });
+    stop = initButtons();
+    await vi.waitFor(() => expect(hostOf()?.getAttribute('data-postshelf-tweet')).toBe('1'));
+    await nextFrame();
+    expect(frames.size).toBe(0);
+    vi.mocked(requestAnimationFrame).mockClear();
+    const scan = vi.spyOn(selectors, 'queryAllFirst');
+    queryFirst(document, 'avatar')!.el.setAttribute('src', 'https://pbs.twimg.com/profile_images/sample-next.jpg');
+    await nextFrame();
+    expect(requestAnimationFrame).not.toHaveBeenCalled();
+    expect(scan).not.toHaveBeenCalled();
+  });
+
+  it('フレーム前に href が続けて変わっても予約は 1 回にまとまる', async () => {
+    vi.spyOn(settings, 'getSettings').mockResolvedValue({ ...settings.DEFAULT_SETTINGS, buttonMode });
+    stop = initButtons();
+    await vi.waitFor(() => expect(hostOf()?.getAttribute('data-postshelf-tweet')).toBe('1'));
+    await nextFrame();
+    vi.mocked(requestAnimationFrame).mockClear();
+    const article = queryAllFirst(document, 'tweet').els[0];
+    const link = ownPostLink(article).link!;
+    link.setAttribute('href', '/sample_user/status/2');
+    await Promise.resolve();
+    link.setAttribute('href', '/sample_user/status/3');
+    await Promise.resolve();
+    expect(requestAnimationFrame).toHaveBeenCalledOnce();
+    expect(frames.size).toBe(1);
+    await nextFrame();
+    await vi.waitFor(() => expect(hostOf().getAttribute('data-postshelf-tweet')).toBe('3'));
+    expect(savedHostOf().hasAttribute('data-saved')).toBe(false);
   });
 
   it('同じ ID の記事は表示を作り直さない', async () => {
