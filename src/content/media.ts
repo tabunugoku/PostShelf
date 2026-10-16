@@ -1,9 +1,12 @@
 /** いまの DOM に出ている保存済みポストの、欠けた項目 (画像・動画・アイコンなど) だけを補う。スクロール・クリック・ページ移動はしない。 */
 import { fillMissing, getFillViews, missingFields, onDataChanged, type FillView } from '../shared/storage';
 import { getCurrentAccount, subscribeAccount } from './account';
-import { collectVisible, pathListeners, SAVED_TTL_MS } from './collect';
+import { collectVisible, pathListeners } from './collect';
 import { extractTweet, fillSource, hasPending, tweetIdOf, type Extracted } from './snapshot';
 import { queryAllFirst } from '../shared/selectors';
+
+/** 保存内容は 30 秒まで再利用し、変更通知では期限前でも破棄する。 */
+export const MEDIA_VIEWS_MAX_AGE_MS = 30_000;
 
 interface MediaDeps {
   now(): number;
@@ -37,6 +40,7 @@ export class VisibleMediaBackfill {
   private context = '';
   private cache: { account: string; at: number; views: Map<string, FillView> } | null = null;
   private running: Promise<number> | null = null;
+  private generation = 0;
 
   constructor(private d: MediaDeps = {
     now: () => Date.now(), accountId: () => getCurrentAccount()?.id ?? null,
@@ -46,12 +50,26 @@ export class VisibleMediaBackfill {
     fillViews: getFillViews, backfill: fillMissing,
   }) {}
 
-  invalidate(): void { this.cache = null; }
+  invalidate(): void {
+    this.generation++;
+    this.cache = null;
+  }
 
   update(): Promise<number> {
     if (this.running) return this.running;
-    this.running = this.read().finally(() => { this.running = null; });
+    this.running = this.readUntilCurrent().finally(() => { this.running = null; });
     return this.running;
+  }
+
+  private async readUntilCurrent(): Promise<number> {
+    let count = 0;
+    let generation: number;
+    do {
+      generation = this.generation;
+      count += await this.read();
+      // 同じ読み込み中の通知はまとめ、再読み込み中に変わった場合だけさらに読み直す。
+    } while (generation !== this.generation);
+    return count;
   }
 
   private async read(): Promise<number> {
@@ -67,9 +85,11 @@ export class VisibleMediaBackfill {
     const ids = new Set(this.d.visibleIds?.() ?? this.d.visible().map((it) => it.tweetId));
     for (const id of this.checked) if (!ids.has(id)) this.checked.delete(id);
     if (![...ids].some((id) => !this.checked.has(id))) return 0;
-    if (!this.cache || this.cache.account !== account || this.d.now() - this.cache.at >= SAVED_TTL_MS) {
+    if (!this.cache || this.cache.account !== account || this.d.now() - this.cache.at >= MEDIA_VIEWS_MAX_AGE_MS) {
+      const generation = this.generation;
       const views = await this.d.fillViews(account);
       if (account !== this.d.accountId() || context !== account + ':' + this.d.path()) return 0;
+      if (generation !== this.generation) return 0;
       this.cache = { account, at: this.d.now(), views };
     }
     // 読み込みを待つ間に仮想化・移動されていても、いまの DOM だけを対象にする。
