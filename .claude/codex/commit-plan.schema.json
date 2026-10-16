@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["items", "shared_files", "checks", "notes", "manual_test"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "message", "files", "tests_failed_before_fix"],
+        "properties": {
+          "id": { "type": "string" },
+          "message": { "type": "string" },
+          "files": { "type": "array", "items": { "type": "string" } },
+          "tests_failed_before_fix": { "type": "boolean" }
+        }
+      }
+    },
+    "shared_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "items"],
+        "properties": {
+          "path": { "type": "string" },
+          "items": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["typecheck", "test", "build", "test_summary"],
+      "properties": {
+        "typecheck": { "type": "string", "enum": ["pass", "fail", "not_run"] },
+        "test": { "type": "string", "enum": ["pass", "fail", "not_run"] },
+        "build": { "type": "string", "enum": ["pass", "fail", "not_run"] },
+        "test_summary": { "type": "string" }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "manual_test": { "type": "array", "items": { "type": "string" } }
+  }
+}
