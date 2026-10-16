@@ -1284,7 +1284,7 @@
     "message": "Vérifier les nouvelles versions"
   },
   "updateCheckDesc": {
-    "message": "Si cette option est activée, PostShelf demande à GitHub le numéro de la dernière version quand vous l’ouvrez, au plus une fois par jour. Aucune donnée n’est envoyée, mais GitHub voit l’heure de la vérification, votre adresse IP, votre type de navigateur et le fait que la demande vient de PostShelf. Les mises à jour ne sont jamais installées automatiquement."
+    "message": "Si cette option est activée, PostShelf demande à GitHub le numéro de la dernière version quand vous ouvrez le gestionnaire ou le panneau latéral, au plus une fois par jour. Aucune donnée n’est envoyée, mais GitHub voit l’heure de la vérification, votre adresse IP, votre type de navigateur et le fait que la demande vient de PostShelf. Les mises à jour ne sont jamais installées automatiquement."
   },
   "updateAvailable": {
     "message": "Une nouvelle version est disponible : $VERSION$",

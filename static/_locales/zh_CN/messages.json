@@ -1284,7 +1284,7 @@
     "message": "检查新版本"
   },
   "updateCheckDesc": {
-    "message": "开启后，打开界面时最多每天一次向 GitHub 查询最新的版本号。不会发送任何数据，但 GitHub 会知道查询的时间、你的 IP 地址、浏览器类型，以及这是来自 PostShelf 的查询。不会自动更新。"
+    "message": "开启后，打开管理页面或侧边栏时最多每天一次向 GitHub 查询最新的版本号。不会发送任何数据，但 GitHub 会知道查询的时间、你的 IP 地址、浏览器类型，以及这是来自 PostShelf 的查询。不会自动更新。"
   },
   "updateAvailable": {
     "message": "新版本 $VERSION$ 已发布",
