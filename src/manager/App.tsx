@@ -89,6 +89,7 @@ import { UpdateAvailable } from './UpdateAvailable';
 import { REPO_URL } from '../shared/links';
 import { SidebarResize } from './SidebarResize';
 import { useCompact } from './useCompact';
+import { reuseBookmarks, reuseFolders } from './reuse';
 
 const sorts = (): [SortKey, string][] => [
   ['savedDesc', t('sortSavedDesc')],
@@ -151,6 +152,7 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const [ready, setReady] = useState(false);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [dataReadVersion, setDataReadVersion] = useState(0);
   const [current, setCurrent] = useState(ALL_FOLDER_ID);
   const [showInAncestors, setShowInAncestors] = useState(true);
   const [view, setView] = useState<ViewMode>('post');
@@ -262,8 +264,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     const startedView = viewRef.current;
     const [f, { bookmarks: b, accounts: accs }] = await Promise.all([listFolders(), listBookmarksWithAccounts()]);
     if (seq !== reloadSeq.current || startedView !== viewRef.current) return;
-    setFolders(f);
-    setBookmarks(b);
+    setFolders((prev) => reuseFolders(prev, f));
+    setBookmarks((prev) => reuseBookmarks(prev, b));
+    setDataReadVersion((version) => version + 1);
     setAccounts(accs);
     const existing = new Set(b.map((x) => x.tweetId));
     setSelected((s) => pruneSelection(s, existing));
@@ -299,8 +302,9 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
       applyView(resolveViewAccount(s.viewAccount, last, initial.accounts));
       if (seq === reloadSeq.current) {
         const data = initial.forAccount(viewRef.current);
-        setFolders(data.folders);
-        setBookmarks(data.bookmarks);
+        setFolders((prev) => reuseFolders(prev, data.folders));
+        setBookmarks((prev) => reuseBookmarks(prev, data.bookmarks));
+        setDataReadVersion((version) => version + 1);
         setAccounts(initial.accounts);
       } else {
         // 初期読み込み中に保存の変更通知があれば、古い一覧を使わず通常どおり読み直す。
@@ -496,7 +500,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     () => queryBookmarks(bookmarks, {
       folderId: curFolder.id, search, sort, filters, now, descendantsOf: viewDescendants,
     }),
-    [bookmarks, curFolder.id, search, sort, filters, viewDescendants, curFolder.id === RECENT_ID ? recentVersion : 0],
+    [bookmarks, curFolder.id, search, sort, filters, viewDescendants,
+      curFolder.id === RECENT_ID ? recentVersion + dataReadVersion : 0],
   );
   // 一覧の ID。shown が変わるときだけ作り直す。tabbableId は一覧の側で 1 回だけ決める (カードごとに全件を走査しない)
   const shownIds = useMemo(() => shown.map((b) => b.tweetId), [shown]);
@@ -523,7 +528,11 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
   const viewName = curFolder.id === RECENT_ID ? curFolder.name : displayName(curFolder);
   // 左のメニューと見出しの件数は、保存データ・表示用の子孫表が変わるまで使い回す。
   // 「直近 7 日」だけはアカウントの通知でも破棄し、次に表示する時刻で数える。
-  const countCache = useMemo(() => countFolders(bookmarks, viewDescendants), [bookmarks, viewDescendants]);
+  // 配列を使い回した読み直しでも、「直近 7 日」の時刻の境界は従来どおり更新する。
+  const countCache = useMemo(
+    () => countFolders(bookmarks, viewDescendants),
+    [bookmarks, viewDescendants, dataReadVersion],
+  );
   const countRecentVersion = useRef(recentVersion);
   if (countRecentVersion.current !== recentVersion) {
     countCache.delete(RECENT_ID);
@@ -1030,7 +1039,8 @@ export function App({ surface = 'tab' }: { surface?: 'tab' | 'sidepanel' }) {
     try {
       // 取り込み完了の直後でも、最後に保存された分が入るよう、始める直前に保存データを読み直す (state が古いことがある)
       const [fresh, settings] = await Promise.all([listBookmarks(), getSettings()]);
-      setBookmarks(fresh);
+      setBookmarks((prev) => reuseBookmarks(prev, fresh));
+      setDataReadVersion((version) => version + 1);
       const queue = queryBookmarks(fresh, { folderId: INBOX_ID, search: '', sort, filters: {}, now: Date.now() });
       setTriageMulti(settings.triageMulti === true);
       setTriage(queue);
