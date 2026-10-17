@@ -444,9 +444,6 @@
   "actionModeSidepanel": {
     "message": "Open the side panel"
   },
-  "actionModeNote": {
-    "message": "The side panel requires Chrome 114 or later."
-  },
   "collectPending": {
     "message": "$COUNT$ not yet imported",
     "placeholders": {

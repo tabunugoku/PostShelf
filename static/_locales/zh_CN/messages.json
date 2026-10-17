@@ -444,9 +444,6 @@
   "actionModeSidepanel": {
     "message": "打开侧边栏"
   },
-  "actionModeNote": {
-    "message": "侧边栏需要 Chrome 114 或更高版本。"
-  },
   "collectPending": {
     "message": "未导入 $COUNT$ 条",
     "placeholders": {

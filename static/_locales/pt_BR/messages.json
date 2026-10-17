@@ -444,9 +444,6 @@
   "actionModeSidepanel": {
     "message": "Abrir o painel lateral"
   },
-  "actionModeNote": {
-    "message": "O painel lateral requer o Chrome 114 ou posterior."
-  },
   "collectPending": {
     "message": "$COUNT$ não importados",
     "placeholders": {

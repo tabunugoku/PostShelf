@@ -444,9 +444,6 @@
   "actionModeSidepanel": {
     "message": "開啟側邊欄"
   },
-  "actionModeNote": {
-    "message": "側邊欄需要 Chrome 114 或更新版本。"
-  },
   "collectPending": {
     "message": "尚未匯入 $COUNT$ 則",
     "placeholders": {
