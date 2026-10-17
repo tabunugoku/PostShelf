@@ -1,4 +1,5 @@
 // 版: v77
+import { seedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
@@ -33,13 +34,12 @@ beforeEach(() => {
   vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => frames.delete(id)));
   const data = installChromeMock();
   Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
     folders: [{
       id: 'sample_folder', accountId: 'me', name: 'Sample Folder', icon: 'ti-folder',
       color: '#E24B4A', order: 0,
     }],
-    bookmarks: {
+  });
+  seedBookmarks(data, Object.values({
       'me:1': {
         accountId: 'me', tweetId: '1', savedAt: 1, folderIds: ['sample_folder'],
         snapshot: {
@@ -47,8 +47,7 @@ beforeEach(() => {
           media: [], url: 'https://x.com/sample_user/status/1',
         },
       },
-    },
-  });
+    }));
   resetAccount();
   setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   setAccountScope('me');

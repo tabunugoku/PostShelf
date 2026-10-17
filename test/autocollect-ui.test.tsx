@@ -1,3 +1,4 @@
+import { seedBookmarks } from './stored-bookmarks';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -119,7 +120,7 @@ describe('manager: the offer banner (it never starts anything by itself)', () =>
     await mount();
     expect($$('.ac-offer').length).toBe(0);
     for (const prep of [async () => updateAutoCollect({ enabled: false }), async () => setCollectOffer('me', 'done')]) {
-      data.bookmarks = {};
+      seedBookmarks(data, Object.values({}));
       await prep();
       document.body.innerHTML = '<div id="app"></div>';
       await mount();

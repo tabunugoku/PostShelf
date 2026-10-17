@@ -1,4 +1,5 @@
 // 版: v47-a
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import * as storage from '../src/shared/storage';
@@ -23,17 +24,16 @@ const quote = (extra = {}) => ({
 let data: Record<string, unknown>;
 beforeEach(() => {
   data = installChromeMock();
-  data.schemaVersion = 2;
-  data.folderIdsRepaired = true;
+  seedBookmarks(data, []);
   storage.setAccountScope('me');
 });
 const seed = (snapshot: Snapshot, accountId = 'me') => {
   const b = { accountId, tweetId: '123', savedAt: 77, folderIds: ['sample-folder'], snapshot };
-  data.bookmarks = { ...(data.bookmarks as object), [`${accountId}:123`]: b };
+  seedBookmarks(data, Object.values({ ...(storedBookmarks(data) as object), [`${accountId}:123`]: b }));
   return structuredClone(b);
 };
 const fill = (snapshot: Snapshot, accountId = 'me') => storage.fillMissing([{ tweetId: '123', snapshot }], accountId);
-const saved = () => (data.bookmarks as any)['me:123'];
+const saved = () => (storedBookmarks(data) as any)['me:123'];
 
 it('fills a missing avatar without touching text or folders', async () => {
   const before = seed(snap());
@@ -52,7 +52,7 @@ it('keeps an existing avatar and writes nothing when nothing is missing', async 
 it('never creates an unsaved post', async () => {
   const old = seed(snap(), 'sample_other');
   expect(await fill(snap({ avatar }))).toBe(0);
-  expect(data.bookmarks).toEqual({ 'sample_other:123': old });
+  expect(storedBookmarks(data)).toEqual({ 'sample_other:123': old });
 });
 
 it('drops an http avatar', async () => {

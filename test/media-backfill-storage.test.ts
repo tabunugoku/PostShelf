@@ -1,4 +1,5 @@
 // 版: v45-a
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import * as storage from '../src/shared/storage';
@@ -10,12 +11,12 @@ const snap = (extra: Partial<Snapshot> = {}): Snapshot => ({ text: '架空の本
 let data: Record<string, unknown>;
 beforeEach(() => {
   data = installChromeMock();
-  data.schemaVersion = 2; data.folderIdsRepaired = true;
+  seedBookmarks(data, []);
   storage.setAccountScope('me');
 });
 const seed = (snapshot: Snapshot, accountId = 'me') => {
   const b = { accountId, tweetId: '123', savedAt: 77, folderIds: ['sample-folder'], snapshot };
-  data.bookmarks = { ...(data.bookmarks as object), [`${accountId}:123`]: b };
+  seedBookmarks(data, Object.values({ ...(storedBookmarks(data) as object), [`${accountId}:123`]: b }));
   return structuredClone(b);
 };
 const fill = (snapshot: Snapshot, accountId = 'me') => storage.fillMissing([{ tweetId: '123', snapshot }], accountId);
@@ -30,7 +31,7 @@ it.each([
   const other = seed(snap(), 'sample_other');
   const set = vi.spyOn(chrome.storage.local, 'set');
   expect(await fill(incoming)).toBe(1);
-  expect(data.bookmarks).toEqual({ 'me:123': { ...before, snapshot: { ...old, ...patch } }, 'sample_other:123': other });
+  expect(storedBookmarks(data)).toEqual({ 'me:123': { ...before, snapshot: { ...old, ...patch } }, 'sample_other:123': other });
   expect(set).toHaveBeenCalledTimes(1);
 });
 
@@ -43,27 +44,27 @@ it.each([
   const before = seed(old);
   const set = vi.spyOn(chrome.storage.local, 'set');
   expect(await fill(incoming)).toBe(0);
-  expect(data.bookmarks).toEqual({ 'me:123': before });
+  expect(storedBookmarks(data)).toEqual({ 'me:123': before });
   expect(set).not.toHaveBeenCalled();
 });
 
 it('never creates an unsaved post and captures the explicit account', async () => {
   const old = seed(snap(), 'sample_other');
   expect(await fill(snap({ media: [image] }))).toBe(0);
-  expect(data.bookmarks).toEqual({ 'sample_other:123': old });
+  expect(storedBookmarks(data)).toEqual({ 'sample_other:123': old });
 });
 
 it('addCollected remains fresh-only, and concurrent writes are preserved', async () => {
   const old = seed(snap({ translated: true, quote: { author: 'Sample Quote', handle: '@sample_quote', text: '架空の引用', media: [] } }));
   expect(await storage.addCollected([{ tweetId: '123', snapshot: snap({ media: [image] }) }], 999, 'me')).toBe(0);
-  expect((data.bookmarks as any)['me:123']).toEqual(old);
+  expect((storedBookmarks(data) as any)['me:123']).toEqual(old);
   await Promise.all([fill(snap({ media: [image] })), storage.addCollected([{ tweetId: '124', snapshot: snap() }], 999, 'me')]);
-  expect((data.bookmarks as any)['me:123']).toEqual({ ...old, snapshot: { ...old.snapshot, media: [image] } });
-  expect((data.bookmarks as any)['me:124'].snapshot).toEqual(snap());
+  expect((storedBookmarks(data) as any)['me:123']).toEqual({ ...old, snapshot: { ...old.snapshot, media: [image] } });
+  expect((storedBookmarks(data) as any)['me:124'].snapshot).toEqual(snap());
 });
 
 it('serial backfills preserve both media updates', async () => {
   seed(snap());
   await Promise.all([fill(snap({ media: [image] })), fill(snap({ media: [poster] }))]);
-  expect((data.bookmarks as any)['me:123'].snapshot.media).toEqual([image]);
+  expect((storedBookmarks(data) as any)['me:123'].snapshot.media).toEqual([image]);
 });

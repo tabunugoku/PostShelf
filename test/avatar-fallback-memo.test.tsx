@@ -1,4 +1,5 @@
 // 版: v56-d
+import { seedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -58,13 +59,12 @@ it('空の表の内容が同じなら参照を変えず候補が消えれば新�
 it('管理画面のフォルダ変更は Context に渡す代用表の参照を変えない', async () => {
   const data = installChromeMock();
   Object.assign(data, {
-    schemaVersion: 2, folderIdsRepaired: true,
     folders: [
       { id: 'sample_folder', accountId: 'me', name: 'Sample Folder', icon: 'ti-folder', order: 0 },
       { id: 'sample_other', accountId: 'me', name: 'Sample Other', icon: 'ti-folder', order: 1 },
     ],
-    bookmarks: { 'me:1': bookmark('1', 1, icon), 'me:2': bookmark('2', 2) },
   });
+  seedBookmarks(data, Object.values({ 'me:1': bookmark('1', 1, icon), 'me:2': bookmark('2', 2) }));
   await updateSettings({ viewAccount: 'me' });
   document.body.innerHTML = '<div id="app"></div>';
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});

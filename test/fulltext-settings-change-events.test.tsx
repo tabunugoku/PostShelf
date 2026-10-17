@@ -1,4 +1,5 @@
 // 版: v77
+import { seedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -24,10 +25,9 @@ beforeEach(() => {
   const data = installChromeMock();
   storage.setAccountScope('me');
   Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
     settings: { ...settings.DEFAULT_SETTINGS },
-    bookmarks: {
+  });
+  seedBookmarks(data, Object.values({
       'me:1': {
         accountId: 'me',
         tweetId: '1',
@@ -42,8 +42,7 @@ beforeEach(() => {
           truncated: true,
         },
       },
-    },
-  });
+    }));
   // 別画面に相当するフォームに分け、同名のラジオ同士が DOM 上で干渉しないようにする。
   document.body.innerHTML = '<form id="manager"></form><form id="sidepanel"></form>';
 });

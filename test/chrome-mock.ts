@@ -52,6 +52,9 @@ export function installChromeMock(lang = 'ja'): Record<string, unknown> {
     runtime: { getManifest: () => ({ version: '9.9.9' }), getURL: (p: string) => `chrome-extension://x/${p}` },
     storage: {
       local: {
+        async getKeys() {
+          return Object.keys(data);
+        },
         async get(key: string | string[] | null) {
           const keys = key === null ? Object.keys(data) : Array.isArray(key) ? key : [key];
           return Object.fromEntries(keys.filter((k) => k in data).map((k) => [k, structuredClone(data[k])]));
@@ -63,7 +66,9 @@ export function installChromeMock(lang = 'ja'): Record<string, unknown> {
         },
         async remove(key: string | string[]) {
           const keys = Array.isArray(key) ? key : [key];
-          const changes = Object.fromEntries(keys.filter((k) => k in data).map((k) => [k, { oldValue: data[k] }]));
+          const changes = Object.fromEntries(keys.filter((k) => k in data).map((k) => [
+            k, { oldValue: data[k], newValue: undefined },
+          ]));
           for (const k of keys) delete data[k];
           for (const l of listeners) l(changes, 'local');
         },
