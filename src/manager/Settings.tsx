@@ -343,7 +343,6 @@ export function SettingsPage({ onChanged, onApplied, onNotice, onAutoCollect, su
             <span>{t(m === 'popup' ? 'actionModePopup' : 'actionModeSidepanel')}</span>
           </label>
         ))}
-        <p class="muted setting-desc"><Sentences text={t('actionModeNote')} /></p>
       </fieldset>
       {heading('data', 'groupData')}
       <fieldset class="setting-group">

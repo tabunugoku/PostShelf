@@ -444,9 +444,6 @@
   "actionModeSidepanel": {
     "message": "サイドパネルを開く"
   },
-  "actionModeNote": {
-    "message": "サイドパネルは Chrome 114 以降で使えます。"
-  },
   "collectPending": {
     "message": "未取り込み $COUNT$ 件",
     "placeholders": {

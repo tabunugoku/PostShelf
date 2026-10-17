@@ -444,9 +444,6 @@
   "actionModeSidepanel": {
     "message": "사이드 패널 열기"
   },
-  "actionModeNote": {
-    "message": "사이드 패널은 Chrome 114 이상에서 사용할 수 있습니다."
-  },
   "collectPending": {
     "message": "미가져옴 $COUNT$개",
     "placeholders": {
