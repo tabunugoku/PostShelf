@@ -143,6 +143,21 @@ it('裏方が失敗したまま 30 秒経つと書かずに StorageError にす�
   expect(set).not.toHaveBeenCalled();
 });
 
+it('スキーマ 1 からの移行が旧キーを消す前に止まっても、次の移行で旧キーを消し、書き出せる', async () => {
+  const { accountId: _, ...legacy } = bookmark();
+  delete data.schemaVersion;
+  delete data.folderIdsRepaired;
+  data.bookmarks = { '1': legacy };
+  const remove = vi.spyOn(chrome.storage.local, 'remove').mockRejectedValueOnce(new Error('架空の失敗'));
+  await expect(storage.runStorageMigration()).rejects.toThrow('架空の失敗');
+  expect(data.schemaVersion).toBe(3);
+  expect(data.bookmarks).toEqual({ '1': legacy });
+  remove.mockRestore();
+  await storage.runStorageMigration();
+  expect(data).not.toHaveProperty('bookmarks');
+  expect((await storage.exportData()).bookmarks).toEqual([{ ...legacy, accountId: 'unknown' }]);
+});
+
 it('30 秒の時間切れのあとの操作では、裏方へもう一度頼む', async () => {
   vi.useFakeTimers();
   const send = vi.spyOn(chrome.runtime, 'sendMessage');

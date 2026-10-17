@@ -149,7 +149,13 @@ export function runStorageMigration(): Promise<void> {
     if (version >= SCHEMA_VERSION && !(KEY_BOOKMARKS in raw)) return;
     let folders: Folder[] = raw[KEY_FOLDERS] ?? [];
     let map: BookmarkMap = raw[KEY_BOOKMARKS] ?? {};
-    if (version < 2) ({ folders, bookmarks: map } = migrateToV2({ folders, bookmarks: map }));
+    if (version < 2) {
+      ({ folders, bookmarks: map } = migrateToV2({ folders, bookmarks: map }));
+    } else {
+      // スキーマ 1 からの移行が、schemaVersion: 3 を書いたあと旧キーを消す前に止まると、旧キーはスキーマ 1 の形
+      // (キーが tweetId、accountId なし) のまま残る。回収の前に同じ規則で整える (スキーマ 2 の形なら変わらない)
+      map = migrateToV2({ bookmarks: map }).bookmarks;
+    }
     if (version < SCHEMA_VERSION && !raw[KEY_REPAIRED]) {
       const repaired = repairedFolderData(map, folders);
       folders = repaired.folders;
