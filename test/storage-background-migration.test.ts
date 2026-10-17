@@ -163,13 +163,57 @@ it('空の保存領域なら裏方を待たずに保存できる', async () => {
   expect(data['bm:sample_a:1']).toBeDefined();
 });
 
-it('スキーマ 3 の旧キー回収は頼むだけで読み込みを待たせない', async () => {
+/** 旧版に戻して 2 件目を保存したあとの状態 (スキーマ 3、1 件目は新しい形、2 件目は旧キーだけ) */
+const seedLeftover = () => {
   data.schemaVersion = 3;
   data['bm:sample_a:1'] = bookmark();
+  data.bookmarks = { 'sample_a:1': bookmark(), 'sample_a:2': bookmark('2') };
+};
+
+it('スキーマ 3 でも旧キーが残っていれば、回収を一度頼んで終わるまで待つ', async () => {
+  seedLeftover();
   const send = vi.spyOn(chrome.runtime, 'sendMessage');
-  expect(await storage.getBookmarkOf('sample_a', '1')).toEqual(bookmark());
-  await storage.getBookmarkOf('sample_a', '1');
-  expect(send).toHaveBeenCalledExactlyOnceWith({ type: 'migrateStorage' });
+  const pending = storage.exportData();
+  await vi.waitFor(() => expect(send).toHaveBeenCalledExactlyOnceWith({ type: 'migrateStorage' }));
+  await storage.runStorageMigration();
+  expect((await pending).bookmarks).toEqual([bookmark(), bookmark('2')]);
+  expect(data).not.toHaveProperty('bookmarks');
+});
+
+it('回収の set が失敗すると、書き出しは旧キーの分を落とした JSON を返さずに StorageError にする', async () => {
+  seedLeftover();
+  vi.useFakeTimers();
+  const set = vi.spyOn(chrome.storage.local, 'set').mockRejectedValueOnce(new Error('架空の失敗'));
+  const pending = expect(storage.exportData()).rejects.toBeInstanceOf(storage.StorageError);
+  await expect(storage.runStorageMigration()).rejects.toThrow('架空の失敗');
+  await vi.advanceTimersByTimeAsync(30_000);
+  await pending;
+  expect(data.bookmarks).toEqual({ 'sample_a:1': bookmark(), 'sample_a:2': bookmark('2') });
+  // 次の起動で回収できれば、書き出しに 2 件とも入る
+  set.mockRestore();
+  await storage.runStorageMigration();
+  expect((await storage.exportData()).bookmarks).toEqual([bookmark(), bookmark('2')]);
+});
+
+it('回収が失敗しているあいだの全削除は行わず、回収のあとの全削除では消したポストが戻らない', async () => {
+  seedLeftover();
+  vi.useFakeTimers();
+  // 回収の書き込み (bm: のキー) だけを失敗させる
+  const set = vi.spyOn(chrome.storage.local, 'set').mockImplementation(async (items) => {
+    if (Object.keys(items).some((key) => key.startsWith('bm:'))) throw new Error('架空の失敗');
+  });
+  const removing = expect(storage.deleteAllData()).rejects.toBeInstanceOf(storage.StorageError);
+  await expect(storage.runStorageMigration()).rejects.toThrow('架空の失敗');
+  await vi.advanceTimersByTimeAsync(30_000);
+  await removing;
+  expect(data['bm:sample_a:1']).toEqual(bookmark());
+  expect(Object.keys(data.bookmarks)).toEqual(['sample_a:1', 'sample_a:2']);
+  set.mockRestore();
+  await storage.runStorageMigration();
+  await storage.deleteAllData();
+  await storage.runStorageMigration();
+  expect(storedBookmarks(data)).toEqual({});
+  expect(data).not.toHaveProperty('bookmarks');
 });
 
 it('裏方は起動・インストール・メッセージで移行を呼び、失敗を記録する', async () => {

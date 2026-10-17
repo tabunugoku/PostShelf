@@ -215,6 +215,12 @@ function requestStorageMigration(): void {
   void chrome.runtime.sendMessage({ type: 'migrateStorage' }).catch((error) => console.error(error));
 }
 
+/** スキーマが 3 以上で、旧キー bookmarks が残っていなければ完了。旧キーの値は読まない (大きいので)。 */
+async function migrationDone(): Promise<boolean> {
+  const [version, keys] = await Promise.all([read(KEY_SCHEMA, 0), chrome.storage.local.getKeys()]);
+  return version >= SCHEMA_VERSION && !keys.includes(KEY_BOOKMARKS);
+}
+
 function waitForMigration(): Promise<void> {
   return new Promise((resolve, reject) => {
     const events = chrome.storage.onChanged;
@@ -224,8 +230,11 @@ function waitForMigration(): Promise<void> {
       if (error) reject(error);
       else resolve();
     };
+    const check = () => void migrationDone().then((done) => {
+      if (done) finish();
+    }, finish);
     const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
-      if (area === 'local' && changes[KEY_SCHEMA]?.newValue >= SCHEMA_VERSION) finish();
+      if (area === 'local' && (KEY_SCHEMA in changes || KEY_BOOKMARKS in changes)) check();
     };
     // 時間切れのあとの操作では、裏方へもう一度頼む (裏方の移行が失敗して止まっている場合に備える)
     const timer = setTimeout(() => {
@@ -235,23 +244,26 @@ function waitForMigration(): Promise<void> {
     events.addListener(listener);
     requestStorageMigration();
     // 最初の読み出しと購読の間に完了した場合も取りこぼさない。
-    void read(KEY_SCHEMA, 0).then((version) => {
-      if (version >= SCHEMA_VERSION) finish();
-    }, finish);
+    check();
   });
 }
 
-/** 裏方に移行を頼み、スキーマ 3 の完了を待つ。移すデータの無い保存領域だけは自分で初期化する。 */
+/**
+ * 裏方に移行を頼み、スキーマ 3 の完了を待つ。移すデータの無い保存領域だけは自分で初期化する。
+ * スキーマ 3 でも旧キー bookmarks が残っていれば (旧版に戻して保存した)、回収が終わるまで待つ。
+ * 待たずに進むと、書き出しが回収前のポストを落とし、全削除のあとに旧キーから復活するため。
+ */
 async function ensureMigrated(): Promise<void> {
   watchMigration();
   if (migrationReady) return;
   migrating ??= (async () => {
     while (!migrationReady) {
       const version = migrationVersion;
+      // bookmarks の値まで読むのは、移行前か旧キーが残っているときだけ (ふだんはキーが無い)
       const flags = await chrome.storage.local.get([KEY_SCHEMA, KEY_FOLDERS, KEY_BOOKMARKS]);
       if (version !== migrationVersion) continue;
       if ((flags[KEY_SCHEMA] ?? 0) >= SCHEMA_VERSION) {
-        if (KEY_BOOKMARKS in flags) requestStorageMigration();
+        if (KEY_BOOKMARKS in flags) await waitForMigration();
       } else if (!(KEY_BOOKMARKS in flags) && (flags[KEY_SCHEMA] === 2 || !(KEY_FOLDERS in flags))) {
         await chrome.storage.local.set({ [KEY_SCHEMA]: SCHEMA_VERSION, [KEY_REPAIRED]: true });
       } else {
@@ -1331,7 +1343,8 @@ export function deleteAllData(): Promise<void> {
   return serial(async () => {
     const keys = await keysOf();
     await chrome.storage.local.set({ [KEY_FOLDERS]: [], [KEY_ACCOUNTS]: {}, [KEY_SCHEMA]: SCHEMA_VERSION, [KEY_REPAIRED]: true });
-    await chrome.storage.local.remove([...keys, KEY_LAST_ACCOUNT]);
+    // 旧キー bookmarks も消す (残すと、次の起動で裏方が回収して、消したポストが戻る)
+    await chrome.storage.local.remove([...keys, KEY_LAST_ACCOUNT, KEY_BOOKMARKS]);
   });
 }
 
