@@ -1,4 +1,5 @@
 // 版: v59-b
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
@@ -16,8 +17,7 @@ beforeEach(async () => {
   vi.resetModules();
   vi.useFakeTimers();
   data = installChromeMock();
-  data.schemaVersion = 2;
-  data.folderIdsRepaired = true;
+  seedBookmarks(data, []);
   document.body.innerHTML = readFileSync('test/fixtures/v59-status.html', 'utf8');
   history.replaceState(null, '', '/sample_status/status/5901');
   vi.stubGlobal('MutationObserver', class {
@@ -34,7 +34,8 @@ beforeEach(async () => {
   const fill = vi.spyOn(storage, 'fillMissing');
   const get = vi.spyOn(chrome.storage.local, 'get');
   reads = () => (get.mock.calls as unknown as [string | string[] | null][])
-    .filter(([key]) => key === 'bookmarks').length;
+    .filter(([key]) => (typeof key === 'string' && key.startsWith('bm:'))
+      || (Array.isArray(key) && key.some((key) => key.startsWith('bm:')))).length;
   fills = () => fill.mock.calls.length;
   const bookmarks: Record<string, Bookmark> = {};
   for (const accountId of ['me', 'sample_other']) {
@@ -55,7 +56,7 @@ beforeEach(async () => {
       };
     }
   }
-  data.bookmarks = bookmarks;
+  seedBookmarks(data, Object.values(bookmarks));
 });
 
 afterEach(() => {
@@ -85,7 +86,7 @@ it('アイコンだけの保留が解けたら、画像が保留中でも欠け�
   readyAvatar();
   await update();
   expect(fills()).toBe(2);
-  const saved = (data.bookmarks as Record<string, Bookmark>)['me:5901'];
+  const saved = (storedBookmarks(data) as Record<string, Bookmark>)['me:5901'];
   expect(saved.snapshot.avatar).toBe('https://pbs.twimg.com/profile_images/sample-status.jpg');
   expect(saved.snapshot.media).toEqual([]);
   const changedReads = reads();
@@ -117,7 +118,7 @@ it('メディアだけの保留が解けたら、アイコンの保留中でも�
   Object.defineProperty(img, 'naturalWidth', { value: 640 });
   await update();
   expect(fills()).toBe(2);
-  expect((data.bookmarks as Record<string, Bookmark>)['me:5901'].snapshot.media)
+  expect((storedBookmarks(data) as Record<string, Bookmark>)['me:5901'].snapshot.media)
     .toEqual(['https://pbs.twimg.com/media/sample-pending.jpg']);
   await update();
   expect(fills()).toBe(2);
@@ -150,11 +151,11 @@ it('保留 ID が変われば再び補完し、同じ集合が続けば再読み
 });
 
 it('保留が解けたら欠けた項目を補い、以後の確認済み動作を維持する', async () => {
-  const before = structuredClone((data.bookmarks as Record<string, Bookmark>)['me:5901']);
+  const before = structuredClone((storedBookmarks(data) as Record<string, Bookmark>)['me:5901']);
   expect(await update()).toBe(true);
   readyAvatar();
   expect(await update()).toBe(false);
-  const saved = (data.bookmarks as Record<string, Bookmark>)['me:5901'];
+  const saved = (storedBookmarks(data) as Record<string, Bookmark>)['me:5901'];
   expect(saved.snapshot.avatar).toBe('https://pbs.twimg.com/profile_images/sample-status.jpg');
   expect(saved.snapshot.text).toBe('架空の全文。読み込みを待つアイコンつきのポスト。');
   expect(saved.snapshot.truncated).toBe(false);
@@ -213,6 +214,6 @@ it('アイコンの保留が続いていても後から出た全文を更新す�
   // 空の本文が読めると mediaPending も解けるため、全文更新とは別に補完も再試行する。
   expect(fills()).toBe(2);
   expect(reads()).toBe(firstReads + 2);
-  expect((data.bookmarks as Record<string, Bookmark>)['me:5901'].snapshot.text)
+  expect((storedBookmarks(data) as Record<string, Bookmark>)['me:5901'].snapshot.text)
     .toBe('架空の後から読み込まれた全文');
 });

@@ -17,10 +17,14 @@ beforeEach(async () => {
   vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1280);
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
   folder = await storage.createFolder({ name: 'Sample folder' });
+  // 保存が速いと savedAt が同じになり、新しい順の並びが決まらない。1 件ごとに 1ms ずらす
+  let now = 1_700_000_000_000;
+  const clock = vi.spyOn(Date, 'now').mockImplementation(() => now++);
   for (let i = 1; i <= 65; i++) await storage.setBookmarkFolders(String(i), [], {
     text: `Sample ${i <= 40 ? 'match' : 'other'} ${i}`, author: 'Sample', handle: '@sample_user',
     media: i % 2 === 0 ? ['https://example.test/sample.jpg'] : [], url: `https://x.com/sample_user/status/${i}`,
   });
+  clock.mockRestore();
   document.body.innerHTML = '<div id="app"></div>';
 });
 afterEach(async () => { await act(() => void render(null, document.querySelector('#app')!)); vi.restoreAllMocks(); });

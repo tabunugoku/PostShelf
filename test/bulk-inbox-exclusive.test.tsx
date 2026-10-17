@@ -14,7 +14,8 @@ it.each([
   for (const name of actions) await click(box(name === 'inbox' ? t('inboxName') : name));
   expect(await assignments()).toEqual(saved); expect(writes).not.toHaveBeenCalled(); expect(document.querySelector('.toast')).toBeNull();
   await confirm(); expect(document.querySelector('.toast')?.textContent).toContain(t(key, count));
-  expect(document.querySelectorAll('.toast')).toHaveLength(1); expect(writes.mock.calls.filter(([items]) => 'bookmarks' in items)).toHaveLength(1);
+  expect(document.querySelectorAll('.toast')).toHaveLength(1);
+  expect(writes.mock.calls.filter(([items]) => Object.keys(items).some((key) => key.startsWith('bm:')))).toHaveLength(1);
   if (actions[0] === 'inbox') expect(await assignments()).toEqual([['inbox'], ['inbox'], ['inbox']]);
 });
 it('makes inbox and user-folder drafts exclusive, including mixed rows', async () => {

@@ -124,7 +124,7 @@ it('旧値または新値が無い通知も届ける', async () => {
   unwatch();
 });
 
-it.each(['folders', 'bookmarks'])('%s があれば時刻だけの変化と同時でも通知する', async (key) => {
+it.each(['folders', 'bm:me:1'])('%s があれば時刻だけの変化と同時でも通知する', async (key) => {
   data.accounts = { me: account() };
   const changed = vi.fn();
   const unwatch = onDataChanged(changed);

@@ -1,10 +1,15 @@
 import { applyActionMode, openManagerTab } from '../shared/panel';
 import { getSettings, onSettingsChanged, type ActionMode } from '../shared/settings';
 import { afterPostsRemoved, cachePostById } from '../shared/cacheops';
+import { runStorageMigration } from '../shared/storage';
 import { AUTO_CAP, FullTextQueue, MANUAL_CAP, cleanupAtStartup, cleanupLegacyTabs, manualItems } from './fulltext';
 
 // 長いポストの全文の取得 (v24)。保存した時点で、たたまれたポストのページを裏のタブで開いて読む (src/background/fulltext.ts)
 const fullText = new FullTextQueue();
+const migrateStorage = () => {
+  void runStorageMigration().catch((error) => console.error(error));
+};
+migrateStorage();
 // 前回の閉じ忘れのタブを閉じる。終わる前に新しい取得が始まると、古い running の記録の更新が新しい状態を上書きするので、
 // 取得・停止の依頼はこの完了を待ってから処理する (失敗しても受け付けは止めない)
 const startupCleanup = cleanupAtStartup().catch(() => {});
@@ -24,6 +29,7 @@ const apply = () => {
 };
 apply();
 chrome.runtime.onInstalled.addListener(apply);
+chrome.runtime.onInstalled.addListener(migrateStorage);
 // 旧版の裏のタブの記録は、更新のときだけ片付ける (service worker が起きるたびには書き込まない)
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'update') void cleanupLegacyTabs().catch(() => {});
@@ -56,6 +62,7 @@ function requestFullText(
 
 // x.com のポップオーバーからの「サイドパネルで開く」。content script からは直接開けないので、ユーザー操作の直後にここで開く
 chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg?.type === 'migrateStorage') migrateStorage();
   // 画像のキャッシュ (オフなら何もしない) と、保存から外したポストの画像の掃除
   if (msg?.type === 'cacheImages' && typeof msg.tweetId === 'string' && typeof msg.accountId === 'string') void cachePostById(msg.tweetId, msg.accountId).catch(() => {});
   if (msg?.type === 'pruneCache') void afterPostsRemoved().catch(() => {});

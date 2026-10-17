@@ -1,4 +1,5 @@
 // 版: v56-b
+import { storedBookmarks } from './stored-bookmarks';
 import { afterEach, expect, it, vi } from 'vitest';
 import { importData, restoreBookmarks } from '../src/shared/storage';
 import type { Bookmark, Folder } from '../src/shared/models';
@@ -29,7 +30,7 @@ it('複数アカウントの取り込みでフォルダをポストごとに絞�
   const scans = folderScans(filter.mock.contexts);
   filter.mockRestore();
   expect(scans).toBeLessThanOrEqual(4);
-  const saved = world.data.bookmarks as Record<string, Bookmark>;
+  const saved = storedBookmarks(world.data) as Record<string, Bookmark>;
   expect(Object.keys(saved)).toHaveLength(6000);
   expect(saved['me:6001'].folderIds).toEqual(['f1', 'f0']);
   expect(saved['sample_other:6000'].folderIds).toEqual(['f1', 'f2']);
@@ -55,7 +56,7 @@ it('複数アカウントの取り消しで所属の祖先を保ちフォルダ�
   const scans = folderScans(filter.mock.contexts);
   filter.mockRestore();
   expect(scans).toBe(0);
-  const saved = world.data.bookmarks as Record<string, Bookmark>;
+  const saved = storedBookmarks(world.data) as Record<string, Bookmark>;
   expect(saved['me:0']).toBeUndefined();
   expect(saved['me:6001'].folderIds).toEqual(['f1', 'f0']);
   expect(saved['sample_other:6000'].folderIds).toEqual(['f1', 'f2']);

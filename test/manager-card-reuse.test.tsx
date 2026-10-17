@@ -1,4 +1,5 @@
 // 版: v79
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi, type MockInstance } from 'vitest';
@@ -44,20 +45,18 @@ beforeEach(() => {
   data = installChromeMock();
   const account = { id: 'me', handle: 'me', lastSeenAt: 10 };
   Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
     accounts: { me: account },
     lastSeenAccount: account,
     settings: { ...DEFAULT_SETTINGS, viewMode: 'list' },
-    bookmarks: Object.fromEntries(Array.from({ length: 50 }, (_, index) => {
-      const b = bookmark(String(index + 1));
-      return ['me:' + b.tweetId, b];
-    })),
     folders: [
       { accountId: 'me', id: 'sample_folder', name: '架空の棚', icon: 'ti-folder', order: 0 },
       { accountId: 'me', id: 'sample_other', name: '別の棚', icon: 'ti-star', order: 1 },
     ],
   });
+  seedBookmarks(data, Object.values(Object.fromEntries(Array.from({ length: 50 }, (_, index) => {
+      const b = bookmark(String(index + 1));
+      return ['me:' + b.tweetId, b];
+    }))));
   storage.setAccountScope('me');
   history.replaceState({}, '', '/');
   document.body.innerHTML = '';
@@ -73,8 +72,8 @@ afterEach(() => {
 it('50件のうち所属が変わったカードだけを描き直す', async () => {
   await mount();
   expect(rows()).toHaveLength(50);
-  data.bookmarks['me:25'].folderIds = ['sample_other'];
-  await reload({ bookmarks: data.bookmarks });
+  storedBookmarks(data)['me:25'].folderIds = ['sample_other'];
+  await reload({ ...Object.fromEntries(Object.entries(storedBookmarks(data)).map(([key, b]) => ['bm:' + key, b])) });
   expect(painted.mock.calls.map(([props]) => props.b.tweetId)).toEqual(['25']);
   expect(document.querySelector('[data-row="25"]')!.textContent).toContain('別の棚');
 });
@@ -85,7 +84,7 @@ it('同じ読み直しは配列と要素の参照を保ち、カードを描き�
   await mount();
   const previousBookmarks = bookmarks.mock.results.at(-1)!.value;
   const previousFolders = folders.mock.results.at(-1)!.value;
-  await reload({ bookmarks: data.bookmarks, folders: data.folders });
+  await reload({ ...Object.fromEntries(Object.entries(storedBookmarks(data)).map(([key, b]) => ['bm:' + key, b])), folders: data.folders });
   expect(painted.mock.calls.length).toBe(0);
   expect(bookmarks.mock.results.at(-1)!.value).toBe(previousBookmarks);
   expect(folders.mock.results.at(-1)!.value).toBe(previousFolders);
@@ -112,11 +111,11 @@ it.each(['name', 'color', 'order'] as const)('フォルダの%sの変更を全�
 it.each(['text', 'media', 'savedAt'] as const)('%sの更新は該当のカードだけに反映する', async (field) => {
   if (field === 'media') data.settings.viewMode = 'grid';
   await mount();
-  const changed: Bookmark = data.bookmarks['me:25'];
+  const changed: Bookmark = storedBookmarks(data)['me:25'];
   if (field === 'text') changed.snapshot.text = '架空の長い本文を取得した結果';
   if (field === 'media') changed.snapshot.media = ['https://pbs.twimg.com/media/sample_image.jpg'];
   if (field === 'savedAt') changed.savedAt = 25.5;
-  await reload({ bookmarks: data.bookmarks });
+  await reload({ ...Object.fromEntries(Object.entries(storedBookmarks(data)).map(([key, b]) => ['bm:' + key, b])) });
   expect(painted.mock.calls.map(([props]) => props.b)).toEqual([changed]);
   if (field === 'text') expect(document.querySelector('[data-row="25"]')!.textContent).toContain(changed.snapshot.text);
   if (field === 'media') expect(document.querySelector('[data-row="25"] .ph')).toBeTruthy();
@@ -125,13 +124,13 @@ it.each(['text', 'media', 'savedAt'] as const)('%sの更新は該当のカード
 it('同じ内容の読み直しでも直近7日の一覧と件数の時刻を更新する', async () => {
   const now = Date.parse('2026-10-15T00:00:00Z');
   vi.spyOn(Date, 'now').mockReturnValue(now);
-  data.bookmarks = { 'me:1': { ...bookmark('1'), savedAt: now - 7 * 24 * 60 * 60 * 1000 + 100 } };
+  seedBookmarks(data, Object.values({ 'me:1': { ...bookmark('1'), savedAt: now - 7 * 24 * 60 * 60 * 1000 + 100 } }));
   await mount();
   await act(() => [...document.querySelectorAll<HTMLButtonElement>('.side .fr')]
     .find((button) => button.textContent?.includes(t('recent7')))!.click());
   expect(ids()).toEqual(['1']);
   vi.mocked(Date.now).mockReturnValue(now + 1000);
-  await reload({ bookmarks: data.bookmarks });
+  await reload({ ...Object.fromEntries(Object.entries(storedBookmarks(data)).map(([key, b]) => ['bm:' + key, b])) });
   expect(ids()).toEqual([]);
   expect(document.querySelector('.bar-count')!.textContent).toBe(t('itemCount', 0));
 });
@@ -139,9 +138,8 @@ it('同じ内容の読み直しでも直近7日の一覧と件数の時刻を更
 it('追加・削除・並べ替えで件数と順序を保ち、消えた選択を外す', async () => {
   await mount();
   await act(() => document.querySelector<HTMLInputElement>('[data-row="25"] .sel')!.click());
-  delete data.bookmarks['me:25'];
-  data.bookmarks['me:51'] = bookmark('51');
-  await reload({ bookmarks: data.bookmarks });
+  seedBookmarks(data, [...Object.values(storedBookmarks(data)).filter((b) => b.tweetId !== '25'), bookmark('51')]);
+  await reload({ ...Object.fromEntries(Object.entries(storedBookmarks(data)).map(([key, b]) => ['bm:' + key, b])) });
   expect(ids()).toEqual(Array.from({ length: 51 }, (_, index) => String(51 - index)).filter((id) => id !== '25'));
   expect(document.querySelector('.bulk-btn')).toBeNull();
   expect(document.querySelector('.bar-count')!.textContent).toBe(t('itemCount', 50));
@@ -154,7 +152,7 @@ it('追加・削除・並べ替えで件数と順序を保ち、消えた選択�
 it('同じポストIDでもアカウントを替えたら前の一覧を残さない', async () => {
   const other = bookmark('25', 'sample_other');
   other.snapshot.text = '別アカウントの架空の本文';
-  data.bookmarks['sample_other:25'] = other;
+  seedBookmarks(data, [...Object.values(storedBookmarks(data)), other]);
   data.accounts.sample_other = { id: 'sample_other', handle: 'sample_other', lastSeenAt: 20 };
   await mount();
   await act(() => document.querySelector<HTMLButtonElement>('.acct-btn')!.click());
@@ -177,10 +175,10 @@ it('重なった読み直しの古い結果があとに届いても最新の一�
     await gate;
     return result;
   });
-  await reload({ bookmarks: data.bookmarks });
+  await reload({ ...Object.fromEntries(Object.entries(storedBookmarks(data)).map(([key, b]) => ['bm:' + key, b])) });
   expect(loaded).toBe(true);
-  data.bookmarks['me:25'].snapshot.text = '新しい架空の本文';
-  await reload({ bookmarks: data.bookmarks });
+  storedBookmarks(data)['me:25'].snapshot.text = '新しい架空の本文';
+  await reload({ ...Object.fromEntries(Object.entries(storedBookmarks(data)).map(([key, b]) => ['bm:' + key, b])) });
   await act(async () => release());
   await flush();
   expect(document.querySelector('[data-row="25"]')!.textContent).toContain('新しい架空の本文');

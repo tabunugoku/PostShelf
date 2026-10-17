@@ -43,7 +43,7 @@ describe('bulk operations', () => {
     expect((await getBookmark('2'))!.folderIds).toEqual([b]);
     const folders = await listFolders();
     expect(folders[1].id).toBe(INBOX_ID); // 「すべて」の次
-    expect(writes).toBe(2); // 受け皿フォルダ作成 + ブックマーク 1 回
+    expect(writes).toBe(1); // 受け皿フォルダとポストを一緒に保存する
   });
 
   it('moveToFolder moves from one folder to another (from=all just adds)', async () => {

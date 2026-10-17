@@ -71,7 +71,7 @@ it.each(['data', 'account', 'path'])('監視経由の %s の変更で 30 秒未�
   stop = media.installMediaBackfill();
   await vi.advanceTimersByTimeAsync(300);
   expect(read).toHaveBeenCalledTimes(1);
-  if (change === 'data') await chrome.storage.local.set({ bookmarks: {} });
+  if (change === 'data') await chrome.storage.local.set({ folders: [] });
   if (change === 'account') {
     account.setCurrentAccount({ id: 'sample_other', handle: 'sample_other', lastSeenAt: 0 });
   }
@@ -136,7 +136,7 @@ it('監視中にアカウントとデータが変わると、新しいアカウ�
   stop = media.installMediaBackfill();
   await vi.advanceTimersByTimeAsync(300);
   account.setCurrentAccount({ id: 'sample_other', handle: 'sample_other', lastSeenAt: 0 });
-  await chrome.storage.local.set({ bookmarks: {} });
+  await chrome.storage.local.set({ folders: [] });
   await vi.advanceTimersByTimeAsync(300);
   old.resolve(views());
   await vi.advanceTimersByTimeAsync(0);

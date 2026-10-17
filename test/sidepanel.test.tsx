@@ -182,7 +182,7 @@ describe('manifest', () => {
     const m = JSON.parse(readFileSync(resolve(process.cwd(), 'static/manifest.json'), 'utf8'));
     expect(m.permissions).toContain('sidePanel');
     expect(m.side_panel.default_path).toBe('sidepanel.html');
-    expect(m.minimum_chrome_version).toBe('114');
+    expect(m.minimum_chrome_version).toBe('130');
     expect(readFileSync(resolve(process.cwd(), 'static/sidepanel.html'), 'utf8')).toContain('manager.js');
   });
 });

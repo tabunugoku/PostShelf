@@ -1,3 +1,4 @@
+import { storedBookmarks } from './stored-bookmarks';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { readFileSync } from 'node:fs';
@@ -84,10 +85,16 @@ describe('F-1: resetSettings', () => {
     await setBookmarkFolders('1', [f.id], snap);
     await addCollected([{ tweetId: '2', snapshot: snap }]);
     await updateSettings(custom);
-    const before = { folders: structuredClone(data.folders), bookmarks: structuredClone(data.bookmarks), accounts: structuredClone(data.accounts), last: await getLastSeenAccount(), schema: data.schemaVersion };
+    const before = {
+      folders: structuredClone(data.folders),
+      bookmarks: structuredClone(storedBookmarks(data)),
+      accounts: structuredClone(data.accounts),
+      last: await getLastSeenAccount(),
+      schema: data.schemaVersion,
+    };
     await resetSettings();
     expect(data.folders).toEqual(before.folders);
-    expect(data.bookmarks).toEqual(before.bookmarks);
+    expect(storedBookmarks(data)).toEqual(before.bookmarks);
     expect(data.accounts).toEqual(before.accounts);
     expect(await getLastSeenAccount()).toEqual(before.last);
     expect(data.schemaVersion).toBe(before.schema);
@@ -274,7 +281,7 @@ describe('F-4/F-5: delete all data', () => {
     await click(btn('すべてのデータを削除'));
     await input($('[role=alertdialog] input'), '削除');
     await click(dlgBtn('削除'));
-    expect(data.bookmarks).toEqual({});
+    expect(storedBookmarks(data)).toEqual({});
     expect(data.folders).toEqual([]);
     expect(data.accounts).toEqual({});
     expect('lastSeenAccount' in data).toBe(false);

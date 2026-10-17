@@ -1,4 +1,5 @@
 // 版: v13
+import { runStorageMigration } from '../src/shared/storage';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -126,6 +127,7 @@ describe('v13-C-4: updating keeps the existing data (v1 data from before account
     data.bookmarks = {
       '11': { tweetId: '11', folderIds: ['f_a'], savedAt: 5, snapshot: { text: '旧', author: 'A', handle: '@a', media: ['https://pbs.twimg.com/media/x?format=jpg&name=small'], url: 'https://x.com/a/status/11' } },
     };
+    await runStorageMigration();
     data.settings = { syncNative: true, buttonMode: 'replace', actionMode: 'sidepanel', viewMode: 'list', sortKey: 'savedDesc', lastFolderId: 'f_a' };
     data.lastRunVersion = '0.0.1';
     setAccountScope(UNKNOWN_ACCOUNT_ID); // 旧データの持ち主は「アカウント未設定」

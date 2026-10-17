@@ -73,7 +73,7 @@ it('保存通知で 30 秒未満でも読み直して件数と案内を更新す
   stop = collect.watchCollectData();
   await collect.refreshCollectButton();
   vi.mocked(storage.getSavedIds).mockResolvedValue(allSaved());
-  await chrome.storage.local.set({ bookmarks: {} });
+  await chrome.storage.local.set({ folders: [] });
   await vi.advanceTimersByTimeAsync(0);
   expect(storage.getSavedIds).toHaveBeenCalledTimes(2);
   expect(button().dataset.pending).toBe('0');
@@ -182,7 +182,7 @@ it('読み込み中の保存通知とアカウント切替が重なっても最�
     .mockReturnValueOnce(fresh.promise);
   stop = collect.watchCollectData();
   const first = collect.refreshCollectButton();
-  await chrome.storage.local.set({ bookmarks: {} });
+  await chrome.storage.local.set({ folders: [] });
   account.setCurrentAccount({ id: 'sample_other', handle: 'sample_other', lastSeenAt: 0 });
   fresh.resolve(allSaved());
   await vi.advanceTimersByTimeAsync(0);
@@ -254,7 +254,7 @@ it('完了表示中の通知と、完了表示より前に始まった読み出�
   await vi.advanceTimersByTimeAsync(0);
   const message = chrome.i18n.getMessage('collectDone', ['1']);
   expect(button().textContent).toBe(message);
-  await chrome.storage.local.set({ bookmarks: {} });
+  await chrome.storage.local.set({ folders: [] });
   old.resolve(new Set());
   await updating;
   await vi.advanceTimersByTimeAsync(2999);
@@ -295,7 +295,7 @@ it('見えていないタブでも通知で件数を更新し、可視化を待�
   stop = collect.watchCollectData();
   await collect.refreshCollectButton();
   vi.mocked(storage.getSavedIds).mockResolvedValue(allSaved());
-  await chrome.storage.local.set({ bookmarks: {} });
+  await chrome.storage.local.set({ folders: [] });
   await vi.advanceTimersByTimeAsync(0);
   expect(storage.getSavedIds).toHaveBeenCalledTimes(2);
   expect(button().dataset.pending).toBe('0');

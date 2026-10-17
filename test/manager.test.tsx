@@ -1,3 +1,4 @@
+import { storedBookmarks } from './stored-bookmarks';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -35,9 +36,9 @@ beforeEach(async () => {
   b = (await createFolder({ name: 'Beta' })).id;
   for (let i = 1; i <= 4; i++) await setBookmarkFolders(String(i), [i <= 2 ? a : b], snap(i));
   // 保存日時を固定 (新しい順に 4,3,2,1)
-  const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+  const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
   for (const k of Object.keys(data)) data[k].savedAt = Number(k.split(':')[1]);
-  await chrome.storage.local.set({ bookmarks: data });
+  await chrome.storage.local.set({ ...Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])) });
   await act(() => void render(<App />, $('#app')));
   await flush();
 });
@@ -248,9 +249,9 @@ describe('v7 manager layout', () => {
     expect($('.folder-editor-host')).toBeTruthy();
     expect($$('[aria-label=編集]').length).toBe(0); // ヘッダーの編集パネルは廃止
     expect(folderRow('直近 7 日').querySelector('.n')!.textContent).toBe('0'); // beforeEach の savedAt (1..4) は 7 日より前
-    const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+    const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
     data['unknown:1'].savedAt = Date.now() - 2 * 86400000;
-    await chrome.storage.local.set({ bookmarks: data });
+    await chrome.storage.local.set({ ...Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])) });
     await flush();
     expect(folderRow('直近 7 日').querySelector('.n')!.textContent).toBe('1');
     await click(folderRow('直近 7 日'));
@@ -273,11 +274,11 @@ describe('v7 manager layout', () => {
   });
 
   it('filter chips (author menu, AND) and the empty "not found" state with a way back', async () => {
-    const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+    const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
     data['unknown:1'].snapshot.media = ['https://x/img.jpg'];
     data['unknown:2'].snapshot.media = ['https://x/img2.jpg'];
     data['unknown:2'].snapshot.handle = '@u1';
-    await chrome.storage.local.set({ bookmarks: data });
+    await chrome.storage.local.set({ ...Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])) });
     await rerender();
     await click($$('.chip.filter').find((c) => c.textContent?.includes('画像あり'))!);
     expect(rowIds().sort()).toEqual(['1', '2']);
@@ -295,7 +296,7 @@ describe('v7 manager layout', () => {
   });
 
   it('with no saved posts at all, explains how to save', async () => {
-    await chrome.storage.local.set({ bookmarks: {} });
+    await chrome.storage.local.remove((await chrome.storage.local.getKeys()).filter((key) => key.startsWith('bm:')));
     await rerender();
     expect($('.empty-state').textContent).toContain('はじめましょう'); // v30: 2 つの手順
     expect($('.empty-state').textContent).toContain('フォルダのボタン');
@@ -320,9 +321,9 @@ describe('v7 manager layout', () => {
   });
 
   it('grid cards keep an equal-height responsive grid and show the first image as a cover', async () => {
-    const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+    const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
     data['unknown:4'].snapshot.media = ['https://x/cover.jpg', 'https://x/second.jpg'];
-    await chrome.storage.local.set({ bookmarks: data });
+    await chrome.storage.local.set({ ...Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])) });
     await rerender();
     await click($('.seg button[aria-label="グリッド表示"]'));
     expect($$('.gc').length).toBe(4);

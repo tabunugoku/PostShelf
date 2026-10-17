@@ -1,4 +1,5 @@
 // 版: v35
+import { seedBookmarks } from './stored-bookmarks';
 import { managerCss } from './css-helpers';
 import type { Bookmark } from '../src/shared/models';
 import { queryBookmarks } from '../src/shared/query';
@@ -18,8 +19,11 @@ const snap = (n: number) => ({ text: `post ${n}`, author: `A${n}`, handle: `@u${
 async function seed(n: number) {
   const data: Record<string, any> = {};
   const now = Date.now();
-  for (let i = 1; i <= n; i++) data[`me:${i}`] = { accountId: 'me', tweetId: String(i), folderIds: [], savedAt: now - i, snapshot: snap(i) };
-  await chrome.storage.local.set({ bookmarks: data });
+  for (let i = 1; i <= n; i++) data[`me:${i}`] = { accountId: 'me', tweetId: String(i), folderIds: ['inbox'], savedAt: now - i, snapshot: snap(i) };
+  const stored: Record<string, unknown> = {};
+  seedBookmarks(stored, Object.values(data));
+  stored.folders = [{ id: 'inbox', accountId: 'me', name: '', icon: 'ti-star', order: 0 }];
+  await chrome.storage.local.set(stored);
 }
 async function mountApp() {
   document.body.innerHTML = '<div id="app"></div>';
@@ -197,7 +201,7 @@ describe('v35-F: button nowrap is split', () => {
 });
 
 describe('v35-G: the search normalization cache survives a reload', () => {
-  const bm = (id: string, text: string): Bookmark => ({ accountId: 'me', tweetId: id, folderIds: [], savedAt: 1, snapshot: { text, author: 'A', handle: '@a', media: [], url: `https://x.com/a/status/${id}` } });
+  const bm = (id: string, text: string): Bookmark => ({ accountId: 'me', tweetId: id, folderIds: ['inbox'], savedAt: 1, snapshot: { text, author: 'A', handle: '@a', media: [], url: `https://x.com/a/status/${id}` } });
   const q = (all: Bookmark[]) => queryBookmarks(all, { folderId: 'all', search: 'キスト', sort: 'savedDesc' });
   it('a new snapshot object with the same content does not normalize again; a changed text does', () => {
     const norm = vi.spyOn(String.prototype, 'normalize');

@@ -33,7 +33,7 @@ function failNextBookmarkRead() {
   const get = local.get.bind(local);
   let armed = true;
   local.get = async (key: unknown) => {
-    if (armed && key === 'bookmarks') {
+    if (armed && Array.isArray(key) && key.some((key) => key.startsWith('bm:'))) {
       armed = false;
       throw new Error('boom');
     }

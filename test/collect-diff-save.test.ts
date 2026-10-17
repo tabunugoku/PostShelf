@@ -1,4 +1,5 @@
 // 版: v26-f
+import { storedBookmarks } from './stored-bookmarks';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { AutoCollector, type CollectDeps, type SeqEntry } from '../src/content/autocollect';
@@ -49,10 +50,10 @@ function makeDeps(total: number, sizes: number[], overrides: Partial<CollectDeps
 async function seedAnchors() {
   await setBookmarkFolders('p10', [], post(10).snapshot);
   await setBookmarkFolders('p50', [], post(50).snapshot);
-  const raw = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, { savedAt: number }>;
+  const raw = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, { savedAt: number }>;
   raw['me:p10'].savedAt = 5_000_000;
   raw['me:p50'].savedAt = 1_000_000;
-  await chrome.storage.local.set({ bookmarks: raw });
+  await chrome.storage.local.set(Object.fromEntries(Object.entries(raw).map(([key, b]) => ['bm:' + key, b])));
 }
 async function runAll(c: AutoCollector) {
   collectors.push(c);
@@ -125,7 +126,6 @@ describe('v26-F: the import saves only the difference, in the same order', () =>
   });
 });
 
-const KEY = 'bookmarks';
 describe('v26-F: the buttons read the saved data once per refresh', () => {
   const one = readFileSync(resolve(process.cwd(), 'test/fixtures/tweet.html'), 'utf8');
   const html = [1, 2, 3].map((n) => one.replaceAll('1234567890', `123456789${n}`)).join('');
@@ -138,7 +138,7 @@ describe('v26-F: the buttons read the saved data once per refresh', () => {
     await refreshAll(); // 初回の移行・所属修復によるキャッシュ無効化も完了させる。
     const get = vi.spyOn(chrome.storage.local, 'get');
     await refreshAll();
-    const reads = (get.mock.calls as unknown as [string][]).filter(([k]) => k === KEY);
+    const reads = (get.mock.calls as unknown as [string][]).filter(([k]) => Array.isArray(k) && k.some((key) => key.startsWith('bm:')));
     expect(reads.length).toBe(0);
     expect(document.querySelectorAll('[data-postshelf-btn]').length).toBeGreaterThan(1);
   });
@@ -148,8 +148,8 @@ describe('v26-F: the buttons read the saved data once per refresh', () => {
     setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 1 });
     dropSavedCache();
     await getSavedIds(); // 初回の移行の読み込みを済ませておく
-    const get = vi.spyOn(chrome.storage.local, 'get');
-    const count = () => (get.mock.calls as unknown as [string][]).filter(([k]) => k === KEY).length;
+    const get = vi.spyOn(chrome.storage.local, 'getKeys');
+    const count = () => get.mock.calls.length;
     await refreshCollectButton();
     await refreshCollectButton();
     await refreshCollectButton();

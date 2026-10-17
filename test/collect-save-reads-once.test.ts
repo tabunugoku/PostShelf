@@ -1,4 +1,5 @@
 // 版: v57-a
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { addCollected, setAccountScope } from '../src/shared/storage';
@@ -10,16 +11,19 @@ const snapshot = {
 };
 beforeEach(() => {
   data = installChromeMock();
-  Object.assign(data, { schemaVersion: 2, folderIdsRepaired: true, folders: [], bookmarks: {} });
+  Object.assign(data, {
+    folders: [],
+  });
+  seedBookmarks(data, Object.values({}));
   setAccountScope('me');
 });
 afterEach(() => vi.restoreAllMocks());
 
-it('受け皿がなくても取り込みは全件を 1 回だけ読んで保存する', async () => {
+it('受け皿がなくても取り込みは対象を 1 回だけ読んで保存する', async () => {
   const get = vi.spyOn(chrome.storage.local, 'get');
   expect(await addCollected([{ tweetId: '1', snapshot }], 1000)).toBe(1);
-  expect((get.mock.calls as unknown as [string][]).filter(([key]) => key === 'bookmarks')).toHaveLength(1);
-  expect(data.bookmarks['me:1']).toEqual({
+  expect((get.mock.calls as unknown as [string][]).filter(([key]) => Array.isArray(key) && key.some((key) => key.startsWith('bm:')))).toHaveLength(1);
+  expect(storedBookmarks(data)['me:1']).toEqual({
     accountId: 'me', tweetId: '1', savedAt: 1000, folderIds: ['inbox'], snapshot,
   });
   expect(data.folders).toEqual([{ id: 'inbox', name: '', icon: 'ti-star', order: 0, accountId: 'me' }]);
@@ -38,8 +42,8 @@ it('直列化した取り込みは先に保存したポストを失わず重複�
     addCollected([{ tweetId: '1', snapshot }], 1000),
     addCollected([{ tweetId: '1', snapshot }, { tweetId: '2', snapshot }], 2000),
   ])).toEqual([1, 1]);
-  expect((get.mock.calls as unknown as [string][]).filter(([key]) => key === 'bookmarks')).toHaveLength(2);
-  expect(Object.keys(data.bookmarks)).toEqual(['me:1', 'me:2']);
-  expect(data.bookmarks['me:1'].savedAt).toBe(1000);
-  expect(data.bookmarks['me:2'].savedAt).toBeLessThan(1000);
+  expect((get.mock.calls as unknown as [string][]).filter(([key]) => Array.isArray(key) && key.some((key) => key.startsWith('bm:')))).toHaveLength(2);
+  expect(Object.keys(storedBookmarks(data))).toEqual(['me:1', 'me:2']);
+  expect(storedBookmarks(data)['me:1'].savedAt).toBe(1000);
+  expect(storedBookmarks(data)['me:2'].savedAt).toBeLessThan(1000);
 });
