@@ -1,6 +1,6 @@
 # データモデル (保存データ)
 
-すべて `chrome.storage.local`。スキーマは **v9 でバージョン 2** (`schemaVersion`)。保存と読み込みは `src/shared/storage.ts` (フォルダ/ブックマーク) と `src/shared/settings.ts` (設定・状態) に集約する。
+すべて `chrome.storage.local`。スキーマは **v83 でバージョン 3** (`schemaVersion`)。保存と読み込みは `src/shared/storage.ts` (フォルダ/ブックマーク) と `src/shared/settings.ts` (設定・状態) に集約する。
 
 ## `folders`: Folder[]
 `{ id, name, icon, color?, order, accountId, parentId? }` (**v9**: `accountId` を追加。フォルダはアカウントごとに分かれる。**v46**: `parentId` を追加)
@@ -12,9 +12,10 @@
 - `color` はどのアイコンでも指定できる (許可リストの 8 色のみ)。無い = 色なし
 - 取り込み時の検証 (**v65**): `icon` が候補 (`ICONS`) に無ければ既定の `ti-folder` にし、`color` が許可リストに無ければ外す。CSS に入る値なので。フォルダ自体は取り込む (`cleanFolderLook`)
 
-## `bookmarks`: Record<`${accountId}:${tweetId}`, Bookmark>
+## `bm:<accountId>:<tweetId>`: Bookmark (1 件ずつのキー)
 `{ accountId, tweetId, folderIds, savedAt, snapshot }`
-- **v9**: キーは `accountId:tweetId`。同じポストを別アカウントで保存すると別のブックマークになる
+- **v83**: 1 件ごとに `bm:<accountId>:<tweetId>` のキーへ保存する。値の `Bookmark` の型は変わらない。同じポストを別アカウントで保存すると別のキーになる
+- キーの一覧は Chrome 130 以降の `chrome.storage.local.getKeys()` で読み、`bm:` または `bm:<accountId>:` で絞る。目次のキーは持たない。更新は変わったポストのキーだけを保存する
 - `folderIds` が空になる操作 (manager の「フォルダから外す」) では、ポストを消さず `['inbox']` に移す。削除は明示的な「削除」だけ
 - x.com のポップオーバーで最後のチェックを外すと、削除ではなく「未分類」に戻る。ブックマークの削除は、ポップオーバー下部のごみ箱のアイコン (「PostShelf から削除」) と、manager の「削除」だけ
 
@@ -69,17 +70,27 @@
 ## アカウント (v9)
 - `accounts`: Record<accountId, `{ id, handle, displayName?, avatar?, lastSeenAt }`>。`id` は正規化したハンドル (小文字、`@` なし)。`handle` は X での大文字小文字のまま
 - `lastSeenAccount`: 同じ形。content script が x.com の画面 (左メニュー下部のアカウント切替ボタン) から読み取るたびに更新する。manager / サイドパネル / popup の既定の表示アカウント
-- `schemaVersion`: `2`
+- `schemaVersion`: `3`
 - 特別なアカウント `unknown` (表示名「アカウント未設定」): v9 より前に保存したデータと、アカウントを判定できなかったとき用。`accounts` には保存しない
 - ハンドルは変更できる。変更すると別のアカウント扱いになるため、manager の「割り当て」で付け替える
 
 ### 移行 (スキーマ 1 → 2)
-- どの保存関数も、最初に `schemaVersion` を見る。2 未満なら 1 回だけ移行する
+- 裏方 (service worker) の `runStorageMigration` が、スキーマ 1 のデータに `migrateToV2` をメモリ上で適用し、続けてスキーマ 3 に移す
 - `accountId` の無いフォルダとブックマークを `unknown` に入れ、ブックマークのキーを `unknown:<tweetId>` にする
-- メモリ上で結果を検証 (件数・ID・中身が元と同じ) し、1 件でも違えば**何も書き込まず**に失敗する。書き込みは `folders`・`bookmarks`・`schemaVersion` の 1 回の `set`
+- メモリ上で結果を検証 (件数・ID・中身が元と同じ) し、1 件でも違えば**何も書き込まず**に失敗する。スキーマ 2 の途中状態は保存せず、次のスキーマ 3 の書き込みにまとめる
 - 冪等: 移行済みのデータに対してもう一度実行しても変わらない (テスト: `test/accounts.test.ts`)
 
+### 移行 (スキーマ 2 → 3)
+- 移行は裏方だけが行う。service worker の起動時・インストール時と、`migrateStorage` メッセージを受けたときに実行し、並行した依頼は 1 つの Promise にまとめる
+- 古い `bookmarks` の map を `bm:<accountId>:<tweetId>` のキーと値に変換する。修復の印が無ければ、従来と同じ規則で所属を修復する
+- 件数・キー・内容をメモリ上で確かめてから、新しいキー・`schemaVersion: 3`・`folderIdsRepaired: true` (と変更した `folders`) を 1 回の `set` で保存する
+- 書いたキーを読み直し、内容が一致した場合だけ `bookmarks` を削除する。中断や読み直しの不一致では古いキーを残す。完了後に再実行しても書き直さない
+- 管理画面・サイドパネル・ポップアップ・x.com は裏方に依頼し、`onChanged` でスキーマ 3 になるのを待つ。30 秒で完了しなければ `StorageError` にし、書き込まない。移すデータの無い新規インストール等は、その画面で印だけを付ける
+- 古い版に戻した後、スキーマ 3 に `bookmarks` が残っていれば、新形式に無いポストだけを足す。既存のポストは上書きせず、足したキーの読み直しを確かめてから古いキーを削除する。この回収ではほかの画面を待たせない
+- `folders`・`accounts`・`lastSeenAccount`・設定・`collectRun` などのキーと形は変わらない
+
 ### エクスポート JSON
+保存スキーマが 3 になっても、書き出す JSON は `version: 2` のまま。`exportedAt` を除き、移行の前後で内容は変わらない。
 - `version: 2`: `{ app, version, exportedAt, accounts, folders, bookmarks }` (全アカウント分。フォルダとブックマークに `accountId`)
 - `version: 1` (v9 より前) または `version` なし: インポートすると `unknown` に入る
 

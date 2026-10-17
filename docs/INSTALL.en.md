@@ -51,7 +51,7 @@ When Chrome starts with an extension loaded in developer mode, it may show a con
 
 ## 5. Troubleshooting
 
-- **An error when loading**: check that `manifest.json` is directly inside the folder you selected. If the folder is nested one level deeper, select the inner folder. Chrome 114 or later is required.
+- **An error when loading**: check that `manifest.json` is directly inside the folder you selected. If the folder is nested one level deeper, select the inner folder. Chrome 130 or later is required.
 - **No icon in the toolbar**: pin PostShelf from the extensions (puzzle piece) menu.
 - **My data seems to be gone**: most likely a different extension was loaded. Compare the ID on `chrome://extensions` with the ID at the top of this page (`aglgbnegdnodlmbmlfmaagjkneokagnc`).
   - Different ID → you are looking at an old version (from before the ID was fixed). Export from it and import into the new version (see section 3).

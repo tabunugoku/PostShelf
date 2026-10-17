@@ -28,6 +28,7 @@ v2〜v81 は実装済みで、バージョン 1.1.8 を公開済み (`docs/relea
 
 ## データモデル (`src/shared/models.ts`)
 型 (`Folder` / `Account` / `Bookmark` と `snapshot` の全項目) は `src/shared/models.ts` と `docs/DATA_MODEL.md` を読む。
+ポストは `bm:<accountId>:<tweetId>` のキーに 1 件ずつ保存する (スキーマ 3)。
 
 保存は、役割ごとに 1 か所に集約する。他のコードは直接 `chrome.storage` を触らない。
 - フォルダ・ブックマーク・アカウント: `src/shared/storage.ts` (`chrome.storage.local`)

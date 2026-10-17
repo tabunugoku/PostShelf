@@ -26,7 +26,7 @@ A Chrome extension (Manifest V3) that lets you sort your X (formerly Twitter) bo
 
 ## Install
 
-PostShelf is not distributed on the Chrome Web Store. Download the zip from [Releases](https://github.com/tabunugoku/PostShelf/releases), unzip it, and load the folder with "Developer mode" in Chrome (Chrome 114 or later). To update, **do not remove the extension**: overwrite the same folder and press "Reload", and your saved data is kept. For the steps, see **[docs/INSTALL.en.md](docs/INSTALL.en.md)** ([日本語](docs/INSTALL.md)).
+PostShelf is not distributed on the Chrome Web Store. Download the zip from [Releases](https://github.com/tabunugoku/PostShelf/releases), unzip it, and load the folder with "Developer mode" in Chrome (Chrome 130 or later). To update, **do not remove the extension**: overwrite the same folder and press "Reload", and your saved data is kept. For the steps, see **[docs/INSTALL.en.md](docs/INSTALL.en.md)** ([日本語](docs/INSTALL.md)).
 
 ## Development
 
@@ -110,7 +110,7 @@ x.com (旧 Twitter) のブックマークを、無料アカウントでも独自
 
 ## インストール
 
-Chrome Web Store では配布していません。[Releases](https://github.com/tabunugoku/PostShelf/releases) から zip をダウンロードして展開し、Chrome の「デベロッパーモード」でそのフォルダを読み込みます (Chrome 114 以降)。更新するとき、**拡張機能を削除せず**、同じフォルダに上書きして「再読み込み」を押すと、保存したデータが残ります。手順は **[docs/INSTALL.md](docs/INSTALL.md)** ([English](docs/INSTALL.en.md)) を見てください。
+Chrome Web Store では配布していません。[Releases](https://github.com/tabunugoku/PostShelf/releases) から zip をダウンロードして展開し、Chrome の「デベロッパーモード」でそのフォルダを読み込みます (Chrome 130 以降)。更新するとき、**拡張機能を削除せず**、同じフォルダに上書きして「再読み込み」を押すと、保存したデータが残ります。手順は **[docs/INSTALL.md](docs/INSTALL.md)** ([English](docs/INSTALL.en.md)) を見てください。
 
 ## 開発 (開発版の使い方)
 
