@@ -63,7 +63,7 @@ describe('v66-C: カードの「フォルダを変更」は 1 回で保存する
     await openPicker();
     const writes = vi.spyOn(chrome.storage.local, 'set');
     await click(box(t('inboxName'))); // 未分類を選ぶと、追加 (未分類) と解除 (Sample O) が同時に起きる
-    expect(writes.mock.calls.filter(([items]) => 'bookmarks' in items)).toHaveLength(1);
+    expect(writes.mock.calls.filter(([items]) => Object.keys(items).some((key) => key.startsWith('bm:')))).toHaveLength(1);
     expect(await folderIdsOf()).toEqual([INBOX_ID]);
   });
 

@@ -1,4 +1,5 @@
 // 版: v21
+import { storedBookmarks } from './stored-bookmarks';
 import { act } from 'preact/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -20,9 +21,9 @@ async function open(withSide = false, account: string | null = 'me') {
   const f = await createFolder({ name: 'F' });
   await createFolder({ name: 'G' });
   for (let i = 1; i <= 4; i++) await setBookmarkFolders(String(i), [f.id], snap(i, i === 4 ? 'とても長い本文'.repeat(20) : undefined));
-  const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+  const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
   Object.values(data).forEach((b: any) => (b.savedAt = Number(b.tweetId)));
-  await chrome.storage.local.set({ bookmarks: data });
+  await chrome.storage.local.set(Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])));
   vi.resetModules();
   await act(async () => void (await import('../src/popup/index')));
   await flush();

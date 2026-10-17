@@ -1,4 +1,5 @@
 // 版: v79
+import { seedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { initButtons, refreshAll } from '../src/content/buttons';
@@ -41,7 +42,7 @@ const start = async () => {
 };
 const save = async (folderIds: string[]) => {
   await chrome.storage.local.set({
-    bookmarks: Object.fromEntries(['1', '2'].map((id) => ['me:' + id, bookmark(id, folderIds)])),
+    ...Object.fromEntries(['1', '2'].map((id) => ['bm:me:' + id, bookmark(id, folderIds)])),
   });
   await flush();
 };
@@ -66,12 +67,10 @@ const expectReads = (reads: ReturnType<typeof watchReads>, count: number) => {
 beforeEach(() => {
   data = installChromeMock();
   Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
     folders,
-    bookmarks: { 'me:1': bookmark('1') },
     settings: { ...DEFAULT_SETTINGS, buttonMode: 'separate' },
   });
+  seedBookmarks(data, Object.values({ 'me:1': bookmark('1') }));
   resetAccount();
   setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   document.body.innerHTML = fixture;
@@ -101,7 +100,7 @@ it.each(['separate', 'replace'] as const)('見えるタブの%sを各1回の読�
   await start();
   const reads = watchReads();
   await chrome.storage.local.set({
-    bookmarks: { 'me:1': bookmark('1', ['sample_other', 'sample_folder']) },
+    ...Object.fromEntries(Object.entries({ 'me:1': bookmark('1', ['sample_other', 'sample_folder']) }).map(([key, b]) => ['bm:' + key, b])),
     folders: folders.map((f) => ({ ...f, color: '#639922' })),
   });
   await flush();
@@ -185,8 +184,8 @@ it('onChangedを差し替えても新しい通知でキャッシュを捨てる'
   chrome.storage.onChanged = events as unknown as typeof chrome.storage.onChanged;
   await refreshAll();
   const reads = watchReads();
-  data.bookmarks = {};
-  for (const listener of listeners) listener({ bookmarks: { newValue: {} } }, 'local');
+  seedBookmarks(data, Object.values({}));
+  for (const listener of listeners) listener({ 'bm:me:1': { newValue: undefined } }, 'local');
   await flush();
   expectReads(reads, 1);
   expectSaved('1', '');

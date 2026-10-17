@@ -1,4 +1,5 @@
 // 版: v56-c
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
@@ -25,10 +26,9 @@ let data: Record<string, any>;
 beforeEach(() => {
   data = installChromeMock();
   Object.assign(data, {
-    schemaVersion: 2, folderIdsRepaired: true,
     folders: [{ id: 'sample_folder', accountId: 'me', name: 'Sample Folder', icon: 'ti-folder', order: 0 }],
-    bookmarks: { 'me:1': { accountId: 'me', tweetId: '1', savedAt: 1, folderIds: ['sample_folder'], snapshot: body } },
   });
+  seedBookmarks(data, Object.values({ 'me:1': { accountId: 'me', tweetId: '1', savedAt: 1, folderIds: ['sample_folder'], snapshot: body } }));
   resetAccount();
   setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   storage.setAccountScope('me');
@@ -47,12 +47,14 @@ it('ボタンの並行更新と同じ変更内の再表示で全件を 1 回だ�
   injectButtons();
   await Promise.all([refreshAll(), refreshAll()]);
   await refreshAll();
-  expect((get.mock.calls as unknown as [string][]).filter(([key]) => key === 'bookmarks')).toHaveLength(1);
+  expect((get.mock.calls as unknown as [string][]).filter(([key]) => Array.isArray(key) && key.some((key) => key.startsWith('bm:')))).toHaveLength(1);
   expect(document.querySelector('[data-postshelf-badge]')!.textContent).toBe('1');
-  await chrome.storage.local.set({ bookmarks: {} });
+  await chrome.storage.local.remove((await chrome.storage.local.getKeys()).filter((key) => key.startsWith('bm:')));
   get.mockClear();
+  const keys = vi.spyOn(chrome.storage.local, 'getKeys');
   await Promise.all([refreshAll(), refreshAll()]);
-  expect((get.mock.calls as unknown as [string][]).filter(([key]) => key === 'bookmarks')).toHaveLength(1);
+  expect(get).toHaveBeenCalledExactlyOnceWith('folders');
+  expect(keys).toHaveBeenCalledTimes(1);
   expect(document.querySelector('[data-postshelf-btn]')!.hasAttribute('data-saved')).toBe(false);
 });
 
@@ -67,9 +69,9 @@ it('ボタンの再表示で ID 取得だけのために本文や画像を抽出
 it('取り込みボタンの並行更新で保存済み ID を 1 回だけ読む', async () => {
   document.body.insertAdjacentHTML('beforeend', '<button class="postshelf-collect"></button>');
   dropSavedCache();
-  const get = vi.spyOn(chrome.storage.local, 'get');
+  const get = vi.spyOn(chrome.storage.local, 'getKeys');
   await Promise.all([refreshCollectButton(), refreshCollectButton(), refreshCollectButton()]);
-  expect((get.mock.calls as unknown as [string][]).filter(([key]) => key === 'bookmarks')).toHaveLength(1);
+  expect(get).toHaveBeenCalledTimes(1);
   expect(document.querySelector<HTMLButtonElement>('.postshelf-collect')!.dataset.pending).toBe('0');
 });
 
@@ -111,19 +113,19 @@ it('既定の画像補完は確認済みの画面を ID だけで判定する', 
   media.invalidate();
   await media.update();
   expect(extract.mock.calls.length).toBe(0);
-  expect((get.mock.calls as unknown as [string][]).filter(([key]) => key === 'bookmarks')).toHaveLength(0);
+  expect((get.mock.calls as unknown as [string][]).filter(([key]) => Array.isArray(key) && key.some((key) => key.startsWith('bm:')))).toHaveLength(0);
 });
 
 it('キャッシュ無効化前の遅い読み込みで新しい表示を上書きしない', async () => {
   injectButtons();
   await refreshAll();
-  await chrome.storage.local.set({ bookmarks: {} });
+  await chrome.storage.local.remove((await chrome.storage.local.getKeys()).filter((key) => key.startsWith('bm:')));
   let resolve!: (bookmarks: Awaited<ReturnType<typeof storage.listBookmarks>>) => void;
   const delayed = new Promise<Awaited<ReturnType<typeof storage.listBookmarks>>>((done) => { resolve = done; });
   vi.spyOn(storage, 'listBookmarks').mockImplementationOnce(() => delayed);
   const oldRefresh = refreshAll();
   await chrome.storage.local.set({
-    bookmarks: { 'me:1': { accountId: 'me', tweetId: '1', savedAt: 1, folderIds: ['sample_folder'], snapshot: body } },
+    'bm:me:1': { accountId: 'me', tweetId: '1', savedAt: 1, folderIds: ['sample_folder'], snapshot: body },
   });
   await refreshAll();
   resolve([]);
@@ -151,11 +153,11 @@ it('管理画面の一括変更と取り消しは書き込み後に全件を各 
   const get = chrome.storage.local.get;
   const set = chrome.storage.local.set;
   vi.spyOn(chrome.storage.local, 'get').mockImplementation(async (key: any) => {
-    if (afterWrite && key === 'bookmarks') reads++;
+    if (afterWrite && Array.isArray(key) && key.some((key) => key.startsWith('bm:'))) reads++;
     return get(key);
   });
   vi.spyOn(chrome.storage.local, 'set').mockImplementation(async (items) => {
-    if ('bookmarks' in items) afterWrite = true;
+    if (Object.keys(items).some((key) => key.startsWith('bm:'))) afterWrite = true;
     return set(items);
   });
   await click(document.querySelector<HTMLInputElement>('.sel')!);
@@ -166,11 +168,11 @@ it('管理画面の一括変更と取り消しは書き込み後に全件を各 
   await click(document.querySelector<HTMLInputElement>('.menu-bulk label input')!);
   await click(button(t('triageConfirm')));
   expect(reads).toBe(1);
-  expect(data.bookmarks['me:1'].folderIds).toEqual(['inbox']);
+  expect(storedBookmarks(data)['me:1'].folderIds).toEqual(['inbox']);
   reads = 0;
   afterWrite = false;
   await click(document.querySelector<HTMLButtonElement>('.toast button')!);
   expect(reads).toBe(1);
-  expect(data.bookmarks['me:1'].folderIds).toEqual(['sample_folder']);
+  expect(storedBookmarks(data)['me:1'].folderIds).toEqual(['sample_folder']);
   expect(document.querySelector('[data-row="1"]')).not.toBeNull();
 });

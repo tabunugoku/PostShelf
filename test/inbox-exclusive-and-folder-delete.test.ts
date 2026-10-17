@@ -1,10 +1,11 @@
 // 版: v18-storage
 import { beforeEach, describe, expect, it } from 'vitest';
+import { storedBookmarks } from './stored-bookmarks';
 import { installChromeMock } from './chrome-mock';
 import { INBOX_ID } from '../src/shared/models';
 import {
   addCollected, addToFolders, createFolder, deleteFolder, getBookmark, importData, listBookmarks, listFolders,
-  moveToFolder, normalizeFolderIds, removeFromFolders, repairFolderIds, setAccountScope, setBookmarkFolders,
+  moveToFolder, runStorageMigration, normalizeFolderIds, removeFromFolders, repairFolderIds, setAccountScope, setBookmarkFolders,
 } from '../src/shared/storage';
 
 let data: Record<string, any>;
@@ -44,7 +45,7 @@ describe('v18-A-1: 「未分類」と他のフォルダは同時に付かない'
   it('importData normalizes folderIds like a normal save (v26)', async () => {
     const bk = { accountId: 'me', tweetId: '5', folderIds: [INBOX_ID, 'f_x'], savedAt: 1, snapshot: snap('5') };
     await importData({ app: 'PostShelf', version: 2, accounts: [], folders: [], bookmarks: [bk] });
-    expect(data.bookmarks['me:5'].folderIds).toEqual(['f_x']);
+    expect(storedBookmarks(data)['me:5'].folderIds).toEqual(['f_x']);
   });
 });
 
@@ -73,14 +74,15 @@ describe('v18-A-2: フォルダの削除と修復', () => {
   it('repairs empty / mixed folderIds once, keeps everything else, and does not write the second time', async () => {
     broken();
     const before = structuredClone(data.bookmarks);
-    expect((await listBookmarks()).length).toBe(3); // 最初の公開関数で直る
+    await runStorageMigration();
+    expect((await listBookmarks()).length).toBe(3);
     expect(data.folderIdsRepaired).toBe(true);
-    expect(data.schemaVersion).toBe(2);
-    expect(data.bookmarks['me:1'].folderIds).toEqual([INBOX_ID]);
-    expect(data.bookmarks['me:2'].folderIds).toEqual(['f_a']);
-    expect(data.bookmarks['me:3']).toEqual(before['me:3']);
-    expect(data.bookmarks['me:2'].savedAt).toBe(2);
-    expect(data.bookmarks['me:2'].snapshot).toEqual(before['me:2'].snapshot);
+    expect(data.schemaVersion).toBe(3);
+    expect(storedBookmarks(data)['me:1'].folderIds).toEqual([INBOX_ID]);
+    expect(storedBookmarks(data)['me:2'].folderIds).toEqual(['f_a']);
+    expect(storedBookmarks(data)['me:3']).toEqual(before['me:3']);
+    expect(storedBookmarks(data)['me:2'].savedAt).toBe(2);
+    expect(storedBookmarks(data)['me:2'].snapshot).toEqual(before['me:2'].snapshot);
     expect(data.folders.some((f: any) => f.id === INBOX_ID && f.accountId === 'me')).toBe(true);
     // 2 回目: 何も書かない
     const snapshot = structuredClone(data);
@@ -95,8 +97,9 @@ describe('v18-A-2: フォルダの削除と修復', () => {
     const writes: string[] = [];
     const set = (globalThis as any).chrome.storage.local.set;
     (globalThis as any).chrome.storage.local.set = async (i: any) => { writes.push(...Object.keys(i)); return set(i); };
+    await runStorageMigration();
     await listBookmarks();
-    expect(writes).toEqual(['folderIdsRepaired']);
+    expect(writes).toEqual(['bm:me:3', 'schemaVersion', 'folderIdsRepaired']);
   });
 });
 

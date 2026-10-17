@@ -1,4 +1,5 @@
 // 版: v76
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { afterEach, expect, it, vi } from 'vitest';
 import * as storage from '../src/shared/storage';
 import * as tree from '../src/shared/folderTree';
@@ -31,10 +32,13 @@ function world(size = 28, hasInbox = true) {
     original['me:' + index] = bookmark;
   }
   original['sample_other:0'] = { ...original['me:0'], accountId: 'sample_other' };
-  Object.assign(data, { schemaVersion: 2, folderIdsRepaired: true, folders, bookmarks: { ...original } });
+  Object.assign(data, {
+    folders,
+  });
+  seedBookmarks(data, Object.values({ ...original }));
   vi.spyOn(chrome.storage.local, 'get').mockImplementation(async (keys: any) => Object.fromEntries(
-    (Array.isArray(keys) ? keys : [keys]).map((key) => [
-      key, key === 'bookmarks' ? { ...(data.bookmarks as Record<string, Bookmark>) } : data[key],
+    (Array.isArray(keys) ? keys : [keys]).filter((key) => key in data).map((key) => [
+      key, data[key],
     ]),
   ));
   const write = vi.spyOn(chrome.storage.local, 'set').mockImplementation(async (items) => {
@@ -115,16 +119,16 @@ it.each([
       undo = await storage.deleteBookmarks(current.ids);
       break;
   }
-  expect(current.data.bookmarks).toEqual(expected.map);
+  expect(storedBookmarks(current.data)).toEqual(expected.map);
   expect(undo).toEqual(expected.undo);
   for (const key of Object.keys(undo)) {
     expect(undo[key]).toBe(current.original[key]);
   }
   expect(current.write).toHaveBeenCalledTimes(Object.keys(undo).length ? 1 : 0);
-  const saved = current.data.bookmarks as Record<string, Bookmark>;
+  const saved = storedBookmarks(current.data) as Record<string, Bookmark>;
   expect(saved['sample_other:0']).toBe(current.original['sample_other:0']);
   await storage.restoreBookmarks(undo);
-  expect(current.data.bookmarks).toEqual(current.original);
+  expect(storedBookmarks(current.data)).toEqual(current.original);
 });
 
 it.each(['update', 'reorder'])('%s による付け替えの保存結果が変更前と一致する', async (operation) => {
@@ -137,7 +141,7 @@ it.each(['update', 'reorder'])('%s による付け替えの保存結果が変更
   for (const [key, bookmark] of Object.entries(current.original)) {
     const expected = bookmark.accountId === 'me'
       ? previousReparentedFolderIds(bookmark.folderIds, folders, 'child', ['parent']) : bookmark.folderIds;
-    expect((current.data.bookmarks as Record<string, Bookmark>)[key]).toEqual({ ...bookmark, folderIds: expected });
+    expect((storedBookmarks(current.data) as Record<string, Bookmark>)[key]).toEqual({ ...bookmark, folderIds: expected });
   }
   expect(current.write).toHaveBeenCalledOnce();
 });
@@ -147,7 +151,7 @@ it.each([false, true])('未分類の受け皿を作る場合も確定式 = %s �
   const expected = previousMutation(current.original, current.ids, current.folders, () => []);
   const undo = atomic ? await storage.changeBookmarkFolders(current.ids, ['inbox'], ['parent', 'other'])
     : await storage.removeFromFolders(current.ids, ['parent', 'other']);
-  expect(current.data.bookmarks).toEqual(expected.map);
+  expect(storedBookmarks(current.data)).toEqual(expected.map);
   expect(undo).toEqual(expected.undo);
   expect((current.data.folders as Folder[]).some((f) => f.id === 'inbox')).toBe(true);
 });

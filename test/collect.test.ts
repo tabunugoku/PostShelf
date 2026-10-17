@@ -1,3 +1,4 @@
+import { storedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -70,7 +71,8 @@ describe('collect button', () => {
     await vi.advanceTimersByTimeAsync(10);
     expect(btn().textContent).toBe('1 件を「未分類」として取り込みました');
     expect([...(await getSavedIds())].sort()).toEqual(['1', '2']);
-    expect((await (async () => (await chrome.storage.local.get('bookmarks')).bookmarks['me:1'].folderIds)())).toEqual([f.id]); // 既存は触らない
+    const stored = storedBookmarks(await chrome.storage.local.get(null));
+    expect(stored['me:1'].folderIds).toEqual([f.id]); // 既存は触らない
     await vi.advanceTimersByTimeAsync(3100);
     expect(btn().textContent).toBe('すべて取り込み済み');
   });

@@ -1,4 +1,5 @@
 // 版: v76
+import { seedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -78,7 +79,10 @@ it('folders と計算関数が無ければ変更前と同じチップを出す',
 it('管理画面は検索時に計算関数を保ち、フォルダの変更で作り直す', async () => {
   const data = installChromeMock();
   setAccountScope('me');
-  Object.assign(data, { schemaVersion: 2, folderIdsRepaired: true, folders, bookmarks: { 'me:1': bookmark } });
+  Object.assign(data, {
+    folders,
+  });
+  seedBookmarks(data, Object.values({ 'me:1': bookmark }));
   const resolver = vi.spyOn(tree, 'leafMemberResolver');
   const fallback = vi.spyOn(tree, 'leafMemberFolders');
   await act(() => void render(<App />, document.body));

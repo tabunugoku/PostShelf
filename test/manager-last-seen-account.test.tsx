@@ -1,4 +1,5 @@
 // 版: v81
+import { seedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -40,13 +41,11 @@ let data: Record<string, unknown>;
 beforeEach(() => {
   data = installChromeMock();
   Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
     accounts: { me: account('me'), sample_empty: account('sample_empty', 20) },
     folders: [{ id: 'sample_folder', accountId: 'me', name: 'サンプルの棚', icon: 'ti-folder', order: 0 }],
-    bookmarks: { 'me:1': bookmark },
     settings: { ...DEFAULT_SETTINGS, viewAccount: 'me' },
   });
+  seedBookmarks(data, Object.values({ 'me:1': bookmark }));
   storage.setAccountScope('me');
   document.body.innerHTML = '<div id="app"></div>';
   history.replaceState({}, '', '/');

@@ -1,4 +1,5 @@
 // 版: v45-c
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
@@ -10,7 +11,9 @@ import { queryOwn } from '../src/shared/selectors';
 
 let data: Record<string, unknown>;
 beforeEach(() => {
-  data = installChromeMock(); data.schemaVersion = 2; data.folderIdsRepaired = true; setAccountScope('me');
+  data = installChromeMock();
+  seedBookmarks(data, []);
+  setAccountScope('me');
   document.body.innerHTML = readFileSync('test/fixtures/v45-media.html','utf8');
   // 「読み込み済み」の補完テストでは、v50 のアイコン待ちも完了している状態を使う。
   const avatar = queryOwn(document.getElementById('image-ready')!, 'avatar')!.el;
@@ -25,7 +28,8 @@ function seed(id: string, extra = {}, accountId = 'me') {
     accountId, tweetId: id, savedAt: 1234, folderIds: ['sample-folder'],
     snapshot: { ...snapshot, ...(avatar ? { avatar } : {}), ...extra },
   };
-  data.bookmarks = { ...(data.bookmarks as object), [`${accountId}:${id}`]: b }; return structuredClone(b);
+  seedBookmarks(data, Object.values({ ...(storedBookmarks(data) as object), [`${accountId}:${id}`]: b }));
+  return structuredClone(b);
 }
 function watcher() {
   let clock = 0, account: string | null = 'me', path = '/home';
@@ -37,14 +41,14 @@ function watcher() {
 it.each(['/home','/sample_image/status/102','/i/history','/i/bookmarks'])('fills only stored media on %s without creating unsaved posts', async path => {
   const old = seed('102'); const other = seed('102',{},'sample_other'); const r=watcher(); r.path(path);
   expect(await r.w.update()).toBe(1);
-  expect(data.bookmarks).toEqual({ 'me:102': { ...old, snapshot: { ...old.snapshot, media:['https://pbs.twimg.com/media/sample-image.jpg'] } }, 'sample_other:102': other });
+  expect(storedBookmarks(data)).toEqual({ 'me:102': { ...old, snapshot: { ...old.snapshot, media:['https://pbs.twimg.com/media/sample-image.jpg'] } }, 'sample_other:102': other });
   expect(r.fill).toHaveBeenCalledTimes(1);
 });
 
 it('fills a saved video poster without changing anything else', async () => {
   const old=seed('104',{hasVideo:true}); const r=watcher();
   expect(await r.w.update()).toBe(1);
-  expect((data.bookmarks as any)['me:104']).toEqual({ ...old, snapshot: { ...old.snapshot, videoPoster:'https://pbs.twimg.com/media/sample-video.jpg' } });
+  expect((storedBookmarks(data) as any)['me:104']).toEqual({ ...old, snapshot: { ...old.snapshot, videoPoster:'https://pbs.twimg.com/media/sample-video.jpg' } });
 });
 
 it('checks a saved post once per display, reuses IDs for 30 seconds and resets on disappearance', async () => {
@@ -64,10 +68,10 @@ it('checks a saved post once per display, reuses IDs for 30 seconds and resets o
 it('does nothing while media is unreadable; a later DOM load can fill it', async () => {
   const old=seed('101'); const r=watcher(); const set=vi.spyOn(chrome.storage.local,'set');
   await r.w.update(); expect(r.fill).not.toHaveBeenCalled(); expect(set).not.toHaveBeenCalled();
-  expect((data.bookmarks as any)['me:101']).toEqual(old);
+  expect((storedBookmarks(data) as any)['me:101']).toEqual(old);
   document.querySelector('#image-pending img')!.setAttribute('src','https://pbs.twimg.com/media/sample-late.jpg');
   expect(await r.w.update()).toBe(1);
-  expect((data.bookmarks as any)['me:101'].snapshot.media).toEqual(['https://pbs.twimg.com/media/sample-late.jpg']);
+  expect((storedBookmarks(data) as any)['me:101'].snapshot.media).toEqual(['https://pbs.twimg.com/media/sample-late.jpg']);
 });
 
 it('invalidates saved IDs on data changes and scopes attempts by account and path', async () => {
@@ -93,8 +97,8 @@ it('backfills during auto collection without losing the fresh posts being saved'
   await c.start({consent:true,accountId:'me',cap:0,speed:'slow'});
   for(let i=0;i<50 && c.state?.status!=='done';i++) await new Promise(resolve=>setTimeout(resolve,0));
   expect(c.state!.status).toBe('done'); expect(c.state!.imported).toBe(4);
-  expect(Object.keys(data.bookmarks as object)).toHaveLength(5);
-  expect((data.bookmarks as any)['me:102']).toEqual({...old,snapshot:{...old.snapshot,media:['https://pbs.twimg.com/media/sample-image.jpg']}});
+  expect(Object.keys(storedBookmarks(data) as object)).toHaveLength(5);
+  expect((storedBookmarks(data) as any)['me:102']).toEqual({...old,snapshot:{...old.snapshot,media:['https://pbs.twimg.com/media/sample-image.jpg']}});
 });
 
 it('uses the existing DOM/path watchers, including late src and poster attribute loads', () => {

@@ -1,4 +1,5 @@
 // 版: v77
+import { seedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -24,12 +25,11 @@ beforeEach(() => {
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
   const account = { id: 'me', handle: 'me', lastSeenAt: now };
   Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
     accounts: { me: account },
     lastSeenAccount: account,
     folders: [{ id: 'sample_folder', accountId: 'me', name: 'サンプルの棚', icon: 'ti-folder', order: 0 }],
-    bookmarks: {
+  });
+  seedBookmarks(data, Object.values({
       'me:1': {
         accountId: 'me',
         tweetId: '1',
@@ -38,8 +38,7 @@ beforeEach(() => {
         snapshot: { text: '七日の境目を確かめる架空の本文', author: 'サンプル', handle: '@sample_author',
           media: [], url: 'https://x.com/sample_author/status/1' },
       },
-    },
-  });
+    }));
   document.body.innerHTML = '<div id="app"></div>';
   history.replaceState({}, '', '/');
 });
@@ -73,8 +72,7 @@ it.each([
   expect(recentCount()).toBe('1');
   expect(row('sample_folder').querySelector('.n')!.textContent).toBe('1');
   const reads = () => (get.mock.calls as unknown as [unknown][]).filter(([keys]) => keys === null
-    || keys === 'bookmarks'
-    || (Array.isArray(keys) && keys.includes('bookmarks'))).length;
+    || (Array.isArray(keys) && keys.some((key) => key.startsWith('bm:')))).length;
   const initialReads = reads();
   expect(initialReads).toBe(1);
   lists.mockClear();

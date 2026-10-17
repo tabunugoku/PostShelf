@@ -1,4 +1,5 @@
 // 版: v77
+import { seedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -14,8 +15,6 @@ beforeEach(() => {
   setAccountScope('me');
   const account = { id: 'me', handle: 'me', lastSeenAt: 1 };
   Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
     accounts: { me: account },
     lastSeenAccount: account,
     settings: { ...DEFAULT_SETTINGS, folderTreeCollapsed: [] },
@@ -25,6 +24,7 @@ beforeEach(() => {
         parentId: 'sample_parent' },
     ],
   });
+  seedBookmarks(data, []);
   history.replaceState({}, '', '/');
   document.body.innerHTML = '<div id="app"></div>';
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});

@@ -1,4 +1,5 @@
 // 版: v47-e
+import { storedBookmarks } from './stored-bookmarks';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { afterEach, beforeEach, expect, it } from 'vitest';
@@ -30,9 +31,9 @@ beforeEach(async () => {
   await setBookmarkFolders('2', [folder], snap(2, '@sample_same', newAvatar));
   await setBookmarkFolders('3', [folder], snap(3, '@sample_same'));
   await setBookmarkFolders('4', [folder], snap(4, '@sample_none'));
-  const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+  const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
   for (const k of Object.keys(data)) data[k].savedAt = Number(k.split(':')[1]);
-  await chrome.storage.local.set({ bookmarks: data });
+  await chrome.storage.local.set(Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])));
   await act(() => void render(<App />, $('#app')));
   await flush();
 });

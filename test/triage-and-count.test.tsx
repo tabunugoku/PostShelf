@@ -1,4 +1,5 @@
 // 版: v29
+import { storedBookmarks } from './stored-bookmarks';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -19,9 +20,9 @@ async function seed(inbox: number, folderNames: string[] = ['Dev', 'Fun']) {
   const fs = [];
   for (const name of folderNames) fs.push(await createFolder({ name }));
   for (let i = 1; i <= inbox; i++) await setBookmarkFolders(String(i), [], snap(i));
-  const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+  const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
   Object.values(data).forEach((b: any) => (b.savedAt = Number(b.tweetId))); // 1 が最も古い → 新しい順なら 3, 2, 1
-  await chrome.storage.local.set({ bookmarks: data });
+  await chrome.storage.local.set(Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])));
   return fs;
 }
 async function mount(surface: 'tab' | 'sidepanel' = 'tab') {

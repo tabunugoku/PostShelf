@@ -1,4 +1,5 @@
 // 版: v56
+import { seedBookmarks } from './stored-bookmarks';
 import { vi } from 'vitest';
 import type { Bookmark, Folder } from '../src/shared/models';
 import { setAccountScope } from '../src/shared/storage';
@@ -23,11 +24,14 @@ export function bulkWorld(size = 5000) {
     Object.freeze(bookmark);
     return [`me:${tweetId}`, bookmark];
   }));
-  Object.assign(data, { schemaVersion: 2, folderIdsRepaired: true, folders, bookmarks: { ...original } });
+  Object.assign(data, {
+    folders,
+  });
+  seedBookmarks(data, Object.values({ ...original }));
   // ブラウザ側の複製は測定対象外。get ごとに map だけを新しくし、項目の不変性も検証する。
   vi.spyOn(chrome.storage.local, 'get').mockImplementation(async (key: any) => Object.fromEntries(
-    (Array.isArray(key) ? key : [key]).map((k) => [
-      k, k === 'bookmarks' ? { ...(data.bookmarks as Record<string, Bookmark>) } : data[k],
+    (Array.isArray(key) ? key : [key]).filter((key) => key in data).map((k) => [
+      k, data[k],
     ]),
   ));
   const write = vi.spyOn(chrome.storage.local, 'set').mockImplementation(async (items) => { Object.assign(data, items); });

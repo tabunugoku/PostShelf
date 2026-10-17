@@ -1,4 +1,5 @@
 // 版: v78
+import { seedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
@@ -24,12 +25,11 @@ beforeEach(() => {
     text: '架空の保存済み本文', author: 'Sample User', handle: '@sample_user', media: [], url: '',
   };
   Object.assign(data, {
-    schemaVersion: 2, folderIdsRepaired: true,
     folders: [{ id: 'sample_folder', name: 'Sample Folder', icon: 'ti-folder', order: 0, accountId: 'me' }],
-    bookmarks: Object.fromEntries(['1', '22', '5'].map(tweetId => ['me:' + tweetId, {
-      accountId: 'me', tweetId, folderIds: ['sample_folder'], savedAt: 1, snapshot,
-    }])),
   });
+  seedBookmarks(data, Object.values(Object.fromEntries(['1', '22', '5'].map(tweetId => ['me:' + tweetId, {
+      accountId: 'me', tweetId, folderIds: ['sample_folder'], savedAt: 1, snapshot,
+    }]))));
   resetAccount();
   setCurrentAccount({ id: 'me', handle: 'me', lastSeenAt: 0 });
   setAccountScope('me');

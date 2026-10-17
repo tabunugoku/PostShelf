@@ -1,3 +1,4 @@
+import { seedBookmarks } from './stored-bookmarks';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { assignOrder } from '../src/shared/ordering';
@@ -15,6 +16,7 @@ let data: Record<string, any>;
 
 beforeEach(() => {
   data = installChromeMock() as Record<string, any>;
+  seedBookmarks(data, []);
   setAccountScope(UNKNOWN_ACCOUNT_ID);
 });
 

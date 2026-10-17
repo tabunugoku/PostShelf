@@ -1,7 +1,8 @@
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { installChromeMock } from './chrome-mock';
-import { ALL_FOLDER_ID, COLORS, displayName } from '../src/shared/models';
-import { createFolder, deleteFolder, listFolders, updateFolder } from '../src/shared/storage';
+import { ALL_FOLDER_ID, COLORS, displayName, type Bookmark } from '../src/shared/models';
+import { createFolder, runStorageMigration, deleteFolder, listFolders, updateFolder } from '../src/shared/storage';
 
 let data: Record<string, unknown>;
 beforeEach(() => {
@@ -58,6 +59,7 @@ describe('folders', () => {
       { id: 'o1', name: 'old', icon: 'ti-star', order: 0 },
       { id: 'o2', name: 'old2', icon: 'ti-folder', order: 1 },
     ];
+    await runStorageMigration();
     const f = await listFolders();
     expect(f.slice(1).map((x) => x.color)).toEqual([undefined, undefined]);
     expect((await updateFolder('o1', { color: COLORS[3] })).color).toBe(COLORS[3]);
@@ -70,10 +72,13 @@ describe('folders', () => {
 
   it('delete removes the folder id from bookmarks but keeps the bookmark', async () => {
     const f = await createFolder({ name: 'a' });
-    data.bookmarks = { 'unknown:1': { accountId: 'unknown', tweetId: '1', folderIds: [f.id, 'other'], savedAt: 0, snapshot: {} } };
+    seedBookmarks(data, [{
+      accountId: 'unknown', tweetId: '1', folderIds: [f.id, 'other'], savedAt: 0,
+      snapshot: {} as Bookmark['snapshot'],
+    }]);
     await deleteFolder(f.id);
     expect((await listFolders()).length).toBe(1);
-    expect((data.bookmarks as any)['unknown:1'].folderIds).toEqual(['other']);
+    expect((storedBookmarks(data) as any)['unknown:1'].folderIds).toEqual(['other']);
     await expect(deleteFolder(f.id)).rejects.toThrow();
   });
 });

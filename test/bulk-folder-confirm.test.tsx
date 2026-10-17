@@ -11,13 +11,14 @@ it.each(['tab', 'sidepanel'] as const)('drafts without writes in the inbox on %s
   const writes = vi.spyOn(chrome.storage.local, 'set');
   await click(box('Sample A')); expect(writes).not.toHaveBeenCalled(); expect(document.querySelector('.menu-bulk')).not.toBeNull();
   expect(await assignments()).toEqual([['inbox'], ['inbox']]);
-  await confirm(); expect(writes.mock.calls.filter(([items]) => 'bookmarks' in items)).toHaveLength(1);
+  await confirm();
+  expect(writes.mock.calls.filter(([items]) => Object.keys(items).some((key) => key.startsWith('bm:')))).toHaveLength(1);
   expect(await assignments()).toEqual([[folders[0].id], [folders[0].id]]); expect(document.querySelector('.menu-bulk')).toBeNull();
 });
 it('keeps the folder view open after clearing every check; Enter saves once', async () => {
   await setup(); await mount('tab', 'Sample A'); const writes = vi.spyOn(chrome.storage.local, 'set');
   await click(box('Sample A')); expect(document.querySelector('.menu-bulk')).not.toBeNull(); expect(writes).not.toHaveBeenCalled();
-  await enter(box('Sample A')); expect(writes.mock.calls.filter(([items]) => 'bookmarks' in items)).toHaveLength(1);
+  await enter(box('Sample A')); expect(writes.mock.calls.filter(([items]) => Object.keys(items).some((key) => key.startsWith('bm:')))).toHaveLength(1);
   expect(await assignments()).toEqual([['inbox'], ['inbox']]); expect(document.querySelector('.menu-bulk')).toBeNull();
 });
 it.each(['Escape', 'back', 'outside', 'other'])('discards a draft on %s', async how => {

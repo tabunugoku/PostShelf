@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { storedBookmarks } from './stored-bookmarks';
 import { installChromeMock } from './chrome-mock';
 import { detectAccount, resetAccount, setCurrentAccount } from '../src/content/account';
 import { openPopover } from '../src/content/popover';
@@ -23,6 +24,7 @@ import {
   listBookmarks,
   listFolders,
   migrateToV2,
+  runStorageMigration,
   noteAccount,
   setAccountScope,
   setBookmarkFolders,
@@ -96,8 +98,8 @@ describe('E-2: data is kept per account', () => {
     setAccountScope('alice');
     expect((await getBookmark('100'))!.folderIds).toEqual([fa.id]);
     expect((await listFolders()).map((f) => f.name)).toEqual(['', 'A-folder']);
-    expect(Object.keys(data.bookmarks).sort()).toEqual(['alice:100', 'bob:100']);
-    expect(data.bookmarks['alice:100'].accountId).toBe('alice');
+    expect(Object.keys(storedBookmarks(data)).sort()).toEqual(['alice:100', 'bob:100']);
+    expect(storedBookmarks(data)['alice:100'].accountId).toBe('alice');
   });
 
   it('deleting a folder, collecting and bulk edits touch only the current account', async () => {
@@ -161,12 +163,13 @@ describe('E-2: migration of existing data (schema 1 → 2)', () => {
     legacy();
     const before = structuredClone(data);
     setAccountScope(UNKNOWN_ACCOUNT_ID);
-    const list = await listBookmarks(); // 最初の公開関数の呼び出しで移行される
-    expect(data.schemaVersion).toBe(2);
+    await runStorageMigration();
+    const list = await listBookmarks();
+    expect(data.schemaVersion).toBe(3);
     expect(list.map((b) => b.tweetId).sort()).toEqual(['11', '12']);
-    expect(Object.keys(data.bookmarks).sort()).toEqual(['unknown:11', 'unknown:12']);
+    expect(Object.keys(storedBookmarks(data)).sort()).toEqual(['unknown:11', 'unknown:12']);
     for (const id of ['11', '12']) {
-      const { accountId, ...rest } = data.bookmarks[`unknown:${id}`];
+      const { accountId, ...rest } = storedBookmarks(data)[`unknown:${id}`];
       expect(accountId).toBe('unknown');
       // 中身はそのまま (hasVideo なども)。ただし「未分類」とフォルダの同時所属は、v18 の修復で「未分類」が外れる
       expect(rest).toEqual(id === '12' ? { ...before.bookmarks[id], folderIds: ['f_a'] } : before.bookmarks[id]);
@@ -181,6 +184,7 @@ describe('E-2: migration of existing data (schema 1 → 2)', () => {
 
   it('is idempotent: running again changes nothing (and is not even written)', async () => {
     legacy();
+    await runStorageMigration();
     await listBookmarks();
     const once = structuredClone(data);
     const set = vi.spyOn(chrome.storage.local, 'set');
@@ -189,14 +193,14 @@ describe('E-2: migration of existing data (schema 1 → 2)', () => {
     expect(set).not.toHaveBeenCalled();
     expect(data).toEqual(once);
     // 関数としても冪等
-    const again = migrateToV2({ folders: data.folders, bookmarks: data.bookmarks });
-    expect(again).toEqual({ folders: once.folders, bookmarks: once.bookmarks });
+    const again = migrateToV2({ folders: data.folders, bookmarks: storedBookmarks(data) });
+    expect(again).toEqual({ folders: once.folders, bookmarks: storedBookmarks(once) });
   });
 
   it('a fresh install (no data) just gets the schema version', async () => {
     await listFolders();
-    expect(data.schemaVersion).toBe(2);
-    expect(data.bookmarks).toEqual({});
+    expect(data.schemaVersion).toBe(3);
+    expect(storedBookmarks(data)).toEqual({});
   });
 
   it('validates in memory and writes nothing when the check fails (two legacy entries collapsing into one)', async () => {
@@ -207,7 +211,7 @@ describe('E-2: migration of existing data (schema 1 → 2)', () => {
     };
     const before = structuredClone(data);
     expect(() => migrateToV2({ folders: data.folders, bookmarks: data.bookmarks })).toThrow();
-    await expect(listBookmarks()).rejects.toThrow();
+    await expect(runStorageMigration()).rejects.toThrow();
     expect(data).toEqual(before); // 何も書き込まれていない
     expect(data.schemaVersion).toBeUndefined();
   });
@@ -327,7 +331,7 @@ describe('F-4 storage: delete all data', () => {
     await deleteAllData();
     expect(await countAllData()).toEqual({ folders: 0, posts: 0, accounts: 0 });
     expect(await getLastSeenAccount()).toBeNull();
-    expect(data.schemaVersion).toBe(2);
+    expect(data.schemaVersion).toBe(3);
   });
 });
 

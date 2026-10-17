@@ -1,4 +1,5 @@
 // 版: v77
+import { seedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -18,8 +19,7 @@ const flush = () => act(() => new Promise<void>((resolve) => setTimeout(resolve,
 let data: Record<string, any>;
 beforeEach(() => {
   data = installChromeMock();
-  data.schemaVersion = 2;
-  data.folderIdsRepaired = true;
+  seedBookmarks(data, []);
   data.accounts = {
     me: { id: 'me', handle: 'me', lastSeenAt: 10 },
     sample_other: { id: 'sample_other', handle: 'sample_other', lastSeenAt: 20 },
@@ -29,9 +29,9 @@ beforeEach(() => {
   data.folders = ['me', 'sample_other', 'unknown'].map((accountId) => ({
     accountId, id: 'sample_folder', name: accountId + 'の棚', icon: 'ti-folder', order: 0,
   }));
-  data.bookmarks = Object.fromEntries([
+  seedBookmarks(data, Object.values(Object.fromEntries([
     bookmark('me', '1'), bookmark('me', '2'), bookmark('sample_other', '3'), bookmark('unknown', '4'),
-  ].map((b) => [b.accountId + ':' + b.tweetId, b]));
+  ].map((b) => [b.accountId + ':' + b.tweetId, b]))));
   document.body.innerHTML = '<div id="app"></div>';
   history.replaceState({}, '', '/');
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
@@ -68,8 +68,8 @@ it.each([
   const names = [...document.querySelectorAll('.side .fr-name')].map((el) => el.textContent);
   if (expectedAccount !== 'sample_empty') expect(names).toContain(expectedAccount + 'の棚');
   expect(names).not.toContain((expectedAccount === 'me' ? 'sample_other' : 'me') + 'の棚');
-  expect(reads('bookmarks')).toBe(1);
-  expect(reads('folders')).toBe(1);
+  expect(reads('bm:me:1')).toBe(1);
+  expect(reads('folders')).toBe(2);
   await act(() => void document.querySelector<HTMLButtonElement>('.acct-btn')!.click());
   await flush();
   const accounts = [...document.querySelectorAll('.acct-row')].map((row) => [
@@ -113,7 +113,7 @@ it('初期読み込み中の変更通知があれば最新データで最初の�
   await act(() => void render(<App />, document.getElementById('app')!));
   await vi.waitFor(() => expect(loaded).toBe(true));
   await act(async () => {
-    await chrome.storage.local.set({ bookmarks: { ...data.bookmarks, 'me:5': bookmark('me', '5') } });
+    await chrome.storage.local.set({ 'bm:me:5': bookmark('me', '5') });
   });
   await flush();
   await act(async () => release());

@@ -1,4 +1,5 @@
 // 版: v56-a
+import { storedBookmarks } from './stored-bookmarks';
 import { afterEach, expect, it, vi } from 'vitest';
 import { addToFolders, deleteBookmarks, moveToFolder, removeFromFolders, restoreBookmarks } from '../src/shared/storage';
 import type { Bookmark } from '../src/shared/models';
@@ -18,7 +19,7 @@ it.each(['add', 'move', 'remove', 'delete'])('5000 件から 1000 件を %s し�
   expect(clone.mock.calls.length).toBe(0);
   expect(stringify.mock.calls.length).toBe(0);
   expect(Object.keys(undo)).toHaveLength(1000);
-  const current = world.data.bookmarks as Record<string, Bookmark>;
+  const current = storedBookmarks(world.data) as Record<string, Bookmark>;
   expect(Object.keys(current)).toHaveLength(op === 'delete' ? 4000 : 5000);
   for (const id of world.ids) {
     const key = `me:${id}`;
@@ -32,9 +33,9 @@ it.each(['add', 'move', 'remove', 'delete'])('5000 件から 1000 件を %s し�
   }
   expect(current['me:1000']).toBe(world.original['me:1000']);
   await restoreBookmarks(undo);
-  expect(world.data.bookmarks).toEqual(world.original);
+  expect(storedBookmarks(world.data)).toEqual(world.original);
   await restoreBookmarks(undo);
-  expect(world.data.bookmarks).toEqual(world.original);
+  expect(storedBookmarks(world.data)).toEqual(world.original);
 });
 
 it('所属が変わらないものと二重適用は取り消しに入れず書き込まない', async () => {

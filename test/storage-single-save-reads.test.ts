@@ -1,4 +1,5 @@
 // 版: v78
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import type { Bookmark, Folder } from '../src/shared/models';
@@ -17,7 +18,10 @@ let data: Record<string, unknown>;
 
 beforeEach(async () => {
   data = installChromeMock();
-  Object.assign(data, { schemaVersion: 2, folderIdsRepaired: true, folders: [], bookmarks: {} });
+  Object.assign(data, {
+    folders: [],
+  });
+  seedBookmarks(data, Object.values({}));
   setAccountScope('me');
   await getBookmark('missing');
 });
@@ -31,18 +35,21 @@ it.each([false, true])('未分類の保存は受け皿あり = %s でも以前�
   const foreign: Bookmark = {
     accountId: 'sample_other', tweetId: '1', folderIds: ['other'], savedAt: 50, snapshot,
   };
-  Object.assign(data, { folders: original, bookmarks: { 'sample_other:1': foreign } });
+  Object.assign(data, {
+    folders: original,
+  });
+  seedBookmarks(data, Object.values({ 'sample_other:1': foreign }));
   vi.spyOn(Date, 'now').mockReturnValue(100);
   const get = vi.spyOn(chrome.storage.local, 'get');
   const set = vi.spyOn(chrome.storage.local, 'set');
   const result = await setBookmarkFolders('1', [], snapshot);
   const expected = { accountId: 'me', tweetId: '1', folderIds: ['inbox'], savedAt: 100, snapshot };
   expect(result).toEqual(expected);
-  expect(data.bookmarks).toEqual({ 'sample_other:1': foreign, 'me:1': expected });
+  expect(storedBookmarks(data)).toEqual({ 'sample_other:1': foreign, 'me:1': expected });
   expect(data.folders).toEqual(hasInbox ? original : [other, mine, inbox]);
-  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bookmarks']);
+  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bm:me:1']);
   expect(set).toHaveBeenCalledOnce();
-  expect(Object.keys(set.mock.calls[0][0]).sort()).toEqual(hasInbox ? ['bookmarks'] : ['bookmarks', 'folders']);
+  expect(Object.keys(set.mock.calls[0][0]).sort()).toEqual(hasInbox ? ['bm:me:1'] : ['bm:me:1', 'folders']);
 });
 
 it('孫を選ぶ保存は祖先・他アカウント・全文・savedAt を保ち、フォルダを書かない', async () => {
@@ -52,16 +59,19 @@ it('孫を選ぶ保存は祖先・他アカウント・全文・savedAt を保�
     accountId: 'me', tweetId: '1', folderIds: ['inbox'], savedAt: 7,
     snapshot: { ...snapshot, text: '架空の長い本文を取得済み', truncated: false },
   };
-  Object.assign(data, { folders, bookmarks: { 'me:1': previous } });
+  Object.assign(data, {
+    folders,
+  });
+  seedBookmarks(data, Object.values({ 'me:1': previous }));
   const get = vi.spyOn(chrome.storage.local, 'get');
   const set = vi.spyOn(chrome.storage.local, 'set');
   const result = await setBookmarkFolders('1', ['grandchild'], { ...snapshot, truncated: true });
   const expected = { ...previous, folderIds: ['grandchild', 'parent', 'child'] };
   expect(result).toEqual(expected);
-  expect(data.bookmarks).toEqual({ 'me:1': expected });
+  expect(storedBookmarks(data)).toEqual({ 'me:1': expected });
   expect(data.folders).toEqual(folders);
-  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bookmarks']);
-  expect(set).toHaveBeenCalledExactlyOnceWith({ bookmarks: { 'me:1': expected } });
+  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bm:me:1']);
+  expect(set).toHaveBeenCalledExactlyOnceWith({ 'bm:me:1': expected });
 });
 
 it.each([
@@ -112,11 +122,14 @@ it.each([
     ...expected,
     { id: 'inbox', name: '', icon: 'ti-star', order: 5, accountId: 'me' },
   ]));
-  expect(data.bookmarks).toEqual({ 'me:1': result });
+  expect(storedBookmarks(data)).toEqual({ 'me:1': result });
 });
 
 it.each([undefined, null])('保存データが %s なら空のフォルダとポストとして読む', async (missing) => {
-  Object.assign(data, { folders: missing, bookmarks: missing });
+  Object.assign(data, {
+    folders: missing,
+  });
+  seedBookmarks(data, Object.values(missing ?? {}));
   vi.spyOn(Date, 'now').mockReturnValue(100);
   const get = vi.spyOn(chrome.storage.local, 'get');
   const set = vi.spyOn(chrome.storage.local, 'set');
@@ -125,8 +138,8 @@ it.each([undefined, null])('保存データが %s なら空のフォルダとポ
 
   expect(result).toEqual({ accountId: 'me', tweetId: '1', folderIds: ['inbox'], savedAt: 100, snapshot });
   expect(data.folders).toEqual([{ id: 'inbox', name: '', icon: 'ti-star', order: 0, accountId: 'me' }]);
-  expect(data.bookmarks).toEqual({ 'me:1': result });
-  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bookmarks']);
+  expect(storedBookmarks(data)).toEqual({ 'me:1': result });
+  expect(get).toHaveBeenCalledExactlyOnceWith(['folders', 'bm:me:1']);
   expect(set).toHaveBeenCalledOnce();
 });
 
@@ -140,7 +153,7 @@ it('フォルダ作成は他アカウントを先に保存し、フォルダを 
     id: expect.any(String), name: '新しいフォルダ', icon: 'ti-folder', order: 0, parentId: 'parent', accountId: 'me',
   });
   expect(data.folders).toEqual([other, mine, created]);
-  expect(data.bookmarks).toEqual({});
+  expect(storedBookmarks(data)).toEqual({});
   expect(get.mock.calls.filter(([keys]) => String(keys) === 'folders')).toHaveLength(1);
 });
 
@@ -165,7 +178,7 @@ it.each(['update', 'reparent', 'reorder', 'reorder-reparent'])('%s は以前と�
     expect(data.folders).toEqual(operation === 'reorder'
       ? [other, child, parent] : [other, rootChild, { ...parent, order: 1 }]);
   }
-  expect(data.bookmarks).toEqual({});
+  expect(storedBookmarks(data)).toEqual({});
   expect(get.mock.calls.filter(([keys]) => String(keys) === 'folders')).toHaveLength(1);
 });
 

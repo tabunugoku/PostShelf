@@ -1,4 +1,5 @@
 // 版: v31
+import { storedBookmarks } from './stored-bookmarks';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -28,9 +29,9 @@ async function seed(inbox: number, folderNames: string[] = ['Dev', 'Fun']) {
   const fs = [];
   for (const name of folderNames) fs.push(await createFolder({ name }));
   for (let i = 1; i <= inbox; i++) await setBookmarkFolders(String(i), [], snap(i));
-  const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+  const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
   Object.values(data).forEach((b: any) => (b.savedAt = Number(b.tweetId)));
-  await chrome.storage.local.set({ bookmarks: data });
+  await chrome.storage.local.set({ ...Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])) });
   return fs;
 }
 async function mountApp(surface: 'tab' | 'sidepanel' = 'tab') {
@@ -94,7 +95,7 @@ describe('v31-1/11/12: triage mode', () => {
     // 読み込みの失敗
     const get = chrome.storage.local.get.bind(chrome.storage.local);
     (chrome.storage.local as any).get = async (k: any) => {
-      if (k === 'bookmarks' || (Array.isArray(k) && k.includes('bookmarks'))) throw new Error('boom');
+      if ((typeof k === 'string' && k.startsWith('bm:')) || (Array.isArray(k) && k.some((key) => key.startsWith('bm:')))) throw new Error('boom');
       return get(k);
     };
     await act(() => void $('.triage-start').click());
@@ -169,7 +170,7 @@ describe('v31-2/3/4: side panel chips', () => {
     await mount();
     const set = chrome.storage.local.set.bind(chrome.storage.local);
     (chrome.storage.local as any).set = async (o: any) => {
-      if ('bookmarks' in o) throw new Error('boom');
+      if (Object.keys(o).some((key) => key.startsWith('bm:'))) throw new Error('boom');
       return set(o);
     };
     await act(() => void $('.ap-chip').click());
@@ -331,11 +332,11 @@ describe('v31-13: popup dots', () => {
     await setBookmarkFolders('1', [f.id], snap(1));
     await setBookmarkFolders('2', [g.id], snap(2));
     await setBookmarkFolders('3', [], snap(3));
-    const data = { ...(await chrome.storage.local.get('bookmarks')), ...(await chrome.storage.local.get('folders')) };
-    Object.values(data.bookmarks as Record<string, any>).forEach((b: any) => (b.savedAt = Number(b.tweetId)));
+    const data = await chrome.storage.local.get(await chrome.storage.local.getKeys());
+    Object.values(storedBookmarks(data) as Record<string, any>).forEach((b: any) => (b.savedAt = Number(b.tweetId)));
     const folders = data.folders as any[];
     for (const x of folders) if (x.id === f.id) delete x.color;
-    await chrome.storage.local.set({ bookmarks: data.bookmarks, folders });
+    await chrome.storage.local.set({ ...Object.fromEntries(Object.entries(storedBookmarks(data)).map(([key, b]) => ['bm:' + key, b])), folders });
     document.body.innerHTML = '<div id="app"></div>';
     vi.resetModules();
     await act(async () => void (await import('../src/popup/index')));

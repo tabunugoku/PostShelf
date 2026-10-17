@@ -1,4 +1,5 @@
 // 版: v77
+import { seedBookmarks } from './stored-bookmarks';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -54,7 +55,7 @@ const holdReload = () => {
 const saveExternally = async () => {
   // 別タブでの保存を模し、共有ストレージの変更通知を実際の購読者へ送る。
   await act(async () => {
-    await chrome.storage.local.set({ bookmarks: { ...data.bookmarks, 'me:3': bookmark('3') } });
+    await chrome.storage.local.set({ 'bm:me:3': bookmark('3') });
   });
   await flush();
 };
@@ -90,16 +91,14 @@ beforeEach(async () => {
   data = installChromeMock();
   const account = { id: 'me', handle: 'me', lastSeenAt: 10 };
   Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
     accounts: { me: account },
     lastSeenAccount: account,
-    bookmarks: { 'me:1': bookmark('1'), 'me:2': bookmark('2') },
     folders: [
       { id: 'sample_folder', accountId: 'me', name: '元の棚', icon: 'ti-folder', order: 0 },
       { id: 'sample_other', accountId: 'me', name: '別の棚', icon: 'ti-star', order: 1 },
     ],
   });
+  seedBookmarks(data, Object.values({ 'me:1': bookmark('1'), 'me:2': bookmark('2') }));
   storage.setAccountScope('me');
   clearStorageError();
   history.replaceState({}, '', '/');

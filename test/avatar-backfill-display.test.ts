@@ -1,4 +1,5 @@
 // 版: v47-b
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
@@ -10,11 +11,10 @@ const avatar = 'https://pbs.twimg.com/profile_images/sample-late.jpg';
 let data: Record<string, unknown>;
 beforeEach(() => {
   data = installChromeMock();
-  data.schemaVersion = 2;
-  data.folderIdsRepaired = true;
+  seedBookmarks(data, []);
   setAccountScope('me');
   document.body.innerHTML = readFileSync('test/fixtures/v47-avatar.html', 'utf8');
-  data.bookmarks = {
+  seedBookmarks(data, Object.values({
     'me:301': {
       accountId: 'me', tweetId: '301', savedAt: 1, folderIds: ['sample-folder'],
       snapshot: {
@@ -26,7 +26,7 @@ beforeEach(() => {
         url: 'https://x.com/sample_avatar/status/301',
       },
     },
-  };
+  }));
 });
 const watcher = () => {
   const fill = vi.fn(fillMissing);
@@ -55,13 +55,13 @@ it('waits for the avatar to finish loading, then fills it', async () => {
   expect(r.fill).not.toHaveBeenCalled();
   load(img, avatar);
   expect(await r.w.update()).toBe(1);
-  expect((data.bookmarks as any)['me:301'].snapshot.avatar).toBe(avatar);
+  expect((storedBookmarks(data) as any)['me:301'].snapshot.avatar).toBe(avatar);
 });
 
 it('does not use an empty src as the avatar', async () => {
   const r = watcher();
   expect(await r.w.update()).toBe(0);
-  expect((data.bookmarks as any)['me:301'].snapshot.avatar).toBeUndefined();
+  expect((storedBookmarks(data) as any)['me:301'].snapshot.avatar).toBeUndefined();
 });
 
 it('targets a post that only lacks its avatar', async () => {

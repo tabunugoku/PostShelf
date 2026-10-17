@@ -1,4 +1,5 @@
 // 版: v20
+import { storedBookmarks } from './stored-bookmarks';
 import { managerCss } from './css-helpers';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
@@ -41,9 +42,9 @@ beforeEach(async () => {
   await noteAccount({ handle: 'me' }, 1);
   setAccountScope('me');
   for (const [id, extra] of Object.entries(posts)) await setBookmarkFolders(id, [], snap(id, extra));
-  const data = (await chrome.storage.local.get('bookmarks')).bookmarks as Record<string, any>;
+  const data = storedBookmarks(await chrome.storage.local.get(null)) as Record<string, any>;
   Object.values(data).forEach((b, i) => (b.savedAt = 100 - i));
-  await chrome.storage.local.set({ bookmarks: data });
+  await chrome.storage.local.set(Object.fromEntries(Object.entries(data).map(([key, b]) => ['bm:' + key, b])));
 });
 afterEach(() => render(null, $('#app')));
 

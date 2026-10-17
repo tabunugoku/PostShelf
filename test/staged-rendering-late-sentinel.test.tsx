@@ -1,4 +1,5 @@
 // 版: v36
+import { seedBookmarks } from './stored-bookmarks';
 import { readFileSync } from 'node:fs';
 import { sizeSeparateButton } from '../src/content/buttons';
 import { act } from 'preact/test-utils';
@@ -21,8 +22,11 @@ const snap = (n: number) => ({ text: `post ${n}`, author: `A${n}`, handle: `@u${
 async function seed(n: number) {
   const data: Record<string, any> = {};
   const now = Date.now();
-  for (let i = 1; i <= n; i++) data[`me:${i}`] = { accountId: 'me', tweetId: String(i), folderIds: [], savedAt: now - i, snapshot: snap(i) };
-  await chrome.storage.local.set({ bookmarks: data });
+  for (let i = 1; i <= n; i++) data[`me:${i}`] = { accountId: 'me', tweetId: String(i), folderIds: ['inbox'], savedAt: now - i, snapshot: snap(i) };
+  const stored: Record<string, unknown> = {};
+  seedBookmarks(stored, Object.values(data));
+  stored.folders = [{ id: 'inbox', accountId: 'me', name: '', icon: 'ti-star', order: 0 }];
+  await chrome.storage.local.set(stored);
 }
 const cardCount = () => $$('[data-row]').length;
 

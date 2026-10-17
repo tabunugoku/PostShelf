@@ -1,4 +1,5 @@
 // 版: v76
+import { seedBookmarks } from './stored-bookmarks';
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -26,9 +27,9 @@ it('再描画では件数と七日の境界を保ち、保存データと祖先�
     snapshot: { text: '架空の本文', author: 'Sample', handle: '@sample_cache', media: [], url: '' },
   };
   Object.assign(data, {
-    schemaVersion: 2, folderIdsRepaired: true, bookmarks: { 'me:1': bookmark },
     folders: [{ id: 'sample', accountId: 'me', name: 'Sample', icon: 'ti-folder', order: 0 }],
   });
+  seedBookmarks(data, Object.values({ 'me:1': bookmark }));
   const count = vi.spyOn(query, 'countFolders');
   await act(() => void render(<App />, document.body));
   await flush();
@@ -45,7 +46,9 @@ it('再描画では件数と七日の境界を保ち、保存データと祖先�
   });
   expect(count).not.toHaveBeenCalled();
   expect(recentCount()).toBe('1');
-  await act(async () => { await chrome.storage.local.set({ bookmarks: { 'me:1': bookmark } }); });
+  await act(async () => {
+    await chrome.storage.local.set({ 'bm:me:1': bookmark });
+  });
   await flush();
   expect(count).toHaveBeenCalled();
   expect(recentCount()).toBe('0');
@@ -62,10 +65,7 @@ it('サイドパネルで七日の境界を越えて初めてメニューを開�
   vi.spyOn(Date, 'now').mockImplementation(() => now);
   vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(390);
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
-  Object.assign(data, {
-    schemaVersion: 2,
-    folderIdsRepaired: true,
-    bookmarks: {
+  seedBookmarks(data, Object.values({
       'me:1': {
         accountId: 'me',
         tweetId: '1',
@@ -73,8 +73,7 @@ it('サイドパネルで七日の境界を越えて初めてメニューを開�
         savedAt: now - query.RECENT_MS + 100,
         snapshot: { text: '架空の本文', author: 'Sample', handle: '@sample_cache', media: [], url: '' },
       },
-    },
-  });
+    }));
   const counts = vi.spyOn(query, 'countFolders');
   const recent = vi.spyOn(query, 'countFolder');
   await act(() => void render(<App surface="sidepanel" />, document.body));

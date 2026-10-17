@@ -1,4 +1,5 @@
 // 版: v81
+import { seedBookmarks } from './stored-bookmarks';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
   getCurrentAccount,
@@ -23,7 +24,7 @@ const settleNotes = async () => {
 
 beforeEach(() => {
   data = installChromeMock();
-  Object.assign(data, { schemaVersion: 2, folderIdsRepaired: true });
+  seedBookmarks(data, []);
   vi.useFakeTimers();
   vi.setSystemTime(100_000);
   resetAccount();

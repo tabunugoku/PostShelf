@@ -1,4 +1,5 @@
 // 版: v46-a
+import { seedBookmarks } from './stored-bookmarks';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import * as s from '../src/shared/storage';
@@ -43,9 +44,12 @@ it.each(['child','grandchild','root'])('deletes only the %s subtree in one write
  expect(new Set((await s.getBookmark('1'))!.folderIds)).toEqual(new Set(remaining));
  expect((await s.listFolders()).filter(f=>!['all','inbox'].includes(f.id)).map(f=>f.id)).toEqual(which==='root'?[]:which==='child'?[p.id]:[p.id,c.id]);
 });
-it('deletion handles inconsistent old membership without adding deleted ancestors',async()=>{
- const {p,c,g}=await tree(); data.bookmarks={'me:1':{accountId:'me',tweetId:'1',folderIds:[g.id],savedAt:1,snapshot}};
- await s.deleteFolder(c.id); expect((await s.getBookmark('1'))!.folderIds).toEqual(['inbox']);expect((await s.listFolders()).some(f=>f.id===p.id)).toBe(true);
+it('deletion handles inconsistent old membership without adding deleted ancestors', async () => {
+  const { p, c, g } = await tree();
+  seedBookmarks(data, [{ accountId: 'me', tweetId: '1', folderIds: [g.id], savedAt: 1, snapshot }]);
+  await s.deleteFolder(c.id);
+  expect((await s.getBookmark('1'))!.folderIds).toEqual(['inbox']);
+  expect((await s.listFolders()).some(f => f.id === p.id)).toBe(true);
 });
 it('imports parent links, repairs missing/cyclic/deep links and preserves flat data',async()=>{
  const f=(id:string,parentId?:string)=>({id,name:'Sample '+id,icon:'ti-folder',order:0,accountId:'me',...(parentId?{parentId}:{})});

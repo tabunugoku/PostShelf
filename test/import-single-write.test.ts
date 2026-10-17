@@ -1,4 +1,5 @@
 // 版: v57-d
+import { seedBookmarks, storedBookmarks } from './stored-bookmarks';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { importData, onDataChanged, setAccountScope } from '../src/shared/storage';
@@ -17,11 +18,10 @@ const incoming = {
 beforeEach(() => {
   data = installChromeMock();
   Object.assign(data, {
-    schemaVersion: 2, folderIdsRepaired: true,
     folders: [{ id: 'sample_old', accountId: 'me', name: 'Sample Old', icon: 'ti-folder', order: 0 }],
-    bookmarks: { 'me:1': { accountId: 'me', tweetId: '1', folderIds: ['sample_old'], savedAt: 1, snapshot } },
     accounts: { me: { id: 'me', handle: 'me', displayName: 'Sample Me', lastSeenAt: 1 } },
   });
+  seedBookmarks(data, Object.values({ 'me:1': { accountId: 'me', tweetId: '1', folderIds: ['sample_old'], savedAt: 1, snapshot } }));
   setAccountScope('me');
 });
 afterEach(() => vi.restoreAllMocks());
@@ -30,10 +30,10 @@ it('JSON の 3 種類の保存データを 1 回の set でまとめて取り込
   const set = vi.spyOn(chrome.storage.local, 'set');
   expect(await importData(incoming)).toBe(1);
   expect(set.mock.calls).toHaveLength(1);
-  expect(Object.keys(set.mock.calls[0][0]).sort()).toEqual(['accounts', 'bookmarks', 'folders']);
+  expect(Object.keys(set.mock.calls[0][0]).sort()).toEqual(['accounts', 'bm:sample_other:1', 'folders']);
   expect(data.folders).toHaveLength(2);
-  expect(data.bookmarks['sample_other:1']).toEqual(incoming.bookmarks[0]);
-  expect(data.bookmarks['me:1'].snapshot).toEqual(snapshot);
+  expect(storedBookmarks(data)['sample_other:1']).toEqual(incoming.bookmarks[0]);
+  expect(storedBookmarks(data)['me:1'].snapshot).toEqual(snapshot);
   expect(data.accounts.sample_other).toEqual(incoming.accounts[0]);
 });
 
@@ -42,7 +42,7 @@ it('保存が失敗したらフォルダ・ポスト・アカウントのどれ�
   const set = chrome.storage.local.set;
   vi.spyOn(chrome.storage.local, 'set').mockImplementation(async (items) => {
     // 旧実装はフォルダを保存した後、2 回目で失敗していた。まとめた set は変更前に失敗する。
-    if ('bookmarks' in items) throw new Error('架空の取り込み失敗');
+    if ('bm:sample_other:1' in items) throw new Error('架空の取り込み失敗');
     return set(items);
   });
   await expect(importData(incoming)).rejects.toThrow('架空の取り込み失敗');
@@ -52,11 +52,11 @@ it('保存が失敗したらフォルダ・ポスト・アカウントのどれ�
 it('変更通知の時点で 3 種類のデータがすべて取り込み済みである', async () => {
   const states: unknown[] = [];
   const off = onDataChanged(() => states.push(structuredClone({
-    folders: data.folders, bookmarks: data.bookmarks, accounts: data.accounts,
+    folders: data.folders, bookmarks: storedBookmarks(data), accounts: data.accounts,
   })));
   try {
     await importData(incoming);
-    expect(states).toEqual([{ folders: data.folders, bookmarks: data.bookmarks, accounts: data.accounts }]);
+    expect(states).toEqual([{ folders: data.folders, bookmarks: storedBookmarks(data), accounts: data.accounts }]);
   } finally {
     off();
   }
