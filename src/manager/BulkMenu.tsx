@@ -38,6 +38,7 @@ export function BulkMenu(props: {
   const original = useRef(draft);
   const originalBookmarks = useRef(props.bookmarks);
   const busy = useRef(false);
+  const addButtonHost = useRef<HTMLDivElement>(null);
   const states = useMemo(() => {
     const counts = new Map<string, number>();
     for (const b of props.bookmarks) for (const id of new Set(b.folderIds)) counts.set(id, (counts.get(id) ?? 0) + 1);
@@ -107,19 +108,42 @@ export function BulkMenu(props: {
       <button class="bulk-btn" aria-haspopup="menu" aria-expanded={open} onClick={() => (open ? close() : setOpen(true))}>
         <strong>{t('selectedCount', props.count)}</strong><Icon name="ti-chevron-down" />
       </button>
-      {open && <Dropdown onClose={close} label={t('bulkMenuLabel')} class={view === 'folders' ? 'menu-bulk menu-wide' : 'menu-bulk'}>
+      {open && <Dropdown
+        onClose={close}
+        label={t('bulkMenuLabel')}
+        class={view === 'folders' ? 'menu-bulk menu-wide' : 'menu-bulk'}
+        fitHeight={view === 'folders'}
+      >
         {view === 'main' ? <>
           <button class="menu-item" onClick={folders}><Icon name="ti-folder-plus" /> {t('changeFolder')}</button>
           <button class="menu-item danger-text" onClick={() => { close(); props.onDelete(); }}><Icon name="ti-trash" /> {t('delete')}</button>
           <button class="menu-item" disabled={props.allSelected} onClick={() => { close(); props.onSelectAll(); }}><Icon name="ti-checks" /> {t('selectAll')}</button>
           <button class="menu-item" onClick={() => { close(); props.onClear(); }}><Icon name="ti-x" /> {t('clearSelection')}</button>
-        </> : <div onKeyDown={onKey}>
+        </> : <div class="bulk-folder-view" onKeyDown={onKey}>
           <button class="menu-item" disabled={saving} onClick={discard}><Icon name="ti-arrow-left" /> {t('back')}</button>
           <fieldset class="bulk-picker" disabled={saving}>
-            <FolderPickerHost folders={props.folders} selected={draft.selected} partial={draft.partial} onToggle={toggle} onChange={() => {}} />
+            <FolderPickerHost
+              folders={props.folders}
+              selected={draft.selected}
+              partial={draft.partial}
+              bounded
+              addButtonHost={addButtonHost}
+              onToggle={toggle}
+              onChange={() => {}}
+            />
+            {error && <div class="error" role="alert">{error}</div>}
+            <div class="bulk-actions" key="bulk-actions">
+              <div ref={addButtonHost} class="bulk-add-folder" />
+              <button
+                class="primary triage-confirm"
+                aria-keyshortcuts="Enter"
+                disabled={saving}
+                onClick={() => void confirm()}
+              >
+                {t('triageConfirm')}
+              </button>
+            </div>
           </fieldset>
-          {error && <div class="error" role="alert">{error}</div>}
-          <div class="bulk-actions"><button class="primary triage-confirm" aria-keyshortcuts="Enter" disabled={saving} onClick={() => void confirm()}>{t('triageConfirm')}</button></div>
         </div>}
       </Dropdown>}
     </span>

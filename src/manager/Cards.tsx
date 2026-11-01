@@ -389,7 +389,6 @@ function CardView(outer: CardOuterProps) {
           {s.createdAt && <span class="muted"> · {formatDate(s.createdAt)}</span>}
         </div>
         <PostText s={s} />
-        {s.quote && <QuoteBlock quote={s.quote} tweetId={b.tweetId} />}
         {s.hasVideo === true ? (
           <MediaGrid count={1}>
             <MediaTile card={props} kind="video" />
@@ -401,6 +400,7 @@ function CardView(outer: CardOuterProps) {
             ))}
           </MediaGrid>
         ) : null}
+        {s.quote && <QuoteBlock quote={s.quote} tweetId={b.tweetId} />}
         <FolderChips
           b={b}
           folderOf={props.folderOf}
