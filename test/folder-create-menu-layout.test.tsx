@@ -141,8 +141,8 @@ describe('v19-2: フォルダ一覧と下部の操作', () => {
     for (const b of [side, del]) {
       expect(b.title).toBe(b.getAttribute('aria-label'));
       expect(b.textContent).toBe(''); // アイコンだけ
-      expect(b.style.width).toBe('44px');
-      expect(b.style.height).toBe('44px');
+      expect(b.style.width).toBe('32px');
+      expect(b.style.height).toBe('32px');
     }
     expect(side.firstElementChild!.className).toContain('ti-layout-sidebar-right');
     expect(del.firstElementChild!.className).toContain('ti-trash');

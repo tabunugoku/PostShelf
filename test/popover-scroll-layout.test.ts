@@ -58,7 +58,7 @@ it('下部の先頭の区切り線の直後に追加ボタンを置く', async (
   const footer = pop.querySelector<HTMLElement>('[data-popover-footer]')!;
   const separator = footer.children[0] as HTMLElement;
   expect(separator.style.borderTopStyle).toBe('solid');
-  expect(separator.style.borderTopWidth).toBe('0.5px');
+  expect(separator.style.borderTopWidth).toBe('1px');
   expect(footer.children[1].textContent).toBe('フォルダを追加');
 });
 

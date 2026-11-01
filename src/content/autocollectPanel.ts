@@ -4,7 +4,18 @@
  */
 import { isBookmarksPath } from '../shared/selectors';
 import { formatDate, jaWrapRule, t, uiLang } from '../shared/strings';
-import { ACCENT, ACCENT_FILL } from '../shared/tokens';
+import {
+  ACCENT,
+  ACCENT_FILL,
+  CONTROL_HEIGHT,
+  FONT_STACK,
+  POPOVER_SHADOW,
+  RADIUS_CARD,
+  RADIUS_CONTROL,
+  RADIUS_PILL,
+  ROW_HEIGHT,
+  SPACE,
+} from '../shared/tokens';
 import { xTheme } from './theme';
 import type { AutoCollector, CollectState } from './autocollect';
 
@@ -50,7 +61,7 @@ function ensureStyle(): void {
   s.textContent = `
 ${jaWrapRule(`.${PANEL_CLASS}`)}
 @keyframes postshelf-pulse{50%{opacity:.35}}
-@keyframes postshelf-slide{0%{margin-left:-35%}100%{margin-left:100%}}
+@keyframes postshelf-slide{0%{transform:translateX(-100%)}100%{transform:translateX(286%)}}
 .${PANEL_CLASS} button:focus-visible{outline:2px solid ${ACCENT};outline-offset:1px}
 html[data-postshelf-panel] .postshelf-collect,html[data-postshelf-panel] .postshelf-autocollect{display:none!important}
 @media (prefers-reduced-motion:reduce){.${PANEL_CLASS} *{animation:none!important}}`;
@@ -151,39 +162,101 @@ export class AutoCollectPanel {
       this.renderBar(r, s, p, v);
       return;
     }
-    r.style.cssText = `position:fixed;right:14px;bottom:14px;z-index:2147483646;width:340px;max-width:calc(100vw - 28px);box-sizing:border-box;background:${p.bg};color:${p.fg};color-scheme:${p.scheme};border:1px solid ${p.border};border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:14px;font:14px/1.5 system-ui,sans-serif`;
+    r.style.cssText = `
+      position:fixed;
+      right:${SPACE[4]}px;
+      bottom:${SPACE[4]}px;
+      z-index:2147483646;
+      width:340px;
+      max-width:calc(100vw - ${SPACE[8]}px);
+      box-sizing:border-box;
+      background:${p.bg};
+      color:${p.fg};
+      color-scheme:${p.scheme};
+      border:1px solid ${p.border};
+      border-radius:${RADIUS_CARD}px;
+      box-shadow:${POPOVER_SHADOW[p.scheme]};
+      padding:${SPACE[4]}px;
+      font:14px/1.5 ${FONT_STACK}
+    `;
     r.replaceChildren();
 
     const dotColor = { run: ACCENT, pause: p.warnFg, done: p.ok, ng: p.ng }[v.dot];
-    const h = el('div', 'display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700');
-    h.append(el('span', `width:10px;height:10px;border-radius:50%;flex:none;background:${dotColor};${v.dot === 'run' ? 'animation:postshelf-pulse 1.2s infinite;' : ''}`), el('span', '', v.title));
+    const h = el('div', `display:flex;align-items:center;gap:${SPACE[2]}px;font-size:14px;font-weight:500`);
+    h.append(el('span', `
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      flex:none;
+      background:${dotColor};
+      ${v.dot === 'run' ? `animation:postshelf-pulse 1.2s infinite;` : ''}
+    `), el('span', '', v.title));
     r.append(h, el('div', `color:${p.muted};font-size:13px`, v.sub));
 
     if (v.bar !== 'none') {
-      const bar = el('div', `height:8px;border-radius:999px;background:${p.border};overflow:hidden;margin:10px 0 6px;border:1px solid ${p.border}`);
-      // 全体の件数は X が教えないので、割合は出さず「進行中」の動くバーにする
-      const fill = el('i', `display:block;height:100%;background:${ACCENT_FILL};width:${v.bar === 'full' ? '100%' : v.bar === 'ind' ? '35%' : '40%'};${v.bar === 'fix' ? 'opacity:.5;' : ''}${v.bar === 'ind' ? 'animation:postshelf-slide 1.6s infinite linear;' : ''}`);
+      const bar = el('div', `
+        height:4px;
+        border-radius:${RADIUS_PILL}px;
+        background:${p.border};
+        overflow:hidden;
+        margin:${SPACE[3]}px 0 ${SPACE[2]}px;
+        border:0
+      `);
+      // 全体の件数は X が教えないので、割合は出さず「進行中」の動くバーにする (transform で動かす)
+      const fill = el('i', `
+        display:block;
+        height:100%;
+        background:${ACCENT_FILL};
+        width:${v.bar === 'full' ? '100%' : v.bar === 'ind' ? '35%' : '40%'};
+        ${v.bar === 'fix' ? `opacity:.5;` : ''}
+        ${v.bar === 'ind' ? 'animation:postshelf-slide 1.6s infinite linear;' : ''}
+      `);
       bar.append(fill);
       r.append(bar);
     }
 
     if (s.status !== 'countdown' && !(s.status === 'stopped' && s.reason?.startsWith('refused'))) {
-      const stats = el('div', 'display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0');
+      const stats = el('div', `display:grid;grid-template-columns:repeat(3,1fr);gap:${SPACE[2]}px;margin:${SPACE[2]}px 0`);
       for (const [n, label] of [[s.imported, t('acStatImported')], [s.skipped, t('acStatSkipped')], [s.failed, t('acStatFailed')]] as const) {
-        const cell = el('div', `background:${p.surface};border:1px solid ${p.border};border-radius:10px;padding:6px 8px;text-align:center`);
-        cell.append(el('b', 'display:block;font-size:18px;line-height:1.2', String(n)), el('span', `font-size:12px;color:${p.muted}`, label));
+        const cell = el('div', `
+          background:${p.surface};
+          border:1px solid ${p.border};
+          border-radius:${RADIUS_CONTROL}px;
+          padding:${SPACE[2]}px;
+          text-align:left
+        `);
+        cell.append(
+          el('b', 'display:block;font-size:18px;line-height:1.5;font-weight:500;font-variant-numeric:tabular-nums', String(n)),
+          el('span', `font-size:12px;color:${p.muted}`, label),
+        );
         stats.append(cell);
       }
       r.append(stats);
       if (s.oldestSeenPostDate && s.status !== 'running') r.append(el('div', `color:${p.muted};font-size:12px`, t('acOldest', dateOf(s.oldestSeenPostDate))));
     }
-    if (v.alert) r.append(el('div', `background:${p.warnBg};color:${p.warnFg};border-radius:10px;padding:8px 10px;font-size:13px;margin-top:8px`, v.alert));
-    if (v.note) r.append(el('div', `color:${p.muted};font-size:13px;margin-top:6px`, v.note));
+    if (v.alert) r.append(el('div', `
+      background:${p.warnBg};
+      color:${p.warnFg};
+      border-radius:${RADIUS_CARD}px;
+      padding:${SPACE[2]}px ${SPACE[3]}px;
+      font-size:13px;
+      margin-top:${SPACE[2]}px
+    `, v.alert));
+    if (v.note) r.append(el('div', `color:${p.muted};font-size:13px;margin-top:${SPACE[2]}px`, v.note));
 
-    const row = el('div', 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px');
+    const row = el('div', `display:flex;gap:${SPACE[2]}px;flex-wrap:wrap;margin-top:${SPACE[2]}px`);
     const buttons = s.status === 'running' || s.status === 'paused' ? [...v.buttons, { label: t('acBtnCollapse'), action: 'collapse' }] : v.buttons;
     for (const b of buttons) {
-      const btn = el('button', `font:inherit;min-height:32px;padding:4px 12px;border-radius:8px;cursor:pointer;border:1px solid ${b.primary ? ACCENT_FILL : b.danger ? p.ng : p.border};background:${b.primary ? ACCENT_FILL : 'transparent'};color:${b.primary ? '#fff' : b.danger ? p.ng : p.fg}`, b.label);
+      const btn = el('button', `
+        font:14px/1.5 ${FONT_STACK};
+        min-height:${CONTROL_HEIGHT}px;
+        padding:${SPACE[1]}px ${SPACE[3]}px;
+        border-radius:${RADIUS_CONTROL}px;
+        cursor:pointer;
+        border:1px solid ${b.primary ? ACCENT_FILL : b.danger ? p.ng : p.border};
+        background:${b.primary ? ACCENT_FILL : 'transparent'};
+        color:${b.primary ? '#fff' : b.danger ? p.ng : p.fg}
+      `, b.label);
       btn.type = 'button';
       btn.dataset.action = b.action;
       btn.addEventListener('click', () => this.act(b.action));
@@ -194,10 +267,48 @@ export class AutoCollectPanel {
 
   /** 畳んだ 1 行のバー (右下。幅は内容なり)。畳んでも取り込みは止まらない */
   private renderBar(r: HTMLElement, s: CollectState, p: Palette, v: PanelView): void {
-    r.style.cssText = `position:fixed;right:14px;bottom:14px;z-index:2147483646;max-width:calc(100vw - 28px);box-sizing:border-box;display:flex;align-items:center;gap:8px;background:${p.bg};color:${p.fg};color-scheme:${p.scheme};border:1px solid ${p.border};border-radius:999px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:0 6px 0 14px;min-height:44px;font:13px/1.4 system-ui,sans-serif;white-space:nowrap`;
+    r.style.cssText = `
+      position:fixed;
+      right:${SPACE[4]}px;
+      bottom:${SPACE[4]}px;
+      z-index:2147483646;
+      max-width:calc(100vw - ${SPACE[8]}px);
+      box-sizing:border-box;
+      display:flex;
+      align-items:center;
+      gap:${SPACE[2]}px;
+      background:${p.bg};
+      color:${p.fg};
+      color-scheme:${p.scheme};
+      border:1px solid ${p.border};
+      border-radius:${RADIUS_PILL}px;
+      box-shadow:${POPOVER_SHADOW[p.scheme]};
+      padding:0 ${SPACE[1]}px 0 ${SPACE[4]}px;
+      min-height:${ROW_HEIGHT}px;
+      font:13px/1.5 ${FONT_STACK};
+      white-space:nowrap
+    `;
     const dotColor = { run: ACCENT, pause: p.warnFg, done: p.ok, ng: p.ng }[v.dot];
-    const dot = el('span', `width:10px;height:10px;border-radius:50%;flex:none;background:${dotColor};${v.dot === 'run' ? 'animation:postshelf-pulse 1.2s infinite;' : ''}`);
-    const btn = el('button', `font:inherit;min-height:44px;padding:0 12px;border:0;border-radius:999px;cursor:pointer;background:transparent;color:${p.fg};white-space:nowrap;font-weight:700`, t('acBtnExpand'));
+    const dot = el('span', `
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      flex:none;
+      background:${dotColor};
+      ${v.dot === 'run' ? `animation:postshelf-pulse 1.2s infinite;` : ''}
+    `);
+    const btn = el('button', `
+      font:14px/1.5 ${FONT_STACK};
+      min-height:${CONTROL_HEIGHT}px;
+      padding:0 ${SPACE[3]}px;
+      border:0;
+      border-radius:${RADIUS_PILL}px;
+      cursor:pointer;
+      background:transparent;
+      color:${p.fg};
+      white-space:nowrap;
+      font-weight:500
+    `, t('acBtnExpand'));
     btn.type = 'button';
     btn.dataset.action = 'expand';
     btn.addEventListener('click', () => this.act('expand'));

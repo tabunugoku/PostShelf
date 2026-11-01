@@ -177,7 +177,7 @@ describe('v28-B: the collapsible auto-collect panel', () => {
     resetCollapsed();
   });
 
-  it('running: collapse → a one-line bar (status role, 44px buttons, same numbers); the collector is untouched; expand restores', () => {
+  it('running: collapse → a one-line bar (status role, 32px buttons, same numbers); the collector is untouched; expand restores', () => {
     const c = stub();
     const p = new AutoCollectPanel(c, () => {});
     p.update(st());
@@ -187,7 +187,7 @@ describe('v28-B: the collapsible auto-collect panel', () => {
     expect(bar.getAttribute('aria-live')).toBe('polite');
     expect(bar.textContent).toContain('取り込み中 · 5 件 · 失敗 1');
     expect($$('.postshelf-autocollect-panel button').map((b) => b.textContent)).toEqual(['開く']);
-    expect($<HTMLElement>('[data-action=expand]').style.minHeight).toBe('44px');
+    expect($<HTMLElement>('[data-action=expand]').style.minHeight).toBe('32px');
     expect(document.documentElement.hasAttribute('data-postshelf-panel')).toBe(true);
     p.update(st({ imported: 9 })); // 取り込みが進んでも、畳んだまま
     expect(bar.textContent).toContain('9 件');
