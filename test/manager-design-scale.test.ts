@@ -86,7 +86,9 @@ describe('管理画面と確認ダイアログの尺度', () => {
   });
 
   it('設定は面と行の罫線にし、サイドパネルの上二段は 36、操作は 32 にする', () => {
-    expect(rule('.setting-group')).toContain('padding:0 var(--sp-4)');
+    // 下の余白は面が決める。最後の部品の余白は消し、どのグループも同じにする
+    expect(rule('.setting-group')).toContain('padding:0 var(--sp-4) var(--sp-3)');
+    expect(rule('.setting-group>:last-child')).toContain('margin-bottom:0;padding-bottom:0');
     expect(rule('.setting-group>.setting~.setting')).toContain('border-top:1px solid var(--border)');
     expect(rule('.phead')).toContain('padding:var(--sp-3)');
     expect(rule('.phead .acct-btn,.phead .folder-btn')).toContain('min-height:var(--h-row)');
