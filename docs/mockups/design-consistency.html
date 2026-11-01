@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PostShelf 画面の統一</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.49.0/dist/tabler-icons.min.css">
+<style>
+/* 配色は static/autocollect-dialog.css のトークンをそのまま写す (この案では色の値は変えない) */
+:root{
+  --text-primary:#0f1419;--text-secondary:#536471;--text-muted:#536471;
+  --surface-1:#f7f9f9;--surface-2:#ffffff;--surface-3:#ffffff;
+  --border:#eff3f4;--border-strong:#cfd9de;--border-stronger:#8b98a5;
+  --fill-ghost-hover:rgba(15,20,25,.06);--fill-ghost-selected:rgba(15,20,25,.12);--fill-control:#cfd9de;
+  --fill-accent:#1d9bf0;--on-accent:#fff;--bg-accent:#e8f5fe;--text-accent:#0f6fb3;--mark-bg:#fff0a0;
+  --accent-strong:#0f6fb3;--danger:#c0302f;--danger-solid:#c0302f;
+  --warn-fg:#8a5a00;--warn-bg:#fff4d6;--ok:#00805a;
+  --shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);
+  /* ---- 新しく足す尺度 (この案の本体) ---- */
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-6:24px;--sp-8:32px;
+  --h-control:32px;--h-row:36px;--h-list:40px;
+  --r-control:8px;--r-card:12px;--r-pill:999px;
+  --icon:18px;--icon-sm:16px;
+  --ease:cubic-bezier(.2,0,0,1);--dur:120ms;
+  --font:system-ui,"Hiragino Sans","Yu Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  /* 説明の部分だけで使う色 (製品の UI には入れない) */
+  --spec-old:#b4232a;--spec-new:#00805a;
+  --page:#eef1f2;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --text-primary:#e7e9ea;--text-secondary:#9aa4ad;--text-muted:#9aa4ad;
+  --surface-1:#16181c;--surface-2:#000000;--surface-3:#16181c;
+  --border:#2f3336;--border-strong:#536471;--border-stronger:#71767b;
+  --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
+  --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;--mark-bg:#5c4b00;
+  --warn-fg:#ffd277;--warn-bg:#3a2d0a;--ok:#4cd8a6;
+  --shadow-popover:0 8px 24px rgba(0,0,0,.5);
+  --spec-old:#f06a68;--spec-new:#4cd8a6;--page:#0b0c0e;
+}}
+:root[data-theme=dark]{
+  --text-primary:#e7e9ea;--text-secondary:#9aa4ad;--text-muted:#9aa4ad;
+  --surface-1:#16181c;--surface-2:#000000;--surface-3:#16181c;
+  --border:#2f3336;--border-strong:#536471;--border-stronger:#71767b;
+  --fill-ghost-hover:rgba(231,233,234,.08);--fill-ghost-selected:rgba(231,233,234,.16);--fill-control:#2f3336;
+  --bg-accent:#031018;--text-accent:#1d9bf0;--danger:#f06a68;--mark-bg:#5c4b00;
+  --warn-fg:#ffd277;--warn-bg:#3a2d0a;--ok:#4cd8a6;
+  --shadow-popover:0 8px 24px rgba(0,0,0,.5);
+  --spec-old:#f06a68;--spec-new:#4cd8a6;--page:#0b0c0e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text-primary);font:14px/1.5 var(--font)}
+:lang(ja) body{word-break:auto-phrase;line-break:strict}
+
+/* ===== 説明の部分 (モックの外側) ===== */
+.doc{max-width:1120px;margin:0 auto;padding:32px 16px 64px}
+.doc h1{font-size:20px;font-weight:500;margin:0 0 4px}
+.doc h2{font-size:16px;font-weight:500;margin:48px 0 4px}
+.doc .lead{color:var(--text-secondary);margin:0 0 16px;max-width:760px}
+.doc p{max-width:760px}
+.themebar{position:sticky;top:0;z-index:100;display:flex;gap:8px;align-items:center;padding:8px 0;background:var(--page)}
+.themebar .lab{color:var(--text-secondary);margin-right:4px}
+.tb{min-height:32px;padding:0 12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--text-primary);font:inherit;cursor:pointer}
+.tb[aria-pressed=true]{background:var(--fill-ghost-selected);border-color:var(--border-stronger)}
+.dir{display:grid;grid-template-columns:120px 1fr;gap:4px 16px;margin:16px 0 0;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);max-width:880px}
+.dir dt{color:var(--text-secondary)}
+.dir dd{margin:0}
+.scales{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:16px}
+.scale{padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2)}
+.scale h3{font-size:14px;font-weight:500;margin:0 0 8px}
+.scale ul{margin:0;padding-left:16px;color:var(--text-secondary)}
+.scale code,.spec code{font:12px var(--mono);color:var(--text-primary)}
+.frame-row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin-top:16px}
+.cap{color:var(--text-secondary);font-size:12px;margin:8px 0 0}
+.spec{width:100%;border-collapse:collapse;margin-top:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.spec th,.spec td{text-align:left;vertical-align:top;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px}
+.spec th{font-weight:500;color:var(--text-secondary);background:var(--surface-1)}
+.spec tr:last-child td{border-bottom:0}
+.spec .o{color:var(--spec-old);font:12px var(--mono)}
+.spec .n{color:var(--spec-new);font:12px var(--mono)}
+.spec td:first-child{white-space:nowrap}
+.audit{margin:8px 0 0;padding-left:20px;max-width:880px}
+.audit li{margin:4px 0}
+.audit .where{font:12px var(--mono);color:var(--text-secondary)}
+
+/* ===== 製品の UI (ここから下が、static/*.css に移す値) ===== */
+.win{border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;background:var(--surface-2);box-shadow:var(--shadow-popover);color:var(--text-primary)}
+.win-bar{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;background:var(--surface-1);border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:12px}
+.win-bar .dots{display:flex;gap:4px}
+.win-bar .dots i{width:8px;height:8px;border-radius:50%;background:var(--border-strong)}
+.ui{font:14px/1.5 var(--font);color:var(--text-primary);background:var(--surface-2)}
+.ui .ti{font-size:var(--icon);line-height:1}
+.ui button{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+/* 共通の部品: ボタンの高さは 32 (操作) と 36 (行・主ボタン) の 2 つだけ。角丸は 8 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);min-height:var(--h-control);padding:0 var(--sp-3);border:1px solid var(--border-strong);border-radius:var(--r-control);background:transparent;cursor:pointer;white-space:nowrap;transition:background-color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.btn:hover{background:var(--fill-ghost-hover)}
+.btn .ti{font-size:var(--icon-sm)}
+.btn.primary{min-height:var(--h-row);background:var(--accent-strong);border-color:transparent;color:#fff;font-weight:500}
+.btn.primary:hover{background:var(--accent-strong);opacity:.92}
+.btn.block{display:flex;width:100%}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:var(--h-control);height:var(--h-control);border:0;border-radius:var(--r-control);background:transparent;color:var(--text-secondary);cursor:pointer;transition:background-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.icon-btn:hover{background:var(--fill-ghost-hover);color:var(--text-primary)}
+.icon-btn.bordered{border:1px solid var(--border-strong)}
+.ui :focus-visible{outline:2px solid var(--fill-accent);outline-offset:2px}
+/* 件数: 等幅の数字、右の 1 列にそろえる。未分類の印だけは塗りの丸 (高さ 20 = 半径 10) */
+.count{margin-left:auto;min-width:24px;text-align:right;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.count-badge{margin-left:auto;display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent-strong);color:#fff;font-size:12px;font-weight:500;font-variant-numeric:tabular-nums}
+/* 署名: フォルダの色は「アイコンの色」か「8px の点」にだけ出す。枠や背景には出さない */
+.fdot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none;background:var(--text-secondary)}
+.fdot.hollow{background:transparent;border:1.5px solid var(--text-secondary)}
+
+/* ---- 管理画面: サイドバー ---- */
+.mgr{display:grid;grid-template-columns:240px minmax(0,1fr);height:720px}
+.side{display:flex;flex-direction:column;gap:2px;padding:12px;background:var(--surface-1);border-right:1px solid var(--border);overflow:hidden}
+.acct-btn{display:flex;align-items:center;gap:var(--sp-2);width:100%;min-height:var(--h-row);padding:0 var(--sp-2);margin-bottom:var(--sp-2);border:1px solid var(--border-strong);border-radius:var(--r-control);background:var(--surface-2);font-weight:500;cursor:pointer}
+.acct-btn .ti-chevron-down{margin-left:auto;font-size:var(--icon-sm);color:var(--text-secondary)}
+.acct-av{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--fill-control);font-size:12px;font-weight:500;flex:none}
+.sec{padding:var(--sp-4) var(--sp-2) var(--sp-1);font-size:12px;color:var(--text-secondary)}
+.sec:first-of-type{padding-top:var(--sp-2)}
+.fr{position:relative;display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-row);padding:0 var(--sp-2);border-radius:var(--r-control);cursor:pointer;transition:background-color var(--dur) var(--ease)}
+.fr:hover{background:var(--fill-ghost-hover)}
+.fr.on{background:var(--fill-ghost-selected);font-weight:500}
+.fr.on .count{color:var(--text-primary)}
+.fr .ti{width:var(--icon);flex:none;text-align:center;color:var(--text-secondary)}
+.fr.on .ti{color:var(--text-primary)}
+.fr.add{color:var(--text-secondary)}
+.fr .tree-toggle{width:16px;font-size:var(--icon-sm)}
+.fr.child{padding-left:calc(var(--sp-2) + 16px)}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:2px}
+.gh-link{display:inline-flex;align-self:flex-start;align-items:center;gap:var(--sp-2);min-height:var(--h-control);margin:var(--sp-1) var(--sp-2) 0;padding:0 var(--sp-3);border:1px solid var(--border-strong);border-radius:var(--r-control);color:var(--text-secondary);font-size:13px;text-decoration:none}
+.gh-link .ti{font-size:var(--icon-sm)}
+
+/* ---- 管理画面: 本体 ---- */
+.main{padding:var(--sp-4) var(--sp-6);overflow:hidden;min-width:0}
+.toolbar{display:flex;flex-direction:column;gap:var(--sp-3);padding-bottom:var(--sp-3)}
+.top{display:flex;align-items:center;gap:var(--sp-2)}
+.top>.ti{font-size:20px}
+.bar-name{font-size:18px;font-weight:500}
+.bar-count{color:var(--text-secondary);margin-right:var(--sp-2);font-variant-numeric:tabular-nums}
+.search{flex:1;display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-row);padding:0 var(--sp-3);border:1px solid var(--border-strong);border-radius:var(--r-pill);color:var(--text-secondary)}
+.sort-btn{min-height:var(--h-row)}
+.sort-btn .ti{margin-left:var(--sp-1)}
+.seg{display:flex;border:1px solid var(--border-strong);border-radius:var(--r-control);overflow:hidden;height:var(--h-row)}
+.seg button{width:36px;border:0;background:transparent;color:var(--text-secondary);cursor:pointer}
+.seg button .ti{font-size:var(--icon-sm)}
+.seg button.on{background:var(--fill-ghost-selected);color:var(--text-primary)}
+.chips{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+/* チップは丸 (タグの意味のものだけ)。高さ 32、半径は高さの半分 */
+.chip{display:inline-flex;align-items:center;gap:var(--sp-1);min-height:var(--h-control);padding:0 var(--sp-3);border:1px solid var(--border-strong);border-radius:16px;background:transparent;color:var(--text-primary);cursor:pointer;white-space:nowrap;transition:background-color var(--dur) var(--ease)}
+.chip:hover{background:var(--fill-ghost-hover)}
+.chip .ti{font-size:var(--icon-sm);color:var(--text-secondary)}
+.chip.on{background:var(--fill-ghost-selected);border-color:var(--border-stronger);font-weight:500}
+
+/* ---- ポスト (X 風カード) ---- */
+.post{position:relative;display:flex;gap:var(--sp-3);padding:var(--sp-3) var(--sp-2);border-top:1px solid var(--border);border-radius:var(--r-control);max-width:720px}
+.post:hover,.post.hover{background:var(--fill-ghost-hover)}
+.post.selected{background:var(--bg-accent)}
+.sel{position:relative;width:32px;height:32px;flex:none;margin:4px -4px 0 -8px}
+.sel::before{content:'';position:absolute;inset:7px;border:2px solid var(--text-secondary);border-radius:4px;background:var(--surface-2)}
+.sel.checked::before{background:var(--accent-strong);border-color:var(--accent-strong)}
+/* '✓' の文字ではなく Tabler の ti-check を重ねる (OS の字形で太さが変わらないように) */
+.sel .ti{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;color:#fff}
+.av{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--fill-control);flex:none;font-size:13px;font-weight:500}
+.post-body{flex:1;min-width:0}
+.post-head{display:flex;gap:var(--sp-1);align-items:baseline;flex-wrap:wrap}
+.post-head .name{font-weight:600}
+.post-head .meta{color:var(--text-secondary)}
+.text{margin-top:2px;line-height:1.6;white-space:pre-line;overflow-wrap:anywhere}
+.more-row{display:flex;gap:var(--sp-3);margin-top:var(--sp-1)}
+.tl{color:var(--text-accent);text-decoration:none}
+.media{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:var(--sp-2);max-width:440px;border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden}
+.ph{position:relative;aspect-ratio:16/10;background:var(--fill-control)}
+/* 動画の下地は青みのグラデーションをやめ、無彩色の 1 色 */
+.ph.v{background:#202327}
+.ph .art{position:absolute;inset:0}
+.ph .badge{position:absolute;left:var(--sp-2);bottom:var(--sp-2);display:inline-flex;gap:var(--sp-1);align-items:center;padding:0 var(--sp-2);height:24px;border-radius:var(--r-control);background:rgba(0,0,0,.7);color:#fff;font-size:12px;font-weight:500}
+.ph .badge .ti{font-size:14px}
+.play{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(0,0,0,.6);border:2px solid #fff;display:grid;place-items:center;color:#fff}
+.play .ti{font-size:20px}
+.act{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3)}
+.fchip{display:inline-flex;align-items:center;gap:var(--sp-1);min-height:var(--h-control);padding:0 var(--sp-1) 0 var(--sp-3);border:1px solid var(--border-strong);border-radius:16px;color:var(--text-secondary);max-width:100%}
+.fchip .ti{font-size:var(--icon-sm)}
+.fchip .x{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;color:var(--text-secondary)}
+.row-actions{display:flex;gap:2px;margin-left:auto;align-self:flex-start;visibility:hidden}
+.post.hover .row-actions,.post:hover .row-actions{visibility:visible}
+
+/* ---- グリッド ---- */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3);max-width:720px;margin-top:var(--sp-3)}
+.gc{display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-3);border:1px solid var(--border);border-radius:var(--r-card);min-height:168px}
+.gc .cover{height:96px;border-radius:4px;overflow:hidden;position:relative}
+.gc-text{color:var(--text-primary);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.gc .act{margin-top:auto}
+
+/* ---- 設定の 1 グループ ---- */
+.set-h{margin:var(--sp-6) 0 var(--sp-2);font-size:13px;color:var(--text-secondary)}
+.setting-group{border:1px solid var(--border);border-radius:var(--r-card);padding:0 var(--sp-4);background:var(--surface-2)}
+.setting{display:flex;gap:var(--sp-4);align-items:flex-start;padding:var(--sp-3) 0;border-top:1px solid var(--border)}
+.setting:first-child{border-top:0}
+.setting .t{font-weight:500}
+.setting .d{color:var(--text-secondary);font-size:13px;margin-top:2px}
+.switch{position:relative;flex:none;width:36px;height:20px;margin-top:2px;margin-left:auto;border-radius:10px;background:var(--border-stronger)}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform var(--dur) var(--ease)}
+.switch.on{background:var(--accent-strong)}
+.switch.on::after{transform:translateX(16px)}
+.danger-zone{border-color:var(--danger)}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+
+/* ---- サイドパネル (狭い表示) ---- */
+.narrow{width:380px;height:720px;display:flex;flex-direction:column}
+.narrow.w520{width:520px}
+.phead{display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-3);border-bottom:1px solid var(--border)}
+.prow{display:flex;gap:var(--sp-2);align-items:center}
+.folder-btn{flex:1;display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-row);padding:0 var(--sp-3);border:1px solid var(--border-strong);border-radius:var(--r-control);background:transparent;font-weight:500;cursor:pointer;min-width:0}
+.folder-btn .count{margin-left:0;font-weight:400}
+.folder-btn .ti-chevron-down{margin-left:auto;font-size:var(--icon-sm);color:var(--text-secondary)}
+.phead .icon-btn{width:var(--h-row);height:var(--h-row)}
+.pbody{flex:1;overflow:hidden;padding:0 var(--sp-3)}
+.narrow .post{gap:var(--sp-2);padding:var(--sp-3) 0;border-radius:0}
+.narrow .av{width:32px;height:32px;font-size:12px}
+.narrow .row-actions{visibility:visible}
+.mini{display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-list);border-top:1px solid var(--border)}
+.mini>.ti{width:var(--icon);text-align:center;flex:none;color:var(--text-secondary)}
+.mini .handle{width:96px;flex:none;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mk{display:inline-flex;align-items:center;gap:var(--sp-1);flex:none;height:24px;padding:0 var(--sp-2);border:1px solid var(--border-strong);border-radius:var(--r-control);font-size:12px;font-weight:500;color:var(--text-secondary)}
+.mk .ti{font-size:14px}
+.pfoot{padding:var(--sp-3);border-top:1px solid var(--border);background:var(--surface-2)}
+.pfoot-note{margin-top:var(--sp-2);color:var(--text-secondary);font-size:12px;text-align:center}
+
+/* ---- ポップアップ (320px) ---- */
+.popup{width:320px;padding:var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-3)}
+.hd{display:flex;align-items:center;gap:var(--sp-2);min-width:0}
+.hd-title{font-weight:500}
+.acct-chip{margin-left:auto;min-width:0;max-width:60%;height:24px;padding:0 var(--sp-2);border:1px solid var(--border-strong);border-radius:12px;font-size:12px;line-height:22px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+/* 数のタイルは左寄せ: 数字が主役で、ラベルはその下に小さく */
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:0;padding:var(--sp-3);border:1px solid var(--border);border-radius:var(--r-card);background:transparent;text-align:left;font:inherit;color:inherit}
+.tile b{font-size:24px;line-height:1.2;font-weight:500;font-variant-numeric:tabular-nums}
+.tile span{font-size:12px;color:var(--text-secondary)}
+button.tile{cursor:pointer;border-color:var(--border-strong);transition:background-color var(--dur) var(--ease)}
+button.tile:hover{background:var(--fill-ghost-hover)}
+button.tile .go{display:flex;align-items:center;gap:var(--sp-1);color:var(--text-accent)}
+button.tile .go .ti{font-size:14px}
+.popup-search{display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-row);padding:0 var(--sp-3);border:1px solid var(--border-strong);border-radius:var(--r-pill);color:var(--text-secondary)}
+.rec-head{font-size:12px;color:var(--text-secondary);margin-bottom:var(--sp-1)}
+.rec-row{display:flex;align-items:center;gap:var(--sp-2);min-height:28px;font-size:13px;white-space:nowrap;overflow:hidden}
+.rec-dots{display:inline-flex;gap:2px;flex:none;width:28px}
+.rec-handle{color:var(--text-secondary);flex:none}
+.rec-text{overflow:hidden;text-overflow:ellipsis}
+.pbtns{display:flex;flex-direction:column;gap:var(--sp-2)}
+.foot-row{display:flex;justify-content:center}
+.foot-row .btn{border:0;color:var(--text-secondary);font-size:13px}
+
+/* ---- x.com の上: フォルダのポップオーバー / 自動取り込みのパネル ---- */
+.xpage{position:relative;width:720px;height:440px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;overflow:hidden;padding:var(--sp-4)}
+.xpost{display:flex;gap:var(--sp-3);padding-bottom:var(--sp-3);border-bottom:1px solid var(--border)}
+.xact{display:flex;gap:40px;margin-top:var(--sp-3);color:var(--text-secondary)}
+.xact .ps{color:var(--fill-accent)}
+.pop{position:absolute;left:120px;top:118px;width:264px;padding:var(--sp-2);background:var(--surface-3);border:1px solid var(--border-strong);border-radius:var(--r-card);box-shadow:var(--shadow-popover);font:14px/1.5 var(--font)}
+.pop-head{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-1) var(--sp-2) var(--sp-2);margin-bottom:var(--sp-1);border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:13px}
+.pop-head .acct-av{width:20px;height:20px;font-size:11px}
+.pop-item{display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-control);padding:0 var(--sp-2);border-radius:var(--r-control)}
+.pop-item:hover,.pop-item.hover{background:var(--fill-ghost-hover)}
+.cb{width:16px;height:16px;border:2px solid var(--text-secondary);border-radius:4px;flex:none;display:grid;place-items:center}
+.cb.on{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff}
+.cb.on .ti{font-size:12px}
+.pop-item.child{padding-left:calc(var(--sp-2) + 16px)}
+.pop-item .ti{font-size:var(--icon-sm)}
+.pop-foot{margin-top:var(--sp-1);padding-top:var(--sp-1);border-top:1px solid var(--border)}
+.pop-foot .pop-item{color:var(--text-secondary)}
+.acp{position:absolute;right:var(--sp-4);bottom:var(--sp-4);width:300px;padding:var(--sp-4);background:var(--surface-3);border:1px solid var(--border-strong);border-radius:var(--r-card);box-shadow:var(--shadow-popover);display:flex;flex-direction:column;gap:var(--sp-2)}
+.acp-h{display:flex;align-items:center;gap:var(--sp-2);font-weight:500}
+.acp-dot{width:8px;height:8px;border-radius:50%;background:var(--fill-accent);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.acp-dot{animation:none}}
+.acp-sub{color:var(--text-secondary);font-size:13px}
+.acp-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden}
+.acp-bar i{display:block;height:100%;width:42%;background:var(--accent-strong)}
+.acp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2)}
+.acp-stats div{padding:var(--sp-2);border:1px solid var(--border);border-radius:var(--r-control)}
+.acp-stats b{display:block;font-size:16px;font-weight:500;font-variant-numeric:tabular-nums}
+.acp-stats span{font-size:12px;color:var(--text-secondary)}
+.acp-row{display:flex;gap:var(--sp-2)}
+
+/* ---- ダイアログ ---- */
+.dialog{width:440px;padding:var(--sp-6);background:var(--surface-3);border:1px solid var(--border-strong);border-radius:var(--r-card);box-shadow:var(--shadow-popover)}
+.dialog-title{font-size:16px;font-weight:500;margin:0 0 var(--sp-2)}
+.dialog p{margin:0 0 var(--sp-6);color:var(--text-secondary)}
+.dialog-actions{display:flex;gap:var(--sp-2);justify-content:flex-end}
+.btn.danger-solid{min-height:var(--h-control);background:var(--danger-solid);border-color:transparent;color:#fff;font-weight:500}
+.menu{width:240px;padding:var(--sp-1);background:var(--surface-3);border:1px solid var(--border-strong);border-radius:var(--r-card);box-shadow:var(--shadow-popover)}
+.menu-item{display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-control);padding:0 var(--sp-2);border-radius:var(--r-control)}
+.menu-item .ti{font-size:var(--icon-sm);color:var(--text-secondary)}
+.menu-item.current{background:var(--fill-ghost-selected);font-weight:500}
+.menu-item.current .ti-check{margin-left:auto;color:var(--text-primary)}
+.menu-sep{height:1px;margin:var(--sp-1) 0;background:var(--border)}
+.menu-item.danger{color:var(--danger)}
+.menu-item.danger .ti{color:var(--danger)}
+
+/* ---- 6. 一括操作のフォルダの変更 ---- */
+.bulk-stage{position:relative;width:520px;height:480px;overflow:hidden;background:var(--surface-2)}
+.bulk-stage .tbar{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--border)}
+.bulk-btn{display:inline-flex;align-items:center;gap:var(--sp-1);margin-left:auto;min-height:var(--h-control);padding:0 var(--sp-3);border:0;border-radius:16px;background:var(--accent-strong);color:#fff;font-weight:500;font-variant-numeric:tabular-nums}
+.bulk-btn .ti{font-size:var(--icon-sm)}
+.bmenu{position:absolute;right:var(--sp-4);top:56px;width:300px;background:var(--surface-3);border:1px solid var(--border-strong);border-radius:var(--r-card);box-shadow:var(--shadow-popover);padding:var(--sp-1)}
+.bmenu.fit{bottom:var(--sp-2);display:flex;flex-direction:column;padding:0}
+.bm-head{flex:none;display:flex;flex-direction:column;gap:var(--sp-1);padding:var(--sp-1) var(--sp-1) var(--sp-2);border-bottom:1px solid var(--border)}
+.bm-status{padding:0 var(--sp-2);font-size:13px;color:var(--text-secondary)}
+.bm-filter{display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-control);margin:0 var(--sp-1);padding:0 var(--sp-2);border:1px solid var(--border-strong);border-radius:var(--r-control);color:var(--text-secondary)}
+.bm-filter .ti{font-size:var(--icon-sm)}
+.bm-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--sp-1)}
+.bm-foot{flex:none;display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2);border-top:1px solid var(--border)}
+.bm-foot .btn.primary{margin-left:auto;min-height:var(--h-control)}
+.bm-foot .btn.quiet{border:0;color:var(--text-secondary);padding:0 var(--sp-2)}
+.pick{display:flex;align-items:center;gap:var(--sp-2);min-height:var(--h-control);padding:0 var(--sp-2);border-radius:var(--r-control)}
+.pick .ti{font-size:var(--icon-sm);color:var(--text-secondary);flex:none}
+.pick .tw{width:16px;flex:none;color:var(--text-secondary);font-size:var(--icon-sm)}
+.pick .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pick .cb{margin-left:auto}
+.pick.l2{padding-left:calc(var(--sp-2) + 16px)}
+.pick.l3{padding-left:calc(var(--sp-2) + 32px)}
+.pick-h{padding:var(--sp-2) var(--sp-2) var(--sp-1);font-size:12px;color:var(--text-secondary)}
+.cb.part{border-color:var(--accent-strong)}
+.cb.part::after{content:'';width:8px;height:2px;background:var(--accent-strong)}
+.offscreen{position:absolute;left:0;right:0;bottom:0;height:72px;display:flex;align-items:flex-end;justify-content:center;padding:0 var(--sp-4) var(--sp-2);background:linear-gradient(transparent,var(--surface-2) 60%);color:var(--spec-old);font-size:12px;text-align:center}
+.mark-new{outline:2px dashed var(--spec-new);outline-offset:-2px}
+.tag-old,.tag-new{display:inline-block;margin-bottom:var(--sp-2);padding:0 var(--sp-2);border-radius:4px;font-size:12px;font-weight:500}
+.tag-old{color:var(--spec-old);border:1px solid var(--spec-old)}
+.tag-new{color:var(--spec-new);border:1px solid var(--spec-new)}
+
+/* ---- 7. 引用のポストの並び ---- */
+.qcard{width:520px;padding:var(--sp-3) var(--sp-4)}
+.quote-block{margin-top:var(--sp-2);max-width:440px;border:1px solid var(--border);border-radius:var(--r-card);padding:var(--sp-3)}
+.quote-head{display:flex;align-items:center;gap:var(--sp-2);font-size:13px}
+.quote-head .qav{width:20px;height:20px;border-radius:50%;background:var(--fill-control);display:inline-grid;place-items:center;font-size:10px;font-weight:500;flex:none}
+.quote-head .name{font-weight:600}
+.quote-head .meta{color:var(--text-secondary)}
+.quote-block .media{margin-top:var(--sp-2);border-radius:8px}
+.ordwrap{position:relative}
+.ord{position:absolute;right:-32px;top:2px;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--text-primary);color:var(--surface-2);font:500 11px/1 var(--mono)}
+</style>
+</head>
+<body>
+<div class="doc">
+  <h1>PostShelf 画面の統一 (管理画面・サイドパネル・ポップアップ・x.com 上の部品)</h1>
+  <p class="lead">配色は今のまま (X に合わせたトークン)。余白・高さ・角丸・文字の太さ・アイコンの大きさを、4 つの面で同じ尺度にそろえる案。文言は変えていない。サンプルのアカウントと本文はすべて架空。</p>
+
+  <div class="themebar" role="group" aria-label="配色">
+    <span class="lab">配色</span>
+    <button class="tb" data-t="auto" aria-pressed="true">OS に合わせる</button>
+    <button class="tb" data-t="light" aria-pressed="false">ライト</button>
+    <button class="tb" data-t="dark" aria-pressed="false">ダーク</button>
+  </div>
+
+  <h2>監査 (いまのコードで見つけたもの)</h2>
+  <ul class="audit">
+    <li>太字 700 が選択・見出し・ボタン・凡例のあちこちにある。強調の段が多すぎて、どこが大事か読めない <span class="where">.fr.on .bar-name .post-head .chip.on .option[aria-selected] .menu-item.current .main-btn .empty-title legend .ac-field legend 自動取り込みパネルの見出し</span></li>
+    <li>操作の高さが 22・24・28・32・36・38・40・44 と 8 種類ある <span class="where">.acct-assign 28 / .menu-item 36 / .fr 40 / .ap-chip 36 / .triage-folder 40 / .ap-del 44</span></li>
+    <li>角丸が 2・3・4・6・8・10・12・14・16・18・20・999 と 12 種類。ボタンは 8 と丸が混ざり、ポップアップのボタンとタイルは 10 <span class="where">.search 20 / .ap-chip 18 / .gh-link 999 / .main-btn 10 / .tile 10 / .banner 10 / パネル 16</span></li>
+    <li>4px の格子に乗らない余白: 14・10・6・3 <span class="where">.side 14px 10px / .post 14px 8px / .fr 6px 10px / .media gap 3</span></li>
+    <li>アイコンの大きさが 12・16・18・22 で、同じ役割でも揃わない。行の左のアイコンの列の幅が決まっていない <span class="where">.top&gt;i 22 / .bar&gt;i 22 / .chip.tag .ti-x 12</span></li>
+    <li>選択のチェックが文字の「✓」で、OS のフォントで太さと位置が変わる <span class="where">.sel:checked::after</span></li>
+    <li>動画の下地が青みのグラデーション <span class="where">.ph.v .viewer-video</span></li>
+    <li>x.com 側の部品だけ、行の高さ 1.4、0.5px の枠、和文フォントの指定なし、影の値が別。自動取り込みのパネルは角丸 16・余白 14・見出し 15px 700 <span class="where">content/popover.ts content/autocollectPanel.ts</span></li>
+    <li>ポップアップの数のタイルが中央寄せ・700 で、管理画面の数の見せ方 (右寄せの等幅) と別の文法 <span class="where">popup.css .tile</span></li>
+    <li>リスト表示の動画の札だけ青い塗り。アクセントが「主な操作・選択」以外に漏れている <span class="where">.mk.v</span></li>
+    <li>参考: <code>docs/screenshots/tab-settings-*.png</code> に開発者のアカウント名が写っている (CLAUDE.md の「公開してはいけないもの」)。この案とは別に撮り直しが必要</li>
+  </ul>
+
+  <h2>方向</h2>
+  <dl class="dir">
+    <dt>製品</dt><dd>x.com のブックマークを、自分の端末の中のフォルダに分けて、あとで読み返すための Chrome 拡張</dd>
+    <dt>性格</dt><dd>静か、几帳面、X のすぐ隣にいる</dd>
+    <dt>世界</dt><dd>X の画面そのもの。地は X の無彩色、アクセントは X の青。拡張が前に出ず、X の続きに見える</dd>
+    <dt>見せ場</dt><dd>保存したポストのカード (本文・画像・動画) と、利用者が選んだフォルダの色。色が濃く出るのはこの 2 つだけ</dd>
+    <dt>署名</dt><dd>フォルダの色は「アイコンの色」か「8px の点」にだけ出す (枠や背景には出さない)。アイコンはサイドバー・チップ・リストの行頭・x.com のポップオーバー、点はアイコンを置けないポップアップの最近の保存だけ。いまの使い方をそのまま規則にする</dd>
+  </dl>
+
+  <div class="scales">
+    <div class="scale"><h3>余白</h3><ul><li><code>4 · 8 · 12 · 16 · 24 · 32</code></li><li>小さな部品の中の調整だけ 2</li><li>グループ内 &lt; グループ間</li></ul></div>
+    <div class="scale"><h3>高さ</h3><ul><li>操作 <code>32</code> (ボタン・チップ・メニュー・アイコンボタン)</li><li>行 <code>36</code> (サイドバー・検索・主ボタン・並べ替え)</li><li>一覧の行 <code>40</code> (リスト表示の .mini)</li></ul></div>
+    <div class="scale"><h3>角丸</h3><ul><li>操作 <code>8</code>、カード・メニュー・ダイアログ <code>12</code></li><li>丸 (高さの半分) は、タグの意味のチップと検索欄だけ</li><li>内側 = 外側 − 余白、最小 4</li></ul></div>
+    <div class="scale"><h3>文字</h3><ul><li>太さ <code>400 / 500</code>。<code>600</code> はポストの投稿者名だけ</li><li>大きさ <code>12 · 13 · 14 · 16 · 18</code>、数字は <code>tabular-nums</code></li><li>行の高さ UI <code>1.5</code>、ポスト本文 <code>1.6</code></li></ul></div>
+    <div class="scale"><h3>アイコン</h3><ul><li>Tabler outline、<code>18</code> (行・ツールバー) と <code>16</code> (チップ・ボタン・メニュー)</li><li>色は文字の役割に従う。フォルダの色だけ例外</li></ul></div>
+    <div class="scale"><h3>動き</h3><ul><li><code>120ms cubic-bezier(.2,0,0,1)</code> を 1 つだけ</li><li>色・背景・枠・transform だけを動かす</li><li>点滅は「取り込み中」の点だけ (実際に動いている状態)</li></ul></div>
+  </div>
+
+  <h2>1. 管理画面 (タブ、幅 1000)</h2>
+  <div class="frame-row">
+    <div class="win" style="width:1000px">
+      <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span>PostShelf</div>
+      <div class="ui mgr">
+        <aside class="side">
+          <button class="acct-btn"><span class="acct-av">M</span>@me<i class="ti ti-chevron-down"></i></button>
+          <div class="sec">スマートビュー</div>
+          <div class="fr on"><i class="ti ti-bookmark"></i>すべて<span class="count">128</span></div>
+          <div class="fr"><i class="ti ti-inbox"></i>未分類<span class="count-badge">4</span></div>
+          <div class="fr"><i class="ti ti-clock"></i>最近の 7 日<span class="count">12</span></div>
+          <div class="sec">フォルダ</div>
+          <div class="fr"><i class="ti ti-chevron-down tree-toggle"></i><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ<span class="count">46</span></div>
+          <div class="fr child"><i class="ti ti-folder" style="color:#1D9E75"></i>拡張機能<span class="count">18</span></div>
+          <div class="fr"><i class="ti ti-chevron-right tree-toggle"></i><i class="ti ti-book" style="color:#BA7517"></i>あとで読む<span class="count">31</span></div>
+          <div class="fr"><span class="tree-toggle" style="width:16px"></span><i class="ti ti-palette" style="color:#D4537E"></i>デザイン<span class="count">9</span></div>
+          <div class="fr add"><span class="tree-toggle" style="width:16px"></span><i class="ti ti-plus"></i>新しいフォルダ</div>
+          <div class="side-foot">
+            <div class="fr"><i class="ti ti-settings"></i>設定</div>
+            <a class="gh-link" href="#"><i class="ti ti-brand-github"></i>GitHub<i class="ti ti-external-link"></i></a>
+          </div>
+        </aside>
+        <main class="main">
+          <div class="toolbar">
+            <div class="top">
+              <i class="ti ti-bookmark"></i><span class="bar-name">すべて</span><span class="bar-count">128 件</span>
+              <div class="search"><i class="ti ti-search"></i>本文、@ユーザー名で検索</div>
+              <button class="btn sort-btn">保存が新しい順<i class="ti ti-chevron-down"></i></button>
+              <div class="seg"><button class="on" aria-label="ポスト表示"><i class="ti ti-layout-list"></i></button><button aria-label="リスト表示"><i class="ti ti-list"></i></button><button aria-label="グリッド表示"><i class="ti ti-layout-grid"></i></button></div>
+            </div>
+            <div class="chips">
+              <button class="chip on"><i class="ti ti-photo"></i>画像あり</button>
+              <button class="chip"><i class="ti ti-video"></i>動画あり</button>
+              <button class="chip"><i class="ti ti-link"></i>リンクあり</button>
+              <button class="chip"><i class="ti ti-user"></i>投稿者で絞り込み</button>
+            </div>
+          </div>
+          <div class="rows">
+            <article class="post hover">
+              <span class="sel"></span>
+              <span class="av">SD</span>
+              <div class="post-body">
+                <div class="post-head"><span class="name">Sample Dev</span><span class="meta">@sample_dev · 2026/10/28</span></div>
+                <div class="text">manifest v3 の service worker を落とさずに長い処理を回すメモ。
+1. alarms で起こす
+2. 状態は storage に置く
+3. 重い処理は分けて投げる…</div>
+                <div class="more-row"><a class="tl" href="#">さらに表示</a><a class="tl" href="#">全文は X で見る</a></div>
+                <div class="act"><span class="fchip"><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ<span class="x"><i class="ti ti-x" style="font-size:14px"></i></span></span></div>
+              </div>
+              <div class="row-actions">
+                <button class="icon-btn" aria-label="フォルダ"><i class="ti ti-folder-plus"></i></button>
+                <button class="icon-btn" aria-label="X で開く"><i class="ti ti-external-link"></i></button>
+                <button class="icon-btn" aria-label="削除"><i class="ti ti-trash"></i></button>
+              </div>
+            </article>
+            <article class="post selected">
+              <span class="sel checked"><i class="ti ti-check"></i></span>
+              <span class="av">SP</span>
+              <div class="post-body">
+                <div class="post-head"><span class="name">Sample Photo</span><span class="meta">@sample_photo · 2026/10/27</span></div>
+                <div class="text">朝の川べり。霧が上がる前の 10 分だけ、光がこうなる</div>
+                <div class="media">
+                  <div class="ph"><svg class="art" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9d6df"/><stop offset="1" stop-color="#eef1ee"/></linearGradient></defs><rect width="160" height="100" fill="url(#sky)"/><circle cx="118" cy="34" r="10" fill="#f6efe0"/><path d="M0 62 Q40 52 80 60 T160 56 V100 H0Z" fill="#8a9a8f"/><path d="M0 74 Q50 66 100 72 T160 70 V100 H0Z" fill="#5d6e66"/><path d="M0 86 H160 V100 H0Z" fill="#9fb3bd" opacity=".8"/></svg></div>
+                  <div class="ph v"><svg class="art" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#202327"/><path d="M0 70 Q40 60 80 68 T160 64 V100 H0Z" fill="#2c3035"/></svg><span class="play"><i class="ti ti-player-play"></i></span><span class="badge"><i class="ti ti-video"></i>0:42</span></div>
+                </div>
+                <div class="act">
+                  <span class="fchip"><i class="ti ti-book" style="color:#BA7517"></i>あとで読む<span class="x"><i class="ti ti-x" style="font-size:14px"></i></span></span>
+                  <span class="fchip"><i class="ti ti-palette" style="color:#D4537E"></i>デザイン<span class="x"><i class="ti ti-x" style="font-size:14px"></i></span></span>
+                </div>
+              </div>
+              <div class="row-actions" style="visibility:visible">
+                <button class="icon-btn" aria-label="フォルダ"><i class="ti ti-folder-plus"></i></button>
+                <button class="icon-btn" aria-label="X で開く"><i class="ti ti-external-link"></i></button>
+                <button class="icon-btn" aria-label="削除"><i class="ti ti-trash"></i></button>
+              </div>
+            </article>
+            <article class="post">
+              <span class="sel" style="visibility:hidden"></span>
+              <span class="av">SN</span>
+              <div class="post-body">
+                <div class="post-head"><span class="name">Sample Notes</span><span class="meta">@sample_notes · 2026/10/25</span></div>
+                <div class="text">IndexedDB は薄く包むだけで十分だった。トランザクションの寿命だけ気をつける</div>
+                <div class="act"><span class="fchip"><i class="ti ti-folder" style="color:#1D9E75"></i>拡張機能<span class="x"><i class="ti ti-x" style="font-size:14px"></i></span></span></div>
+              </div>
+            </article>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <p class="cap">サイドバー: 余白 12、行 36、行の間 2、見出しは上 16・下 4。アイコンは 18 の 1 列、件数は右の 1 列で等幅。選択は 500 と面の 1 段だけ (700 にしない)。ポストの選択チェックは ti-check。</p>
+
+  <h2>2. グリッド表示・設定・メニュー・確認 (管理画面の続き)</h2>
+  <div class="frame-row">
+    <div class="win ui" style="width:520px;padding:16px">
+      <div class="grid" style="margin-top:0">
+        <div class="gc">
+          <div class="cover"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block"><rect width="160" height="100" fill="#c9d6df"/><circle cx="118" cy="34" r="10" fill="#f6efe0"/><path d="M0 62 Q40 52 80 60 T160 56 V100 H0Z" fill="#8a9a8f"/><path d="M0 74 Q50 66 100 72 T160 70 V100 H0Z" fill="#5d6e66"/></svg></div>
+          <div class="post-head"><span class="name">Sample Photo</span><span class="meta">@sample_photo</span></div>
+          <div class="gc-text">朝の川べり。霧が上がる前の 10 分だけ、光がこうなる</div>
+          <div class="act"><span class="fchip"><i class="ti ti-book" style="color:#BA7517"></i>あとで読む</span></div>
+        </div>
+        <div class="gc">
+          <div class="post-head"><span class="name">Sample Dev</span><span class="meta">@sample_dev</span></div>
+          <div class="gc-text">manifest v3 の service worker を落とさずに長い処理を回すメモ。alarms で起こし、状態は storage に置く</div>
+          <div class="act"><span class="fchip"><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ</span></div>
+        </div>
+      </div>
+      <div class="set-h">保存</div>
+      <div class="setting-group">
+        <div class="setting"><div><div class="t">X のブックマークと連動する</div><div class="d">・フォルダに保存したとき、X 標準のブックマークも付けます。(以下略)</div></div><span class="switch"></span></div>
+        <div class="setting"><div><div class="t">長いポストの全文を取得する</div><div class="d">X で「さらに表示」とたたまれたポストを保存すると、そのポストのページを裏のタブで開いて全文を読み、閉じます。(以下略)</div></div><span class="switch on"></span></div>
+      </div>
+      <div class="set-h">初期化と削除</div>
+      <div class="setting-group danger-zone">
+        <div class="setting"><div><div class="t">危険な操作</div><div class="d">フォルダ、保存したポスト、アカウント情報をすべて削除します。設定は残ります。取り消しはできません。</div><div style="margin-top:12px"><button class="btn danger"><i class="ti ti-trash"></i>すべてのデータを削除</button></div></div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div class="menu ui">
+        <div class="menu-item current">保存が新しい順<i class="ti ti-check"></i></div>
+        <div class="menu-item">保存が古い順</div>
+        <div class="menu-item">投稿が新しい順</div>
+        <div class="menu-sep"></div>
+        <div class="menu-item"><i class="ti ti-pencil"></i>名前・アイコン・色を変更</div>
+        <div class="menu-item danger"><i class="ti ti-trash"></i>削除</div>
+      </div>
+      <div class="dialog ui">
+        <p style="color:var(--text-primary)">このフォルダを削除しますか？ 保存したポストは削除されません。</p>
+        <div class="dialog-actions"><button class="btn">キャンセル</button><button class="btn danger-solid">削除</button></div>
+      </div>
+    </div>
+  </div>
+  <p class="cap">グリッドのカードは角丸 12・余白 12、画像は内側の 4。設定は 1 グループを 1 枚の面にし、行を罫線で区切る (fieldset の凡例をやめ、見出しは上の .set-h だけ)。スイッチは 36×20。メニューの行は 32、ダイアログの余白は 24。</p>
+
+  <h2>3. サイドパネル (幅 380 と 520)</h2>
+  <div class="frame-row">
+    <div>
+      <div class="win"><div class="ui narrow">
+        <div class="phead">
+          <button class="acct-btn" style="margin:0"><span class="acct-av">M</span>@me<i class="ti ti-chevron-down"></i></button>
+          <div class="prow">
+            <button class="folder-btn"><i class="ti ti-bookmark"></i>すべて<span class="count">128</span><i class="ti ti-chevron-down"></i></button>
+            <button class="icon-btn bordered" aria-label="検索"><i class="ti ti-search"></i></button>
+            <button class="icon-btn bordered" aria-label="タブで開く"><i class="ti ti-external-link"></i></button>
+          </div>
+          <div class="prow">
+            <button class="btn">保存が新しい順<i class="ti ti-chevron-down"></i></button>
+            <button class="btn"><i class="ti ti-adjustments-horizontal"></i>絞り込み</button>
+            <div class="seg" style="margin-left:auto;height:32px"><button class="on" style="width:32px"><i class="ti ti-layout-list"></i></button><button style="width:32px"><i class="ti ti-list"></i></button><button style="width:32px"><i class="ti ti-layout-grid"></i></button></div>
+          </div>
+        </div>
+        <div class="pbody">
+          <article class="post" style="border-top:0">
+            <span class="av">SD</span>
+            <div class="post-body">
+              <div class="post-head"><span class="name">Sample Dev</span><span class="meta">@sample_dev · 10/28</span></div>
+              <div class="text">manifest v3 の service worker を落とさずに長い処理を回すメモ。
+1. alarms で起こす
+2. 状態は storage に置く…</div>
+              <div class="more-row"><a class="tl" href="#">さらに表示</a></div>
+              <div class="act"><span class="fchip"><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ<span class="x"><i class="ti ti-x" style="font-size:14px"></i></span></span></div>
+            </div>
+            <div class="row-actions"><button class="icon-btn" aria-label="メニュー"><i class="ti ti-dots-vertical"></i></button></div>
+          </article>
+          <article class="post">
+            <span class="av">SP</span>
+            <div class="post-body">
+              <div class="post-head"><span class="name">Sample Photo</span><span class="meta">@sample_photo · 10/27</span></div>
+              <div class="text">朝の川べり。霧が上がる前の 10 分だけ、光がこうなる</div>
+              <div class="media" style="grid-template-columns:1fr"><div class="ph"><svg class="art" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#c9d6df"/><circle cx="118" cy="34" r="10" fill="#f6efe0"/><path d="M0 62 Q40 52 80 60 T160 56 V100 H0Z" fill="#8a9a8f"/><path d="M0 74 Q50 66 100 72 T160 70 V100 H0Z" fill="#5d6e66"/><path d="M0 86 H160 V100 H0Z" fill="#9fb3bd" opacity=".8"/></svg></div></div>
+            </div>
+            <div class="row-actions"><button class="icon-btn" aria-label="メニュー"><i class="ti ti-dots-vertical"></i></button></div>
+          </article>
+        </div>
+        <div class="pfoot">
+          <button class="btn primary block"><i class="ti ti-folder-plus"></i>いま開いているポストを保存…</button>
+          <div class="pfoot-note">x.com のポストを開いているときに表示</div>
+        </div>
+      </div></div>
+      <p class="cap">380: 見出しの 3 段は余白 12・段の間 8。上 2 段は高さ 36、操作の段は 32。</p>
+    </div>
+    <div>
+      <div class="win"><div class="ui narrow w520" style="height:440px">
+        <div class="phead">
+          <div class="prow">
+            <button class="acct-btn" style="margin:0;width:auto;flex:none"><span class="acct-av">M</span>@me<i class="ti ti-chevron-down"></i></button>
+            <button class="folder-btn"><i class="ti ti-bookmark"></i>すべて<span class="count">128</span><i class="ti ti-chevron-down"></i></button>
+            <button class="icon-btn bordered" aria-label="検索"><i class="ti ti-search"></i></button>
+            <button class="icon-btn bordered" aria-label="タブで開く"><i class="ti ti-external-link"></i></button>
+          </div>
+          <div class="prow">
+            <button class="btn">保存が新しい順<i class="ti ti-chevron-down"></i></button>
+            <button class="btn"><i class="ti ti-adjustments-horizontal"></i>絞り込み<span class="count-badge" style="margin-left:4px">1</span></button>
+            <div class="seg" style="margin-left:auto;height:32px"><button style="width:32px"><i class="ti ti-layout-list"></i></button><button class="on" style="width:32px"><i class="ti ti-list"></i></button><button style="width:32px"><i class="ti ti-layout-grid"></i></button></div>
+          </div>
+        </div>
+        <div class="pbody">
+          <div class="mini" style="border-top:0"><i class="ti ti-code" style="color:#378ADD"></i><span class="handle">@sample_dev</span><span class="t">manifest v3 の service worker を落とさずに長い処理を回すメモ</span><button class="icon-btn" aria-label="メニュー"><i class="ti ti-dots-vertical"></i></button></div>
+          <div class="mini"><i class="ti ti-book" style="color:#BA7517"></i><span class="handle">@sample_photo</span><span class="t">朝の川べり。霧が上がる前の 10 分だけ、光がこうなる</span><span class="mk"><i class="ti ti-photo"></i>2</span><button class="icon-btn" aria-label="メニュー"><i class="ti ti-dots-vertical"></i></button></div>
+          <div class="mini"><i class="ti ti-code" style="color:#378ADD"></i><span class="handle">@sample_video</span><span class="t">拡張機能のサイドパネルを 30 秒で見せる</span><span class="mk"><i class="ti ti-video"></i>動画</span><button class="icon-btn" aria-label="メニュー"><i class="ti ti-dots-vertical"></i></button></div>
+          <div class="mini"><i class="ti ti-inbox"></i><span class="handle">@sample_notes</span><span class="t">IndexedDB は薄く包むだけで十分だった</span><button class="icon-btn" aria-label="メニュー"><i class="ti ti-dots-vertical"></i></button></div>
+        </div>
+      </div></div>
+      <p class="cap">520 のリスト表示。行は 40、行頭はいちばん下のフォルダのアイコン (今と同じ)。動画の札も画像と同じ枠だけにする (青い塗りをやめる。アクセントを主な操作と選択だけに残すため)。札は高さ 24・角丸 8・500。</p>
+    </div>
+  </div>
+
+  <h2>4. ポップアップ (幅 320)</h2>
+  <div class="frame-row">
+    <div class="win"><div class="ui popup">
+      <div class="hd"><svg width="24" height="24" viewBox="0 0 1024 1024" aria-hidden="true"><rect x="110" y="170" width="804" height="580" rx="200" fill="#1D9BF0"/><polygon points="240,720 240,920 450,720" fill="#1D9BF0"/><polygon points="410,170 614,170 614,620 512,510 410,620" fill="#FFFFFF"/></svg><span class="hd-title">PostShelf</span><span class="acct-chip">@me</span></div>
+      <div class="tiles">
+        <div class="tile"><b>128</b><span>ポスト</span></div>
+        <button class="tile"><b>4</b><span class="go">未分類を仕分ける<i class="ti ti-arrow-right"></i></span></button>
+      </div>
+      <div class="popup-search"><i class="ti ti-search" style="font-size:16px"></i>保存したポストを検索</div>
+      <div>
+        <div class="rec-head">最近保存した 3 件</div>
+        <div class="rec-row"><span class="rec-dots"><span class="fdot" style="background:#378ADD"></span></span><span class="rec-handle">@sample_dev</span><span class="rec-text">manifest v3 の service worker を落とさずに…</span></div>
+        <div class="rec-row"><span class="rec-dots"><span class="fdot" style="background:#BA7517"></span><span class="fdot" style="background:#D4537E"></span></span><span class="rec-handle">@sample_photo</span><span class="rec-text">朝の川べり。霧が上がる前の 10 分だけ</span></div>
+        <div class="rec-row"><span class="rec-dots"><span class="fdot hollow"></span></span><span class="rec-handle">@sample_notes</span><span class="rec-text">IndexedDB は薄く包むだけで十分だった</span></div>
+      </div>
+      <div class="pbtns">
+        <button class="btn primary block"><i class="ti ti-external-link"></i>管理画面を開く</button>
+        <button class="btn block"><i class="ti ti-layout-sidebar-right"></i>サイドパネルで開く</button>
+      </div>
+      <div class="foot-row"><button class="btn"><i class="ti ti-settings"></i>設定</button></div>
+    </div></div>
+    <div style="max-width:420px">
+      <p class="cap" style="margin-top:0">余白 16、ブロックの間 12。数のタイルは管理画面の数と同じ文法 (左寄せ・500・等幅) にし、角丸は 10 → 12。押せるタイル (未分類を仕分ける) は枠を一段濃くし、文言をアクセントの文字色と矢印にして押せることを示す。主ボタン 36・副ボタン 32 ではなく、両方 36 で幅いっぱい (並んだ 2 つの高さをそろえる)。最近の保存の点は 8px (今と同じ)。</p>
+    </div>
+  </div>
+
+  <h2>5. x.com の上 (フォルダのポップオーバー・自動取り込みのパネル)</h2>
+  <div class="frame-row">
+    <div class="xpage ui">
+      <div class="xpost">
+        <span class="av">SD</span>
+        <div class="post-body">
+          <div class="post-head"><span class="name">Sample Dev</span><span class="meta">@sample_dev · 3 時間</span></div>
+          <div class="text">manifest v3 の service worker を落とさずに長い処理を回すメモ</div>
+          <div class="xact"><i class="ti ti-message-circle"></i><i class="ti ti-repeat"></i><i class="ti ti-heart"></i><i class="ti ti-bookmark"></i><i class="ti ti-folder-plus ps"></i></div>
+        </div>
+      </div>
+      <div class="pop">
+        <div class="pop-head"><span class="acct-av">M</span>保存先: @me</div>
+        <div class="pop-item"><span class="cb on"><i class="ti ti-check"></i></span><i class="ti ti-code" style="color:#378ADD"></i>開発ネタ</div>
+        <div class="pop-item child hover"><span class="cb"></span><i class="ti ti-folder" style="color:#1D9E75"></i>拡張機能</div>
+        <div class="pop-item"><span class="cb"></span><i class="ti ti-book" style="color:#BA7517"></i>あとで読む</div>
+        <div class="pop-item"><span class="cb"></span><i class="ti ti-palette" style="color:#D4537E"></i>デザイン</div>
+        <div class="pop-foot"><div class="pop-item"><i class="ti ti-plus"></i>フォルダを追加</div></div>
+      </div>
+      <div class="acp">
+        <div class="acp-h"><span class="acp-dot"></span>ブックマークを取り込み中</div>
+        <div class="acp-sub">速度「ゆっくり」で読み込み中</div>
+        <div class="acp-bar"><i></i></div>
+        <div class="acp-stats"><div><b>84</b><span>取り込み</span></div><div><b>212</b><span>スキップ</span></div><div><b>0</b><span>失敗</span></div></div>
+        <div class="acp-row"><button class="btn">一時停止</button><button class="btn">停止</button></div>
+      </div>
+    </div>
+    <div style="max-width:440px">
+      <p class="cap" style="margin-top:0">x.com 側も管理画面と同じ値にする: 行の高さ 1.5、枠 1px、和文フォントを含む同じフォントの並び、影は <code>--shadow-popover</code>、角丸 12、メニューの行 32。ポップオーバーのチェックも ti-check。</p>
+      <p class="cap">自動取り込みのパネルは、角丸 16 → 12、余白 14 → 16、右下の間隔 14 → 16、見出し 15px 700 → 14px 500、数のタイルは中央寄せ 700 → 左寄せ 500。点の点滅は残す (実際に動いている状態なので)。進み具合の棒は 8 → 4 で枠なし。</p>
+    </div>
+  </div>
+
+  <h2>6. 不具合: 複数選択 → フォルダを変更で、フォルダが多いと「フォルダを追加」と「確定」に届かない</h2>
+  <p class="lead">原因: 一括操作のメニュー (<code>BulkMenu.tsx</code>) は <code>Dropdown</code> を <code>fixed</code> なしで開くので、高さの上限が無い。しかも上に固定されたツールバー (<code>.bookmark-toolbar</code>、sticky) の中にあるので、ページをスクロールしても動かない。フォルダの一覧 (<code>FolderPickerHost</code>) は <code>extras</code> なしで作られ、「フォルダを追加」は一覧の末尾に入るので、確定のボタンと一緒に画面の外へ出る。</p>
+  <div class="frame-row">
+    <div>
+      <span class="tag-old">いま</span>
+      <div class="win"><div class="ui bulk-stage">
+        <div class="tbar"><i class="ti ti-bookmark"></i><span class="bar-name" style="font-size:16px">すべて</span><span class="bar-count">2,480 件</span><button class="bulk-btn">2 件選択中<i class="ti ti-chevron-down"></i></button></div>
+        <div class="bmenu">
+          <div class="pick" style="color:var(--text-secondary)"><i class="ti ti-arrow-left"></i><span class="nm">戻る</span></div>
+          <div class="pick-h">スマートビュー</div>
+          <div class="pick "><span class="tw"></span><i class="ti ti-inbox"></i><span class="nm">未分類</span><span class="cb"></span></div>
+          <div class="pick-h">フォルダ</div>
+          <div class="pick "><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">あとで読む</span><span class="cb part"></span></div>
+          <div class="pick "><i class="ti ti-chevron-down tw"></i><i class="ti ti-folder"></i><span class="nm">イラスト</span><span class="cb on"><i class="ti ti-check"></i></span></div>
+          <div class="pick l2"><i class="ti ti-chevron-down tw"></i><i class="ti ti-folder"></i><span class="nm">シリーズ A</span><span class="cb on"><i class="ti ti-check"></i></span></div>
+          <div class="pick l3"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">キャラクター 1</span><span class="cb on"><i class="ti ti-check"></i></span></div>
+          <div class="pick l3"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">キャラクター 2</span><span class="cb"></span></div>
+          <div class="pick l3"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">キャラクター 3</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">シリーズ B</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">シリーズ C</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">その他 (イラスト)</span><span class="cb"></span></div>
+          <div class="pick "><i class="ti ti-chevron-down tw"></i><i class="ti ti-folder"></i><span class="nm">写真</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">風景</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">その他 (写真)</span><span class="cb"></span></div>
+          <div class="pick "><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">開発ネタ</span><span class="cb"></span></div>
+          <div class="pick "><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">アーカイブ</span><span class="cb"></span></div>
+          <div class="menu-sep"></div><div class="pick"><i class="ti ti-folder-plus"></i><span class="nm">フォルダを追加</span></div>
+          <div style="display:flex;justify-content:flex-end;padding:8px"><button class="btn primary">確定</button></div>
+        </div>
+        <div class="offscreen">この下に「フォルダを追加」と「確定」がある。メニューは上に固定されたツールバーの中にあり、ページをスクロールしてもついてこない</div>
+      </div></div>
+    </div>
+    <div>
+      <span class="tag-new">案</span>
+      <div class="win"><div class="ui bulk-stage">
+        <div class="tbar"><i class="ti ti-bookmark"></i><span class="bar-name" style="font-size:16px">すべて</span><span class="bar-count">2,480 件</span><button class="bulk-btn">2 件選択中<i class="ti ti-chevron-down"></i></button></div>
+        <div class="bmenu fit">
+          <div class="bm-head">
+            <div class="pick" style="color:var(--text-secondary)"><i class="ti ti-arrow-left"></i><span class="nm">戻る</span></div>
+            <div class="bm-status">✓ 2 個のフォルダに保存済み</div>
+            <div class="bm-filter"><i class="ti ti-search"></i>フォルダを絞り込み</div>
+          </div>
+          <div class="bm-list mark-new">
+          <div class="pick-h">スマートビュー</div>
+          <div class="pick "><span class="tw"></span><i class="ti ti-inbox"></i><span class="nm">未分類</span><span class="cb"></span></div>
+          <div class="pick-h">フォルダ</div>
+          <div class="pick "><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">あとで読む</span><span class="cb part"></span></div>
+          <div class="pick "><i class="ti ti-chevron-down tw"></i><i class="ti ti-folder"></i><span class="nm">イラスト</span><span class="cb on"><i class="ti ti-check"></i></span></div>
+          <div class="pick l2"><i class="ti ti-chevron-down tw"></i><i class="ti ti-folder"></i><span class="nm">シリーズ A</span><span class="cb on"><i class="ti ti-check"></i></span></div>
+          <div class="pick l3"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">キャラクター 1</span><span class="cb on"><i class="ti ti-check"></i></span></div>
+          <div class="pick l3"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">キャラクター 2</span><span class="cb"></span></div>
+          <div class="pick l3"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">キャラクター 3</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">シリーズ B</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">シリーズ C</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">その他 (イラスト)</span><span class="cb"></span></div>
+          <div class="pick "><i class="ti ti-chevron-down tw"></i><i class="ti ti-folder"></i><span class="nm">写真</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">風景</span><span class="cb"></span></div>
+          <div class="pick l2"><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">その他 (写真)</span><span class="cb"></span></div>
+          <div class="pick "><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">開発ネタ</span><span class="cb"></span></div>
+          <div class="pick "><span class="tw"></span><i class="ti ti-folder"></i><span class="nm">アーカイブ</span><span class="cb"></span></div>
+          </div>
+          <div class="bm-foot"><button class="btn quiet"><i class="ti ti-folder-plus"></i>フォルダを追加</button><button class="btn primary">確定</button></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <p class="cap">案: x.com のポップオーバーと同じ 3 段の形にする。上の段 (戻る・保存先の状態・フォルダが 8 個以上なら「フォルダを絞り込み」) と下の段 (「フォルダを追加」と「確定」) は動かさず、間のフォルダの一覧 (緑の破線) だけをスクロールする。メニューの高さは、開いた位置から画面の下端 − 8px まで (<code>Dropdown</code> の <code>fixed</code> の置き方と同じ)。一覧の中のホイールは外へ伝えない (<code>overscroll-behavior:contain</code>)。<code>createFolderPicker</code> に <code>extras</code> を渡せば、絞り込み欄・状態の表示・「フォルダを追加」のボタン (<code>addButton</code>) は今の部品がそのまま使える。サイドパネルの一括操作も同じ部品なので、一緒に直る。</p>
+  <p class="cap">見本のフォルダ名は架空。一部のポストだけが入っているフォルダ (あとで読む) は、チェックの中を横棒にした (いまの一部の状態の表示に合わせて、Codex が確かめる)。</p>
+
+  <h2>7. 引用のポストの並び: 本文 → 自分の画像 → 引用元</h2>
+  <p class="lead">いまは <code>Cards.tsx</code> のポスト表示で、本文 (<code>PostText</code>) のすぐ下に引用 (<code>QuoteBlock</code>) を置き、ポスト自身の画像・動画 (<code>MediaGrid</code>) はその下に出している。X の画面と同じ、本文 → 自分の画像・動画 → 引用元 の順にする。</p>
+  <div class="frame-row">
+    <div><span class="tag-old">いま</span><div class="win ui qcard"><article class="post" style="border-top:0;max-width:none;padding-right:40px"><span class="av">SD</span><div class="post-body"><div class="post-head"><span class="name">Sample Dev</span><span class="meta">@sample_dev · 2026/11/01</span></div><div class="ordwrap"><span class="ord">1</span><div class="text">盤面のスクリーンショットと、仕組みの図を添付します。新しく作ったサービスの紹介です</div></div><div class="ordwrap"><span class="ord">2</span><div class="quote-block"><div class="quote-head"><span class="qav">SG</span><span class="name">Sample Games</span><span class="meta">@sample_games · 2026/10/31</span></div><div class="text">オンラインで対戦できるサービスを作りました。よかったら遊んでみてください</div><div class="media" style="grid-template-columns:1fr"><div class="ph" style="aspect-ratio:16/9"><svg class="art" viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice"><rect width="160" height="90" fill="#d8c49a"/><g stroke="#8a6d3b" stroke-width=".8"><path d="M16 0 V90"/><path d="M32 0 V90"/><path d="M48 0 V90"/><path d="M64 0 V90"/><path d="M80 0 V90"/><path d="M96 0 V90"/><path d="M112 0 V90"/><path d="M128 0 V90"/><path d="M144 0 V90"/><path d="M0 15 H160"/><path d="M0 30 H160"/><path d="M0 45 H160"/><path d="M0 60 H160"/><path d="M0 75 H160"/></g></svg></div></div></div></div><div class="ordwrap"><span class="ord">3</span><div class="media" style="grid-template-columns:1fr"><div class="ph"><svg class="art" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#e9eef1"/><rect x="14" y="14" width="56" height="32" rx="4" fill="#c9d6df"/><rect x="90" y="14" width="56" height="32" rx="4" fill="#c9d6df"/><rect x="52" y="60" width="56" height="28" rx="4" fill="#9fb3bd"/><path d="M42 46 L70 60 M118 46 L90 60" stroke="#8b98a5" stroke-width="2"/></svg></div></div></div><div class="act"><span class="fchip"><i class="ti ti-folder" style="color:#378ADD"></i>開発ネタ<span class="x"><i class="ti ti-x" style="font-size:14px"></i></span></span></div></div></article></div></div>
+    <div><span class="tag-new">案</span><div class="win ui qcard"><article class="post" style="border-top:0;max-width:none;padding-right:40px"><span class="av">SD</span><div class="post-body"><div class="post-head"><span class="name">Sample Dev</span><span class="meta">@sample_dev · 2026/11/01</span></div><div class="ordwrap"><span class="ord">1</span><div class="text">盤面のスクリーンショットと、仕組みの図を添付します。新しく作ったサービスの紹介です</div></div><div class="ordwrap"><span class="ord">2</span><div class="media" style="grid-template-columns:1fr"><div class="ph"><svg class="art" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice"><rect width="160" height="100" fill="#e9eef1"/><rect x="14" y="14" width="56" height="32" rx="4" fill="#c9d6df"/><rect x="90" y="14" width="56" height="32" rx="4" fill="#c9d6df"/><rect x="52" y="60" width="56" height="28" rx="4" fill="#9fb3bd"/><path d="M42 46 L70 60 M118 46 L90 60" stroke="#8b98a5" stroke-width="2"/></svg></div></div></div><div class="ordwrap"><span class="ord">3</span><div class="quote-block"><div class="quote-head"><span class="qav">SG</span><span class="name">Sample Games</span><span class="meta">@sample_games · 2026/10/31</span></div><div class="text">オンラインで対戦できるサービスを作りました。よかったら遊んでみてください</div><div class="media" style="grid-template-columns:1fr"><div class="ph" style="aspect-ratio:16/9"><svg class="art" viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice"><rect width="160" height="90" fill="#d8c49a"/><g stroke="#8a6d3b" stroke-width=".8"><path d="M16 0 V90"/><path d="M32 0 V90"/><path d="M48 0 V90"/><path d="M64 0 V90"/><path d="M80 0 V90"/><path d="M96 0 V90"/><path d="M112 0 V90"/><path d="M128 0 V90"/><path d="M144 0 V90"/><path d="M0 15 H160"/><path d="M0 30 H160"/><path d="M0 45 H160"/><path d="M0 60 H160"/><path d="M0 75 H160"/></g></svg></div></div></div></div><div class="act"><span class="fchip"><i class="ti ti-folder" style="color:#378ADD"></i>開発ネタ<span class="x"><i class="ti ti-x" style="font-size:14px"></i></span></span></div></div></article></div></div>
+  </div>
+  <p class="cap">変えるのは <code>Cards.tsx</code> のポスト表示の、引用と画像・動画の 2 つの要素の順番だけ。引用元の画像は、引用の枠の中のまま。動画のポスト (<code>hasVideo</code>) も同じ順にする。リスト表示とグリッド表示は引用を出さないので変わらない。画像ビューアの右の詳細 (<code>Viewer.tsx</code>) は引用だけを出すので変えない。テスト: 引用と画像の両方があるポストで、<code>.media</code> が <code>.quote-block</code> より前にあることを確かめる。</p>
+
+  <h2>Codex に渡す値 (旧 → 新)</h2>
+  <p class="lead">配色トークンは変えない。尺度のトークン (<code>--sp-*</code> <code>--h-*</code> <code>--r-*</code> <code>--icon*</code> <code>--ease</code> <code>--dur</code>) は <code>static/autocollect-dialog.css</code> の <code>:root,:host</code> に足し、manager.css・popup.css・自動取り込みの確認ダイアログから参照する。x.com の上のポップオーバーと自動取り込みのパネルは、X のページの DOM にインラインの style で描くので CSS 変数が届かない。同じ値を <code>src/shared/tokens.ts</code> に定数として足し (いまの色の定数と同じやり方)、<code>content/popover.ts</code>・<code>content/autocollectPanel.ts</code> はそれを使う。</p>
+  <table class="spec">
+    <thead><tr><th>場所</th><th>旧</th><th>新</th></tr></thead>
+    <tbody>
+      <tr><td>文字の太さ (全体)</td><td class="o">700 (選択・見出し・主ボタン・凡例・バッジ)</td><td class="n">500。600 は .post-head の名前だけ</td></tr>
+      <tr><td>.side</td><td class="o">padding 14px 10px</td><td class="n">padding 12px</td></tr>
+      <tr><td>.fr</td><td class="o">min-height 40, padding 6px 10px, gap 10, .on 700</td><td class="n">min-height 36, padding 0 8px, gap 8, .on 500</td></tr>
+      <tr><td>.sec</td><td class="o">14px, padding 10px 10px 4px</td><td class="n">12px, padding 16px 8px 4px</td></tr>
+      <tr><td>.fr .n / .count</td><td class="o">比例数字</td><td class="n">tabular-nums、min-width 24 右寄せ</td></tr>
+      <tr><td>.badge (未分類の数)</td><td class="o">14px, line-height 20, radius 10, 700</td><td class="n">.count-badge と同じ 12px・高さ 20・500 に統一</td></tr>
+      <tr><td>.main</td><td class="o">padding 16px 20px</td><td class="n">padding 16px 24px</td></tr>
+      <tr><td>.top&gt;i / .bar&gt;i</td><td class="o">22px</td><td class="n">20px</td></tr>
+      <tr><td>.bar-name</td><td class="o">18px 700</td><td class="n">18px 500</td></tr>
+      <tr><td>.search</td><td class="o">radius 20, min-height 36</td><td class="n">radius 999 (丸のまま), min-height 36</td></tr>
+      <tr><td>.seg / .sort-btn</td><td class="o">高さが中身なり</td><td class="n">高さ 36 (検索欄と同じ段)</td></tr>
+      <tr><td>.chip.filter / .chip.tag / .folder-membership</td><td class="o">padding 2px 12px / 0 10px / 0 8px, gap 6</td><td class="n">高さ 32、radius 16、padding 0 12px、gap 4、.on は 500</td></tr>
+      <tr><td>.post</td><td class="o">padding 14px 8px</td><td class="n">padding 12px 8px</td></tr>
+      <tr><td>.post-head</td><td class="o">700</td><td class="n">名前 600、他は 400</td></tr>
+      <tr><td>.media</td><td class="o">gap 3, margin-top 10</td><td class="n">gap 2, margin-top 8</td></tr>
+      <tr><td>.act</td><td class="o">gap 6, margin-top 10</td><td class="n">gap 8, margin-top 12</td></tr>
+      <tr><td>.sel:checked::after</td><td class="o">content '✓'</td><td class="n">ti-check を重ねる (または mask の SVG)</td></tr>
+      <tr><td>.ph.v / .viewer-video</td><td class="o">linear-gradient(135deg,#14171a,#3b4a57)</td><td class="n">#202327 の 1 色</td></tr>
+      <tr><td>.ph .badge / .cnt / .mk</td><td class="o">radius 6, 700, line-height 22</td><td class="n">radius 8, 500, 高さ 24</td></tr>
+      <tr><td>.mk.v</td><td class="o">青い塗り</td><td class="n">.mk と同じ枠だけ</td></tr>
+      <tr><td>.gc</td><td class="o">gap 6, .cover-wrap radius 8</td><td class="n">gap 8, .cover-wrap radius 4 (12 − 余白 12 の最小 4)</td></tr>
+      <tr><td>.view-grid</td><td class="o">gap 10, padding 10px 10px 0</td><td class="n">gap 12, padding 12px 12px 0</td></tr>
+      <tr><td>.menu / .listbox</td><td class="o">padding 6</td><td class="n">padding 4</td></tr>
+      <tr><td>.menu-item / .option</td><td class="o">min-height 36 / 32, padding 4px 8px / 4px 10px, current 700</td><td class="n">両方 32、padding 0 8px、current 500</td></tr>
+      <tr><td>.banner</td><td class="o">radius 10, padding 6px 8px 6px 12px, gap 10</td><td class="n">radius 12, padding 8px 8px 8px 12px, gap 8</td></tr>
+      <tr><td>.setting-group</td><td class="o">fieldset + legend 700, padding 4px 12px 8px</td><td class="n">面 1 枚、padding 0 16px、行は罫線で区切る、凡例は 500</td></tr>
+      <tr><td>.setting&gt;input[role=switch]</td><td class="o">38×22, つまみ 18</td><td class="n">36×20, つまみ 16 (transform で動かす。left を動かさない)</td></tr>
+      <tr><td>.dialog</td><td class="o">padding 16</td><td class="n">padding 24、title 500</td></tr>
+      <tr><td>.phead</td><td class="o">padding 10px 12px</td><td class="n">padding 12px、段の間 8</td></tr>
+      <tr><td>.ap-chip / .triage-folder</td><td class="o">高さ 36 / 40, radius 18 / 20, .on 700</td><td class="n">高さ 32, radius 16, .on 500</td></tr>
+      <tr><td>.ap-del</td><td class="o">44×44</td><td class="n">36×36 (サイドパネルの行の高さ)</td></tr>
+      <tr><td>.acct-assign</td><td class="o">min-height 28, radius 6</td><td class="n">32, radius 8</td></tr>
+      <tr><td>.gh-link</td><td class="o">radius 999</td><td class="n">radius 8 (タグではないボタン)</td></tr>
+      <tr><td>.empty-title / .onboard-n</td><td class="o">700</td><td class="n">500</td></tr>
+      <tr><td>popup body</td><td class="o">padding 12</td><td class="n">padding 16、ブロックの間 12</td></tr>
+      <tr><td>popup .tile</td><td class="o">中央寄せ, radius 10, padding 8, b 20px 700</td><td class="n">左寄せ, radius 12, padding 12, b 24px 500 tabular-nums</td></tr>
+      <tr><td>popup .main-btn / .sub-btn</td><td class="o">radius 10, 700, margin-top 10 / 6</td><td class="n">radius 8, 500, 高さ 36, 間 8</td></tr>
+      <tr><td>popup .hd-title</td><td class="o">700</td><td class="n">500</td></tr>
+      <tr><td>popup .popup-search</td><td class="o">radius 8 (既定)</td><td class="n">radius 999 (管理画面の検索欄と同じ)</td></tr>
+      <tr><td>content/popover.ts</td><td class="o">line-height 1.4, 枠 .5px, font system-ui のみ, 影は独自</td><td class="n">1.5, 1px, 和文を含む同じ並び, --shadow-popover 相当の値</td></tr>
+      <tr><td>content/autocollectPanel.ts</td><td class="o">radius 16, padding 14, right/bottom 14, 見出し 15px 700, タイル radius 10 中央 700, 棒 8px 枠つき</td><td class="n">radius 12, padding 16, right/bottom 16, 14px 500, タイル radius 8 左寄せ 500, 棒 4px 枠なし</td></tr>
+      <tr><td>autocollect-dialog.css</td><td class="o">body / .ac-root line-height 1.6、.ac-alert・.ac-order&gt;div radius 10 padding 8px 10px、.ac-field legend・.ac-ok 700、.ac-dialog gap 10</td><td class="n">UI は 1.5 (ポスト本文 .text だけ 1.6)、radius 12 padding 8px 12px、500、gap 12</td></tr>
+      <tr><td>.toast / .health / .warn / .dirbox</td><td class="o">padding 10px 14px / 8px 10px / 8px 10px / 10px 12px、radius 12 / 10 / 8 / 12</td><td class="n">padding 8px 12px (toast は 12px 16px)、radius 12 (面) または 8 (操作の大きさのもの)</td></tr>
+      <tr><td>.active-post / .triage-post</td><td class="o">padding 8px 10px / 12px、gap 6</td><td class="n">padding 12px、gap 8</td></tr>
+      <tr><td>表に無いもの (フォルダの編集パネルを含む)</td><td class="o">そのほかの値</td><td class="n">同じ置き換えに従う: 余白 2→2 (小さな部品の中だけ)、3→4、6→8、10→8 か 12 (グループの中は 8、外は 12)、14→16。角丸 6→8、10→12、14・18・20→高さの半分。太さ 700→500 (600 はポストの投稿者名だけ)</td></tr>
+      <tr><td>動き</td><td class="o">.12s / .15s が混在、switch は left を動かす</td><td class="n">120ms cubic-bezier(.2,0,0,1) の 1 つ。transform・色だけ</td></tr>
+    </tbody>
+  </table>
+
+  <h2>文言</h2>
+  <ul class="audit">
+    <li>文言は変えない。ラベルは短く、感嘆符も無く、すでに整っている。設定の説明の句点は、文として読ませる説明なので残す</li>
+  </ul>
+</div>
+<script>
+// 配色の切り替え (このモックだけ)
+document.querySelectorAll('.tb').forEach((b) => {
+  b.addEventListener('click', () => {
+    const t = b.dataset.t;
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+    document.querySelectorAll('.tb').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  });
+});
+</script>
+</body>
+</html>
