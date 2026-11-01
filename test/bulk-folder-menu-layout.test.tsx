@@ -180,7 +180,8 @@ it('絞り込み中の作成後もクエリを保ち、作ったフォルダは�
 it('高さ制限の経路と下部の折り返しを一括操作の CSS に閉じ込める', () => {
   const css = readFileSync('static/manager.css', 'utf8');
   expect(css).toMatch(/\.menu-bulk\.menu-wide\{[^}]*display:flex/);
-  expect(css).toMatch(/\.bulk-picker\{[^}]*min-height:0/);
+  // fieldset は flex の縮みを子へ伝えないので、箱を作らない contents にする (実機で確認)
+  expect(css).toMatch(/\.bulk-picker\{[^}]*display:contents/);
   expect(css).toMatch(/\.bulk-actions\{[^}]*flex-wrap:wrap/);
 });
 

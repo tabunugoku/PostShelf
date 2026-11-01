@@ -101,7 +101,9 @@ h1{font-size:16px;font-weight:500;margin:0 0 4px}
 .menu-bulk.menu-wide{display:flex;flex-direction:column;box-sizing:border-box}
 .menu-bulk .bulk-folder-view{display:flex;flex-direction:column;min-height:0}
 .menu-bulk .bulk-folder-view>.menu-item{flex-shrink:0}
-.bulk-picker{border:0;margin:0;padding:0;min-width:0;min-height:0;display:flex;flex-direction:column}
+/* Chrome の fieldset は中身を見えない箱に入れて並べるので、flex の縮みが子へ届かない (実機で一覧が縮まなかった)。
+   箱を作らない contents にし、子を .bulk-folder-view の flex の項目にする。disabled は DOM の性質なので効いたまま */
+.bulk-picker{border:0;margin:0;padding:0;min-width:0;display:contents}
 .menu-bulk .picker-host{display:flex;flex:1 1 auto;min-height:0}
 .menu-bulk .error{flex-shrink:0}
 .bulk-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;flex-shrink:0}
