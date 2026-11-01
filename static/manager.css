@@ -225,7 +225,9 @@ h1{font-size:16px;font-weight:500;margin:0 0 var(--sp-1)}
 .cache-perm-note{margin:calc(0px - var(--sp-1)) 0 var(--sp-1)}
 .setting-group{border:1px solid var(--border);border-radius:var(--r-card);margin:var(--sp-3) 0;padding:0 var(--sp-4);background:var(--surface-1)}
 .setting-group>.setting~.setting{border-top:1px solid var(--border)}
-.setting-group legend{padding:0 var(--sp-1);font-weight:500}
+/* 背景のある面では、枠の線に乗る凡例は文字に線が重なる。float で枠から外し、面の中の見出しにする */
+.setting-group legend{float:left;width:100%;padding:var(--sp-3) 0 0;font-weight:500}
+.setting-group legend+*{clear:both}
 .folder-demo{margin:var(--sp-1) 0 var(--sp-2)}
 .folder-demo summary{cursor:pointer;font-weight:500;padding:var(--sp-2) 0}
 .folder-demo-heading{margin:var(--sp-3) 0 var(--sp-1);font-size:14px}
@@ -246,6 +248,8 @@ h1{font-size:16px;font-weight:500;margin:0 0 var(--sp-1)}
 .layout-narrow{display:flex;flex-direction:column;min-height:100vh}
 .phead{position:sticky;top:0;z-index:10;display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-3);background:var(--surface-2);border-bottom:1px solid var(--border)}
 .row{display:flex;gap:var(--sp-2);align-items:center}
+/* 上の 2 段は高さ 36。フォルダの選択と並ぶアイコンのボタンも同じ高さにする */
+.phead .row>.icon-btn{width:var(--h-row);min-width:var(--h-row);height:var(--h-row)}
 .folder-btn{display:flex;width:100%;align-items:center;justify-content:space-between;gap:var(--sp-2);font-weight:500;min-height:var(--h-row)}
 .fb-main{display:flex;gap:var(--sp-2);align-items:center;min-width:0}
 .fb-main .muted{font-weight:400}

@@ -32,6 +32,8 @@ describe('管理画面と確認ダイアログの尺度', () => {
     expect(semibold.map(match => match[1].trim())).toEqual(['.post-head strong']);
     expect(rule('.post-head .muted')).toContain('font-weight:400');
     expect(rule('.setting-group legend')).toContain('font-weight:500');
+    // 凡例は枠の線に乗せず、面の中の見出しにする (線が文字に重なるため)
+    expect(rule('.setting-group legend')).toContain('float:left');
   });
 
   it('行とメニューとチップに役割ごとの高さと余白を使う', () => {
@@ -88,6 +90,7 @@ describe('管理画面と確認ダイアログの尺度', () => {
     expect(rule('.setting-group>.setting~.setting')).toContain('border-top:1px solid var(--border)');
     expect(rule('.phead')).toContain('padding:var(--sp-3)');
     expect(rule('.phead .acct-btn,.phead .folder-btn')).toContain('min-height:var(--h-row)');
+    expect(rule('.phead .row>.icon-btn')).toContain('height:var(--h-row)');
     expect(rule('.layout-narrow .tools .seg')).toContain('min-height:var(--h-control)');
     expect(rule('.layout-narrow .tools .seg button')).toContain('height:calc(var(--h-control) - 2px)');
     expect(css).toContain('@media (max-width:380px)');
