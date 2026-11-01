@@ -3,6 +3,11 @@
    管理画面の配色は OS の設定 (prefers-color-scheme) に追従し、x.com 側はホスト要素の data-theme (X のテーマ) で決める。
    ダークの値は 2 か所 (media と :host) に同じものを書く。変えるときは両方そろえる (test/autocollect-dialog-on-x.test.tsx が検査する) */
 :root,:host{
+  /* 画面とテーマにかかわらず共通に使う尺度 */
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-6:24px;--sp-8:32px;
+  --h-control:32px;--h-row:36px;--h-list:40px;
+  --r-control:8px;--r-card:12px;--r-pill:999px;--icon:18px;--icon-sm:16px;
+  --ease:cubic-bezier(.2,0,0,1);--dur:120ms;
   /* ---- デザイントークン (X の画面に揃えた配色。manager / サイドパネル / popup で共有) ---- */
   --text-primary:#0f1419;--text-secondary:#536471;--text-muted:#536471;
   --surface-1:#f7f9f9;--surface-2:#ffffff;--surface-3:#ffffff;
@@ -33,41 +38,43 @@
   --shadow-popover:0 8px 24px rgba(0,0,0,.5);
 }
 /* x.com 側の描画先。ホスト要素に効く x.com の CSS から継ぐ値を all:initial で断ち、X の文字と同じ大きさ・色で描く (管理画面には無い要素) */
-.ac-root{all:initial;display:block;color:var(--text-primary);font:14px/1.6 system-ui,"Hiragino Sans","Yu Gothic",sans-serif;color-scheme:light}
+.ac-root{all:initial;display:block;color:var(--text-primary);font:14px/1.5 system-ui,"Hiragino Sans","Yu Gothic",sans-serif;color-scheme:light}
 :host([data-theme=dark]) .ac-root{color-scheme:dark}
 .ac-dialog:focus{outline:none}
 .dialog button{white-space:normal;min-width:0;overflow-wrap:anywhere}
 *{box-sizing:border-box}
-button,input{min-height:32px;font:inherit;color:inherit;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius);padding:4px 10px;cursor:pointer}
+button,input{min-height:var(--h-control);font:inherit;color:inherit;background:transparent;border:1px solid var(--border-strong);border-radius:var(--r-control);padding:var(--sp-1) var(--sp-2);cursor:pointer}
 input{cursor:text;background:var(--surface-2)}
 input[type=checkbox],input[type=radio]{min-height:0}
 button:hover{background:var(--fill-ghost-hover)}
 button:disabled{cursor:not-allowed}
 :focus-visible{outline:2px solid var(--fill-accent);outline-offset:2px}
 .muted{color:var(--text-secondary)}
-.error{color:var(--danger);margin:0 0 8px}
+.error{color:var(--danger);margin:0 0 var(--sp-2)}
 .overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
-.dialog{width:min(460px,calc(100vw - 32px));padding:16px;background:var(--surface-3);border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-popover)}
-.dialog p{margin:0 0 16px;text-wrap:balance}
-.dialog-title{font-size:16px;margin:0 0 8px}
-.dialog-actions{display:flex;gap:8px;justify-content:flex-end}
+.dialog{width:min(460px,calc(100vw - 32px));padding:var(--sp-6);background:var(--surface-3);border:1px solid var(--border-strong);border-radius:var(--r-card);box-shadow:var(--shadow-popover)}
+.dialog p{margin:0 0 var(--sp-4);text-wrap:balance}
+.dialog-title{font-size:16px;margin:0 0 var(--sp-2)}
+.dialog-actions{display:flex;gap:var(--sp-2);justify-content:flex-end}
 .primary{background:var(--accent-strong);color:#fff;border-color:transparent}.primary:hover{background:var(--accent-strong);opacity:.9}
-.setting{display:flex;gap:10px;align-items:flex-start;padding:10px 0;cursor:pointer}
-.setting input{min-height:0;width:20px;height:20px;margin-top:4px;accent-color:var(--accent-strong);flex:none}
+.setting{display:flex;gap:var(--sp-2);align-items:flex-start;padding:var(--sp-2) 0;cursor:pointer}
+.setting input{min-height:0;width:20px;height:20px;margin-top:var(--sp-1);accent-color:var(--accent-strong);flex:none}
 .dialog-wide{width:min(640px,calc(100vw - 32px))}
-.dialog .error{margin:0 0 16px}
+.dialog .error{margin:0 0 var(--sp-4)}
 .danger-solid:disabled,.primary:disabled,.danger-solid:disabled:hover,.primary:disabled:hover{opacity:.45}
-select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--radius);min-height:32px;padding:2px 8px}
+select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-control);min-height:var(--h-control);padding:2px var(--sp-2)}
 input[type=number]{width:110px}
-.ac-alert{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:8px 10px;font-size:14px}
-.ac-dialog{display:grid;gap:10px;max-height:calc(100vh - 32px);overflow:auto}
+.ac-alert{background:var(--warn-bg);color:var(--warn-fg);border-radius:var(--r-card);padding:var(--sp-2) var(--sp-3);font-size:14px}
+.ac-dialog{display:grid;gap:var(--sp-3);max-height:calc(100vh - 32px);overflow:auto}
 .ac-dialog p,.ac-dialog .dialog-title{margin:0}
 .ac-field{border:0;margin:0;padding:0;display:grid;gap:2px}
-.ac-field legend{font-weight:700;padding:0 0 2px}
-.ac-cap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.ac-cap select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;min-height:32px;padding:2px 8px}
-.ac-order{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px}
-.ac-order>div{border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--surface-1)}
-.ac-order ol{margin:4px 0 0;padding-left:20px}
-.ac-ok{color:var(--ok);font-weight:700}
+.ac-field legend{font-weight:500;padding:0 0 2px}
+.ac-cap{display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap}
+.ac-cap select{font:inherit;color:inherit;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-control);min-height:var(--h-control);padding:2px var(--sp-2)}
+.ac-order{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);font-size:14px}
+.ac-order>div{border:1px solid var(--border);border-radius:var(--r-card);padding:var(--sp-2) var(--sp-3);background:var(--surface-1)}
+.ac-order ol{margin:var(--sp-1) 0 0;padding-left:20px}
+.ac-ok{color:var(--ok);font-weight:500}
 @media (max-width:480px){.ac-order{grid-template-columns:1fr}}
+
+b,strong,.dialog-title{font-weight:500}

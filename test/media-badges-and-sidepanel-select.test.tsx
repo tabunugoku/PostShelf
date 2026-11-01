@@ -85,7 +85,7 @@ describe.each([
     }
     expect(row('v').querySelector('.ph.v img')).toBeTruthy();
     expect(row('w').querySelector('.ph.v img')).toBeNull(); // サムネイルなし: 暗い面 (.ph.v の背景) に再生ボタンと札だけ
-    expect(css).toMatch(/\.ph\.v\{[^}]*background:linear-gradient\(135deg,#14171a,#3b4a57\)/);
+    expect(css).toMatch(/\.ph\.v\{[^}]*background:#202327/);
     const cnt = row('i3').querySelector('.ph .cnt')!;
     expect(cnt.getAttribute('aria-label')).toBe('画像 3 枚');
     expect(cnt.textContent?.trim()).toBe('3');

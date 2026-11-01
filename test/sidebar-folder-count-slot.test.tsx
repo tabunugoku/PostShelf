@@ -28,7 +28,7 @@ it('keeps the count slot in flow while the menu covers it without moving the fol
   expect(rule('.fr:hover .n')).not.toMatch(/margin-left\s*:\s*0(?:;|$)/);
   expect(rule('.fr:focus-within .n')).not.toMatch(/margin-left\s*:\s*0(?:;|$)/);
   for (const sel of ['.fr .n', '.fr .badge']) {
-    expect(rule(sel)).toContain('min-width:32px');
+    expect(rule(sel)).toContain('min-width:24px');
     expect(rule(sel)).toContain('text-align:right');
     expect(rule(sel)).toContain('flex-shrink:0');
   }

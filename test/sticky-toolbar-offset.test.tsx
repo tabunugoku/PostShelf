@@ -1,5 +1,5 @@
 // 版: v41-review-i
-import { readFileSync } from 'node:fs';
+import { managerCss } from './css-helpers';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -7,8 +7,11 @@ import { App } from '../src/manager/App';
 import * as storage from '../src/shared/storage';
 import { installChromeMock, installPanelMock } from './chrome-mock';
 
-const css = readFileSync('static/manager.css', 'utf8');
-const rule = (selector: string) => css.slice(css.indexOf(selector + '{') + selector.length + 1).split('}')[0];
+const css = managerCss();
+// jsdom は CSS 変数を寸法に解決しないので、ブラウザと同じ値を渡す。
+const rule = (selector: string) => css.slice(css.indexOf(selector + '{') + selector.length + 1).split('}')[0]
+  .replace(/var\((--sp-\d+)\)/g, (_, name) => css.match(new RegExp(`${name}:(\\d+px)`))![1])
+  .replace(/calc\(0px - (\d+)px\)/g, '-$1px');
 const styleOf = (selector: string) => {
   const el = document.createElement('div'); el.style.cssText = rule(selector); return el.style;
 };
