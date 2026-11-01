@@ -694,7 +694,6 @@ button.tile .go .ti{font-size:14px}
         <div class="bmenu fit">
           <div class="bm-head">
             <div class="pick" style="color:var(--text-secondary)"><i class="ti ti-arrow-left"></i><span class="nm">戻る</span></div>
-            <div class="bm-status">✓ 2 個のフォルダに保存済み</div>
             <div class="bm-filter"><i class="ti ti-search"></i>フォルダを絞り込み</div>
           </div>
           <div class="bm-list mark-new">
@@ -721,7 +720,7 @@ button.tile .go .ti{font-size:14px}
       </div></div>
     </div>
   </div>
-  <p class="cap">案: x.com のポップオーバーと同じ 3 段の形にする。上の段 (戻る・保存先の状態・フォルダが 8 個以上なら「フォルダを絞り込み」) と下の段 (「フォルダを追加」と「確定」) は動かさず、間のフォルダの一覧 (緑の破線) だけをスクロールする。メニューの高さは、開いた位置から画面の下端 − 8px まで (<code>Dropdown</code> の <code>fixed</code> の置き方と同じ)。一覧の中のホイールは外へ伝えない (<code>overscroll-behavior:contain</code>)。<code>createFolderPicker</code> に <code>extras</code> を渡せば、絞り込み欄・状態の表示・「フォルダを追加」のボタン (<code>addButton</code>) は今の部品がそのまま使える。サイドパネルの一括操作も同じ部品なので、一緒に直る。</p>
+  <p class="cap">案: x.com のポップオーバーと同じ 3 段の形にする。上の段 (戻る・フォルダが 8 個以上なら「フォルダを絞り込み」) と下の段 (「フォルダを追加」と「確定」) は動かさず、間のフォルダの一覧 (緑の破線) だけをスクロールする。メニューの高さは、開いた位置から画面の下端 − 8px まで (<code>Dropdown</code> の <code>fixed</code> の置き方と同じ)。一覧の中のホイールは外へ伝えない (<code>overscroll-behavior:contain</code>)。<code>createFolderPicker</code> に <code>extras</code> を渡せば、絞り込み欄・状態の表示・「フォルダを追加」のボタン (<code>addButton</code>) は今の部品がそのまま使える。サイドパネルの一括操作も同じ部品なので、一緒に直る。</p>
   <p class="cap">見本のフォルダ名は架空。一部のポストだけが入っているフォルダ (あとで読む) は、チェックの中を横棒にした (いまの一部の状態の表示に合わせて、Codex が確かめる)。</p>
 
   <h2>7. 引用のポストの並び: 本文 → 自分の画像 → 引用元</h2>
