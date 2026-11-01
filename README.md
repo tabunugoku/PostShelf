@@ -6,6 +6,11 @@ A Chrome extension (Manifest V3) that lets you sort your X (formerly Twitter) bo
 
 日本語の説明は、下の「日本語 (Japanese)」を開いてください。
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/en-grid-dark.png">
+  <img src="docs/readme/en-grid-light.png" alt="The PostShelf manager in grid view, with folders in the sidebar (sample data)" width="100%">
+</picture>
+
 ## Features
 
 - Sort saved posts into folders (one post can be in several folders)
@@ -23,6 +28,22 @@ A Chrome extension (Manifest V3) that lets you sort your X (formerly Twitter) bo
 - The interface is available in 8 languages
 - Data is stored in `chrome.storage.local` only. No data is sent out. No analytics. No tracking.
 - Check for new versions (in Settings, **off by default**): when on, PostShelf asks GitHub for the latest version number when you open the manager or the side panel, at most once a day, and shows a link to the release page if a newer one exists. No data is sent, but GitHub sees the time of the check, your IP address, your browser type, and that the request comes from PostShelf. Updates are never installed automatically.
+
+## Screens
+
+All screenshots use made-up accounts and posts.
+
+| On x.com | Side panel | Popup |
+|---|---|---|
+| <img src="docs/readme/en-x-dark.png" alt="The folder popover next to a post on x.com" width="300"> | <img src="docs/readme/en-side-dark.png" alt="The side panel" width="190"> | <img src="docs/readme/en-popup-dark.png" alt="The popup from the toolbar icon" width="190"> |
+| Press the PostShelf button next to a post and tick folders. A post can go in several folders | The same manager in a narrow panel next to the page | Counts, search and recent saves. Opens the manager or the side panel |
+
+## How to use
+
+1. Load PostShelf in Chrome (see [Install](#install)). A PostShelf button appears next to the bookmark button of each post on x.com.
+2. Press it and tick the folders for the post. "Add folder" creates a new folder on the spot.
+3. Open the manager from the toolbar icon. Pick a folder on the left, and switch between "Posts", "List" and "Grid view" at the top right. To move many posts at once, use "Select" and then "Change folders".
+4. To bring in bookmarks you already have on X, open "Bookmarks" on x.com and use the import guide (see [Importing bookmarks automatically](#importing-bookmarks-automatically-note-on-xs-terms)). Imported posts go to "Unsorted", and "Sort Unsorted" in the popup helps you file them.
 
 ## Install
 
@@ -90,6 +111,11 @@ x.com (旧 Twitter) のブックマークを、無料アカウントでも独自
 
 **紹介サイト:** https://tabunugoku.github.io/PostShelf/ · **ダウンロード:** [Releases](https://github.com/tabunugoku/PostShelf/releases) · **ライセンス:** MIT
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/ja-grid-dark.png">
+  <img src="docs/readme/ja-grid-light.png" alt="グリッド表示の管理画面と、左のフォルダの一覧 (架空のデータ)" width="100%">
+</picture>
+
 ## 機能
 
 - ブックマーク先をフォルダ分け (1 ポストを複数フォルダに入れられる)
@@ -107,6 +133,22 @@ x.com (旧 Twitter) のブックマークを、無料アカウントでも独自
 - 画面は 8 言語に対応
 - データは `chrome.storage.local` のみ。外部送信・解析・トラッキングなし
 - 新しいバージョンを確かめる (設定、**初期値はオフ**): オンにすると、管理画面とサイドパネルを開いたときに 1 日 1 回まで、GitHub に最新のバージョン番号を問い合わせ、新しいバージョンがあればリリースのページへのリンクを出します。送るデータはありませんが、GitHub には、確かめた時刻・IP アドレス・ブラウザの種類と、PostShelf からの問い合わせであることが伝わります。更新は自動では行いません
+
+## 画面
+
+スクリーンショットのアカウントとポストは、すべて架空のものです。
+
+| x.com の上 | サイドパネル | ポップアップ |
+|---|---|---|
+| <img src="docs/readme/ja-x-dark.png" alt="x.com のポストの横のフォルダ選択のポップオーバー" width="300"> | <img src="docs/readme/ja-side-dark.png" alt="サイドパネル" width="190"> | <img src="docs/readme/ja-popup-dark.png" alt="ツールバーのアイコンから開くポップアップ" width="190"> |
+| ポストの横の PostShelf のボタンを押し、フォルダにチェックを入れる。1 つのポストを複数のフォルダに入れられる | 管理画面と同じものを、ページの横の細い枠で開く | 件数・検索・最近の保存。管理画面とサイドパネルを開ける |
+
+## 使い方
+
+1. Chrome に PostShelf を読み込みます (「[インストール](#インストール)」を参照)。x.com の各ポストのブックマークボタンの横に、PostShelf のボタンが出ます。
+2. ボタンを押して、ポストを入れるフォルダにチェックを入れます。「フォルダを追加」で、その場で新しいフォルダを作れます。
+3. ツールバーのアイコンから管理画面を開きます。左でフォルダを選び、右上で「ポスト表示」「リスト表示」「グリッド表示」を切り替えます。多くのポストをまとめて移すときは、「選択」から「フォルダを変更」を使います。
+4. X に保存済みのブックマークを取り込むときは、x.com の「ブックマーク」を開き、取り込みの案内から始めます (「[ブックマークの自動取り込み](#ブックマークの自動取り込み-規約上の注意)」を参照)。取り込んだポストは「未分類」に入り、ポップアップの「未分類を仕分ける」から振り分けられます。
 
 ## インストール
 
