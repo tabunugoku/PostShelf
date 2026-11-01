@@ -25,7 +25,7 @@ export const RECENT_MIN_FOLDERS = 6;
 
 export interface FolderPicker {
   el: HTMLElement;
-  /** x.com 用。呼び出し元の下部に置く追加ボタン */
+  /** 高さ制限ありのとき、呼び出し元の下部に置く追加ボタン */
   addButton?: HTMLButtonElement;
   /** selected を外から書き換えたあと、チェックの表示を合わせる */
   sync: () => void;
@@ -100,6 +100,8 @@ export function createFolderPicker(opts: {
    * 渡さなければ有効にしない (manager の「フォルダを変更」は見た目を変えない)。recentIds は新しい順。存在しないフォルダは飛ばす
    */
   extras?: { recentIds: string[] };
+  /** 一括操作用。保存状態と最近使った段を出さず、絞り込みと一覧の高さ制限だけを使う */
+  bounded?: boolean;
 }): FolderPicker {
   const { selected, theme: th, onChange } = opts;
   const el = document.createElement('div');
@@ -147,7 +149,8 @@ export function createFolderPicker(opts: {
 
   const folders = [...opts.folders];
   const extras = opts.extras;
-  if (extras) el.style.cssText = 'display:flex;flex-direction:column;flex:1 1 auto;min-height:0';
+  const bounded = !!extras || !!opts.bounded;
+  if (bounded) el.style.cssText = 'display:flex;flex-direction:column;flex:1 1 auto;min-height:0';
   const userFolderCount = () => folders.filter((f) => f.id !== INBOX_ID).length;
   let query = '';
   let collapsed = new Set<string>();
@@ -160,7 +163,7 @@ export function createFolderPicker(opts: {
 
   // 見出し (保存状態) と絞り込み欄。一覧の再描画で消えないよう、一覧とは別の要素に置く
   const headEl = document.createElement('div');
-  if (extras) {
+  if (bounded) {
     headEl.dataset.pickerHeader = '';
     headEl.style.flexShrink = '0';
   }
@@ -175,7 +178,7 @@ export function createFolderPicker(opts: {
     statusEl.textContent = ids.length === 0 ? '' : n === 0 ? `✓ ${t('savedInInbox')}` : `✓ ${t('savedInFolders', n)}`;
     statusEl.style.display = ids.length === 0 ? 'none' : 'block';
   };
-  if (extras) {
+  if (bounded) {
     filterEl.type = 'text';
     filterEl.placeholder = t('folderFilter');
     filterEl.setAttribute('aria-label', t('folderFilter'));
@@ -186,13 +189,15 @@ export function createFolderPicker(opts: {
       query = foldText(filterEl.value.trim());
       render();
     });
-    headEl.append(statusEl, filterEl);
+    if (extras) headEl.append(statusEl);
+    headEl.append(filterEl);
   }
-  const showFilter = () => !!extras && userFolderCount() >= FILTER_MIN_FOLDERS;
+  const showFilter = () => bounded && userFolderCount() >= FILTER_MIN_FOLDERS;
   const listEl = document.createElement('div');
-  if (extras) {
+  if (bounded) {
     listEl.dataset.pickerList = '';
     listEl.style.cssText = 'min-height:0;overflow-y:auto;overscroll-behavior:contain';
+    if (opts.bounded) listEl.style.minHeight = '32px';
   }
   el.append(headEl, listEl);
 
@@ -212,7 +217,7 @@ export function createFolderPicker(opts: {
 
   const menu = createFolderMenu({
     theme: th,
-    bounded: !!extras,
+    bounded,
     existing: () => [inboxOf(folders), ...folders], // 「未分類」(まだ保存されていないときの仮想の行) も同名の判定に含める
     onCreated: async (f) => {
       // 作ったフォルダを、このポストの保存先として選んで一覧に戻る (「未分類」との排他は normalize)
@@ -243,8 +248,8 @@ export function createFolderPicker(opts: {
     headEl.style.display = 'none';
     listEl.style.display = 'none';
     menu.el.hidden = false;
-    menu.el.style.display = extras ? 'flex' : 'grid';
-    if (extras) addBtn.style.display = 'none';
+    menu.el.style.display = bounded ? 'flex' : 'grid';
+    if (bounded) addBtn.style.display = 'none';
     menu.focus();
   };
   const closeMenu = () => {
@@ -252,7 +257,7 @@ export function createFolderPicker(opts: {
     menu.el.style.display = 'none';
     headEl.style.display = '';
     listEl.style.display = '';
-    if (extras) addBtn.style.display = 'flex';
+    if (bounded) addBtn.style.display = 'flex';
     render();
     addBtn.focus();
   };
@@ -301,7 +306,7 @@ export function createFolderPicker(opts: {
         for (const r of flattenFolders(users, collapsed)) addRow(r.folder, r.depth, r.hasChildren);
       }
     }
-    if (!extras) listEl.append(divider(th), addBtn);
+    if (!bounded) listEl.append(divider(th), addBtn);
   };
   const addRow = (f: Folder, depth = 1, hasChildren = false, recent = false) => {
     const row = document.createElement('div');
@@ -407,7 +412,7 @@ export function createFolderPicker(opts: {
   sync();
   return {
     el,
-    addButton: extras ? addBtn : undefined,
+    addButton: bounded ? addBtn : undefined,
     sync,
     setFolders: next => {
       folders.splice(0, folders.length, ...next);

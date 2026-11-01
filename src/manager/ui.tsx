@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import type { ComponentChildren } from 'preact';
+import type { ComponentChildren, RefObject } from 'preact';
 import { render } from 'preact';
 import { createFolderPicker } from '../shared/folderPicker';
 import type { Folder } from '../shared/models';
@@ -151,7 +151,15 @@ export function pickMenuSide(anchor: { left: number; right: number }, menuWidth:
  * fixed: カードや一覧の overflow に隠れないよう、body 直下 (portal) に出し、きっかけのボタンの近くを基準に、画面の端に収まる位置へ補正する
  * (右にはみ出すときは左へ、下にはみ出すときは上へ)。スクロールやウィンドウの大きさの変更でも閉じる (位置がずれるため)。
  */
-export function Dropdown(props: { onClose: () => void; children: ComponentChildren; label?: string; class?: string; fixed?: boolean }) {
+export function Dropdown(props: {
+  onClose: () => void;
+  children: ComponentChildren;
+  label?: string;
+  class?: string;
+  fixed?: boolean;
+  /** 通常の配置のまま、下端までの高さに収める (一括のフォルダ変更用) */
+  fitHeight?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const marker = useRef<HTMLSpanElement>(null);
   /** きっかけのボタンを含む入れ物 (fixed のときは、目印の span の親。そうでなければ、このメニューの親) */
@@ -181,6 +189,21 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
     el.style.top = `${below + h > vh - 8 && above >= 8 ? above : Math.max(8, Math.min(below, vh - h - 8))}px`;
   };
   useLayoutEffect(place, []);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!props.fitHeight || props.fixed || !el) return;
+    // sticky なツールバーの下に開く一括操作だけ、一覧を縮めて上下の操作を残す。
+    const fit = () => {
+      const vh = document.documentElement.clientHeight || window.innerHeight;
+      el.style.maxHeight = `${Math.max(160, vh - el.getBoundingClientRect().top - 8)}px`;
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => {
+      window.removeEventListener('resize', fit);
+      el.style.maxHeight = '';
+    };
+  }, [props.fitHeight, props.fixed]);
   useLayoutEffect(() => {
     // 中身があとから増える (フォルダの一覧など) ときも、画面の端に収まる位置に補正し直す
     const el = ref.current;
@@ -233,7 +256,16 @@ export function Dropdown(props: { onClose: () => void; children: ComponentChildr
  * x.com のポップオーバーと共通のチェックボックス式フォルダ選択 (src/shared/folderPicker.ts) を Preact に載せる。
  * 配色は manager の CSS 変数を渡す。
  */
-export function FolderPickerHost(props: { folders: Folder[]; selected: string[]; partial?: Set<string>; onToggle?: (folderId: string, on: boolean) => void | Promise<void>; onChange: (selected: Set<string>, source?: 'created') => void | boolean | Promise<void | boolean> }) {
+export function FolderPickerHost(props: {
+  folders: Folder[];
+  selected: string[];
+  partial?: Set<string>;
+  bounded?: boolean;
+  /** 高さ制限ありのとき、一覧の外へ追加ボタンを置く先 */
+  addButtonHost?: RefObject<HTMLDivElement>;
+  onToggle?: (folderId: string, on: boolean) => void | Promise<void>;
+  onChange: (selected: Set<string>, source?: 'created') => void | boolean | Promise<void | boolean>;
+}) {
   const host = useRef<HTMLDivElement>(null);
   const pickerRef = useRef<ReturnType<typeof createFolderPicker> | null>(null);
   const selected = useRef(new Set(props.selected));
@@ -245,11 +277,13 @@ export function FolderPickerHost(props: { folders: Folder[]; selected: string[];
       folders: props.folders,
       selected: selected.current,
       partial: props.partial ? partial.current : undefined,
+      bounded: props.bounded,
       onToggle: props.onToggle ? (id, on) => latest.current.onToggle?.(id, on) : undefined,
       theme: { fg: 'var(--text-primary)', border: 'var(--border-strong)', hover: 'var(--fill-ghost-hover)', accent: 'var(--fill-accent)' },
       onChange: (selected, source) => latest.current.onChange(selected, source),
     });
     host.current?.replaceChildren(picker.el);
+    if (picker.addButton) props.addButtonHost?.current?.replaceChildren(picker.addButton);
     pickerRef.current = picker;
   }, []);
   useLayoutEffect(() => {
