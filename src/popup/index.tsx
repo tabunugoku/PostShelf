@@ -78,7 +78,10 @@ function Popup() {
         {counts.inbox > 0 ? (
           <button class="tile tile-inbox" onClick={() => openManager('#inbox')}>
             <b>{counts.inbox}</b>
-            <span>{t('popupInbox')}</span>
+            <span>
+              {t('popupInbox')}
+              <Icon name="ti-arrow-right" />
+            </span>
           </button>
         ) : (
           <div class="tile tile-quiet">

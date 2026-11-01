@@ -10,6 +10,7 @@ import { createFolderMenu } from './folderCreateMenu';
 import { foldText } from './fold';
 import { ancestors, flattenFolders, leafMemberFolders, withAncestors, withoutDescendants } from './folderTree';
 import { getCollapsedFolders, setCollapsedFolders } from './storage';
+import { CHECK_MASK, CONTROL_HEIGHT, FONT_STACK, ICON, ICON_SMALL, MINUS_MASK, RADIUS_CONTROL, SPACE } from './tokens';
 
 export interface PickerTheme {
   fg: string;
@@ -48,28 +49,84 @@ export function flatButton(th: PickerTheme, text: string, icon: string, tone: 'n
   const b = document.createElement('button');
   b.type = 'button';
   const color = tone === 'danger' ? '#f4212e' : th.fg;
-  b.style.cssText = `box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;width:100%;min-height:36px;padding:4px 8px;background:transparent;color:${color};border:0;border-radius:8px;cursor:pointer;font:inherit;line-height:1.4;text-align:left;opacity:${tone === 'sub' ? '.8' : '1'}`;
+  b.style.cssText = `
+    box-sizing:border-box;
+    margin:0;
+    display:flex;
+    gap:${SPACE[2]}px;
+    align-items:center;
+    width:100%;
+    min-height:${CONTROL_HEIGHT}px;
+    padding:${SPACE[1]}px ${SPACE[2]}px;
+    background:transparent;
+    color:${color};
+    border:0;
+    border-radius:${RADIUS_CONTROL}px;
+    cursor:pointer;
+    font:14px/1.5 ${FONT_STACK};
+    line-height:1.5;
+    text-align:left;
+    opacity:${tone === 'sub' ? '.8' : '1'}
+  `;
   const ic = document.createElement('i');
   ic.className = `ti ${icon}`;
-  ic.style.cssText = 'display:block;position:static;margin:0;padding:0;width:18px;height:18px;font-size:18px;line-height:1;font-style:normal;flex:none';
+  ic.style.cssText = `
+    display:block;
+    position:static;
+    margin:0;
+    padding:0;
+    width:${ICON_SMALL}px;
+    height:${ICON_SMALL}px;
+    font-size:${ICON_SMALL}px;
+    line-height:1;
+    font-style:normal;
+    flex:none
+  `;
   b.append(ic, document.createTextNode(text));
   b.addEventListener('mouseenter', () => (b.style.background = th.hover));
   b.addEventListener('mouseleave', () => (b.style.background = 'transparent'));
   return b;
 }
 
-/** アイコンだけのボタン (44px 角)。名前は aria-label と title に入れる */
+/** アイコンだけのボタン (32px 角)。名前は aria-label と title に入れる */
 export function iconButton(th: PickerTheme, label: string, icon: string, tone: 'normal' | 'danger' = 'normal'): HTMLButtonElement {
   const b = document.createElement('button');
   b.type = 'button';
   b.setAttribute('aria-label', label);
   b.title = label;
   const color = tone === 'danger' ? '#f4212e' : th.fg;
-  b.style.cssText = `box-sizing:border-box;margin:0;display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;padding:0;background:transparent;color:${color};border:0;border-radius:8px;cursor:pointer;font:inherit`;
+  b.style.cssText = `
+    box-sizing:border-box;
+    margin:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:none;
+    width:${CONTROL_HEIGHT}px;
+    height:${CONTROL_HEIGHT}px;
+    padding:0;
+    background:transparent;
+    color:${color};
+    border:0;
+    border-radius:${RADIUS_CONTROL}px;
+    cursor:pointer;
+    font:14px/1.5 ${FONT_STACK}
+  `;
   const ic = document.createElement('i');
   ic.className = `ti ${icon}`;
   ic.setAttribute('aria-hidden', 'true');
-  ic.style.cssText = 'display:block;position:static;margin:0;padding:0;width:20px;height:20px;font-size:20px;line-height:1;font-style:normal;flex:none';
+  ic.style.cssText = `
+    display:block;
+    position:static;
+    margin:0;
+    padding:0;
+    width:${ICON}px;
+    height:${ICON}px;
+    font-size:${ICON}px;
+    line-height:1;
+    font-style:normal;
+    flex:none
+  `;
   b.append(ic);
   b.addEventListener('mouseenter', () => (b.style.background = th.hover));
   b.addEventListener('mouseleave', () => (b.style.background = 'transparent'));
@@ -79,7 +136,7 @@ export function iconButton(th: PickerTheme, label: string, icon: string, tone: '
 /** 区切り線 */
 export function divider(th: PickerTheme): HTMLElement {
   const d = document.createElement('div');
-  d.style.cssText = `box-sizing:border-box;height:0;margin:4px 0;border:0;border-top:.5px solid ${th.border}`;
+  d.style.cssText = `box-sizing:border-box;height:0;margin:${SPACE[1]}px 0;border:0;border-top:1px solid ${th.border}`;
   return d;
 }
 
@@ -151,6 +208,7 @@ export function createFolderPicker(opts: {
   const extras = opts.extras;
   const bounded = !!extras || !!opts.bounded;
   if (bounded) el.style.cssText = 'display:flex;flex-direction:column;flex:1 1 auto;min-height:0';
+  el.style.font = `14px/1.5 ${FONT_STACK}`;
   const userFolderCount = () => folders.filter((f) => f.id !== INBOX_ID).length;
   let query = '';
   let collapsed = new Set<string>();
@@ -168,7 +226,14 @@ export function createFolderPicker(opts: {
     headEl.style.flexShrink = '0';
   }
   const statusEl = document.createElement('div');
-  statusEl.style.cssText = `box-sizing:border-box;padding:2px 8px 6px;font-size:13px;opacity:.8;white-space:nowrap;color:${th.fg}`;
+  statusEl.style.cssText = `
+    box-sizing:border-box;
+    padding:2px ${SPACE[2]}px ${SPACE[2]}px;
+    font-size:13px;
+    opacity:.8;
+    white-space:nowrap;
+    color:${th.fg}
+  `;
   const filterEl = document.createElement('input');
   const paintStatus = () => {
     if (!extras) return;
@@ -182,7 +247,20 @@ export function createFolderPicker(opts: {
     filterEl.type = 'text';
     filterEl.placeholder = t('folderFilter');
     filterEl.setAttribute('aria-label', t('folderFilter'));
-    filterEl.style.cssText = `box-sizing:border-box;display:block;width:100%;margin:0 0 4px;padding:6px 8px;font:inherit;color:${th.fg};background:transparent;border:.5px solid ${th.border};border-radius:8px;outline:none`;
+    filterEl.style.cssText = `
+      box-sizing:border-box;
+      display:block;
+      width:100%;
+      margin:0 0 ${SPACE[1]}px;
+      padding:${SPACE[2]}px ${SPACE[2]}px;
+      font:14px/1.5 ${FONT_STACK};
+      color:${th.fg};
+      background:transparent;
+      border:1px solid ${th.border};
+      border-radius:${RADIUS_CONTROL}px;
+      min-height:${CONTROL_HEIGHT}px;
+      outline:none
+    `;
     filterEl.addEventListener('focus', () => (filterEl.style.outline = `2px solid ${th.accent}`));
     filterEl.addEventListener('blur', () => (filterEl.style.outline = 'none'));
     filterEl.addEventListener('input', () => {
@@ -276,7 +354,14 @@ export function createFolderPicker(opts: {
     const heading = (text: string) => {
       const h = document.createElement('div');
       h.textContent = text;
-      h.style.cssText = `box-sizing:border-box;padding:6px 8px 2px;font-size:12px;opacity:.7;white-space:nowrap;color:${th.fg}`;
+      h.style.cssText = `
+        box-sizing:border-box;
+        padding:${SPACE[2]}px ${SPACE[2]}px 2px;
+        font-size:12px;
+        opacity:.7;
+        white-space:nowrap;
+        color:${th.fg}
+      `;
       listEl.append(h);
     };
     if (query) {
@@ -314,24 +399,68 @@ export function createFolderPicker(opts: {
     row.dataset.depth = String(depth);
     row.style.cssText = 'display:flex;align-items:center;min-width:0;padding-left:' + (depth - 1) * 16 + 'px';
     const label = document.createElement('label');
-    label.style.cssText = 'box-sizing:border-box;margin:0;display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;cursor:pointer';
+    label.style.cssText = `
+      box-sizing:border-box;
+      margin:0;
+      display:flex;
+      gap:${SPACE[2]}px;
+      align-items:center;
+      min-height:${CONTROL_HEIGHT}px;
+      padding:${SPACE[1]}px ${SPACE[2]}px;
+      border-radius:${RADIUS_CONTROL}px;
+      cursor:pointer;
+      font:14px/1.5 ${FONT_STACK}
+    `;
     let hovered = false;
     const ico = document.createElement('i');
     ico.className = `ti ${f.icon}`;
-    ico.style.cssText = 'display:block;position:static;margin:0;padding:0;font-size:18px;line-height:1;font-style:normal';
+    ico.style.cssText = `display:block;position:static;margin:0;padding:0;font-size:${ICON}px;line-height:1;font-style:normal`;
     ico.style.color = safeColor(f.color) ?? th.fg;
     // 自前のチェック (角の丸い四角。選択中はアクセント色で塗り、白いチェック)。実際の入力は input type=checkbox のまま
     // (キーボードとスクリーンリーダーの操作はそのまま)。appearance:none で見た目だけを変える
     const box = document.createElement('span');
-    box.style.cssText = 'box-sizing:border-box;position:relative;display:block;width:18px;height:18px;flex:none;margin:0;padding:0';
+    box.style.cssText = `
+      box-sizing:border-box;
+      position:relative;
+      display:block;
+      width:${ICON}px;
+      height:${ICON}px;
+      flex:none;
+      margin:0;
+      padding:0
+    `;
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = selected.has(f.id);
-    cb.style.cssText = `box-sizing:border-box;-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border-radius:5px;cursor:pointer;color:${th.fg}`;
+    cb.style.cssText = `
+      box-sizing:border-box;
+      -webkit-appearance:none;
+      appearance:none;
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      margin:0;
+      padding:0;
+      border-radius:4px;
+      cursor:pointer;
+      color:${th.fg}
+    `;
     const tick = document.createElement('i');
     tick.className = 'ti ti-check';
     tick.setAttribute('aria-hidden', 'true');
-    tick.style.cssText = 'position:absolute;inset:0;display:none;align-items:center;justify-content:center;margin:0;padding:0;font-size:13px;line-height:1;font-style:normal;color:#fff;pointer-events:none';
+    tick.style.cssText = `
+      position:absolute;
+      inset:1px;
+      display:none;
+      margin:0;
+      padding:0;
+      font-size:0;
+      line-height:1;
+      background:#fff;
+      mask:${CHECK_MASK};
+      pointer-events:none
+    `;
     box.append(cb, tick);
     const paintRow = () => {
       const on = selected.has(f.id);
@@ -340,10 +469,11 @@ export function createFolderPicker(opts: {
       cb.indeterminate = mixed;
       if (opts.partial) cb.setAttribute('aria-checked', mixed ? 'mixed' : String(on));
       label.setAttribute('data-checked', mixed ? 'mixed' : String(on));
-      cb.style.border = `1.5px solid ${on || mixed ? th.accent : th.fg}`;
+      cb.style.border = `2px solid ${on || mixed ? th.accent : th.fg}`;
       cb.style.opacity = on || mixed ? '1' : '.6';
       cb.style.background = on || mixed ? th.accent : 'transparent';
       tick.className = mixed ? 'ti ti-minus' : 'ti ti-check';
+      tick.style.mask = mixed ? MINUS_MASK : CHECK_MASK;
       tick.style.display = on || mixed ? 'flex' : 'none';
       label.style.background = on || mixed || hovered ? th.hover : '';
     };
@@ -382,7 +512,20 @@ export function createFolderPicker(opts: {
       arrow.dataset.treeToggle = '';
       arrow.setAttribute('aria-label', t(closed ? 'treeExpand' : 'treeCollapse'));
       arrow.setAttribute('aria-expanded', String(!closed));
-      arrow.style.cssText = `box-sizing:border-box;display:grid;place-items:center;flex:none;width:20px;min-height:32px;padding:0;margin:0;border:0;background:transparent;color:${th.fg};cursor:pointer`;
+      arrow.style.cssText = `
+        box-sizing:border-box;
+        display:grid;
+        place-items:center;
+        flex:none;
+        width:20px;
+        min-height:${CONTROL_HEIGHT}px;
+        padding:0;
+        margin:0;
+        border:0;
+        background:transparent;
+        color:${th.fg};
+        cursor:pointer
+      `;
       const chevron = document.createElement('i');
       chevron.className = 'ti ' + (closed ? 'ti-chevron-right' : 'ti-chevron-down');
       chevron.style.cssText = 'font-size:14px;line-height:1;margin:0;padding:0';

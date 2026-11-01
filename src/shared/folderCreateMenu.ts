@@ -16,7 +16,7 @@ import {
 } from './models';
 import { createFolder, StorageError, updateFolder } from './storage';
 import { t } from './strings';
-import { ACCENT_FILL } from './tokens';
+import { ACCENT_FILL, CONTROL_HEIGHT, FONT_STACK, ICON, RADIUS_CONTROL, SPACE } from './tokens';
 import type { PickerTheme } from './folderPicker';
 
 export interface FolderCreateMenu {
@@ -57,14 +57,30 @@ export function createFolderMenu(opts: {
   const el = document.createElement('form');
   el.setAttribute('aria-label', t(editing ? 'folderMore' : 'createFolder'));
   el.noValidate = true;
-  el.style.cssText = 'box-sizing:border-box;margin:0;display:grid;gap:12px;min-width:0';
+  el.style.cssText = `box-sizing:border-box;margin:0;display:grid;gap:${SPACE[3]}px;min-width:0;font:14px/1.5 ${FONT_STACK}`;
 
   let icon: string = FOLDER_ICON;
   let color: string | undefined;
 
   // x.com 側の CSS (button / i の余白・基準線・フォントなど) に引きずられないよう、部品ごとに明示する (v19)
-  const RESET = 'box-sizing:border-box;margin:0;line-height:1.4;font:inherit;-webkit-appearance:none;appearance:none';
-  const btnCss = `${RESET};min-height:32px;padding:4px 12px;border-radius:8px;cursor:pointer;border:.5px solid ${th.border};background:transparent;color:${th.fg}`;
+  const RESET = `
+    box-sizing:border-box;
+    margin:0;
+    line-height:1.5;
+    font:14px/1.5 ${FONT_STACK};
+    -webkit-appearance:none;
+    appearance:none
+  `;
+  const btnCss = `
+    ${RESET};
+    min-height:${CONTROL_HEIGHT}px;
+    padding:${SPACE[1]}px ${SPACE[3]}px;
+    border-radius:${RADIUS_CONTROL}px;
+    cursor:pointer;
+    border:1px solid ${th.border};
+    background:transparent;
+    color:${th.fg}
+  `;
   const mk = (text: string, type: 'button' | 'submit' = 'button') => {
     const b = document.createElement('button');
     b.type = type;
@@ -74,24 +90,34 @@ export function createFolderMenu(opts: {
   };
 
   const head = document.createElement('div');
-  head.style.cssText = `${RESET};display:flex;gap:8px;align-items:center`;
+  head.style.cssText = `${RESET};display:flex;gap:${SPACE[2]}px;align-items:center`;
   const back = mk(`← ${t('back')}`);
-  back.style.cssText = btnCss + ';border:0;padding:4px 8px';
+  back.style.cssText = btnCss + `;border:0;padding:${SPACE[1]}px ${SPACE[2]}px`;
   const title = document.createElement('strong');
   title.textContent = t(editing ? 'folderMore' : 'createFolder');
-  title.style.cssText = `${RESET};flex:1;min-width:0;font-weight:700`;
+  title.style.cssText = `${RESET};flex:1;min-width:0;font-weight:500`;
   head.append(back, title);
 
   const input = document.createElement('input');
   input.placeholder = t('newFolderPlaceholder');
   input.setAttribute('aria-label', t('name'));
   input.autocomplete = 'off';
-  input.style.cssText = `${RESET};min-width:0;width:100%;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;padding:4px 8px;min-height:32px`;
+  input.style.cssText = `
+    ${RESET};
+    min-width:0;
+    width:100%;
+    background:transparent;
+    color:${th.fg};
+    border:1px solid ${th.border};
+    border-radius:${RADIUS_CONTROL}px;
+    padding:${SPACE[1]}px ${SPACE[2]}px;
+    min-height:${CONTROL_HEIGHT}px
+  `;
 
   /** ラベルは、並べる列の上に置く (列の左に置くと、幅が足りずに折り返す) */
   const group = (label: string) => {
     const g = document.createElement('div');
-    g.style.cssText = `${RESET};display:grid;gap:6px;min-width:0`;
+    g.style.cssText = `${RESET};display:grid;gap:${SPACE[2]}px;min-width:0`;
     const l = document.createElement('div');
     l.textContent = label;
     l.style.cssText = `${RESET};font-size:12px;opacity:.75`;
@@ -106,7 +132,7 @@ export function createFolderMenu(opts: {
   const iconGroup = group(t('icon'));
   const iconGrid = document.createElement('div');
   iconGrid.dataset.mainIcons = '';
-  const gridCss = `${RESET};display:grid;grid-template-columns:repeat(9,1fr);gap:4px;width:100%;min-width:0`;
+  const gridCss = `${RESET};display:grid;grid-template-columns:repeat(9,1fr);gap:${SPACE[1]}px;width:100%;min-width:0`;
   iconGrid.style.cssText = gridCss;
   const moreGrid = document.createElement('div');
   moreGrid.dataset.moreIcons = '';
@@ -116,9 +142,35 @@ export function createFolderMenu(opts: {
   const iconButton = () => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.style.cssText = `${RESET};display:grid;place-items:center;aspect-ratio:1;width:100%;min-width:0;min-height:0;padding:0;border-radius:8px;cursor:pointer;border:.5px solid transparent;background:transparent;color:${th.fg}`;
+    b.style.cssText = `
+      ${RESET};
+      display:grid;
+      place-items:center;
+      aspect-ratio:1;
+      width:100%;
+      min-width:0;
+      min-height:0;
+      padding:0;
+      border-radius:${RADIUS_CONTROL}px;
+      cursor:pointer;
+      border:1px solid transparent;
+      background:transparent;
+      color:${th.fg}
+    `;
     const ic = document.createElement('i');
-    ic.style.cssText = 'display:block;box-sizing:border-box;margin:0;padding:0;width:18px;height:18px;font-size:18px;line-height:1;font-style:normal;position:static;vertical-align:baseline';
+    ic.style.cssText = `
+      display:block;
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      width:${ICON}px;
+      height:${ICON}px;
+      font-size:${ICON}px;
+      line-height:1;
+      font-style:normal;
+      position:static;
+      vertical-align:baseline
+    `;
     b.append(ic);
     return b;
   };
@@ -146,7 +198,15 @@ export function createFolderMenu(opts: {
   // 色 (色なし + 8 色の 9 個): 幅を 9 等分した 1 行。丸の大きさは、幅に合わせて 20〜24px
   const colorGroup = group(t('color'));
   const colorGrid = document.createElement('div');
-  colorGrid.style.cssText = `${RESET};display:grid;grid-template-columns:repeat(9,1fr);gap:6px;width:100%;align-items:center;justify-items:center`;
+  colorGrid.style.cssText = `
+    ${RESET};
+    display:grid;
+    grid-template-columns:repeat(9,1fr);
+    gap:${SPACE[2]}px;
+    width:100%;
+    align-items:center;
+    justify-items:center
+  `;
   const swatches = new Map<string | undefined, HTMLButtonElement>();
   for (const c of [undefined, ...COLORS]) {
     const b = document.createElement('button');
@@ -155,7 +215,18 @@ export function createFolderMenu(opts: {
     b.dataset.color = c ?? '';
     if (c === undefined) b.title = t('colorNone');
     // 色なし: 斜線の入った枠 (manager の編集パネルの「色なし」と同じ見た目)
-    b.style.cssText = `${RESET};display:block;width:clamp(20px,100%,24px);aspect-ratio:1;min-height:0;padding:0;border-radius:50%;cursor:pointer;border:.5px solid ${th.border};background:${c ?? `linear-gradient(135deg,transparent 45%,${th.fg} 46%,${th.fg} 54%,transparent 55%)`}`;
+    b.style.cssText = `
+      ${RESET};
+      display:block;
+      width:clamp(20px,100%,24px);
+      aspect-ratio:1;
+      min-height:0;
+      padding:0;
+      border-radius:50%;
+      cursor:pointer;
+      border:1px solid ${th.border};
+      background:${c ?? `linear-gradient(135deg,transparent 45%,${th.fg} 46%,${th.fg} 54%,transparent 55%)`}
+    `;
     b.addEventListener('click', () => {
       color = c;
       paint();
@@ -168,7 +239,16 @@ export function createFolderMenu(opts: {
   // 名前・アイコン・色を決めたあとの見え方 (1 行)。名前が空のときは薄くして「フォルダ名」を出す
   const preview = document.createElement('div');
   preview.setAttribute('aria-hidden', 'true');
-  preview.style.cssText = `${RESET};display:flex;gap:8px;align-items:center;min-height:32px;padding:4px 8px;border-radius:8px;background:${th.hover}`;
+  preview.style.cssText = `
+    ${RESET};
+    display:flex;
+    gap:${SPACE[2]}px;
+    align-items:center;
+    min-height:${CONTROL_HEIGHT}px;
+    padding:${SPACE[1]}px ${SPACE[2]}px;
+    border-radius:${RADIUS_CONTROL}px;
+    background:${th.hover}
+  `;
   const prevIcon = document.createElement('i');
   const prevName = document.createElement('span');
   prevName.style.cssText = `${RESET};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`;
@@ -180,7 +260,7 @@ export function createFolderMenu(opts: {
 
   const actions = document.createElement('div');
   actions.dataset.folderActions = '';
-  actions.style.cssText = `${RESET};display:flex;gap:8px;justify-content:flex-end;flex-wrap:nowrap`;
+  actions.style.cssText = `${RESET};display:flex;gap:${SPACE[2]}px;justify-content:flex-end;flex-wrap:nowrap`;
   const del = opts.onDelete ? mk(t('delete')) : undefined;
   if (del) {
     del.style.marginRight = 'auto';
@@ -194,7 +274,16 @@ export function createFolderMenu(opts: {
   }
   const cancel = mk(t('cancel'));
   const create = mk(t(editing ? 'save' : 'create'), 'submit');
-  create.style.cssText = `${RESET};min-height:32px;padding:4px 12px;border-radius:8px;cursor:pointer;border:0;background:${ACCENT_FILL};color:#fff`;
+  create.style.cssText = `
+    ${RESET};
+    min-height:${CONTROL_HEIGHT}px;
+    padding:${SPACE[1]}px ${SPACE[3]}px;
+    border-radius:${RADIUS_CONTROL}px;
+    cursor:pointer;
+    border:0;
+    background:${ACCENT_FILL};
+    color:#fff
+  `;
   actions.append(cancel, create);
 
   const paint = () => {
@@ -227,7 +316,17 @@ export function createFolderMenu(opts: {
     });
     const name = input.value.trim();
     prevIcon.className = `ti ${icon}`;
-    prevIcon.style.cssText = `display:block;position:static;margin:0;padding:0;width:18px;height:18px;font-size:18px;line-height:1;font-style:normal`;
+    prevIcon.style.cssText = `
+      display:block;
+      position:static;
+      margin:0;
+      padding:0;
+      width:${ICON}px;
+      height:${ICON}px;
+      font-size:${ICON}px;
+      line-height:1;
+      font-style:normal
+    `;
     prevIcon.style.color = safeColor(color) ?? th.fg;
     prevName.textContent = name || t('newFolderPlaceholder');
     prevName.style.opacity = name ? '1' : '.5';
@@ -310,7 +409,7 @@ export function createFolderMenu(opts: {
   if (opts.bounded) {
     const fields = document.createElement('div');
     fields.dataset.folderFields = '';
-    fields.style.cssText = 'display:grid;gap:12px;min-height:0;overflow-y:auto;overscroll-behavior:contain';
+    fields.style.cssText = `display:grid;gap:${SPACE[3]}px;min-height:0;overflow-y:auto;overscroll-behavior:contain`;
     fields.append(...Array.from(el.children).filter(child => child !== actions));
     actions.style.flexShrink = '0';
     el.prepend(fields);

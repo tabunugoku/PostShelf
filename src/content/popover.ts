@@ -1,3 +1,4 @@
+import { CONTROL_HEIGHT, FONT_STACK, POPOVER_SHADOW, RADIUS_CARD, RADIUS_CONTROL, SPACE } from '../shared/tokens';
 import { queryFirst } from '../shared/selectors';
 import { jaWrapRule, t, uiLang } from '../shared/strings';
 import { extractTweet, tweetIdOf } from './snapshot';
@@ -69,7 +70,23 @@ function openErrorPopover(article: Element, anchor: HTMLElement, tweetId: string
   pop.className = POP_CLASS;
   pop.setAttribute('role', 'alert');
   pop.lang = uiLang();
-  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:#f4212e;border:.5px solid ${th.border};border-radius:12px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;overflow-wrap:anywhere`;
+  pop.style.cssText = `
+    position:fixed;
+    z-index:2147483647;
+    top:0;
+    left:0;
+    color-scheme:${th.scheme};
+    min-width:240px;
+    max-width:300px;
+    background:${th.bg};
+    color:#f4212e;
+    border:1px solid ${th.border};
+    border-radius:${RADIUS_CARD}px;
+    padding:${SPACE[3]}px;
+    box-shadow:${POPOVER_SHADOW[th.scheme]};
+    font:14px/1.5 ${FONT_STACK};
+    overflow-wrap:anywhere
+  `;
   pop.textContent = t('errorStorage');
   pop.addEventListener('click', (e) => e.stopPropagation());
   document.body.append(pop);
@@ -95,7 +112,23 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   pop.className = POP_CLASS;
   pop.setAttribute('role', 'dialog');
   const th = xTheme();
-  pop.style.cssText = `position:fixed;z-index:2147483647;top:0;left:0;color-scheme:${th.scheme};min-width:240px;max-width:300px;background:${th.bg};color:${th.fg};border:.5px solid ${th.border};border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 6px rgba(0,0,0,.12);font:14px/1.4 system-ui,sans-serif;text-wrap:pretty`;
+  pop.style.cssText = `
+    position:fixed;
+    z-index:2147483647;
+    top:0;
+    left:0;
+    color-scheme:${th.scheme};
+    min-width:240px;
+    max-width:300px;
+    background:${th.bg};
+    color:${th.fg};
+    border:1px solid ${th.border};
+    border-radius:${RADIUS_CARD}px;
+    padding:${SPACE[2]}px;
+    box-shadow:${POPOVER_SHADOW[th.scheme]};
+    font:14px/1.5 ${FONT_STACK};
+    text-wrap:pretty
+  `;
   pop.lang = uiLang(); // X のページの lang ではなく UI の言語で折り返す
   pop.style.cssText += ';box-sizing:border-box;display:flex;flex-direction:column';
   pop.addEventListener('click', (e) => e.stopPropagation());
@@ -103,7 +136,16 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   // 保存先の表示 (アバター小 + @ハンドル)。判定できないときは警告だけを出して保存させない
   const head = document.createElement('div');
   head.className = 'postshelf-account';
-  head.style.cssText = `display:flex;gap:6px;align-items:center;padding:2px 8px 8px;margin-bottom:6px;border-bottom:.5px solid ${th.border};font-size:14px;overflow-wrap:anywhere`;
+  head.style.cssText = `
+    display:flex;
+    gap:${SPACE[2]}px;
+    align-items:center;
+    padding:2px ${SPACE[2]}px ${SPACE[2]}px;
+    margin-bottom:${SPACE[2]}px;
+    border-bottom:1px solid ${th.border};
+    font-size:14px;
+    overflow-wrap:anywhere
+  `;
   if (account) {
     if (account.avatar) {
       const img = document.createElement('img');
@@ -126,7 +168,14 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
   const errorEl = document.createElement('div');
   errorEl.className = 'postshelf-save-error';
   errorEl.setAttribute('role', 'alert');
-  errorEl.style.cssText = 'display:none;padding:6px 8px;margin-top:6px;color:#f4212e;font-size:13px;overflow-wrap:anywhere';
+  errorEl.style.cssText = `
+    display:none;
+    padding:${SPACE[2]}px ${SPACE[2]}px;
+    margin-top:${SPACE[2]}px;
+    color:#f4212e;
+    font-size:13px;
+    overflow-wrap:anywhere
+  `;
   const save = async () => {
     try {
       await saveNow();
@@ -198,7 +247,20 @@ async function buildPopover(article: Element, anchor: HTMLElement): Promise<HTML
     const rel = document.createElement('button');
     rel.type = 'button';
     rel.textContent = t('releaseNative');
-    rel.style.cssText = `display:block;width:100%;text-align:left;margin-top:6px;padding:6px 8px;background:transparent;color:${th.fg};border:.5px solid ${th.border};border-radius:8px;cursor:pointer`;
+    rel.style.cssText = `
+      display:block;
+      width:100%;
+      text-align:left;
+      margin-top:${SPACE[2]}px;
+      min-height:${CONTROL_HEIGHT}px;
+      font:14px/1.5 ${FONT_STACK};
+      padding:${SPACE[1]}px ${SPACE[2]}px;
+      background:transparent;
+      color:${th.fg};
+      border:1px solid ${th.border};
+      border-radius:${RADIUS_CONTROL}px;
+      cursor:pointer
+    `;
     rel.addEventListener('click', () => {
       setNativeBookmark(article, false);
       rel.remove();
@@ -249,7 +311,7 @@ function minimumHeight(pop: HTMLElement): number {
     height += element.offsetHeight + (Number.parseFloat(style.marginTop) || 0)
       + (Number.parseFloat(style.marginBottom) || 0);
   }
-  return height + 4 * 32;
+  return height + 4 * CONTROL_HEIGHT;
 }
 
 /** 初回の表示側を保ち、ボタンから 4px の位置で空きに合わせて高さを変える */

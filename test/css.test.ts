@@ -30,7 +30,7 @@ describe('v9-D: selected state has no edge line (background + weight + aria only
   });
   it('the sidebar row keeps a background and bold weight', () => {
     expect(rule(src, '.fr.on')).toMatch(/background:var\(--fill-ghost-selected\)/);
-    expect(rule(src, '.fr.on')).toMatch(/font-weight:700/);
+    expect(rule(src, '.fr.on')).toMatch(/font-weight:500/);
   });
 });
 

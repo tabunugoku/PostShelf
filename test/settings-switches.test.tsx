@@ -48,7 +48,7 @@ describe('v19-4: 設定画面', () => {
 
   it('the heading has a gap between the gear icon and the text', () => {
     expect($('.bar > i').className).toContain('ti-settings');
-    expect(css).toMatch(/\.bar\{display:flex;align-items:center;gap:10px/);
+    expect(css).toMatch(/\.bar\{display:flex;align-items:center;gap:var\(--sp-2\)/);
   });
 
   it('the image cache is collapsed while off (one line + the permission note), and opens when turned on', async () => {
