@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { FolderEdit } from '../src/manager/FolderEdit';
 import { Triage } from '../src/manager/Triage';
 import { App } from '../src/manager/App';
@@ -16,7 +16,7 @@ const extra = 'palette brush pencil camera movie music microphone device-gamepad
 const main = ['ti-folder','ti-star','ti-code','ti-book','ti-bulb','ti-heart','ti-photo','ti-briefcase'];
 const flush = () => act(() => new Promise<void>(r=>setTimeout(r,30)));
 let folder: Folder;
-let saved: ReturnType<typeof vi.fn>;
+let saved: Mock<(...args: any[]) => any>;
 beforeEach(async () => {
   installChromeMock(); installPanelMock(); storage.setAccountScope('unknown');
   history.replaceState(null,'','/'); vi.spyOn(window,'scrollTo').mockImplementation(()=>{});

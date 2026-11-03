@@ -29,7 +29,7 @@ const press = async (key: string) => {
   const listeners = keyListeners.get(target)!;
   const deadline = Date.now() + 2000;
   // ホストの伝播を止めるリスナーに加え、effect のキー処理が付くまで待つ。
-  while (listeners.mock.calls.filter(([type]) => type === 'keydown').length < 2) {
+  while (listeners.mock.calls.filter((call: unknown[]) => call[0] === 'keydown').length < 2) {
     if (Date.now() >= deadline) {
       throw new Error('ダイアログの keydown リスナーが 2 秒以内に取り付けられなかった');
     }

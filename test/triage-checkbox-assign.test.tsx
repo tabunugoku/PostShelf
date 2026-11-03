@@ -1,7 +1,7 @@
 // 版: v40-e
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { Triage } from '../src/manager/Triage';
 import * as storage from '../src/shared/storage';
 import { t } from '../src/shared/strings';
@@ -11,7 +11,7 @@ import { installChromeMock, installPanelMock } from './chrome-mock';
 const flush = () => act(() => new Promise<void>((r) => setTimeout(r, 30)));
 let folders: Folder[];
 let queue: Bookmark[];
-let changed: ReturnType<typeof vi.fn>;
+let changed: Mock<(...args: any[]) => any>;
 beforeEach(async () => {
   installChromeMock();
   installPanelMock();

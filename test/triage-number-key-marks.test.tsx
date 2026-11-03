@@ -1,7 +1,7 @@
 // 版: v41-l
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { Triage } from '../src/manager/Triage';
 import { App } from '../src/manager/App';
 import * as storage from '../src/shared/storage';
@@ -12,7 +12,7 @@ import { installChromeMock, installPanelMock } from './chrome-mock';
 
 const flush = () => act(() => new Promise<void>(r => setTimeout(r, 30)));
 let folders: Folder[], queue: Bookmark[];
-let changed: ReturnType<typeof vi.fn>;
+let changed: Mock<(...args: any[]) => any>;
 beforeEach(async () => {
   installChromeMock(); installPanelMock(); storage.setAccountScope('unknown');
   history.replaceState(null, '', '/');
@@ -116,7 +116,7 @@ it('creates from N with draft marks and waits for explicit confirmation', async 
   progress(2); expect(root().contains(document.activeElement)).toBe(true);
 });
 it('leaves check marks uncommitted when closing with Escape', async () => {
-  const closed=vi.fn();
+  const closed=vi.fn<() => void>();
   await act(()=>void render(<Triage multi queue={queue} live={new Set(queue.map(b=>b.tweetId))} folders={folders} pickerFolders={folders} onChanged={changed} onClose={closed}/>,document.querySelector('#app')!));
   await flush(); await key('1'); await key('Escape');
   expect(closed).toHaveBeenCalledOnce(); expect((await storage.getBookmark('111'))?.folderIds).toEqual(['inbox']);
