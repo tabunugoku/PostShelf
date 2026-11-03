@@ -144,7 +144,7 @@ let storageMigration: Promise<void> | undefined;
 /** 裏方だけが旧データを移し、書き込みの検証後に古いキーを削除する。 */
 export function runStorageMigration(): Promise<void> {
   storageMigration ??= (async () => {
-    const raw = await chrome.storage.local.get([KEY_SCHEMA, KEY_REPAIRED, KEY_FOLDERS, KEY_BOOKMARKS]);
+    const raw = await chrome.storage.local.get<Record<string, any>>([KEY_SCHEMA, KEY_REPAIRED, KEY_FOLDERS, KEY_BOOKMARKS]);
     const version = raw[KEY_SCHEMA] ?? 0;
     if (version >= SCHEMA_VERSION && !(KEY_BOOKMARKS in raw)) return;
     let folders: Folder[] = raw[KEY_FOLDERS] ?? [];
@@ -204,7 +204,7 @@ function watchMigration(): void {
   const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
     if (area !== 'local') return;
     const schema = changes[KEY_SCHEMA];
-    if (schema && (schema.newValue ?? 0) < SCHEMA_VERSION) {
+    if (schema && ((schema.newValue as number | undefined) ?? 0) < SCHEMA_VERSION) {
       migrationReady = false;
       recoveryRequested = false;
       migrationVersion++;
@@ -266,7 +266,7 @@ async function ensureMigrated(): Promise<void> {
     while (!migrationReady) {
       const version = migrationVersion;
       // bookmarks の値まで読むのは、移行前か旧キーが残っているときだけ (ふだんはキーが無い)
-      const flags = await chrome.storage.local.get([KEY_SCHEMA, KEY_FOLDERS, KEY_BOOKMARKS]);
+      const flags = await chrome.storage.local.get<Record<string, any>>([KEY_SCHEMA, KEY_FOLDERS, KEY_BOOKMARKS]);
       if (version !== migrationVersion) continue;
       if ((flags[KEY_SCHEMA] ?? 0) >= SCHEMA_VERSION) {
         if (KEY_BOOKMARKS in flags) await waitForMigration();
@@ -362,7 +362,7 @@ async function readMap(accountId?: string): Promise<BookmarkMap> {
 /** フォルダと対象のポストを一緒に読み、別画面のフォルダ変更を待つ隙間を作らない。 */
 async function readFoldersAndMap(keys: string[]): Promise<{ folders: Folder[]; map: BookmarkMap }> {
   await ensureMigrated();
-  const data = await chrome.storage.local.get([KEY_FOLDERS, ...keys.map((key) => 'bm:' + key)]);
+  const data = await chrome.storage.local.get<Record<string, any>>([KEY_FOLDERS, ...keys.map((key) => 'bm:' + key)]);
   return {
     folders: data[KEY_FOLDERS] ?? [],
     map: Object.fromEntries(keys.filter((key) => data['bm:' + key]).map((key) => [key, data['bm:' + key]])),
