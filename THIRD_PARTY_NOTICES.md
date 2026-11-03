@@ -6,7 +6,7 @@ PostShelf bundles the following third-party components. Their license texts are 
 | 部品 / Component | 版 / Version | ライセンス / License | 同梱の形 / How it is included |
 |---|---|---|---|
 | Preact | 10.29.8 | MIT | 管理画面とポップアップの JavaScript にバンドル / bundled into the manager and popup scripts |
-| Tabler Icons (webfont, outline) | 3.49.0 | MIT | `icons/tabler-icons.min.css` と `icons/fonts/` (アイコンフォント / icon font files) |
+| Tabler Icons (webfont, outline) | 3.50.0 | MIT | `icons/tabler-icons.min.css` と `icons/fonts/` (アイコンフォント / icon font files) |
 
 PostShelf 自身のライセンスは、まだ決まっていません (`docs/PUBLISH.md` を参照)。
 The license of PostShelf's own code has not been decided yet (see `docs/PUBLISH.md`).
