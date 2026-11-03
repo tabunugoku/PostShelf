@@ -3,7 +3,7 @@ import { managerCss } from './css-helpers';
 import { readFileSync } from 'node:fs';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { Triage } from '../src/manager/Triage';
 import { createFolder, listBookmarks, setAccountScope, setBookmarkFolders } from '../src/shared/storage';
 import type { Folder } from '../src/shared/models';
@@ -14,7 +14,7 @@ const css = managerCss().replace(/\/\*[\s\S]*?\*\//g, '');
 const zIndex = (selector: string) => Number([...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
   .find((m) => m[1].trim() === selector)?.[2].match(/z-index:(\d+)/)?.[1]);
 let folders: Folder[];
-let closed: ReturnType<typeof vi.fn>;
+let closed: Mock<(...args: any[]) => any>;
 beforeEach(async () => {
   installChromeMock();
   installPanelMock();

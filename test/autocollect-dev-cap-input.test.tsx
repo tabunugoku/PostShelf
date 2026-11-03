@@ -1,7 +1,7 @@
 // 版: v49-b
 import { act } from 'preact/test-utils';
 import { render } from 'preact';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { installChromeMock } from './chrome-mock';
 import { AutoCollectDialog } from '../src/shared/AutoCollectDialog';
 
@@ -20,7 +20,7 @@ const setText = (input: HTMLInputElement, value: string) =>
   });
 const agree = () => act(() => void $<HTMLInputElement>('input[type=checkbox]').click());
 
-let onStart: ReturnType<typeof vi.fn>;
+let onStart: Mock<(...args: any[]) => any>;
 const open = (cap = 300) => {
   onStart = vi.fn();
   return act(() => void render(

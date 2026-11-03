@@ -1,7 +1,7 @@
 // 版: v38-b
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { Triage } from '../src/manager/Triage';
 import * as storage from '../src/shared/storage';
 import * as menus from '../src/shared/folderCreateMenu';
@@ -14,7 +14,7 @@ const flush = () => act(() => new Promise<void>((r) => setTimeout(r, 10)));
 const click = async (sel: string) => { await act(() => void document.querySelector<HTMLElement>(sel)!.click()); await flush(); };
 let folders: Folder[];
 let queue: Bookmark[];
-let changed: ReturnType<typeof vi.fn>;
+let changed: Mock<(...args: any[]) => any>;
 beforeEach(async () => {
   installChromeMock();
   installPanelMock();

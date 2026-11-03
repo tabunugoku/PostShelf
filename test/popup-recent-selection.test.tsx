@@ -38,16 +38,23 @@ it.each([
   vi.spyOn(storage, 'listFolders').mockResolvedValue([
     { id: 'sample_folder', name: 'Sample Folder', icon: 'ti-folder', color: '#E24B4A', order: 0, accountId: 'me' },
   ]);
+  // Array.prototype の反復を監視すると、vitest 4 では監視の記録自身が反復を呼んで止まらない。
+  // そこで、この配列だけに数える反復を持たせる (列挙しないので toEqual には出ない)
+  let scans = 0;
+  const values = Array.prototype[Symbol.iterator];
+  Object.defineProperty(bookmarks, Symbol.iterator, {
+    value(this: Bookmark[]) {
+      scans++;
+      return values.call(this);
+    },
+  });
   Object.freeze(bookmarks);
-  const iterate = vi.spyOn(Array.prototype, Symbol.iterator);
   const sort = vi.spyOn(Array.prototype, 'sort');
   await act(async () => { await import('../src/popup/index'); });
   await act(() => new Promise<void>((resolve) => setTimeout(resolve, 30)));
   const bookmarkSorts = sort.mock.contexts.filter(context => Array.isArray(context) &&
     context.some(item => item && typeof item === 'object' && 'savedAt' in item));
-  const scans = iterate.mock.contexts.filter(context => context === bookmarks).length;
   sort.mockRestore();
-  iterate.mockRestore();
   expect(bookmarkSorts).toHaveLength(0);
   expect(scans).toBe(1);
   expect([...document.querySelectorAll('.rec-row')].map(row => row.querySelector('.rec-handle')!.textContent))

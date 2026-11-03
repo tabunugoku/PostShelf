@@ -1,7 +1,7 @@
 // 版: v40-b
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { Triage } from '../src/manager/Triage';
 import * as storage from '../src/shared/storage';
 import type { Bookmark, Folder } from '../src/shared/models';
@@ -19,7 +19,7 @@ const click = async (selector: string) => {
 };
 let folders: Folder[];
 let queue: Bookmark[];
-let closed: ReturnType<typeof vi.fn>;
+let closed: Mock<(...args: any[]) => any>;
 beforeEach(async () => {
   installChromeMock();
   installPanelMock();

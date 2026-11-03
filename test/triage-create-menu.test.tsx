@@ -2,14 +2,14 @@
 import { readFileSync } from 'node:fs';
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { Triage } from '../src/manager/Triage';
 import * as storage from '../src/shared/storage';
 import type { Bookmark, Folder } from '../src/shared/models';
 import { installChromeMock, installPanelMock } from './chrome-mock';
 
 const flush = () => act(() => new Promise<void>(r => setTimeout(r, 30)));
-let folders: Folder[], queue: Bookmark[], closed: ReturnType<typeof vi.fn>;
+let folders: Folder[], queue: Bookmark[], closed: Mock<(...args: any[]) => any>;
 beforeEach(async () => {
   installChromeMock(); installPanelMock(); storage.setAccountScope('unknown');
   folders = [];

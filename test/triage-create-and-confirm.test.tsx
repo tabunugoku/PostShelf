@@ -1,7 +1,7 @@
 // 版: v41-q
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest';
 import { Triage } from '../src/manager/Triage';
 import * as storage from '../src/shared/storage';
 import { getSettings } from '../src/shared/settings';
@@ -13,7 +13,7 @@ const flush = () => act(() => new Promise<void>(r => setTimeout(r, 30)));
 // 片付けのあとに changed が再描画すると、jsdom が消えたあとで effect が走る
 let alive = true;
 let folders: Folder[], queue: Bookmark[], multi: boolean;
-let changed: ReturnType<typeof vi.fn>, closed: ReturnType<typeof vi.fn>;
+let changed: Mock<(...args: any[]) => any>, closed: Mock<(...args: any[]) => any>;
 const renderCurrent = () => render(<Triage multi={multi} queue={queue} live={new Set(queue.map(b => b.tweetId))}
   folders={folders} pickerFolders={folders} onChanged={changed} onClose={closed} />, document.querySelector('#app')!);
 beforeEach(async () => {
