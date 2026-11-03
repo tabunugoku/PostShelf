@@ -161,6 +161,20 @@ export function checkManifestFilesInZip(manifest, zipNames) {
   return errors;
 }
 
+/** CSS の url() が指す、CSS からの相対パス (?・# 以降は除く)。Tabler Icons 3.50 からフォントが 48 個に分かれたので、名前を決め打ちしない */
+export function cssFontUrls(css) {
+  const urls = [...css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map((m) => m[1].split(/[?#]/)[0].replace(/^\.\//, ''));
+  return [...new Set(urls)].filter((u) => !/^(data|https?):/.test(u));
+}
+
+/** zip の icons/tabler-icons.min.css が指すフォントが、すべて zip に入っているか */
+export function checkCssFontsInZip(css, zipNames) {
+  const set = new Set(zipNames);
+  const urls = cssFontUrls(css);
+  if (!urls.length) return ['icons/tabler-icons.min.css にフォントの url() がありません'];
+  return urls.filter((u) => !set.has(`icons/${u}`)).map((u) => `icons/tabler-icons.min.css が指す icons/${u} が zip にありません`);
+}
+
 export function checkKeyId(manifest, installMd) {
   if (!manifest.key) return ['manifest に key がありません'];
   const id = extensionIdFromKey(manifest.key);

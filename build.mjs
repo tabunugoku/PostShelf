@@ -1,5 +1,6 @@
 import { build } from 'esbuild';
-import { cp, mkdir, rm } from 'node:fs/promises';
+import { cp, mkdir, readFile, rm } from 'node:fs/promises';
+import { cssFontUrls } from './scripts/checks.mjs';
 
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist', { recursive: true });
@@ -30,6 +31,8 @@ await cp('THIRD_PARTY_NOTICES.md', 'dist/THIRD_PARTY_NOTICES.md');
 const tabler = 'node_modules/@tabler/icons-webfont/dist';
 await mkdir('dist/icons/fonts', { recursive: true });
 await cp(`${tabler}/tabler-icons.min.css`, 'dist/icons/tabler-icons.min.css');
-for (const ext of ['woff2', 'woff', 'ttf']) {
-  await cp(`${tabler}/fonts/tabler-icons.${ext}`, `dist/icons/fonts/tabler-icons.${ext}`);
+// CSS が実際に読むフォントだけを入れる (3.50 から種類ごとの woff2 に分かれ、名前も数も版で変わる)
+const tablerCss = await readFile(`${tabler}/tabler-icons.min.css`, 'utf8');
+for (const font of cssFontUrls(tablerCss)) {
+  await cp(`${tabler}/${font}`, `dist/icons/${font}`);
 }

@@ -5,8 +5,8 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { crc32, extensionIdFromKey, idFromDoc, listZip, makeZip } from '../scripts/lib.mjs';
 import {
-  ALLOWED_NETWORK_URLS, LOCALES, OPTIONAL_HOST_PERMISSIONS, REQUIRED_HOST_PERMISSIONS, REQUIRED_PERMISSIONS, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions,
-  checkReleaseNotes, checkVersion, manifestFiles,
+  ALLOWED_NETWORK_URLS, LOCALES, OPTIONAL_HOST_PERMISSIONS, REQUIRED_HOST_PERMISSIONS, REQUIRED_PERMISSIONS, checkCssFontsInZip, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions,
+  checkReleaseNotes, checkVersion, cssFontUrls, manifestFiles,
 } from '../scripts/checks.mjs';
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), 'utf8');
@@ -159,6 +159,21 @@ describe('v13-C-3: release checks', () => {
     expect(checkManifestFilesInZip(manifest, names.filter((n) => n !== 'brand/icon-48.png'))).toHaveLength(1);
     expect(checkManifestFilesInZip(manifest, [...names, 'content.js.map', 'node_modules/x/a.js'])).toHaveLength(2);
     expect(checkManifestFilesInZip(manifest, names.map((n) => `postshelf/${n}`))[0]).toContain('manifest.json'); // 直下に無い
+  });
+  it('finds the fonts that the icon CSS loads, without query strings or duplicates', () => {
+    const css = '@font-face{src:url("./fonts/a.core.woff2?h1") format("woff2")}'
+      + '@font-face{src:url(\'./fonts/a.text.woff2#x\'),url("./fonts/a.core.woff2?h2"),url(data:font/woff2;base64,AA)}';
+    expect(cssFontUrls(css)).toEqual(['fonts/a.core.woff2', 'fonts/a.text.woff2']);
+    expect(checkCssFontsInZip(css, ['icons/fonts/a.core.woff2', 'icons/fonts/a.text.woff2'])).toEqual([]);
+    expect(checkCssFontsInZip(css, ['icons/fonts/a.core.woff2'])).toHaveLength(1);
+    expect(checkCssFontsInZip('.ti{}', [])).toHaveLength(1);
+  });
+  it('every font the bundled Tabler Icons CSS loads exists in the package (Tabler 3.50 split the font)', () => {
+    const dir = 'node_modules/@tabler/icons-webfont/dist';
+    const fonts = cssFontUrls(read(`${dir}/tabler-icons.min.css`));
+    expect(fonts.length).toBeGreaterThan(0);
+    const present = new Set(readdirSync(resolve(process.cwd(), `${dir}/fonts`)).map((name) => `fonts/${name}`));
+    expect(fonts.filter((font) => !present.has(font))).toEqual([]);
   });
   it('the zip writer produces a valid archive (names, CRC, content)', async () => {
     const entries = [
