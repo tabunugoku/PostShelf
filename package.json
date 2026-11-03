@@ -12,11 +12,11 @@
     "release:check": "node scripts/release-check.mjs"
   },
   "devDependencies": {
-    "@tabler/icons-webfont": "^3.49.0",
+    "@tabler/icons-webfont": "^3.50.0",
     "@types/chrome": "^0.3.7",
-    "@types/node": "^26.6.4",
-    "esbuild": "^0.25.0",
-    "fake-indexeddb": "^6.2.5",
+    "@types/node": "^26.6.6",
+    "esbuild": "^0.28.2",
+    "fake-indexeddb": "^6.2.7",
     "jsdom": "^26.0.0",
     "preact": "^10.26.0",
     "typescript": "^5.7.0",
