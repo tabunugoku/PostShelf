@@ -2,7 +2,7 @@
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import {
-  LOCALES, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions, checkReleaseNotes, checkVersion,
+  LOCALES, checkCssFontsInZip, checkKeyId, checkLocales, checkManifestFilesInZip, checkNoRemoteCode, checkPermissions, checkReleaseNotes, checkVersion,
   listZip, readJson,
 } from './checks.mjs';
 
@@ -38,6 +38,10 @@ const results = [
   ['8 言語の messages.json のキーとプレースホルダーが一致', checkLocales(locales)],
   ['dist に外部スクリプト URL / eval / new Function / 許可外ホストへの通信が無い', checkNoRemoteCode('dist')],
   ['manifest が指すファイルがすべて zip に入っている', checkManifestFilesInZip(manifest, listZip(readFileSync(zipPath)))],
+  [
+    'アイコンの CSS が指すフォントがすべて zip に入っている',
+    checkCssFontsInZip(readFileSync('dist/icons/tabler-icons.min.css', 'utf8'), listZip(readFileSync(zipPath))),
+  ],
   ['key から求めた拡張機能 ID が docs/INSTALL.md と同じ', checkKeyId(manifest, readFileSync('docs/INSTALL.md', 'utf8'))],
 ];
 let failed = false;
