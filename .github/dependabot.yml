@@ -1,0 +1,30 @@
+# 依存の更新の確認。PR を増やしすぎないよう、月 1 回・種類ごとに 1 つの PR にまとめる
+# マージは利用者が指示したときだけ (CLAUDE.md の「進め方」)
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        patterns:
+          - '*'
+    # メジャー版の更新は、変更点を読んで手で判断する (自動の PR にしない)
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major
+    commit-message:
+      prefix: '依存'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: 'CI'
