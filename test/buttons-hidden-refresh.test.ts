@@ -181,7 +181,7 @@ it('onChangedを差し替えても新しい通知でキャッシュを捨てる'
     addListener: (listener: any) => listeners.add(listener),
     removeListener: (listener: any) => listeners.delete(listener),
   };
-  chrome.storage.onChanged = events as unknown as typeof chrome.storage.onChanged;
+  Object.assign(chrome.storage, { onChanged: events });
   await refreshAll();
   const reads = watchReads();
   seedBookmarks(data, Object.values({}));

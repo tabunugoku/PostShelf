@@ -91,7 +91,7 @@ it('読み直しで不一致なら旧キーを残す', async () => {
   const get = chrome.storage.local.get;
   vi.spyOn(chrome.storage.local, 'get').mockImplementation(async (keys) => {
     const result = await get(keys);
-    if (Array.isArray(keys) && keys.includes('bm:sample_a:1')) return {};
+    if (Array.isArray(keys) && (keys as string[]).includes('bm:sample_a:1')) return {};
     return result;
   });
   const remove = vi.spyOn(chrome.storage.local, 'remove');

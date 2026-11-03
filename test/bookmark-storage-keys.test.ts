@@ -141,7 +141,7 @@ it('取り込みの読み出し後に別画面が保存した同じポストは�
   const get = chrome.storage.local.get;
   vi.spyOn(chrome.storage.local, 'get').mockImplementation(async (keys) => {
     const result = await get(keys);
-    if (Array.isArray(keys) && keys.includes('bm:sample_a:1')) {
+    if (Array.isArray(keys) && (keys as string[]).includes('bm:sample_a:1')) {
       data['bm:sample_a:1'] = { ...bookmark(), savedAt: 100 };
     }
     return result;
